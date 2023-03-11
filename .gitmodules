@@ -1,0 +1,24 @@
+[submodule "Submodules/imgui"]
+	path = Submodules/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "Submodules/assimp"]
+	path = Submodules/assimp
+	url = https://github.com/assimp/assimp.git
+[submodule "Submodules/stb"]
+	path = Submodules/stb
+	url = https://github.com/nothings/stb.git
+[submodule "Submodules/cereal"]
+	path = Submodules/cereal
+	url = https://github.com/USCiLab/cereal.git
+[submodule "Submodules/taskflow"]
+	path = Submodules/taskflow
+	url = https://github.com/taskflow/taskflow.git
+[submodule "Submodules/spdlog"]
+	path = Submodules/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "Assets/glTF-Sample-Models"]
+	path = Assets/glTF-Sample-Models
+	url = https://github.com/KhronosGroup/glTF-Sample-Models.git
+[submodule "Submodules/spirv-cross"]
+	path = Submodules/spirv-cross
+	url = https://github.com/KhronosGroup/SPIRV-Cross.git
