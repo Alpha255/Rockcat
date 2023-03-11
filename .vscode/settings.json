@@ -1,0 +1,30 @@
+{
+    "cmake.useCMakePresets": "always",
+    "C_Cpp.autoAddFileAssociations": false,
+    "C_Cpp.autocompleteAddParentheses": true,
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "C_Cpp.inactiveRegionOpacity": 0.55,
+    "C_Cpp.dimInactiveRegions": true,
+    "clangd.onConfigChanged": "restart",
+    "cmake.exportCompileCommandsFile": true,
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.semanticHighlighting.enabled": true,
+    "cmake.copyCompileCommands": "${workspaceFolder}build/compile_commands.json",
+    "clangd.arguments": [
+        "--background-index",
+        "--enable-config",
+        "--compile-commands-dir=${workspaceFolder}build",
+        "-j=8",
+        "--query-driver={LLVM_PATH}/clang++.exe",
+        "--clang-tidy",
+        "--all-scopes-completion",
+        "--completion-style=detailed",
+        "--function-arg-placeholders",
+        "--header-insertion=iwyu",
+        "--pch-storage=disk",
+        "--pretty"
+    ],
+    "lldb.showDisassembly": "auto",
+    "lldb.dereferencePointers": true,
+    "lldb.consoleMode": "commands"
+}

@@ -1,0 +1,181 @@
+{
+    "class Scene": {
+        "m_MainCameraIndex": 0,
+        "m_RootID": 0,
+        "m_DirectionalLights": [],
+        "m_PointLights": [],
+        "m_SpotLights": [],
+        "m_AreaLights": [],
+        "m_Models": [
+            {
+                "key": 2,
+                "value": {
+                    "polymorphic_id": 1073741824,
+                    "ptr_wrapper": {
+                        "id": 2147483649,
+                        "data": {
+                            "class SceneNode": {
+                                "m_Type": 1,
+                                "m_Enabled": true,
+                                "m_Visible": true,
+                                "m_Selected": false,
+                                "m_Tickable": false,
+                                "m_ID": 2,
+                                "m_Position": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0
+                                },
+                                "m_Scaling": {
+                                    "x": 1.0,
+                                    "y": 1.0,
+                                    "z": 1.0
+                                },
+                                "m_Rotation": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0,
+                                    "w": 1.0
+                                },
+                                "m_Name": "BoxTextured",
+                                "m_ChildrenIDs": []
+                            },
+                            "m_Model": {
+                                "ptr_wrapper": {
+                                    "id": 2147483650,
+                                    "data": {
+                                        "Path": "Models\\glTF\\2.0\\BoxTextured\\glTF\\BoxTextured.gltf"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "m_Cameras": [
+            {
+                "key": 1,
+                "value": {
+                    "polymorphic_id": 1073741824,
+                    "ptr_wrapper": {
+                        "id": 2147483651,
+                        "data": {
+                            "class SceneNode": {
+                                "m_Type": 5,
+                                "m_Enabled": true,
+                                "m_Visible": true,
+                                "m_Selected": false,
+                                "m_Tickable": false,
+                                "m_ID": 1,
+                                "m_Position": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0
+                                },
+                                "m_Scaling": {
+                                    "x": 1.0,
+                                    "y": 1.0,
+                                    "z": 1.0
+                                },
+                                "m_Rotation": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0,
+                                    "w": 1.0
+                                },
+                                "m_Name": "$NamelessCamera",
+                                "m_ChildrenIDs": []
+                            },
+                            "m_Eye": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 90.0
+                            },
+                            "m_LookAt": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 1.0
+                            },
+                            "m_DefaultEye": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 90.0
+                            },
+                            "m_DefaultLookAt": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 1.0
+                            },
+                            "m_MinBoundary": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "m_MaxBoundary": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "m_ModelCenter": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "m_Fov": 0.7853981852531433,
+                            "m_Aspect": 1.7777777910232545,
+                            "m_NearPlane": 1.0,
+                            "m_FarPlane": 1000.0,
+                            "m_RotationSpeed": 0.009999999776482582,
+                            "m_MoveSpeed": 5.0,
+                            "m_Yaw": 0.0,
+                            "m_Pitch": -0.0,
+                            "m_Mode": 0,
+                            "m_ClipToBoundary": false
+                        }
+                    }
+                }
+            }
+        ],
+        "m_DefaultObjects": [
+            {
+                "key": 0,
+                "value": {
+                    "polymorphic_id": 1073741824,
+                    "ptr_wrapper": {
+                        "id": 2147483652,
+                        "data": {
+                            "m_Type": 0,
+                            "m_Enabled": true,
+                            "m_Visible": true,
+                            "m_Selected": false,
+                            "m_Tickable": false,
+                            "m_ID": 0,
+                            "m_Position": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "m_Scaling": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            },
+                            "m_Rotation": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0,
+                                "w": 1.0
+                            },
+                            "m_Name": "Root",
+                            "m_ChildrenIDs": [
+                                1,
+                                2
+                            ]
+                        }
+                    }
+                }
+            }
+        ]
+    }
+}

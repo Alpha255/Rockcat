@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/MarioEditor">
+    <file>../../Application/Resource/Mario.ico</file>
+  </qresource>
+</RCC>

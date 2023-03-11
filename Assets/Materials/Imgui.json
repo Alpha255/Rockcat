@@ -1,0 +1,259 @@
+{
+    "class Material": {
+        "class Gear::Serializeable<class Material>": {
+            "class Gear::File": {
+                "m_Path": "Materials\\Imgui.json",
+                "m_LastWriteTime": {
+                    "Year": 2022,
+                    "Month": 5,
+                    "Day": 26,
+                    "Hour": 13,
+                    "Minutes": 8,
+                    "Seconds": 58
+                }
+            }
+        },
+        "m_Attributes": {
+            "AlbedoOrDiffuse": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0,
+                "w": 1.0
+            },
+            "Ambient": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0,
+                "w": 1.0
+            },
+            "Specular": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+            },
+            "Emissive": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+            },
+            "Transparent": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0,
+                "w": 1.0
+            },
+            "Reflective": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+            },
+            "Metallic": 0.0,
+            "Roughness": 0.0,
+            "Opacity": 1.0,
+            "Shiness": 1.0,
+            "OcclusionStrength": 1.0,
+            "SpecularFactor": 1.0,
+            "TwoSide": false
+        },
+        "m_Images": {
+            "value0": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value1": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value2": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value3": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value4": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value5": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value6": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value7": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value8": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value9": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value10": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value11": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value12": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value13": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value14": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value15": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value16": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value17": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            }
+        },
+        "m_Shaders": {
+            "value0": {
+                "ptr_wrapper": {
+                    "id": 2147483649,
+                    "data": {
+                        "Path": "Shaders\\ImGui.vert"
+                    }
+                }
+            },
+            "value1": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value2": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value3": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            },
+            "value4": {
+                "ptr_wrapper": {
+                    "id": 2147483650,
+                    "data": {
+                        "Path": "Shaders\\ImGui.frag"
+                    }
+                }
+            },
+            "value5": {
+                "ptr_wrapper": {
+                    "id": 0
+                }
+            }
+        },
+        "m_DebugName": "Imgui",
+        "m_PermutationBindings": {
+            "value0": {
+                "ptr_wrapper": {
+                    "id": 2147483651,
+                    "data": {
+                        "Type": 0,
+                        "Bindings": [
+                            {
+                                "key": 0,
+                                "value": []
+                            }
+                        ]
+                    }
+                }
+            },
+            "value1": {
+                "ptr_wrapper": {
+                    "id": 2147483652,
+                    "data": {
+                        "Type": 0,
+                        "Bindings": []
+                    }
+                }
+            },
+            "value2": {
+                "ptr_wrapper": {
+                    "id": 2147483653,
+                    "data": {
+                        "Type": 0,
+                        "Bindings": []
+                    }
+                }
+            },
+            "value3": {
+                "ptr_wrapper": {
+                    "id": 2147483654,
+                    "data": {
+                        "Type": 0,
+                        "Bindings": []
+                    }
+                }
+            },
+            "value4": {
+                "ptr_wrapper": {
+                    "id": 2147483655,
+                    "data": {
+                        "Type": 0,
+                        "Bindings": [
+                            {
+                                "key": 0,
+                                "value": []
+                            }
+                        ]
+                    }
+                }
+            },
+            "value5": {
+                "ptr_wrapper": {
+                    "id": 2147483656,
+                    "data": {
+                        "Type": 0,
+                        "Bindings": []
+                    }
+                }
+            }
+        }
+    }
+}

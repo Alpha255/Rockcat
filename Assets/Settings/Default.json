@@ -1,0 +1,41 @@
+{
+    "struct RHI::RenderSettings": {
+        "class Gear::Serializeable<struct RHI::RenderSettings>": {
+            "class Gear::File": {
+                "m_Path": "Settings\\Default.json",
+                "m_LastWriteTime": {
+                    "Year": 2022,
+                    "Month": 5,
+                    "Day": 18,
+                    "Hour": 7,
+                    "Minutes": 47,
+                    "Seconds": 51
+                }
+            }
+        },
+        "Resolution": {
+            "Width": 1280,
+            "Height": 720,
+            "MinWidth": 640,
+            "MinHeight": 480
+        },
+        "VSync": false,
+        "FullScreen": false,
+        "MotionVectors": false,
+        "FrustumCulling": false,
+        "EnableTiledBasedLightCulling": false,
+        "EnableClusteredBasedLightCulling": false,
+        "EnableStencilBasedLightCulling": false,
+        "RenderingPath": 0,
+        "ShadowTechnique": 0,
+        "PostProcessing": {
+            "Enable": false,
+            "DOF": false,
+            "Blur": false,
+            "Bloom": false,
+            "GodRay": false,
+            "ToneMappingTechnique": 0
+        },
+        "Renderer": "Vulkan"
+    }
+}

@@ -1,0 +1,25 @@
+{
+    "struct ShaderCompileConfigs": {
+        "ShadersMacros": [
+            {
+                "key": "Shaders\\Blit.vert",
+                "value": [
+                    [
+                    ],
+                    [
+                        {
+                            "Name": "_GPU_GEN_TRIANGLE_",
+                            "Definition": "1"
+                        }
+                    ],
+                    [
+                        {
+                            "Name": "_GPU_GEN_QUAD_",
+                            "Definition": "1"
+                        }
+                    ]
+                ]
+            }
+        ]
+    }
+}
