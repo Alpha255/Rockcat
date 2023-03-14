@@ -308,6 +308,7 @@ workspace "Rockcat"
 		targetname "$(ProjectName)_$(Configuration)"
 		files {
 			"./Source/Applications/RenderTest/**",
+			"./Source/Runtime/Application/Resource.rc"
 		}
 		includedirs { 
 			"$(SolutionDir)",
