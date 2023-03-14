@@ -5,7 +5,7 @@
 
 NAMESPACE_START(RHI)
 
-using FieldID = Handle<class Field, uint16_t>;
+using FieldID = ObjectID<class Field, uint16_t>;
 using RenderPassID = DirectedAcyclicGraph::NodeID;
 
 class Field
@@ -33,7 +33,6 @@ public:
 		, m_Visibility(Visibility)
 		, m_Type(Type)
 		, m_Attributes({})
-		, m_ID(FieldID::Alloc())
 	{
 	}
 
@@ -121,12 +120,12 @@ class IRenderPass : public DirectedAcyclicGraph::Node
 {
 public:
 	IRenderPass(const char8_t* Name)
-		: DirectedAcyclicGraph::Node(RenderPassID::Alloc())
+		: DirectedAcyclicGraph::Node(RenderPassID())
 		, m_Name(Name)
 	{
 	}
 
-	void AddField(const char8_t* Name, Field::EVisibility Visiblity, Field::EType Type)
+	void AddField(const char8_t* Name, Field::EVisibility Visibility, Field::EType Type)
 	{
 		m_Fields.emplace_back(Field(Name, Visibility, Type));
 	}
@@ -136,14 +135,14 @@ public:
 		return m_Name.c_str();
 	}
 
-	RenderPassID ID() const
+	RenderPassID GetID() const
 	{
-		return Node::ID();
+		return Node::GetID();
 	}
 
 	virtual void Execute() = 0;
 
-	virtual void OnResize(uint32_t Width, uint32_t Height) { (void)Width; (void)m_Height; }
+	virtual void OnResize(uint32_t Width, uint32_t Height) { (void)Width; (void)Height; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)

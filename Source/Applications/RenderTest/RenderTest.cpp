@@ -1,5 +1,5 @@
 #include "Applications/RenderTest/RenderTest.h"
-#include "ThirdParty/ImGUI/imgui.h"
+#include <Submodules/imgui/imgui.h>
 
 void RenderTest::OnStartup()
 {

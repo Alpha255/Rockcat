@@ -1,7 +1,7 @@
 #include "Colorful/IRenderer/RenderGraph/RenderGraph.h"
 #include "Colorful/IRenderer/RenderSettings.h"
 #include "Colorful/IRenderer/IRenderer.h"
-#include "Runtime/Scene.h"
+#include "Runtime/Scene/Scene.h"
 
 NAMESPACE_START(RHI)
 
@@ -17,21 +17,21 @@ void RenderGraph::AddPass(const std::shared_ptr<IRenderPass>& RenderPass)
 
 	m_Graph.AddNode(RenderPass);
 
-	if (RenderPass->ID().Index() > m_RenderPasses.size())
+	if (RenderPass->GetID().GetIndex() > m_RenderPasses.size())
 	{
 		m_RenderPasses.emplace_back();
 	}
-	m_RenderPasses[RenderPass->ID().Index()] = RenderPass;
+	m_RenderPasses[RenderPass->GetID().GetIndex()] = RenderPass;
 
 	m_NeedRecompile = true;
 }
 
 void RenderGraph::RemovePass(RenderPassID PassID)
 {
-	assert(PassID.IsValid() && PassID.Index() < m_RenderPasses.size());
+	assert(PassID.IsValid() && PassID.GetIndex() < m_RenderPasses.size());
 
 	m_Graph.RemoveNode(PassID);
-	m_RenderPasses[PassID.Index()].reset();
+	m_RenderPasses[PassID.GetIndex()].reset();
 
 	m_NeedRecompile = true;
 }

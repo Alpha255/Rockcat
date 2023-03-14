@@ -3,11 +3,11 @@
 #include "Colorful/IRenderer/IShader.h"
 #include "Colorful/D3D/DXGI_Interface.h"
 #include "Colorful/IRenderer/IRenderer.h"
-#include <ThirdParty/glslang/glslang/Public/ShaderLang.h>
-#include <ThirdParty/glslang/StandAlone/ResourceLimits.h>
-#include <ThirdParty/glslang/SPIRV/GlslangToSpv.h>
-#include <ThirdParty/SPIRV-Cross/spirv_hlsl.hpp>
-#include <ThirdParty/dxc/inc/dxcapi.h>
+#include <glslang/Include/ResourceLimits.h>
+#include <glslang/Public/ShaderLang.h>
+#include <glslang/SPIRV/GlslangToSpv.h>
+#include <spirv_cross/spirv_hlsl.hpp>
+#include <dxc/dxcapi.h>
 
 struct ShaderCompileConfigs : public Serializeable<ShaderCompileConfigs>
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Gear.h"
+#include "Runtime/Core/Gear.h"
 
 #define ASSET_PATH_SHADERS      "Shaders\\"
 #define ASSET_PATH_SHADER_CACHE "Shaders\\Cache\\"
@@ -76,13 +76,13 @@ struct IAsset
 	}
 };
 
-using AssetID = Handle<IAsset, uint32_t>;
+using AssetID = ObjectID<IAsset, uint32_t>;
 
 template<class T, IAsset::ECategory TCategory>
 struct Asset : public IAsset
 {
 	using CompletionCallback = std::function<void(std::shared_ptr<Asset>)>;
-	using CompletionCallbackList = ThreadSafeContainer<std::vector<CompletionCallback>>;
+	using CompletionCallbackList = std::pair<std::mutex, std::vector<CompletionCallback>>;
 
 	Asset() = default;
 

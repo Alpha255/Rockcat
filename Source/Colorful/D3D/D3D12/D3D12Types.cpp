@@ -6,7 +6,7 @@ namespace D3D12Type
 {
 	DXGI_FORMAT Format(EFormat Format)
 	{
-		return static_cast<DXGI_FORMAT>(FormatAttribute::Attribute(Format).DXGIFromat);
+		return static_cast<DXGI_FORMAT>(FormatAttribute::Attribute(Format).DxgiFromat);
 	}
 
 	D3D12_RESOURCE_DIMENSION ImageDimension(EImageType Type)

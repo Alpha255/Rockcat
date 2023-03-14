@@ -1,13 +1,12 @@
 #include "Colorful/IRenderer/Format.h"
 #include <dxgiformat.h>
-#include <ThirdParty/Vulkan-Headers/include/vulkan/vulkan.h>
-#include <ThirdParty/KTX-Software/lib/gl_format.h>
+#include <vulkan/vulkan.h>
 
 /// https://docs.microsoft.com/en-us/windows/win32/api/dxgiformat/ne-dxgiformat-dxgi_format
 
 NAMESPACE_START(RHI)
 
-#define GFX_FORMAT_ATTRIBUTE(Format, DXGIFormat, VulkanFormat, GLFormat, BytesPerPixel, BitsPerPixel) { EFormat::Format, DXGI_FORMAT::DXGIFormat, VkFormat::VulkanFormat, GLFormat, BytesPerPixel, BitsPerPixel, #Format }
+#define GFX_FORMAT_ATTRIBUTE(Format, DXGIFormat, VulkanFormat, GLFormat, BytesPerPixel, BitsPerPixel) { EFormat::Format, DXGI_FORMAT::DXGIFormat, VkFormat::VulkanFormat, BytesPerPixel, BitsPerPixel, #Format }
 
 static const std::vector<FormatAttribute> FormatAttributes
 {
@@ -158,11 +157,11 @@ FormatAttribute FormatAttribute::Attribute_Vk(uint32_t Format)
 	return FormatAttribute();
 }
 
-FormatAttribute FormatAttribute::Attribute_DXGI(uint32_t Format)
+FormatAttribute FormatAttribute::Attribute_Dxgi(uint32_t Format)
 {
 	for (auto& attr : FormatAttributes)
 	{
-		if (static_cast<uint32_t>(attr.DXGIFromat) == Format)
+		if (static_cast<uint32_t>(attr.DxgiFromat) == Format)
 		{
 			return attr;
 		}
@@ -172,27 +171,13 @@ FormatAttribute FormatAttribute::Attribute_DXGI(uint32_t Format)
 	return FormatAttribute();
 }
 
-FormatAttribute FormatAttribute::Attribute_GL(uint32_t Format)
-{
-	for (auto& attr : FormatAttributes)
-	{
-		if (attr.GLFormat == Format)
-		{
-			return attr;
-		}
-	}
-
-	assert(0);
-	return FormatAttribute();
-}
-
-uint32_t FormatAttribute::ToDXGIFormat(EFormat Format)
+uint32_t FormatAttribute::ToDxgiFormat(EFormat Format)
 {
 	assert(FormatAttributes[static_cast<uint32_t>(Format)].Format == Format);
-	return FormatAttributes[static_cast<uint32_t>(Format)].DXGIFromat;
+	return FormatAttributes[static_cast<uint32_t>(Format)].DxgiFromat;
 }
 
-uint32_t FormatAttribute::ToVulkanFormat(EFormat Format)
+uint32_t FormatAttribute::ToVkFormat(EFormat Format)
 {
 	assert(FormatAttributes[static_cast<uint32_t>(Format)].Format == Format);
 	return FormatAttributes[static_cast<uint32_t>(Format)].VkFormat;

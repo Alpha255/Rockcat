@@ -2,7 +2,7 @@
 
 #include "Colorful/IRenderer/IImage.h"
 #include "Colorful/IRenderer/IBuffer.h"
-#include "Core/DirectedAcyclicGraph.h"
+#include "Runtime/Core/DirectedAcyclicGraph.h"
 
 NAMESPACE_START(RHI)
 

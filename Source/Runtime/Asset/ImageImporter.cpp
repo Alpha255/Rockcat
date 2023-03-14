@@ -1,9 +1,7 @@
 #include "Runtime/Asset/ImageImporter.h"
 #include "Colorful/IRenderer/IImage.h"
 #include "Colorful/IRenderer/IDevice.h"
-#include <Thirdparty/stb/stb_image.h>
-#include <Thirdparty/DirectXTex/DirectXTex/DDS.h>
-#include <Thirdparty/KTX-Software/include/ktx.h>
+#include <Submodules/stb/stb_image.h>
 
 class ITextureImporter
 {
@@ -29,6 +27,7 @@ public:
 	RHI::ImageDesc Reimport(const byte8_t* Data, size_t Size) override final;
 };
 
+#if ENABLE_DDS_KTX
 static DXGI_FORMAT PixelFormatToDXGIFormat(const DirectX::DDS_PIXELFORMAT& PixelFormat)
 {
 #define IS_BITMASK(R, G, B, A) (PixelFormat.RBitMask == R && PixelFormat.GBitMask == G && PixelFormat.BBitMask == B && PixelFormat.ABitMask == A)
@@ -207,10 +206,12 @@ static DXGI_FORMAT PixelFormatToDXGIFormat(const DirectX::DDS_PIXELFORMAT& Pixel
 	return DXGI_FORMAT_UNKNOWN;
 #undef IS_BITMASK
 }
+#endif
 
 ImageImporter::ImageImporter(RHI::IDevice* RHIDevice)
 	: IImporter(RHIDevice)
 {
+#if ENABLE_DDS_KTX
 	m_Importers.emplace_back(
 		std::move(
 			std::make_pair(
@@ -228,6 +229,7 @@ ImageImporter::ImageImporter(RHI::IDevice* RHIDevice)
 			)
 		)
 	);
+#endif
 
 	m_Importers.emplace_back(
 		std::move(
@@ -269,6 +271,7 @@ void ImageImporter::Reimport(std::shared_ptr<IAsset> Asset)
 	LOG_ERROR("TextureImporter:: Unsupported texture format: \"{}\"", Image->Path.c_str());
 }
 
+#if ENABLE_DDS_KTX
 RHI::ImageDesc DDSImporter::Reimport(const byte8_t* Data, size_t Size)
 {
 	assert(Data && Size);
@@ -514,6 +517,7 @@ RHI::ImageDesc KTXImporter::Reimport(const byte8_t* Data, size_t Size)
 
 	return Desc;
 }
+#endif
 
 RHI::ImageDesc STBImporter::Reimport(const byte8_t* Data, size_t Size)
 {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Colorful/IRenderer/IRenderStates.h"
-#include "Runtime/SceneNode.h"
+#include "Runtime/Scene/SceneNode.h"
 #include "Runtime/Asset/Material.h"
 
 struct MeshAttributes

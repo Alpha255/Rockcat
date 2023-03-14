@@ -1,6 +1,6 @@
 #include "Colorful/IRenderer/RenderGraph/RenderPass/ForwardShadingPass.h"
 #include "Colorful/IRenderer/IRenderer.h"
-#include "Runtime/Scene.h"
+#include "Runtime/Scene/Scene.h"
 
 NAMESPACE_START(RHI)
 

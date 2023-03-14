@@ -1,9 +1,9 @@
 #include "Runtime/Asset/AssimpImporter.h"
-#include <Thirdparty/assimp/include/assimp/Importer.hpp>
-#include <Thirdparty/assimp/include/assimp/ProgressHandler.hpp>
-#include <Thirdparty/assimp/include/assimp/scene.h>
-#include <Thirdparty/assimp/include/assimp/postprocess.h>
-#include <Thirdparty/assimp/include/assimp/DefaultLogger.hpp>
+#include <Submodules/assimp/include/assimp/Importer.hpp>
+#include <Submodules/assimp/include/assimp/ProgressHandler.hpp>
+#include <Submodules/assimp/include/assimp/scene.h>
+#include <Submodules/assimp/include/assimp/postprocess.h>
+#include <Submodules/assimp/include/assimp/DefaultLogger.hpp>
 
 class ProgressReporter : public Assimp::ProgressHandler
 {

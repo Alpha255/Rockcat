@@ -122,9 +122,8 @@ enum class EFormat : uint32_t
 struct FormatAttribute
 {
 	EFormat Format = EFormat::Unknown;
-	int32_t DXGIFromat = 0u;
+	int32_t DxgiFromat = 0u;
 	uint32_t VkFormat = 0u;
-	uint32_t GLFormat = 0u;
 	uint32_t BytesPerPixel = 0u;
 	uint32_t BitsPerPixel = 0u;
 	const char8_t* Name = nullptr;
@@ -132,10 +131,9 @@ struct FormatAttribute
 	static FormatAttribute Attribute(EFormat Format);
 	static FormatAttribute Attribute(const char8_t* const Format);
 	static FormatAttribute Attribute_Vk(uint32_t Format);
-	static FormatAttribute Attribute_DXGI(uint32_t Format);
-	static FormatAttribute Attribute_GL(uint32_t Format);
-	static uint32_t ToDXGIFormat(EFormat Format);
-	static uint32_t ToVulkanFormat(EFormat Format);
+	static FormatAttribute Attribute_Dxgi(uint32_t Format);
+	static uint32_t ToDxgiFormat(EFormat Format);
+	static uint32_t ToVkFormat(EFormat Format);
 	static EFormat ToSRGBFormat(EFormat Format);
 
 	static bool8_t IsColor(EFormat Format);

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Runtime/Asset/IImporter.h"
-#include <ThirdParty/taskflow/taskflow/taskflow.hpp>
+#include <Submodules/taskflow/taskflow/taskflow.hpp>
 
 class AssetDatabase : public LazySingleton<AssetDatabase>
 {
@@ -74,7 +74,7 @@ public:
 protected:
 	ALLOW_ACCESS_LAZY(AssetDatabase);
 
-	using AssetMap = ThreadSafeContainer<std::unordered_map<std::string, std::shared_ptr<IAsset>>>;
+	using AssetMap = std::pair<std::mutex, std::unordered_map<std::string, std::shared_ptr<IAsset>>>;
 	using AssetMapArray = std::array<AssetMap, IAsset::ECategory::Unknown>;
 
 	AssetDatabase();

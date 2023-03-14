@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/SceneNode.h"
+#include "Runtime/Scene/SceneNode.h"
 
 class Camera : public SceneNode, public IInputHandler
 {

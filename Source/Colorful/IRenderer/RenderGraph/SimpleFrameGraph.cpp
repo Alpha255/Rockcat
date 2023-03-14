@@ -1,6 +1,6 @@
 #include "Colorful/IRenderer/RenderGraph/SimpleFrameGraph.h"
 #include "Colorful/IRenderer/IRenderer.h"
-#include "Runtime/Scene.h"
+#include "Runtime/Scene/Scene.h"
 
 NAMESPACE_START(RHI)
 

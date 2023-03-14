@@ -12,11 +12,11 @@ def ExecCommand(Command):
 
 def PreMakeAssimp():
 	try:
-		AssimpBuildPath = '.\\ThirdParty\\assimp\\build'
+		AssimpBuildPath = '.\\Submodules\\assimp\\build'
 		if not os.path.exists(AssimpBuildPath):
 			os.mkdir(AssimpBuildPath)
 		print('Build: Premake assimp...')
-		ExecCommand('cmake -S .\\ThirdParty\\assimp -B .\\ThirdParty\\assimp\\build -G "Visual Studio 17 2022" -A x64')
+		ExecCommand('cmake -S .\\Submodules\\assimp -B .\\Submodules\\assimp\\build -G "Visual Studio 17 2022" -A x64')
 	except OSError as Err:
 		print('Failed to make directory: {0}'.format(Err.__str__()))
 

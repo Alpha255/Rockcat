@@ -33,7 +33,7 @@ public:
 		return m_VkAttributes;
 	}
 protected:
-	using ImageViewMap = ThreadSafeContainer<std::unordered_map<ImageSubresourceRange, VkImageView, ImageSubresourceRange::Hasher>>;
+	using ImageViewMap = std::pair<std::mutex, std::unordered_map<ImageSubresourceRange, VkImageView, ImageSubresourceRange::Hasher>>;
 	friend struct VulkanPipelineBarrier;
 	friend class VulkanCommandBuffer;
 	friend class VulkanGraphicsPipelineState;
