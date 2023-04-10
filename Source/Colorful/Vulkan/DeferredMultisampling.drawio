@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2023-04-10T10:23:07.442Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36" etag="80Il1nlN8A2a-S_7srUj" version="21.1.5" type="github">
+<mxfile host="app.diagrams.net" modified="2023-04-10T10:34:42.882Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36" etag="wh1oL-GmGU0mqlEdthWI" version="21.1.5" type="github">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
-    <mxGraphModel dx="1195" dy="1866" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="2022" dy="1866" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
@@ -73,7 +73,7 @@
         <mxCell id="M9S69U1If9DtEvXvd2Mu-41" value="GraphicsPipeline" style="swimlane;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="510" y="-260" width="370" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="M9S69U1If9DtEvXvd2Mu-42" value="UseSampleShading: SampleShadingPipelline" style="whiteSpace=wrap;html=1;" vertex="1" parent="M9S69U1If9DtEvXvd2Mu-41">
+        <mxCell id="M9S69U1If9DtEvXvd2Mu-42" value="UseSampleShading: OffscreenSampleShadingPipelline" style="whiteSpace=wrap;html=1;" vertex="1" parent="M9S69U1If9DtEvXvd2Mu-41">
           <mxGeometry x="20" y="40" width="320" height="20" as="geometry" />
         </mxCell>
         <mxCell id="M9S69U1If9DtEvXvd2Mu-43" value="!UseSampleShading: OffscreenPipeline" style="whiteSpace=wrap;html=1;" vertex="1" parent="M9S69U1If9DtEvXvd2Mu-41">
@@ -86,7 +86,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="M9S69U1If9DtEvXvd2Mu-47" value="VkPipelineMultisampleStateCreateInfo" style="swimlane;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
-          <mxGeometry x="44" y="-380" width="370" height="110" as="geometry" />
+          <mxGeometry x="44" y="-380" width="370" height="140" as="geometry" />
         </mxCell>
         <mxCell id="M9S69U1If9DtEvXvd2Mu-48" value=".sampleShadingEnable = VK_TRUE" style="whiteSpace=wrap;html=1;" vertex="1" parent="M9S69U1If9DtEvXvd2Mu-47">
           <mxGeometry x="20" y="40" width="320" height="20" as="geometry" />
@@ -94,10 +94,40 @@
         <mxCell id="M9S69U1If9DtEvXvd2Mu-49" value=".minSampleShading = 0.25f" style="whiteSpace=wrap;html=1;" vertex="1" parent="M9S69U1If9DtEvXvd2Mu-47">
           <mxGeometry x="21" y="70" width="230" height="20" as="geometry" />
         </mxCell>
+        <mxCell id="M9S69U1If9DtEvXvd2Mu-53" value=".rasterizationSamples = sampleCount" style="whiteSpace=wrap;html=1;" vertex="1" parent="M9S69U1If9DtEvXvd2Mu-47">
+          <mxGeometry x="20" y="100" width="230" height="20" as="geometry" />
+        </mxCell>
         <mxCell id="M9S69U1If9DtEvXvd2Mu-50" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="M9S69U1If9DtEvXvd2Mu-47" target="M9S69U1If9DtEvXvd2Mu-42">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="560" y="-110" as="sourcePoint" />
             <mxPoint x="610" y="-160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="M9S69U1If9DtEvXvd2Mu-54" value="GraphicsPipeline" style="swimlane;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="-150" y="420" width="370" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="M9S69U1If9DtEvXvd2Mu-55" value="UseMSAA: DeferredPipeline" style="whiteSpace=wrap;html=1;" vertex="1" parent="M9S69U1If9DtEvXvd2Mu-54">
+          <mxGeometry x="20" y="40" width="320" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="M9S69U1If9DtEvXvd2Mu-56" value="!UseMSAA: DeferredPipelineNoMSAA" style="whiteSpace=wrap;html=1;" vertex="1" parent="M9S69U1If9DtEvXvd2Mu-54">
+          <mxGeometry x="21" y="70" width="230" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="M9S69U1If9DtEvXvd2Mu-57" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="M9S69U1If9DtEvXvd2Mu-54">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="130" y="432.5" as="sourcePoint" />
+            <mxPoint x="270" y="347.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="M9S69U1If9DtEvXvd2Mu-58" value="VkSpecializationInfo" style="swimlane;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="-630" y="290" width="370" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="M9S69U1If9DtEvXvd2Mu-59" value="sampleCount" style="whiteSpace=wrap;html=1;" vertex="1" parent="M9S69U1If9DtEvXvd2Mu-58">
+          <mxGeometry x="20" y="40" width="320" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="M9S69U1If9DtEvXvd2Mu-62" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="M9S69U1If9DtEvXvd2Mu-58" target="M9S69U1If9DtEvXvd2Mu-54">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-260" y="370" as="sourcePoint" />
+            <mxPoint x="-150" y="380" as="targetPoint" />
           </mxGeometry>
         </mxCell>
       </root>
