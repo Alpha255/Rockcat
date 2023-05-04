@@ -1,0 +1,24 @@
+- Enable device extension: **VK_EXT_CONSERVATIVE_RASTERIZATION_EXTENSION_NAME**
+- Enable instance extension: **VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME**
+- VkPhysicalDeviceConservativeRasterizationPropertiesEXT ConverativeRasterProps
+    - VkPhysicalDevicePropeties2KHR DeviceProps2
+        - .pNext = ConverativeRasterProps;
+        - vkGetPhysicalDeviceProperties2KHR(PhysicalDevice, &DeviceProps2);
+- VkPipelineRasterizationConservativeStateCreateInfoEXT ConservativeRasterStateCreateInfo;
+    - .conservativeRasterizationMode = VK_CONSERVATIVE_RASTERIZATION_MODE_OVERESTIMATE_EXT;
+    - .extraPrimitiveOverestimationSize = ConverativeRasterProps.maxExtraPrimitiveOverestimationSize;
+- RasterizationStateCreateInfo.pNext = &ConservativeRasterStateCreateInfo;
+- Pipelines.TriangleOverlay
+    - Vert: triangle.vert
+    - Frag: triangleoverlay.frag
+    - RasterizationStateCreateInfo.lineWidth = 2;
+    - RasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_LINE;
+- Pipelines.Triangle/Pipelines.TriangleConservativeRaster
+    - Vert: triangle.vert
+    - Frag: triangle.frag
+    - RasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
+- BuildCommandBuffer
+    - ConservativeRasterEnabled ? Pipelines.TriangleConservativeRaster : Pipelines.Triangle
+        - DrawIndexed
+    - Pipelines.TriangleOverlay
+        - DrawIndexed

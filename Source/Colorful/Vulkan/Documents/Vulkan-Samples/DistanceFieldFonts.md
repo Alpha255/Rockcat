@@ -1,0 +1,2 @@
+- [Libgdx](libgdx.com/wiki/graphics/2d/fonts/distance-field-fonts)
+- [Partial Derivatives](ronja-tutorials.com/post/046-fwidth)
