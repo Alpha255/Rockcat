@@ -24,7 +24,7 @@ std::string ShaderCache::GetCachedPath(const char8_t* Path)
 		IRenderer::Get().Settings()->RendererName());
 }
 
-IShaderPtr ShaderCache::Get(const std::vector<ShaderMacro>& Macros)
+IShaderSharedPtr ShaderCache::Get(const std::vector<ShaderMacro>& Macros)
 {
 	auto Permutation = ShaderMacro::ToPermutation(Macros);
 	auto Ret = Variants.find(Permutation);

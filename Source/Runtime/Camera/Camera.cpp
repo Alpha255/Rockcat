@@ -221,7 +221,7 @@ void Camera::Tick(float32_t ElapsedSeconds)
 			m_MouseMovements.WheelDelta = 0;
 		}
 
-		Matrix rot = Matrix::Inverse(m_QuatCurrent.ToRotationMatrix());
+		Matrix rot = Matrix::Inverse(m_QuatCurrent.GetRotationMatrix());
 
 		Vector3 WorldUp(0.0f, 1.0f, 0.0f);
 		Vector3 WorldAhead(0.0f, 0.0f, 1.0f);

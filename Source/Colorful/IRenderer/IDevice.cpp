@@ -2,7 +2,7 @@
 
 NAMESPACE_START(RHI)
 
-ISamplerPtr IDevice::GetOrCreateSampler(const SamplerDesc& Desc)
+ISamplerSharedPtr IDevice::GetOrCreateSampler(const SamplerDesc& Desc)
 {
 	auto Hash = Desc.Hash();
 
@@ -17,7 +17,7 @@ ISamplerPtr IDevice::GetOrCreateSampler(const SamplerDesc& Desc)
 	return Sampler;
 }
 
-IInputLayoutPtr IDevice::GetOrCreateInputLayout(const InputLayoutDesc& Desc, const ShaderDesc& VertexShaderDesc)
+IInputLayoutSharedPtr IDevice::GetOrCreateInputLayout(const InputLayoutDesc& Desc, const ShaderDesc& VertexShaderDesc)
 {
 	auto Hash = Desc.Hash();
 
@@ -32,7 +32,7 @@ IInputLayoutPtr IDevice::GetOrCreateInputLayout(const InputLayoutDesc& Desc, con
 	return InputLayout;
 }
 
-IPipelinePtr IDevice::GetOrCreateGraphicsPipeline(const GraphicsPipelineDesc& Desc)
+IPipelineSharedPtr IDevice::GetOrCreateGraphicsPipeline(const GraphicsPipelineDesc& Desc)
 {
 	auto& Ret = m_GraphicsPipelineCache[Desc.Hash()];
 	if (!Ret)
@@ -43,7 +43,7 @@ IPipelinePtr IDevice::GetOrCreateGraphicsPipeline(const GraphicsPipelineDesc& De
 	return Ret;
 }
 
-IFrameBufferPtr IDevice::GetOrCreateFrameBuffer(const FrameBufferDesc& Desc)
+IFrameBufferSharedPtr IDevice::GetOrCreateFrameBuffer(const FrameBufferDesc& Desc)
 {
 	auto& Ret = m_FrameBufferCache[Desc.Hash()];
 	if (!Ret)

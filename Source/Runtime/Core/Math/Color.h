@@ -10,7 +10,9 @@ class Color : public Vector4
 public:
 	using Vector4::Vector4;
 
-	Color(const class Color32& Color);
+	Color(uint32_t RGBA);
+
+	Color(uint8_t R, uint8_t G, uint8_t B, uint8_t A = 1);
 
 	float32_t R() const { return x; }
 	float32_t G() const { return y; }
@@ -31,57 +33,19 @@ public:
 
 	static Color Random();
 
-	static Color SRGBToRGB(const Color& SRGB)
-	{
-		assert(0);
-		return SRGB;
-	}
+	Color ToSRGB() const;
+	Color FromSRGB() const;
+	Color ToREC709() const;
+	Color FromREC709() const;
+
+	uint32_t RGB10A2() const;
+	uint32_t RGBA8() const;
+
+	uint32_t RG11B10F(bool8_t RoundToEven = false) const;
+	uint32_t RGB9E5() const;
 protected:
 private:
 	static const float32_t Scaler;
-};
-
-class Color32
-{
-public:
-	Color32(uint8_t R, uint8_t G, uint8_t B, uint8_t A = 255u)
-		: Value{R, G, B, A}
-	{
-	}
-
-	Color32(const Color& Color);
-
-	float32_t R() const { return Value.R; }
-	float32_t G() const { return Value.G; }
-	float32_t B() const { return Value.B; }
-	float32_t A() const { return Value.A; }
-
-	static const Color32 White;
-	static const Color32 Black;
-	static const Color32 Red;
-	static const Color32 Green;
-	static const Color32 Blue;
-	static const Color32 Yellow;
-	static const Color32 Cyan;
-	static const Color32 Magenta;
-	static const Color32 Silver;
-	static const Color32 LightSteelBlue;
-	static const Color32 DarkBlue;
-
-	static Color32 Random();
-protected:
-private:
-	union
-	{
-		struct CValue
-		{
-			uint8_t R;
-			uint8_t G;
-			uint8_t B;
-			uint8_t A;
-		}Value;
-		uint32_t UIntValue;
-	};
 };
 
 NAMESPACE_END(Math)

@@ -29,16 +29,16 @@ public:
 		return m_Scene;
 	}
 
-	ISamplerPtr GetOrCreateSampler(const struct SamplerDesc& Desc);
+	ISamplerSharedPtr GetOrCreateSampler(const struct SamplerDesc& Desc);
 
-	IPipelinePtr GetOrCreateGraphicsPipeline(const struct GraphicsPipelineDesc& Desc);
+	IPipelineSharedPtr GetOrCreateGraphicsPipeline(const struct GraphicsPipelineDesc& Desc);
 protected:
 private:
 	class Scene* m_Scene = nullptr;
 	IDevice* m_RenderDevice = nullptr;
 	IFrameBuffer* m_SwapchainFrameBuffer = nullptr;
-	std::unordered_map<size_t, ISamplerPtr> m_Samplers;
-	std::unordered_map<size_t, IPipelinePtr> m_GraphicsPipelines;
+	std::unordered_map<size_t, ISamplerSharedPtr> m_Samplers;
+	std::unordered_map<size_t, IPipelineSharedPtr> m_GraphicsPipelines;
 };
 
 NAMESPACE_END(RHI)

@@ -64,7 +64,7 @@ public:
 	virtual ~PipelineState() = default;
 
 	template<EShaderStage Stage>
-	void SetImage(uint32_t Binding, const IImagePtr& Image)
+	void SetImage(uint32_t Binding, const IImageSharedPtr& Image)
 	{
 		if (auto Variable = ShaderVariableTable.Find(Stage, Binding))
 		{
@@ -81,7 +81,7 @@ public:
 	}
 
 	template<EShaderStage Stage>
-	void SetSampler(uint32_t Binding, const ISamplerPtr& Sampler)
+	void SetSampler(uint32_t Binding, const ISamplerSharedPtr& Sampler)
 	{
 		if (auto Variable = ShaderVariableTable.Find(Stage, Binding))
 		{
@@ -98,7 +98,7 @@ public:
 	}
 
 	template<EShaderStage Stage>
-	void SetUniformBuffer(uint32_t Binding, const IBufferPtr& Buffer)
+	void SetUniformBuffer(uint32_t Binding, const IBufferSharedPtr& Buffer)
 	{
 		if (auto Variable = ShaderVariableTable.Find(Stage, Binding))
 		{

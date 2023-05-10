@@ -13,6 +13,9 @@ public:
 	using EdgeIDAllocator = ObjectIDAllocator<class Edge, uint16_t>;
 	using EdgeID = EdgeIDAllocator::TID;
 
+	DECLARE_SMART_PTR(Node)
+	DECLARE_SMART_PTR(Edge)
+
 	class Node
 	{
 	public:
@@ -157,7 +160,7 @@ public:
 		return NewNode->GetID();
 	}
 
-	void AddNode(const std::shared_ptr<Node>& NewNode)
+	void AddNode(const NodeSharedPtr& NewNode)
 	{
 		m_Nodes.insert(std::make_pair(NewNode->GetID().GetIndex(), NewNode));
 	}
@@ -220,8 +223,8 @@ public:
 	}
 protected:
 private:
-	std::unordered_map<NodeID::IndexType, std::shared_ptr<Node>> m_Nodes;
-	std::unordered_map<EdgeID::IndexType, std::shared_ptr<Edge>> m_Edges;
+	std::unordered_map<NodeID::IndexType, NodeSharedPtr> m_Nodes;
+	std::unordered_map<EdgeID::IndexType, EdgeSharedPtr> m_Edges;
 
 	NodeIDAllocator m_NodeIDAllocator;
 	EdgeIDAllocator m_EdgeIDAllocator;

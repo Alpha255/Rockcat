@@ -24,7 +24,7 @@ public:
 
 	BlitPass(const Scene* TargetScene, const Camera* ViewCamera);
 
-	void SetSource(IImagePtr Src)
+	void SetSource(IImageSharedPtr Src)
 	{
 		m_BlitSrc = Src;
 	}
@@ -41,12 +41,12 @@ private:
 	EMode m_Mode = EMode::FullscreenTriangle;
 	ESampler m_Sampler = ESampler::Point;
 	Drawable m_Drawable;
-	std::unordered_map<size_t, IPipelinePtr> m_GraphicsPipelines;
+	std::unordered_map<size_t, IPipelineSharedPtr> m_GraphicsPipelines;
 	std::shared_ptr<MeshInstance> m_FullscreenTriangle;
 	std::shared_ptr<MeshInstance> m_FullscreenQuad;
-	IImagePtr m_BlitSrc;
-	ISamplerPtr m_LinearSampler;
-	ISamplerPtr m_PointSampler;
+	IImageSharedPtr m_BlitSrc;
+	ISamplerSharedPtr m_LinearSampler;
+	ISamplerSharedPtr m_PointSampler;
 	static ImageSlice AllSlice;
 };
 

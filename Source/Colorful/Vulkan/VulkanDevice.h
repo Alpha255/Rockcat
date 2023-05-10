@@ -78,47 +78,47 @@ public:
 		VERIFY_VK(vkDeviceWaitIdle(Get()));
 	}
 
-	IShaderPtr CreateShader(const ShaderDesc& Desc) override final
+	IShaderSharedPtr CreateShader(const ShaderDesc& Desc) override final
 	{
 		return std::make_shared<VulkanShader>(this, Desc);
 	}
 
-	IImagePtr CreateImage(const ImageDesc& Desc) override final
+	IImageSharedPtr CreateImage(const ImageDesc& Desc) override final
 	{
 		return std::make_shared<VulkanImage>(this, Desc);
 	}
 
-	IInputLayoutPtr CreateInputLayout(const InputLayoutDesc& Desc, const ShaderDesc& VertexShaderDesc) override final
+	IInputLayoutSharedPtr CreateInputLayout(const InputLayoutDesc& Desc, const ShaderDesc& VertexShaderDesc) override final
 	{
 		return std::make_shared<VulkanInputLayout>(Desc, VertexShaderDesc);
 	}
 
-	IFrameBufferPtr CreateFrameBuffer(const FrameBufferDesc& Desc) override final
+	IFrameBufferSharedPtr CreateFrameBuffer(const FrameBufferDesc& Desc) override final
 	{
 		return std::make_shared<VulkanFramebuffer>(this, Desc);
 	}
 
-	IPipelinePtr CreateGraphicsPipeline(const GraphicsPipelineDesc& Desc) override final
+	IPipelineSharedPtr CreateGraphicsPipeline(const GraphicsPipelineDesc& Desc) override final
 	{
 		return std::make_shared<VulkanGraphicsPipeline>(this, m_PipelineCache->Get(), Desc);
 	}
 
-	IBufferPtr CreateBuffer(const BufferDesc& Desc) override final
+	IBufferSharedPtr CreateBuffer(const BufferDesc& Desc) override final
 	{
 		return std::make_shared<VulkanBuffer>(this, Desc);
 	}
 
-	ISamplerPtr CreateSampler(const SamplerDesc& Desc) override final
+	ISamplerSharedPtr CreateSampler(const SamplerDesc& Desc) override final
 	{
 		return std::make_shared<VulkanSampler>(this, Desc);
 	}
 
-	ICommandBufferPoolPtr CreateCommandBufferPool(EQueueType QueueType) override final
+	ICommandBufferPoolSharedPtr CreateCommandBufferPool(EQueueType QueueType) override final
 	{
 		return Queue(QueueType)->CreateCommandBufferPool();
 	}
 
-	ICommandBufferPtr GetOrAllocateCommandBuffer(EQueueType QueueType, ECommandBufferLevel Level, bool8_t AutoBegin, bool8_t UseForTransfer) override final
+	ICommandBufferSharedPtr GetOrAllocateCommandBuffer(EQueueType QueueType, ECommandBufferLevel Level, bool8_t AutoBegin, bool8_t UseForTransfer) override final
 	{
 		return Queue(QueueType)->GetOrAllocateCommandBuffer(Level, AutoBegin, UseForTransfer);
 	}
@@ -145,19 +145,19 @@ public:
 		return m_Queues[QueueIndex] ? m_Queues[QueueIndex].get() : m_Queues[GraphicsQueueIndex].get();
 	}
 
-	void SubmitCommandBuffers(EQueueType QueueType, const std::vector<ICommandBufferPtr>& Commands) override final
+	void SubmitCommandBuffers(EQueueType QueueType, const std::vector<ICommandBufferSharedPtr>& Commands) override final
 	{
 		Queue(QueueType)->Submit(Commands);
 	}
 
-	void SubmitCommandBuffer(EQueueType QueueType, ICommandBufferPtr& Command) override final
+	void SubmitCommandBuffer(EQueueType QueueType, ICommandBufferSharedPtr& Command) override final
 	{
-		Queue(QueueType)->Submit(std::vector<ICommandBufferPtr>{ Command });
+		Queue(QueueType)->Submit(std::vector<ICommandBufferSharedPtr>{ Command });
 	}
 
-	void SubmitCommandBuffers(const std::vector<ICommandBufferPtr>& Commands) override final;
+	void SubmitCommandBuffers(const std::vector<ICommandBufferSharedPtr>& Commands) override final;
 
-	void SubmitCommandBuffer(ICommandBufferPtr& Command) override final;
+	void SubmitCommandBuffer(ICommandBufferSharedPtr& Command) override final;
 
 	VkPipelineCache PipelineCache() const
 	{

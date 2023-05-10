@@ -11,7 +11,7 @@ RenderGraph::RenderGraph(bool8_t EnableAsyncTasks)
 	m_RenderPasses.reserve(std::numeric_limits<uint8_t>().max());
 }
 
-void RenderGraph::AddPass(const std::shared_ptr<IRenderPass>& RenderPass)
+void RenderGraph::AddRenderPass(const IRenderPassSharedPtr& RenderPass)
 {
 	assert(RenderPass);
 
@@ -26,7 +26,7 @@ void RenderGraph::AddPass(const std::shared_ptr<IRenderPass>& RenderPass)
 	m_NeedRecompile = true;
 }
 
-void RenderGraph::RemovePass(RenderPassID PassID)
+void RenderGraph::RemoveRenderPass(RenderPassID PassID)
 {
 	assert(PassID.IsValid() && PassID.GetIndex() < m_RenderPasses.size());
 
@@ -36,9 +36,9 @@ void RenderGraph::RemovePass(RenderPassID PassID)
 	m_NeedRecompile = true;
 }
 
-std::shared_ptr<IRenderPass> RenderGraph::GetPass()
+IRenderPassSharedPtr RenderGraph::GetRenderPass()
 {
-	return std::shared_ptr<IRenderPass>();
+	return IRenderPassSharedPtr();
 }
 
 void RenderGraph::Compile()

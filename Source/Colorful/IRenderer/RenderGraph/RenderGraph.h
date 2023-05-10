@@ -9,29 +9,25 @@ class RenderGraph : public Serializeable<RenderGraph>
 public:
 	RenderGraph(bool8_t EnableAsyncTasks);
 
-	void AddPass(const std::shared_ptr<IRenderPass>& RenderPass);
+	void AddRenderPass(const IRenderPassSharedPtr& RenderPass);
 
-	void RemovePass(RenderPassID PassID);
+	void RemoveRenderPass(RenderPassID PassID);
 
-	std::shared_ptr<IRenderPass> GetPass();
+	IRenderPassSharedPtr GetRenderPass();
 
 	void Compile();
 
 	void Execute();
 
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(m_Graph)
-		);
-	}
+	SERIALIZE_START
+		CEREAL_NVP(m_Graph)
+	SERIALIZE_END
 protected:
 private:
 	bool8_t m_NeedRecompile = true;
 	bool8_t m_EnableAsyncTasks = false;
 	DirectedAcyclicGraph m_Graph;
-	std::vector<std::shared_ptr<IRenderPass>> m_RenderPasses;
+	std::vector<IRenderPassSharedPtr> m_RenderPasses;
 };
 
 NAMESPACE_END(RHI)

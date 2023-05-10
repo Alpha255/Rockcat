@@ -3,14 +3,14 @@
 
 NAMESPACE_START(RHI)
 
-ISamplerPtr RenderGraphContext::GetOrCreateSampler(const SamplerDesc& /*Desc*/)
+ISamplerSharedPtr RenderGraphContext::GetOrCreateSampler(const SamplerDesc& /*Desc*/)
 {
-    return ISamplerPtr();
+    return ISamplerSharedPtr();
 }
 
-IPipelinePtr RenderGraphContext::GetOrCreateGraphicsPipeline(const GraphicsPipelineDesc& /*Desc*/)
+IPipelineSharedPtr RenderGraphContext::GetOrCreateGraphicsPipeline(const GraphicsPipelineDesc& /*Desc*/)
 {
-    return IPipelinePtr();
+    return IPipelineSharedPtr();
 }
 
 NAMESPACE_END(RHI)

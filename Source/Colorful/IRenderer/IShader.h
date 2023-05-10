@@ -254,7 +254,7 @@ struct ShaderDesc
 
 struct ShaderCompiled
 {
-	IShaderPtr Shader;
+	IShaderSharedPtr Shader;
 	std::shared_ptr<ShaderDesc> Desc;
 
 	template<class Archive>
@@ -286,7 +286,7 @@ struct ShaderCache : public Serializeable<ShaderCache>
 		);
 	}
 
-	IShaderPtr Get(const std::vector<ShaderMacro>& Macros);
+	IShaderSharedPtr Get(const std::vector<ShaderMacro>& Macros);
 private:
 	friend class ShaderCompiler;
 	friend class ShaderImporter;
@@ -328,7 +328,7 @@ struct PipelineShaders
 		return Shaders[Stage].get();
 	}
 
-	void Set(EShaderStage Stage, const IShaderPtr& Shader)
+	void Set(EShaderStage Stage, const IShaderSharedPtr& Shader)
 	{
 		assert(Shader->Stage() == Stage);
 		Shaders[Stage] = Shader;
@@ -358,7 +358,7 @@ struct PipelineShaders
 		}
 	}
 
-	std::array<IShaderPtr, EShaderStage::ShaderStageCount> Shaders;
+	std::array<IShaderSharedPtr, EShaderStage::ShaderStageCount> Shaders;
 };
 
 class PipelineShaderVariableTable

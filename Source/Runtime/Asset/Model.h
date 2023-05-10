@@ -264,9 +264,9 @@ protected:
 	friend struct std::hash<VertexLayout>;
 	friend class AssimpImporter;
 private:
-	RHI::IBufferPtr m_VertexBuffer;
-	RHI::IBufferPtr m_IndexBuffer;
-	RHI::IInputLayoutPtr m_InputLayout;
+	RHI::IBufferSharedPtr m_VertexBuffer;
+	RHI::IBufferSharedPtr m_IndexBuffer;
+	RHI::IInputLayoutSharedPtr m_InputLayout;
 
 	std::string m_DebugName;
 };

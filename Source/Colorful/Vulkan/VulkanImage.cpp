@@ -46,11 +46,11 @@ VulkanImage::VulkanImage(VulkanDevice* Device, const ImageDesc& Desc)
 
 		if (m_Device->Options().BatchResourceSubmit)
 		{
-			m_Device->Queue(EQueueType::Transfer)->QueueSubmit(std::vector<ICommandBufferPtr>{Command});
+			m_Device->Queue(EQueueType::Transfer)->QueueSubmit(std::vector<ICommandBufferSharedPtr>{Command});
 		}
 		else
 		{
-			m_Device->Queue(EQueueType::Transfer)->Submit(std::vector<ICommandBufferPtr>{Command});
+			m_Device->Queue(EQueueType::Transfer)->Submit(std::vector<ICommandBufferSharedPtr>{Command});
 		}
 	}
 

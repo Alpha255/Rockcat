@@ -29,70 +29,70 @@ public:
 	{
 	}
 
-	IShaderPtr CreateShader(const ShaderDesc& Desc) override final
+	IShaderSharedPtr CreateShader(const ShaderDesc& Desc) override final
 	{
 		return std::make_shared<D3D12Shader>(Desc);
 	}
 
-	IImagePtr CreateImage(const ImageDesc& Desc) override final
+	IImageSharedPtr CreateImage(const ImageDesc& Desc) override final
 	{
 		return std::make_shared<D3D12Image>(this, Desc);
 	}
 
-	IInputLayoutPtr CreateInputLayout(const InputLayoutDesc& Desc, const ShaderDesc&) override final
+	IInputLayoutSharedPtr CreateInputLayout(const InputLayoutDesc& Desc, const ShaderDesc&) override final
 	{
 		return std::make_shared<D3D12InputLayout>(Desc);
 	}
 
-	IFrameBufferPtr CreateFrameBuffer(const FrameBufferDesc& Desc) override final
+	IFrameBufferSharedPtr CreateFrameBuffer(const FrameBufferDesc& Desc) override final
 	{
 		return std::make_shared<D3D12FrameBuffer>(Desc);
 	}
 
-	IPipelinePtr CreateGraphicsPipeline(const GraphicsPipelineDesc& Desc) override final
+	IPipelineSharedPtr CreateGraphicsPipeline(const GraphicsPipelineDesc& Desc) override final
 	{
 		return std::make_shared<D3D12GraphicsPipeline>(this, Desc);
 	}
 
-	IBufferPtr CreateBuffer(const BufferDesc& Desc) override final
+	IBufferSharedPtr CreateBuffer(const BufferDesc& Desc) override final
 	{
 		return std::make_shared<D3D12Buffer>(this, Desc);
 	}
 
-	ISamplerPtr CreateSampler(const SamplerDesc& Desc) override final
+	ISamplerSharedPtr CreateSampler(const SamplerDesc& Desc) override final
 	{
 		return std::make_shared<D3D12Sampler>(this, Desc);
 	}
 
-	ICommandBufferPoolPtr CreateCommandBufferPool(EQueueType QueueType) override final
+	ICommandBufferPoolSharedPtr CreateCommandBufferPool(EQueueType QueueType) override final
 	{
 		(void)QueueType;
 		return nullptr;
 	}
 
-	void SubmitCommandBuffers(EQueueType QueueType, const std::vector<ICommandBufferPtr>& Commands) override final
+	void SubmitCommandBuffers(EQueueType QueueType, const std::vector<ICommandBufferSharedPtr>& Commands) override final
 	{
 		(void)QueueType;
 		(void)Commands;
 	}
 
-	void SubmitCommandBuffer(EQueueType QueueType, ICommandBufferPtr& Command) override final
+	void SubmitCommandBuffer(EQueueType QueueType, ICommandBufferSharedPtr& Command) override final
 	{
 		(void)QueueType;
 		(void)Command;
 	}
 
-	void SubmitCommandBuffers(const std::vector<ICommandBufferPtr>& Commands) override final
+	void SubmitCommandBuffers(const std::vector<ICommandBufferSharedPtr>& Commands) override final
 	{
 		(void)Commands;
 	}
 
-	void SubmitCommandBuffer(ICommandBufferPtr& Command) override final
+	void SubmitCommandBuffer(ICommandBufferSharedPtr& Command) override final
 	{
 		(void)Command;
 	}
 
-	ICommandBufferPtr GetOrAllocateCommandBuffer(EQueueType QueueType, ECommandBufferLevel Level, bool8_t AutoBegin, bool8_t UseForTransfer) override final
+	ICommandBufferSharedPtr GetOrAllocateCommandBuffer(EQueueType QueueType, ECommandBufferLevel Level, bool8_t AutoBegin, bool8_t UseForTransfer) override final
 	{
 		(void)QueueType;
 		(void)Level;

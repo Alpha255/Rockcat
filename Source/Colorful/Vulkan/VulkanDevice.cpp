@@ -407,9 +407,9 @@ void VulkanDevice::FreeFence(std::shared_ptr<VulkanFence> Fence)
 	}
 }
 
-void VulkanDevice::SubmitCommandBuffers(const std::vector<ICommandBufferPtr>& Commands)
+void VulkanDevice::SubmitCommandBuffers(const std::vector<ICommandBufferSharedPtr>& Commands)
 {
-	std::array<std::vector<ICommandBufferPtr>, static_cast<size_t>(EQueueType::Compute) + 1ull> QueueCommands;
+	std::array<std::vector<ICommandBufferSharedPtr>, static_cast<size_t>(EQueueType::Compute) + 1ull> QueueCommands;
 	for (auto Command : Commands)
 	{
 		if (Command)
@@ -435,10 +435,10 @@ void VulkanDevice::SubmitCommandBuffers(const std::vector<ICommandBufferPtr>& Co
 	}
 }
 
-void VulkanDevice::SubmitCommandBuffer(ICommandBufferPtr& Command)
+void VulkanDevice::SubmitCommandBuffer(ICommandBufferSharedPtr& Command)
 {
 	assert(Command);
-	Queue(std::static_pointer_cast<VulkanCommandBuffer>(Command)->Pool()->QueueType())->Submit(std::vector<ICommandBufferPtr>{Command});
+	Queue(std::static_pointer_cast<VulkanCommandBuffer>(Command)->Pool()->QueueType())->Submit(std::vector<ICommandBufferSharedPtr>{Command});
 }
 
 VulkanDevice::~VulkanDevice()

@@ -38,13 +38,13 @@ protected:
 	void CustomStyles();
 private:
 	ImGuiContext* m_Context = nullptr;
-	IBufferPtr m_VertexBuffer;
-	IBufferPtr m_IndexBuffer;
-	IBufferPtr m_UniformBuffer;
-	IPipelinePtr m_GraphicsPipeline;
-	IInputLayoutPtr m_InputLayout;
-	IImagePtr m_FontImage;
-	ISamplerPtr m_LinearSampler;
+	IBufferSharedPtr m_VertexBuffer;
+	IBufferSharedPtr m_IndexBuffer;
+	IBufferSharedPtr m_UniformBuffer;
+	IPipelineSharedPtr m_GraphicsPipeline;
+	IInputLayoutSharedPtr m_InputLayout;
+	IImageSharedPtr m_FontImage;
+	ISamplerSharedPtr m_LinearSampler;
 	IDevice* m_Device = nullptr;
 	std::shared_ptr<Material> m_Material;
 	GraphicsPipelineDesc m_GraphicsPipelineDesc;

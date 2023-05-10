@@ -62,10 +62,10 @@ private:
 
 struct FrameBufferDesc : public IHashedResourceDesc
 {
-	std::vector<IImagePtr> ColorAttachments;
-	IImagePtr DepthStencilAttachment;
+	std::vector<IImageSharedPtr> ColorAttachments;
+	IImageSharedPtr DepthStencilAttachment;
 
-	FrameBufferDesc& AddColorAttachment(const IImagePtr& Attachment)
+	FrameBufferDesc& AddColorAttachment(const IImageSharedPtr& Attachment)
 	{
 		assert(Attachment);
 		assert(std::find(ColorAttachments.begin(), ColorAttachments.end(), Attachment) == ColorAttachments.end());
@@ -86,7 +86,7 @@ struct FrameBufferDesc : public IHashedResourceDesc
 		return *this;
 	}
 
-	FrameBufferDesc& SetDepthStencilAttachment(const IImagePtr& Attachment)
+	FrameBufferDesc& SetDepthStencilAttachment(const IImageSharedPtr& Attachment)
 	{
 		assert(Attachment);
 

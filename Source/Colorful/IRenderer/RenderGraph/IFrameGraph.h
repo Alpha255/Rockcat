@@ -72,8 +72,8 @@ protected:
 	IFrameGraphPass* m_BindPass = nullptr;
 	IFrameBuffer* m_SwapchainFrameBuffer = nullptr;
 
-	IFrameBufferPtr m_FrameBuffer;
-	IPipelinePtr m_GraphicsPipeline;
+	IFrameBufferSharedPtr m_FrameBuffer;
+	IPipelineSharedPtr m_GraphicsPipeline;
 	GraphicsPipelineDesc m_GraphicsPipelineDesc;
 
 	Viewport m_Viewport;

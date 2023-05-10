@@ -14,7 +14,7 @@ public:
 	void SetupMaterial(const MeshInstance* Mesh) override final;
 	void UpdateUniformBuffers(class ICommandBuffer* Command) override final;
 
-	IImagePtr GetColorAttachment() const
+	IImageSharedPtr GetColorAttachment() const
 	{
 		return m_FrameBuffer->Description().ColorAttachments[0];
 	}
@@ -24,9 +24,9 @@ private:
 	std::vector<Drawable> m_Drawables;
 	EShadowTechnique m_ShadowTechnique = EShadowTechnique::None;
 	const Material* m_LastMaterial = nullptr;
-	ISamplerPtr m_LinearSampler;
-	IBufferPtr m_Transform;
-	IBufferPtr m_Lighting;
+	ISamplerSharedPtr m_LinearSampler;
+	IBufferSharedPtr m_Transform;
+	IBufferSharedPtr m_Lighting;
 };
 
 NAMESPACE_END(RHI)

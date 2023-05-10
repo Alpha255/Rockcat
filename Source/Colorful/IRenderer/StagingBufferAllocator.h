@@ -13,7 +13,7 @@ public:
 		size_t Size = 0u;
 		size_t CurOffset = 0u;
 		size_t CurEnd = 0u;
-		IBufferPtr Buffer;
+		IBufferSharedPtr Buffer;
 	};
 
 	std::shared_ptr<Heap> Alloc(size_t Size, size_t Alignment = Kilobyte / 4ull);

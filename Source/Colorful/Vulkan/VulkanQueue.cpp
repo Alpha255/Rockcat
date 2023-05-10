@@ -48,7 +48,7 @@ std::shared_ptr<VulkanCommandBuffer> VulkanQueue::GetOrAllocateCommandBuffer(ECo
 	return CommandPool->second->GetOrAllocate(Level, AutoBegin, UseForTransfer);
 }
 
-void VulkanQueue::QueueSubmit(const std::vector<ICommandBufferPtr>& CommandBuffers)
+void VulkanQueue::QueueSubmit(const std::vector<ICommandBufferSharedPtr>& CommandBuffers)
 {
 	std::lock_guard<std::mutex> ScopedLocker(m_CommandsTracker.Mutex);
 
@@ -68,7 +68,7 @@ void VulkanQueue::SubmitQueuedCommandBuffers()
 	}
 }
 
-void VulkanQueue::Submit(const std::vector<ICommandBufferPtr>& CommandBuffers)
+void VulkanQueue::Submit(const std::vector<ICommandBufferSharedPtr>& CommandBuffers)
 {
 	/// #TODO: Async submit
 

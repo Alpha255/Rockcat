@@ -56,41 +56,41 @@ public:
 
 	virtual void WaitIdle() = 0;
 
-	virtual IShaderPtr CreateShader(const ShaderDesc& Desc) = 0;
+	virtual IShaderSharedPtr CreateShader(const ShaderDesc& Desc) = 0;
 
-	virtual IImagePtr CreateImage(const ImageDesc& Desc) = 0;
+	virtual IImageSharedPtr CreateImage(const ImageDesc& Desc) = 0;
 
-	virtual IInputLayoutPtr CreateInputLayout(const InputLayoutDesc& Desc, const ShaderDesc& VertexShaderDesc) = 0;
+	virtual IInputLayoutSharedPtr CreateInputLayout(const InputLayoutDesc& Desc, const ShaderDesc& VertexShaderDesc) = 0;
 
-	virtual IFrameBufferPtr CreateFrameBuffer(const FrameBufferDesc& Desc) = 0;
+	virtual IFrameBufferSharedPtr CreateFrameBuffer(const FrameBufferDesc& Desc) = 0;
 
-	virtual IPipelinePtr CreateGraphicsPipeline(const GraphicsPipelineDesc& Desc) = 0;
+	virtual IPipelineSharedPtr CreateGraphicsPipeline(const GraphicsPipelineDesc& Desc) = 0;
 
-	virtual IBufferPtr CreateBuffer(const BufferDesc& Desc) = 0;
+	virtual IBufferSharedPtr CreateBuffer(const BufferDesc& Desc) = 0;
 
-	virtual ISamplerPtr CreateSampler(const SamplerDesc& Desc) = 0;
+	virtual ISamplerSharedPtr CreateSampler(const SamplerDesc& Desc) = 0;
 
-	virtual ICommandBufferPoolPtr CreateCommandBufferPool(EQueueType QueueType) = 0;
+	virtual ICommandBufferPoolSharedPtr CreateCommandBufferPool(EQueueType QueueType) = 0;
 
-	virtual void SubmitCommandBuffers(EQueueType QueueType, const std::vector<ICommandBufferPtr>& Commands) = 0;
+	virtual void SubmitCommandBuffers(EQueueType QueueType, const std::vector<ICommandBufferSharedPtr>& Commands) = 0;
 
-	virtual void SubmitCommandBuffer(EQueueType QueueType, ICommandBufferPtr& Command) = 0;
+	virtual void SubmitCommandBuffer(EQueueType QueueType, ICommandBufferSharedPtr& Command) = 0;
 
-	virtual void SubmitCommandBuffers(const std::vector<ICommandBufferPtr>& Commands) = 0;
+	virtual void SubmitCommandBuffers(const std::vector<ICommandBufferSharedPtr>& Commands) = 0;
 
-	virtual void SubmitCommandBuffer(ICommandBufferPtr& Command) = 0;
+	virtual void SubmitCommandBuffer(ICommandBufferSharedPtr& Command) = 0;
 
-	virtual ICommandBufferPtr GetOrAllocateCommandBuffer(EQueueType QueueType, ECommandBufferLevel Level = ECommandBufferLevel::Primary, bool8_t AutoBegin = true, bool8_t UseForTransfer = false) = 0;
+	virtual ICommandBufferSharedPtr GetOrAllocateCommandBuffer(EQueueType QueueType, ECommandBufferLevel Level = ECommandBufferLevel::Primary, bool8_t AutoBegin = true, bool8_t UseForTransfer = false) = 0;
 
-	IPipelinePtr GetOrCreateGraphicsPipeline(const GraphicsPipelineDesc& Desc);
+	IPipelineSharedPtr GetOrCreateGraphicsPipeline(const GraphicsPipelineDesc& Desc);
 
-	IInputLayoutPtr GetOrCreateInputLayout(const InputLayoutDesc& Desc, const ShaderDesc& VertexShaderDesc);
+	IInputLayoutSharedPtr GetOrCreateInputLayout(const InputLayoutDesc& Desc, const ShaderDesc& VertexShaderDesc);
 
-	ISamplerPtr GetOrCreateSampler(const SamplerDesc& Desc);
+	ISamplerSharedPtr GetOrCreateSampler(const SamplerDesc& Desc);
 
-	IFrameBufferPtr GetOrCreateFrameBuffer(const FrameBufferDesc& Desc);
+	IFrameBufferSharedPtr GetOrCreateFrameBuffer(const FrameBufferDesc& Desc);
 
-	IImagePtr CreateRenderTarget(
+	IImageSharedPtr CreateRenderTarget(
 		uint32_t Width,
 		uint32_t Height,
 		EFormat Format,
@@ -118,7 +118,7 @@ public:
 		return CreateImage(Desc);
 	}
 
-	IImagePtr CreateDepthStencil(uint32_t Width, uint32_t Height, EFormat Format, const char8_t* Name = "NamelessDepthStencil")
+	IImageSharedPtr CreateDepthStencil(uint32_t Width, uint32_t Height, EFormat Format, const char8_t* Name = "NamelessDepthStencil")
 	{
 		assert(FormatAttribute::IsDepthStenci(Format));
 
@@ -145,7 +145,7 @@ public:
 		return m_Adapter.c_str();
 	}
 
-	IBufferPtr CreateUniformBuffer(size_t Size)
+	IBufferSharedPtr CreateUniformBuffer(size_t Size)
 	{
 		return CreateBuffer(
 			BufferDesc
@@ -158,7 +158,7 @@ public:
 		);
 	}
 
-	IBufferPtr CreateVertexBuffer(size_t Size, EDeviceAccessFlags AccessFlags, const void* InitialData)
+	IBufferSharedPtr CreateVertexBuffer(size_t Size, EDeviceAccessFlags AccessFlags, const void* InitialData)
 	{
 		return CreateBuffer(
 			BufferDesc
@@ -172,7 +172,7 @@ public:
 		);
 	}
 
-	IBufferPtr CreateIndexBuffer(size_t Size, EDeviceAccessFlags AccessFlags, const void* InitialData)
+	IBufferSharedPtr CreateIndexBuffer(size_t Size, EDeviceAccessFlags AccessFlags, const void* InitialData)
 	{
 		return CreateBuffer(
 			BufferDesc
@@ -188,10 +188,10 @@ public:
 protected:
 	std::string m_Adapter;
 protected:
-	std::pair<std::mutex, std::unordered_map<size_t, ISamplerPtr>> m_Samplers;
-	std::pair<std::mutex, std::unordered_map<size_t, IInputLayoutPtr>> m_InputLayouts;
-	std::unordered_map<size_t, IFrameBufferPtr> m_FrameBufferCache;
-	std::unordered_map<size_t, IPipelinePtr> m_GraphicsPipelineCache;
+	std::pair<std::mutex, std::unordered_map<size_t, ISamplerSharedPtr>> m_Samplers;
+	std::pair<std::mutex, std::unordered_map<size_t, IInputLayoutSharedPtr>> m_InputLayouts;
+	std::unordered_map<size_t, IFrameBufferSharedPtr> m_FrameBufferCache;
+	std::unordered_map<size_t, IPipelineSharedPtr> m_GraphicsPipelineCache;
 };
 
 class ISwapchain

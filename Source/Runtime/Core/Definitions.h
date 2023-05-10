@@ -118,9 +118,10 @@ static_assert(sizeof(byte8_t) == 1ull, "Size of byte miss match.");
 
 #define RENDERER_POSTFIX "Renderer"
 
-#define DECLARE_SHARED_PTR(ClassName) class ClassName; using ClassName##Ptr = std::shared_ptr<ClassName>;
-#define DECLARE_UNIQUE_PTR(ClassName) class ClassName; using ClassName##Ptr = std::unique_ptr<ClassName>;
-#define DECLARE_PLAIN_PTR(ClassName)  class ClassName; using ClassName##Ptr = ClassName*;
+#define DECLARE_SMART_PTR(ClassName) class ClassName; \
+	using ClassName##SharedPtr = std::shared_ptr<ClassName>; \
+	using ClassName##UniquePtr = std::unique_ptr<ClassName>; \
+	using ClassName##WeakPtr = std::weak_ptr<ClassName>;
 
 #define DESCRIPTION(Description)
 
@@ -289,7 +290,7 @@ public:
 		m_Name = Name;
 	}
 
-	const char8_t* Name() const noexcept
+	const char8_t* GetName() const noexcept
 	{
 		return m_Name.data();
 	}
@@ -297,3 +298,11 @@ protected:
 private:
 	std::string m_Name;
 };
+
+#define SERIALIZE_START template<class Archive> \
+	void serialize(Archive& Ar) \
+	{ \
+		Ar( \
+
+#define SERIALIZE_END ); \
+	}

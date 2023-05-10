@@ -42,12 +42,12 @@ public:
 		return *this;
 	}
 
-	const char8_t* Name() const
+	const char8_t* GetName() const
 	{
 		return m_Name.c_str();
 	}
 
-	EVisibility Visibility() const
+	EVisibility GetVisibility() const
 	{
 		return m_Visibility;
 	}
@@ -57,12 +57,12 @@ public:
 		m_Visibility = Visibility;
 	}
 
-	EType Type() const
+	EType GetType() const
 	{
 		return m_Type;
 	}
 
-	FieldID ID() const
+	FieldID GetID() const
 	{
 		return m_ID;
 	}
@@ -105,8 +105,8 @@ public:
 protected:
 private:
 	FieldID m_ID;
-	EVisibility m_Visibility;
-	EType m_Type;
+	EVisibility m_Visibility = EVisibility::None;
+	EType m_Type = EType::Image2D;
 	union
 	{
 		//ImageAttributes ImagesAttributes;
@@ -130,7 +130,7 @@ public:
 		m_Fields.emplace_back(Field(Name, Visibility, Type));
 	}
 
-	const char8_t* Name() const
+	const char8_t* GetName() const
 	{
 		return m_Name.c_str();
 	}

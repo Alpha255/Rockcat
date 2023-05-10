@@ -48,9 +48,9 @@ public:
 		}
 	}
 
-	void Submit(const std::vector<ICommandBufferPtr>& CommandBuffers);
+	void Submit(const std::vector<ICommandBufferSharedPtr>& CommandBuffers);
 
-	void QueueSubmit(const std::vector<ICommandBufferPtr>& CommandBuffers);
+	void QueueSubmit(const std::vector<ICommandBufferSharedPtr>& CommandBuffers);
 
 	void SubmitQueuedCommandBuffers();
 
@@ -63,7 +63,7 @@ protected:
 	struct CommandBufferTracker
 	{
 		std::list<std::shared_ptr<VulkanCommandBuffer>> InFlight;
-		std::vector<ICommandBufferPtr> Queued;
+		std::vector<ICommandBufferSharedPtr> Queued;
 		std::mutex Mutex;
 	};
 private:

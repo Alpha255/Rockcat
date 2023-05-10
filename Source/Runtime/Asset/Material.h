@@ -140,7 +140,7 @@ public:
 		return m_PipelineShaders.Get(Stage);
 	}
 
-	RHI::IImagePtr Image(EImageType Type) const
+	RHI::IImageSharedPtr Image(EImageType Type) const
 	{
 		assert(Type < EImageType::Unknown);
 		return m_Images[Type] ? m_Images[Type]->Object : DefaultImage->Object;

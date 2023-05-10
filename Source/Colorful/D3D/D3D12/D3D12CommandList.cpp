@@ -68,8 +68,8 @@ void D3D12CommandList::Reset()
 
 void D3D12CommandList::BeginDebugMarker(const char8_t* Name, const Color& MarkerColor)
 {
-	Color32 ColorIn32(MarkerColor);
-	PIXBeginEvent(m_Handle, PIX_COLOR(ColorIn32.R(), ColorIn32.G(), ColorIn32.B()), Name);
+	uint32_t RGBA = MarkerColor.RGBA8();
+	PIXBeginEvent(m_Handle, PIX_COLOR(uint8_t(RGBA && 0x000F), uint8_t(RGBA && 0x00F0 >> 8), uint8_t(RGBA & 0x0F00 >> 16)), Name);
 }
 
 void D3D12CommandList::EndDebugMarker()

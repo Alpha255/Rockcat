@@ -59,35 +59,33 @@ public:
 
 	inline Quaternion operator+(const Quaternion& Other) const
 	{
-		return Quaternion(x + Other.x, y + Other.y, z + Other.z, w + Other.w);
+		Quaternion Ret;
+		VECTOR_STORE(4, &Ret, DirectX::XMVectorAdd(VECTOR_LOAD(4, this), VECTOR_LOAD(4, &Other)));
+		return Ret;
 	}
 
 	inline Quaternion& operator+=(const Quaternion& Other)
 	{
-		x += Other.x;
-		y += Other.y;
-		z += Other.z;
-		w += Other.w;
+		VECTOR_STORE(4, this, DirectX::XMVectorAdd(VECTOR_LOAD(4, this), VECTOR_LOAD(4, &Other)));
 		return *this;
 	}
 
 	inline Quaternion operator-(const Quaternion& Other) const
 	{
-		return Quaternion(x - Other.x, y - Other.y, z - Other.z, w - Other.w);
+		Quaternion Ret;
+		VECTOR_STORE(4, &Ret, DirectX::XMVectorSubtract(VECTOR_LOAD(4, this), VECTOR_LOAD(4, &Other)));
+		return Ret;
 	}
 
 	inline Quaternion& operator-=(const Quaternion& Other)
 	{
-		x -= Other.x;
-		y -= Other.y;
-		z -= Other.z;
-		w -= Other.w;
+		VECTOR_STORE(4, this, DirectX::XMVectorSubtract(VECTOR_LOAD(4, this), VECTOR_LOAD(4, &Other)));
 		return *this;
 	}
 
 	inline Quaternion operator*(const Quaternion& Other) const
 	{
-		Quaternion Ret(0.0f, 0.0f, 0.0f, 0.0f);
+		Quaternion Ret;
 		VECTOR_STORE(4, &Ret, DirectX::XMQuaternionMultiply(VECTOR_LOAD(4, this), VECTOR_LOAD(4, &Other)));
 		return Ret;
 	}
@@ -171,14 +169,14 @@ public:
 		return Ret;
 	}
 
-	inline Matrix ToRotationMatrix()
+	inline Matrix GetRotationMatrix()
 	{
 		Matrix Ret;
 		MATRIX_STORE(&Ret, DirectX::XMMatrixRotationQuaternion(VECTOR_LOAD(4, this)));
 		return Ret;
 	}
 
-	inline std::pair<Vector3, float32_t> ToAxisAngle()
+	inline std::pair<Vector3, float32_t> GetAxisAngle()
 	{
 		DirectX::XMVECTOR AxisV;
 		Vector3 Axis;
