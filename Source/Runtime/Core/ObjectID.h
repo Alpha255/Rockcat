@@ -4,36 +4,43 @@
 
 NAMESPACE_START(Gear)
 
-template<class TObject, class TIndex>
+template<class TObject, class TIndex = uint32_t>
 class ObjectID
 {
 public:
-	static const TIndex NullIndex = std::numeric_limits<TIndex>().max();
-	static_assert(std::is_integral_v<TIndex>, "The index type must be integral");
+	static const constexpr TIndex NullIndex = std::numeric_limits<TIndex>().max();
+	static_assert(std::is_unsigned<TIndex>::value, "The index type must be unsigned integral");
 
 	using IndexType = TIndex;
 
-	ObjectID() = default;
+	constexpr ObjectID() = default;
 
-	ObjectID(const TIndex Index)
+	constexpr explicit ObjectID(const TIndex Index)
 		: m_Index(Index)
 	{
 		assert(m_Index < NullIndex);
 	}
 
-	TIndex GetIndex() const
+	template<class UIndex>
+	constexpr explicit ObjectID(UIndex Index)
+		: m_Index(static_cast<IndexType>(Index))
+	{
+		assert(m_Index < NullIndex);
+	}
+
+	constexpr TIndex GetIndex() const
 	{
 		assert(IsValid());
 		return m_Index;
 	}
 
-	operator bool8_t() const { return IsValid(); }
+	constexpr operator bool8_t() const { return IsValid(); }
 
-	bool8_t IsValid() const { return m_Index != NullIndex; }
+	constexpr bool8_t IsValid() const { return m_Index != NullIndex; }
 
-	bool8_t operator==(const ObjectID& Other) const { return m_Index == Other.m_Index; };
+	constexpr bool8_t operator==(const ObjectID& Other) const { return m_Index == Other.m_Index; };
 
-	bool8_t operator!=(const ObjectID& Other) const { return m_Index != Other.m_Index; };
+	constexpr bool8_t operator!=(const ObjectID& Other) const { return m_Index != Other.m_Index; };
 
 	struct Hasher
 	{
@@ -84,8 +91,10 @@ public:
 	}
 protected:
 private:
-	TIndex m_MaxIndex = 0;
+	std::atomic<TIndex> m_MaxIndex = 0;
 	std::queue<TIndex> m_FreeIndices;
 };
+
+#define DECLARE_OBJECT_ID(ObjectType, IDType) using ObjectType##ID = ObjectID<class ObjectType, IDType>; using ObjectType##IDAllocator = ObjectIDAllocator<class ObjectType, IDType>;
 
 NAMESPACE_END(Gear)
