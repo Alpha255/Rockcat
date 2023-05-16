@@ -1,0 +1,215 @@
+#define GROUP_TILE_SIZE 8
+#define MAX_MIP_BATCH_SIZE 4
+
+float4 DispatchThreadIDToBufferUV;
+float2 InvSize;
+float2 InputViewportMaxBound;
+uint4 PixelViewportMinMax;
+
+Texture2D ParentDepthTexture;
+SamplerState ParentDepthTextureSampler;
+
+RWTexture2D<float> FurthestHZBOutput_0;
+RWTexture2D<float> FurthestHZBOutput_1;
+RWTexture2D<float> FurthestHZBOutput_2;
+RWTexture2D<float> FurthestHZBOutput_3;
+
+RWTexture2D<float> ClosestHZBOutput_0;
+RWTexture2D<float> ClosestHZBOutput_1;
+RWTexture2D<float> ClosestHZBOutput_2;
+RWTexture2D<float> ClosestHZBOutput_3;
+
+groupshared float SharedMinDeviceZ[GROUP_TILE_SIZE * GROUP_TILE_SIZE];
+groupshared float SharedMaxDeviceZ[GROUP_TILE_SIZE * GROUP_TILE_SIZE];
+
+uint SignedRightShift(uint X, const int BitShift)
+{
+    if (BitShift > 0)
+    {
+        return X << asuint(BitShift);
+    }
+    else if (BitShift < 0)
+    {
+        return X >> asuint(-BitShift);
+    }
+
+    return X;
+}
+
+// Return the pixel pos in a two dimensional tile size of N = 2^TileSizeLog2, to
+// store at a given SharedArrayId in uint2, so that a following recursive 2x2 pixel
+// block reduction stays entirely LDS memory banks coherent.
+uint2 InitialTilePixelPositionForReduction2x2(const int TileSizeLog2, uint SharedArrayId)
+{
+    uint X = 0;
+    uint Y = 0;
+
+    [unroll]
+    for (uint Index = 0; Index < TileSizeLog2; ++Index)
+    {
+        const uint DestBitID = TileSizeLog2 - 1 - Index;
+        const uint DestBitMask = 1u << DestBitID;
+
+        X |= DestBitMask & SignedRightShift(SharedArrayId, int(DestBitID) - int(Index * 2 + 0));
+        Y |= DestBitMask & SignedRightShift(SharedArrayId, int(DestBitID) - int(Index * 2 + 1));
+    }
+
+    return uint2(X, Y);
+}
+
+uint2 InitialTilePixelPositionForReduction2x2(const int TileSizeLog2, const uint ReduceCount, uint SharedArrayId)
+{
+    uint2 P = InitialTilePixelPositionForReduction2x2(ReduceCount, SharedArrayId);
+
+    SharedArrayId = SharedArrayId >> (2 * ReduceCount);
+
+    const uint RemainingSize = 1u << (TileSizeLog2 - ReduceCount);
+
+    P.x = ((SharedArrayId % RemainingSize) << ReduceCount);
+    P.y = ((SharedArrayId / RemainingSize) << ReduceCount);
+
+    return P;
+}
+
+float4 Gather4(Texture2D Texture, SamplerState TextureSampler, float2 BufferUV)
+{
+#if 1
+    float2 UV = min(BufferUV + float2(-0.25f, 0.25f) * InvSize, InputViewportMaxBound - InvSize);
+    return Texture.GatherRed(TextureSampler, UV, 0);
+#else
+    float2 UVs[4];
+
+    UV[0] = min(BufferUV + float2(-0.25f,  0.25f) * InvSize, InputViewportMaxBound);
+    UV[1] = min(BufferUV + float2( 0.25f, -0.25f) * InvSize, InputViewportMaxBound);
+    UV[2] = min(BufferUV + float2(-0.25f,  0.25f) * InvSize, InputViewportMaxBound);
+    UV[3] = min(BufferUV + float2( 0.25f,  0.25f) * InvSize, InputViewportMaxBound);
+
+    float4 Out;
+    Out.x = Texture.SampleLevel(TextureSampler, UV[0], 0).r;
+    Out.y = Texture.SampleLevel(TextureSampler, UV[1], 0).r;
+    Out.z = Texture.SampleLevel(TextureSampler, UV[2], 0).r;
+    Out.w = Texture.SampleLevel(TextureSampler, UV[3], 0).r;
+
+    return Out;
+#endif
+}
+
+void OutputMipLevel(uint MipLevel, uint2 OutputPixelPos, float FurthestDeivceZ, float ClosestDeviceZ)
+{
+#if DIM_MIP_LEVEL_COUNT >= 2
+    if (MipLevel == 1)
+    {
+    #if DIM_FURTHEST
+        FurthestHZBOutput_1[OutputPixelPos] = FurthestDeivceZ;
+    #endif
+    #if DIM_CLOSEST
+        ClosestHZBOutput_1[OutputPixelPos] = ClosestDeviceZ;
+    #endif
+    }
+#endif
+#if DIM_MIP_LEVEL_COUNT >= 3
+    else if (MipLevel == 2)
+    {
+    #if DIM_FURTHEST
+        FurthestHZBOutput_2[OutputPixelPos] = FurthestDeivceZ;
+    #endif
+    #if DIM_CLOSEST
+        ClosestHZBOutput_2[OutputPixelPos] = ClosestDeviceZ;
+    #endif
+    }
+#endif
+#if DIM_MIP_LEVEL_COUNT >= 3
+    if (MipLevel == 2)
+    {
+    #if DIM_FURTHEST
+        FurthestHZBOutput_2[OutputPixelPos] = FurthestDeivceZ;
+    #endif
+    #if DIM_CLOSEST
+        ClosestHZBOutput_2[OutputPixelPos] = ClosestDeviceZ;
+    #endif
+    }
+#endif
+#if DIM_MIP_LEVEL_COUNT >= 4
+    if (MipLevel == 3)
+    {
+    #if DIM_FURTHEST
+        FurthestHZBOutput_3[OutputPixelPos] = FurthestDeivceZ;
+    #endif
+    #if DIM_CLOSEST
+        ClosestHZBOutput_3[OutputPixelPos] = ClosestDeviceZ;
+    #endif
+    }
+#endif
+}
+
+[numthreads(GROUP_TILE_SIZE, GROUP_TILE_SIZE, 1)]
+void BuildHZB(uint2 GroupId : SV_GroupID, uint GroupThreadIndex : SV_GroupIndex)
+{
+#if DIM_MIP_LEVEL_COUNT == 1
+    uint2 GroupThreadID = uint2(GroupThreadIndex % GROUP_TILE_SIZE, GroupThreadIndex / GROUP_TILE_SIZE);
+#else
+    uint2 GroupThreadID = InitialTilePixelPositionForReduction2x2(MAX_MIP_BATCH_SIZE - 1, GroupThreadIndex);
+#endif
+
+    uint2 DispatchThreadID = GROUP_TILE_SIZE * GroupId + GroupThreadID;
+
+    float2 BufferUV = (DispatchThreadID + 0.5) * DispatchThreadIDToBufferUV.xy + DispatchThreadIDToBufferUV.zw;
+    float4 DeviceZ = Gather4(ParentDepthTexture, ParentDepthTextureSampler, BufferUV);
+
+    uint2 SrcPixelCoord = (DispatchThreadID << 1) + PixelViewportMinMax.xy;
+
+    float MinDeviceZ = min(min3(DeviceZ.x, DeviceZ.y, DeviceZ.z), DeviceZ.w);
+    float MaxDeviceZ = max(max3(DeviceZ.x, DeviceZ.y, DeviceZ.z), DeviceZ.w);
+
+    uint2 OutputPixelPos = DispatchThreadID;
+
+#if DIM_FURTHEST
+    FurthestHZBOutput_0[OutputPixelPos] = MinDeviceZ;
+#endif
+
+#if DIM_CLOSEST
+    ClosestHZBOutput_0[OutputPixelPos] = MaxDeviceZ;
+#endif
+
+    SharedMinDeviceZ[GroupThreadID] = MinDeviceZ;
+    SharedMaxDeviceZ[GroupThreadID] = MaxDeviceZ;
+
+    [unroll]
+    for (uint MipLevel = 1; MipLevel < DIM_MIP_LEVEL_COUNT; ++MipLevel)
+    {
+        const uint TileSize = uint(GROUP_TILE_SIZE) >> MipLevel;
+        const uint ReduceBankSize = TileSize * TileSize;
+
+        if (MipLevel == 1)
+        {
+            GroupMemoryBarrierWithGroupSync();
+        }
+
+        [branch]
+        if (GroupThreadIndex < ReduceBankSize)
+        {
+            float4 ParentMinDeviceZ;
+            float4 ParentMaxDeviceZ;
+
+            ParentMinDeviceZ[0] = MinDeviceZ;
+            ParentMaxDeviceZ[0] = MaxDeviceZ;
+
+            [unroll]
+            for (uint Index = 1; Index < 4; ++Index)
+            {
+                uint LDSIndex = GroupThreadIndex + Index * ReduceBankSize;
+                ParentMinDeviceZ[Index] = SharedMinDeviceZ[LDSIndex];
+                ParentMaxDeviceZ[Index] = SharedMaxDeviceZ[LDSIndex];
+            }
+
+            MinDeviceZ = min(min3(ParentMinDeviceZ.x, ParentMinDeviceZ.y, ParentMinDeviceZ.z), ParentMinDeviceZ.w);
+            MaxDeviceZ = max(max3(ParentMaxDeviceZ.x, ParentMaxDeviceZ.y, ParentMaxDeviceZ.z), ParentMaxDeviceZ.w);
+
+            OutputPixelPos = OutputPixelPos >> 1;
+            OutputMipLevel(MipLevel, OutputPixelPos, MinDeviceZ, MaxDeviceZ);
+
+            SharedMinDeviceZ[GroupThreadIndex] = MinDeviceZ;
+            SharedMaxDeviceZ[GroupThreadIndex] = MaxDeviceZ;
+        }
+    }
+}
