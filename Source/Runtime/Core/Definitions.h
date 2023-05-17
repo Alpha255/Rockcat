@@ -71,7 +71,7 @@ using long32_t = long;
 using ulong32_t = unsigned long;
 using long64_t = long long;
 using ulong64_t = unsigned long long;
-using byte8_t = unsigned char;
+using byte8_t = char;
 
 static_assert(sizeof(char8_t) == 1ull, "Size of char miss match.");
 static_assert(sizeof(uchar8_t) == 1ull, "Size of unsigned char miss match.");
