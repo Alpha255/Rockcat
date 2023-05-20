@@ -1,7 +1,6 @@
 #include "Runtime/Core/Math/Color.h"
 #include "Runtime/Core/Math/Math.h"
 
-NAMESPACE_START(Gear)
 NAMESPACE_START(Math)
 
 const Color Color::White(1.0f, 1.0f, 1.0f, 1.0f);
@@ -246,4 +245,3 @@ uint32_t Color::RGB9E5() const
 }
 
 NAMESPACE_END(Math)
-NAMESPACE_END(Gear)

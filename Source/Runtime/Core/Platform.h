@@ -3,8 +3,6 @@
 #include "Runtime/Core/GUID.h"
 #include "Runtime/Core/Math/Vector2.h"
 
-NAMESPACE_START(Gear)
-
 namespace Platform
 {
 	std::string GetErrorMessage(uint32_t ErrCode = ~0u);
@@ -63,4 +61,3 @@ namespace Platform
 	};
 };
 
-NAMESPACE_END(Gear)

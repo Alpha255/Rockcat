@@ -7,8 +7,6 @@
 	#error Unknown platform!
 #endif
 
-NAMESPACE_START(Gear)
-
 namespace String
 {
 	void ToLower(std::string& Str)
@@ -178,4 +176,3 @@ namespace String
 	}
 }
 
-NAMESPACE_END(Gear)

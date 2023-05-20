@@ -1,6 +1,5 @@
 #include "Runtime/Core/Math/AABB.h"
 
-NAMESPACE_START(Gear)
 NAMESPACE_START(Math)
 
 AABB AABB::CreateFromVertices(const std::vector<Vector3>& Vertices)
@@ -16,4 +15,3 @@ AABB AABB::CreateFromVertices(const std::vector<Vector3>& Vertices)
 }
 
 NAMESPACE_END(Math)
-NAMESPACE_END(Gear)

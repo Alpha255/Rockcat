@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/Definitions.h"
 
-NAMESPACE_START(Gear)
-
 struct IO
 {
 	enum class EOpenMode : uint8_t
@@ -134,4 +132,3 @@ private:
 	std::shared_ptr<std::fstream> m_Stream;
 };
 
-NAMESPACE_END(Gear)

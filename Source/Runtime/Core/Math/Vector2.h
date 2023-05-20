@@ -2,7 +2,6 @@
 
 #include "Runtime/Core/Math/Vector.h"
 
-NAMESPACE_START(Gear)
 NAMESPACE_START(Math)
 
 class Vector2 : public Float2
@@ -194,4 +193,3 @@ inline Vector2 Negate(const Vector2 &targetVec)
 #endif
 
 NAMESPACE_END(Math)
-NAMESPACE_END(Gear)

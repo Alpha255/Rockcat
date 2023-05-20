@@ -10,8 +10,6 @@
 	#error Unknown platform!
 #endif
 
-NAMESPACE_START(Gear)
-
 namespace Platform
 {
 #if defined(PLATFORM_WIN32)
@@ -187,4 +185,3 @@ Guid Guid::Create()
 	return Platform::CreateGUID();
 }
 
-NAMESPACE_END(Gear)

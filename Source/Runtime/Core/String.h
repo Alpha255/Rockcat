@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/Definitions.h"
 
-NAMESPACE_START(Gear)
-
 namespace String
 {
 	void ToLower(std::string& Str);
@@ -38,7 +36,5 @@ namespace String
 
 	uint32_t ToHex(const char8_t* Str);
 };
-
-NAMESPACE_END(Gear)
 
 

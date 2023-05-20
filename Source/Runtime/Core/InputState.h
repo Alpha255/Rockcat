@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/Math/Math.h"
 
-NAMESPACE_START(Gear)
-
 enum class EMouseButton : uint8_t
 {
 	LButton,
@@ -113,4 +111,3 @@ public:
 	virtual void OnWindowResized(uint32_t Width, uint32_t Height) = 0;
 };
 
-NAMESPACE_END(Gear)

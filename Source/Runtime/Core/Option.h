@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/Definitions.h"
 
-NAMESPACE_START(Gear)
-
 template<class T>
 class Option
 {
@@ -43,4 +41,3 @@ private:
 	std::string_view m_Description;
 };
 
-NAMESPACE_END(Gear)

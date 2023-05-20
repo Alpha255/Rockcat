@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/Definitions.h"
 
-NAMESPACE_START(Gear)
-
 class CpuTimer
 {
 public:
@@ -73,4 +71,3 @@ private:
 	EState m_State = EState::Tick;
 };
 
-NAMESPACE_END(Gear)

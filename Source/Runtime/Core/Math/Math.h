@@ -12,7 +12,6 @@
 #include "Runtime/Core/Math/Sphere.h"
 #include "Runtime/Core/Math/Transform.h"
 
-NAMESPACE_START(Gear)
 NAMESPACE_START(Math)
 
 static constexpr float32_t PI = DirectX::XM_PI;
@@ -39,4 +38,3 @@ inline float32_t RadiansToDegree(float32_t Radians)
 }
 
 NAMESPACE_END(Math)
-NAMESPACE_END(Gear)

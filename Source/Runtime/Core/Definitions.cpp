@@ -1,7 +1,5 @@
 #include "Runtime/Core/Definitions.h"
 
-NAMESPACE_START(Gear)
-
 std::string TrimEnumString(const std::string& Name)
 {
 	std::string::const_iterator It = Name.begin();
@@ -47,4 +45,3 @@ size_t PopulationCount(size_t Value)
 #endif
 }
 
-NAMESPACE_END(Gear)

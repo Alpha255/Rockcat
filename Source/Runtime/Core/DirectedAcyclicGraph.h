@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/ObjectID.h"
 
-NAMESPACE_START(Gear)
-
 class DirectedAcyclicGraph
 {
 public:
@@ -230,4 +228,3 @@ private:
 	EdgeIDAllocator m_EdgeIDAllocator;
 };
 
-NAMESPACE_END(Gear)

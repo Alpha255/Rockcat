@@ -2,14 +2,16 @@
 
 #include "Runtime/Core/ObjectID.h"
 
-NAMESPACE_START(Gear)
-
 DECLARE_OBJECT_ID(Asset, uint32_t)
 
 struct AssetData
 {
 	size_t SizeInBytes = 0u;
 	std::shared_ptr<byte8_t> RawData;
+};
+
+struct AssetType
+{
 };
 
 class Asset
@@ -58,4 +60,3 @@ private:
 	std::string m_Path;
 };
 
-NAMESPACE_END(Gear)

@@ -1,6 +1,5 @@
 #include "Runtime/Core/Math/Matrix.h"
 
-NAMESPACE_START(Gear)
 NAMESPACE_START(Math)
 
 #if defined(USE_SSE)
@@ -13,5 +12,4 @@ void Vector4::Transform(const Matrix& Trans)
 }
 #endif
 
-NAMESPACE_END(Gear)
 NAMESPACE_END(Math)

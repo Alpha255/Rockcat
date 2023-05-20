@@ -8,7 +8,6 @@
 #define USE_SSE 1
 ///#define FORCE_ALIGN_16
 
-NAMESPACE_START(Gear)
 NAMESPACE_START(Math)
 
 /***************************************************************************************
@@ -386,5 +385,3 @@ inline Vector##Dimension Cross(const Vector##Dimension& Left, const Vector##Dime
 }
 
 NAMESPACE_END(Math)
-NAMESPACE_END(Gear)
-

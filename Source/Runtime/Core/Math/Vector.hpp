@@ -4,7 +4,6 @@
 #include <DirectXMath.h>
 #include <DirectXCollision.h>
 
-NAMESPACE_START(Gear)
 NAMESPACE_START(Math)
 
 class Vector
@@ -439,4 +438,3 @@ public:
 };
 
 NAMESPACE_END(Math)
-NAMESPACE_END(Gear)

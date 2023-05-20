@@ -5,8 +5,6 @@
 #include <Submodules/spdlog/include/spdlog/spdlog.h>
 #include <Submodules/spdlog/include/spdlog/async_logger.h>
 
-NAMESPACE_START(Gear)
-
 class Logger : public Singleton<Logger>
 {
 public:
@@ -60,4 +58,3 @@ private:
 #define LOG_CRITICAL(Format, ...)   Gear::Logger::Get().Critical(Format, __VA_ARGS__)
 #define TRACE(Format, ...)          Gear::Logger::Get().Trace(Format, __VA_ARGS__)
 
-NAMESPACE_END(Gear)

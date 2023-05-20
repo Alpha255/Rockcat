@@ -11,8 +11,6 @@
 	#error Unknown platform!
 #endif
 
-NAMESPACE_START(Gear)
-
 #define MINIMAL_WINDOW_SIZE 32
 
 static ::LRESULT MessageProc(::HWND HWnd, uint32_t Message, ::WPARAM WParam, ::LPARAM LParam)
@@ -299,4 +297,3 @@ void Window::PollMessage()
 	}
 }
 
-NAMESPACE_END(Gear)

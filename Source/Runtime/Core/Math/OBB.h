@@ -2,7 +2,6 @@
 
 #include "Runtime/Core/Math/Vector4.h"
 
-NAMESPACE_START(Gear)
 NAMESPACE_START(Math)
 
 class OBB
@@ -13,4 +12,3 @@ private:
 };
 
 NAMESPACE_END(Math)
-NAMESPACE_END(Gear)

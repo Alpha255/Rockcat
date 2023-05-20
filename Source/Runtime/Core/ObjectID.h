@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/Definitions.h"
 
-NAMESPACE_START(Gear)
-
 template<class TObject, class TIndex = uint32_t>
 class ObjectID
 {
@@ -97,4 +95,3 @@ private:
 
 #define DECLARE_OBJECT_ID(ObjectType, IDType) using ObjectType##ID = ObjectID<class ObjectType, IDType>; using ObjectType##IDAllocator = ObjectIDAllocator<class ObjectType, IDType>;
 
-NAMESPACE_END(Gear)

@@ -1,6 +1,5 @@
 #include "Runtime/Core/Math/Matrix.h"
 
-NAMESPACE_START(Gear)
 NAMESPACE_START(Math)
 
 #if !defined(USE_SSE)
@@ -81,4 +80,3 @@ void Matrix::GaussJordanInverse()
 #endif
 
 NAMESPACE_END(Math)
-NAMESPACE_END(Gear)

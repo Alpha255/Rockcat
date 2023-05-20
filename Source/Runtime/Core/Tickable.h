@@ -2,8 +2,6 @@
 
 #include "Definitions.h"
 
-NAMESPACE_START(Gear)
-
 class ITickable
 {
 public:
@@ -30,4 +28,3 @@ protected:
 private:
 };
 
-NAMESPACE_END(Gear)

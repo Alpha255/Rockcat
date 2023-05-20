@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/Definitions.h"
 
-NAMESPACE_START(Gear)
-
 /// From https://github.com/simco50/CppDelegates
 
 #if __cplusplus >= 201703L
@@ -340,4 +338,3 @@ private:
 	std::unique_ptr<DelegateType> m_Delegate;
 };
 
-NAMESPACE_END(Gear)

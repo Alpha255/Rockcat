@@ -1,8 +1,6 @@
 #include "Runtime/Core/Logger.h"
 #include <Submodules/spdlog/include/spdlog/sinks/windebug_sink.h>
 
-NAMESPACE_START(Gear)
-
 Logger::Logger()
 {
 	m_AsyncLogger = spdlog::create_async("SpdLogger", std::make_shared<spdlog::sinks::windebug_sink_mt>(), 1024u);
@@ -14,4 +12,3 @@ Logger::Logger()
 #endif
 }
 
-NAMESPACE_END(Gear)

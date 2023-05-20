@@ -2,7 +2,6 @@
 
 #include "Runtime/Core/Math/Matrix.h"
 
-NAMESPACE_START(Gear)
 NAMESPACE_START(Math)
 
 class Quaternion : public Float4
@@ -215,4 +214,3 @@ inline Quaternion SlerpV(const Quaternion& Q0, const Quaternion& Q1, const Vecto
 }
 
 NAMESPACE_END(Math)
-NAMESPACE_END(Gear)

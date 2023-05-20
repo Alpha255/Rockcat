@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/String.h"
 
-NAMESPACE_START(Gear)
-
 struct Guid
 {
 	enum class EFormat
@@ -130,4 +128,3 @@ struct Guid
 	}
 };
 
-NAMESPACE_END(Gear)

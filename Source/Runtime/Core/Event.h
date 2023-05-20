@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/Definitions.h"
 
-NAMESPACE_START(Gear)
-
 template<class... Args>
 class Event;
 
@@ -201,4 +199,3 @@ private:
 };
 
 
-NAMESPACE_END(Gear)

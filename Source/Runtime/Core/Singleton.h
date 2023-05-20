@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/Definitions.h"
 
-NAMESPACE_START(Gear)
-
 class NoneCopyable
 {
 public:
@@ -88,7 +86,5 @@ private:
 class ModuleFactory
 {
 };
-
-NAMESPACE_END(Gear)
 
 

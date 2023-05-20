@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/String.h"
 
-NAMESPACE_START(Gear)
-
 struct FileTime
 {
 	uint16_t Year = 0u;
@@ -262,4 +260,3 @@ private:
 	mutable FileTime m_LastWriteTime;
 };
 
-NAMESPACE_END(Gear)

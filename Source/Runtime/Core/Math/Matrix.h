@@ -2,7 +2,6 @@
 
 #include "Runtime/Core/Math/Vector4.h"
 
-NAMESPACE_START(Gear)
 NAMESPACE_START(Math)
 
 class Matrix : public Float4x4
@@ -805,4 +804,3 @@ inline Vector4 operator*(const Vector4 &Left, const Matrix &Right)
 #endif
 
 NAMESPACE_END(Math)
-NAMESPACE_END(Gear)

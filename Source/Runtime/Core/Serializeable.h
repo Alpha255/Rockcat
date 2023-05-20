@@ -19,8 +19,6 @@
 #include <cereal/types/forward_list.hpp>
 #include <cereal/types/list.hpp>
 
-NAMESPACE_START(Gear)
-
 #define SERIALIZEABLE_EXT ".json"
 
 template<class T>
@@ -116,4 +114,3 @@ private:
 	bool8_t m_Dirty = false;
 };
 
-NAMESPACE_END(Gear)

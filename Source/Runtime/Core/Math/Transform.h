@@ -4,7 +4,6 @@
 #include "Runtime/Core/Math/Euler.h"
 #include "Runtime/Core/Math/Quaternion.h"
 
-NAMESPACE_START(Gear)
 NAMESPACE_START(Math)
 
 class Transform
@@ -104,4 +103,3 @@ private:
 };
 
 NAMESPACE_END(Math)
-NAMESPACE_END(Gear)

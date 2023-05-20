@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/File.h"
 
-NAMESPACE_START(Gear)
-
 class SyncContinuousOFStream : public File, public std::ofstream
 {
 public:
@@ -95,4 +93,3 @@ private:
 	size_t m_ReadSize = 0u;
 };
 
-NAMESPACE_END(Gear)

@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/InputState.h"
 
-NAMESPACE_START(Gear)
-
 struct WindowDesc
 {
 	uint32_t Width = 0u;
@@ -88,4 +86,3 @@ private:
 	KeyboardEvent m_KeyboardEvent;
 };
 
-NAMESPACE_END(Gear)

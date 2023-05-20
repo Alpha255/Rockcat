@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/ObjectID.h"
 
-NAMESPACE_START(Gear)
-
 class Scene
 {
 public:
@@ -143,4 +141,3 @@ private:
 	SceneData m_Data;
 };
 
-NAMESPACE_END(Gear)

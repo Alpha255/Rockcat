@@ -2,8 +2,6 @@
 #include "Runtime/Core/Logger.h"
 #include "Runtime/Core/Platform.h"
 
-NAMESPACE_START(Gear)
-
 #if PLATFORM_WIN32
 
 size_t File::Size(const char8_t* Path)
@@ -158,4 +156,3 @@ void File::CreateDirectories(const char8_t* Path)
 	#error Unknown platform!
 #endif
 
-NAMESPACE_END(Gear)

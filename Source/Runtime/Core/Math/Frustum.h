@@ -3,7 +3,6 @@
 #include "Runtime/Core/Math/Plane.h"
 #include "Runtime/Core/Math/Matrix.h"
 
-NAMESPACE_START(Gear)
 NAMESPACE_START(Math)
 
 class Frustum
@@ -96,4 +95,3 @@ private:
 };
 
 NAMESPACE_END(Math)
-NAMESPACE_END(Gear)

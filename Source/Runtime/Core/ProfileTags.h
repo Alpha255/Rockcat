@@ -2,8 +2,6 @@
 
 #include "Runtime/Core/Definitions.h"
 
-NAMESPACE_START(Gear)
-
 class Profiler
 {
 public:
@@ -53,4 +51,3 @@ private:
 	std::vector<std::shared_ptr<TagData>> m_Tags;
 };
 
-NAMESPACE_END(Gear)
