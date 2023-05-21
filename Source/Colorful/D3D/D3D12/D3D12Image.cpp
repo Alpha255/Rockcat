@@ -69,7 +69,7 @@ D3D12Image::D3D12Image(D3D12Device* Device, const ImageDesc& Desc)
 		IID_PPV_ARGS(Reference())));
 
 #if 1
-	Get()->SetName(String::ToWide(Desc.Name).c_str());
+	Get()->SetName(StringUtils::ToWide(Desc.Name).c_str());
 #else
 	SetDebugName(Desc.Name.c_str());
 #endif

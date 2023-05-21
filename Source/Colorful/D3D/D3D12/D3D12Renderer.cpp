@@ -60,7 +60,7 @@ D3D12Renderer::~D3D12Renderer()
 {
 }
 
-#if defined(DYNAMIC_LIB)
+#if defined(DYNAMIC_LIBRARY)
 	extern "C"
 	{
 		EXPORT_API void CreateRenderer(IRendererPtr& RendererPtr, const RenderSettings* Settings)

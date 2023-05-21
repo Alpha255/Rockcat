@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/String.h"
+#include "Runtime/Core/StringUtils.h"
 
 struct Guid
 {
@@ -36,10 +36,10 @@ struct Guid
 	{
 		if (Format == EFormat::DigitsWithHyphens)
 		{
-			return String::Format("%08X-%04X-%04X-%04X-%04X%08X", A, B >> 16, B & 0xFFFF, C >> 16, C & 0xFFFF, D);
+			return StringUtils::Format("%08X-%04X-%04X-%04X-%04X%08X", A, B >> 16, B & 0xFFFF, C >> 16, C & 0xFFFF, D);
 		}
 
-		return String::Format("%08X%08X%08X%08X", A, B, C, D);
+		return StringUtils::Format("%08X%08X%08X%08X", A, B, C, D);
 	}
 
 	static Guid FromString(const std::string& GuidStr)
@@ -77,10 +77,10 @@ struct Guid
 		}
 
 		ret = Guid(
-			String::ToHex(Normalized.substr(0u, 8u).c_str()),
-			String::ToHex(Normalized.substr(8u, 8u).c_str()),
-			String::ToHex(Normalized.substr(16u, 8u).c_str()),
-			String::ToHex(Normalized.substr(24u, 8u).c_str()));
+			StringUtils::ToHex(Normalized.substr(0u, 8u).c_str()),
+			StringUtils::ToHex(Normalized.substr(8u, 8u).c_str()),
+			StringUtils::ToHex(Normalized.substr(16u, 8u).c_str()),
+			StringUtils::ToHex(Normalized.substr(24u, 8u).c_str()));
 
 		return ret;
 	}

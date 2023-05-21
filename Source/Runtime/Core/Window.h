@@ -2,13 +2,13 @@
 
 #include "Runtime/Core/InputState.h"
 
-struct WindowDesc
+struct WindowCreateInfo
 {
 	uint32_t Width = 0u;
 	uint32_t Height = 0u;
 	uint32_t MinWidth = 0u;
 	uint32_t MinHeight = 0u;
-	const char8_t* Title = "MainWindow";
+	std::string_view Title = "MainWindow";
 };
 
 class Window
@@ -21,7 +21,7 @@ public:
 		Destroyed,
 	};
 
-	Window(const WindowDesc& Desc, IInputHandler* InputHandler);
+	Window(const WindowCreateInfo& CreateInfo, IInputHandler* InputHandler);
 
 	inline const uint32_t Width() const
 	{

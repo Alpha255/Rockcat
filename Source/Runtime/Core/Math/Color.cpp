@@ -27,7 +27,7 @@ Color::Color(uint32_t RGBA)
 }
 
 Color::Color(uint8_t R, uint8_t G, uint8_t B, uint8_t A)
-	: Vector4(R * Scaler, G * Scaler, B * Scaler, G * Scaler)
+	: Vector4(R * Scaler, G * Scaler, B * Scaler, A * Scaler)
 {
 }
 

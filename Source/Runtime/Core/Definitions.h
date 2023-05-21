@@ -87,7 +87,7 @@ static_assert(sizeof(byte8_t) == 1ull, "Size of byte miss match.");
 #define NAMESPACE_START(Name) namespace Name {
 #define NAMESPACE_END(Name) }
 
-#if defined(DYNAMIC_LIB)
+#if defined(DYNAMIC_LIBRARY)
 	#define EXPORT_API __declspec(dllexport)
 #else
 	#define EXPORT_API __declspec(dllimport)
@@ -102,13 +102,13 @@ static_assert(sizeof(byte8_t) == 1ull, "Size of byte miss match.");
 }
 
 #if defined(PLATFORM_WIN32)
-#define VERIFY_PLATFORM(Condition)                                                   \
-{                                                                                    \
-	if (!(Condition))                                                                \
-	{                                                                                \
-		assert(0);                                                                   \
-		LOG_ERROR("Failed to invoke WINAPI, {}", Gear::Platform::GetErrorMessage()); \
-	}                                                                                \
+#define VERIFY_WITH_PLATFORM_MESSAGE(Condition)                                          \
+{                                                                                        \
+	if (!(Condition))                                                                    \
+	{                                                                                    \
+		LOG_ERROR("Failed to invoke platform API, {}", PlatformMisc::GetErrorMessage()); \
+		assert(0);                                                                       \
+	}                                                                                    \
 }
 
 #define DLL_POSTFIX ".dll"

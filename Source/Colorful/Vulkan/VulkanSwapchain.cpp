@@ -309,7 +309,7 @@ void VulkanSwapchain::Create(bool8_t RecreateSurface)
 				ESampleCount::Sample_1_Bit,
 				EBufferUsageFlags::None,
 				EResourceState::Present,
-				String::Format("SwapchainImage-%d", ImageIndex)
+				StringUtils::Format("SwapchainImage-%d", ImageIndex)
 			}, 
 			Images[ImageIndex]);
 

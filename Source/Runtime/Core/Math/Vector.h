@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Runtime/Core/Definitions.h"
-#include "Runtime/Core/Serializeable.h"
+#include "Runtime/Core/Cereal.h"
 #include <DirectXMath.h>
 #include <DirectXCollision.h>
 

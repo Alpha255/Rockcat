@@ -339,4 +339,36 @@ workspace "Rockcat"
 			links {
 				"spirv-cross-core"
 			}
-
+		group "Test"
+			project "Test"
+			kind "ConsoleApp"
+			language "C++"
+			location "./Out/Intermediate/VCProjects"
+			targetname "$(ProjectName)_$(Configuration)"
+			files {
+				"./Source/Test/**"
+			}
+			includedirs { 
+				"$(SolutionDir)",
+				"$(SolutionDir)/Source",
+				"$(SolutionDir)Submodules/cereal/include",
+				"$(SolutionDir)Submodules/spdlog/include"
+			}
+			libdirs {
+				"$(VK_SDK_PATH)/Lib"
+			}
+			targetdir "$(SolutionDir)Out"
+			links {
+				"Runtime",
+				"dxcompiler",
+				"d3dcompiler",
+				"assimp",
+			}
+			filter { "configurations:Debug" }
+				links {
+				"spirv-cross-cored"
+				}
+			filter { "configurations:Release" }
+				links {
+					"spirv-cross-core"
+				}

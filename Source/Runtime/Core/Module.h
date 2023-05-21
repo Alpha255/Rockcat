@@ -2,7 +2,7 @@
 
 #include "Runtime/Core/Definitions.h"
 
-class EXPORT_API IModule
+class IModule
 {
 public:
 	virtual ~IModule() = default;

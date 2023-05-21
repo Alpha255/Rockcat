@@ -53,7 +53,7 @@ D3D12Device::D3D12Device(DxgiFactory* Factory)
 		};
 
 		LOG_INFO("Create D3D12 device on adapter: \"{}\", DeviceID = {}. Feature Level = {}",
-			String::ToMultiByte(AdapterDesc.Description),
+			StringUtils::ToMultiByte(AdapterDesc.Description),
 			AdapterDesc.DeviceId,
 			GetFeatureLevelName(FeatureLevel));
 

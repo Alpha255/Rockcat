@@ -157,7 +157,7 @@ protected:
 		(void)(UserData);
 		(void)(MessageTypeFlags);
 
-		std::string Message(std::move(Gear::String::Format("Vulkan Validation: [%3d][%10s]: %s",
+		std::string Message(std::move(Gear::StringUtils::Format("Vulkan Validation: [%3d][%10s]: %s",
 			MessengerCallbackData->messageIdNumber,
 			MessengerCallbackData->pMessageIdName,
 			MessengerCallbackData->pMessage)));

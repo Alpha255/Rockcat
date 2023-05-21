@@ -98,7 +98,7 @@ VulkanRenderer::~VulkanRenderer()
 	LOG_DEBUG("Vulkan renderer finalized");
 }
 
-#if defined(DYNAMIC_LIB)
+#if defined(DYNAMIC_LIBRARY)
 	extern "C"
 	{
 		EXPORT_API void CreateRenderer(IRendererPtr& RendererPtr, const RenderSettings* Settings)

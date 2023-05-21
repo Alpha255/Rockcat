@@ -40,17 +40,17 @@ public:
 
     void SetDefine(const char8_t* Name, int32_t Value)
     {
-        m_Definitions.insert(std::make_pair(std::string(Name), String::Format("%d", Value)));
+        m_Definitions.insert(std::make_pair(std::string(Name), StringUtils::Format("%d", Value)));
     }
 
     void SetDefine(const char8_t* Name, uint32_t Value)
     {
-        m_Definitions.insert(std::make_pair(std::string(Name), String::Format("%d", Value)));
+        m_Definitions.insert(std::make_pair(std::string(Name), StringUtils::Format("%d", Value)));
     }
 
     void SetDefine(const char8_t* Name, float32_t Value)
     {
-        m_Definitions.insert(std::make_pair(std::string(Name), String::Format("%.2f", Value)));
+        m_Definitions.insert(std::make_pair(std::string(Name), StringUtils::Format("%.2f", Value)));
     }
 
     void Merge(const ShaderCompilerDefinitions& Other)
