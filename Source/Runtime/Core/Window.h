@@ -8,7 +8,21 @@ struct WindowCreateInfo
 	uint32_t Height = 0u;
 	uint32_t MinWidth = 0u;
 	uint32_t MinHeight = 0u;
-	std::string_view Title = "MainWindow";
+	bool8_t FreezeWhenInactive = true;
+	std::string Title = "MainWindow";
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(Width),
+			CEREAL_NVP(Height),
+			CEREAL_NVP(MinWidth),
+			CEREAL_NVP(MinHeight),
+			CEREAL_NVP(FreezeWhenInactive),
+			CEREAL_NVP(Title)
+		);
+	}
 };
 
 class Window

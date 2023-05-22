@@ -274,35 +274,14 @@ public:                                                        \
 	}                                                          \
 };
 
-
-class NamedObject
+class NoneCopyable
 {
 public:
-	NamedObject() = default;
+	NoneCopyable() = default;
+	~NoneCopyable() = default;
 
-	NamedObject(const char8_t* Name)
-		: m_Name(Name)
-	{
-	}
-
-	void SetName(const char8_t* Name)
-	{
-		m_Name = Name;
-	}
-
-	const char8_t* GetName() const noexcept
-	{
-		return m_Name.data();
-	}
+	NoneCopyable(const NoneCopyable&) = delete;
+	NoneCopyable& operator=(const NoneCopyable&) = delete;
 protected:
 private:
-	std::string m_Name;
 };
-
-#define SERIALIZE_START template<class Archive> \
-	void serialize(Archive& Ar) \
-	{ \
-		Ar( \
-
-#define SERIALIZE_END ); \
-	}

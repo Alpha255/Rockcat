@@ -55,7 +55,7 @@ Window::Window(const WindowCreateInfo& CreateInfo, IInputHandler* InputHandler)
 		::LoadCursor(0, IDC_ARROW),
 		static_cast<::HBRUSH>(::GetStockObject(BLACK_BRUSH)),
 		nullptr,
-		CreateInfo.Title.data(),
+		CreateInfo.Title.c_str(),
 		Icon
 	};
 	VERIFY_WITH_PLATFORM_MESSAGE(::RegisterClassExA(&WndClassEx) != 0);
@@ -71,8 +71,8 @@ Window::Window(const WindowCreateInfo& CreateInfo, IInputHandler* InputHandler)
 
 	uint32_t ExtraWindowStyle = 0u;
 	::HWND Handle = ::CreateWindowA(
-		CreateInfo.Title.data(),
-		CreateInfo.Title.data(),
+		CreateInfo.Title.c_str(),
+		CreateInfo.Title.c_str(),
 		WS_OVERLAPPEDWINDOW ^ ExtraWindowStyle,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,

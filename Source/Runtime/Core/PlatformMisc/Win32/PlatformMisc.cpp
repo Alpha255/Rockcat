@@ -2,9 +2,10 @@
 #include "Runtime/Engine/Engine.h"
 
 #if defined(PLATFORM_WIN32)
-	#include <Windows.h>
-	#include <windowsx.h>
-	#include <shlobj.h>
+
+#include <Windows.h>
+#include <windowsx.h>
+#include <shlobj.h>
 
 #define FILE_PATH_LENGTH_MAX UINT16_MAX
 
@@ -164,8 +165,8 @@ size_t PlatformMisc::GetHardwareConcurrencyThreadsCount(bool8_t UseHyperThreadin
 	if(!::GetLogicalProcessorInformationEx(::LOGICAL_PROCESSOR_RELATIONSHIP::RelationAll, (::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX)Buffer.get(), &BufferSize) &&
 		::GetLastError() == ERROR_INSUFFICIENT_BUFFER)
 	{
-		Buffer.reset(new byte8_t[Buffer]());
-		if (::::GetLogicalProcessorInformationEx(::LOGICAL_PROCESSOR_RELATIONSHIP::RelationAll, (::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX)Buffer.get(), &BufferSize))
+		Buffer.reset(new byte8_t[BufferSize]());
+		if (::GetLogicalProcessorInformationEx(::LOGICAL_PROCESSOR_RELATIONSHIP::RelationAll, (::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX)Buffer.get(), &BufferSize))
 		{
 			byte8_t* BufferPtr = Buffer.get();
 			while (BufferPtr < Buffer.get() + BufferSize)

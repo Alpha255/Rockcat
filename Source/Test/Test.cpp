@@ -5,6 +5,8 @@ int main()
 {
 	LOG_ERROR("Test");
 
+	PlatformMisc::GetHardwareConcurrencyThreadsCount(true);
+
 	auto Test = ShaderCache::Load("ImGui.vert");
 	Test->Save();
 

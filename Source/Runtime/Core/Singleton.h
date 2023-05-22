@@ -2,18 +2,6 @@
 
 #include "Runtime/Core/Definitions.h"
 
-class NoneCopyable
-{
-public:
-	NoneCopyable() = default;
-	~NoneCopyable() = default;
-
-	NoneCopyable(const NoneCopyable&) = delete;
-	NoneCopyable& operator=(const NoneCopyable&) = delete;
-protected:
-private:
-};
-
 template<class T> 
 class Singleton : public NoneCopyable
 {
