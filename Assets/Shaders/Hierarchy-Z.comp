@@ -1,3 +1,7 @@
+#include "Shaders/Definitions.hlsli"
+#include "Shaders/VertexInputLayout.hlsli"
+#include "Shaders/Algorithm.hlsli"
+
 #define GROUP_TILE_SIZE 8
 #define MAX_MIP_BATCH_SIZE 4
 
