@@ -25,5 +25,7 @@ public:
 	static Guid CreateGUID();
 
 	static Math::Vector2 GetCurrentCursorPosition();
+
+	static size_t GetHardwareConcurrencyThreadsCount(bool8_t UseHyperThreading);
 };
 

@@ -154,6 +154,45 @@ Math::Vector2 PlatformMisc::GetCurrentCursorPosition()
 	return Math::Vector2(static_cast<float32_t>(Pos.x), static_cast<float32_t>(Pos.y));
 }
 
+size_t PlatformMisc::GetHardwareConcurrencyThreadsCount(bool8_t UseHyperThreading)
+{
+	std::unique_ptr<byte8_t> Buffer;
+	::DWORD BufferSize = 0;
+	size_t PhysicalCoreCount = 0u;
+	size_t LogicalCoreCount = 0u;
+
+	if(!::GetLogicalProcessorInformationEx(::LOGICAL_PROCESSOR_RELATIONSHIP::RelationAll, (::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX)Buffer.get(), &BufferSize) &&
+		::GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+	{
+		Buffer.reset(new byte8_t[Buffer]());
+		if (::::GetLogicalProcessorInformationEx(::LOGICAL_PROCESSOR_RELATIONSHIP::RelationAll, (::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX)Buffer.get(), &BufferSize))
+		{
+			byte8_t* BufferPtr = Buffer.get();
+			while (BufferPtr < Buffer.get() + BufferSize)
+			{
+				::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX ProcessorInfo = (::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX)BufferPtr;
+				if (!ProcessorInfo)
+				{
+					break;
+				}
+
+				if (ProcessorInfo->Relationship == ::LOGICAL_PROCESSOR_RELATIONSHIP::RelationProcessorCore)
+				{
+					++PhysicalCoreCount;
+
+					for (uint32_t Index = 0u; Index < ProcessorInfo->Processor.GroupCount; ++Index)
+					{
+						LogicalCoreCount += std::bitset<sizeof(::KAFFINITY) * CHAR_BIT>(ProcessorInfo->Processor.GroupMask[Index].Mask).count();
+					}
+				}
+				BufferPtr += ProcessorInfo->Size;
+			} 
+		}
+	}
+
+	return UseHyperThreading ? LogicalCoreCount : PhysicalCoreCount;
+}
+
 Guid Guid::Create()
 {
 	return PlatformMisc::CreateGUID();
