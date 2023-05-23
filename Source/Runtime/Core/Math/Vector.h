@@ -43,6 +43,13 @@ NAMESPACE_START(Math)
 	using Float4x4 = DirectX::XMFLOAT4X4;
 #endif
 
+	using Int2 = DirectX::XMINT2;
+	using Int3 = DirectX::XMINT3;
+	using Int4 = DirectX::XMINT4;
+	using UInt2 = DirectX::XMUINT2;
+	using UInt3 = DirectX::XMUINT3;
+	using UInt4 = DirectX::XMUINT4;
+
 #define VECTOR_EQUAL(Dimension, Left, Right)               DirectX::XMVector##Dimension##Equal(Left, Right)
 #define VECTOR_NOT_EQUAL(Dimension, Left, Right)           DirectX::XMVector##Dimension##NotEqual(Left, Right)
 #define VECTOR_GREATER(Dimension, Left, Right)             DirectX::XMVector##Dimension##Greater(Left, Right)

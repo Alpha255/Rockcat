@@ -72,7 +72,7 @@ public:
 
     bool8_t operator>=(const Vector& Other) const
     {
-        return DirectX::XMVector4GreaterEqual(m_Value, Other.m_Value);
+        return DirectX::XMVector4GreaterOrEqual(m_Value, Other.m_Value);
     }
 
     bool8_t operator<(const Vector& Other) const
@@ -82,7 +82,7 @@ public:
 
     bool8_t operator<=(const Vector& Other) const
     {
-        return DirectX::XMVector4LessEqual(m_Value, Other.m_Value);
+        return DirectX::XMVector4LessOrEqual(m_Value, Other.m_Value);
     }
 
     Vector Round() const
@@ -342,7 +342,7 @@ public:
 
     float32_t LengthEst() const
     {
-        return DirectX::XMVectorGetX(DirectX::XMVectoreLengthEst(m_Value));
+        return DirectX::XMVectorGetX(DirectX::XMVector3LengthEst(m_Value));
     }
 
     void Normalize()
@@ -366,7 +366,7 @@ public:
     }
 };
 
-class Vector4 : public Vector
+class Vector4 : public Vector3
 {
 public:
     using Vector3::Vector3;
