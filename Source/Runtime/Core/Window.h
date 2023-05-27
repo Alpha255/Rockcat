@@ -2,14 +2,16 @@
 
 #include "Runtime/Core/InputState.h"
 
+#define MINIMAL_WINDOW_SIZE 32
+
 struct WindowCreateInfo
 {
-	uint32_t Width = 0u;
-	uint32_t Height = 0u;
-	uint32_t MinWidth = 0u;
-	uint32_t MinHeight = 0u;
+	uint32_t Width = 1280u;
+	uint32_t Height = 720u;
+	uint32_t MinWidth = MINIMAL_WINDOW_SIZE;
+	uint32_t MinHeight = MINIMAL_WINDOW_SIZE;
 	bool8_t FreezeWhenInactive = true;
-	std::string Title = "MainWindow";
+	std::string Title = "UnnamedApplication";
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -37,35 +39,12 @@ public:
 
 	Window(const WindowCreateInfo& CreateInfo, IInputHandler* InputHandler);
 
-	inline const uint32_t Width() const
-	{
-		return m_Width;
-	}
-
-	inline const uint32_t Height() const
-	{
-		return m_Height;
-	}
-
-	inline const uint64_t Handle() const
-	{
-		return m_Handle;
-	}
-
-	inline const bool8_t Active() const
-	{
-		return m_State == EState::OnFocus;
-	}
-
-	inline const bool8_t Destroyed() const
-	{
-		return m_State == EState::Destroyed;
-	}
-
-	inline const EState State() const
-	{
-		return m_State;
-	}
+	const uint32_t GetWidth() const { return m_Width; }
+	const uint32_t GetHeight() const { return m_Height; }
+	const void* GetHandle() const { return m_Handle; }
+	const bool8_t IsActive() const { return m_State == EState::OnFocus; }
+	const bool8_t IsDestroyed() const { return m_State == EState::Destroyed; }
+	const EState GetState() const { return m_State; }
 
 	void ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam);
 
@@ -94,7 +73,7 @@ private:
 	uint32_t m_Width = 0u;
 	uint32_t m_Height = 0u;
 	EState m_State = EState::OnFocus;
-	uint64_t m_Handle = 0u;
+	void* m_Handle = nullptr;
 	IInputHandler* m_InputHandler = nullptr;
 	MouseEvent m_MouseEvent;
 	KeyboardEvent m_KeyboardEvent;

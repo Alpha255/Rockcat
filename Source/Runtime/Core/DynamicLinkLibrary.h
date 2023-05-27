@@ -1,10 +1,10 @@
 #include "Runtime/Core/Definitions.h"
 
-class DynamicModule
+class DynamicLinkLibrary
 {
 public:
-	DynamicModule(const char8_t* ModuleName);
-	virtual ~DynamicModule();
+	DynamicLinkLibrary(const char8_t* LibraryName);
+	virtual ~DynamicLinkLibrary();
 
 	void* GetProcAddress(const char8_t* FunctionName);
 protected:

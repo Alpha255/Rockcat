@@ -111,12 +111,17 @@ static_assert(sizeof(byte8_t) == 1ull, "Size of byte miss match.");
 	}                                                                                    \
 }
 
-#define DLL_POSTFIX ".dll"
+#define DLL_EXTENSION ".dll"
 #else
 	#error Unknown platform!
 #endif
 
 #define RENDERER_POSTFIX "Renderer"
+
+#define SPDLOG_LEVEL_NAMES                                                                                                                 \
+    {                                                                                                                                      \
+        "Trace", "Debug", "Info", "Warning", "Error", "Critical", "Off"                                                                    \
+    }
 
 #define DECLARE_SMART_PTR(ClassName) class ClassName; \
 	using ClassName##SharedPtr = std::shared_ptr<ClassName>; \
@@ -126,7 +131,8 @@ static_assert(sizeof(byte8_t) == 1ull, "Size of byte miss match.");
 #define DESCRIPTION(Description)
 
 #define TO_STRING(X) #X
-#define CAT(A, B) A##B
+#define CAT(A, B) CAT_INNER(A, B)
+#define CAT_INNER(A, B) A##B
 #define FILE_LINE CAT(__FILE__, __LINE__)
 
 #define CEREAL_BASE(ClassType) cereal::make_nvp(typeid(ClassType).name(), cereal::virtual_base_class<ClassType>(this))
@@ -242,6 +248,12 @@ template <class T>
 inline constexpr T AlignDown(T Value, T Alignment)
 {
 	return (Value) & ~(Alignment - 1);
+}
+
+template<class Function, class... Args>
+inline auto Invoke(Function&& Func, Args&&... ArgList) -> decltype(std::forward<Function>(std::forward<Args>(ArgList)...))
+{
+	return std::forward<Function>(Func)(std::forward<Args>(ArgList)...);
 }
 
 size_t PopulationCount(size_t Value);

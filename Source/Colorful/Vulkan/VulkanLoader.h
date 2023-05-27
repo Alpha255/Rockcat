@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Colorful/IRenderer/IRenderer.h"
+#include "Runtime/Core/DynamicLinkLibrary.h"
+#include "Runtime/Engine/RHI/RHIInterface.h"
 
 #define USE_VK_LOADER true
 
@@ -216,7 +217,7 @@ NAMESPACE_END(RHI)
 
 NAMESPACE_START(RHI)
 
-class VulkanLoader : public Platform::DynamicLibrary, public Singleton<VulkanLoader>
+class VulkanLoader : public DynamicLinkLibrary
 {
 public:
 	~VulkanLoader();
@@ -227,10 +228,8 @@ public:
 
 	void LoadExtFuncs(VkInstance Instance, VkDevice Device, bool8_t SupportDebugMarker, bool8_t SupportDebugUtils);
 protected:
-	ALLOW_ACCESS(VulkanLoader)
-
 	VulkanLoader()
-		: Platform::DynamicLibrary("vulkan-1.dll")
+		: DynamicLinkLibrary((std::string("vulkan-1") + DLL_EXTENSION).c_str())
 	{
 	}
 private:

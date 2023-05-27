@@ -11,8 +11,6 @@
 	#error Unknown platform!
 #endif
 
-#define MINIMAL_WINDOW_SIZE 32
-
 static ::LRESULT MessageProc(::HWND HWnd, uint32_t Message, ::WPARAM WParam, ::LPARAM LParam)
 {
 	if (Message == WM_CREATE)
@@ -87,7 +85,7 @@ Window::Window(const WindowCreateInfo& CreateInfo, IInputHandler* InputHandler)
 	::ShowWindow(Handle, SW_SHOWDEFAULT);
 	VERIFY_WITH_PLATFORM_MESSAGE(::UpdateWindow(Handle) != 0);
 
-	m_Handle = reinterpret_cast<uint64_t>(Handle);
+	m_Handle = reinterpret_cast<void*>(Handle);
 }
 
 void Window::UpdateSize(bool8_t Signal)

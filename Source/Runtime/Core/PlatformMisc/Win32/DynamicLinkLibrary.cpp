@@ -1,4 +1,4 @@
-#include "Runtime/Core/DynamicModule.h"
+#include "Runtime/Core/DynamicLinkLibrary.h"
 #include "Runtime/Engine/Engine.h"
 #include "Runtime/Core/PlatformMisc.h"
 
@@ -8,21 +8,34 @@
 #include <windowsx.h>
 #include <shlobj.h>
 
-DynamicModule::DynamicModule(const char8_t* ModuleName)
+DynamicLinkLibrary::DynamicLinkLibrary(const char8_t* ModuleName)
 {
 	m_Handle = reinterpret_cast<void*>(::LoadLibraryA(ModuleName));
 	VERIFY_WITH_PLATFORM_MESSAGE(m_Handle);
 }
 
-void* DynamicModule::GetProcAddress(const char8_t* FunctionName)
+void* DynamicLinkLibrary::GetProcAddress(const char8_t* FunctionName)
 {
 	assert(m_Handle);
 	return ::GetProcAddress(reinterpret_cast<::HMODULE>(m_Handle), FunctionName);
 }
 
-DynamicModule::~DynamicModule()
+DynamicLinkLibrary::~DynamicLinkLibrary()
 {
 	VERIFY_WITH_PLATFORM_MESSAGE(::FreeLibrary(reinterpret_cast<::HMODULE>(m_Handle)) != 0);
 }
+
+struct ComponentObjectModelLibrary
+{
+	ComponentObjectModelLibrary()
+	{
+		VERIFY_WITH_PLATFORM_MESSAGE(::CoInitializeEx(nullptr, COINIT_MULTITHREADED) == S_OK);
+	}
+
+	~ComponentObjectModelLibrary()
+	{
+		::CoUninitialize();
+	}
+};
 
 #endif

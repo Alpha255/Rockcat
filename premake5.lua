@@ -341,12 +341,13 @@ workspace "Rockcat"
 			}
 		group "Test"
 			project "Test"
-			kind "ConsoleApp"
+			kind "WindowedApp"
 			language "C++"
 			location "./Out/Intermediate/VCProjects"
 			targetname "$(ProjectName)_$(Configuration)"
 			files {
-				"./Source/Test/**"
+				"./Source/Test/**",
+				"./Source/Runtime/Engine/Application/Resource.rc"
 			}
 			includedirs { 
 				"$(SolutionDir)",
