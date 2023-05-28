@@ -1,10 +1,3 @@
-function appResourceFiles()
-	files { 
-		"./Assets/Icon/Resource.rc",
-		"./Applications/Resource.h"
-	}
-end
-
 workspace "Rockcat"
 	location "./"
 	configurations { "Debug", "Release" }
@@ -53,25 +46,12 @@ workspace "Rockcat"
 				"$(VK_SDK_PATH)/Lib"
 			}
 
-		group "Colorful"
-			project "IRenderer"
+		group "RHI"
+			project "VulkanRHI"
 				kind "StaticLib"
 				language "C++"
 				location "./Out/Intermediate/VCProjects"
-				files "./Source/Colorful/IRenderer/**"
-				includedirs {
-					"$(SolutionDir)",
-					"$(SolutionDir)Source",
-					"$(SolutionDir)Submodules",
-					"$(SolutionDir)Submodules/cereal/include",
-					"$(SolutionDir)Submodules/spdlog/include",
-					"$(VK_SDK_PATH)/Include",
-				}
-			project "VulkanRenderer"
-				kind "StaticLib"
-				language "C++"
-				location "./Out/Intermediate/VCProjects"
-				files "./Source/Colorful/Vulkan/**"
+				files "./Source/RHI/Vulkan/**"
 				includedirs {
 					"$(SolutionDir)",
 					"$(SolutionDir)Source",
@@ -79,14 +59,14 @@ workspace "Rockcat"
 					"$(SolutionDir)Submodules/spdlog/include",
 					"$(VK_SDK_PATH)/Include",
 				}
-			project "D3D12Renderer"
+			project "D3D12RHI"
 				kind "StaticLib"
 				language "C++"
 				location "./Out/Intermediate/VCProjects"
 				files { 
-					"./Source/Colorful/D3D/D3D12/**",
-					"./Source/Colorful/D3D/DXGI_Interface.h",
-					"./Source/Colorful/D3D/DXGI_Interface.cpp",
+					"./Source/RHI/D3D/D3D12/**",
+					"./Source/RHI/D3D/DXGI_Interface.h",
+					"./Source/RHI/D3D/DXGI_Interface.cpp",
 				}
 				includedirs { 
 					"$(SolutionDir)",
@@ -98,105 +78,6 @@ workspace "Rockcat"
 					"d3d12",
 					"dxgi"
 				}
---[[
-	group "Colorful"
-		project "IRenderer"
-			kind "StaticLib"
-			language "C++"
-			location "./Out/Intermediate/VCProjects"
-			files "./Colorful/Gfx/**"
-			removefiles "./Colorful/Gfx/ImGui/**"
-			includedirs { 
-				"$(SolutionDir)",
-				"$(SolutionDir)Submodules",
-				"$(SolutionDir)Submodules/cereal/include",
-				"$(SolutionDir)Submodules/spdlog/include",
-				"$(SolutionDir)Submodules/glslang",
-				"$(SolutionDir)Submodules/KTX-Software/include",
-				"$(SolutionDir)Submodules/assimp/build/include",
-				"$(SolutionDir)Submodules/assimp/include",
-				"$(SolutionDir)Submodules/Vulkan-Headers/include",
-			}
-			defines { "STB_IMAGE_IMPLEMENTATION", "KHRONOS_STATIC", "LIBKTX" }
-			libdirs {
-				"$(SolutionDir)Submodules/dxc/lib/x64"
-			}
-			links {
-				"spirv-cross",
-				"libktx",
-				"dxcompiler",
-				"d3dcompiler",
-				"assimp"
-			}
-			postbuildcommands {
-				"{COPY} $(SolutionDir)Submodules/dxc/bin/x64/*.dll $(SolutionDir)Out"
-			}
-
-		project "VulkanRenderer"
-			kind "StaticLib"
-			language "C++"
-			location "./Out/Intermediate/VCProjects"
-			targetname "$(ProjectName)_$(Configuration)"
-			targetdir "$(SolutionDir)Out"
-			files "./Colorful/Vulkan/**"
-			includedirs { 
-				"$(SolutionDir)",
-				"$(SolutionDir)Submodules/Vulkan-Headers/include",
-				"$(SolutionDir)Submodules/cereal/include",
-				"$(SolutionDir)Submodules/spdlog/include",
-			}
-			-- defines { "DYNAMIC_LIB" }
-			--implibname "$(SolutionDir)Out/Intermediate/$(Configuration)/$(ProjectName)"
-			links { 
-				"Gear", 
-				"IRenderer",
-				"spirv-cross",
-				"libktx",
-				"dxcompiler",
-				"d3dcompiler",
-				"assimp",
-			}
---]]
---[[
-		project "D3D11Renderer"
-			kind "SharedLib"
-			language "C++"
-			location "./Projects"
-			files { 
-				"./Colorful/D3D/D3D11/**",
-				"./Colorful/D3D/DXGI_Interface.h",
-				"./Colorful/D3D/DXGI_Interface.cpp",
-			}
-			includedirs { "$(SolutionDir)" }
-			defines { "DYNAMIC_LIB" }
-			implibname "$(SolutionDir)Out/Intermediate/$(Configuration)/$(ProjectName)"
-			links { 
-				"Gear",
-				"d3d11",
-				"dxgi",
-				"IRenderer"
-			}
-
-		project "SoftwareRenderer"
-			kind "SharedLib"
-			language "C++"
-			location "./Projects"
-			files "./Colorful/Software/**"
-			includedirs { "$(SolutionDir)" }
-			defines { "DYNAMIC_LIB" }
-			implibname "$(SolutionDir)Out/Intermediate/$(Configuration)/$(ProjectName)"
-			links { 
-				"Gear",
-				"IRenderer"
-			}
-		
-		project "ImGuiRenderer"
-			kind "StaticLib"
-			language "C++"
-			location "./Projects/"
-			files "./Colorful/Gfx/ImGui/**"
-			includedirs { "$(SolutionDir)" }
-]]
 	group "Submodules"
 		project "imgui"
 			kind "StaticLib"
@@ -308,7 +189,7 @@ workspace "Rockcat"
 		targetname "$(ProjectName)_$(Configuration)"
 		files {
 			"./Source/Applications/RenderTest/**",
-			"./Source/Runtime/Application/Resource.rc"
+			"./Source/Runtime/Engine/Application/Resource.rc"
 		}
 		includedirs { 
 			"$(SolutionDir)",
@@ -321,10 +202,9 @@ workspace "Rockcat"
 		}
 		targetdir "$(SolutionDir)Out"
 		links { 
-			"Runtime", 
-			"IRenderer", 
-			"VulkanRenderer",
-			"D3D12Renderer",
+			"Runtime",  
+			"VulkanRHI",
+			"D3D12RHI",
 			"vulkan-1",
 			"dxcompiler",
 			"d3dcompiler",
