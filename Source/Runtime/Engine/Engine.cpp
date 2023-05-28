@@ -23,8 +23,6 @@ void Engine::Run()
 		Application->OnStartup();
 	}
 
-	std::vector<std::unique_ptr<BaseApplication>> AppsToDestroy;
-
 	while (true)
 	{
 		if (m_Applications.empty())
@@ -32,28 +30,19 @@ void Engine::Run()
 			break;
 		}
 
-		for (auto AppIt = m_Applications.begin(); AppIt != m_Applications.end(); ++AppIt)
+		m_Applications.remove_if([](std::unique_ptr<BaseApplication>& App) {
+			if (App->IsRequestingQuit())
+			{
+				App->OnShutdown();
+				return true;
+			}
+			return false;
+		});
+
+		for each (auto& Application in m_Applications)
 		{
-			if ((*AppIt)->IsRequestingQuit())
-			{
-				AppsToDestroy.emplace_back(std::unique_ptr<BaseApplication>(AppIt->release()));
-				AppIt = m_Applications.erase(AppIt);
-			}
-			else
-			{
-				(*AppIt)->Tick(0.0f);
-			}
-
-			if (AppIt == m_Applications.end())
-			{
-				break;
-			}
+			Application->Tick(0.0f);
 		}
-	}
-
-	for each (auto& Application in AppsToDestroy)
-	{
-		Application->OnShutdown();
 	}
 }
 
