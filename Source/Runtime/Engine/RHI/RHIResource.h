@@ -68,9 +68,9 @@ enum class ERHIBufferUsageFlags : uint16_t
 };
 ENUM_FLAG_OPERATORS(ERHIBufferUsageFlags)
 
-enum ERHIResourceState : uint32_t
+enum class ERHIResourceState : uint32_t
 {
-	Unknown = UINT32_MAX,
+	Unknown = 0xFFFFFFFF,
 	Common = 0x0,
 	VertexBuffer = 0x1,
 	UniformBuffer = 0x2,

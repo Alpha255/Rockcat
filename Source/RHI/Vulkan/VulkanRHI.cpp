@@ -1,12 +1,7 @@
-#include "Colorful/Vulkan/VulkanRenderer.h"
-#include "Colorful/Vulkan/VulkanDevice.h"
-#include "Colorful/Vulkan/VulkanSwapChain.h"
-#include "Colorful/Vulkan/VulkanMemoryAllocator.h"
-#include "Colorful/IRenderer/StagingBufferAllocator.h"
-#include "Runtime/Asset/AssetDatabase.h"
+#include "RHI/Vulkan/VulkanRHI.h"
+#include "Runtime/Engine/Engine.h"
 
-NAMESPACE_START(RHI)
-
+#if 0
 VulkanRenderer::VulkanRenderer(const RenderSettings* Settings, uint64_t WindowHandle)
 	: IRenderer(Settings)
 {
@@ -107,5 +102,13 @@ VulkanRenderer::~VulkanRenderer()
 		}
 	}
 #endif
+#endif
 
-NAMESPACE_END(RHI)
+void VulkanRHI::InitializeGraphicsDevices()
+{
+	LOG_INFO("Initialize");
+}
+
+void VulkanRHI::Finalize()
+{
+}

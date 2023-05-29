@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Colorful/Vulkan/VulkanLoader.h"
-
-NAMESPACE_START(RHI)
+#include "RHI/Vulkan/VulkanLoader.h"
 
 namespace VkType
 {
@@ -34,5 +32,3 @@ namespace VkType
 	VkAccessFlags accessFlags(GfxFlags flags);
 #endif
 };
-
-NAMESPACE_END(RHI)

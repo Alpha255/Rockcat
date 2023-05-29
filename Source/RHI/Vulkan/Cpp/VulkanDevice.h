@@ -1,7 +1,7 @@
 #pragma once
 
 #include "VulkanInstance.h"
-#include "Colorful/IRenderer/IDevice.h"
+#include "Runtime/Engine/RHI/RHIDevice.h"
 
 NAMESPACE_START(RHI)
 
@@ -140,7 +140,7 @@ public:
 		auto DeviceProperties = m_PhysicalDevice.getProperties();
 		LOG_INFO("Create {} Vulkan device on adapter: \"{} {}\", DeviceID = {}. VulkanAPI Version: {}.{}.{}",
 			vk::to_string(DeviceProperties.deviceType).data(),
-			IDevice::GetVendorName(DeviceProperties.vendorID),
+			RHIDevice::GetVendorName(DeviceProperties.vendorID),
 			DeviceProperties.deviceName.data(),
 			DeviceProperties.deviceID,
 			VK_VERSION_MAJOR(DeviceProperties.apiVersion),

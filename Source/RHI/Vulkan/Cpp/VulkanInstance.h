@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Colorful/IRenderer/IRenderer.h"
+#include "Runtime/Core/StringUtils.h"
+#include "Runtime/Engine/Engine.h"
 
 #define VK_NO_PROTOTYPES
 #include <vulkan/vulkan.hpp>
@@ -157,7 +158,7 @@ protected:
 		(void)(UserData);
 		(void)(MessageTypeFlags);
 
-		std::string Message(std::move(Gear::StringUtils::Format("Vulkan Validation: [%3d][%10s]: %s",
+		std::string Message(std::move(StringUtils::Format("Vulkan Validation: [%3d][%10s]: %s",
 			MessengerCallbackData->messageIdNumber,
 			MessengerCallbackData->pMessageIdName,
 			MessengerCallbackData->pMessage)));

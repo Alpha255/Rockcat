@@ -7,7 +7,7 @@ enum class EMouseButton : uint8_t
 	LButton,
 	RButton,
 	MButton,
-	None = std::numeric_limits<uint8_t>().max(),
+	None = 0xFF,
 };
 
 enum class EKeyboardKey : uint8_t
@@ -64,7 +64,7 @@ enum class EKeyboardKey : uint8_t
 	Z = 'Z',
 	F1,
 	Other,
-	None = std::numeric_limits<uint8_t>().max()
+	None = 0xFF
 };
 
 enum class EKeyState : uint8_t

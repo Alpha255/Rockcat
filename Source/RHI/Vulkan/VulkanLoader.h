@@ -1,18 +1,13 @@
 #pragma once
 
 #include "Runtime/Core/DynamicLinkLibrary.h"
-#include "Runtime/Engine/RHI/RHIInterface.h"
-
-#define USE_VK_LOADER true
+#include "Runtime/Engine/RHI/RHIResource.h"
 
 #define VK_FUNC_DECLARE(Func) extern PFN_##Func Func;
 #define VK_FUNC_DEFINITION(Func) PFN_##Func Func = nullptr;
 #define VK_FUNC_RESET(Func) Func = nullptr;
 
 #if USE_VK_LOADER
-
-#define VK_NO_PROTOTYPES
-#include <vulkan/vulkan.h>
 
 #define VK_GLOBAL_FUNC_TABLE(Action)               \
 	Action(vkCreateInstance)                       \
@@ -164,8 +159,6 @@ VK_FUNC_TABLE_DECLARE
 
 #else
 
-#include <vulkan/vulkan.h>
-
 #define VK_FUN_TABLE_DEBUG_MARKER(Action) \
 	Action(vkDebugMarkerSetObjectTagEXT)  \
 	Action(vkDebugMarkerSetObjectNameEXT) \
@@ -253,10 +246,10 @@ namespace VulkanResult
 #define VK_ALLOCATION_CALLBACKS nullptr
 
 template<class TInterface, class THWObject>
-class VkHWObject : public std::conditional_t<std::is_void_v<TInterface>, void, TInterface>, public IHWObject<THWObject>
+class VkHWObject : public std::conditional_t<std::is_void_v<TInterface>, void, TInterface>, public RHIObject<THWObject>
 {
 public:
-	using IHWObject<THWObject>::IHWObject;
+	using RHIObject<THWObject>::RHIObject;
 	using InterfaceType = std::conditional_t<std::is_void_v<TInterface>, void, TInterface>;
 
 	VkHWObject() = default;

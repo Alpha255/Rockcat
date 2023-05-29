@@ -32,8 +32,6 @@
 #include <variant>
 ///#include <span>  /// cpp20
 
-#include <cereal/cereal.hpp>
-
 #if defined(_WIN32)
 	#if !defined(VK_USE_PLATFORM_WIN32_KHR)
 		#define VK_USE_PLATFORM_WIN32_KHR 1
@@ -52,7 +50,7 @@
 	#define MEM(MemberName)
 #endif
 
-#pragma warning(disable : 26812)
+//#pragma warning(disable : 26812)
 
 #if defined(max)
 	#undef max
