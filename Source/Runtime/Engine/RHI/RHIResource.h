@@ -162,7 +162,7 @@ private:
 	T* m_Handle = nullptr;
 };
 
-struct RHIResource
+class RHIResource
 {
 public:
 	RHIResource() = default;

@@ -13,7 +13,8 @@ enum class ERHICullMode : uint8_t
 {
 	None,
 	FrontFace,
-	BackFace
+	BackFace,
+	FrontAndBackFace
 };
 
 enum class ERHIFrontFace : uint8_t

@@ -8,7 +8,7 @@
 #if USE_VK_LOADER
 	#define VK_NO_PROTOTYPES
 #endif
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan.hpp>
 
 enum class ERHIFormat : uint16_t
 {
@@ -128,7 +128,7 @@ enum class ERHIFormat : uint16_t
 namespace RHI
 {
 	static DXGI_FORMAT GetDXGIFormat(ERHIFormat Format);
-	static VkFormat GetVulkanFormat(ERHIFormat Format);
+	static vk::Format GetVulkanFormat(ERHIFormat Format);
 	static ERHIFormat GetSRGBFormat(ERHIFormat Format);
 	static ERHIFormat GetRHIFormatByName(const char8_t* Name);
 

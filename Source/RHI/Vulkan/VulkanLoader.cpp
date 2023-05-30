@@ -1,6 +1,8 @@
 #include "RHI/Vulkan/VulkanLoader.h"
 #include "Runtime/Engine/Engine.h"
 
+#if !defined(VULKAN_HPP_CPLUSPLUS)
+
 #define VK_LOADER_VERIFY_FUNC(Func)                                   \
 	if (!Func)                                                        \
 	{                                                                 \
@@ -11,8 +13,6 @@
 #if USE_VK_LOADER
 
 VK_FUNC_TABLE_DEFINITION
-
-NAMESPACE_START(RHI)
 
 VulkanLoader::~VulkanLoader()
 {
@@ -54,8 +54,6 @@ void VulkanLoader::LoadDeviceFuncs(VkDevice Device)
 }
 
 #else
-
-NAMESPACE_START(RHI)
 
 VK_EXT_FUNC_TABLE_DEFINITION
 
@@ -136,4 +134,4 @@ namespace VulkanResult
 	}
 }
 
-NAMESPACE_END(RHI)
+#endif

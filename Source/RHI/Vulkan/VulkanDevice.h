@@ -1,13 +1,8 @@
 #pragma once
 
-#include "Colorful/Vulkan/VulkanQueue.h"
-#include "Colorful/Vulkan/VulkanShader.h"
-#include "Colorful/Vulkan/VulkanDescriptor.h"
-#include "Colorful/Vulkan/VulkanBuffer.h"
-#include "Colorful/Vulkan/VulkanPipeline.h"
+#include "RHI/Vulkan/VulkanTypes.h"
 
-NAMESPACE_START(RHI)
-
+#if 0
 struct VulkanExtensions
 {
 	bool8_t Synchronization2 = false;
@@ -28,10 +23,12 @@ enum class ESyncType
 	QueueWaitSemaphore, /// Can't insure the texture inuse is complete upload when not use async transfer ???
 	ForceWaitQueueIdle  /// Can't insure the texture inuse is complete upload when not use async transfer ???
 };
+#endif
 
-class VulkanDevice final : public VkHWObject<IDevice, VkDevice_T>
+class VulkanDevice final
 {
 public:
+#if 0
 	VulkanDevice(class VulkanInstance* Instance);
 
 	~VulkanDevice();
@@ -188,6 +185,5 @@ private:
 	std::vector<std::unique_ptr<VulkanDescriptorPool>> m_DescriptorPools;
 	VulkanExtensions m_Extensions;
 	VkDeviceOptions m_Options;
+#endif
 };
-
-NAMESPACE_END(RHI)

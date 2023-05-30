@@ -150,10 +150,10 @@ namespace RHI
 		return s_FormatAttributes[static_cast<uint32_t>(Format)].DXGIFormat;
 	}
 
-	VkFormat GetVulkanFormat(ERHIFormat Format)
+	vk::Format GetVulkanFormat(ERHIFormat Format)
 	{
 		assert(s_FormatAttributes[static_cast<uint32_t>(Format)].RHIFormat == Format);
-		return s_FormatAttributes[static_cast<uint32_t>(Format)].VulkanFormat;
+		return static_cast<vk::Format>(s_FormatAttributes[static_cast<uint32_t>(Format)].VulkanFormat);
 	}
 
 	ERHIFormat GetSRGBFormat(ERHIFormat Format)

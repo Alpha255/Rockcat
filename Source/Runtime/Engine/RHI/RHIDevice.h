@@ -77,14 +77,6 @@ public:
 
 	virtual RHICommandBufferPtr GetOrAllocateCommandBuffer(ERHIDeviceQueueType QueueType, ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary, bool8_t AutoBegin = true) = 0;
 
-	RHIGraphicsPipelinePtr GetOrCreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo);
-
-	RHIInputLayoutPtr GetOrCreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo);
-
-	RHISamplerPtr GetOrCreateSampler(const RHISamplerCreateInfo& RHICreateInfo);
-
-	RHIFrameBufferPtr GetOrCreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo);
-
 	RHIImagePtr CreateColorAttachment(
 		uint32_t Width,
 		uint32_t Height,
@@ -105,7 +97,7 @@ public:
 			ERHIImageType::T_2D,
 			Format,
 			SampleCount,
-			ShaderResource ? ERHIBufferUsageFlags::RenderTarget | ERHIBufferUsageFlags::ShaderResource : ERHIBufferUsageFlags::RenderTarget,
+			UseForShaderResource ? ERHIBufferUsageFlags::RenderTarget | ERHIBufferUsageFlags::ShaderResource : ERHIBufferUsageFlags::RenderTarget,
 			ERHIResourceState::RenderTarget,
 			Name
 		};

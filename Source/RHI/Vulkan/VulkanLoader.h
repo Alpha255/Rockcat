@@ -3,6 +3,10 @@
 #include "Runtime/Core/DynamicLinkLibrary.h"
 #include "Runtime/Engine/RHI/RHIResource.h"
 
+#define VK_ALLOCATION_CALLBACKS nullptr
+
+#if !defined(VULKAN_HPP_CPLUSPLUS)
+
 #define VK_FUNC_DECLARE(Func) extern PFN_##Func Func;
 #define VK_FUNC_DEFINITION(Func) PFN_##Func Func = nullptr;
 #define VK_FUNC_RESET(Func) Func = nullptr;
@@ -202,13 +206,9 @@ VK_FUNC_TABLE_DECLARE
 #define VK_EXT_FUNC_TABLE_DEFINITION  VK_EXT_FUNC_TABLE(VK_FUNC_DEFINITION)
 #define VK_EXT_FUNC_TABLE_RESET       VK_EXT_FUNC_TABLE(VK_FUNC_RESET)
 
-NAMESPACE_START(RHI)
-	VK_EXT_FUNC_TABLE_DECLAR
-NAMESPACE_END(RHI)
+VK_EXT_FUNC_TABLE_DECLAR
 
 #endif
-
-NAMESPACE_START(RHI)
 
 class VulkanLoader : public DynamicLinkLibrary
 {
@@ -243,8 +243,6 @@ namespace VulkanResult
 	}                                                                                        \
 }
 
-#define VK_ALLOCATION_CALLBACKS nullptr
-
 template<class TInterface, class THWObject>
 class VkHWObject : public std::conditional_t<std::is_void_v<TInterface>, void, TInterface>, public RHIObject<THWObject>
 {
@@ -273,5 +271,14 @@ public:
 protected:
 	class VulkanDevice* m_Device = nullptr;
 };
-
-NAMESPACE_END(RHI)
+#else
+#define VERIFY_VK(Func)                                                                                                                   \
+{                                                                                                                                         \
+	vk::Result TempResult = (Func);                                                                                                       \
+	if (TempResult != vk::Result::eSuccess)                                                                                               \
+	{                                                                                                                                     \
+		LOG_ERROR("Vulkan: Failed to invoke VulkanAPI: File: {}, Line: {}, vkResult: {}", __FILE__, __LINE__, vk::to_string(TempResult)); \
+		assert(0);                                                                                                                        \
+	}                                                                                                                                     \
+}
+#endif
