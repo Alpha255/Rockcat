@@ -2,7 +2,7 @@
     "cmake.useCMakePresets": "always",
     "C_Cpp.autoAddFileAssociations": false,
     "C_Cpp.autocompleteAddParentheses": true,
-    "C_Cpp.intelliSenseEngine": "disabled",
+    "C_Cpp.intelliSenseEngine": "default",
     "C_Cpp.inactiveRegionOpacity": 0.55,
     "C_Cpp.dimInactiveRegions": true,
     "clangd.onConfigChanged": "restart",
@@ -26,5 +26,9 @@
     ],
     "lldb.showDisassembly": "auto",
     "lldb.dereferencePointers": true,
-    "lldb.consoleMode": "commands"
+    "lldb.consoleMode": "commands",
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.cStandard": "c17",
+    "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
+    "C_Cpp.intelliSenseEngineFallback": "enabled"
 }

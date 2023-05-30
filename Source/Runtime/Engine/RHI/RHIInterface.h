@@ -15,10 +15,10 @@ public:
 	{ 
 		switch (RHI)
 		{
-		case ERenderHardwareInterface::Software: return "SoftwareRHI";
-		case ERenderHardwareInterface::Vulkan: return "VulkanRHI";
-		case ERenderHardwareInterface::D3D11: return "D3D11RHI";
-		case ERenderHardwareInterface::D3D12: return "D3D12RHI";
+		case ERenderHardwareInterface::Software: return "Software";
+		case ERenderHardwareInterface::Vulkan: return "Vulkan";
+		case ERenderHardwareInterface::D3D11: return "D3D11";
+		case ERenderHardwareInterface::D3D12: return "D3D12";
 		default: return "Null";
 		} 
 	}

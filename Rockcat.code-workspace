@@ -4,5 +4,14 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"files.associations": {
+			"*.bjsl": "xml",
+			"*.vert": "hlsl",
+			"*.frag": "hlsl",
+			"*.usf": "hlsl",
+			"*.ush": "hlsl",
+			"bitset": "cpp"
+		}
+	}
 }

@@ -53,6 +53,19 @@ private:
 	std::map<std::string, std::string> m_Definitions;
 };
 
+class GlobalShaderConfigurations : public SerializableAsset<ShaderCache>
+{
+public:
+	GlobalShaderConfigurations()
+		: SerializableAsset(StringUtils::Format("%sGlobalShaderConfigs%s", ASSET_PATH_SHADERS, SERIALIZABLE_EXT).c_str())
+	{
+	}
+};
+
+class ShaderVariantMask : public std::bitset<sizeof<uint32_t>>
+{
+};
+
 class ShaderBinary : private AssetData
 {
 public:

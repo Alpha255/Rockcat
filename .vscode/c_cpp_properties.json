@@ -1,18 +1,21 @@
 {
     "configurations": [
         {
-            "name": "clang++",
-            "intelliSenseMode": "clang-x64",
-            "compilerPath": "${LLVM_PATH}/clang++.exe",
+            "name": "gcc",
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
             "includePath": [
-                "${workspaceFolder}"
+                "${workspaceFolder}",
+                "${workspaceFolder}/Source",
+                "${workspaceFolder}/Submodules/cereal/include",
+                "${workspaceFolder}/Submodules/spdlog/include"
             ],
-            "defines": [],
+            "defines": ["_WIN32"],
             "browse": {
                 "path": [
                     "${workspaceFolder}"
                 ],
-                "limitSymbolsToIncludedHeaders": true,
+                "limitSymbolsToIncludedHeaders": false,
                 "databaseFilename": ""
             },
             "cStandard": "c11",
