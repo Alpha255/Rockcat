@@ -1,3 +1,4 @@
+#if 0
 #include "Colorful/Vulkan/VulkanDevice.h"
 #include "Colorful/Vulkan/VulkanInstance.h"
 
@@ -16,7 +17,7 @@ NAMESPACE_START(RHI)
 	static_assert(VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT == VK_OBJECT_TYPE_SAMPLER, "Miss match");
 #endif
 
-VulkanDevice::VulkanDevice(VulkanInstance* Instance)
+	VulkanDevice::VulkanDevice(VulkanInstance* Instance)
 	: m_Instance(Instance->Get())
 {
 	assert(m_Instance);
@@ -465,3 +466,82 @@ VulkanDevice::~VulkanDevice()
 }
 
 NAMESPACE_END(RHI)
+
+#endif
+
+#include "RHI/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanInstance.h"
+
+VulkanDevice::VulkanDevice()
+{
+	m_Instance = std::make_unique<VulkanInstance>(ERHIDebugLayerLevel::Error);
+}
+
+void VulkanDevice::WaitIdle()
+{
+}
+
+RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& RHICreateInfo)
+{
+	return RHIShaderPtr();
+}
+
+RHIImagePtr VulkanDevice::CreateImage(const RHIImageCreateInfo& RHICreateInfo)
+{
+	return RHIImagePtr();
+}
+
+RHIInputLayoutPtr VulkanDevice::CreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo)
+{
+	return RHIInputLayoutPtr();
+}
+
+RHIFrameBufferPtr VulkanDevice::CreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo)
+{
+	return RHIFrameBufferPtr();
+}
+
+RHIGraphicsPipelinePtr VulkanDevice::CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo)
+{
+	return RHIGraphicsPipelinePtr();
+}
+
+RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo)
+{
+	return RHIBufferPtr();
+}
+
+RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& RHICreateInfo)
+{
+	return RHISamplerPtr();
+}
+
+RHICommandBufferPoolPtr VulkanDevice::CreateCommandBufferPool(ERHIDeviceQueueType QueueType)
+{
+	return RHICommandBufferPoolPtr();
+}
+
+void VulkanDevice::SubmitCommandBuffers(ERHIDeviceQueueType QueueType, const std::vector<RHICommandBuffer*>& Commands)
+{
+}
+
+void VulkanDevice::SubmitCommandBuffer(ERHIDeviceQueueType QueueType, RHICommandBuffer* Command)
+{
+}
+
+void VulkanDevice::SubmitCommandBuffers(const std::vector<RHICommandBuffer*>& Commands)
+{
+}
+
+void VulkanDevice::SubmitCommandBuffer(RHICommandBuffer* Command)
+{
+}
+
+RHICommandBufferPtr VulkanDevice::GetOrAllocateCommandBuffer(ERHIDeviceQueueType QueueType, ERHICommandBufferLevel Level, bool8_t AutoBegin)
+{
+	return RHICommandBufferPtr();
+}
+
+VulkanDevice::~VulkanDevice()
+{
+}

@@ -15,6 +15,7 @@ vk::CompareOp GetCompareFunc(ERHICompareFunc Func);
 vk::StencilOp GetStencilOp(ERHIStencilOp Op);
 vk::Format GetFormat(ERHIFormat Format);
 vk::ShaderStageFlagBits GetShaderStage(ERHIShaderStage Stage);
+vk::ShaderStageFlags GetShaderStageFlags(ERHIShaderStage Stage);
 vk::PrimitiveTopology GetPrimitiveTopology(ERHIPrimitiveTopology PrimitiveTopology);
 vk::DescriptorType GetDescriptorType(ERHIResourceType Type);
 vk::Filter GetFilter(ERHIFilter Filter);

@@ -1,5 +1,25 @@
 #include "RHI/Vulkan/VulkanRHI.h"
+#include "RHI/Vulkan/VulkanDevice.h"
 #include "Runtime/Engine/Engine.h"
+
+VulkanRHI::VulkanRHI()
+{
+	InitializeGraphicsDevices();
+}
+
+void VulkanRHI::InitializeGraphicsDevices()
+{
+	const vk::DynamicLoader vkDynamicLoader;
+	const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = vkDynamicLoader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
+	assert(vkGetInstanceProcAddr);
+	VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);	
+
+	m_Device = std::make_unique<VulkanDevice>();
+}
+
+void VulkanRHI::Finalize()
+{
+}
 
 #if 0
 VulkanRenderer::VulkanRenderer(const RenderSettings* Settings, uint64_t WindowHandle)
@@ -40,7 +60,7 @@ void VulkanRenderer::Present()
 {
 	/// #TODO: User dedicate present queue ???
 	for (auto QueueType : std::array<EQueueType, 3u>{
-			EQueueType::Graphics,
+		EQueueType::Graphics,
 			EQueueType::Transfer,
 			EQueueType::Compute})
 	{
@@ -94,21 +114,12 @@ VulkanRenderer::~VulkanRenderer()
 }
 
 #if defined(DYNAMIC_LIBRARY)
-	extern "C"
+extern "C"
+{
+	EXPORT_API void CreateRenderer(IRendererPtr& RendererPtr, const RenderSettings* Settings)
 	{
-		EXPORT_API void CreateRenderer(IRendererPtr& RendererPtr, const RenderSettings* Settings)
-		{
-			RendererPtr = std::make_unique<VulkanRenderer>(Settings);
-		}
+		RendererPtr = std::make_unique<VulkanRenderer>(Settings);
 	}
+}
 #endif
 #endif
-
-void VulkanRHI::InitializeGraphicsDevices()
-{
-	LOG_INFO("Initialize");
-}
-
-void VulkanRHI::Finalize()
-{
-}

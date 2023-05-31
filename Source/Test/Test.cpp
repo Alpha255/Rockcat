@@ -9,4 +9,3 @@ public:
 };
 
 REGISTER_APPLICATION(Test, "Test.json")
-REGISTER_APPLICATION(Test, "Test1.json")

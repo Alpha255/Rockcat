@@ -243,7 +243,9 @@ workspace "Rockcat"
 				"Runtime",
 				"dxcompiler",
 				"d3dcompiler",
+				"VulkanRHI",
 				"assimp",
+				"vulkan-1",
 			}
 			filter { "configurations:Debug" }
 				links {

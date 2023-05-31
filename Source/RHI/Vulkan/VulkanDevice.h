@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RHI/Vulkan/VulkanTypes.h"
+#include "Runtime/Engine/RHI/RHIDevice.h"
 
 #if 0
 struct VulkanExtensions
@@ -25,9 +26,42 @@ enum class ESyncType
 };
 #endif
 
-class VulkanDevice final
+class VulkanDevice final : public RHIDevice
 {
 public:
+	VulkanDevice();
+
+	~VulkanDevice();
+
+	virtual void WaitIdle() override final;
+
+	virtual RHIShaderPtr CreateShader(const RHIShaderCreateInfo& RHICreateInfo) override final;
+
+	virtual RHIImagePtr CreateImage(const RHIImageCreateInfo& RHICreateInfo) override final;
+
+	virtual RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo) override final;
+
+	virtual RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo) override final;
+
+	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) override final;
+
+	virtual RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo) override final;
+
+	virtual RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& RHICreateInfo) override final;
+
+	virtual RHICommandBufferPoolPtr CreateCommandBufferPool(ERHIDeviceQueueType QueueType) override final;
+
+	virtual void SubmitCommandBuffers(ERHIDeviceQueueType QueueType, const std::vector<RHICommandBuffer*>& Commands) override final;
+
+	virtual void SubmitCommandBuffer(ERHIDeviceQueueType QueueType, RHICommandBuffer* Command) override final;
+
+	virtual void SubmitCommandBuffers(const std::vector<RHICommandBuffer*>& Commands) override final;
+
+	virtual void SubmitCommandBuffer(RHICommandBuffer* Command) override final;
+
+	virtual RHICommandBufferPtr GetOrAllocateCommandBuffer(ERHIDeviceQueueType QueueType, ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary, bool8_t AutoBegin = true) override final;
+private:
+	std::unique_ptr<class VulkanInstance> m_Instance;
 #if 0
 	VulkanDevice(class VulkanInstance* Instance);
 
@@ -69,92 +103,6 @@ public:
 	}
 
 	void SetObjectName(uint64_t ObjectHandle, VkObjectType Type, const char8_t* Name);
-
-	void WaitIdle() override final
-	{
-		VERIFY_VK(vkDeviceWaitIdle(Get()));
-	}
-
-	IShaderSharedPtr CreateShader(const ShaderDesc& Desc) override final
-	{
-		return std::make_shared<VulkanShader>(this, Desc);
-	}
-
-	IImageSharedPtr CreateImage(const ImageDesc& Desc) override final
-	{
-		return std::make_shared<VulkanImage>(this, Desc);
-	}
-
-	IInputLayoutSharedPtr CreateInputLayout(const InputLayoutDesc& Desc, const ShaderDesc& VertexShaderDesc) override final
-	{
-		return std::make_shared<VulkanInputLayout>(Desc, VertexShaderDesc);
-	}
-
-	IFrameBufferSharedPtr CreateFrameBuffer(const FrameBufferDesc& Desc) override final
-	{
-		return std::make_shared<VulkanFramebuffer>(this, Desc);
-	}
-
-	IPipelineSharedPtr CreateGraphicsPipeline(const GraphicsPipelineDesc& Desc) override final
-	{
-		return std::make_shared<VulkanGraphicsPipeline>(this, m_PipelineCache->Get(), Desc);
-	}
-
-	IBufferSharedPtr CreateBuffer(const BufferDesc& Desc) override final
-	{
-		return std::make_shared<VulkanBuffer>(this, Desc);
-	}
-
-	ISamplerSharedPtr CreateSampler(const SamplerDesc& Desc) override final
-	{
-		return std::make_shared<VulkanSampler>(this, Desc);
-	}
-
-	ICommandBufferPoolSharedPtr CreateCommandBufferPool(EQueueType QueueType) override final
-	{
-		return Queue(QueueType)->CreateCommandBufferPool();
-	}
-
-	ICommandBufferSharedPtr GetOrAllocateCommandBuffer(EQueueType QueueType, ECommandBufferLevel Level, bool8_t AutoBegin, bool8_t UseForTransfer) override final
-	{
-		return Queue(QueueType)->GetOrAllocateCommandBuffer(Level, AutoBegin, UseForTransfer);
-	}
-
-	VulkanDescriptor GetOrAllocateDescriptor(const GraphicsPipelineDesc& Desc);
-
-	std::shared_ptr<VulkanFence> GetOrCreateFence(bool8_t Signaled = false);
-
-	void FreeFence(std::shared_ptr<VulkanFence> Fence);
-
-	VulkanQueue* Queue(EQueueType QueueType)
-	{
-		assert(QueueType <= EQueueType::Compute);
-
-		static const uint32_t GraphicsQueueIndex = static_cast<uint32_t>(EQueueType::Graphics);
-		const uint32_t QueueIndex = static_cast<uint32_t>(QueueType);
-
-#if !USE_DEDICATE_TRANSFER_QUEUE
-		if (QueueType == EQueueType::Transfer)
-		{
-			return m_Queues[GraphicsQueueIndex].get();
-		}
-#endif
-		return m_Queues[QueueIndex] ? m_Queues[QueueIndex].get() : m_Queues[GraphicsQueueIndex].get();
-	}
-
-	void SubmitCommandBuffers(EQueueType QueueType, const std::vector<ICommandBufferSharedPtr>& Commands) override final
-	{
-		Queue(QueueType)->Submit(Commands);
-	}
-
-	void SubmitCommandBuffer(EQueueType QueueType, ICommandBufferSharedPtr& Command) override final
-	{
-		Queue(QueueType)->Submit(std::vector<ICommandBufferSharedPtr>{ Command });
-	}
-
-	void SubmitCommandBuffers(const std::vector<ICommandBufferSharedPtr>& Commands) override final;
-
-	void SubmitCommandBuffer(ICommandBufferSharedPtr& Command) override final;
 
 	VkPipelineCache PipelineCache() const
 	{

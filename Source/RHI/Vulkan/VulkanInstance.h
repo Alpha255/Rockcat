@@ -1,56 +1,35 @@
 #pragma once
 
-#include "Colorful/Vulkan/VulkanTypes.h"
+#include "RHI/Vulkan/VulkanTypes.h"
 
-NAMESPACE_START(RHI)
-
-template <typename T>
-std::vector<const char8_t*> GetSupportedProperties(
-	const std::vector<T>& SupportedProperties, 
-	const std::vector<const char8_t*>& TargetProperties)
+struct VulkanLayer
 {
-	std::vector<const char8_t*> Ret;
-
-	for each (auto PropertyName in TargetProperties)
+	VulkanLayer(const char8_t* InName, bool8_t Needed = false)
+		: Name(InName)
+		, IsNeeded(Needed)
 	{
-		for (auto It = SupportedProperties.begin(); It != SupportedProperties.end(); ++It)
-		{
-			if (_stricmp((const char8_t* const)(&(*It)), PropertyName) == 0)
-			{
-				Ret.push_back(PropertyName);
-				break;
-			}
-		}
 	}
 
-	return Ret;
-}
+	inline bool8_t operator==(const VulkanLayer& Other) const { return Name == Other.Name; }
+	inline bool8_t operator!=(const VulkanLayer& Other) const { return Name != Other.Name; }
 
-std::string GetEnabledPropertiesMessage(const std::vector<const char8_t*>& Properties);
+	std::string_view Name;
+	bool8_t IsNeeded = false;
+};
+using VulkanExtension = VulkanLayer;
 
-class VulkanInstance final : public VkHWObject<void, VkInstance_T>
+class VulkanInstance final
 {
 public:
-	VulkanInstance(bool8_t Verbose);
+	VulkanInstance(ERHIDebugLayerLevel DebugLevel);
 
 	~VulkanInstance();
 
-	const bool8_t SupportDebugUtils() const
-	{
-		return m_DebugUtils != VK_NULL_HANDLE;
-	}
-
-	const bool8_t SupportDebugReport() const
-	{
-		return m_DebugReport != VK_NULL_HANDLE;
-	}
+	inline vk::Instance& Get() { assert(!m_Instance); return m_Instance; }
 private:
-#if VK_EXT_debug_utils
-	VkDebugUtilsMessengerEXT m_DebugUtils = VK_NULL_HANDLE;
-#endif
-#if VK_EXT_debug_report
-	VkDebugReportCallbackEXT m_DebugReport = VK_NULL_HANDLE;
-#endif
-};
+	void SetupRuntimeDebug(ERHIDebugLayerLevel DebugLevel, bool8_t EnableDebugUtils, bool8_t EnableDebugReports);
 
-NAMESPACE_END(RHI)
+	vk::Instance m_Instance;
+	vk::DebugReportCallbackEXT m_DebugReportCallback;
+	vk::DebugUtilsMessengerEXT m_DebugUtilsMessenger;
+};

@@ -53,7 +53,7 @@ private:
 	std::map<std::string, std::string> m_Definitions;
 };
 
-class GlobalShaderConfigurations : public SerializableAsset<ShaderCache>
+class GlobalShaderConfigurations : public SerializableAsset<GlobalShaderConfigurations>
 {
 public:
 	GlobalShaderConfigurations()
@@ -62,7 +62,7 @@ public:
 	}
 };
 
-class ShaderVariantMask : public std::bitset<sizeof<uint32_t>>
+class ShaderVariantMask : public std::bitset<sizeof(uint32_t)>
 {
 };
 

@@ -1,5 +1,297 @@
-#include "Colorful/Vulkan/VulkanInstance.h"
-#include "Colorful/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanInstance.h"
+#include "Runtime/Engine/Engine.h"
+
+#define VK_LAYER_KHRONOS_VALIDATION_NAME "VK_LAYER_KHRONOS_validation"
+#define LOG_ENABLED_LAYERS_AND_EXTENSIONS 1
+
+VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
+
+static constexpr bool8_t UNIQUE_MESSAGE = true;
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsMessengerCallback(
+	VkDebugUtilsMessageSeverityFlagBitsEXT MessageServerityFlagBits,
+	VkDebugUtilsMessageTypeFlagsEXT MessageTypeFlags,
+	const VkDebugUtilsMessengerCallbackDataEXT* MessengerCallbackData,
+	void* UserData)
+{
+	(void)(UserData);
+	(void)(MessageTypeFlags);
+
+	std::string Message = StringUtils::Format("Vulkan Validation: [%3d][%10s]: %s",
+		MessengerCallbackData->messageIdNumber,
+		MessengerCallbackData->pMessageIdName,
+		MessengerCallbackData->pMessage);
+
+	if (EnumHasAnyFlags(MessageServerityFlagBits, VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT))
+	{
+#if 0
+		LOG_INFO("Vulkan Validation: {:<3}{:<10}: {}", MessengerCallbackData->messageIdNumber, MessengerCallbackData->pMessageIdName, MessengerCallbackData->pMessage);
+#else
+		LOG_INFO("{}", Message);
+#endif
+	}
+	else if (EnumHasAnyFlags(MessageServerityFlagBits, VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT))
+	{
+		LOG_WARNING("{}", Message);
+	}
+	else if (EnumHasAnyFlags(MessageServerityFlagBits, VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT))
+	{
+		LOG_ERROR("{}", Message);
+	}
+	else if (EnumHasAnyFlags(MessageServerityFlagBits, VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT))
+	{
+		LOG_DEBUG("{}", Message);
+	}
+	else
+	{
+		assert(0);
+	}
+
+	return VK_FALSE;
+}
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugReportCallback(
+	VkDebugReportFlagsEXT Flags,
+	VkDebugReportObjectTypeEXT Type,
+	uint64_t Handle,
+	size_t Location,
+	int32_t MessageCode,
+	const char8_t* LayerPrefix,
+	const char8_t* Message,
+	void* UserData)
+{
+	(void)Type;
+	(void)Handle;
+	(void)Location;
+	(void)MessageCode;
+	(void)UserData;
+
+	if (EnumHasAnyFlags(Flags, VK_DEBUG_REPORT_ERROR_BIT_EXT))
+	{
+		LOG_ERROR("{}: {}", LayerPrefix, Message);
+	}
+	else if (EnumHasAnyFlags(Flags, VK_DEBUG_REPORT_WARNING_BIT_EXT) || EnumHasAnyFlags(Flags, VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT))
+	{
+		LOG_WARNING("{}: {}", LayerPrefix, Message);
+	}
+	else
+	{
+		LOG_INFO("{}: {}", LayerPrefix, Message);
+	}
+
+	return VK_FALSE;
+}
+
+VulkanInstance::VulkanInstance(ERHIDebugLayerLevel DebugLevel)
+{
+	const bool8_t EnableRuntimeDebug = DebugLevel > ERHIDebugLayerLevel::None;
+	std::vector<VulkanLayer> WantedLayers = EnableRuntimeDebug ? std::vector<VulkanLayer>
+	{
+		{ VK_LAYER_KHRONOS_VALIDATION_NAME, false },
+	} : std::vector<VulkanLayer>{};
+
+	std::vector<VulkanExtension> WantedExtensions
+	{
+		{ VK_KHR_SURFACE_EXTENSION_NAME, true },
+#if defined(PLATFORM_WIN32)
+		{ VK_KHR_WIN32_SURFACE_EXTENSION_NAME, true },
+#elif defined(PLATFORM_LINUX)
+		{ VK_KHR_XCB_SURFACE_EXTENSION_NAME, true },
+#endif
+	};
+
+	std::vector<const char8_t*> EnabledLayers;
+	std::vector<const char8_t*> EnabledExtensions;
+
+	auto LayerProperties = vk::enumerateInstanceLayerProperties();
+	for each (const auto& LayerProperty in LayerProperties)
+	{
+		if (std::find(WantedLayers.begin(), WantedLayers.end(), VulkanLayer(LayerProperty.layerName.data())) != WantedLayers.end())
+		{
+			EnabledLayers.push_back(LayerProperty.layerName.data());
+		}
+	}
+
+	bool8_t SupportDebugReport = false, SupportDebugUtils = false;
+	auto ExtensionProperties = vk::enumerateInstanceExtensionProperties();
+	for each (const auto& ExtensionProperty in ExtensionProperties)
+	{
+		if (std::find(WantedExtensions.begin(), WantedExtensions.end(), VulkanExtension(ExtensionProperty.extensionName.data())) != WantedExtensions.end())
+		{
+			EnabledExtensions.push_back(ExtensionProperty.extensionName.data());
+		}
+
+		if (EnableRuntimeDebug)
+		{
+			if (!SupportDebugUtils)
+			{
+				SupportDebugUtils = std::strcmp(ExtensionProperty.extensionName.data(), VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0;
+			}
+			if (!SupportDebugReport)
+			{
+				SupportDebugReport = std::strcmp(ExtensionProperty.extensionName.data(), VK_EXT_DEBUG_REPORT_EXTENSION_NAME) == 0;
+			}
+		}
+	}
+
+	if (EnableRuntimeDebug)
+	{
+		if (SupportDebugUtils)
+		{
+			EnabledExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+		}
+		else if (SupportDebugReport)
+		{
+			EnabledExtensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+		}
+	}
+
+#if LOG_ENABLED_LAYERS_AND_EXTENSIONS
+	for (uint32_t Index = 0u; Index < EnabledLayers.size(); ++Index)
+	{
+		if (Index < WantedLayers.size())
+		{
+			const char8_t* WantedLayerName = WantedLayers[Index].Name.data();
+			if (std::find_if(EnabledLayers.begin(), EnabledLayers.end(), [WantedLayerName](const char8_t* LayerName) {
+					return strcmp(LayerName, WantedLayerName) == 0;
+				}) != EnabledLayers.end())
+			{
+				LOG_INFO("VulkanRHI: Enable instance layer: {}", EnabledLayers[Index]);
+			}
+			else
+			{
+				if (WantedLayers[Index].IsNeeded)
+				{
+					LOG_ERROR("VulkanRHI: Request instance layer \"{}\" is not supported.", WantedLayers[Index].Name.data());
+				}
+			}
+		}
+		else
+		{
+			LOG_INFO("VulkanRHI: Enable instance layer: {}", EnabledLayers[Index]);
+		}
+	}
+
+	for (uint32_t Index = 0u; Index < EnabledExtensions.size(); ++Index)
+	{
+		if (Index < WantedExtensions.size())
+		{
+			const char8_t* WantedExtensionName = WantedExtensions[Index].Name.data();
+			if (std::find_if(EnabledExtensions.begin(), EnabledExtensions.end(), [WantedExtensionName](const char8_t* ExtensionName) {
+				return strcmp(ExtensionName, WantedExtensionName) == 0;
+				}) != EnabledExtensions.end())
+			{
+				LOG_INFO("VulkanRHI: Enable instance extension: {}", EnabledExtensions[Index]);
+			}
+			else
+			{
+				if (WantedExtensions[Index].IsNeeded)
+				{
+					LOG_ERROR("VulkanRHI: Request instance extension \"{}\" is not supported.", WantedExtensions[Index].Name.data());
+				}
+			}
+		}
+		else
+		{
+			LOG_INFO("VulkanRHI: Enable instance extension: {}", EnabledExtensions[Index]);
+		}
+	}
+#endif
+
+	auto ApplicationInfo = vk::ApplicationInfo()
+		.setApplicationVersion(VK_HEADER_VERSION_COMPLETE);
+
+	auto CreateInfo = vk::InstanceCreateInfo()
+		.setEnabledLayerCount(static_cast<uint32_t>(EnabledLayers.size()))
+		.setPpEnabledLayerNames(EnabledLayers.data())
+		.setEnabledExtensionCount(static_cast<uint32_t>(EnabledExtensions.size()))
+		.setPpEnabledExtensionNames(EnabledExtensions.data())
+		.setPApplicationInfo(&ApplicationInfo);
+
+	VERIFY_VK(vk::createInstance(&CreateInfo, nullptr, &m_Instance));
+
+	VULKAN_HPP_DEFAULT_DISPATCHER.init(m_Instance);
+
+	SetupRuntimeDebug(DebugLevel, SupportDebugUtils, SupportDebugReport);
+}
+
+void VulkanInstance::SetupRuntimeDebug(ERHIDebugLayerLevel DebugLevel, bool8_t EnableDebugUtils, bool8_t EnableDebugReports)
+{
+	if (DebugLevel > ERHIDebugLayerLevel::None)
+	{
+		if (EnableDebugUtils)
+		{
+			vk::DebugUtilsMessageSeverityFlagsEXT MessageSeverityFlags;
+			vk::DebugUtilsMessageTypeFlagsEXT MessageTypeFlags;
+			switch (DebugLevel)
+			{
+			case ERHIDebugLayerLevel::Verbose:
+				MessageSeverityFlags |= vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose;
+				MessageTypeFlags |= vk::DebugUtilsMessageTypeFlagBitsEXT::eDeviceAddressBinding;
+			case ERHIDebugLayerLevel::Error:
+				MessageSeverityFlags |= vk::DebugUtilsMessageSeverityFlagBitsEXT::eError;
+				MessageTypeFlags |= vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
+			case ERHIDebugLayerLevel::Warning:
+				MessageSeverityFlags |= vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning;
+				MessageTypeFlags |= vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation;
+			case ERHIDebugLayerLevel::Info:
+				MessageSeverityFlags |= vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo;
+				MessageTypeFlags |= vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral;
+				break;
+			}
+
+			auto CreateInfo = vk::DebugUtilsMessengerCreateInfoEXT()
+				.setMessageSeverity(MessageSeverityFlags)
+				.setMessageType(MessageTypeFlags)
+				.setPfnUserCallback(vkDebugUtilsMessengerCallback)
+				.setPUserData(this);
+			VERIFY_VK(m_Instance.createDebugUtilsMessengerEXT(&CreateInfo, nullptr, &m_DebugUtilsMessenger));
+		}
+		else if (EnableDebugReports)
+		{
+			vk::DebugReportFlagsEXT DebugReportFlags;
+			switch (DebugLevel)
+			{
+			case ERHIDebugLayerLevel::Verbose:
+				DebugReportFlags |= vk::DebugReportFlagBitsEXT::eDebug;
+			case ERHIDebugLayerLevel::Error:
+				DebugReportFlags |= vk::DebugReportFlagBitsEXT::eError;
+			case ERHIDebugLayerLevel::Warning:
+				DebugReportFlags |= vk::DebugReportFlagBitsEXT::eWarning;
+				DebugReportFlags |= vk::DebugReportFlagBitsEXT::ePerformanceWarning;
+			case ERHIDebugLayerLevel::Info:
+				DebugReportFlags |= vk::DebugReportFlagBitsEXT::eInformation;
+				break;
+			}
+
+			auto CreateInfo = vk::DebugReportCallbackCreateInfoEXT()
+				.setFlags(DebugReportFlags)
+				.setPfnCallback(vkDebugReportCallback)
+				.setPUserData(this);
+			VERIFY_VK(m_Instance.createDebugReportCallbackEXT(&CreateInfo, nullptr, &m_DebugReportCallback));
+		}
+	}
+}
+
+VulkanInstance::~VulkanInstance()
+{
+	if (m_DebugUtilsMessenger)
+	{
+		m_Instance.destroyDebugUtilsMessengerEXT(m_DebugUtilsMessenger);
+		m_DebugUtilsMessenger = nullptr;
+	}
+
+	if (m_DebugReportCallback)
+	{
+		m_Instance.destroyDebugReportCallbackEXT(m_DebugReportCallback);
+		m_DebugReportCallback = nullptr;
+	}
+
+	m_Instance.destroy();
+	m_Instance = nullptr;
+}
+
+#if false
 
 NAMESPACE_START(RHI)
 
@@ -286,5 +578,4 @@ VulkanInstance::~VulkanInstance()
 
 	vkDestroyInstance(Get(), VK_ALLOCATION_CALLBACKS);
 }
-
-NAMESPACE_END(RHI)
+#endif

@@ -88,8 +88,8 @@ struct RHIImageCreateInfo
 	inline RHIImageCreateInfo& SetWidth(uint32_t Value) { Width = Value; return *this; }
 	inline RHIImageCreateInfo& SetHeight(uint32_t Value) { Height = Value; return *this; }
 	inline RHIImageCreateInfo& SetDepth(uint32_t Value) { Depth = Value; return *this; }
-	inline RHIImageCreateInfo& SetMipLevels(uint32_t Value) { MipLevels = Value; return *this; }
-	inline RHIImageCreateInfo& SetArrayLayers(uint32_t Value) { ArrayLayers = Value; return *this; }
+	inline RHIImageCreateInfo& SetMipLevels(uint32_t Value) { MipLevels = static_cast<uint16_t>(Value); return *this; }
+	inline RHIImageCreateInfo& SetArrayLayers(uint32_t Value) { ArrayLayers = static_cast<uint16_t>(Value); return *this; }
 	inline RHIImageCreateInfo& SetFormat(ERHIFormat Value) { Format = Value; return *this; }
 	inline RHIImageCreateInfo& SetImageType(ERHIImageType Value) { ImageType = Value; return *this; }
 	inline RHIImageCreateInfo& SetSampleCount(ERHISampleCount Count) { SampleCount = Count; return *this; }

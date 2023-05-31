@@ -95,6 +95,8 @@ vk::BlendFactor GetBlendFactor(ERHIBlendFactor Factor)
 	case ERHIBlendFactor::InverseDstColor:  return vk::BlendFactor::eOneMinusDstColor;
 	case ERHIBlendFactor::Src1Color:        return vk::BlendFactor::eSrc1Color;
 	case ERHIBlendFactor::InverseSrc1Color: return vk::BlendFactor::eOneMinusSrc1Color;
+	default:
+		return vk::BlendFactor::eOne;
 	}
 }
 
@@ -154,6 +156,8 @@ vk::StencilOp GetStencilOp(ERHIStencilOp Op)
 	case ERHIStencilOp::Invert:            return vk::StencilOp::eInvert;
 	case ERHIStencilOp::IncrementAndWrap:  return vk::StencilOp::eIncrementAndWrap;
 	case ERHIStencilOp::DecrementAndWrap:  return vk::StencilOp::eDecrementAndWrap;
+	default:
+		return vk::StencilOp::eKeep;
 	}
 }
 
@@ -172,7 +176,32 @@ vk::ShaderStageFlagBits GetShaderStage(ERHIShaderStage Stage)
 	case ERHIShaderStage::Geometry: return vk::ShaderStageFlagBits::eGeometry;
 	case ERHIShaderStage::Fragment: return vk::ShaderStageFlagBits::eFragment;
 	case ERHIShaderStage::Compute:  return vk::ShaderStageFlagBits::eCompute;
+	default:
+		assert(0);
+		return vk::ShaderStageFlagBits::eAll;
 	}
+}
+
+vk::ShaderStageFlags GetShaderStageFlags(ERHIShaderStage Stage)
+{
+	vk::ShaderStageFlags ShaderStageFlags;
+	if (EnumHasAnyFlags(Stage, ERHIShaderStage::Vertex))
+	{
+		ShaderStageFlags |= vk::ShaderStageFlagBits::eVertex;
+	}
+	if (EnumHasAnyFlags(Stage, ERHIShaderStage::Geometry))
+	{
+		ShaderStageFlags |= vk::ShaderStageFlagBits::eGeometry;
+	}
+	if (EnumHasAnyFlags(Stage, ERHIShaderStage::Fragment))
+	{
+		ShaderStageFlags |= vk::ShaderStageFlagBits::eFragment;
+	}
+	if (EnumHasAnyFlags(Stage, ERHIShaderStage::Compute))
+	{
+		ShaderStageFlags |= vk::ShaderStageFlagBits::eCompute;
+	}
+	return ShaderStageFlags;
 }
 
 vk::PrimitiveTopology GetPrimitiveTopology(ERHIPrimitiveTopology PrimitiveTopology)

@@ -92,6 +92,15 @@ enum class ERHIResourceState : uint32_t
 	InputAttachment = 0x20000
 };
 
+enum class ERHIDebugLayerLevel
+{
+	None,
+	Info,
+	Warning,
+	Error,
+	Verbose
+};
+
 struct RHIHashedObject
 {
 	virtual size_t GetHash() const = 0;

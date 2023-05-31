@@ -6,8 +6,7 @@
 class RHIInterface
 {
 public:
-	RHIInterface() { InitializeGraphicsDevices(); }
-	virtual ~RHIInterface() { Finalize(); }
+	virtual ~RHIInterface() = default;
 
 	virtual ERenderHardwareInterface GetRHIType() const { return ERenderHardwareInterface::Null; }
 
@@ -25,7 +24,7 @@ public:
 
 	const char8_t* GetRHIName() const { return GetRHIName(GetRHIType()); }
 protected:
-	virtual void InitializeGraphicsDevices() {}
+	virtual void InitializeGraphicsDevices() = 0;
 
-	virtual void Finalize() {}
+	virtual void Finalize() = 0;
 };

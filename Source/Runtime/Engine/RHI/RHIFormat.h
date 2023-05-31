@@ -127,14 +127,14 @@ enum class ERHIFormat : uint16_t
 
 namespace RHI
 {
-	static DXGI_FORMAT GetDXGIFormat(ERHIFormat Format);
-	static vk::Format GetVulkanFormat(ERHIFormat Format);
-	static ERHIFormat GetSRGBFormat(ERHIFormat Format);
-	static ERHIFormat GetRHIFormatByName(const char8_t* Name);
+	DXGI_FORMAT GetDXGIFormat(ERHIFormat Format);
+	vk::Format GetVulkanFormat(ERHIFormat Format);
+	ERHIFormat GetSRGBFormat(ERHIFormat Format);
+	ERHIFormat GetRHIFormatByName(const char8_t* Name);
 
-	static bool8_t IsColor(ERHIFormat Format);
-	static bool8_t IsDepth(ERHIFormat Format);
-	static bool8_t IsDepthStenci(ERHIFormat Format);
+	bool8_t IsColor(ERHIFormat Format);
+	bool8_t IsDepth(ERHIFormat Format);
+	bool8_t IsDepthStenci(ERHIFormat Format);
 
-	static void CalculateFormatBytes(uint32_t Width, uint32_t Height, ERHIFormat Format, __out size_t& SliceBytes, __out size_t& RowBytes);
+	void CalculateFormatBytes(uint32_t Width, uint32_t Height, ERHIFormat Format, __out size_t& SliceBytes, __out size_t& RowBytes);
 }

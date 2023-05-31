@@ -10,15 +10,15 @@ enum class ERHIShaderLanguage : uint8_t
 
 enum class ERHIShaderStage : uint8_t
 {
-	Vertex,
-	Hull,
-	Domain,
-	Geometry,
-	Fragment,
-	Compute,
-	Num
+	Vertex = 0,
+	Hull = 1 << 0,
+	Domain = 1 << 1,
+	Geometry = 1 << 2,
+	Fragment = 1 << 3,
+	Compute = 1 << 4,
+	Num = 6
 };
-
+ENUM_FLAG_OPERATORS(ERHIShaderStage)
 
 enum class ERHIVertexInputRate : uint8_t
 {
@@ -98,7 +98,6 @@ public:
 private:
 	ERHIShaderStage m_Stage = ERHIShaderStage::Num;
 };
-
 
 class RHIGlobalShader : public RHIShader
 {
