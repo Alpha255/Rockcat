@@ -474,70 +474,72 @@ NAMESPACE_END(RHI)
 
 VulkanDevice::VulkanDevice()
 {
-	m_Instance = std::make_unique<VulkanInstance>(ERHIDebugLayerLevel::Error);
+	auto LayerAndExtensionsConfigs = VulkanLayerExtensionConfigurations::Load(VK_LAYER_EXT_CONFIG_NAME);
+
+	m_Instance = std::make_unique<VulkanInstance>(LayerAndExtensionsConfigs.get());
 }
 
 void VulkanDevice::WaitIdle()
 {
 }
 
-RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& RHICreateInfo)
+RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& /*RHICreateInfo*/)
 {
 	return RHIShaderPtr();
 }
 
-RHIImagePtr VulkanDevice::CreateImage(const RHIImageCreateInfo& RHICreateInfo)
+RHIImagePtr VulkanDevice::CreateImage(const RHIImageCreateInfo& /*RHICreateInfo*/)
 {
 	return RHIImagePtr();
 }
 
-RHIInputLayoutPtr VulkanDevice::CreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo)
+RHIInputLayoutPtr VulkanDevice::CreateInputLayout(const RHIInputLayoutCreateInfo& /*RHICreateInfo*/)
 {
 	return RHIInputLayoutPtr();
 }
 
-RHIFrameBufferPtr VulkanDevice::CreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo)
+RHIFrameBufferPtr VulkanDevice::CreateFrameBuffer(const RHIFrameBufferCreateInfo& /*RHICreateInfo*/)
 {
 	return RHIFrameBufferPtr();
 }
 
-RHIGraphicsPipelinePtr VulkanDevice::CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo)
+RHIGraphicsPipelinePtr VulkanDevice::CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& /*RHICreateInfo*/)
 {
 	return RHIGraphicsPipelinePtr();
 }
 
-RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo)
+RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& /*RHICreateInfo*/)
 {
 	return RHIBufferPtr();
 }
 
-RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& RHICreateInfo)
+RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& /*RHICreateInfo*/)
 {
 	return RHISamplerPtr();
 }
 
-RHICommandBufferPoolPtr VulkanDevice::CreateCommandBufferPool(ERHIDeviceQueueType QueueType)
+RHICommandBufferPoolPtr VulkanDevice::CreateCommandBufferPool(ERHIDeviceQueueType /*QueueType*/)
 {
 	return RHICommandBufferPoolPtr();
 }
 
-void VulkanDevice::SubmitCommandBuffers(ERHIDeviceQueueType QueueType, const std::vector<RHICommandBuffer*>& Commands)
+void VulkanDevice::SubmitCommandBuffers(ERHIDeviceQueueType /*QueueType*/, const std::vector<RHICommandBuffer*>& /*Commands*/)
 {
 }
 
-void VulkanDevice::SubmitCommandBuffer(ERHIDeviceQueueType QueueType, RHICommandBuffer* Command)
+void VulkanDevice::SubmitCommandBuffer(ERHIDeviceQueueType /*QueueType*/, RHICommandBuffer* /*Command*/)
 {
 }
 
-void VulkanDevice::SubmitCommandBuffers(const std::vector<RHICommandBuffer*>& Commands)
+void VulkanDevice::SubmitCommandBuffers(const std::vector<RHICommandBuffer*>& /*Commands*/)
 {
 }
 
-void VulkanDevice::SubmitCommandBuffer(RHICommandBuffer* Command)
+void VulkanDevice::SubmitCommandBuffer(RHICommandBuffer* /*Command*/)
 {
 }
 
-RHICommandBufferPtr VulkanDevice::GetOrAllocateCommandBuffer(ERHIDeviceQueueType QueueType, ERHICommandBufferLevel Level, bool8_t AutoBegin)
+RHICommandBufferPtr VulkanDevice::GetOrAllocateCommandBuffer(ERHIDeviceQueueType /*QueueType*/, ERHICommandBufferLevel /*Level*/, bool8_t /*AutoBegin*/)
 {
 	return RHICommandBufferPtr();
 }

@@ -1,0 +1,103 @@
+#pragma once
+
+#include "RHI/Vulkan/VulkanTypes.h"
+#include "Runtime/Engine/Asset/SerializableAsset.h"
+
+#define VK_LAYER_EXT_CONFIG_NAME "VkLayerAndExtensionConfigs.json"
+#define VK_LAYER_KHRONOS_VALIDATION_NAME "VK_LAYER_KHRONOS_validation"
+
+using VulkanLayerArray = std::vector<std::unique_ptr<class VulkanLayer>>;
+using VulkanExtensionArray = std::vector<std::unique_ptr<class VulkanExtension>>;
+
+struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayerExtensionConfigurations>
+{
+	using ParentClass::ParentClass;
+
+	ERHIDebugLayerLevel DebugLayerLevel = ERHIDebugLayerLevel::Error;
+
+	bool8_t KhronosValidationLayer = true;
+
+	bool8_t KHRSurfaceExt = true;
+	bool8_t DebugUtilsExt = true;
+	bool8_t DebugReportExt = true;
+	bool8_t ValidationFeaturesExt = true;
+	bool8_t ValidationFeaturesExt_GPUAssisted = false;
+	bool8_t ValidationFeaturesExt_GPUAssistedReserveBindingSlot = false;
+	bool8_t ValidationFeaturesExt_BestPractices = true;
+	bool8_t ValidationFeaturesExt_DebugPrintf = false;
+	bool8_t ValidationFeaturesExt_Synchronization = true;
+	bool8_t DebugMarkerExt = true;
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(DebugLayerLevel),
+			CEREAL_NVP(KhronosValidationLayer),
+			CEREAL_NVP(KHRSurfaceExt),
+			CEREAL_NVP(DebugUtilsExt),
+			CEREAL_NVP(DebugReportExt),
+			CEREAL_NVP(ValidationFeaturesExt),
+			CEREAL_NVP(ValidationFeaturesExt_GPUAssisted),
+			CEREAL_NVP(ValidationFeaturesExt_GPUAssistedReserveBindingSlot),
+			CEREAL_NVP(ValidationFeaturesExt_BestPractices),
+			CEREAL_NVP(ValidationFeaturesExt_DebugPrintf),
+			CEREAL_NVP(ValidationFeaturesExt_Synchronization),
+			CEREAL_NVP(DebugMarkerExt)
+		);
+	}
+};
+
+class VulkanLayer
+{
+public:
+	VulkanLayer(const char8_t* Name, bool8_t Needed)
+		: m_Name(Name)
+		, m_Needed(Needed)
+	{
+	}
+
+	inline bool8_t IsEnabled() const { return m_Enabled; }
+	inline bool8_t IsNeeded() const { return m_Needed; }
+	inline const char8_t* GetName() const { return m_Name.data(); }
+
+	static VulkanLayerArray GetWantedInstanceLayers();
+
+	static VulkanLayerArray GetWantedDeviceLayers();
+protected:
+	friend class VulkanInstance;
+	void SetEnabled(const VulkanLayerExtensionConfigurations* Configs, bool8_t Supported) { m_Enabled = IsEnabledInConfig(Configs) && Supported; }
+	virtual bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const { return Configs && false; }
+private:
+	std::string_view m_Name;
+	bool8_t m_Enabled = false;
+	bool8_t m_Needed = false;
+};
+
+class VulkanExtension : public VulkanLayer
+{
+public:
+	using VulkanLayer::VulkanLayer;
+
+	static VulkanExtensionArray GetWantedInstanceExtensions();
+
+	static VulkanExtensionArray GetWantedDeviceExtensions();
+};
+
+class VulkanInstanceExtension : public VulkanExtension
+{
+public:
+	using VulkanExtension::VulkanExtension;
+
+	virtual void OnInstanceCreation(const VulkanLayerExtensionConfigurations* /*Configs*/, vk::InstanceCreateInfo& /*CreateInfo*/) {}
+protected:
+	friend class VulkanInstance;
+};
+
+class VulkanDeviceExtension : public VulkanExtension
+{
+public:
+	using VulkanExtension::VulkanExtension;
+};
+
+void LogEnableLayerAndExtensions(const VulkanLayerArray& Layers, const VulkanExtensionArray& Extensions, const char8_t* Category);
