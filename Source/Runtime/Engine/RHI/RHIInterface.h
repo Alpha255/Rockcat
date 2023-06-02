@@ -6,6 +6,12 @@
 class RHIInterface
 {
 public:
+	RHIInterface(const GraphicsSettings* GfxSettings)
+	{
+		assert(GfxSettings);
+		s_GraphicsSettings = GfxSettings;
+	}
+
 	virtual ~RHIInterface() = default;
 
 	virtual ERenderHardwareInterface GetRHIType() const { return ERenderHardwareInterface::Null; }
@@ -22,9 +28,13 @@ public:
 		} 
 	}
 
+	static const GraphicsSettings* GetGraphicsSettings() { assert(s_GraphicsSettings); return s_GraphicsSettings; }
+
 	const char8_t* GetRHIName() const { return GetRHIName(GetRHIType()); }
 protected:
 	virtual void InitializeGraphicsDevices() = 0;
 
 	virtual void Finalize() = 0;
+private:
+	static const GraphicsSettings* s_GraphicsSettings;
 };

@@ -196,11 +196,11 @@ protected:
 #endif
 			}
 		}
-
-		return IS_VALID(GraphicsQueueIndex) && IS_VALID(ComputeQueueIndex) && IS_VALID(TransferQueueIndex) && IS_VALID(PresentQueueIndex);
 #undef IS_VALID
 #undef IS_INVALID
 #undef IS_FLAGS_MATCH
+
+		return IS_VALID(GraphicsQueueIndex) && IS_VALID(ComputeQueueIndex) && IS_VALID(TransferQueueIndex) && IS_VALID(PresentQueueIndex);
 	}
 private:
 	vk::PhysicalDevice m_PhysicalDevice;

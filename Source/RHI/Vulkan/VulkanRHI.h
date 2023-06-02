@@ -5,7 +5,7 @@
 class VulkanRHI final : public RHIInterface
 {
 public:
-	VulkanRHI();
+	VulkanRHI(const GraphicsSettings* GfxSettings);
 
 	ERenderHardwareInterface GetRHIType() const override final { return ERenderHardwareInterface::Vulkan; }
 protected:

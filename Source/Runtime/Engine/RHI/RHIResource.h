@@ -182,14 +182,8 @@ public:
 	{
 	}
 
-	inline void SetDebugName(const char8_t* DebugName) { m_DebugName = DebugName; }
+	inline virtual void SetDebugName(const char8_t* DebugName) { m_DebugName = DebugName; }
 	inline const char8_t* GetDebugName() const { return m_DebugName.c_str(); }
 private:
 	std::string m_DebugName;
 };
-
-template<class T, class AnyObject>
-inline T* Cast(AnyObject* Object)
-{
-	return static_cast<T*>(Object);
-}

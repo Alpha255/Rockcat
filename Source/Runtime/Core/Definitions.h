@@ -298,3 +298,24 @@ public:
 protected:
 private:
 };
+
+template<class T, class Any>
+inline T* Cast(Any* Ptr) { return static_cast<T*>(Ptr); }
+
+template<class T, class Any>
+inline const T* Cast(const Any* Ptr) { return static_cast<T*>(Ptr); }
+
+template<class T, class Any>
+inline T* Cast(const Any* Ptr) { return static_cast<T*>(const_cast<Any*>(Ptr)); }
+
+template<class T, class Any>
+inline T* Cast(std::shared_ptr<Any>& SharedPtr) { return static_cast<T*>(SharedPtr.get()); }
+
+template<class T, class Any>
+inline std::shared_ptr<T> Cast(std::shared_ptr<Any>& SharedPtr) { return std::static_pointer_cast<T>(SharedPtr); }
+
+template<class T, class Any>
+inline const std::shared_ptr<T> Cast(const std::shared_ptr<Any>& SharedPtr) { return std::static_pointer_cast<T>(SharedPtr); }
+
+template<class T, class Any>
+inline T* Cast(std::unique_ptr<Any>& UniquePtr) { return static_cast<T*>(UniquePtr.get()); }

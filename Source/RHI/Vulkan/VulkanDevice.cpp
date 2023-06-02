@@ -471,16 +471,177 @@ NAMESPACE_END(RHI)
 
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanInstance.h"
+#include "RHI/Vulkan/VulkanRHI.h"
 
 VulkanDevice::VulkanDevice()
 {
 	auto LayerAndExtensionsConfigs = VulkanLayerExtensionConfigurations::Load(VK_LAYER_EXT_CONFIG_NAME);
 
 	m_Instance = std::make_unique<VulkanInstance>(LayerAndExtensionsConfigs.get());
+
+	uint32_t GraphicsQueueIndex = ~0u, ComputeQueueIndex = ~0u, TransferQueueIndex = ~0u, PresentQueueIndex = ~0u;
+
+	std::vector<const vk::PhysicalDevice*> DiscreteGpus;
+	std::vector<const vk::PhysicalDevice*> OtherGpus;
+
+	auto PhysicalDevices = Instance->enumeratePhysicalDevices();
+	for (const auto& PhysicalDevice : PhysicalDevices)
+	{
+		if (GetQueueFamilyIndex(&PhysicalDevice, GraphicsQueueIndex, ComputeQueueIndex, TransferQueueIndex, PresentQueueIndex))
+		{
+			if (PhysicalDevice.getProperties().deviceType == vk::PhysicalDeviceType::eDiscreteGpu)
+			{
+				DiscreteGpus.push_back(&PhysicalDevice);
+			}
+			else
+			{
+				OtherGpus.push_back(&PhysicalDevice);
+			}
+		}
+	}
+
+	if (DiscreteGpus.size() == 0u && OtherGpus.size() > 0u)
+	{
+		LOG_WARNING("VulkanRHI: Can't find discrete GPU");
+	}
+
+	m_PhysicalDevice = DiscreteGpus.size() > 0u ? *DiscreteGpus[0] : (OtherGpus.size() > 0u ? *OtherGpus[0] : vk::PhysicalDevice{});
+	assert(m_PhysicalDevice);
+
+	GetQueueFamilyIndex(&m_PhysicalDevice, GraphicsQueueIndex, ComputeQueueIndex, TransferQueueIndex, PresentQueueIndex);
+
+	auto WantedLayers = VulkanLayer::GetWantedDeviceLayers();
+	auto WantedExtensions = VulkanExtension::GetWantedDeviceExtensions();
+
+	std::vector<const char8_t*> EnabledLayers;
+	std::vector<const char8_t*> EnabledExtensions;
+
+	auto LayerProperties = m_PhysicalDevice.enumerateDeviceLayerProperties();
+	for each (const auto& LayerProperty in LayerProperties)
+	{
+		auto LayerIt = std::find_if(WantedLayers.begin(), WantedLayers.end(), [&LayerProperty](const std::unique_ptr<VulkanLayer>& Layer) {
+			return strcmp(Layer->GetName(), LayerProperty.layerName.data()) == 0;
+			});
+		if (LayerIt != WantedLayers.end())
+		{
+			EnabledLayers.push_back(LayerProperty.layerName.data());
+			(*LayerIt)->SetEnabled(LayerAndExtensionsConfigs.get(), true);
+		}
+	}
+
+	auto ExtensionProperties = m_PhysicalDevice.enumerateDeviceExtensionProperties();
+	for each (const auto& ExtensionProperty in ExtensionProperties)
+	{
+		auto ExtensionIt = std::find_if(WantedExtensions.begin(), WantedExtensions.end(), [&ExtensionProperty](const std::unique_ptr<VulkanExtension>& Extension) {
+			return strcmp(Extension->GetName(), ExtensionProperty.extensionName.data()) == 0;
+			});
+		if (ExtensionIt != WantedExtensions.end())
+		{
+			EnabledExtensions.push_back(ExtensionProperty.extensionName.data());
+			(*ExtensionIt)->SetEnabled(Configs, true);
+		}
+	}
+
+	LogEnableLayerAndExtensions(WantedLayers, WantedExtensions, "device");
+
+	std::set<uint32_t> QueueFamilyIndices{ GraphicsQueueIndex, PresentQueueIndex };
+	if (VulkanRHI::GetGraphicsSettings()->EnableComputeQueue)
+	{
+		QueueFamilyIndices.insert(ComputeQueueIndex);
+	}
+	if (VulkanRHI::GetGraphicsSettings()->EnableTransferQueue)
+	{
+		QueueFamilyIndices.insert(TransferQueueIndex);
+	}
+
+	const float32_t Priority = 1.0f;
+	std::vector<vk::DeviceQueueCreateInfo> QueueCreateInfos;
+	for (auto QueueFamilyIndex : QueueFamilyIndices)
+	{
+		QueueCreateInfos.emplace_back(std::move(
+			vk::DeviceQueueCreateInfo()
+				.setQueueFamilyIndex(QueueFamilyIndex)
+				.setQueueCount(1u)
+				.setPQueuePriorities(&Priority)));
+		}
+
+	auto DeviceFeatures = m_PhysicalDevice.getFeatures();
+
+	auto CreateInfo = vk::DeviceCreateInfo()
+		.setPQueueCreateInfos(QueueCreateInfos)
+		.setPEnabledLayerNames(EnabledLayers)
+		.setPEnabledExtensionNames(EnabledExtensions)
+		.setPEnabledFeatures(&DeviceFeatures);
+
+	for (auto& Extension : WantedExtensions)
+	{
+		if (Extension->IsEnabled())
+		{
+			Extension->PreDeviceCreation(LayerAndExtensionsConfigs.get(), CreateInfo);
+		}
+	}
+
+	VERIFY_VK(m_PhysicalDevice.createDevice(&CreateInfo, nullptr, &m_LogicalDevice));
+
+	auto PhysicalDeviceProperties = m_PhysicalDevice.getProperties();
+	LOG_INFO("VulkanRHI: Create {} vulkan device on adapter: \"{} {}\", DeviceID = {}. VulkanAPI Version: {}.{}.{}",
+		vk::to_string(PhysicalDeviceProperties.deviceType).data(),
+		RHIDevice::GetVendorName(PhysicalDeviceProperties.vendorID),
+		PhysicalDeviceProperties.deviceName.data(),
+		PhysicalDeviceProperties.deviceID,
+		VK_VERSION_MAJOR(PhysicalDeviceProperties.apiVersion),
+		VK_VERSION_MINOR(PhysicalDeviceProperties.apiVersion),
+		VK_VERSION_PATCH(PhysicalDeviceProperties.apiVersion));
+
+	VULKAN_HPP_DEFAULT_DISPATCHER.init(m_LogicalDevice);
 }
 
 void VulkanDevice::WaitIdle()
 {
+}
+
+bool8_t VulkanDevice::GetQueueFamilyIndex(
+	const vk::PhysicalDevice* PhysicalDevice, 
+	uint32_t& GraphicsQueueIndex, 
+	uint32_t& ComputeQueueIndex, 
+	uint32_t& TransferQueueIndex, 
+	uint32_t& PresentQueueIndex) const
+{
+#define IS_INVALID(Index) Property.queueCount > 0u && Index == std::numeric_limits<uint32_t>().max()
+#define IS_VALID(Index) Index == std::numeric_limits<uint32_t>().max()
+#define IS_FLAGS_MATCH(Flag) (Property.queueFlags & vk::QueueFlagBits::Flag) == vk::QueueFlagBits::Flag
+	GraphicsQueueIndex = ComputeQueueIndex = TransferQueueIndex = std::numeric_limits<uint32_t>().max();
+
+	auto Properties = PhysicalDevice->getQueueFamilyProperties();
+	for (uint32_t Index = 0u; Index < Properties.size(); ++Index)
+	{
+		const auto& Property = Properties[Index];
+		if (IS_INVALID(GraphicsQueueIndex) && IS_FLAGS_MATCH(eGraphics))
+		{
+			GraphicsQueueIndex = Index;
+		}
+		if (IS_INVALID(ComputeQueueIndex) && IS_FLAGS_MATCH(eCompute) && !(IS_FLAGS_MATCH(eGraphics)))
+		{
+			ComputeQueueIndex = Index;
+		}
+		if (IS_INVALID(TransferQueueIndex) && IS_FLAGS_MATCH(eTransfer) && !(IS_FLAGS_MATCH(eGraphics)) && !(IS_FLAGS_MATCH(eCompute)))
+		{
+			TransferQueueIndex = Index;
+		}
+		if (IS_INVALID(PresentQueueIndex))
+		{
+#if PLATFORM_WIN32
+			if (PhysicalDevice->getWin32PresentationSupportKHR(Index))
+			{
+				PresentQueueIndex = Index;
+			}
+#endif
+		}
+	}
+#undef IS_VALID
+#undef IS_INVALID
+#undef IS_FLAGS_MATCH
+	return IS_VALID(GraphicsQueueIndex) && IS_VALID(ComputeQueueIndex) && IS_VALID(TransferQueueIndex) && IS_VALID(PresentQueueIndex);
 }
 
 RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& /*RHICreateInfo*/)

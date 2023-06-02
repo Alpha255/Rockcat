@@ -14,7 +14,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsMessengerCallback(
 	(void)(UserData);
 	(void)(MessageTypeFlags);
 
-	std::string Message = StringUtils::Format("Vulkan Validation: [%3d][%10s]: %s",
+	std::string Message = StringUtils::Format("VulkanRHI: Validation: [%3d][%10s]: %s",
 		MessengerCallbackData->messageIdNumber,
 		MessengerCallbackData->pMessageIdName,
 		MessengerCallbackData->pMessage);
@@ -22,7 +22,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsMessengerCallback(
 	if (EnumHasAnyFlags(MessageServerityFlagBits, VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT))
 	{
 #if 0
-		LOG_INFO("Vulkan Validation: {:<3}{:<10}: {}", MessengerCallbackData->messageIdNumber, MessengerCallbackData->pMessageIdName, MessengerCallbackData->pMessage);
+		LOG_INFO("VulkanRHI Validation: {:<3}{:<10}: {}", MessengerCallbackData->messageIdNumber, MessengerCallbackData->pMessageIdName, MessengerCallbackData->pMessage);
 #else
 		LOG_INFO("{}", Message);
 #endif
@@ -65,15 +65,15 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugReportCallback(
 
 	if (EnumHasAnyFlags(Flags, VK_DEBUG_REPORT_ERROR_BIT_EXT))
 	{
-		LOG_ERROR("{}: {}", LayerPrefix, Message);
+		LOG_ERROR("VulkanRHI: {}: {}", LayerPrefix, Message);
 	}
 	else if (EnumHasAnyFlags(Flags, VK_DEBUG_REPORT_WARNING_BIT_EXT) || EnumHasAnyFlags(Flags, VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT))
 	{
-		LOG_WARNING("{}: {}", LayerPrefix, Message);
+		LOG_WARNING("VulkanRHI: {}: {}", LayerPrefix, Message);
 	}
 	else
 	{
-		LOG_INFO("{}: {}", LayerPrefix, Message);
+		LOG_INFO("VulkanRHI: {}: {}", LayerPrefix, Message);
 	}
 
 	return VK_FALSE;
@@ -145,6 +145,14 @@ VulkanInstance::VulkanInstance(const VulkanLayerExtensionConfigurations* Configs
 		.setPEnabledLayerNames(EnabledLayers)
 		.setPEnabledExtensionNames(EnabledExtensions)
 		.setPApplicationInfo(&ApplicationInfo);
+
+	for each (auto& Extension in WantedExtensions)
+	{
+		if (Extension->IsEnabled())
+		{
+			Extension->PreInstanceCreation(Configs, CreateInfo);
+		}
+	}
 
 	VERIFY_VK(vk::createInstance(&CreateInfo, nullptr, &m_Instance));
 

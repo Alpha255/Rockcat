@@ -89,7 +89,7 @@ class VulkanInstanceExtension : public VulkanExtension
 public:
 	using VulkanExtension::VulkanExtension;
 
-	virtual void OnInstanceCreation(const VulkanLayerExtensionConfigurations* /*Configs*/, vk::InstanceCreateInfo& /*CreateInfo*/) {}
+	virtual void PreInstanceCreation(const VulkanLayerExtensionConfigurations* /*Configs*/, vk::InstanceCreateInfo& /*CreateInfo*/) {}
 protected:
 	friend class VulkanInstance;
 };
@@ -98,6 +98,10 @@ class VulkanDeviceExtension : public VulkanExtension
 {
 public:
 	using VulkanExtension::VulkanExtension;
+
+	virtual void PreDeviceCreation(const VulkanLayerExtensionConfigurations* /*Configs*/, vk::DeviceCreateInfo& /*CreateInfo*/) {}
+protected:
+	friend class VulkanDevice;
 };
 
 void LogEnableLayerAndExtensions(const VulkanLayerArray& Layers, const VulkanExtensionArray& Extensions, const char8_t* Category);

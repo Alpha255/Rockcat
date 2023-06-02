@@ -94,6 +94,11 @@ struct GraphicsSettings
 	bool8_t EnableTiledBasedLightCulling = false;
 	bool8_t EnableClusteredBasedLightCulling = false;
 	bool8_t EnableStencilBasedLightCulling = false;
+	bool8_t EnableComputeQueue = true;
+	bool8_t EnableTransferQueue = true;
+	bool8_t BatchResourceDataTransfer = false;
+	bool8_t BatchResourceBarrier = false;
+	bool8_t AsyncCommandlistSubmission = false;
 	ERenderingPath RenderingPath = ERenderingPath::ForwardShading;
 	EShadowTechnique ShadowTechnique = EShadowTechnique::None;
 	EAntiAliasingTechnique AntiAliasingTechnique = EAntiAliasingTechnique::None;
@@ -112,6 +117,11 @@ struct GraphicsSettings
 			CEREAL_NVP(EnableTiledBasedLightCulling),
 			CEREAL_NVP(EnableClusteredBasedLightCulling),
 			CEREAL_NVP(EnableStencilBasedLightCulling),
+			CEREAL_NVP(EnableComputeQueue),
+			CEREAL_NVP(EnableTransferQueue),
+			CEREAL_NVP(BatchResourceDataTransfer),
+			CEREAL_NVP(BatchResourceBarrier),
+			CEREAL_NVP(AsyncCommandlistSubmission),
 			CEREAL_NVP(RenderingPath),
 			CEREAL_NVP(ShadowTechnique),
 			CEREAL_NVP(AntiAliasingTechnique),

@@ -111,7 +111,7 @@ public:
 		return Configs && Configs->ValidationFeaturesExt;
 	}
 
-	virtual void OnInstanceCreation(const VulkanLayerExtensionConfigurations* Configs, vk::InstanceCreateInfo& CreateInfo)
+	virtual void PreInstanceCreation(const VulkanLayerExtensionConfigurations* Configs, vk::InstanceCreateInfo& CreateInfo)
 	{
 		std::vector<vk::ValidationFeatureEnableEXT> EnabledFeatures;
 

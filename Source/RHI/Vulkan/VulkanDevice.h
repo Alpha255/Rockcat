@@ -61,7 +61,12 @@ public:
 
 	virtual RHICommandBufferPtr GetOrAllocateCommandBuffer(ERHIDeviceQueueType QueueType, ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary, bool8_t AutoBegin = true) override final;
 private:
+	bool8_t GetQueueFamilyIndex(const vk::PhysicalDevice* PhysicalDevice, uint32_t& GraphicsQueueIndex, uint32_t& ComputeQueueIndex, uint32_t& TransferQueueIndex, uint32_t& PresentQueueIndex) const;
+
 	std::unique_ptr<class VulkanInstance> m_Instance;
+
+	vk::PhysicalDevice m_PhysicalDevice;
+	vk::Device m_LogicalDevice;
 #if 0
 	VulkanDevice(class VulkanInstance* Instance);
 

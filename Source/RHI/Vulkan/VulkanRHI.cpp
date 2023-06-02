@@ -2,7 +2,8 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "Runtime/Engine/Engine.h"
 
-VulkanRHI::VulkanRHI()
+VulkanRHI::VulkanRHI(const GraphicsSettings* GfxSettings)
+	: RHIInterface(GfxSettings)
 {
 	InitializeGraphicsDevices();
 }

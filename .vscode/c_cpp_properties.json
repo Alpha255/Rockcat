@@ -1,14 +1,15 @@
 {
     "configurations": [
         {
-            "name": "gcc",
-            "intelliSenseMode": "linux-gcc-x64",
-            "compilerPath": "/usr/bin/gcc",
+            "name": "clang",
+            "intelliSenseMode": "clang-x64",
+            "compilerPath": "/usr/bin/clang",
             "includePath": [
                 "${workspaceFolder}",
                 "${workspaceFolder}/Source",
                 "${workspaceFolder}/Submodules/cereal/include",
-                "${workspaceFolder}/Submodules/spdlog/include"
+                "${workspaceFolder}/Submodules/spdlog/include",
+                "${workspaceFolder}/Submodules/Vulkan-Headers/include"
             ],
             "defines": ["_WIN32"],
             "browse": {
