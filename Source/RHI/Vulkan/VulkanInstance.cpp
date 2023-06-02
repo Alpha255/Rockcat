@@ -87,6 +87,7 @@ VulkanInstance::VulkanInstance(const VulkanLayerExtensionConfigurations* Configs
 	std::vector<const char8_t*> EnabledLayers;
 	std::vector<const char8_t*> EnabledExtensions;
 
+	LOG_DEBUG("VulkanRHI: Found supported instance layers:");
 	auto LayerProperties = vk::enumerateInstanceLayerProperties();
 	for each (const auto& LayerProperty in LayerProperties)
 	{
@@ -98,11 +99,14 @@ VulkanInstance::VulkanInstance(const VulkanLayerExtensionConfigurations* Configs
 			EnabledLayers.push_back(LayerProperty.layerName.data());
 			(*LayerIt)->SetEnabled(Configs, true);
 		}
+
+		LOG_DEBUG("\t\t\t\t\"{}\"", LayerProperty.layerName.data());
 	}
 
 	VulkanExtensionArray::iterator DebugUtilExt = WantedExtensions.end();
 	VulkanExtensionArray::iterator DebugReportExt = WantedExtensions.end();
 
+	LOG_DEBUG("VulkanRHI: Found supported instance extensions:");
 	auto ExtensionProperties = vk::enumerateInstanceExtensionProperties();
 	for each (const auto& ExtensionProperty in ExtensionProperties)
 	{
@@ -123,6 +127,8 @@ VulkanInstance::VulkanInstance(const VulkanLayerExtensionConfigurations* Configs
 				DebugReportExt = ExtensionIt;
 			}
 		}
+
+		LOG_DEBUG("\t\t\t\t\"{}\"", ExtensionProperty.extensionName.data());
 	}
 
 	if (DebugUtilExt != WantedExtensions.end() && (*DebugUtilExt)->IsEnabled())
@@ -150,7 +156,7 @@ VulkanInstance::VulkanInstance(const VulkanLayerExtensionConfigurations* Configs
 	{
 		if (Extension->IsEnabled())
 		{
-			Extension->PreInstanceCreation(Configs, CreateInfo);
+			Cast<VulkanInstanceExtension>(Extension)->PreInstanceCreation(Configs, CreateInfo);
 		}
 	}
 

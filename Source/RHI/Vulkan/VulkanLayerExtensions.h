@@ -66,6 +66,8 @@ public:
 	static VulkanLayerArray GetWantedDeviceLayers();
 protected:
 	friend class VulkanInstance;
+	friend class VulkanDevice;
+
 	void SetEnabled(const VulkanLayerExtensionConfigurations* Configs, bool8_t Supported) { m_Enabled = IsEnabledInConfig(Configs) && Supported; }
 	virtual bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const { return Configs && false; }
 private:

@@ -50,15 +50,7 @@
 	#define MEM(MemberName)
 #endif
 
-//#pragma warning(disable : 26812)
-
-#if defined(max)
-	#undef max
-#endif
-
-#if defined(min)
-	#undef min
-#endif
+#define NOMINMAX 1
 
 using char8_t = char;
 using uchar8_t = unsigned char;
@@ -309,7 +301,7 @@ template<class T, class Any>
 inline T* Cast(const Any* Ptr) { return static_cast<T*>(const_cast<Any*>(Ptr)); }
 
 template<class T, class Any>
-inline T* Cast(std::shared_ptr<Any>& SharedPtr) { return static_cast<T*>(SharedPtr.get()); }
+inline T* Cast(const std::shared_ptr<Any>& SharedPtr) { return static_cast<T*>(SharedPtr.get()); }
 
 template<class T, class Any>
 inline std::shared_ptr<T> Cast(std::shared_ptr<Any>& SharedPtr) { return std::static_pointer_cast<T>(SharedPtr); }
@@ -318,4 +310,4 @@ template<class T, class Any>
 inline const std::shared_ptr<T> Cast(const std::shared_ptr<Any>& SharedPtr) { return std::static_pointer_cast<T>(SharedPtr); }
 
 template<class T, class Any>
-inline T* Cast(std::unique_ptr<Any>& UniquePtr) { return static_cast<T*>(UniquePtr.get()); }
+inline T* Cast(const std::unique_ptr<Any>& UniquePtr) { return static_cast<T*>(UniquePtr.get()); }

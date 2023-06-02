@@ -16,7 +16,7 @@ void RenderModule::InitializeRHI(const GraphicsSettings& GfxSettings)
 			LOG_ERROR("{} is not support yet!", RHIInterface::GetRHIName(ERenderHardwareInterface::Software));
 			break;
 		case ERenderHardwareInterface::Vulkan:
-			m_RHIs[(size_t)ERenderHardwareInterface::Vulkan] = std::make_unique<VulkanRHI>();
+			m_RHIs[(size_t)ERenderHardwareInterface::Vulkan] = std::make_unique<VulkanRHI>(&GfxSettings);
 			break;
 		case ERenderHardwareInterface::D3D11:
 			LOG_ERROR("{} is not support yet!", RHIInterface::GetRHIName(ERenderHardwareInterface::D3D11));

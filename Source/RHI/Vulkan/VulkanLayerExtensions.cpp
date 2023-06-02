@@ -177,7 +177,7 @@ void LogEnableLayerAndExtensions(const VulkanLayerArray& Layers, const VulkanExt
 	{
 		if (Layer->IsEnabled())
 		{
-			LOG_INFO("VulkanRHI: Enable {} layer: {}", Category, Layer->GetName());
+			LOG_INFO("VulkanRHI: Enable {} layer: \"{}\"", Category, Layer->GetName());
 		}
 		else
 		{
@@ -192,7 +192,7 @@ void LogEnableLayerAndExtensions(const VulkanLayerArray& Layers, const VulkanExt
 	{
 		if (Extension->IsEnabled())
 		{
-			LOG_INFO("VulkanRHI: Enable {} extension: {}", Category, Extension->GetName());
+			LOG_INFO("VulkanRHI: Enable {} extension: \"{}\"", Category, Extension->GetName());
 		}
 		else
 		{

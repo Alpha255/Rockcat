@@ -9,7 +9,7 @@ public:
 
 	~VulkanInstance();
 
-	inline vk::Instance& Get() { assert(!m_Instance); return m_Instance; }
+	inline vk::Instance& Get() { assert(m_Instance); return m_Instance; }
 private:
 	void SetupRuntimeDebug(const VulkanLayerExtensionConfigurations* Configs, bool8_t EnableDebugUtils, bool8_t EnableDebugReports);
 

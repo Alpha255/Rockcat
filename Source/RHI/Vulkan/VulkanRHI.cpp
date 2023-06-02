@@ -20,6 +20,7 @@ void VulkanRHI::InitializeGraphicsDevices()
 
 void VulkanRHI::Finalize()
 {
+	m_Device.reset();
 }
 
 #if 0
