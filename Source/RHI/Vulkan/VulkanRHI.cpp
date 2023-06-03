@@ -2,6 +2,10 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "Runtime/Engine/Engine.h"
 
+#if USE_DYNAMIC_VK_LOADER
+	VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
+#endif
+
 VulkanRHI::VulkanRHI(const GraphicsSettings* GfxSettings)
 	: RHIInterface(GfxSettings)
 {
@@ -10,17 +14,20 @@ VulkanRHI::VulkanRHI(const GraphicsSettings* GfxSettings)
 
 void VulkanRHI::InitializeGraphicsDevices()
 {
-	const vk::DynamicLoader vkDynamicLoader;
-	const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = vkDynamicLoader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
+#if USE_DYNAMIC_VK_LOADER
+	const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = m_DynamicLoader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
 	assert(vkGetInstanceProcAddr);
 	VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);	
+#endif
 
 	m_Device = std::make_unique<VulkanDevice>();
 }
 
-void VulkanRHI::Finalize()
+VulkanRHI::~VulkanRHI()
 {
 	m_Device.reset();
+
+	LOG_INFO("VulkanRHI: Finalized");
 }
 
 #if 0

@@ -33,8 +33,6 @@ public:
 	const char8_t* GetRHIName() const { return GetRHIName(GetRHIType()); }
 protected:
 	virtual void InitializeGraphicsDevices() = 0;
-
-	virtual void Finalize() = 0;
 private:
 	static const GraphicsSettings* s_GraphicsSettings;
 };

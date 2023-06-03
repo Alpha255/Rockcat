@@ -1,7 +1,44 @@
 #include "RHI/Vulkan/VulkanInstance.h"
 #include "Runtime/Engine/Engine.h"
 
-VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
+#if !USE_DYNAMIC_VK_LOADER
+PFN_vkCreateDebugUtilsMessengerEXT PFN_CreateDebugUtilsMessengerEXT;
+PFN_vkDestroyDebugUtilsMessengerEXT PFN_DestroyDebugUtilsMessengerEXT;
+
+VKAPI_ATTR VkResult VKAPI_CALL vkCreateDebugUtilsMessengerEXT(
+	VkInstance Instance,
+	const VkDebugUtilsMessengerCreateInfoEXT* CreateInfo,
+	const VkAllocationCallbacks* Allocator,
+	VkDebugUtilsMessengerEXT* Messenger) 
+{
+	return PFN_CreateDebugUtilsMessengerEXT(Instance, CreateInfo, Allocator, Messenger);
+}
+
+VKAPI_ATTR void VKAPI_CALL vkDestroyDebugUtilsMessengerEXT(
+	VkInstance Instance, 
+	VkDebugUtilsMessengerEXT Messenger,
+	VkAllocationCallbacks const* Allocator) 
+{
+	return PFN_DestroyDebugUtilsMessengerEXT(Instance, Messenger, Allocator);
+}
+
+PFN_vkCreateDebugReportCallbackEXT PFN_CreateDebugReportCallbackEXT;
+PFN_vkDestroyDebugReportCallbackEXT PFN_DestroyDebugReportCallbackEXT;
+
+VKAPI_ATTR VkResult VKAPI_CALL vkCreateDebugReportCallbackEXT(
+	VkInstance Instance, 
+	const VkDebugReportCallbackCreateInfoEXT* CreateInfo, 
+	const VkAllocationCallbacks* Allocator, 
+	VkDebugReportCallbackEXT* Callback)
+{
+	return PFN_CreateDebugReportCallbackEXT(Instance, CreateInfo, Allocator, Callback);
+}
+
+VKAPI_ATTR void VKAPI_CALL vkDestroyDebugReportCallbackEXT(VkInstance Instance, VkDebugReportCallbackEXT Callback, const VkAllocationCallbacks* Allocator)
+{
+	return PFN_DestroyDebugReportCallbackEXT(Instance, Callback, Allocator);
+}
+#endif
 
 static constexpr bool8_t UNIQUE_MESSAGE = true;
 
@@ -162,7 +199,9 @@ VulkanInstance::VulkanInstance(const VulkanLayerExtensionConfigurations* Configs
 
 	VERIFY_VK(vk::createInstance(&CreateInfo, nullptr, &m_Instance));
 
+#if USE_DYNAMIC_VK_LOADER
 	VULKAN_HPP_DEFAULT_DISPATCHER.init(m_Instance);
+#endif
 
 	SetupRuntimeDebug(Configs, (*DebugUtilExt)->IsEnabled(), (*DebugReportExt)->IsEnabled());
 }
@@ -173,6 +212,12 @@ void VulkanInstance::SetupRuntimeDebug(const VulkanLayerExtensionConfigurations*
 	{
 		if (EnableDebugUtils)
 		{
+#if !USE_DYNAMIC_VK_LOADER
+			PFN_CreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(m_Instance.getProcAddr("vkCreateDebugUtilsMessengerEXT"));
+			PFN_DestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(m_Instance.getProcAddr("vkDestroyDebugUtilsMessengerEXT"));
+			assert(PFN_CreateDebugUtilsMessengerEXT && PFN_DestroyDebugUtilsMessengerEXT);
+#endif
+
 			vk::DebugUtilsMessageSeverityFlagsEXT MessageSeverityFlags;
 			vk::DebugUtilsMessageTypeFlagsEXT MessageTypeFlags;
 			switch (Configs->DebugLayerLevel)
@@ -201,6 +246,12 @@ void VulkanInstance::SetupRuntimeDebug(const VulkanLayerExtensionConfigurations*
 		}
 		else if (EnableDebugReports)
 		{
+#if !USE_DYNAMIC_VK_LOADER
+			PFN_CreateDebugReportCallbackEXT = reinterpret_cast<PFN_vkCreateDebugReportCallbackEXT>(m_Instance.getProcAddr("vkCreateDebugReportCallbackEXT"));
+			PFN_DestroyDebugReportCallbackEXT = reinterpret_cast<PFN_vkDestroyDebugReportCallbackEXT>(m_Instance.getProcAddr("DestroyDebugReportCallbackEXT"));
+			assert(PFN_CreateDebugReportCallbackEXT && PFN_DestroyDebugReportCallbackEXT);
+#endif
+
 			vk::DebugReportFlagsEXT DebugReportFlags;
 			switch (Configs->DebugLayerLevel)
 			{

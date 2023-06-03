@@ -30,4 +30,8 @@ void RenderModule::InitializeRHI(const GraphicsSettings& GfxSettings)
 
 void RenderModule::Finalize()
 {
+	for (auto& RHI : m_RHIs)
+	{
+		RHI.reset();
+	}
 }

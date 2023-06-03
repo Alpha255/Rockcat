@@ -3,9 +3,9 @@
 #include "Runtime/Engine/RHI/RHIDeclarations.h"
 #include <dxgiformat.h>
 
-#define USE_VK_LOADER 1
+#define USE_DYNAMIC_VK_LOADER 1
 
-#if USE_VK_LOADER
+#if USE_DYNAMIC_VK_LOADER
 	#define VK_NO_PROTOTYPES
 #endif
 #include <vulkan/vulkan.hpp>

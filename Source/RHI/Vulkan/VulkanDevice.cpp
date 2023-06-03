@@ -598,7 +598,9 @@ VulkanDevice::VulkanDevice()
 		VK_VERSION_MINOR(PhysicalDeviceProperties.apiVersion),
 		VK_VERSION_PATCH(PhysicalDeviceProperties.apiVersion));
 
+#if USE_DYNAMIC_VK_LOADER
 	VULKAN_HPP_DEFAULT_DISPATCHER.init(m_LogicalDevice);
+#endif
 }
 
 void VulkanDevice::WaitIdle()
