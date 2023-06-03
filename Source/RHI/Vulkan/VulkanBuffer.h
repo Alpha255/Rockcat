@@ -2,15 +2,6 @@
 
 #include "RHI/Vulkan/VulkanTypes.h"
 
-#if 0
-struct VkStatedObject
-{
-	EResourceState CurrentState = EResourceState::Common;
-	EResourceState RequiredState = EResourceState::Common;
-	EResourceState PermanentState = EResourceState::Unknown;
-};
-#endif
-
 class VulkanBuffer final : public RHIBuffer, public VkDeviceResource
 {
 public:
@@ -37,6 +28,8 @@ public:
 	inline bool8_t IsCoherent() const { return m_Coherent; }
 	inline bool8_t IsHostVisible() const { return m_HostVisible; }
 	bool8_t IsHostCached() const { return m_HostCached; }
+
+	void SetDebugName(const char8_t* Name) override final;
 private:
 	vk::Buffer m_Buffer;
 	vk::DeviceMemory m_Memory;

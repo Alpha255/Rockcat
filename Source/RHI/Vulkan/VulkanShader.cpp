@@ -1,8 +1,36 @@
-#include "Colorful/Vulkan/VulkanShader.h"
-#include "Colorful/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanShader.h"
+#include "RHI/Vulkan/VulkanDevice.h"
+#include "Runtime/Engine/Asset/ShaderAsset.h"
 
-NAMESPACE_START(RHI)
+VulkanShader::VulkanShader(const class VulkanDevice& Device, const RHIShaderCreateInfo& CreateInfo)
+	: VkDeviceResource(Device)
+{
+	assert(GetStage() < ERHIShaderStage::Num && CreateInfo.Binary);
+	assert(CreateInfo.Binary->GetSize() && CreateInfo.Binary->GetSize() % sizeof(uint32_t) == 0);
 
+	auto vkCreateInfo = vk::ShaderModuleCreateInfo()
+		.setCodeSize(CreateInfo.Binary->GetSize())
+		.setPCode(reinterpret_cast<const uint32_t*>(CreateInfo.Binary->GetBinary()));
+
+	VERIFY_VK(GetNativeDevice().createShaderModule(&vkCreateInfo, nullptr, &m_Shader));
+
+	SetDebugName(CreateInfo.Name.c_str());
+}
+
+VulkanShader::~VulkanShader()
+{
+	GetNativeDevice().destroy(m_Shader);
+	m_Shader = nullptr;
+}
+
+void VulkanShader::SetDebugName(const char8_t* Name)
+{
+	assert(Name);
+	GetDevice().SetObjectName(m_Shader, Name);
+	RHIShader::SetDebugName(Name);
+}
+
+#if 0
 VulkanInputLayout::VulkanInputLayout(const InputLayoutDesc& Desc, const ShaderDesc& VertexShaderDesc)
 {
 	(void)VertexShaderDesc;
@@ -34,27 +62,4 @@ VulkanInputLayout::VulkanInputLayout(const InputLayoutDesc& Desc, const ShaderDe
 		m_Bindings.emplace_back(BindingDescription);
 	}
 }
-
-VulkanShader::VulkanShader(VulkanDevice* Device, const ShaderDesc& Desc)
-	: VkHWObject(Device, Desc)
-{
-	assert(m_Stage < EShaderStage::ShaderStageCount && Desc.BinarySize);
-
-	VkShaderModuleCreateInfo CreateInfo
-	{
-		VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-		nullptr,
-		0u,
-		Desc.BinarySize,
-		Desc.Binary.data()
-	};
-
-	VERIFY_VK(vkCreateShaderModule(m_Device->Get(), &CreateInfo, VK_ALLOCATION_CALLBACKS, Reference()));
-}
-
-VulkanShader::~VulkanShader()
-{
-	vkDestroyShaderModule(m_Device->Get(), Get(), VK_ALLOCATION_CALLBACKS);
-}
-
-NAMESPACE_END(RHI)
+#endif

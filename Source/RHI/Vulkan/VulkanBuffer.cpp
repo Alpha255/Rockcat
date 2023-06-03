@@ -113,6 +113,14 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 		}
 		else
 		{
+			if (RHIInterface::GetGraphicsSettings()->BatchResourceDataTransfer)
+			{
+
+			}
+			else
+			{
+
+			}
 			//auto Command = m_Device->GetOrAllocateCommandBuffer(EQueueType::Transfer, ECommandBufferLevel::Primary, true, true);
 
 			//Command->CopyBuffer(this, CreateInfo.InitialData, CreateInfo.Size, 0u, 0u);
@@ -201,6 +209,13 @@ bool8_t VulkanBuffer::Update(const void* Data, size_t Size, size_t SrcOffset, si
 	}
 
 	return false;
+}
+
+void VulkanBuffer::SetDebugName(const char8_t* Name)
+{
+	assert(Name);
+	GetDevice().SetObjectName(m_Buffer, Name);
+	RHIBuffer::SetDebugName(Name);
 }
 
 VulkanBuffer::~VulkanBuffer()

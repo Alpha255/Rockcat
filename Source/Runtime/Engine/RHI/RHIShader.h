@@ -89,7 +89,7 @@ struct RHIShaderCreateInfo
 	std::string Name;
 };
 
-class RHIShader : RHIResource
+class RHIShader : public RHIResource
 {
 public:
 	using RHIResource::RHIResource;

@@ -67,10 +67,16 @@ public:
 
 	const vk::Instance& GetInstance() const;
 
-	void SetObjectName(vk::ObjectType Type, uint64_t Object, const char8_t* Name) const;
+	template<class VkObject>
+	inline void SetObjectName(VkObject Object, const char8_t* Name) const
+	{
+		SetObjectName(VkObject::objectType, reinterpret_cast<uint64_t>((VkObject::NativeType)Object), Name);
+	}
 
 	const vk::PhysicalDeviceLimits& GetPhysicalDeviceLimits() const { return m_Limits; }
 private:
+	void SetObjectName(vk::ObjectType Type, uint64_t Object, const char8_t* Name) const;
+
 	bool8_t GetQueueFamilyIndex(const vk::PhysicalDevice& PhysicalDevice, uint32_t& GraphicsQueueIndex, uint32_t& ComputeQueueIndex, uint32_t& TransferQueueIndex, uint32_t& PresentQueueIndex) const;
 
 	std::unique_ptr<class VulkanInstance> m_Instance;

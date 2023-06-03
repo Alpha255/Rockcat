@@ -299,3 +299,19 @@ public:
 private:
 	const class VulkanDevice& m_Device;
 };
+
+template<class VkObject>
+class VkHwObject : public VkDeviceResource, public RHIResource
+{
+public:
+	VkHwObject(const class VulkanDevice& Device, const char8_t* Name)
+		: VkDeviceResource(Device)
+		, RHIResource(Name)
+	{
+	}
+
+	inline VkObject& GetNative() { return m_Native; }
+	inline const VkObject& GetNative() const { return m_Native; }
+protected:
+	VkObject m_Native;
+};

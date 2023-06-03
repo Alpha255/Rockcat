@@ -1,22 +1,25 @@
 #pragma once
 
-#include "Colorful/Vulkan/VulkanLoader.h"
+#include "RHI/Vulkan/VulkanTypes.h"
 
-NAMESPACE_START(RHI)
-
-class VulkanShader final : public VkHWObject<IShader, VkShaderModule_T>
+class VulkanShader final : public RHIShader, public VkDeviceResource
 {
 public:
-	VulkanShader(class VulkanDevice* Device, const ShaderDesc& Desc);
+	VulkanShader(const class VulkanDevice& Device, const RHIShaderCreateInfo& CreateInfo);
 
 	~VulkanShader();
+
+	void SetDebugName(const char8_t* Name) override final;
+private:
+	vk::ShaderModule m_Shader;
 };
 
-class VulkanInputLayout final : public IInputLayout
+class VulkanInputLayout final : public RHIInputLayout
 {
 public:
-	VulkanInputLayout(const InputLayoutDesc& Desc, const ShaderDesc& VertexShaderDesc);
+	VulkanInputLayout(const RHIInputLayoutCreateInfo& CreateInfo);
 
+#if 0
 	VkPipelineVertexInputStateCreateInfo InputStateCreateInfo() const
 	{
 		assert(m_Bindings.size() && m_Attrs.size());
@@ -32,10 +35,8 @@ public:
 			m_Attrs.data()
 		};
 	}
-protected:
 private:
 	std::vector<VkVertexInputBindingDescription> m_Bindings;
 	std::vector<VkVertexInputAttributeDescription> m_Attrs;
+#endif
 };
-
-NAMESPACE_END(RHI)
