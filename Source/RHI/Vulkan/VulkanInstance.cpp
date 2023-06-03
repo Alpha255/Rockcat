@@ -1,4 +1,5 @@
 #include "RHI/Vulkan/VulkanInstance.h"
+#include "RHI/Vulkan/VulkanLayerExtensions.h"
 #include "Runtime/Engine/Engine.h"
 
 #if !USE_DYNAMIC_VK_LOADER
@@ -116,7 +117,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugReportCallback(
 	return VK_FALSE;
 }
 
-VulkanInstance::VulkanInstance(const VulkanLayerExtensionConfigurations* Configs)
+VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 {
 	auto WantedLayers = VulkanLayer::GetWantedInstanceLayers();
 	auto WantedExtensions = VulkanExtension::GetWantedInstanceExtensions();
@@ -193,7 +194,7 @@ VulkanInstance::VulkanInstance(const VulkanLayerExtensionConfigurations* Configs
 	{
 		if (Extension->IsEnabled())
 		{
-			Cast<VulkanInstanceExtension>(Extension)->PreInstanceCreation(Configs, CreateInfo);
+			Cast<VulkanInstanceExtension>(Extension)->PreInstanceCreation(const_cast<VulkanLayerExtensionConfigurations*>(Configs), CreateInfo);
 		}
 	}
 

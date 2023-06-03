@@ -298,9 +298,6 @@ template<class T, class Any>
 inline const T* Cast(const Any* Ptr) { return static_cast<T*>(Ptr); }
 
 template<class T, class Any>
-inline T* Cast(const Any* Ptr) { return static_cast<T*>(const_cast<Any*>(Ptr)); }
-
-template<class T, class Any>
 inline T* Cast(const std::shared_ptr<Any>& SharedPtr) { return static_cast<T*>(SharedPtr.get()); }
 
 template<class T, class Any>

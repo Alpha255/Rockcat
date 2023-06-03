@@ -308,41 +308,6 @@ NAMESPACE_START(RHI)
 	m_PipelineCache = std::make_unique<VulkanPipelineCache>(this);
 }
 
-void VulkanDevice::SetObjectName(uint64_t ObjectHandle, VkObjectType Type, const char8_t* Name)
-{
-	assert(ObjectHandle && Name && Type != VK_OBJECT_TYPE_UNKNOWN);
-
-	if (EnabledExtensions().DebugUtils)
-	{
-		VkDebugUtilsObjectNameInfoEXT ObjectNameInfo
-		{
-			VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
-			nullptr,
-			Type,
-			ObjectHandle,
-			Name
-		};
-
-		VERIFY_VK(vkSetDebugUtilsObjectNameEXT(Get(), &ObjectNameInfo));
-	}
-	else
-	{
-		if (EnabledExtensions().DebugMarker)
-		{
-			VkDebugMarkerObjectNameInfoEXT ObjectNameInfo
-			{
-				VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT,
-				nullptr,
-				static_cast<VkDebugReportObjectTypeEXT>(Type),
-				ObjectHandle,
-				Name
-			};
-
-			VERIFY_VK(vkDebugMarkerSetObjectNameEXT(Get(), &ObjectNameInfo));
-		}
-	}
-}
-
 VulkanDescriptor VulkanDevice::GetOrAllocateDescriptor(const GraphicsPipelineDesc& Desc)
 {
 	auto KeyBindings = VulkanDescriptor::MakeKeyBindings(this, Desc);
@@ -472,22 +437,21 @@ NAMESPACE_END(RHI)
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanInstance.h"
 #include "RHI/Vulkan/VulkanRHI.h"
+#include "RHI/Vulkan/VulkanLayerExtensions.h"
 
-VulkanDevice::VulkanDevice()
+VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 {
-	auto LayerAndExtensionsConfigs = VulkanLayerExtensionConfigurations::Load(VK_LAYER_EXT_CONFIG_NAME);
-
-	m_Instance = std::make_unique<VulkanInstance>(LayerAndExtensionsConfigs.get());
+	m_Instance = std::make_unique<VulkanInstance>(Configs);
 
 	uint32_t GraphicsQueueIndex = ~0u, ComputeQueueIndex = ~0u, TransferQueueIndex = ~0u, PresentQueueIndex = ~0u;
 
 	std::vector<const vk::PhysicalDevice*> DiscreteGpus;
 	std::vector<const vk::PhysicalDevice*> OtherGpus;
 
-	auto PhysicalDevices = m_Instance->Get().enumeratePhysicalDevices();
+	auto PhysicalDevices = m_Instance->GetNative().enumeratePhysicalDevices();
 	for (const auto& PhysicalDevice : PhysicalDevices)
 	{
-		if (GetQueueFamilyIndex(&PhysicalDevice, GraphicsQueueIndex, ComputeQueueIndex, TransferQueueIndex, PresentQueueIndex))
+		if (GetQueueFamilyIndex(PhysicalDevice, GraphicsQueueIndex, ComputeQueueIndex, TransferQueueIndex, PresentQueueIndex))
 		{
 			if (PhysicalDevice.getProperties().deviceType == vk::PhysicalDeviceType::eDiscreteGpu)
 			{
@@ -508,7 +472,7 @@ VulkanDevice::VulkanDevice()
 	m_PhysicalDevice = DiscreteGpus.size() > 0u ? *DiscreteGpus[0] : (OtherGpus.size() > 0u ? *OtherGpus[0] : vk::PhysicalDevice{});
 	assert(m_PhysicalDevice);
 
-	GetQueueFamilyIndex(&m_PhysicalDevice, GraphicsQueueIndex, ComputeQueueIndex, TransferQueueIndex, PresentQueueIndex);
+	GetQueueFamilyIndex(m_PhysicalDevice, GraphicsQueueIndex, ComputeQueueIndex, TransferQueueIndex, PresentQueueIndex);
 
 	auto WantedLayers = VulkanLayer::GetWantedDeviceLayers();
 	auto WantedExtensions = VulkanExtension::GetWantedDeviceExtensions();
@@ -526,7 +490,7 @@ VulkanDevice::VulkanDevice()
 		if (LayerIt != WantedLayers.end())
 		{
 			EnabledLayers.push_back(LayerProperty.layerName.data());
-			(*LayerIt)->SetEnabled(LayerAndExtensionsConfigs.get(), true);
+			(*LayerIt)->SetEnabled(Configs, true);
 		}
 
 		LOG_DEBUG("\t\t\t\t\"{}\"", LayerProperty.layerName.data());
@@ -542,7 +506,7 @@ VulkanDevice::VulkanDevice()
 		if (ExtensionIt != WantedExtensions.end())
 		{
 			EnabledExtensions.push_back(ExtensionProperty.extensionName.data());
-			(*ExtensionIt)->SetEnabled(LayerAndExtensionsConfigs.get(), true);
+			(*ExtensionIt)->SetEnabled(Configs, true);
 		}
 
 		LOG_DEBUG("\t\t\t\t\"{}\"", ExtensionProperty.extensionName.data());
@@ -583,7 +547,7 @@ VulkanDevice::VulkanDevice()
 	{
 		if (Extension->IsEnabled())
 		{
-			Cast<VulkanDeviceExtension>(Extension)->PreDeviceCreation(LayerAndExtensionsConfigs.get(), CreateInfo);
+			Cast<VulkanDeviceExtension>(Extension)->PreDeviceCreation(Configs, CreateInfo);
 		}
 	}
 
@@ -598,6 +562,8 @@ VulkanDevice::VulkanDevice()
 		VK_VERSION_MINOR(PhysicalDeviceProperties.apiVersion),
 		VK_VERSION_PATCH(PhysicalDeviceProperties.apiVersion));
 
+	m_Limits = PhysicalDeviceProperties.limits;
+
 #if USE_DYNAMIC_VK_LOADER
 	VULKAN_HPP_DEFAULT_DISPATCHER.init(m_LogicalDevice);
 #endif
@@ -608,7 +574,7 @@ void VulkanDevice::WaitIdle()
 }
 
 bool8_t VulkanDevice::GetQueueFamilyIndex(
-	const vk::PhysicalDevice* PhysicalDevice, 
+	const vk::PhysicalDevice& PhysicalDevice,
 	uint32_t& GraphicsQueueIndex, 
 	uint32_t& ComputeQueueIndex, 
 	uint32_t& TransferQueueIndex, 
@@ -620,7 +586,7 @@ bool8_t VulkanDevice::GetQueueFamilyIndex(
 	
 	GraphicsQueueIndex = ComputeQueueIndex = TransferQueueIndex = std::numeric_limits<uint32_t>().max();
 
-	auto Properties = PhysicalDevice->getQueueFamilyProperties();
+	auto Properties = PhysicalDevice.getQueueFamilyProperties();
 	for (uint32_t Index = 0u; Index < Properties.size(); ++Index)
 	{
 		const auto& Property = Properties[Index];
@@ -639,7 +605,7 @@ bool8_t VulkanDevice::GetQueueFamilyIndex(
 		if (IS_VALID_PROPERTY_INDEX(PresentQueueIndex))
 		{
 #if PLATFORM_WIN32
-			if (PhysicalDevice->getWin32PresentationSupportKHR(Index))
+			if (PhysicalDevice.getWin32PresentationSupportKHR(Index))
 			{
 				PresentQueueIndex = Index;
 			}
@@ -712,6 +678,35 @@ void VulkanDevice::SubmitCommandBuffer(RHICommandBuffer* /*Command*/)
 RHICommandBufferPtr VulkanDevice::GetOrAllocateCommandBuffer(ERHIDeviceQueueType /*QueueType*/, ERHICommandBufferLevel /*Level*/, bool8_t /*AutoBegin*/)
 {
 	return RHICommandBufferPtr();
+}
+
+void VulkanDevice::SetObjectName(vk::ObjectType Type, uint64_t Object, const char8_t* Name) const
+{
+	assert(Object && Name && Type != vk::ObjectType::eUnknown);
+
+	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarkerExt)
+	{
+		auto DebugMarkerObjectNameInfo = vk::DebugMarkerObjectNameInfoEXT()
+			.setObjectType(GetDebugReportObjectType(Type))
+			.setObject(Object)
+			.setPObjectName(Name);
+
+		VERIFY_VK(m_LogicalDevice.debugMarkerSetObjectNameEXT(&DebugMarkerObjectNameInfo));
+	}
+	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtilsExt)
+	{
+		auto DebugUtilsObjectNameInfo = vk::DebugUtilsObjectNameInfoEXT()
+			.setObjectType(Type)
+			.setObjectHandle(Object)
+			.setPObjectName(Name);
+
+		VERIFY_VK(m_LogicalDevice.setDebugUtilsObjectNameEXT(&DebugUtilsObjectNameInfo));
+	}
+}
+
+const vk::Instance& VulkanDevice::GetInstance() const
+{
+	return m_Instance->GetNative();
 }
 
 VulkanDevice::~VulkanDevice()

@@ -33,11 +33,8 @@ public:
 
 	virtual bool8_t Update(const void* Data, size_t Size, size_t SrcOffset = 0u, size_t DstOffset = 0u) = 0;
 
-	void* GetMappedMemory() const
-	{
-		return m_MappedMemory;
-	}
-private:
+	void* GetMappedMemory() const { return m_MappedMemory; }
+protected:
 	void* m_MappedMemory = nullptr;
 };
 

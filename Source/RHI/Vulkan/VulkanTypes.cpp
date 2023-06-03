@@ -320,26 +320,48 @@ vk::ImageViewType GetImageViewType(ERHIImageType Type)
 	}
 }
 
-vk::DebugReportObjectTypeEXT GetDebugReportObjectType(ERHIResourceType Type)
+vk::DebugReportObjectTypeEXT GetDebugReportObjectType(vk::ObjectType Type)
 {
 	switch (Type)
 	{
-	case ERHIResourceType::SampledImage:
-	case ERHIResourceType::StorageImage:
-	case ERHIResourceType::CombinedImageSampler:
-		return vk::DebugReportObjectTypeEXT::eImage;
-	case ERHIResourceType::InputAttachment:
-		return vk::DebugReportObjectTypeEXT::eImageView;
-	case ERHIResourceType::UniformTexelBuffer:
-	case ERHIResourceType::StorageTexelBuffer:
-	case ERHIResourceType::StorageBuffer:
-	case ERHIResourceType::UniformBuffer:
-	case ERHIResourceType::StorageBufferDynamic:
-	case ERHIResourceType::UniformBufferDynamic:
-	case ERHIResourceType::PushConstants:
-		return vk::DebugReportObjectTypeEXT::eBuffer;
-	case ERHIResourceType::Sampler:
-		return vk::DebugReportObjectTypeEXT::eSampler;
+	case vk::ObjectType::eUnknown: return vk::DebugReportObjectTypeEXT::eUnknown;
+	case vk::ObjectType::eInstance: return vk::DebugReportObjectTypeEXT::eInstance;
+	case vk::ObjectType::ePhysicalDevice: return vk::DebugReportObjectTypeEXT::ePhysicalDevice;
+	case vk::ObjectType::eDevice: return vk::DebugReportObjectTypeEXT::eDevice;
+	case vk::ObjectType::eQueue: return vk::DebugReportObjectTypeEXT::eQueue;
+	case vk::ObjectType::eSemaphore: return vk::DebugReportObjectTypeEXT::eSemaphore;
+	case vk::ObjectType::eCommandBuffer: return vk::DebugReportObjectTypeEXT::eCommandBuffer;
+	case vk::ObjectType::eFence: return vk::DebugReportObjectTypeEXT::eFence;
+	case vk::ObjectType::eDeviceMemory: return vk::DebugReportObjectTypeEXT::eDeviceMemory;
+	case vk::ObjectType::eBuffer: return vk::DebugReportObjectTypeEXT::eBuffer;
+	case vk::ObjectType::eImage: return vk::DebugReportObjectTypeEXT::eImage;
+	case vk::ObjectType::eEvent: return vk::DebugReportObjectTypeEXT::eEvent;
+	case vk::ObjectType::eQueryPool: return vk::DebugReportObjectTypeEXT::eQueryPool;
+	case vk::ObjectType::eBufferView: return vk::DebugReportObjectTypeEXT::eBufferView;
+	case vk::ObjectType::eImageView: return vk::DebugReportObjectTypeEXT::eImageView;
+	case vk::ObjectType::eShaderModule: return vk::DebugReportObjectTypeEXT::eShaderModule;
+	case vk::ObjectType::ePipelineCache: return vk::DebugReportObjectTypeEXT::ePipelineCache;
+	case vk::ObjectType::ePipelineLayout: return vk::DebugReportObjectTypeEXT::ePipelineLayout;
+	case vk::ObjectType::eRenderPass: return vk::DebugReportObjectTypeEXT::eRenderPass;
+	case vk::ObjectType::ePipeline: return vk::DebugReportObjectTypeEXT::ePipeline;
+	case vk::ObjectType::eDescriptorSetLayout: return vk::DebugReportObjectTypeEXT::eDescriptorSetLayout;
+	case vk::ObjectType::eSampler: return vk::DebugReportObjectTypeEXT::eSampler;
+	case vk::ObjectType::eDescriptorPool: return vk::DebugReportObjectTypeEXT::eDescriptorPool;
+	case vk::ObjectType::eDescriptorSet: return vk::DebugReportObjectTypeEXT::eDescriptorSet;
+	case vk::ObjectType::eFramebuffer: return vk::DebugReportObjectTypeEXT::eFramebuffer;
+	case vk::ObjectType::eCommandPool: return vk::DebugReportObjectTypeEXT::eCommandPool;
+	case vk::ObjectType::eSamplerYcbcrConversion: return vk::DebugReportObjectTypeEXT::eSamplerYcbcrConversion;
+	case vk::ObjectType::eDescriptorUpdateTemplate:return vk::DebugReportObjectTypeEXT::eDescriptorUpdateTemplate;
+	case vk::ObjectType::eSurfaceKHR: return vk::DebugReportObjectTypeEXT::eSurfaceKHR;
+	case vk::ObjectType::eSwapchainKHR: return vk::DebugReportObjectTypeEXT::eSwapchainKHR;
+	case vk::ObjectType::eDisplayKHR: return vk::DebugReportObjectTypeEXT::eDisplayKHR;
+	case vk::ObjectType::eDisplayModeKHR: return vk::DebugReportObjectTypeEXT::eDisplayModeKHR;
+	case vk::ObjectType::eDebugReportCallbackEXT: return vk::DebugReportObjectTypeEXT::eDebugReportCallbackEXT;
+	case vk::ObjectType::eCuModuleNVX: return vk::DebugReportObjectTypeEXT::eCuModuleNVX;
+	case vk::ObjectType::eCuFunctionNVX: return vk::DebugReportObjectTypeEXT::eCuFunctionNVX;
+	case vk::ObjectType::eAccelerationStructureKHR: return vk::DebugReportObjectTypeEXT::eAccelerationStructureKHR;
+	case vk::ObjectType::eValidationCacheEXT: return vk::DebugReportObjectTypeEXT::eValidationCacheEXT;
+	case vk::ObjectType::eAccelerationStructureNV: return vk::DebugReportObjectTypeEXT::eAccelerationStructureNV;
 	default:
 		return vk::DebugReportObjectTypeEXT::eUnknown;
 	}

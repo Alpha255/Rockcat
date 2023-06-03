@@ -1,12 +1,9 @@
-#include "Colorful/Vulkan/VulkanBuffer.h"
-#include "Colorful/Vulkan/VulkanDevice.h"
-#include "Colorful/Vulkan/VulkanMemoryAllocator.h"
-#include "Colorful/Vulkan/VulkanQueue.h"
+#include "RHI/Vulkan/VulkanBuffer.h"
+#include "RHI/Vulkan/VulkanDevice.h"
+#include "Runtime/Engine/Engine.h"
 
-NAMESPACE_START(RHI)
-
-VulkanBuffer::VulkanBuffer(VulkanDevice* Device, const BufferDesc& Desc)
-	: VkHWObject(Device)
+VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo& CreateInfo)
+	: VkDeviceResource(Device)
 {
 	/// If a memory object does not have the VK_MEMORY_PROPERTY_HOST_COHERENT_BIT property, 
 	/// then vkFlushMappedMemoryRanges must be called in order to guarantee that writes to the memory object from the host are made available to the host domain, 
@@ -29,130 +26,122 @@ VulkanBuffer::VulkanBuffer(VulkanDevice* Device, const BufferDesc& Desc)
 
 	/// https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkBufferUsageFlagBits.html
 
-	size_t AlignedSize = Desc.Size;
-	VkBufferUsageFlags UsageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+	size_t AlignedSize = CreateInfo.Size;
+	vk::BufferUsageFlags UsageFlags = vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eTransferDst;
 
-	if (EnumHasAnyFlags(Desc.UsageFlags, EBufferUsageFlags::UniformBuffer))
+	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UniformBuffer))
 	{
-		UsageFlags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-		AlignedSize = Align(Desc.Size, m_Device->PhysicalLimits().minUniformBufferOffsetAlignment);
-		RequiredState = EResourceState::UniformBuffer;
+		UsageFlags |= vk::BufferUsageFlagBits::eUniformBuffer;
+		AlignedSize = Align(CreateInfo.Size, GetDevice().GetPhysicalDeviceLimits().minUniformBufferOffsetAlignment);
+		//RequiredState = EResourceState::UniformBuffer;
 	}
-	if (EnumHasAnyFlags(Desc.UsageFlags, EBufferUsageFlags::IndexBuffer))
+	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::IndexBuffer))
 	{
-		UsageFlags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-		RequiredState = EResourceState::IndexBuffer;
+		UsageFlags |= vk::BufferUsageFlagBits::eIndexBuffer;
+		//RequiredState = EResourceState::IndexBuffer;
 	}
-	if (EnumHasAnyFlags(Desc.UsageFlags, EBufferUsageFlags::VertexBuffer))
+	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::VertexBuffer))
 	{
-		UsageFlags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-		RequiredState = EResourceState::VertexBuffer;
+		UsageFlags |= vk::BufferUsageFlagBits::eVertexBuffer;
+		//RequiredState = EResourceState::VertexBuffer;
 	}
-	if (EnumHasAnyFlags(Desc.UsageFlags, EBufferUsageFlags::IndirectBuffer))
+	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::IndirectBuffer))
 	{
-		UsageFlags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
-		RequiredState = EResourceState::IndirectArgument;
+		UsageFlags |= vk::BufferUsageFlagBits::eIndirectBuffer;
+		//RequiredState = EResourceState::IndirectArgument;
 	}
-	if (EnumHasAnyFlags(Desc.UsageFlags, EBufferUsageFlags::StructuredBuffer))
+	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::StructuredBuffer))
 	{
-		UsageFlags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-		AlignedSize = Align(Desc.Size, m_Device->PhysicalLimits().minStorageBufferOffsetAlignment);
+		UsageFlags |= vk::BufferUsageFlagBits::eStorageBuffer;
+		AlignedSize = Align(CreateInfo.Size, GetDevice().GetPhysicalDeviceLimits().minStorageBufferOffsetAlignment);
 	}
-	if (EnumHasAnyFlags(Desc.UsageFlags, EBufferUsageFlags::UnorderedAccess))
+	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UnorderedAccess))
 	{
-		UsageFlags |= VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT;
-		AlignedSize = Align(Desc.Size, m_Device->PhysicalLimits().minTexelBufferOffsetAlignment);
-		RequiredState = EResourceState::UnorderedAccess;
+		UsageFlags |= vk::BufferUsageFlagBits::eStorageTexelBuffer;
+		AlignedSize = Align(CreateInfo.Size, GetDevice().GetPhysicalDeviceLimits().minTexelBufferOffsetAlignment);
+		//RequiredState = EResourceState::UnorderedAccess;
 	}
-	if (EnumHasAnyFlags(Desc.UsageFlags, EBufferUsageFlags::ShaderResource))
+	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::ShaderResource))
 	{
-		UsageFlags |= VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT;
-		RequiredState = EResourceState::ShaderResource;
+		UsageFlags |= vk::BufferUsageFlagBits::eUniformTexelBuffer;
+		//RequiredState = EResourceState::ShaderResource;
 	}
-	if (EnumHasAnyFlags(Desc.UsageFlags, EBufferUsageFlags::AccelerationStructure))
+	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::AccelerationStructure))
 	{
-		UsageFlags |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR;
-		RequiredState = EResourceState::AccelerationStructure;
+		UsageFlags |= vk::BufferUsageFlagBits::eAccelerationStructureStorageKHR;
+		//RequiredState = EResourceState::AccelerationStructure;
 		/// #TODO Align
 	}
 
-	VkBufferCreateInfo CreateInfo
-	{
-		VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-		nullptr,
-		0u,
-		AlignedSize,
-		UsageFlags,
-		VK_SHARING_MODE_EXCLUSIVE,
-		0u,
-		nullptr
-	};
-	VERIFY_VK(vkCreateBuffer(m_Device->Get(), &CreateInfo, VK_ALLOCATION_CALLBACKS, Reference()));
+	auto vkCreateInfo = vk::BufferCreateInfo()
+		.setSize(AlignedSize)
+		.setUsage(UsageFlags)
+		.setSharingMode(vk::SharingMode::eExclusive);
+	VERIFY_VK(GetNativeDevice().createBuffer(&vkCreateInfo, nullptr, &m_Buffer));
 
-	m_DeviceMemory = VulkanMemoryAllocator::Get().Alloc(Get(), Desc.AccessFlags);
+	//m_DeviceMemory = VulkanMemoryAllocator::Get().Alloc(Get(), CreateInfo.AccessFlags);
 
-	VERIFY_VK(vkBindBufferMemory(m_Device->Get(), Get(), m_DeviceMemory.Handle, 0u));
+	GetNativeDevice().bindBufferMemory(m_Buffer, m_Memory, 0u);
 
-	const bool8_t IsVolatile = Desc.AccessFlags == EDeviceAccessFlags::GpuReadCpuWrite;
+	const bool8_t IsVolatile = CreateInfo.AccessFlags == ERHIDeviceAccessFlags::GpuReadCpuWrite;
 
 	if (IsVolatile)
 	{
-		Map(VK_WHOLE_SIZE, 0ull);
+		Map(VK_WHOLE_SIZE, 0u);
 	}
 
-	if (Desc.InitialData)
+	if (CreateInfo.InitialData)
 	{
 		if (IsVolatile)
 		{
-			VERIFY(memcpy_s(m_MappedMemory, Desc.Size, Desc.InitialData, Desc.Size) == 0);
+			VERIFY(memcpy_s(m_MappedMemory, CreateInfo.Size, CreateInfo.InitialData, CreateInfo.Size) == 0);
 		}
 #if false
 		else
 		{
 			ScopedBufferMapper Mapper(this, AlignedSize, 0u);
-			VERIFY(memcpy_s(m_MappedMemory, Desc.Size, Desc.InitialData, Desc.Size) == 0);
+			VERIFY(memcpy_s(m_MappedMemory, CreateInfo.Size, CreateInfo.InitialData, CreateInfo.Size) == 0);
 		}
 #endif
 
-		if (m_DeviceMemory.IsHostVisible)
+		if (m_HostVisible)
 		{
-			if (!m_DeviceMemory.IsCoherent)
+			if (!m_Coherent)
 			{
 				FlushMappedRange(VK_WHOLE_SIZE, 0u);
 			}
 		}
 		else
 		{
-			auto Command = m_Device->GetOrAllocateCommandBuffer(EQueueType::Transfer, ECommandBufferLevel::Primary, true, true);
+			//auto Command = m_Device->GetOrAllocateCommandBuffer(EQueueType::Transfer, ECommandBufferLevel::Primary, true, true);
 
-			Command->CopyBuffer(this, Desc.InitialData, Desc.Size, 0u, 0u);
+			//Command->CopyBuffer(this, CreateInfo.InitialData, CreateInfo.Size, 0u, 0u);
 
-			if (m_Device->Options().BatchResourceSubmit)
-			{
-				m_Device->Queue(EQueueType::Transfer)->QueueSubmit(std::vector<ICommandBufferSharedPtr>{Command});
-			}
-			else
-			{
-				m_Device->Queue(EQueueType::Transfer)->Submit(std::vector<ICommandBufferSharedPtr>{Command});
-			}
+			//if (m_Device->Options().BatchResourceSubmit)
+			//{
+			//	m_Device->Queue(EQueueType::Transfer)->QueueSubmit(std::vector<ICommandBufferSharedPtr>{Command});
+			//}
+			//else
+			//{
+			//	m_Device->Queue(EQueueType::Transfer)->Submit(std::vector<ICommandBufferSharedPtr>{Command});
+			//}
 		}
 	}
 }
 
 void* VulkanBuffer::Map(size_t Size, size_t Offset)
 {
-	assert(m_DeviceMemory.IsHostVisible && m_MappedMemory == nullptr && (Size == VK_WHOLE_SIZE || Offset + Size <= m_DeviceMemory.Size));
+	assert(m_HostVisible && m_MappedMemory == nullptr && (Size == VK_WHOLE_SIZE || Offset + Size <= m_Size));
 
-	VERIFY_VK(vkMapMemory(m_Device->Get(), m_DeviceMemory.Handle, Offset, Size, 0u, &m_MappedMemory));
-	
+	VERIFY_VK(GetNativeDevice().mapMemory(m_Memory, Offset, Size, vk::MemoryMapFlags(0u), &m_MappedMemory));
 	return m_MappedMemory;
 }
 
 void VulkanBuffer::Unmap()
 {
-	assert(m_DeviceMemory.IsHostVisible && m_MappedMemory);
+	assert(m_HostVisible && m_MappedMemory);
 
-	vkUnmapMemory(m_Device->Get(), m_DeviceMemory.Handle);
+	GetNativeDevice().unmapMemory(m_Memory);
 	m_MappedMemory = nullptr;
 }
 
@@ -165,47 +154,35 @@ void VulkanBuffer::FlushMappedRange(size_t Size, size_t Offset)
 
 	/// #TODO Align to nonCoherentAtomSize
 	
-	assert(!m_DeviceMemory.IsCoherent);
-	
-	assert(m_MappedMemory);
+	assert(!m_Coherent && m_MappedMemory);
+	assert(Offset + Size <= m_Size || (Size == VK_WHOLE_SIZE && Offset < m_Size));
 
-	assert(Offset + Size <= m_DeviceMemory.Size || (Size == VK_WHOLE_SIZE && Offset < m_DeviceMemory.Size));
-
-	VkMappedMemoryRange MemRange
-	{
-		VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
-		nullptr,
-		m_DeviceMemory.Handle,
-		Offset,
-		Size
-	};
-	VERIFY_VK(vkFlushMappedMemoryRanges(m_Device->Get(), 1u, &MemRange));
+	vk::MappedMemoryRange MappedRange;
+	MappedRange
+		.setMemory(m_Memory)
+		.setSize(Size)
+		.setOffset(Offset);
+	VERIFY_VK(GetNativeDevice().flushMappedMemoryRanges(1u, &MappedRange));
 }
 
 void VulkanBuffer::InvalidateMappedRange(size_t Size, size_t Offset)
 {
 	/// #TODO Align to nonCoherentAtomSize
 
-	assert(!m_DeviceMemory.IsCoherent);
+	assert(!m_Coherent && m_MappedMemory);
+	assert(Offset + Size <= m_Size || (Size == VK_WHOLE_SIZE && Offset < m_Size));
 
-	assert(m_MappedMemory);
-
-	assert(Offset + Size <= m_DeviceMemory.Size || (Size == VK_WHOLE_SIZE && Offset < m_DeviceMemory.Size));
-
-	VkMappedMemoryRange MemRange
-	{
-		VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
-		nullptr,
-		m_DeviceMemory.Handle,
-		Offset,
-		Size
-	};
-	VERIFY_VK(vkInvalidateMappedMemoryRanges(m_Device->Get(), 1u, &MemRange));
+	vk::MappedMemoryRange MappedRange;
+	MappedRange
+		.setMemory(m_Memory)
+		.setSize(Size)
+		.setOffset(Offset);
+	VERIFY_VK(GetNativeDevice().invalidateMappedMemoryRanges(1u, &MappedRange));
 }
 
 bool8_t VulkanBuffer::Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset)
 {
-	assert(Data && Size && Size <= m_DeviceMemory.Size);
+	assert(Data && Size && Size <= m_Size);
 
 	if (m_MappedMemory)
 	{
@@ -215,7 +192,7 @@ bool8_t VulkanBuffer::Update(const void* Data, size_t Size, size_t SrcOffset, si
 			reinterpret_cast<const byte8_t*>(Data) + SrcOffset, 
 			Size) == 0);
 
-		if (!m_DeviceMemory.IsCoherent)
+		if (!m_Coherent)
 		{
 			FlushMappedRange(Size, DstOffset);
 		}
@@ -233,12 +210,12 @@ VulkanBuffer::~VulkanBuffer()
 		Unmap();
 	}
 
-	if (m_DeviceMemory.Handle)
+	if (m_Memory)
 	{
-		vkFreeMemory(m_Device->Get(), m_DeviceMemory.Handle, VK_ALLOCATION_CALLBACKS);
-		m_DeviceMemory.Handle = VK_NULL_HANDLE;
+		GetNativeDevice().freeMemory(m_Memory);
+		m_Memory = nullptr;
 	}
-	vkDestroyBuffer(m_Device->Get(), Get(), VK_ALLOCATION_CALLBACKS);
-}
 
-NAMESPACE_END(RHI)
+	GetNativeDevice().destroy(m_Buffer);
+	m_Buffer = nullptr;
+}

@@ -282,3 +282,20 @@ protected:
 	}                                                                                                                                     \
 }
 #endif
+
+class VkDeviceResource
+{
+public:
+	VkDeviceResource(const class VulkanDevice& Device)
+		: m_Device(Device)
+	{
+	}
+
+	inline const class VulkanDevice& GetDevice() const { return m_Device; }
+
+	const vk::Device& GetNativeDevice() const;
+
+	const vk::Instance& GetNativeInstance() const;
+private:
+	const class VulkanDevice& m_Device;
+};

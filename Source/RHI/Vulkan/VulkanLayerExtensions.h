@@ -15,35 +15,35 @@ struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayer
 
 	ERHIDebugLayerLevel DebugLayerLevel = ERHIDebugLayerLevel::Error;
 
-	bool8_t KhronosValidationLayer = true;
+	bool8_t HasKhronosValidationLayer = true;
 
-	bool8_t KHRSurfaceExt = true;
-	bool8_t DebugUtilsExt = true;
-	bool8_t DebugReportExt = true;
-	bool8_t ValidationFeaturesExt = true;
-	bool8_t ValidationFeaturesExt_GPUAssisted = false;
-	bool8_t ValidationFeaturesExt_GPUAssistedReserveBindingSlot = false;
-	bool8_t ValidationFeaturesExt_BestPractices = true;
-	bool8_t ValidationFeaturesExt_DebugPrintf = false;
-	bool8_t ValidationFeaturesExt_Synchronization = true;
-	bool8_t DebugMarkerExt = true;
+	bool8_t HasKHRSurfaceExt = true;
+	bool8_t HasDebugUtilsExt = true;
+	bool8_t HasDebugReportExt = true;
+	bool8_t HasValidationFeaturesExt = true;
+	bool8_t HasValidationFeaturesExt_GPUAssisted = false;
+	bool8_t HasValidationFeaturesExt_GPUAssistedReserveBindingSlot = false;
+	bool8_t HasValidationFeaturesExt_BestPractices = true;
+	bool8_t HasValidationFeaturesExt_DebugPrintf = false;
+	bool8_t HasValidationFeaturesExt_Synchronization = true;
+	bool8_t HasDebugMarkerExt = true;
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
 			CEREAL_NVP(DebugLayerLevel),
-			CEREAL_NVP(KhronosValidationLayer),
-			CEREAL_NVP(KHRSurfaceExt),
-			CEREAL_NVP(DebugUtilsExt),
-			CEREAL_NVP(DebugReportExt),
-			CEREAL_NVP(ValidationFeaturesExt),
-			CEREAL_NVP(ValidationFeaturesExt_GPUAssisted),
-			CEREAL_NVP(ValidationFeaturesExt_GPUAssistedReserveBindingSlot),
-			CEREAL_NVP(ValidationFeaturesExt_BestPractices),
-			CEREAL_NVP(ValidationFeaturesExt_DebugPrintf),
-			CEREAL_NVP(ValidationFeaturesExt_Synchronization),
-			CEREAL_NVP(DebugMarkerExt)
+			CEREAL_NVP(HasKhronosValidationLayer),
+			CEREAL_NVP(HasKHRSurfaceExt),
+			CEREAL_NVP(HasDebugUtilsExt),
+			CEREAL_NVP(HasDebugReportExt),
+			CEREAL_NVP(HasValidationFeaturesExt),
+			CEREAL_NVP(HasValidationFeaturesExt_GPUAssisted),
+			CEREAL_NVP(HasValidationFeaturesExt_GPUAssistedReserveBindingSlot),
+			CEREAL_NVP(HasValidationFeaturesExt_BestPractices),
+			CEREAL_NVP(HasValidationFeaturesExt_DebugPrintf),
+			CEREAL_NVP(HasValidationFeaturesExt_Synchronization),
+			CEREAL_NVP(HasDebugMarkerExt)
 		);
 	}
 };
@@ -70,6 +70,7 @@ protected:
 
 	void SetEnabled(const VulkanLayerExtensionConfigurations* Configs, bool8_t Supported) { m_Enabled = IsEnabledInConfig(Configs) && Supported; }
 	virtual bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const { return Configs && false; }
+	virtual void SetEnabledToConfig(VulkanLayerExtensionConfigurations* /*Config*/) const {}
 private:
 	std::string_view m_Name;
 	bool8_t m_Enabled = false;
@@ -91,7 +92,7 @@ class VulkanInstanceExtension : public VulkanExtension
 public:
 	using VulkanExtension::VulkanExtension;
 
-	virtual void PreInstanceCreation(const VulkanLayerExtensionConfigurations* /*Configs*/, vk::InstanceCreateInfo& /*CreateInfo*/) {}
+	virtual void PreInstanceCreation(VulkanLayerExtensionConfigurations* Configs, vk::InstanceCreateInfo& /*CreateInfo*/) { SetEnabledToConfig(Configs); }
 protected:
 	friend class VulkanInstance;
 };
@@ -101,7 +102,7 @@ class VulkanDeviceExtension : public VulkanExtension
 public:
 	using VulkanExtension::VulkanExtension;
 
-	virtual void PreDeviceCreation(const VulkanLayerExtensionConfigurations* /*Configs*/, vk::DeviceCreateInfo& /*CreateInfo*/) {}
+	virtual void PreDeviceCreation(VulkanLayerExtensionConfigurations* Configs, vk::DeviceCreateInfo& /*CreateInfo*/) { SetEnabledToConfig(Configs); }
 protected:
 	friend class VulkanDevice;
 };

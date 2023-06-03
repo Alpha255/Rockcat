@@ -29,7 +29,7 @@ enum class ESyncType
 class VulkanDevice final : public RHIDevice
 {
 public:
-	VulkanDevice();
+	VulkanDevice(struct VulkanLayerExtensionConfigurations* Configs);
 
 	~VulkanDevice();
 
@@ -60,10 +60,22 @@ public:
 	virtual void SubmitCommandBuffer(RHICommandBuffer* Command) override final;
 
 	virtual RHICommandBufferPtr GetOrAllocateCommandBuffer(ERHIDeviceQueueType QueueType, ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary, bool8_t AutoBegin = true) override final;
+
+	inline const vk::Device& GetNative() const { return m_LogicalDevice; }
+
+	inline const vk::PhysicalDevice& GetPhysicalDevice() const { return m_PhysicalDevice; }
+
+	const vk::Instance& GetInstance() const;
+
+	void SetObjectName(vk::ObjectType Type, uint64_t Object, const char8_t* Name) const;
+
+	const vk::PhysicalDeviceLimits& GetPhysicalDeviceLimits() const { return m_Limits; }
 private:
-	bool8_t GetQueueFamilyIndex(const vk::PhysicalDevice* PhysicalDevice, uint32_t& GraphicsQueueIndex, uint32_t& ComputeQueueIndex, uint32_t& TransferQueueIndex, uint32_t& PresentQueueIndex) const;
+	bool8_t GetQueueFamilyIndex(const vk::PhysicalDevice& PhysicalDevice, uint32_t& GraphicsQueueIndex, uint32_t& ComputeQueueIndex, uint32_t& TransferQueueIndex, uint32_t& PresentQueueIndex) const;
 
 	std::unique_ptr<class VulkanInstance> m_Instance;
+
+	vk::PhysicalDeviceLimits m_Limits;
 
 	vk::PhysicalDevice m_PhysicalDevice;
 	vk::Device m_LogicalDevice;
@@ -106,8 +118,6 @@ private:
 		assert(IsValid());
 		return m_Features;
 	}
-
-	void SetObjectName(uint64_t ObjectHandle, VkObjectType Type, const char8_t* Name);
 
 	VkPipelineCache PipelineCache() const
 	{

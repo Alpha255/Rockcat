@@ -1,4 +1,5 @@
 #include "RHI/Vulkan/VulkanLoader.h"
+#include "RHI/Vulkan/VulkanDevice.h"
 #include "Runtime/Engine/Engine.h"
 
 #if !defined(VULKAN_HPP_CPLUSPLUS)
@@ -135,3 +136,13 @@ namespace VulkanResult
 }
 
 #endif
+
+const vk::Device& VkDeviceResource::GetNativeDevice() const
+{
+	return m_Device.GetNative();
+}
+
+const vk::Instance& VkDeviceResource::GetNativeInstance() const
+{
+	return m_Device.GetInstance();
+}

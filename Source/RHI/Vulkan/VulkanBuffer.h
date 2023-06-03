@@ -1,32 +1,20 @@
 #pragma once
 
-#include "Colorful/Vulkan/VulkanInstance.h"
+#include "RHI/Vulkan/VulkanTypes.h"
 
-NAMESPACE_START(RHI)
-
+#if 0
 struct VkStatedObject
 {
 	EResourceState CurrentState = EResourceState::Common;
 	EResourceState RequiredState = EResourceState::Common;
 	EResourceState PermanentState = EResourceState::Unknown;
 };
+#endif
 
-struct VulkanDeviceMemory
-{
-	VkDeviceMemory Handle = VK_NULL_HANDLE;
-	size_t Size = 0u;
-
-	bool8_t IsCoherent = false;
-	bool8_t IsHostVisible = false;
-	bool8_t IsHostCached = false;
-};
-
-class VulkanBuffer final : public VkHWObject<IBuffer, VkBuffer_T>, protected VkStatedObject
+class VulkanBuffer final : public RHIBuffer, public VkDeviceResource
 {
 public:
-	static_assert(WHOLE_SIZE == VK_WHOLE_SIZE, "Guarante the same value");
-
-	VulkanBuffer(class VulkanDevice* Device, const BufferDesc& Desc);
+	VulkanBuffer(const class VulkanDevice& Device, const RHIBufferCreateInfo& CreateInfo);
 
 	~VulkanBuffer();
 
@@ -45,31 +33,17 @@ public:
 
 	bool8_t Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset) override final;
 
-	size_t Size() const
-	{
-		return m_DeviceMemory.Size;
-	}
-
-	bool8_t IsCoherent() const
-	{
-		return m_DeviceMemory.IsCoherent;
-	}
-
-	bool8_t IsHostVisible() const
-	{
-		return m_DeviceMemory.IsHostVisible;
-	}
-
-	bool8_t IsHostCached() const
-	{
-		return m_DeviceMemory.IsHostCached;
-	}
-protected:
-	friend struct VulkanPipelineBarrier;
-	friend class VulkanCommandBuffer;
-	friend class VulkanGraphicsPipelineState;
+	inline size_t GetSize() const { return m_Size; }
+	inline bool8_t IsCoherent() const { return m_Coherent; }
+	inline bool8_t IsHostVisible() const { return m_HostVisible; }
+	bool8_t IsHostCached() const { return m_HostCached; }
 private:
-	VulkanDeviceMemory m_DeviceMemory;
-};
+	vk::Buffer m_Buffer;
+	vk::DeviceMemory m_Memory;
 
-NAMESPACE_END(RHI)
+	bool8_t m_Coherent = false;
+	bool8_t m_HostVisible = false;
+	bool8_t m_HostCached = false;
+
+	size_t m_Size = 0u;
+};

@@ -1,10 +1,13 @@
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanLayerExtensions.h"
 #include "Runtime/Engine/Engine.h"
 
 #if USE_DYNAMIC_VK_LOADER
 	VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 #endif
+
+std::shared_ptr<VulkanLayerExtensionConfigurations> VulkanRHI::s_LayerExtensionConfigs;
 
 VulkanRHI::VulkanRHI(const GraphicsSettings* GfxSettings)
 	: RHIInterface(GfxSettings)
@@ -19,8 +22,8 @@ void VulkanRHI::InitializeGraphicsDevices()
 	assert(vkGetInstanceProcAddr);
 	VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);	
 #endif
-
-	m_Device = std::make_unique<VulkanDevice>();
+	s_LayerExtensionConfigs = VulkanLayerExtensionConfigurations::Load(VK_LAYER_EXT_CONFIG_NAME);
+	m_Device = std::make_unique<VulkanDevice>(s_LayerExtensionConfigs.get());
 }
 
 VulkanRHI::~VulkanRHI()

@@ -17,7 +17,12 @@ public:
 
 	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
 	{
-		return Configs && Configs->KhronosValidationLayer;
+		return Configs && Configs->HasKhronosValidationLayer;
+	}
+
+	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
+	{
+		Config->HasKhronosValidationLayer = IsEnabled();
 	}
 };
 
@@ -32,6 +37,11 @@ public:
 	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
 	{
 		return Configs && true;
+	}
+
+	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
+	{
+		Config->HasKHRSurfaceExt = IsEnabled();
 	}
 };
 
@@ -54,6 +64,11 @@ public:
 	{
 		return Configs && true;
 	}
+
+	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
+	{
+		Config->HasKHRSurfaceExt = IsEnabled();
+	}
 };
 
 class VkDebugUtilsExt : public VulkanInstanceExtension
@@ -66,7 +81,12 @@ public:
 
 	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
 	{
-		return Configs && Configs->DebugUtilsExt;
+		return Configs && Configs->HasDebugUtilsExt;
+	}
+
+	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
+	{
+		Config->HasDebugUtilsExt = IsEnabled();
 	}
 };
 
@@ -80,7 +100,12 @@ public:
 
 	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
 	{
-		return Configs && Configs->DebugReportExt;
+		return Configs && Configs->HasDebugReportExt;
+	}
+
+	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
+	{
+		Config->HasDebugReportExt = IsEnabled();
 	}
 };
 
@@ -94,7 +119,12 @@ public:
 
 	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
 	{
-		return Configs && Configs->DebugMarkerExt;
+		return Configs && Configs->HasDebugMarkerExt;
+	}
+
+	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
+	{
+		Config->HasDebugMarkerExt = IsEnabled();
 	}
 };
 
@@ -108,24 +138,31 @@ public:
 
 	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
 	{
-		return Configs && Configs->ValidationFeaturesExt;
+		return Configs && Configs->HasValidationFeaturesExt;
 	}
 
-	virtual void PreInstanceCreation(const VulkanLayerExtensionConfigurations* Configs, vk::InstanceCreateInfo& CreateInfo)
+	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
+	{
+		Config->HasValidationFeaturesExt = IsEnabled();
+	}
+
+	virtual void PreInstanceCreation(VulkanLayerExtensionConfigurations* Configs, vk::InstanceCreateInfo& CreateInfo)
 	{
 		std::vector<vk::ValidationFeatureEnableEXT> EnabledFeatures;
 
 #define APPEND_FEATURE(Enabled, Feature) if (Configs->Enabled) { EnabledFeatures.push_back(Feature); }
-		APPEND_FEATURE(ValidationFeaturesExt_GPUAssisted, vk::ValidationFeatureEnableEXT::eGpuAssisted);
-		APPEND_FEATURE(ValidationFeaturesExt_GPUAssistedReserveBindingSlot, vk::ValidationFeatureEnableEXT::eGpuAssistedReserveBindingSlot);
-		APPEND_FEATURE(ValidationFeaturesExt_BestPractices, vk::ValidationFeatureEnableEXT::eBestPractices);
-		APPEND_FEATURE(ValidationFeaturesExt_DebugPrintf, vk::ValidationFeatureEnableEXT::eDebugPrintf);
-		APPEND_FEATURE(ValidationFeaturesExt_Synchronization, vk::ValidationFeatureEnableEXT::eSynchronizationValidation);
+		APPEND_FEATURE(HasValidationFeaturesExt_GPUAssisted, vk::ValidationFeatureEnableEXT::eGpuAssisted);
+		APPEND_FEATURE(HasValidationFeaturesExt_GPUAssistedReserveBindingSlot, vk::ValidationFeatureEnableEXT::eGpuAssistedReserveBindingSlot);
+		APPEND_FEATURE(HasValidationFeaturesExt_BestPractices, vk::ValidationFeatureEnableEXT::eBestPractices);
+		APPEND_FEATURE(HasValidationFeaturesExt_DebugPrintf, vk::ValidationFeatureEnableEXT::eDebugPrintf);
+		APPEND_FEATURE(HasValidationFeaturesExt_Synchronization, vk::ValidationFeatureEnableEXT::eSynchronizationValidation);
 #undef APPEND_FEATURE
 
-		vk::ValidationFeaturesEXT ValidationFeatures;
-		ValidationFeatures.setEnabledValidationFeatures(EnabledFeatures);
+		auto ValidationFeatures = vk::ValidationFeaturesEXT()
+			.setEnabledValidationFeatures(EnabledFeatures);
 		SetPNext(CreateInfo, ValidationFeatures);
+
+		VulkanInstanceExtension::PreInstanceCreation(Configs, CreateInfo);
 	}
 };
 

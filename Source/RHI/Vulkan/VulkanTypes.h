@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Runtime/Engine/RHI/RHIShader.h"
-#include "Runtime/Engine/RHI/RHIImage.h"
+#include "Runtime/Engine/RHI/RHIBuffer.h"
 #include "RHI/Vulkan/VulkanLoader.h"
 
 vk::PolygonMode GetPolygonMode(ERHIPolygonMode Mode);
@@ -24,7 +24,7 @@ vk::BorderColor GetBorderColor(ERHIBorderColor BorderColor);
 vk::ImageType GetImageType(ERHIImageType Type);
 vk::SampleCountFlagBits GetSampleCount(ERHISampleCount SampleCount);
 vk::ImageViewType GetImageViewType(ERHIImageType Type);
-vk::DebugReportObjectTypeEXT GetDebugReportObjectType(ERHIResourceType Type);
+vk::DebugReportObjectTypeEXT GetDebugReportObjectType(vk::ObjectType Type);
 #if 0
 VkAttachmentLoadOp attachmentLoadOp(RenderPassDesc::EAttachmentLoadOp op);
 VkAttachmentStoreOp attachmentStoreOp(RenderPassDesc::EAttachmentStoreOp op);
