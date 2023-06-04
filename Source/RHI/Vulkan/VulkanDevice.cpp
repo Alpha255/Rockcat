@@ -680,30 +680,6 @@ RHICommandBufferPtr VulkanDevice::GetOrAllocateCommandBuffer(ERHIDeviceQueueType
 	return RHICommandBufferPtr();
 }
 
-void VulkanDevice::SetObjectName(vk::ObjectType Type, uint64_t Object, const char8_t* Name) const
-{
-	assert(Object && Name && Type != vk::ObjectType::eUnknown);
-
-	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarkerExt)
-	{
-		auto DebugMarkerObjectNameInfo = vk::DebugMarkerObjectNameInfoEXT()
-			.setObjectType(GetDebugReportObjectType(Type))
-			.setObject(Object)
-			.setPObjectName(Name);
-
-		VERIFY_VK(m_LogicalDevice.debugMarkerSetObjectNameEXT(&DebugMarkerObjectNameInfo));
-	}
-	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtilsExt)
-	{
-		auto DebugUtilsObjectNameInfo = vk::DebugUtilsObjectNameInfoEXT()
-			.setObjectType(Type)
-			.setObjectHandle(Object)
-			.setPObjectName(Name);
-
-		VERIFY_VK(m_LogicalDevice.setDebugUtilsObjectNameEXT(&DebugUtilsObjectNameInfo));
-	}
-}
-
 const vk::Instance& VulkanDevice::GetInstance() const
 {
 	return m_Instance->GetNative();

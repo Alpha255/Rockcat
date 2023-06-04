@@ -1,5 +1,7 @@
 #include "RHI/Vulkan/VulkanLoader.h"
 #include "RHI/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanRHI.h"
+#include "RHI/Vulkan/VulkanLayerExtensions.h"
 #include "Runtime/Engine/Engine.h"
 
 #if !defined(VULKAN_HPP_CPLUSPLUS)
@@ -145,4 +147,28 @@ const vk::Device& VkDeviceResource::GetNativeDevice() const
 const vk::Instance& VkDeviceResource::GetNativeInstance() const
 {
 	return m_Device.GetInstance();
+}
+
+void VkDeviceResource::SetObjectName(vk::ObjectType Type, uint64_t Object, const char8_t* Name)
+{
+	assert(Object && Name && Type != vk::ObjectType::eUnknown);
+
+	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarkerExt)
+	{
+		auto DebugMarkerObjectNameInfo = vk::DebugMarkerObjectNameInfoEXT()
+			.setObjectType(GetDebugReportObjectType(Type))
+			.setObject(Object)
+			.setPObjectName(Name);
+
+		VERIFY_VK(GetNativeDevice().debugMarkerSetObjectNameEXT(&DebugMarkerObjectNameInfo));
+	}
+	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtilsExt)
+	{
+		auto DebugUtilsObjectNameInfo = vk::DebugUtilsObjectNameInfoEXT()
+			.setObjectType(Type)
+			.setObjectHandle(Object)
+			.setPObjectName(Name);
+
+		VERIFY_VK(GetNativeDevice().setDebugUtilsObjectNameEXT(&DebugUtilsObjectNameInfo));
+	}
 }

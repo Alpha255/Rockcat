@@ -3,7 +3,7 @@
 #include "Runtime/Engine/Engine.h"
 
 VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo& CreateInfo)
-	: VkDeviceResource(Device)
+	: VkHwResource(Device)
 {
 	/// If a memory object does not have the VK_MEMORY_PROPERTY_HOST_COHERENT_BIT property, 
 	/// then vkFlushMappedMemoryRanges must be called in order to guarantee that writes to the memory object from the host are made available to the host domain, 
@@ -77,11 +77,11 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 		.setSize(AlignedSize)
 		.setUsage(UsageFlags)
 		.setSharingMode(vk::SharingMode::eExclusive);
-	VERIFY_VK(GetNativeDevice().createBuffer(&vkCreateInfo, nullptr, &m_Buffer));
+	VERIFY_VK(GetNativeDevice().createBuffer(&vkCreateInfo, nullptr, &m_Native));
 
 	//m_DeviceMemory = VulkanMemoryAllocator::Get().Alloc(Get(), CreateInfo.AccessFlags);
 
-	GetNativeDevice().bindBufferMemory(m_Buffer, m_Memory, 0u);
+	GetNativeDevice().bindBufferMemory(m_Native, m_Memory, 0u);
 
 	const bool8_t IsVolatile = CreateInfo.AccessFlags == ERHIDeviceAccessFlags::GpuReadCpuWrite;
 
@@ -165,8 +165,7 @@ void VulkanBuffer::FlushMappedRange(size_t Size, size_t Offset)
 	assert(!m_Coherent && m_MappedMemory);
 	assert(Offset + Size <= m_Size || (Size == VK_WHOLE_SIZE && Offset < m_Size));
 
-	vk::MappedMemoryRange MappedRange;
-	MappedRange
+	auto MappedRange = vk::MappedMemoryRange()
 		.setMemory(m_Memory)
 		.setSize(Size)
 		.setOffset(Offset);
@@ -180,8 +179,7 @@ void VulkanBuffer::InvalidateMappedRange(size_t Size, size_t Offset)
 	assert(!m_Coherent && m_MappedMemory);
 	assert(Offset + Size <= m_Size || (Size == VK_WHOLE_SIZE && Offset < m_Size));
 
-	vk::MappedMemoryRange MappedRange;
-	MappedRange
+	auto MappedRange = vk::MappedMemoryRange()
 		.setMemory(m_Memory)
 		.setSize(Size)
 		.setOffset(Offset);
@@ -211,13 +209,6 @@ bool8_t VulkanBuffer::Update(const void* Data, size_t Size, size_t SrcOffset, si
 	return false;
 }
 
-void VulkanBuffer::SetDebugName(const char8_t* Name)
-{
-	assert(Name);
-	GetDevice().SetObjectName(m_Buffer, Name);
-	RHIBuffer::SetDebugName(Name);
-}
-
 VulkanBuffer::~VulkanBuffer()
 {
 	if (m_MappedMemory)
@@ -230,7 +221,4 @@ VulkanBuffer::~VulkanBuffer()
 		GetNativeDevice().freeMemory(m_Memory);
 		m_Memory = nullptr;
 	}
-
-	GetNativeDevice().destroy(m_Buffer);
-	m_Buffer = nullptr;
 }

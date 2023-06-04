@@ -98,12 +98,11 @@ struct RHIImageCreateInfo
 	inline RHIImageCreateInfo& SetName(const char8_t* Value) { Name = Value; return *this; }
 };
 
-class RHIImage : public RHIResource
+class RHIImage
 {
 public:
 	RHIImage(const RHIImageCreateInfo& CreateInfo)
-		: RHIResource(CreateInfo.Name.c_str())
-		, m_Width(CreateInfo.Width)
+		: m_Width(CreateInfo.Width)
 		, m_Height(CreateInfo.Height)
 		, m_Depth(CreateInfo.Depth)
 		, m_ArrayLayers(CreateInfo.ArrayLayers)
@@ -120,7 +119,6 @@ public:
 	inline uint32_t GetMipLevels() const { return m_MipLevels; }
 	inline ERHIImageType GetImageType() const { return m_Type; }
 	inline ERHIFormat GetFormat() const { return m_Format; }
-protected:
 private:
 	uint32_t m_Width = 1u;
 	uint32_t m_Height = 1u;
@@ -218,8 +216,6 @@ struct RHISamplerCreateInfo : public RHIHashedObject
 	inline RHISamplerCreateInfo& SetMaxLOD(float32_t MaxLODValue) { MaxLOD = MaxLODValue; return *this; }
 };
 
-class RHISampler : public RHIResource
+class RHISampler
 {
-public:
-	using RHIResource::RHIResource;
 };

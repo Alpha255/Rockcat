@@ -76,8 +76,6 @@ struct RHIInputLayoutCreateInfo : public RHIHashedObject
 
 class RHIInputLayout : public RHIResource
 {
-public:
-	using RHIResource::RHIResource;
 };
 
 struct RHIShaderCreateInfo
@@ -92,8 +90,6 @@ struct RHIShaderCreateInfo
 class RHIShader : public RHIResource
 {
 public:
-	using RHIResource::RHIResource;
-
 	ERHIShaderStage GetStage() const { return m_Stage; }
 private:
 	ERHIShaderStage m_Stage = ERHIShaderStage::Num;

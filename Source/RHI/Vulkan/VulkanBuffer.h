@@ -2,7 +2,7 @@
 
 #include "RHI/Vulkan/VulkanTypes.h"
 
-class VulkanBuffer final : public RHIBuffer, public VkDeviceResource
+class VulkanBuffer final : public VkHwResource<vk::Buffer>, public RHIBuffer
 {
 public:
 	VulkanBuffer(const class VulkanDevice& Device, const RHIBufferCreateInfo& CreateInfo);
@@ -28,10 +28,7 @@ public:
 	inline bool8_t IsCoherent() const { return m_Coherent; }
 	inline bool8_t IsHostVisible() const { return m_HostVisible; }
 	bool8_t IsHostCached() const { return m_HostCached; }
-
-	void SetDebugName(const char8_t* Name) override final;
 private:
-	vk::Buffer m_Buffer;
 	vk::DeviceMemory m_Memory;
 
 	bool8_t m_Coherent = false;

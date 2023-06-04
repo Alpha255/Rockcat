@@ -18,11 +18,9 @@ struct RHIBufferCreateInfo
 	inline RHIBufferCreateInfo& SetInitialData(const void* Data) { InitialData = Data; return *this; }
 };
 
-class RHIBuffer : public RHIResource
+class RHIBuffer
 {
 public:
-	using RHIResource::RHIResource;
-
 	virtual void* Map(size_t Size = WHOLE_SIZE, size_t Offset = 0u) = 0;
 
 	virtual void Unmap() = 0;
@@ -113,11 +111,9 @@ struct RHIFrameBufferCreateInfo : public RHIHashedObject
 	uint32_t Depth = 0u;
 };
 
-class RHIFrameBuffer : public RHIResource
+class RHIFrameBuffer
 {
 public:
-	using RHIResource::RHIResource;
-
 	inline uint32_t GetWidth() const { return m_Width; }
 	inline uint32_t GetHeight() const { return m_Height; }
 	inline uint32_t GetDepth() const { return m_Depth; }

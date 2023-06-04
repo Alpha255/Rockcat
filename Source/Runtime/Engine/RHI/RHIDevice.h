@@ -171,11 +171,9 @@ private:
 	std::string m_AdapterName;
 };
 
-class RHISwapchain : public RHIResource
+class RHISwapchain
 {
 public:
-	using RHIResource::RHIResource;
-
 	RHISwapchain(const void* WindowHandle, uint32_t Width, uint32_t Height, bool8_t Fullscreen, bool8_t VSync)
 		: m_WindowHandle(WindowHandle)
 		, m_Width(Width)

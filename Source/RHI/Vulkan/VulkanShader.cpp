@@ -3,7 +3,7 @@
 #include "Runtime/Engine/Asset/ShaderAsset.h"
 
 VulkanShader::VulkanShader(const class VulkanDevice& Device, const RHIShaderCreateInfo& CreateInfo)
-	: VkDeviceResource(Device)
+	: VkHwResource(Device)
 {
 	assert(GetStage() < ERHIShaderStage::Num && CreateInfo.Binary);
 	assert(CreateInfo.Binary->GetSize() && CreateInfo.Binary->GetSize() % sizeof(uint32_t) == 0);
@@ -12,22 +12,9 @@ VulkanShader::VulkanShader(const class VulkanDevice& Device, const RHIShaderCrea
 		.setCodeSize(CreateInfo.Binary->GetSize())
 		.setPCode(reinterpret_cast<const uint32_t*>(CreateInfo.Binary->GetBinary()));
 
-	VERIFY_VK(GetNativeDevice().createShaderModule(&vkCreateInfo, nullptr, &m_Shader));
+	VERIFY_VK(GetNativeDevice().createShaderModule(&vkCreateInfo, nullptr, &m_Native));
 
-	SetDebugName(CreateInfo.Name.c_str());
-}
-
-VulkanShader::~VulkanShader()
-{
-	GetNativeDevice().destroy(m_Shader);
-	m_Shader = nullptr;
-}
-
-void VulkanShader::SetDebugName(const char8_t* Name)
-{
-	assert(Name);
-	GetDevice().SetObjectName(m_Shader, Name);
-	RHIShader::SetDebugName(Name);
+	VkHwResource::SetDebugName(CreateInfo.Name.c_str());
 }
 
 #if 0

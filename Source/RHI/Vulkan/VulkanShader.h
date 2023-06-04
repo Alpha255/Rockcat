@@ -2,16 +2,12 @@
 
 #include "RHI/Vulkan/VulkanTypes.h"
 
-class VulkanShader final : public RHIShader, public VkDeviceResource
+class VulkanShader final : public VkHwResource<vk::ShaderModule>, public RHIShader
 {
 public:
 	VulkanShader(const class VulkanDevice& Device, const RHIShaderCreateInfo& CreateInfo);
 
-	~VulkanShader();
-
-	void SetDebugName(const char8_t* Name) override final;
-private:
-	vk::ShaderModule m_Shader;
+	~VulkanShader() = default;
 };
 
 class VulkanInputLayout final : public RHIInputLayout

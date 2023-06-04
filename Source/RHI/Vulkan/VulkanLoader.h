@@ -296,22 +296,38 @@ public:
 	const vk::Device& GetNativeDevice() const;
 
 	const vk::Instance& GetNativeInstance() const;
+protected:
+	void SetObjectName(vk::ObjectType Type, uint64_t Object, const char8_t* Name);
 private:
 	const class VulkanDevice& m_Device;
 };
 
 template<class VkObject>
-class VkHwObject : public VkDeviceResource, public RHIResource
+class VkHwResource : public VkDeviceResource, public RHIResource
 {
 public:
-	VkHwObject(const class VulkanDevice& Device, const char8_t* Name)
+	VkHwResource(const class VulkanDevice& Device, const char8_t* Name)
 		: VkDeviceResource(Device)
 		, RHIResource(Name)
 	{
 	}
 
+	VkHwResource(const class VulkanDevice& Device)
+		: VkDeviceResource(Device)
+	{
+	}
+
 	inline VkObject& GetNative() { return m_Native; }
 	inline const VkObject& GetNative() const { return m_Native; }
+
+	inline void SetDebugName(const char8_t* Name) override final
+	{
+		assert(Name);
+		SetObjectName(VkObject::objectType, reinterpret_cast<uint64_t>((VkObject::NativeType)m_Native), Name);
+		RHIResource::SetDebugName(Name);
+	}
+
+	virtual ~VkHwResource() { GetNativeDevice().destroy(m_Native); m_Native = nullptr; };
 protected:
 	VkObject m_Native;
 };

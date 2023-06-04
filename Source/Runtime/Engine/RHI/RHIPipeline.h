@@ -186,20 +186,14 @@ private:
 #endif
 };
 
-class RHIPipeline : public RHIResource
+class RHIPipeline
 {
-public:
-	using RHIResource::RHIResource;
 };
 
 class RHIGraphicsPipeline : public RHIPipeline
 {
-public:
-	using RHIPipeline::RHIPipeline;
 };
 
 class RHIComputePipeline : public RHIPipeline
 {
-public:
-	using RHIPipeline::RHIPipeline;
 };
