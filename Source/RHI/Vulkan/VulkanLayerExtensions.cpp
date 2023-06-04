@@ -1,12 +1,5 @@
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 
-template<class LastStruct, class NextStruct>
-static void SetPNext(LastStruct& Last, NextStruct& Next)
-{
-	Next.pNext = (void*)Last.pNext;
-	Last.pNext = (void*)&Next;
-}
-
 class VkKHRValidationLayer : public VulkanLayer
 {
 public:
@@ -128,6 +121,63 @@ public:
 	}
 };
 
+class VkTimelineSemaphoreExt : public VulkanDeviceExtension
+{
+public:
+	VkTimelineSemaphoreExt()
+		: VulkanDeviceExtension(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME, false)
+	{
+	}
+
+	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
+	{
+		return Configs && Configs->HasTimelineSemaphore;
+	}
+
+	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
+	{
+		Config->HasTimelineSemaphore = IsEnabled();
+	}
+};
+
+class VkFullscreenExclusiveExt : public VulkanDeviceExtension
+{
+public:
+	VkFullscreenExclusiveExt()
+		: VulkanDeviceExtension(VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME, false)
+	{
+	}
+
+	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
+	{
+		return Configs && Configs->HasFullscreenExclusive;
+	}
+
+	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
+	{
+		Config->HasFullscreenExclusive = IsEnabled();
+	}
+};
+
+class VkDynamicStateExt : public VulkanDeviceExtension
+{
+public:
+	VkDynamicStateExt()
+		: VulkanDeviceExtension(VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME, false)
+	{
+	}
+
+	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
+	{
+		return Configs && Configs->HasDynamicState;
+	}
+
+	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
+	{
+		Config->HasDynamicState = IsEnabled();
+	}
+};
+
 class VkValidationFeaturesExt : public VulkanInstanceExtension
 {
 public:
@@ -201,6 +251,8 @@ VulkanExtensionArray VulkanExtension::GetWantedDeviceExtensions()
 	VulkanExtensionArray WantedExts;
 
 	APPEND_EXT(VkDebugMarkerExt);
+	APPEND_EXT(VkTimelineSemaphoreExt);
+	APPEND_EXT(VkFullscreenExclusiveExt);
 
 	return WantedExts;
 }

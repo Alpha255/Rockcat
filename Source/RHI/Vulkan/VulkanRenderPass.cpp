@@ -143,55 +143,48 @@ VulkanRenderPass::~VulkanRenderPass()
 
 #endif
 
-#include "Colorful/Vulkan/VulkanRenderPass.h"
-#include "Colorful/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanRenderPass.h"
+#include "RHI/Vulkan/VulkanDevice.h"
+#include "Runtime/Engine/Engine.h"
 
-NAMESPACE_START(RHI)
-
-VulkanFramebuffer::VulkanFramebuffer(VulkanDevice* Device, const FrameBufferDesc& Desc)
-	: VkHWObject(Device, Desc.Width, Desc.Height, Desc.Depth, Desc)
+VulkanFramebuffer::VulkanFramebuffer(const VulkanDevice& Device, const RHIFrameBufferCreateInfo& CreateInfo)
+	: VkHwResource(Device)
 {
-	CreateRenderPass(Desc);
+	CreateRenderPass(CreateInfo);
 
-	std::vector<VkImageView> Attachments;
-	for (auto& ColorAttachment : Desc.ColorAttachments)
+	std::vector<vk::ImageView> Attachments;
+	for (auto& ColorAttachment : CreateInfo.ColorAttachments)
 	{
 		if (ColorAttachment)
 		{
-			auto Image = std::static_pointer_cast<VulkanImage>(ColorAttachment);
+			auto Image = Cast<VulkanImage>(ColorAttachment);
 			assert(Image &&
-				Image->Width() == Desc.Width &&
-				Image->Height() == Desc.Height &&
-				Image->Depth() == Desc.Depth);
+				Image->GetWidth() == CreateInfo.Width &&
+				Image->GetHeight() == CreateInfo.Height &&
+				Image->GetDepth() == CreateInfo.Depth);
 
-			Attachments.push_back(Image->GetOrCrateImageView(AllSubresource));
+			//Attachments.push_back(Image->GetOrCrateImageView(AllSubresource));
 		}
 	}
-	if (Desc.DepthStencilAttachment)
+	if (CreateInfo.DepthStencilAttachment)
 	{
-		auto Image = std::static_pointer_cast<VulkanImage>(Desc.DepthStencilAttachment);
+		auto Image = Cast<VulkanImage>(CreateInfo.DepthStencilAttachment);
 		assert(Image);
 
-		Attachments.push_back(Image->GetOrCrateImageView(AllSubresource));
+		//Attachments.push_back(Image->GetOrCrateImageView(AllSubresource));
 	}
 
-	VkFramebufferCreateInfo CreateInfo
-	{
-		VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-		nullptr,
-		0u,
-		m_RenderPass,
-		static_cast<uint32_t>(Attachments.size()),
-		Attachments.data(),
-		Desc.Width,
-		Desc.Height,
-		Desc.Depth
-	};
+	auto vkCreateInfo = vk::FramebufferCreateInfo()
+		.setRenderPass(m_RenderPass)
+		.setAttachments(Attachments)
+		.setWidth(CreateInfo.Width)
+		.setHeight(CreateInfo.Height)
+		.setLayers(CreateInfo.Depth);
 
-	VERIFY_VK(vkCreateFramebuffer(m_Device->Get(), &CreateInfo, VK_ALLOCATION_CALLBACKS, Reference()));
+	VERIFY_VK(GetNativeDevice().createFramebuffer(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
-void VulkanFramebuffer::CreateRenderPass(const FrameBufferDesc& Desc)
+void VulkanFramebuffer::CreateRenderPass(const RHIFrameBufferCreateInfo& CreateInfo)
 {
 	/*********************************************************************************************************************
 	VK_ATTACHMENT_LOAD_OP_LOAD specifies that the previous contents of the image within the render area will be preserved.
@@ -220,65 +213,51 @@ void VulkanFramebuffer::CreateRenderPass(const FrameBufferDesc& Desc)
 	For attachments with a color format, this uses the access type VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT.
 	*********************************************************************************************************************/
 
-	assert(Desc.ColorAttachments.size() > 0u);
+	assert(CreateInfo.ColorAttachments.size() > 0u);
 
-	std::vector<VkAttachmentReference> ColorAttachmentReferences(Desc.ColorAttachments.size());
-	std::vector<VkAttachmentDescription> AttachmentDescriptions(Desc.ColorAttachments.size());
-	VkAttachmentReference DepthAttachmentReference;
+	std::vector<vk::AttachmentReference> ColorAttachmentReferences(CreateInfo.ColorAttachments.size());
+	std::vector<vk::AttachmentDescription> AttachmentDescriptions(CreateInfo.ColorAttachments.size());
+	vk::AttachmentReference DepthAttachmentReference;
 
-	for (uint32_t ColorAttachmentIndex = 0u; ColorAttachmentIndex < Desc.ColorAttachments.size(); ++ColorAttachmentIndex)
+	for (uint32_t ColorAttachmentIndex = 0u; ColorAttachmentIndex < CreateInfo.ColorAttachments.size(); ++ColorAttachmentIndex)
 	{
-		AttachmentDescriptions[ColorAttachmentIndex].flags = 0u;
-		AttachmentDescriptions[ColorAttachmentIndex].format = VkType::Format(Desc.ColorAttachments[ColorAttachmentIndex]->Format());
-		AttachmentDescriptions[ColorAttachmentIndex].samples = VK_SAMPLE_COUNT_1_BIT;
-		AttachmentDescriptions[ColorAttachmentIndex].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
-		AttachmentDescriptions[ColorAttachmentIndex].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		AttachmentDescriptions[ColorAttachmentIndex].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		AttachmentDescriptions[ColorAttachmentIndex].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		AttachmentDescriptions[ColorAttachmentIndex].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		AttachmentDescriptions[ColorAttachmentIndex].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		AttachmentDescriptions[ColorAttachmentIndex]
+			.setFormat(GetFormat(CreateInfo.ColorAttachments[ColorAttachmentIndex]->GetFormat()))
+			.setSamples(vk::SampleCountFlagBits::e1)
+			.setLoadOp(vk::AttachmentLoadOp::eLoad)
+			.setStoreOp(vk::AttachmentStoreOp::eStore)
+			.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+			.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+			.setInitialLayout(vk::ImageLayout::eColorAttachmentOptimal)
+			.setFinalLayout(vk::ImageLayout::eColorAttachmentOptimal);
 
-		ColorAttachmentReferences[ColorAttachmentIndex].attachment = ColorAttachmentIndex;
-		ColorAttachmentReferences[ColorAttachmentIndex].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		ColorAttachmentReferences[ColorAttachmentIndex]
+			.setAttachment(ColorAttachmentIndex)
+			.setLayout(vk::ImageLayout::eAttachmentOptimal);
 	}
 
-	if (Desc.DepthStencilAttachment)
+	if (CreateInfo.DepthStencilAttachment)
 	{
-		AttachmentDescriptions.push_back(
-			VkAttachmentDescription
-			{
-				0u,
-				VkType::Format(Desc.DepthStencilAttachment->Format()),
-				VK_SAMPLE_COUNT_1_BIT,
-				VK_ATTACHMENT_LOAD_OP_LOAD,
-				VK_ATTACHMENT_STORE_OP_STORE,
-				VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-				VK_ATTACHMENT_STORE_OP_DONT_CARE,
-				VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-				VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-			}
-		);
+		AttachmentDescriptions.emplace_back(
+			vk::AttachmentDescription()
+			.setFormat(GetFormat(CreateInfo.DepthStencilAttachment->GetFormat()))
+			.setSamples(vk::SampleCountFlagBits::e1)
+			.setLoadOp(vk::AttachmentLoadOp::eLoad)
+			.setStoreOp(vk::AttachmentStoreOp::eStore)
+			.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+			.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+			.setInitialLayout(vk::ImageLayout::eStencilAttachmentOptimal)
+			.setFinalLayout(vk::ImageLayout::eStencilAttachmentOptimal));
 
-		DepthAttachmentReference = VkAttachmentReference
-		{
-			static_cast<uint32_t>(AttachmentDescriptions.size()) - 1u,
-			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-		};
+		DepthAttachmentReference
+			.setAttachment(static_cast<uint32_t>(AttachmentDescriptions.size()) - 1u)
+			.setLayout(vk::ImageLayout::eStencilAttachmentOptimal);
 	}
 
-	VkSubpassDescription SubpassDescription
-	{
-		0u,
-		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		0u,       /// inputAttachmentCount
-		nullptr,  /// pInputAttachments
-		static_cast<uint32_t>(ColorAttachmentReferences.size()),
-		ColorAttachmentReferences.data(),
-		nullptr,  /// pResolveAttachments
-		Desc.DepthStencilAttachment ? &DepthAttachmentReference : nullptr,
-		0u,       /// preserveAttachmentCount
-		nullptr   /// pPreserveAttachments
-	};
+	auto SubpassDescription = vk::SubpassDescription()
+		.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
+		.setColorAttachments(ColorAttachmentReferences)
+		.setPDepthStencilAttachment(&DepthAttachmentReference);
 
 	/***********************************************************************************
 	VK_DEPENDENCY_BY_REGION_BIT specifies that dependencies will be framebuffer-local.
@@ -288,39 +267,27 @@ void VulkanFramebuffer::CreateRenderPass(const FrameBufferDesc& Desc)
 	VK_DEPENDENCY_DEVICE_GROUP_BIT specifies that dependencies are non-device-local dependency.
 	************************************************************************************/
 
-	VkSubpassDependency SubpassDependency
-	{
-		VK_SUBPASS_EXTERNAL,
-		0u,
-		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-		VK_ACCESS_NONE_KHR,
-		VK_ACCESS_NONE_KHR,
-		VK_DEPENDENCY_BY_REGION_BIT
-	};
+	auto SubpassDependency = vk::SubpassDependency()
+		.setSrcSubpass(VK_SUBPASS_EXTERNAL)
+		.setDstSubpass(0u)
+		.setSrcStageMask(vk::PipelineStageFlagBits::eTopOfPipe)
+		.setDstStageMask(vk::PipelineStageFlagBits::eBottomOfPipe)
+		.setSrcAccessMask(vk::AccessFlagBits::eNoneKHR)
+		.setDstAccessMask(vk::AccessFlagBits::eNoneKHR)
+		.setDependencyFlags(vk::DependencyFlagBits::eByRegion);
 
-	VkRenderPassCreateInfo CreateInfo
-	{
-		VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-		nullptr,
-		0u,
-		static_cast<uint32_t>(AttachmentDescriptions.size()),
-		AttachmentDescriptions.data(),
-		1u,
-		&SubpassDescription,
-		0u,
-		&SubpassDependency
-	};
+	auto vkCreateInfo = vk::RenderPassCreateInfo()
+		.setAttachments(AttachmentDescriptions)
+		.setSubpassCount(1u)
+		.setPSubpasses(&SubpassDescription)
+		.setDependencyCount(1u)
+		.setPDependencies(&SubpassDependency);
 
-	VERIFY_VK(vkCreateRenderPass(m_Device->Get(), &CreateInfo, VK_ALLOCATION_CALLBACKS, &m_RenderPass));
+	VERIFY_VK(GetNativeDevice().createRenderPass(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_RenderPass));
 }
 
 VulkanFramebuffer::~VulkanFramebuffer()
 {
-	vkDestroyRenderPass(m_Device->Get(), m_RenderPass, VK_ALLOCATION_CALLBACKS);
-	m_RenderPass = VK_NULL_HANDLE;
-
-	vkDestroyFramebuffer(m_Device->Get(), Get(), VK_ALLOCATION_CALLBACKS);
+	GetNativeDevice().destroy(m_RenderPass, VK_ALLOCATION_CALLBACKS);
+	m_RenderPass = nullptr;
 }
-
-NAMESPACE_END(RHI)

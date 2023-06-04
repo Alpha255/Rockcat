@@ -77,7 +77,7 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 		.setSize(AlignedSize)
 		.setUsage(UsageFlags)
 		.setSharingMode(vk::SharingMode::eExclusive);
-	VERIFY_VK(GetNativeDevice().createBuffer(&vkCreateInfo, nullptr, &m_Native));
+	VERIFY_VK(GetNativeDevice().createBuffer(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
 	//m_DeviceMemory = VulkanMemoryAllocator::Get().Alloc(Get(), CreateInfo.AccessFlags);
 
@@ -115,11 +115,9 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 		{
 			if (RHIInterface::GetGraphicsSettings()->BatchResourceDataTransfer)
 			{
-
 			}
 			else
 			{
-
 			}
 			//auto Command = m_Device->GetOrAllocateCommandBuffer(EQueueType::Transfer, ECommandBufferLevel::Primary, true, true);
 

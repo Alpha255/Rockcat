@@ -3,13 +3,13 @@ VulkanRenderPassPtr VkRenderStateCache::getOrCreateRenderPass(const RenderPassDe
 {
 	for (auto& pair : m_RenderPassCache)
 	{
-		if (pair.first == Desc.hash())
+		if (pair.first == CreateInfo.hash())
 		{
 			return pair.second;
 		}
 	}
 
-	if (Desc.AttachmentDescs.size() == 0u)
+	if (CreateInfo.AttachmentDescs.size() == 0u)
 	{
 		RenderPassDesc defaultRenderPassDesc;
 		defaultRenderPassDesc.AttachmentDescs.resize(2u);
@@ -77,269 +77,199 @@ VulkanRenderPassPtr VkRenderStateCache::getOrCreateRenderPass(const RenderPassDe
 		};
 
 		auto renderPass = create_shared<VulkanRenderPass>(defaultRenderPassDesc);
-		m_RenderPassCache.push_back(std::make_pair(Desc.hash(), renderPass));
+		m_RenderPassCache.push_back(std::make_pair(CreateInfo.hash(), renderPass));
 		return renderPass;
 	}
 
 	auto renderPass = create_shared<VulkanRenderPass>(Desc);
-	m_RenderPassCache.push_back(std::make_pair(Desc.hash(), renderPass));
+	m_RenderPassCache.push_back(std::make_pair(CreateInfo.hash(), renderPass));
 	return renderPass;
 }
 #else
-#include "Colorful/Vulkan/VulkanPipeline.h"
-#include "Colorful/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanPipeline.h"
+#include "RHI/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanRHI.h"
+#include "RHI/Vulkan/VulkanLayerExtensions.h"
+#include "Runtime/Engine/Engine.h"
 
-NAMESPACE_START(RHI)
-
-VulkanPipelineCache::VulkanPipelineCache(VulkanDevice* Device)
-	: VkHWObject(Device)
+VulkanPipelineCache::VulkanPipelineCache(const VulkanDevice& Device)
+	: VkHwResource(Device)
 {
-	VkPipelineCacheCreateInfo CreateInfo
-	{
-		VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO,
-		nullptr,
-		0u,   /// flags is reserved for future use
-		0u,   /// #TODO "pInitialData"
-		nullptr
-	};
-	VERIFY_VK(vkCreatePipelineCache(m_Device->Get(), &CreateInfo, VK_ALLOCATION_CALLBACKS, Reference()));
+	vk::PipelineCacheCreateInfo vkCreateInfo;
+	VERIFY_VK(GetNativeDevice().createPipelineCache(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
-VulkanPipeline::VulkanPipeline(VulkanDevice* Device)
-	: VkHWObject(Device)
+VulkanPipeline::VulkanPipeline(const VulkanDevice& Device)
+	: VkHwResource(Device)
 {
 }
 
-VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanDevice* Device, VkPipelineCache PipelineCache, const GraphicsPipelineDesc& Desc)
+VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::PipelineCache PipelineCache, const RHIGraphicsPipelineCreateInfo& CreateInfo)
 	: VulkanPipeline(Device)
 {
-	assert(Desc.FrameBuffer);
+	assert(CreateInfo.FrameBuffer);
 
-	std::vector<VkPipelineShaderStageCreateInfo> ShaderStageCreateInfos;
-	Desc.Shaders.ForEach([&ShaderStageCreateInfos](IShader* Shader) {
-		ShaderStageCreateInfos.emplace_back(
-			VkPipelineShaderStageCreateInfo
-			{
-				VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-				nullptr,
-				0u,
-				VkType::ShaderStage(Shader->Stage()),
-				static_cast<VulkanShader*>(Shader)->Get(),
-				"main", /// #TODO
-				nullptr /// pSpecializationInfo
-			}
-		);
-	});
-	assert(ShaderStageCreateInfos.size() > 0u);
+	std::vector<vk::PipelineShaderStageCreateInfo> ShaderStageCreateInfos;
+	//CreateInfo.Shaders.ForEach([&ShaderStageCreateInfos](RHIShader* Shader) {
+	//	ShaderStageCreateInfos.emplace_back(
+	//		vk::PipelineShaderStageCreateInfo().
+	//		{
+	//			VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+	//			nullptr,
+	//			0u,
+	//			VkType::ShaderStage(Shader->Stage()),
+	//			static_cast<VulkanShader*>(Shader)->Get(),
+	//			"main", /// #TODO
+	//			nullptr /// pSpecializationInfo
+	//		}
+	//	);
+	//});
+	//assert(ShaderStageCreateInfos.size() > 0u);
 
-	VkPipelineRasterizationStateCreateInfo RasterizationStateCreateInfo
+	auto RasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo()
+		.setDepthClampEnable(CreateInfo.RasterizationState.EnableDepthClamp)
+		.setRasterizerDiscardEnable(false)
+		.setPolygonMode(GetPolygonMode(CreateInfo.RasterizationState.PolygonMode))
+		.setCullMode(GetCullMode(CreateInfo.RasterizationState.CullMode))
+		.setFrontFace(GetFrontFace(CreateInfo.RasterizationState.FrontFace))
+		.setDepthBiasEnable(CreateInfo.RasterizationState.DepthBias != 0.0f)
+		.setDepthBiasConstantFactor(CreateInfo.RasterizationState.DepthBias)
+		.setDepthBiasClamp(CreateInfo.RasterizationState.DepthBiasClamp)
+		.setDepthBiasSlopeFactor(CreateInfo.RasterizationState.DepthBiasSlope)
+		.setLineWidth(CreateInfo.RasterizationState.LineWidth);
+
+	auto FrontFaceStencilState = vk::StencilOpState()
+		.setFailOp(GetStencilOp(CreateInfo.DepthStencilState.FrontFaceStencil.FailOp))
+		.setPassOp(GetStencilOp(CreateInfo.DepthStencilState.FrontFaceStencil.PassOp))
+		.setDepthFailOp(GetStencilOp(CreateInfo.DepthStencilState.FrontFaceStencil.DepthFailOp))
+		.setCompareOp(GetCompareFunc(CreateInfo.DepthStencilState.FrontFaceStencil.CompareFunc))
+		.setCompareMask(CreateInfo.DepthStencilState.StencilReadMask)
+		.setWriteMask(CreateInfo.DepthStencilState.StencilWriteMask)
+		.setReference(CreateInfo.DepthStencilState.FrontFaceStencil.Ref);
+	auto BackFaceStencilState = vk::StencilOpState()
+		.setFailOp(GetStencilOp(CreateInfo.DepthStencilState.BackFaceStencil.FailOp))
+		.setPassOp(GetStencilOp(CreateInfo.DepthStencilState.BackFaceStencil.PassOp))
+		.setDepthFailOp(GetStencilOp(CreateInfo.DepthStencilState.BackFaceStencil.DepthFailOp))
+		.setCompareOp(GetCompareFunc(CreateInfo.DepthStencilState.BackFaceStencil.CompareFunc))
+		.setCompareMask(CreateInfo.DepthStencilState.StencilReadMask)
+		.setWriteMask(CreateInfo.DepthStencilState.StencilWriteMask)
+		.setReference(CreateInfo.DepthStencilState.BackFaceStencil.Ref);
+
+	auto DepthStencilStateCreateInfo = vk::PipelineDepthStencilStateCreateInfo()
+		.setDepthTestEnable(CreateInfo.DepthStencilState.EnableDepth)
+		.setDepthWriteEnable(CreateInfo.DepthStencilState.EnableDepthWrite)
+		.setDepthCompareOp(GetCompareFunc(CreateInfo.DepthStencilState.DepthCompareFunc))
+		.setDepthBoundsTestEnable(CreateInfo.DepthStencilState.EnableDepthBoundsTest)
+		.setStencilTestEnable(CreateInfo.DepthStencilState.EnableStencil)
+		.setFront(FrontFaceStencilState)
+		.setBack(BackFaceStencilState)
+		.setMinDepthBounds(CreateInfo.DepthStencilState.DepthBounds.x)
+		.setMaxDepthBounds(CreateInfo.DepthStencilState.DepthBounds.y);
+
+	std::vector<vk::PipelineColorBlendAttachmentState> ColorBlendAttachmentStates;
+	for (uint32_t AttachmentIndex = 0u; AttachmentIndex < ERHILimitations::MaxRenderTargets; ++AttachmentIndex)
 	{
-		VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
-		nullptr,
-		0u, /// flags is reserved for future use
-		Desc.RasterizationState.EnableDepthClamp,
-		false,
-		VkType::PolygonMode(Desc.RasterizationState.PolygonMode),
-		VkType::CullMode(Desc.RasterizationState.CullMode),
-		VkType::FrontFace(Desc.RasterizationState.FrontFace),
-		Desc.RasterizationState.DepthBias != 0.0f,
-		Desc.RasterizationState.DepthBias,
-		Desc.RasterizationState.DepthBiasClamp,
-		Desc.RasterizationState.DepthBiasSlope,
-		Desc.RasterizationState.LineWidth
-	};
-
-	VkPipelineDepthStencilStateCreateInfo DepthStencilStateCreateInfo
-	{
-		VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-		nullptr,
-		0u,  /// flags is reserved for future use.
-		Desc.DepthStencilState.EnableDepth,
-		Desc.DepthStencilState.EnableDepthWrite,
-		VkType::CompareFunc(Desc.DepthStencilState.DepthCompareFunc),
-		Desc.DepthStencilState.EnableDepthBoundsTest,
-		Desc.DepthStencilState.EnableStencil,
-		{
-			VkType::StencilOp(Desc.DepthStencilState.FrontFaceStencil.FailOp),
-			VkType::StencilOp(Desc.DepthStencilState.FrontFaceStencil.PassOp),
-			VkType::StencilOp(Desc.DepthStencilState.FrontFaceStencil.DepthFailOp),
-			VkType::CompareFunc(Desc.DepthStencilState.FrontFaceStencil.CompareFunc),
-			Desc.DepthStencilState.StencilReadMask,
-			Desc.DepthStencilState.StencilWriteMask,
-			Desc.DepthStencilState.FrontFaceStencil.Ref
-		},
-		{
-			VkType::StencilOp(Desc.DepthStencilState.BackFaceStencil.FailOp),
-			VkType::StencilOp(Desc.DepthStencilState.BackFaceStencil.PassOp),
-			VkType::StencilOp(Desc.DepthStencilState.BackFaceStencil.DepthFailOp),
-			VkType::CompareFunc(Desc.DepthStencilState.BackFaceStencil.CompareFunc),
-			Desc.DepthStencilState.StencilReadMask,
-			Desc.DepthStencilState.StencilWriteMask,
-			Desc.DepthStencilState.BackFaceStencil.Ref
-		},
-		Desc.DepthStencilState.DepthBounds.x,
-		Desc.DepthStencilState.DepthBounds.y
-	};
-
-	std::vector<VkPipelineColorBlendAttachmentState> ColorBlendAttachmentStates;
-	for (uint32_t AttachmentIndex = 0u; AttachmentIndex < ELimitations::MaxRenderTargets; ++AttachmentIndex)
-	{
-		if (Desc.BlendState.RenderTargetBlends[AttachmentIndex].Index == AttachmentIndex)
+		if (CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].Index == AttachmentIndex)
 		{
 			ColorBlendAttachmentStates.emplace_back(
-				VkPipelineColorBlendAttachmentState
-				{
-					Desc.BlendState.RenderTargetBlends[AttachmentIndex].Enable,
-					VkType::BlendFactor(Desc.BlendState.RenderTargetBlends[AttachmentIndex].SrcColor),
-					VkType::BlendFactor(Desc.BlendState.RenderTargetBlends[AttachmentIndex].DstColor),
-					VkType::BlendOp(Desc.BlendState.RenderTargetBlends[AttachmentIndex].ColorOp),
-					VkType::BlendFactor(Desc.BlendState.RenderTargetBlends[AttachmentIndex].SrcAlpha),
-					VkType::BlendFactor(Desc.BlendState.RenderTargetBlends[AttachmentIndex].DstAlpha),
-					VkType::BlendOp(Desc.BlendState.RenderTargetBlends[AttachmentIndex].AlphaOp),
-					VkType::ColorComponentFlags(Desc.BlendState.RenderTargetBlends[AttachmentIndex].ColorMask)
-				}
-			);
+				vk::PipelineColorBlendAttachmentState()
+				.setBlendEnable(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].Enable)
+				.setSrcColorBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].SrcColor))
+				.setDstColorBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].DstColor))
+				.setColorBlendOp(GetBlendOp(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].ColorOp))
+				.setSrcAlphaBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].SrcAlpha))
+				.setDstAlphaBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].DstAlpha))
+				.setAlphaBlendOp(GetBlendOp(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].AlphaOp))
+				.setColorWriteMask(GetColorComponentFlags(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].ColorMask)));
 		}
 	}
-	VkPipelineColorBlendStateCreateInfo BlendStateCreateInfo
-	{
-		VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
-		nullptr,
-		0u,  /// flags is reserved for future use.
-		Desc.BlendState.EnableLogicOp,
-		VkType::LogicOp(Desc.BlendState.LogicOp),
-		static_cast<uint32_t>(ColorBlendAttachmentStates.size()),
-		ColorBlendAttachmentStates.data()
-	};
+	auto BlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo()
+		.setLogicOpEnable(CreateInfo.BlendState.EnableLogicOp)
+		.setLogicOp(GetLogicOp(CreateInfo.BlendState.LogicOp))
+		.setAttachments(ColorBlendAttachmentStates);
 
-	VkPipelineTessellationStateCreateInfo TessellationStateCreateInfo
-	{
-		VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO
-	};
+	vk::PipelineTessellationStateCreateInfo TessellationStateCreateInfo;
 
-	VkPipelineViewportStateCreateInfo ViewportStateCreateInfo
-	{
-		VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
-		nullptr,
-		0u,
-		1u,
-		nullptr,
-		1u,
-		nullptr
-	};
+	auto ViewportStateCreateInfo = vk::PipelineViewportStateCreateInfo()
+		.setScissorCount(1u)
+		.setViewportCount(1u);
 
-	VkPipelineMultisampleStateCreateInfo MultisampleStateCreateInfo
-	{
-		VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-		nullptr,
-		0u,
-		static_cast<VkSampleCountFlagBits>(Desc.MultisampleState.SampleCount),
-		Desc.MultisampleState.EnableSampleShading,
-		Desc.MultisampleState.MinSampleShading,
-		Desc.MultisampleState.SampleMask,
-		Desc.MultisampleState.EnableAlphaToCoverage,
-		Desc.MultisampleState.EnableAlphaToOne
-	};
+	auto MultisampleStateCreateInfo = vk::PipelineMultisampleStateCreateInfo()
+		.setRasterizationSamples(GetSampleCount(CreateInfo.MultisampleState.SampleCount))
+		.setSampleShadingEnable(CreateInfo.MultisampleState.EnableSampleShading)
+		.setMinSampleShading(CreateInfo.MultisampleState.MinSampleShading)
+		.setPSampleMask(CreateInfo.MultisampleState.SampleMask)
+		.setAlphaToCoverageEnable(CreateInfo.MultisampleState.EnableAlphaToCoverage)
+		.setAlphaToOneEnable(CreateInfo.MultisampleState.EnableAlphaToOne);
 
 	/// Set viewport/scissor dynamic
-	std::vector<VkDynamicState> DynamicStates
+	std::vector<vk::DynamicState> DynamicStates
 	{
-		VK_DYNAMIC_STATE_VIEWPORT,
-		VK_DYNAMIC_STATE_SCISSOR
+		vk::DynamicState::eViewport,
+		vk::DynamicState::eScissor
 	};
 
-#if VK_EXT_extended_dynamic_state
 	/// Provided by VK_VERSION_1_3
 	/// VK_DYNAMIC_STATE_CULL_MODE specifies that the cullMode state in VkPipelineRasterizationStateCreateInfo will be ignored 
 	/// and must be set dynamically with vkCmdSetCullMode before any drawing commands.
-	if (m_Device->EnabledExtensions().ExtendedDynamicState)
+	if (VulkanRHI::GetLayerExtensionConfigs().HasDynamicState)
 	{
-		DynamicStates.push_back(VK_DYNAMIC_STATE_CULL_MODE_EXT);
-		DynamicStates.push_back(VK_DYNAMIC_STATE_FRONT_FACE_EXT);
-		DynamicStates.push_back(VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY_EXT);
+		DynamicStates.push_back(vk::DynamicState::eCullModeEXT);
+		DynamicStates.push_back(vk::DynamicState::eFrontFaceEXT);
+		DynamicStates.push_back(vk::DynamicState::ePrimitiveTopologyEXT);
 	}
-#endif
 
-	VkPipelineDynamicStateCreateInfo DynamicStateCreateInfo
-	{
-		VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
-		nullptr,
-		0u,
-		static_cast<uint32_t>(DynamicStates.size()),
-		DynamicStates.data()
-	};
+	auto DynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
+		.setDynamicStates(DynamicStates);
 
-	VkPipelineVertexInputStateCreateInfo InputStateCreateInfo
-	{
-		VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO
-	};
+	vk::PipelineVertexInputStateCreateInfo InputStateCreateInfo;
 
-	if (auto InputLayout = static_cast<const VulkanInputLayout*>(Desc.InputLayout))
-	{
-		InputStateCreateInfo = InputLayout->InputStateCreateInfo();
-	}
+	//if (auto InputLayout = static_cast<const VulkanInputLayout*>(CreateInfo.InputLayout))
+	//{
+	//	InputStateCreateInfo = InputLayout->InputStateCreateInfo();
+	//}
 	
-	VkPipelineInputAssemblyStateCreateInfo InputAssemblyStateCreateInfo
-	{
-		VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-		nullptr,
-		0u,
-		VkType::PrimitiveTopology(Desc.PrimitiveTopology),
-		false /// #TODO primitiveRestartEnable
-	};
+	auto InputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo()
+		.setTopology(GetPrimitiveTopology(CreateInfo.PrimitiveTopology))
+		.setPrimitiveRestartEnable(false);
 
-	m_Descriptor = m_Device->GetOrAllocateDescriptor(Desc);
+	//m_Descriptor = m_Device->GetOrAllocateDescriptor(Desc);
 
-	VkGraphicsPipelineCreateInfo CreateInfo
-	{
-		VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-		nullptr,
-		0u,
-		static_cast<uint32_t>(ShaderStageCreateInfos.size()),
-		ShaderStageCreateInfos.data(),
-		&InputStateCreateInfo,
-		&InputAssemblyStateCreateInfo,
-		&TessellationStateCreateInfo,
-		&ViewportStateCreateInfo,
-		&RasterizationStateCreateInfo,
-		&MultisampleStateCreateInfo,
-		&DepthStencilStateCreateInfo,
-		&BlendStateCreateInfo,
-		&DynamicStateCreateInfo,
-		m_Descriptor.PipelineLayout,
-		static_cast<VulkanFramebuffer*>(Desc.FrameBuffer)->RenderPass(),
-		0u,
-		VK_NULL_HANDLE,
-		0u
-	};
+	auto vkCreateInfo = vk::GraphicsPipelineCreateInfo()
+		.setStages(ShaderStageCreateInfos)
+		.setPVertexInputState(&InputStateCreateInfo)
+		.setPInputAssemblyState(&InputAssemblyStateCreateInfo)
+		.setPTessellationState(&TessellationStateCreateInfo)
+		.setPViewportState(&ViewportStateCreateInfo)
+		.setPRasterizationState(&RasterizationStateCreateInfo)
+		.setPMultisampleState(&MultisampleStateCreateInfo)
+		.setPDepthStencilState(&DepthStencilStateCreateInfo)
+		.setPColorBlendState(&BlendStateCreateInfo)
+		.setPDynamicState(&DynamicStateCreateInfo)
+		.setLayout(nullptr)
+		.setRenderPass(nullptr);
 
 	/// #TODO Batch creations ???
-	VERIFY_VK(vkCreateGraphicsPipelines(m_Device->Get(), PipelineCache, 1u, &CreateInfo, VK_ALLOCATION_CALLBACKS, Reference()));
+	VERIFY_VK(GetNativeDevice().createGraphicsPipelines(PipelineCache, 1u, &vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
-	m_State = std::make_shared<VulkanGraphicsPipelineState>(Desc, m_Descriptor.DescriptorSet);
-}
-
-VulkanPipelineCache::~VulkanPipelineCache()
-{
-	vkDestroyPipelineCache(m_Device->Get(), Get(), VK_ALLOCATION_CALLBACKS);
+	//m_State = std::make_shared<VulkanGraphicsPipelineState>(Desc, m_Descriptor.DescriptorSet);
 }
 
 VulkanPipeline::~VulkanPipeline()
 {
-	vkDestroyDescriptorSetLayout(m_Device->Get(), m_Descriptor.DescriptorSetLayout, VK_ALLOCATION_CALLBACKS);
+	//vkDestroyDescriptorSetLayout(m_Device->Get(), m_Descriptor.DescriptorSetLayout, VK_ALLOCATION_CALLBACKS);
 
-	vkDestroyPipelineLayout(m_Device->Get(), m_Descriptor.PipelineLayout, VK_ALLOCATION_CALLBACKS);
-
-	vkDestroyPipeline(m_Device->Get(), Get(), VK_ALLOCATION_CALLBACKS);
+	//vkDestroyPipelineLayout(m_Device->Get(), m_Descriptor.PipelineLayout, VK_ALLOCATION_CALLBACKS);
 }
 
+#if 0
 VulkanGraphicsPipelineState::VulkanGraphicsPipelineState(const GraphicsPipelineDesc& Desc, VkDescriptorSet DescriptorSet)
 	: PipelineState(Desc)
 	, m_DescriptorSet(DescriptorSet)
 {
 	assert(m_DescriptorSet != VK_NULL_HANDLE);
 
-	Desc.Shaders.ForEach([this, DescriptorSet](const IShader* Shader) {
+	CreateInfo.Shaders.ForEach([this, DescriptorSet](const IShader* Shader) {
 		for (auto& Variable : Shader->Desc()->Variables)
 		{
 			VkWriteDescriptorSet WriteDescriptorSet
@@ -407,6 +337,6 @@ void VulkanGraphicsPipelineState::WriteUniformBuffer(EShaderStage, uint32_t Bind
 	VkBuffer->RequiredState = EResourceState::UniformBuffer;
 	ResourcesNeedTransitionState.emplace_back(ResourceNeedTransitionState{ nullptr, VkBuffer });
 }
+#endif
 
-NAMESPACE_END(RHI)
 #endif

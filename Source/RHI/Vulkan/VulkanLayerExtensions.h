@@ -9,6 +9,13 @@
 using VulkanLayerArray = std::vector<std::unique_ptr<class VulkanLayer>>;
 using VulkanExtensionArray = std::vector<std::unique_ptr<class VulkanExtension>>;
 
+template<class LastStruct, class NextStruct>
+inline void SetPNext(LastStruct& Last, NextStruct& Next)
+{
+	Next.pNext = (void*)Last.pNext;
+	Last.pNext = (void*)&Next;
+}
+
 struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayerExtensionConfigurations>
 {
 	using ParentClass::ParentClass;
@@ -27,6 +34,9 @@ struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayer
 	bool8_t HasValidationFeaturesExt_DebugPrintf = false;
 	bool8_t HasValidationFeaturesExt_Synchronization = true;
 	bool8_t HasDebugMarkerExt = true;
+	bool8_t HasTimelineSemaphore = false;
+	bool8_t HasFullscreenExclusive = false;
+	bool8_t HasDynamicState = false;
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -43,7 +53,9 @@ struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayer
 			CEREAL_NVP(HasValidationFeaturesExt_BestPractices),
 			CEREAL_NVP(HasValidationFeaturesExt_DebugPrintf),
 			CEREAL_NVP(HasValidationFeaturesExt_Synchronization),
-			CEREAL_NVP(HasDebugMarkerExt)
+			CEREAL_NVP(HasDebugMarkerExt),
+			CEREAL_NVP(HasTimelineSemaphore),
+			CEREAL_NVP(HasFullscreenExclusive)
 		);
 	}
 };

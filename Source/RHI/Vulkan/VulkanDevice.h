@@ -33,7 +33,7 @@ public:
 
 	~VulkanDevice();
 
-	virtual void WaitIdle() override final;
+	virtual void WaitIdle() const override final { assert(m_LogicalDevice); m_LogicalDevice.waitIdle(); }
 
 	virtual RHIShaderPtr CreateShader(const RHIShaderCreateInfo& RHICreateInfo) override final;
 

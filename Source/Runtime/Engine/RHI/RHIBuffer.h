@@ -38,10 +38,10 @@ protected:
 
 struct RHIFrameBufferCreateInfo : public RHIHashedObject
 {
-	std::vector<const RHIImage*> ColorAttachments;
-	const RHIImage* DepthStencilAttachment = nullptr;
+	std::vector<RHIImage*> ColorAttachments;
+	RHIImage* DepthStencilAttachment = nullptr;
 
-	RHIFrameBufferCreateInfo& AddColorAttachment(const RHIImage* Attachment)
+	RHIFrameBufferCreateInfo& AddColorAttachment(RHIImage* Attachment)
 	{
 		assert(Attachment);
 		assert(std::find(ColorAttachments.begin(), ColorAttachments.end(), Attachment) == ColorAttachments.end());
@@ -62,7 +62,7 @@ struct RHIFrameBufferCreateInfo : public RHIHashedObject
 		return *this;
 	}
 
-	RHIFrameBufferCreateInfo& SetDepthStencilAttachment(const RHIImage* Attachment)
+	RHIFrameBufferCreateInfo& SetDepthStencilAttachment(RHIImage* Attachment)
 	{
 		assert(Attachment);
 

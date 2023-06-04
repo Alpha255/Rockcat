@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Colorful/Vulkan/VulkanInstance.h"
+#include "RHI/Vulkan/VulkanTypes.h"
 
 /*****************
 	Fences
@@ -32,50 +32,49 @@
 		Many cases that would otherwise need an application to use other synchronization primitives can be expressed more efficiently as part of a render pass.
 ********************/
 
-NAMESPACE_START(RHI)
-
-class VulkanFence final : public VkHWObject<void, VkFence_T>
+class VulkanFence final : public VkHwResource<vk::Fence>
 {
 public:
-	VulkanFence(class VulkanDevice* Device, bool8_t Signaled = false);
+	VulkanFence(const class VulkanDevice& Device, bool8_t Signaled = false);
 
-	~VulkanFence();
+	~VulkanFence() = default;
 
-	bool8_t IsSignaled();
+	bool8_t IsSignaled() const;
 
-	void Reset();
+	void Reset() const;
 
-	void Wait(uint64_t Nanoseconds);
+	void Wait(uint64_t Nanoseconds) const;
 protected:
 private:
 };
 
-class VulkanSemaphore final : public VkHWObject<void, VkSemaphore_T>
+class VulkanSemaphore final : public VkHwResource<vk::Semaphore>
 {
 public:
-	VulkanSemaphore(class VulkanDevice* Device);
+	VulkanSemaphore(const class VulkanDevice& Device);
 
-	~VulkanSemaphore();
+	~VulkanSemaphore() = default;
 
-	uint64_t CounterValue() const;
+	uint64_t GetCounterValue() const;
 
-	void Wait(uint64_t Value, uint64_t Nanoseconds);
+	void Wait(uint64_t Value, uint64_t Nanoseconds) const;
 
-	void Signal(uint64_t Value);
+	void Signal(uint64_t Value) const;
 };
 
-class VulkanEvent final : public VkHWObject<void, VkEvent_T>
+class VulkanEvent final : public VkHwResource<vk::Event>
 {
 public:
-	VulkanEvent(class VulkanDevice* Device);
+	VulkanEvent(const class VulkanDevice& Device);
 
-	~VulkanEvent();
+	~VulkanEvent() = default;
 
-	bool8_t IsSignaled();
+	bool8_t IsSignaled() const;
 
-	void Signal(bool8_t Signaled);
+	void Signal(bool8_t Signaled) const;
 };
 
+#if 0
 struct VulkanPipelineBarrier
 {
 	VkPipelineStageFlags SrcStageFlags = VK_PIPELINE_STAGE_NONE_KHR;
@@ -135,5 +134,4 @@ struct VulkanPipelineBarrier
 protected:
 	class VulkanCommandBuffer* m_Command = nullptr;
 };
-
-NAMESPACE_END(RHI)
+#endif

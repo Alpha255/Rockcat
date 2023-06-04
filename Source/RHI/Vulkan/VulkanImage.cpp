@@ -1,195 +1,178 @@
-#include "Colorful/Vulkan/VulkanImage.h"
-#include "Colorful/Vulkan/VulkanDevice.h"
-#include "Colorful/Vulkan/VulkanMemoryAllocator.h"
+#include "RHI/Vulkan/VulkanImage.h"
+#include "RHI/Vulkan/VulkanDevice.h"
+#include "Runtime/Engine/Engine.h"
 
-NAMESPACE_START(RHI)
-
-VulkanImage::VulkanImage(VulkanDevice* Device, const ImageDesc& Desc)
-	: VkHWObject(Device, Desc)
+VulkanImage::VulkanImage(const VulkanDevice& Device, const RHIImageCreateInfo& CreateInfo, vk::Image Image)
+	: VkHwResource(Device)
+	, RHIImage(CreateInfo)
 {
-	FillAttributes(Desc);
-	/// VkFormatProperties
-
-	VkImageCreateInfo CreateInfo
-	{
-		VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-		nullptr,
-		m_VkAttributes.CreateFlags,
-		m_VkAttributes.Type,
-		m_VkAttributes.Format,
-		VkExtent3D
-		{
-			Desc.Width,
-			Desc.Type == EImageType::T_1D || Desc.Type == EImageType::T_1D_Array ? 1u : Desc.Height,
-			Desc.Type == EImageType::T_3D ? Desc.Depth : 1u
-		},
-		Desc.MipLevels,
-		Desc.ArrayLayers,
-		VkType::SampleCount(Desc.SampleCount),
-		m_VkAttributes.Tiling,
-		m_VkAttributes.UsageFlags,
-		m_VkAttributes.SharingMode,
-		0u,
-		nullptr,
-		m_VkAttributes.Layout
-	};
-	VERIFY_VK(vkCreateImage(m_Device->Get(), &CreateInfo, VK_ALLOCATION_CALLBACKS, Reference()));
-
-	m_DeviceMemory = VulkanMemoryAllocator::Get().Alloc(m_Handle, EDeviceAccessFlags::GpuRead);
-	VERIFY_VK(vkBindImageMemory(m_Device->Get(), m_Handle, m_DeviceMemory.Handle, 0u));
-
-	if (Desc.Asset.Data)
-	{
-		auto Command = m_Device->GetOrAllocateCommandBuffer(EQueueType::Transfer, ECommandBufferLevel::Primary, true, true);
-
-		Command->CopyBufferToImage(this, Desc.Asset.Data, Desc.Asset.Size, AllSubresource);
-
-		if (m_Device->Options().BatchResourceSubmit)
-		{
-			m_Device->Queue(EQueueType::Transfer)->QueueSubmit(std::vector<ICommandBufferSharedPtr>{Command});
-		}
-		else
-		{
-			m_Device->Queue(EQueueType::Transfer)->Submit(std::vector<ICommandBufferSharedPtr>{Command});
-		}
-	}
-
-	m_Device->SetObjectName(ToUInt64(), VK_OBJECT_TYPE_IMAGE, Desc.Name.data());
-}
-
-void VulkanImage::FillAttributes(const ImageDesc& Desc)
-{
-	assert(Desc.Format != EFormat::Unknown && Desc.Type != EImageType::Unknown);
-	assert(Desc.ArrayLayers <= m_Device->PhysicalLimits().maxImageArrayLayers);
+	assert(CreateInfo.Format != ERHIFormat::Unknown && CreateInfo.ImageType != ERHIImageType::Unknown);
+	assert(CreateInfo.ArrayLayers <= GetDevice().GetPhysicalDeviceLimits().maxImageArrayLayers);
 	assert(
-		(Desc.Type == EImageType::T_1D && Desc.Width <= m_Device->PhysicalLimits().maxImageDimension1D) ||
-		((Desc.Type == EImageType::T_2D || Desc.Type == EImageType::T_2D_Array) &&
-			Desc.Width <= m_Device->PhysicalLimits().maxImageDimension2D &&
-			Desc.Height <= m_Device->PhysicalLimits().maxImageDimension2D) ||
-		((Desc.Type == EImageType::T_Cube || Desc.Type == EImageType::T_Cube_Array) &&
-			Desc.Width <= m_Device->PhysicalLimits().maxImageDimensionCube &&
-			Desc.Height <= m_Device->PhysicalLimits().maxImageDimensionCube) ||
-		(Desc.Type == EImageType::T_3D && Desc.Height <= m_Device->PhysicalLimits().maxImageDimension3D));
+		(CreateInfo.ImageType == ERHIImageType::T_1D && CreateInfo.Width <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension1D) ||
+		((CreateInfo.ImageType == ERHIImageType::T_2D || CreateInfo.ImageType == ERHIImageType::T_2D_Array) &&
+			CreateInfo.Width <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension2D &&
+			CreateInfo.Height <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension2D) ||
+		((CreateInfo.ImageType == ERHIImageType::T_Cube || CreateInfo.ImageType == ERHIImageType::T_Cube_Array) &&
+			CreateInfo.Width <= GetDevice().GetPhysicalDeviceLimits().maxImageDimensionCube &&
+			CreateInfo.Height <= GetDevice().GetPhysicalDeviceLimits().maxImageDimensionCube) ||
+		(CreateInfo.ImageType == ERHIImageType::T_3D && CreateInfo.Height <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension3D));
 
 	///VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME
 
-	if (FormatAttribute::IsColor(Desc.Format))
+	if (RHI::IsColor(CreateInfo.Format))
 	{
-		m_VkAttributes.Aspect = VK_IMAGE_ASPECT_COLOR_BIT;
+		//m_VkAttributes.Aspect = VK_IMAGE_ASPECT_COLOR_BIT;
 	}
-	else if (FormatAttribute::IsDepthStenci(Desc.Format))
+	else if (RHI::IsDepthStenci(CreateInfo.Format))
 	{
-		m_VkAttributes.Aspect = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+		//m_VkAttributes.Aspect = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
 	}
-	else if (FormatAttribute::IsDepth(Desc.Format))
+	else if (RHI::IsDepth(CreateInfo.Format))
 	{
-		m_VkAttributes.Aspect = VK_IMAGE_ASPECT_DEPTH_BIT;
+		//m_VkAttributes.Aspect = VK_IMAGE_ASPECT_DEPTH_BIT;
 	}
 	else
 	{
 		assert(false);
 	}
 
-	if (Desc.Type == EImageType::T_Cube || Desc.Type == EImageType::T_Cube_Array)
-	{
-		m_VkAttributes.CreateFlags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
-	}
+	///RequiredState = CreateInfo.RequiredState;
 
-	RequiredState = Desc.RequiredState;
-
-	m_VkAttributes.UsageFlags = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-	if (EnumHasAnyFlags(Desc.Usages, EBufferUsageFlags::RenderTarget))
+	vk::ImageUsageFlags UsageFlags(vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst);
+	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::RenderTarget))
 	{
-		m_VkAttributes.UsageFlags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-		RequiredState = EResourceState::RenderTarget;
+		UsageFlags |= vk::ImageUsageFlagBits::eColorAttachment;
+		//RequiredState = EResourceState::RenderTarget;
 	}
-	if (EnumHasAnyFlags(Desc.Usages, EBufferUsageFlags::DepthStencil))
+	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::DepthStencil))
 	{
-		m_VkAttributes.UsageFlags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-		RequiredState = EResourceState::DepthWrite;
+		UsageFlags |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
+		//RequiredState = EResourceState::DepthWrite;
 	}
-	if (EnumHasAnyFlags(Desc.Usages, EBufferUsageFlags::UnorderedAccess))
+	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UnorderedAccess))
 	{
-		m_VkAttributes.UsageFlags |= VK_IMAGE_USAGE_STORAGE_BIT;
-		RequiredState = EResourceState::UnorderedAccess;
+		UsageFlags |= vk::ImageUsageFlagBits::eStorage;
+		//RequiredState = EResourceState::UnorderedAccess;
 	}
-	if (EnumHasAnyFlags(Desc.Usages, EBufferUsageFlags::ShaderResource))
+	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::ShaderResource))
 	{
-		m_VkAttributes.UsageFlags |= VK_IMAGE_USAGE_SAMPLED_BIT;
-		RequiredState = EResourceState::ShaderResource;
+		UsageFlags |= vk::ImageUsageFlagBits::eSampled;
+		//RequiredState = EResourceState::ShaderResource;
 	}
-	if (EnumHasAnyFlags(Desc.Usages, EBufferUsageFlags::InputAttachment))
+	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::InputAttachment))
 	{
 		/// VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT specifies that the image can be used to create a VkImageView suitable for occupying VkDescriptorSet slot of type VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT; 
 		/// be read from a shader as an input attachment; and be used as an input attachment in a framebuffer.
-		m_VkAttributes.UsageFlags |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
-		RequiredState = EResourceState::InputAttachment;
+		UsageFlags |= vk::ImageUsageFlagBits::eInputAttachment;
+		//RequiredState = EResourceState::InputAttachment;
 	}
 
-	m_VkAttributes.Type = VkType::ImageType(Desc.Type);
-	m_VkAttributes.ViewType = VkType::ImageViewType(Desc.Type);
-	m_VkAttributes.Format = VkType::Format(Desc.Format);
+//#if true
+//	if (CreateInfo.RequiredState == EResourceState::Present)
+//	{
+//		PermanentState = EResourceState::Present;
+//	}
+//#endif
 
-#if true
-	if (Desc.RequiredState == EResourceState::Present)
+	if (Image)
 	{
-		PermanentState = EResourceState::Present;
+		m_Native = Image;
 	}
-#endif
-}
-
-VulkanImage::VulkanImage(VulkanDevice* Device, const ImageDesc& Desc, VkImage Image, bool8_t Own)
-	: VkHWObject(Device, Desc)
-	, m_Own(Own)
-{
-	assert(Image != VK_NULL_HANDLE);
-	m_Handle = Image;
-
-	FillAttributes(Desc);
-}
-
-VkImageView VulkanImage::GetOrCrateImageView(const ImageSubresourceRange& SubresourceRange)
-{
-	std::lock_guard ScopedLocker(m_Views.first);
-
-	VkImageView& ImageView = m_Views.second[SubresourceRange];
-	if (ImageView == VK_NULL_HANDLE)
+	else
 	{
-		VkImageSubresourceRange VkSubresourceRange
-		{
-			m_VkAttributes.Aspect,
-			SubresourceRange.BaseMipLevel,
-			SubresourceRange.LevelCount == ImageSubresourceRange::AllMipLevels ? VK_REMAINING_MIP_LEVELS : SubresourceRange.LevelCount,
-			SubresourceRange.BaseArrayLayer,
-			SubresourceRange.LayerCount == ImageSubresourceRange::AllArrayLayers ? VK_REMAINING_ARRAY_LAYERS : SubresourceRange.LayerCount
-			/// 6 * ArraySize for cubemap
-		};
+		auto vkCreateInfo = vk::ImageCreateInfo()
+			.setFlags((CreateInfo.ImageType == ERHIImageType::T_Cube || CreateInfo.ImageType == ERHIImageType::T_Cube_Array) ?
+				vk::ImageCreateFlagBits::eCubeCompatible : vk::ImageCreateFlags())
+			.setImageType(::GetImageType(CreateInfo.ImageType))
+			.setFormat(::GetFormat(CreateInfo.Format))
+			.setExtent(vk::Extent3D(
+				CreateInfo.Width,
+				CreateInfo.ImageType == ERHIImageType::T_1D || CreateInfo.ImageType == ERHIImageType::T_1D_Array ? 1u : CreateInfo.Height,
+				CreateInfo.ImageType == ERHIImageType::T_3D ? CreateInfo.Depth : 1u))
+			.setMipLevels(CreateInfo.MipLevels)
+			.setArrayLayers(CreateInfo.ArrayLayers)
+			.setSamples(GetSampleCount(CreateInfo.SampleCount))
+			.setTiling(vk::ImageTiling::eOptimal)
+			.setUsage(UsageFlags)
+			.setSharingMode(vk::SharingMode::eExclusive)
+			.setInitialLayout(vk::ImageLayout::eUndefined);
+		VERIFY_VK(GetNativeDevice().createImage(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
-		VkImageViewCreateInfo CreateInfo
+		if (RHIInterface::GetGraphicsSettings()->BatchResourceDataTransfer)
 		{
-			VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-			nullptr,
-			0u,
-			m_Handle,
-			m_VkAttributes.ViewType,
-			m_VkAttributes.Format,
-			{
-				VK_COMPONENT_SWIZZLE_R,
-				VK_COMPONENT_SWIZZLE_G,
-				VK_COMPONENT_SWIZZLE_B,
-				VK_COMPONENT_SWIZZLE_A
-			},
-			VkSubresourceRange
-		};
+		}
+		else
+		{
+		}
+		//m_DeviceMemory = VulkanMemoryAllocator::Get().Alloc(m_Handle, EDeviceAccessFlags::GpuRead);
+		//VERIFY_VK(vkBindImageMemory(m_Device->Get(), m_Handle, m_DeviceMemory.Handle, 0u));
 
-		VERIFY_VK(vkCreateImageView(m_Device->Get(), &CreateInfo, VK_ALLOCATION_CALLBACKS, &ImageView));
+		//if (CreateInfo.Asset.Data)
+		//{
+		//	auto Command = m_Device->GetOrAllocateCommandBuffer(EQueueType::Transfer, ECommandBufferLevel::Primary, true, true);
+
+		//	Command->CopyBufferToImage(this, CreateInfo.Asset.Data, CreateInfo.Asset.Size, AllSubresource);
+
+		//	if (m_Device->Options().BatchResourceSubmit)
+		//	{
+		//		m_Device->Queue(EQueueType::Transfer)->QueueSubmit(std::vector<ICommandBufferSharedPtr>{Command});
+		//	}
+		//	else
+		//	{
+		//		m_Device->Queue(EQueueType::Transfer)->Submit(std::vector<ICommandBufferSharedPtr>{Command});
+		//	}
+		//}
 	}
 
-	return ImageView;
+	VkHwResource::SetDebugName(CreateInfo.Name.data());
 }
+
+//
+//VkImageView VulkanImage::GetOrCrateImageView(const ImageSubresourceRange& SubresourceRange)
+//{
+//	std::lock_guard ScopedLocker(m_Views.first);
+//
+//	VkImageView& ImageView = m_Views.second[SubresourceRange];
+//	if (ImageView == VK_NULL_HANDLE)
+//	{
+//		VkImageSubresourceRange VkSubresourceRange
+//		{
+//			m_VkAttributes.Aspect,
+//			SubresourceRange.BaseMipLevel,
+//			SubresourceRange.LevelCount == ImageSubresourceRange::AllMipLevels ? VK_REMAINING_MIP_LEVELS : SubresourceRange.LevelCount,
+//			SubresourceRange.BaseArrayLayer,
+//			SubresourceRange.LayerCount == ImageSubresourceRange::AllArrayLayers ? VK_REMAINING_ARRAY_LAYERS : SubresourceRange.LayerCount
+//			/// 6 * ArraySize for cubemap
+//		};
+//
+//		VkImageViewCreateInfo CreateInfo
+//		{
+//			VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+//			nullptr,
+//			0u,
+//			m_Handle,
+//			m_VkAttributes.ViewType,
+//			m_VkAttributes.Format,
+//			{
+//				VK_COMPONENT_SWIZZLE_R,
+//				VK_COMPONENT_SWIZZLE_G,
+//				VK_COMPONENT_SWIZZLE_B,
+//				VK_COMPONENT_SWIZZLE_A
+//			},
+//			VkSubresourceRange
+//		};
+//
+//		VERIFY_VK(vkCreateImageView(m_Device->Get(), &CreateInfo, VK_ALLOCATION_CALLBACKS, &ImageView));
+//	}
+//
+//	return ImageView;
+//}
+//
 
 VulkanImage::~VulkanImage()
 {
+#if 0
 	if (m_Own)
 	{
 		vkDestroyImage(m_Device->Get(), m_Handle, VK_ALLOCATION_CALLBACKS);
@@ -205,38 +188,34 @@ VulkanImage::~VulkanImage()
 		vkFreeMemory(m_Device->Get(), m_DeviceMemory.Handle, VK_ALLOCATION_CALLBACKS);
 		m_DeviceMemory.Handle = VK_NULL_HANDLE;
 	}
+#endif
 }
 
-VulkanSampler::VulkanSampler(VulkanDevice* Device, const SamplerDesc& Desc)
-	: VkHWObject(Device)
+VulkanSampler::VulkanSampler(const VulkanDevice& Device, const RHISamplerCreateInfo& CreateInfo)
+	: VkHwResource(Device)
 {
-	VkSamplerCreateInfo CreateInfo
-	{
-		VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-		nullptr,
-		0u,
-		VkType::Filter(Desc.MinMagFilter),
-		VkType::Filter(Desc.MinMagFilter),
-		Desc.MinMagFilter == EFilter::Nearest ? VK_SAMPLER_MIPMAP_MODE_NEAREST : VK_SAMPLER_MIPMAP_MODE_LINEAR,
-		VkType::SamplerAddressMode(Desc.AddressModeU),
-		VkType::SamplerAddressMode(Desc.AddressModeV),
-		VkType::SamplerAddressMode(Desc.AddressModeW),
-		Desc.MipLODBias,
-		Desc.MaxAnisotropy > 0 ? true : false,
-		static_cast<float32_t>(Desc.MaxAnisotropy),
-		false,
-		VkType::CompareFunc(Desc.CompareOp),
-		Desc.MinLOD,
-		Desc.MaxLOD,
-		VkType::BorderColor(Desc.BorderColor),
-		false
-	};
-	VERIFY_VK(vkCreateSampler(m_Device->Get(), &CreateInfo, VK_ALLOCATION_CALLBACKS, Reference()));
+	/*
+	  If the image view has a depth/stencil format, the depth component is selected by the aspectMask,
+	  and the operation is an OpImage*Dref* instruction, a depth comparison is performed.
+	  The result is 1.0 if the comparison evaluates to true, and 0.0 otherwise. This value replaces the depth component D.
+	  The compare operation is selected by the VkCompareOp value set by VkSamplerCreateInfo::compareOp.
+	  The reference value from the SPIR-V operand Dref and the texel depth value Dtex are used as the reference and test values, respectively, in that operation.
+	*/
+	auto vkCreateInfo = vk::SamplerCreateInfo()
+		.setMinFilter(GetFilter(CreateInfo.MinMagFilter))
+		.setMagFilter(GetFilter(CreateInfo.MinMagFilter))
+		.setMipmapMode(CreateInfo.MinMagFilter == ERHIFilter::Nearest ? vk::SamplerMipmapMode::eNearest : vk::SamplerMipmapMode::eLinear)
+		.setAddressModeU(GetSamplerAddressMode(CreateInfo.AddressModeU))
+		.setAddressModeV(GetSamplerAddressMode(CreateInfo.AddressModeV))
+		.setAddressModeW(GetSamplerAddressMode(CreateInfo.AddressModeW))
+		.setMipLodBias(CreateInfo.MipLODBias)
+		.setAnisotropyEnable(CreateInfo.MaxAnisotropy > 0.0f ? true : false)
+		.setMaxAnisotropy(CreateInfo.MaxAnisotropy)
+		.setCompareOp(GetCompareFunc(CreateInfo.CompareOp))
+		.setCompareEnable(!(CreateInfo.CompareOp == ERHICompareFunc::Never || CreateInfo.CompareOp == ERHICompareFunc::Always))
+		.setMinLod(CreateInfo.MinLOD)
+		.setMaxLod(CreateInfo.MaxLOD)
+		.setBorderColor(GetBorderColor(CreateInfo.BorderColor))
+		.setUnnormalizedCoordinates(false);
+	VERIFY_VK(GetNativeDevice().createSampler(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
-
-VulkanSampler::~VulkanSampler()
-{
-	vkDestroySampler(m_Device->Get(), Get(), VK_ALLOCATION_CALLBACKS);
-}
-
-NAMESPACE_END(RHI)

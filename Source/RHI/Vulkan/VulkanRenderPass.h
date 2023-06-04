@@ -1,35 +1,25 @@
 #pragma once
 
-#include "Colorful/Vulkan/VulkanBuffer.h"
+#include "RHI/Vulkan/VulkanImage.h"
 
-/// https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#memory-model
-
-NAMESPACE_START(RHI)
-
-class VulkanRenderPass final : public VkHWObject<void, VkRenderPass_T>
+class VulkanRenderPass final : public VkHwResource<vk::RenderPass>
 {
 public:
-	///VulkanRenderPass(class VulkanDevice* Device, const RenderPassDesc& desc);
-	~VulkanRenderPass();
+	//VulkanRenderPass(const class VulkanDevice& Device, const RHIRenderPassCreateInfo& CreateInfo);
+	
+	~VulkanRenderPass() = default;
 protected:
 private:
 };
 
-class VulkanFramebuffer final : public VkHWObject<IFrameBuffer, VkFramebuffer_T>
+class VulkanFramebuffer final : public VkHwResource<vk::Framebuffer>, public RHIFrameBuffer
 {
 public:
-	VulkanFramebuffer(class VulkanDevice* Device, const FrameBufferDesc& Desc);
+	VulkanFramebuffer(const class VulkanDevice& Device, const RHIFrameBufferCreateInfo& CreateInfo);
 
 	~VulkanFramebuffer();
-
-	VkRenderPass RenderPass() const
-	{
-		return m_RenderPass;
-	}
 protected:
-	void CreateRenderPass(const FrameBufferDesc& Desc);
+	void CreateRenderPass(const RHIFrameBufferCreateInfo& CreateInfo);
 private:
-	VkRenderPass m_RenderPass = VK_NULL_HANDLE;
+	vk::RenderPass m_RenderPass;
 };
-
-NAMESPACE_END(RHI)

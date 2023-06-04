@@ -1,21 +1,19 @@
 #pragma once
 
-#include "Colorful/Vulkan/VulkanImage.h"
+#include "RHI/Vulkan/VulkanImage.h"
 
 /// VulkanDescriptor Manager???
 
-NAMESPACE_START(RHI)
-
-class VulkanDescriptorPool final : public VkHWObject<void, VkDescriptorPool_T>
+class VulkanDescriptorPool final : public VkHwResource<vk::DescriptorPool>
 {
 public:
-	VulkanDescriptorPool(class VulkanDevice* Device);
+	VulkanDescriptorPool(const class VulkanDevice& Device);
 
-	~VulkanDescriptorPool();
+	~VulkanDescriptorPool() = default;
 
 	void Reset();
 
-	VkDescriptorSet Alloc(VkDescriptorSetLayout DescriptorSetLayout);
+	vk::DescriptorSet Alloc(vk::DescriptorSetLayout DescriptorSetLayout);
 
 	bool8_t IsFull() const;
 protected:
@@ -23,6 +21,7 @@ private:
 	uint32_t m_AllocatedCount = 0u;
 };
 
+#if 0
 struct VulkanDescriptor
 {
 	VkDescriptorSetLayout DescriptorSetLayout = VK_NULL_HANDLE;
@@ -50,7 +49,6 @@ struct VulkanDescriptor
 		}
 	};
 
-	static KeyBindings MakeKeyBindings(class VulkanDevice* Device, const GraphicsPipelineDesc& Desc);
+	static KeyBindings MakeKeyBindings(class VulkanDevice* Device, const RHIGraphicsPipelineCreateInfo& Desc);
 };
-
-NAMESPACE_END(RHI)
+#endif

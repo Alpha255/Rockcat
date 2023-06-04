@@ -131,6 +131,8 @@ namespace RHI
 	vk::Format GetVulkanFormat(ERHIFormat Format);
 	ERHIFormat GetSRGBFormat(ERHIFormat Format);
 	ERHIFormat GetRHIFormatByName(const char8_t* Name);
+	ERHIFormat GetRHIFormat(vk::Format vkFormat);
+	ERHIFormat GetRHIFormat(DXGI_FORMAT DXGIFormat);
 
 	bool8_t IsColor(ERHIFormat Format);
 	bool8_t IsDepth(ERHIFormat Format);

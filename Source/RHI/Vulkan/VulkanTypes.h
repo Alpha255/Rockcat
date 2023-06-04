@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Runtime/Engine/RHI/RHIShader.h"
-#include "Runtime/Engine/RHI/RHIBuffer.h"
+#include "Runtime/Engine/RHI/RHIPipeline.h"
 #include "RHI/Vulkan/VulkanLoader.h"
 
 vk::PolygonMode GetPolygonMode(ERHIPolygonMode Mode);

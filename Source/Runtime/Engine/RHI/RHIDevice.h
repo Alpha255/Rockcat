@@ -49,7 +49,7 @@ public:
 			static_cast<EVendorID>(VendorID) == EVendorID::Intel;
 	}
 
-	virtual void WaitIdle() = 0;
+	virtual void WaitIdle() const = 0;
 
 	virtual RHIShaderPtr CreateShader(const RHIShaderCreateInfo& RHICreateInfo) = 0;
 

@@ -12,7 +12,7 @@ VulkanShader::VulkanShader(const class VulkanDevice& Device, const RHIShaderCrea
 		.setCodeSize(CreateInfo.Binary->GetSize())
 		.setPCode(reinterpret_cast<const uint32_t*>(CreateInfo.Binary->GetBinary()));
 
-	VERIFY_VK(GetNativeDevice().createShaderModule(&vkCreateInfo, nullptr, &m_Native));
+	VERIFY_VK(GetNativeDevice().createShaderModule(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
 	VkHwResource::SetDebugName(CreateInfo.Name.c_str());
 }

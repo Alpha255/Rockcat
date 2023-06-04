@@ -156,6 +156,30 @@ namespace RHI
 		return static_cast<vk::Format>(s_FormatAttributes[static_cast<uint32_t>(Format)].VulkanFormat);
 	}
 
+	ERHIFormat GetRHIFormat(vk::Format vkFormat)
+	{
+		for each (auto& Attrs in s_FormatAttributes)
+		{
+			if (static_cast<vk::Format>(Attrs.VulkanFormat) == vkFormat)
+			{
+				return Attrs.RHIFormat;
+			}
+		}
+		return ERHIFormat::Unknown;
+	}
+
+	ERHIFormat GetRHIFormat(DXGI_FORMAT DXGIFormat)
+	{
+		for each (auto & Attrs in s_FormatAttributes)
+		{
+			if (Attrs.DXGIFormat == DXGIFormat)
+			{
+				return Attrs.RHIFormat;
+			}
+		}
+		return ERHIFormat::Unknown;
+	}
+
 	ERHIFormat GetSRGBFormat(ERHIFormat Format)
 	{
 		switch (Format)

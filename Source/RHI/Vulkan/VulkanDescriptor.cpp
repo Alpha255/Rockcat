@@ -1,7 +1,6 @@
-#include "Colorful/Vulkan/VulkanDescriptor.h"
-#include "Colorful/Vulkan/VulkanDevice.h"
-
-NAMESPACE_START(RHI)
+#include "RHI/Vulkan/VulkanDescriptor.h"
+#include "RHI/Vulkan/VulkanDevice.h"
+#include "Runtime/Engine/Engine.h"
 
 static constexpr uint32_t DescriptorPoolLimits[] =
 {
@@ -20,11 +19,11 @@ static constexpr uint32_t DescriptorPoolLimits[] =
 
 static constexpr uint32_t DescriptorSetsLimit = 2048u;
 
-VulkanDescriptorPool::VulkanDescriptorPool(VulkanDevice* Device)
-	: VkHWObject(Device)
+VulkanDescriptorPool::VulkanDescriptorPool(const VulkanDevice& Device)
+	: VkHwResource(Device)
 {
 #if _DEBUG
-	auto& DeviceLimits = m_Device->PhysicalLimits();
+	auto& DeviceLimits = GetDevice().GetPhysicalDeviceLimits();
 	const std::vector<uint32_t> DeviceDescriptorLimits = 
 	{
 		DeviceLimits.maxDescriptorSetSamplers,
@@ -42,32 +41,26 @@ VulkanDescriptorPool::VulkanDescriptorPool(VulkanDevice* Device)
 
 	/// assert(DescriptorSetsLimit <= DeviceLimits.maxBoundDescriptorSets);
 
-	for (uint32_t DescriptorIndex = VK_DESCRIPTOR_TYPE_SAMPLER; DescriptorIndex <= VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT; ++DescriptorIndex)
+	for (auto DescriptorIndex = vk::DescriptorType::eSampler; DescriptorIndex <= vk::DescriptorType::eInputAttachment;)
 	{
-		assert(DescriptorPoolLimits[DescriptorIndex] <= DeviceDescriptorLimits[DescriptorIndex]);
+		assert(DescriptorPoolLimits[static_cast<size_t>(DescriptorIndex)] <= DeviceDescriptorLimits[static_cast<size_t>(DescriptorIndex)]);
+		DescriptorIndex = static_cast<vk::DescriptorType>(static_cast<size_t>(DescriptorIndex) + 1u);
 	}
 #endif
 
-	std::vector<VkDescriptorPoolSize> DescriptorPoolSizes(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT + 1u);
-	for (uint32_t DescriptorIndex = VK_DESCRIPTOR_TYPE_SAMPLER; DescriptorIndex <= VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT; ++DescriptorIndex)
+	std::vector<vk::DescriptorPoolSize> DescriptorPoolSizes(static_cast<size_t>(vk::DescriptorType::eInputAttachment) + 1u);
+	for (auto DescriptorIndex = vk::DescriptorType::eSampler; DescriptorIndex <= vk::DescriptorType::eInputAttachment;)
 	{
-		DescriptorPoolSizes[DescriptorIndex] = VkDescriptorPoolSize
-		{
-			static_cast<VkDescriptorType>(DescriptorIndex),
-			DescriptorPoolLimits[DescriptorIndex]
-		};
+		DescriptorPoolSizes[static_cast<size_t>(DescriptorIndex)] = vk::DescriptorPoolSize()
+			.setDescriptorCount(DescriptorPoolLimits[static_cast<size_t>(DescriptorIndex)])
+			.setType(DescriptorIndex);
+		DescriptorIndex = static_cast<vk::DescriptorType>(static_cast<size_t>(DescriptorIndex) + 1u);
 	}
 
-	VkDescriptorPoolCreateInfo CreateInfo
-	{
-		VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-		nullptr,
-		0u,
-		DescriptorSetsLimit,
-		static_cast<uint32_t>(DescriptorPoolSizes.size()),
-		DescriptorPoolSizes.data()
-	};
-	VERIFY_VK(vkCreateDescriptorPool(m_Device->Get(), &CreateInfo, VK_ALLOCATION_CALLBACKS, Reference()));
+	auto vkCreateInfo = vk::DescriptorPoolCreateInfo()
+		.setPoolSizes(DescriptorPoolSizes)
+		.setMaxSets(DescriptorSetsLimit);
+	VERIFY_VK(GetNativeDevice().createDescriptorPool(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
 void VulkanDescriptorPool::Reset()
@@ -76,25 +69,21 @@ void VulkanDescriptorPool::Reset()
 	/// flags is reserved for future use
 	/// Resetting a descriptor pool recycles all of the resources from all of the descriptor sets allocated from the descriptor pool back to the descriptor pool, 
 	/// and the descriptor sets are implicitly freed.
-	assert(IsValid());
-	vkResetDescriptorPool(m_Device->Get(), Get(), 0u);
+	assert(m_Native);
+	GetNativeDevice().resetDescriptorPool(m_Native);
 }
 
-VkDescriptorSet VulkanDescriptorPool::Alloc(VkDescriptorSetLayout DescriptorSetLayout)
+vk::DescriptorSet VulkanDescriptorPool::Alloc(vk::DescriptorSetLayout DescriptorSetLayout)
 {
-	assert(!IsFull() && DescriptorSetLayout != VK_NULL_HANDLE);
+	assert(!IsFull() && DescriptorSetLayout);
 
-	VkDescriptorSetAllocateInfo AllocInfo
-	{
-		VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-		nullptr,
-		Get(),
-		1u,
-		& DescriptorSetLayout
-	};
+	auto AllocInfo = vk::DescriptorSetAllocateInfo()
+		.setDescriptorPool(m_Native)
+		.setPSetLayouts(&DescriptorSetLayout)
+		.setDescriptorSetCount(1u);
 
-	VkDescriptorSet DescriptorSet = VK_NULL_HANDLE;
-	VERIFY_VK(vkAllocateDescriptorSets(m_Device->Get(), &AllocInfo, &DescriptorSet));
+	vk::DescriptorSet DescriptorSet;
+	VERIFY_VK(GetNativeDevice().allocateDescriptorSets(&AllocInfo, &DescriptorSet));
 	++m_AllocatedCount;
 	return DescriptorSet;
 }
@@ -104,13 +93,7 @@ bool8_t VulkanDescriptorPool::IsFull() const
 	return m_AllocatedCount == DescriptorSetsLimit;
 }
 
-VulkanDescriptorPool::~VulkanDescriptorPool()
-{
-	/// When a pool is destroyed, all descriptor sets allocated from the pool are implicitly freed and become invalid. 
-	/// Descriptor sets allocated from a given pool do not need to be freed before destroying that descriptor pool.
-	vkDestroyDescriptorPool(m_Device->Get(), Get(), VK_ALLOCATION_CALLBACKS);
-}
-
+#if 0
 VulkanDescriptor::KeyBindings VulkanDescriptor::MakeKeyBindings(VulkanDevice* Device, const GraphicsPipelineDesc& Desc)
 {
 	size_t Hash = 0u;
@@ -159,4 +142,4 @@ VulkanDescriptor::KeyBindings VulkanDescriptor::MakeKeyBindings(VulkanDevice* De
 	return std::make_tuple(Hash, Bindings, PushConstantRanges);
 }
 
-NAMESPACE_END(RHI)
+#endif

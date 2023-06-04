@@ -1,31 +1,27 @@
 #pragma once
 
-#include "Colorful/Vulkan/VulkanAsync.h"
-#include "Colorful/Vulkan/VulkanImage.h"
+#include "RHI/Vulkan/VulkanAsync.h"
+#include "RHI/Vulkan/VulkanImage.h"
 
-NAMESPACE_START(RHI)
-
-class VulkanSurface final : public VkHWObject<void, VkSurfaceKHR_T>
+class VulkanSurface final : public VkDeviceResource
 {
 public:
-	VulkanSurface(class VulkanDevice* Device, uint64_t WindowHandle);
+	VulkanSurface(const class VulkanDevice& Device, const void* WindowHandle);
 
 	~VulkanSurface();
+
+	inline vk::SurfaceKHR& GetNative() { return m_Surface; }
+	inline const vk::SurfaceKHR& GetNative() const { return m_Surface; }
+private:
+	vk::SurfaceKHR m_Surface;
 };
 
-class VulkanSwapchain final : public VkHWObject<void, VkSwapchainKHR_T>
+class VulkanSwapchain final : public VkHwResource<vk::SwapchainKHR>
 {
 public:
-	VulkanSwapchain(
-		class VulkanDevice* Device,
-		uint64_t WindowHandle, 
-		uint32_t Width,
-		uint32_t Height,
-		bool8_t Fullscreen,
-		bool8_t VSync,
-		bool8_t SRgb);
+	VulkanSwapchain(const class VulkanDevice& Device, const void* WindowHandle, uint32_t Width, uint32_t Height);
 
-	~VulkanSwapchain();
+	~VulkanSwapchain() = default;
 
 	void Resize(uint32_t Width, uint32_t Height)
 	{
@@ -36,26 +32,12 @@ public:
 		}
 	}
 
-	inline uint32_t Width() const
-	{
-		return m_Width;
-	}
+	inline uint32_t GetWidth() const { return m_Width; }
+	inline uint32_t GetHeight() const { return m_Height; }
+	inline uint32_t GetCurrentImageIndex() const { return m_CurImageIndex; }
+	inline vk::Format GetColorFormat() const { return m_ColorFormat; }
 
-	inline uint32_t Height() const
-	{
-		return m_Height;
-	}
-
-	inline uint32_t CurrentImageIndex() const
-	{
-		return m_CurImageIndex;
-	}
-
-	inline VkFormat ColorFormat() const
-	{
-		return m_ColorFormat;
-	}
-
+#if 0
 	VkSemaphore PresentCompleteSemaphore() const
 	{
 		return m_PresentComplete->Get();
@@ -65,6 +47,7 @@ public:
 	{
 		return m_BackBuffers[m_CurImageIndex].get();
 	}
+#endif
 
 	void AcquireNextImage();
 
@@ -79,13 +62,11 @@ private:
 	uint32_t m_Width = 0u;
 	uint32_t m_Height = 0u;
 	uint32_t m_CurImageIndex = 0u;
-	VkFormat m_ColorFormat = VkFormat::VK_FORMAT_UNDEFINED;
+	vk::Format m_ColorFormat = vk::Format::eUndefined;
 
-	const uint64_t m_WindowHandle;
+	const void* m_WindowHandle = nullptr;
 
 	std::unique_ptr<VulkanSurface> m_Surface;
-	std::unique_ptr<VulkanSemaphore> m_PresentComplete;
-	std::vector<std::shared_ptr<class VulkanFramebuffer>> m_BackBuffers;
+	//std::unique_ptr<VulkanSemaphore> m_PresentComplete;
+	//std::vector<std::shared_ptr<class VulkanFramebuffer>> m_BackBuffers;
 };
-
-NAMESPACE_END(RHI)

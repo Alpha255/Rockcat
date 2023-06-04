@@ -295,6 +295,8 @@ public:
 
 	const vk::Device& GetNativeDevice() const;
 
+	const vk::PhysicalDevice& GetNativePhysicalDevice() const;
+
 	const vk::Instance& GetNativeInstance() const;
 protected:
 	void SetObjectName(vk::ObjectType Type, uint64_t Object, const char8_t* Name);
@@ -327,7 +329,7 @@ public:
 		RHIResource::SetDebugName(Name);
 	}
 
-	virtual ~VkHwResource() { GetNativeDevice().destroy(m_Native); m_Native = nullptr; };
+	virtual ~VkHwResource() { GetNativeDevice().destroy(m_Native, VK_ALLOCATION_CALLBACKS, vk::defaultDispatchLoaderDynamic); m_Native = nullptr; };
 protected:
 	VkObject m_Native;
 };

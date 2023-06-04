@@ -144,6 +144,11 @@ const vk::Device& VkDeviceResource::GetNativeDevice() const
 	return m_Device.GetNative();
 }
 
+const vk::PhysicalDevice& VkDeviceResource::GetNativePhysicalDevice() const
+{
+	return m_Device.GetPhysicalDevice();
+}
+
 const vk::Instance& VkDeviceResource::GetNativeInstance() const
 {
 	return m_Device.GetInstance();

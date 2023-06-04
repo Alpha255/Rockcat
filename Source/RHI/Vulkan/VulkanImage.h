@@ -1,37 +1,16 @@
 #pragma once
 
-#include "Colorful/Vulkan/VulkanBuffer.h"
+#include "RHI/Vulkan/VulkanBuffer.h"
 
-NAMESPACE_START(RHI)
-
-struct VkImageAttributes
-{
-	VkFormat Format = VK_FORMAT_UNDEFINED;
-	VkImageCreateFlags CreateFlags = 0u;
-	VkImageUsageFlags UsageFlags = 0u;
-	VkImageAspectFlags Aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
-	VkImageType Type = VkImageType::VK_IMAGE_TYPE_2D;
-	VkImageViewType ViewType = VkImageViewType::VK_IMAGE_VIEW_TYPE_2D;
-	VkImageTiling Tiling = VkImageTiling::VK_IMAGE_TILING_OPTIMAL;
-	VkSharingMode SharingMode = VkSharingMode::VK_SHARING_MODE_EXCLUSIVE;
-	VkImageLayout Layout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-};
-
-class VulkanImage : public VkHWObject<IImage, VkImage_T>, protected VkStatedObject
+class VulkanImage final : public VkHwResource<vk::Image>, public RHIImage
 {
 public:
-	VulkanImage(class VulkanDevice* Device, const ImageDesc& Desc);
-
-	VulkanImage(class VulkanDevice* Device, const ImageDesc& Desc, VkImage Image, bool8_t Own = false);
+	VulkanImage(const class VulkanDevice& Device, const RHIImageCreateInfo& CreateInfo, vk::Image Image = vk::Image());
 
 	~VulkanImage();
 
+#if 0
 	VkImageView GetOrCrateImageView(const ImageSubresourceRange& SubResource);
-
-	const VkImageAttributes& VkAttributes() const
-	{
-		return m_VkAttributes;
-	}
 protected:
 	using ImageViewMap = std::pair<std::mutex, std::unordered_map<ImageSubresourceRange, VkImageView, ImageSubresourceRange::Hasher>>;
 	friend struct VulkanPipelineBarrier;
@@ -49,16 +28,13 @@ private:
 	VulkanDeviceMemory m_DeviceMemory;
 	ImageViewMap m_Views;
 	bool8_t m_Own = true;
+#endif
 };
 
-class VulkanSampler final : public VkHWObject<ISampler, VkSampler_T>
+class VulkanSampler final : public VkHwResource<vk::Sampler>, public RHISampler
 {
 public:
-	VulkanSampler(class VulkanDevice* Device, const SamplerDesc& Desc);
+	VulkanSampler(const class VulkanDevice& Device, const RHISamplerCreateInfo& CreateInfo);
 
-	~VulkanSampler();
-protected:
-private:
+	~VulkanSampler() = default;
 };
-
-NAMESPACE_END(RHI)

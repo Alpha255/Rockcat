@@ -1,88 +1,72 @@
-#include "Colorful/Vulkan/VulkanAsync.h"
-#include "Colorful/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanAsync.h"
+#include "RHI/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanRHI.h"
+#include "RHI/Vulkan/VulkanLayerExtensions.h"
+#include "Runtime/Engine/Engine.h"
 
-NAMESPACE_START(RHI)
-
-VulkanFence::VulkanFence(VulkanDevice* Device, bool8_t Signaled)
-	: VkHWObject(Device)
+VulkanFence::VulkanFence(const VulkanDevice& Device, bool8_t Signaled)
+	: VkHwResource(Device)
 {
-	VkFenceCreateInfo CreateInfo
-	{
-		VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-		nullptr,
-		Signaled ? VK_FENCE_CREATE_SIGNALED_BIT : 0u
-	};
-
-	VERIFY_VK(vkCreateFence(m_Device->Get(), &CreateInfo, VK_ALLOCATION_CALLBACKS, Reference()));
+	auto vkCreateInfo = vk::FenceCreateInfo()
+		.setFlags(Signaled ? vk::FenceCreateFlagBits::eSignaled : vk::FenceCreateFlags());
+	VERIFY_VK(GetNativeDevice().createFence(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
-bool8_t VulkanFence::IsSignaled()
+bool8_t VulkanFence::IsSignaled() const
 {
 	/// If a queue submission command is pending execution, then the value returned by this command may immediately be out of date.
 	/// If the device has been lost, vkGetFenceStatus may return any of the (VK_SUCCESS|VK_NOT_READY|VK_ERROR_DEVICE_LOST). 
 	/// If the device has been lost and vkGetFenceStatus is called repeatedly, it will eventually return either VK_SUCCESS or VK_ERROR_DEVICE_LOST.
 
-	auto Ret = vkGetFenceStatus(m_Device->Get(), Get());
-	if (VK_SUCCESS == Ret)
+	switch (GetNativeDevice().getFenceStatus(m_Native))
 	{
+	case vk::Result::eSuccess:
 		return true;
-	}
-	else if (VK_NOT_READY == Ret)
-	{
+	case vk::Result::eNotReady:
+		return false;
+	case vk::Result::eErrorDeviceLost:
+	default:
+		assert(0);
 		return false;
 	}
-	else if (VK_ERROR_DEVICE_LOST == Ret)
-	{
-		assert(false);
-		return false;
-	}
-
-	return false;
 }
 
-void VulkanFence::Reset()
+void VulkanFence::Reset() const
 {
-	VERIFY_VK(vkResetFences(m_Device->Get(), 1u, Reference()));
+	VERIFY_VK(GetNativeDevice().resetFences(1u, &m_Native));
 }
 
-void VulkanFence::Wait(uint64_t Nanoseconds)
+void VulkanFence::Wait(uint64_t Nanoseconds) const
 {
-	VERIFY_VK(vkWaitForFences(m_Device->Get(), 1u, Reference(), true, Nanoseconds));
+	/*
+	  waitAll is the condition that must be satisfied to successfully unblock the wait. 
+	  If waitAll is VK_TRUE, then the condition is that all fences in pFences are signaled. 
+	  Otherwise, the condition is that at least one fence in pFences is signaled.
+	*/
+	VERIFY_VK(GetNativeDevice().waitForFences(1u, &m_Native, true, Nanoseconds));
 }
 
-VulkanFence::~VulkanFence()
-{
-	vkDestroyFence(m_Device->Get(), Get(), VK_ALLOCATION_CALLBACKS);
-}
-
-VulkanSemaphore::VulkanSemaphore(VulkanDevice* Device)
-	: VkHWObject(Device)
+VulkanSemaphore::VulkanSemaphore(const VulkanDevice& Device)
+	: VkHwResource(Device)
 {
 	/// Semaphores have two states - signaled and unsignaled. The state of a semaphore can be signaled after execution of a batch of commands is completed. 
 	/// A batch can wait for a semaphore to become signaled before it begins execution, and the semaphore is also unsignaled before the batch begins execution.
 
-	VkSemaphoreCreateInfo CreateInfo
-	{
-		VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-		nullptr,
-		0u  /// flags is reserved for future use
-	};
+	auto vkCreateInfo = vk::SemaphoreCreateInfo();
+	auto SemaphoreTypeCreateInfo = vk::SemaphoreTypeCreateInfo();
 
-#if VK_KHR_timeline_semaphore
-	if (m_Device->EnabledExtensions().TimelineSemaphore)
+	if (VulkanRHI::GetLayerExtensionConfigs().HasTimelineSemaphore)
 	{
-		VkSemaphoreTypeCreateInfo TypeCreateInfo
-		{
-			VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO,
-			nullptr,
-			VK_SEMAPHORE_TYPE_TIMELINE,
-			0u
-		};
-		CreateInfo.pNext = &TypeCreateInfo;
-	}
+		SemaphoreTypeCreateInfo.setInitialValue(0u)
+			.setSemaphoreType(vk::SemaphoreType::eTimeline);
+#if 0
+		vkCreateInfo.setPNext(&SemaphoreTypeCreateInfo);
+#else
+		SetPNext(vkCreateInfo, SemaphoreTypeCreateInfo);
 #endif
+	}
 
-	VERIFY_VK(vkCreateSemaphore(m_Device->Get(), &CreateInfo, VK_ALLOCATION_CALLBACKS, Reference()));
+	VERIFY_VK(GetNativeDevice().createSemaphore(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
 	/// When a batch is submitted to a queue via a queue submission, and it includes semaphores to be signaled, 
 	/// it defines a memory dependency on the batch, and defines semaphore signal operations which set the semaphores to the signaled state.
@@ -93,114 +77,81 @@ VulkanSemaphore::VulkanSemaphore(VulkanDevice* Device)
 	/// 2. There must be no other queue waiting on the same semaphore when the operation executes.
 }
 
-uint64_t VulkanSemaphore::CounterValue() const
+uint64_t VulkanSemaphore::GetCounterValue() const
 {
-#if VK_KHR_timeline_semaphore
-	if (m_Device->EnabledExtensions().TimelineSemaphore)
+	uint64_t Value = std::numeric_limits<uint64_t>().max();
+	if (VulkanRHI::GetLayerExtensionConfigs().HasTimelineSemaphore)
 	{
-		uint64_t Count = 0u;
-		vkGetSemaphoreCounterValue(m_Device->Get(), m_Handle, &Count);
-		return Count;
+		VERIFY_VK(GetNativeDevice().getSemaphoreCounterValue(m_Native, &Value));
 	}
-#endif
-
-	return std::numeric_limits<uint64_t>().max();
+	return Value;
 }
 
-void VulkanSemaphore::Wait(uint64_t Value, uint64_t Nanoseconds)
+void VulkanSemaphore::Wait(uint64_t Value, uint64_t Nanoseconds) const
 {
-#if VK_KHR_timeline_semaphore
-	if (m_Device->EnabledExtensions().TimelineSemaphore)
+	if (VulkanRHI::GetLayerExtensionConfigs().HasTimelineSemaphore)
 	{
-		VkSemaphoreWaitInfo WaitInfo
-		{
-			VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO,
-			nullptr,
-			0u,
-			1u,
-			&m_Handle,
-			&Value
-		};
-		VERIFY_VK(vkWaitSemaphores(m_Device->Get(), &WaitInfo, Nanoseconds));
+		auto WaitInfo = vk::SemaphoreWaitInfo()
+			.setSemaphoreCount(1u)
+			.setPSemaphores(&m_Native)
+			.setPValues(&Value);
+		VERIFY_VK(GetNativeDevice().waitSemaphores(&WaitInfo, Nanoseconds));
 	}
-#endif
 }
 
-void VulkanSemaphore::Signal(uint64_t Value)
+void VulkanSemaphore::Signal(uint64_t Value) const
 {
-#if VK_KHR_timeline_semaphore
-	if (m_Device->EnabledExtensions().TimelineSemaphore)
+	if (VulkanRHI::GetLayerExtensionConfigs().HasTimelineSemaphore)
 	{
-		VkSemaphoreSignalInfo SignalInfo
-		{
-			VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO,
-			nullptr,
-			m_Handle,
-			Value
-		};
-		VERIFY_VK(vkSignalSemaphore(m_Device->Get(), &SignalInfo));
+		auto SignalInfo = vk::SemaphoreSignalInfo()
+			.setSemaphore(m_Native)
+			.setValue(Value);
+		VERIFY_VK(GetNativeDevice().signalSemaphore(&SignalInfo));
 	}
-#endif
 }
 
-VulkanSemaphore::~VulkanSemaphore()
-{
-	vkDestroySemaphore(m_Device->Get(), Get(), VK_ALLOCATION_CALLBACKS);
-}
-
-VulkanEvent::VulkanEvent(VulkanDevice* Device)
-	: VkHWObject(Device)
+VulkanEvent::VulkanEvent(const VulkanDevice& Device)
+	: VkHwResource(Device)
 {
 	/// An application can signal an event, or unsignal it, on either the host or the device. 
 	/// A device can wait for an event to become signaled before executing further operations. 
 	/// No command exists to wait for an event to become signaled on the host.
 
-	VkEventCreateInfo CreateInfo
-	{
-		VK_STRUCTURE_TYPE_EVENT_CREATE_INFO,
-		nullptr,
-		0u  /// flags is reserved for future use
-	};
-
-	VERIFY_VK(vkCreateEvent(m_Device->Get(), &CreateInfo, VK_ALLOCATION_CALLBACKS, Reference()));
+	auto vkCreateInfo = vk::EventCreateInfo();
+	VERIFY_VK(GetNativeDevice().createEvent(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
 	/// The state of an event can also be updated on the device by commands inserted in command buffers.
 	/// To set the state of an event to signaled from a device, call: vkCmdSetEvent
 }
 
-bool8_t VulkanEvent::IsSignaled()
+bool8_t VulkanEvent::IsSignaled() const
 {
-	auto Ret = vkGetEventStatus(m_Device->Get(), Get());
-	if (VK_EVENT_SET == Ret)
+	switch (GetNativeDevice().getEventStatus(m_Native))
 	{
+	case vk::Result::eEventSet:
 		return true;
-	}
-	else if (VK_EVENT_RESET == Ret)
-	{
+	case vk::Result::eEventReset:
+		return false;
+	default:
+		assert(0);
 		return false;
 	}
-
-	return false;
 }
-void VulkanEvent::Signal(bool8_t Signaled)
+void VulkanEvent::Signal(bool8_t Signaled) const
 {
 	if (Signaled)
 	{
 		/// Set the state of an event to signaled from the host
-		VERIFY_VK(vkSetEvent(m_Device->Get(), Get()));
+		GetNativeDevice().setEvent(m_Native);
 	}
 	else
 	{
 		/// Set the state of an event to unsignaled from the host
-		VERIFY_VK(vkResetEvent(m_Device->Get(), Get()));
+		GetNativeDevice().resetEvent(m_Native);
 	}
 }
 
-VulkanEvent::~VulkanEvent()
-{
-	vkDestroyEvent(m_Device->Get(), Get(), VK_ALLOCATION_CALLBACKS);
-}
-
+#if 0
 VkAccessFlags VulkanPipelineBarrier::AccessFlags(VkImageLayout Layout)
 {
 	VkAccessFlags Flags = 0u;
@@ -697,4 +648,4 @@ void VulkanPipelineBarrier::Commit()
 	}
 }
 
-NAMESPACE_END(RHI)
+#endif

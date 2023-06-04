@@ -1,41 +1,39 @@
 #pragma once
 
-#include "Colorful/Vulkan/VulkanAsync.h"
-#include "Colorful/Vulkan/VulkanDescriptor.h"
-#include "Colorful/Vulkan/VulkanRenderPass.h"
+#include "RHI/Vulkan/VulkanAsync.h"
+#include "RHI/Vulkan/VulkanDescriptor.h"
+#include "RHI/Vulkan/VulkanRenderPass.h"
 
-NAMESPACE_START(RHI)
-
-class VulkanPipelineCache : public VkHWObject<void, VkPipelineCache_T>
+class VulkanPipelineCache : public VkHwResource<vk::PipelineCache>
 {
 public:
-	VulkanPipelineCache(class VulkanDevice* Device);
+	VulkanPipelineCache(const class VulkanDevice& Device);
 
-	~VulkanPipelineCache();
+	~VulkanPipelineCache() = default;
 
 	void Load() {}
 	void Save() {}
 };
 
-class VulkanPipeline : public VkHWObject<IPipeline, VkPipeline_T>
+class VulkanPipeline : public VkHwResource<vk::Pipeline>
 {
 public:
-	VulkanPipeline(class VulkanDevice* Device);
+	VulkanPipeline(const class VulkanDevice& Device);
 
 	virtual ~VulkanPipeline();
 
-	VulkanDescriptor& Descriptor()
-	{
-		return m_Descriptor;
-	}
-protected:
-	VulkanDescriptor m_Descriptor;
+//	VulkanDescriptor& Descriptor()
+//	{
+//		return m_Descriptor;
+//	}
+//protected:
+//	VulkanDescriptor m_Descriptor;
 };
 
 class VulkanGraphicsPipeline final : public VulkanPipeline
 {
 public:
-	VulkanGraphicsPipeline(class VulkanDevice* Device, VkPipelineCache PipelineCache, const GraphicsPipelineDesc& Desc);
+	VulkanGraphicsPipeline(const class VulkanDevice& Device, vk::PipelineCache PipelineCache, const RHIGraphicsPipelineCreateInfo& CreateInfo);
 protected:
 private:
 };
@@ -48,6 +46,7 @@ class VulkanRayTracingPipeline final : public VulkanPipeline
 {
 };
 
+#if 0
 class VulkanGraphicsPipelineState : public PipelineState
 {
 public:
@@ -77,4 +76,4 @@ private:
 	VkDescriptorSet m_DescriptorSet = VK_NULL_HANDLE;
 };
 
-NAMESPACE_END(RHI)
+#endif

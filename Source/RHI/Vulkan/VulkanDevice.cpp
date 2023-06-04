@@ -569,10 +569,6 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 #endif
 }
 
-void VulkanDevice::WaitIdle()
-{
-}
-
 bool8_t VulkanDevice::GetQueueFamilyIndex(
 	const vk::PhysicalDevice& PhysicalDevice,
 	uint32_t& GraphicsQueueIndex, 

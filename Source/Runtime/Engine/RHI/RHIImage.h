@@ -96,6 +96,7 @@ struct RHIImageCreateInfo
 	inline RHIImageCreateInfo& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; };
 	inline RHIImageCreateInfo& SetRequiredState(ERHIResourceState State) { RequiredState = State; return *this; }
 	inline RHIImageCreateInfo& SetName(const char8_t* Value) { Name = Value; return *this; }
+	inline RHIImageCreateInfo& SetName(const std::string& Value) { Name = Value; return *this; }
 };
 
 class RHIImage
@@ -175,7 +176,7 @@ struct RHISamplerCreateInfo : public RHIHashedObject
 	ERHICompareFunc CompareOp = ERHICompareFunc::Less;
 	ERHIBorderColor BorderColor = ERHIBorderColor::FloatTransparentBlack;
 
-	uint32_t MaxAnisotropy = 0u;
+	float32_t MaxAnisotropy = 0.0f;
 	float32_t MipLODBias = 0.0f;
 	float32_t MinLOD = 0.0f;
 	float32_t MaxLOD = 0.0f;
@@ -210,7 +211,7 @@ struct RHISamplerCreateInfo : public RHIHashedObject
 	inline RHISamplerCreateInfo& SetAddressModeW(ERHISamplerAddressMode SamplerAddressMode) { AddressModeW = SamplerAddressMode; return *this; };
 	inline RHISamplerCreateInfo& SetCompareOp(ERHICompareFunc CompareFunc) { CompareOp = CompareFunc; return *this; }
 	inline RHISamplerCreateInfo& SetBorderColor(ERHIBorderColor BorderColorMode) { BorderColor = BorderColorMode; return *this; }
-	inline RHISamplerCreateInfo& SetMaxAnisotropy(uint32_t Anisotropy) { MaxAnisotropy = Anisotropy; return *this; }
+	inline RHISamplerCreateInfo& SetMaxAnisotropy(float32_t Anisotropy) { MaxAnisotropy = Anisotropy; return *this; }
 	inline RHISamplerCreateInfo& SetMipLODBias(float32_t MipLODBiasValue) { MipLODBias = MipLODBiasValue; return *this; }
 	inline RHISamplerCreateInfo& SetMinLOD(float32_t MinLODValue) { MinLOD = MinLODValue; return *this; }
 	inline RHISamplerCreateInfo& SetMaxLOD(float32_t MaxLODValue) { MaxLOD = MaxLODValue; return *this; }

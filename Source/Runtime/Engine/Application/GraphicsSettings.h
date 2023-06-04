@@ -89,6 +89,7 @@ struct GraphicsSettings
 	DisplayResolution Resolution;
 	bool8_t VSync = false;
 	bool8_t FullScreen = false;
+	bool8_t SRGBSwapchain = false;
 	bool8_t MotionVectors = false;
 	bool8_t FrustumCulling = true;
 	bool8_t EnableTiledBasedLightCulling = false;
@@ -112,6 +113,7 @@ struct GraphicsSettings
 			CEREAL_NVP(Resolution),
 			CEREAL_NVP(VSync),
 			CEREAL_NVP(FullScreen),
+			CEREAL_NVP(SRGBSwapchain),
 			CEREAL_NVP(MotionVectors),
 			CEREAL_NVP(FrustumCulling),
 			CEREAL_NVP(EnableTiledBasedLightCulling),
