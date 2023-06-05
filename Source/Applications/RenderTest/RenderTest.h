@@ -12,4 +12,5 @@ public:
 	void OnRender() override final;
 protected:
 private:
+	std::unique_ptr<class Scene> m_Scene;
 };

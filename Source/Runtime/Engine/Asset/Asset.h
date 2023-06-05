@@ -6,13 +6,11 @@ DECLARE_OBJECT_ID(Asset, uint32_t)
 
 #define ASSET_PATH_SHADERS      "Shaders\\"
 #define ASSET_PATH_SHADERCACHE  "Shaders\\ShaderCache\\"
-#define ASSET_PATH_TEXTURES     "Textures\\"
-#define ASSET_PATH_IMAGES       "Assets\\Images\\"
+#define ASSET_PATH_IMAGES       "Images\\"
 #define ASSET_PATH_MATERIALS    "Materials\\"
-#define ASSET_PATH_MODELS       "Models\\"
+#define ASSET_PATH_MODELS       "glTF-Sample-Models\\2.0\\"
 #define ASSET_PATH_AUDIOS       "Audios\\"
 #define ASSET_PATH_SCENES       "Scenes\\"
-#define ASSET_PATH_SETTINGS     "Settings\\"
 
 struct AssetData
 {
@@ -22,6 +20,14 @@ struct AssetData
 
 struct AssetType
 {
+	std::string_view AssetTypeName;
+	std::vector<std::string_view> AssetFileExtensions;
+
+	AssetType(const char8_t* TypeName, std::initializer_list<std::string_view>& Extensions)
+		: AssetTypeName(TypeName)
+		, AssetFileExtensions(Extensions)
+	{
+	}
 };
 
 class Asset
@@ -115,7 +121,7 @@ private:
 	std::atomic<EAssetStatus> m_Status = EAssetStatus::NotLoaded;
 
 	mutable std::time_t m_LastWriteTime = 0u;
-	std::string m_Path;
 	mutable bool8_t m_Dirty = false;
+	std::string m_Path;
 };
 

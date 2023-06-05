@@ -49,7 +49,7 @@ public:
 			
 			if (!std::filesystem::path(SavePath).has_extension())
 			{
-				SavePath += SERIALIZABLE_EXT;
+				SavePath += GetAssetExtension();
 			}
 
 			auto ParentPath = std::filesystem::path(SavePath).parent_path();
@@ -72,6 +72,8 @@ public:
 			}
 		}
 	}
+
+	virtual const char8_t* GetAssetExtension() const { return SERIALIZABLE_EXT; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)

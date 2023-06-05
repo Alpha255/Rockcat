@@ -7,6 +7,9 @@ class Scene
 public:
 	DECLARE_OBJECT_ID(Node, uint32_t)
 
+	Scene() = default;
+	Scene(const char8_t* SceneAssetName);
+
 	class Node
 	{
 	public:
@@ -33,7 +36,7 @@ public:
 		bool8_t IsVisible() const { return m_Visible; }
 		void SetVisible(bool8_t Visible) { m_Visible = Visible; }
 
-		const char8_t* GetName() const { return m_Name.data(); }
+		const char8_t* GetName() const { return m_Name.c_str(); }
 		void SetName(const char8_t* Name) { m_Name = Name; }
 
 		template<class Archive>
@@ -57,18 +60,9 @@ public:
 		bool8_t m_Alive = true;
 		bool8_t m_Visible = true;
 
-		std::string_view m_Name;
+		std::string m_Name;
 	};
 
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(m_Graph),
-			CEREAL_NVP(m_Data)
-		);
-	}
-protected:
 	struct SceneGraph
 	{
 		NodeID Root;
@@ -114,6 +108,18 @@ protected:
 			return NextID;
 		}
 
+		Node* FindNode(const char8_t* NodeName)
+		{
+			for each (auto& Node in Nodes)
+			{
+				if (strcmp(Node.GetName(), NodeName) == 0)
+				{
+					return &Node;
+				}
+			}
+			return nullptr;
+		}
+
 		template<class Archive>
 		void serialize(Archive& Ar)
 		{
@@ -125,18 +131,18 @@ protected:
 		}
 	};
 
-	const SceneGraph& GetGraph() const { return m_Graph; }
-
 	struct SceneData
 	{
-		template<class Archive>
-		void serialize(Archive& Ar)
-		{
-			Ar(
-			);
-		}
 	};
+
+	const SceneGraph& GetSceneGraph() const { return m_Graph; }
+	const SceneData& GetSceneData() const { return m_Data; }
+protected:
+	friend class SceneBuilder;
 private:
+	SceneGraph& GetSceneGraph() { return m_Graph; }
+	SceneData& GetSceneData() { return m_Data; }
+
 	SceneGraph m_Graph;
 	SceneData m_Data;
 };

@@ -3,6 +3,7 @@
 #include "Runtime/Engine/Modules/SpdLogModule.h"
 #include "Runtime/Engine/Modules/RenderModule.h"
 #include "Runtime/Engine/Modules/TaskFlowModule.h"
+#include "Runtime/Engine/Asset/AssetDatabase.h"
 #include "Runtime/Engine/Application/BaseApplication.h"
 
 class Engine final : public NoneCopyable
@@ -12,20 +13,13 @@ public:
 
 	~Engine() { Finalize(); }
 
-	SpdLogModule& GetSpdLogModule()
-	{
-		return m_SpdLogModule;
-	}
+	SpdLogModule& GetSpdLogModule() { return m_SpdLogModule; }
 
-	RenderModule& GetRenderModule()
-	{
-		return m_RenderModule;
-	}
+	RenderModule& GetRenderModule() { return m_RenderModule; }
 
-	TaskFlowModule& GetTaskFlowModule()
-	{
-		return m_TaskFlowModule;
-	}
+	TaskFlowModule& GetTaskFlowModule() { return m_TaskFlowModule; }
+
+	AssetDatabase& GetAssetDatabase() { return m_AssetDatabase; }
 
 	void Run();
 
@@ -57,6 +51,7 @@ private:
 	SpdLogModule m_SpdLogModule;
 	RenderModule m_RenderModule;
 	TaskFlowModule m_TaskFlowModule;
+	AssetDatabase m_AssetDatabase;
 
 	std::list<std::unique_ptr<BaseApplication>> m_Applications;
 

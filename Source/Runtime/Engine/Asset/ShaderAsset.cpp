@@ -9,5 +9,5 @@ std::string ShaderCache::ConvertToShaderCachePath(const char8_t* ShaderName)
 		ASSET_PATH_SHADERCACHE,
 		ShaderName,
 		"Vulkan",
-		SERIALIZABLE_EXT);
+		GetAssetExtension());
 }

@@ -57,7 +57,7 @@ class GlobalShaderConfigurations : public SerializableAsset<GlobalShaderConfigur
 {
 public:
 	GlobalShaderConfigurations()
-		: SerializableAsset(StringUtils::Format("%sGlobalShaderConfigs%s", ASSET_PATH_SHADERS, SERIALIZABLE_EXT).c_str())
+		: SerializableAsset(StringUtils::Format("%sGlobalShaderConfigs%s", ASSET_PATH_SHADERS, GetAssetExtension()).c_str())
 	{
 	}
 };

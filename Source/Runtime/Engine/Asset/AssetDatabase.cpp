@@ -4,6 +4,7 @@
 #include "Runtime/Asset/ImageImporter.h"
 #include "Runtime/Asset/ShaderImporter.h"
 #include "Colorful/IRenderer/IRenderer.h"
+#include "AssetDatabase.h"
 
 AssetDatabase::AssetDatabase()
 {
@@ -31,3 +32,10 @@ AssetDatabase::~AssetDatabase()
 	}
 }
 #endif
+
+#include "Runtime/Engine/Asset/AssetDatabase.h"
+
+const Asset* AssetDatabase::LoadAsset(const std::string& AssetPath)
+{
+	return nullptr;
+}

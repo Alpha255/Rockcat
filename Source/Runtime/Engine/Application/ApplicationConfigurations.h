@@ -19,7 +19,6 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(ParentClass),
 			CEREAL_NVP(m_EnableWindow),
 			CEREAL_NVP(m_EnableRendering),
 			CEREAL_NVP(m_WindowCreateInfo),

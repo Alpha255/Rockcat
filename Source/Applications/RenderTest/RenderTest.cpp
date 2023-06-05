@@ -1,4 +1,6 @@
 #include "Applications/RenderTest/RenderTest.h"
+#include "Runtime/Engine/Scene/Scene.h"
+#include "Runtime/Engine/Asset/SceneAsset.h"
 #include "Runtime/Core/Main.h"
 //#include <Submodules/imgui/imgui.h>
 
@@ -20,6 +22,8 @@ void RenderTest::OnStartup()
 	m_Scene->Save(true);
 #endif
 #endif
+
+	m_Scene = std::make_unique<Scene>("RenderTest.scene");
 }
 
 void RenderTest::OnRender()
