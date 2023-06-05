@@ -2,7 +2,7 @@
     "configurations": [
         {
             "name": "clang",
-            "intelliSenseMode": "clang-x64",
+            "intelliSenseMode": "linux-clang-x64",
             "compilerPath": "/usr/bin/clang",
             "includePath": [
                 "${workspaceFolder}",
@@ -11,7 +11,9 @@
                 "${workspaceFolder}/Submodules/spdlog/include",
                 "${workspaceFolder}/Submodules/Vulkan-Headers/include"
             ],
-            "defines": ["_WIN32"],
+            "defines": [
+                "_WIN32"
+            ],
             "browse": {
                 "path": [
                     "${workspaceFolder}"
@@ -19,6 +21,22 @@
                 "limitSymbolsToIncludedHeaders": false,
                 "databaseFilename": ""
             },
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        },
+        {
+            "name": "gcc",
+            "includePath": [
+                "${workspaceFolder}",
+                "${workspaceFolder}/Source",
+                "${workspaceFolder}/Submodules/cereal/include",
+                "${workspaceFolder}/Submodules/spdlog/include",
+                "${workspaceFolder}/Submodules/Vulkan-Headers/include"
+            ],
+            "defines": [
+                "_WIN32"
+            ],
+            "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++17"
         }

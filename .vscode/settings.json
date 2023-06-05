@@ -2,7 +2,7 @@
     "cmake.useCMakePresets": "always",
     "C_Cpp.autoAddFileAssociations": false,
     "C_Cpp.autocompleteAddParentheses": true,
-    "C_Cpp.intelliSenseEngine": "Disabled",
+    "C_Cpp.intelliSenseEngine": "default",
     "C_Cpp.inactiveRegionOpacity": 0.55,
     "C_Cpp.dimInactiveRegions": true,
     "clangd.onConfigChanged": "restart",
@@ -15,7 +15,7 @@
         "--enable-config",
         "--compile-commands-dir=${workspaceFolder}build",
         "-j=8",
-        "--query-driver={LLVM_PATH}/clang++.exe",
+        "--query-driver=/usr/bin/clang",
         "--clang-tidy",
         "--all-scopes-completion",
         "--completion-style=detailed",
@@ -29,6 +29,6 @@
     "lldb.consoleMode": "commands",
     "C_Cpp.default.cppStandard": "c++17",
     "C_Cpp.default.cStandard": "c17",
-    "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
-    "C_Cpp.intelliSenseEngineFallback": "Disabled"
+    "C_Cpp.default.intelliSenseMode": "linux-clang-x64",
+    "C_Cpp.intelliSenseEngineFallback": "disabled"
 }
