@@ -1,5 +1,18 @@
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 
+#define BIND_WITH_CONFIG_GENERAL(ConfigName, ForceEnable) \
+	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final \
+	{ \
+		return Configs && (ForceEnable || Configs->ConfigName); \
+	} \
+	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final \
+	{ \
+		Config->ConfigName = IsEnabled(); \
+	}
+
+#define BIND_WITH_CONFIG(ConfigName) BIND_WITH_CONFIG_GENERAL(ConfigName, false)
+#define BIND_WITH_CONFIG_FORCE_ENABLE(ConfigName) BIND_WITH_CONFIG_GENERAL(ConfigName, true)
+
 class VkKHRValidationLayer : public VulkanLayer
 {
 public:
@@ -8,15 +21,7 @@ public:
 	{
 	}
 
-	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
-	{
-		return Configs && Configs->HasKhronosValidationLayer;
-	}
-
-	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
-	{
-		Config->HasKhronosValidationLayer = IsEnabled();
-	}
+	BIND_WITH_CONFIG(HasKhronosValidationLayer)
 };
 
 class VkKHRSurfaceExt : public VulkanInstanceExtension
@@ -27,15 +32,7 @@ public:
 	{
 	}
 
-	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
-	{
-		return Configs && true;
-	}
-
-	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
-	{
-		Config->HasKHRSurfaceExt = IsEnabled();
-	}
+	BIND_WITH_CONFIG_FORCE_ENABLE(HasKHRSurfaceExt)
 };
 
 class VkKHRPlatformSurfaceExt : public VulkanInstanceExtension
@@ -53,15 +50,7 @@ public:
 	}
 #endif
 
-	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
-	{
-		return Configs && true;
-	}
-
-	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
-	{
-		Config->HasKHRSurfaceExt = IsEnabled();
-	}
+	BIND_WITH_CONFIG_FORCE_ENABLE(HasKHRSurfaceExt)
 };
 
 class VkDebugUtilsExt : public VulkanInstanceExtension
@@ -72,15 +61,7 @@ public:
 	{
 	}
 
-	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
-	{
-		return Configs && Configs->HasDebugUtilsExt;
-	}
-
-	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
-	{
-		Config->HasDebugUtilsExt = IsEnabled();
-	}
+	BIND_WITH_CONFIG(HasDebugUtilsExt)
 };
 
 class VkDebugReportExt : public VulkanInstanceExtension
@@ -91,15 +72,7 @@ public:
 	{
 	}
 
-	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
-	{
-		return Configs && Configs->HasDebugReportExt;
-	}
-
-	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
-	{
-		Config->HasDebugReportExt = IsEnabled();
-	}
+	BIND_WITH_CONFIG(HasDebugReportExt)
 };
 
 class VkDebugMarkerExt : public VulkanDeviceExtension
@@ -110,15 +83,18 @@ public:
 	{
 	}
 
-	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
+	BIND_WITH_CONFIG(HasDebugMarkerExt)
+};
+
+class VkGetPhysicalDeviceProperties2Ext : public VulkanInstanceExtension
+{
+public:
+	VkGetPhysicalDeviceProperties2Ext()
+		: VulkanInstanceExtension(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME, false)
 	{
-		return Configs && Configs->HasDebugMarkerExt;
 	}
 
-	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
-	{
-		Config->HasDebugMarkerExt = IsEnabled();
-	}
+	BIND_WITH_CONFIG(HasGetPhysicalDeviceProperties2)
 };
 
 class VkTimelineSemaphoreExt : public VulkanDeviceExtension
@@ -129,15 +105,7 @@ public:
 	{
 	}
 
-	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
-	{
-		return Configs && Configs->HasTimelineSemaphore;
-	}
-
-	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
-	{
-		Config->HasTimelineSemaphore = IsEnabled();
-	}
+	BIND_WITH_CONFIG(HasTimelineSemaphore)
 };
 
 class VkFullscreenExclusiveExt : public VulkanDeviceExtension
@@ -148,15 +116,7 @@ public:
 	{
 	}
 
-	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
-	{
-		return Configs && Configs->HasFullscreenExclusive;
-	}
-
-	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
-	{
-		Config->HasFullscreenExclusive = IsEnabled();
-	}
+	BIND_WITH_CONFIG(HasFullscreenExclusive)
 };
 
 class VkDynamicStateExt : public VulkanDeviceExtension
@@ -167,15 +127,7 @@ public:
 	{
 	}
 
-	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
-	{
-		return Configs && Configs->HasDynamicState;
-	}
-
-	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
-	{
-		Config->HasDynamicState = IsEnabled();
-	}
+	BIND_WITH_CONFIG(HasDynamicState)
 };
 
 class VkValidationFeaturesExt : public VulkanInstanceExtension
@@ -186,15 +138,7 @@ public:
 	{
 	}
 
-	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final
-	{
-		return Configs && Configs->HasValidationFeaturesExt;
-	}
-
-	void SetEnabledToConfig(VulkanLayerExtensionConfigurations* Config) const override final
-	{
-		Config->HasValidationFeaturesExt = IsEnabled();
-	}
+	BIND_WITH_CONFIG(HasValidationFeaturesExt)
 
 	virtual void PreInstanceCreation(VulkanLayerExtensionConfigurations* Configs, vk::InstanceCreateInfo& CreateInfo)
 	{
@@ -242,6 +186,7 @@ VulkanExtensionArray VulkanExtension::GetWantedInstanceExtensions()
 	APPEND_EXT(VkDebugUtilsExt);
 	APPEND_EXT(VkDebugReportExt);
 	APPEND_EXT(VkValidationFeaturesExt);
+	//APPEND_EXT(VkGetPhysicalDeviceProperties2Ext);
 
 	return WantedExts;
 }

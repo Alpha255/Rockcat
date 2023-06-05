@@ -33,6 +33,7 @@ struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayer
 	bool8_t HasValidationFeaturesExt_BestPractices = true;
 	bool8_t HasValidationFeaturesExt_DebugPrintf = false;
 	bool8_t HasValidationFeaturesExt_Synchronization = true;
+	bool8_t HasGetPhysicalDeviceProperties2 = false;
 	bool8_t HasDebugMarkerExt = true;
 	bool8_t HasTimelineSemaphore = false;
 	bool8_t HasFullscreenExclusive = false;
@@ -53,6 +54,7 @@ struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayer
 			CEREAL_NVP(HasValidationFeaturesExt_BestPractices),
 			CEREAL_NVP(HasValidationFeaturesExt_DebugPrintf),
 			CEREAL_NVP(HasValidationFeaturesExt_Synchronization),
+			CEREAL_NVP(HasGetPhysicalDeviceProperties2),
 			CEREAL_NVP(HasDebugMarkerExt),
 			CEREAL_NVP(HasTimelineSemaphore),
 			CEREAL_NVP(HasFullscreenExclusive)
@@ -80,7 +82,7 @@ protected:
 	friend class VulkanInstance;
 	friend class VulkanDevice;
 
-	void SetEnabled(const VulkanLayerExtensionConfigurations* Configs, bool8_t Supported) { m_Enabled = IsEnabledInConfig(Configs) && Supported; }
+	bool8_t SetEnabled(const VulkanLayerExtensionConfigurations* Configs, bool8_t Supported) { m_Enabled = IsEnabledInConfig(Configs) && Supported; return m_Enabled; }
 	virtual bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const { return Configs && false; }
 	virtual void SetEnabledToConfig(VulkanLayerExtensionConfigurations* /*Config*/) const {}
 private:

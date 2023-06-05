@@ -489,8 +489,10 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 			});
 		if (LayerIt != WantedLayers.end())
 		{
-			EnabledLayers.push_back(LayerProperty.layerName.data());
-			(*LayerIt)->SetEnabled(Configs, true);
+			if ((*LayerIt)->SetEnabled(Configs, true))
+			{
+				EnabledLayers.push_back(LayerProperty.layerName.data());
+			}
 		}
 
 		LOG_DEBUG("\t\t\t\t\"{}\"", LayerProperty.layerName.data());
@@ -505,8 +507,10 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 			});
 		if (ExtensionIt != WantedExtensions.end())
 		{
-			EnabledExtensions.push_back(ExtensionProperty.extensionName.data());
-			(*ExtensionIt)->SetEnabled(Configs, true);
+			if ((*ExtensionIt)->SetEnabled(Configs, true))
+			{
+				EnabledExtensions.push_back(ExtensionProperty.extensionName.data());
+			}
 		}
 
 		LOG_DEBUG("\t\t\t\t\"{}\"", ExtensionProperty.extensionName.data());
