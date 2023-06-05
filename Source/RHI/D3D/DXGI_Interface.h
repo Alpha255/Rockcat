@@ -7,20 +7,16 @@
 #include <d3d11_4.h>
 #include <dxgi1_6.h>
 #include <d3dcompiler.h>
-#include "Colorful/IRenderer/IResource.h"
+#include "Runtime/Engine/RHI/RHIResource.h"
 
-NAMESPACE_START(RHI)
-
-template<class TInterface, class THWInterface>
-class D3DHWObject : public std::conditional_t<std::is_void_v<TInterface>, std::_Any_tag, TInterface>, public IHWObject<THWInterface>
+template<class HwObjectType>
+class D3DHwResource : public RHIObject<HwObjectType>, public RHIResource
 {
 public:
-	using InterfaceType = std::conditional_t<std::is_void_v<TInterface>, std::_Any_tag, TInterface>;
+	D3DHwResource() = default;
 
-	D3DHWObject() = default;
-
-	D3DHWObject(THWInterface* Handle, bool8_t AddRef = true)
-		: IHWObject<THWInterface>(Handle)
+	D3DHwResource(HwObjectType* Handle, bool8_t AddRef = true)
+		: RHIResource<HwObjectType>(Handle)
 	{
 		if (AddRef)
 		{
@@ -28,13 +24,7 @@ public:
 		}
 	}
 
-	template<class... TArgs>
-	D3DHWObject(TArgs&&... Args)
-		: InterfaceType(std::forward<TArgs>(Args)...)
-	{
-	}
-
-	D3DHWObject(const D3DHWObject& Other)
+	D3DHwResource(const D3DHwResource& Other)
 	{
 		if (m_Handle != Other.m_Handle)
 		{
@@ -52,7 +42,7 @@ public:
 		}
 	}
 
-	D3DHWObject(D3DHWObject&& Other)
+	D3DHwResource(D3DHwResource&& Other)
 	{
 		if (m_Handle != Other.m_Handle)
 		{
@@ -65,7 +55,7 @@ public:
 		}
 	}
 
-	D3DHWObject& operator=(const D3DHWObject& Other)
+	D3DHwResource& operator=(const D3DHwResource& Other)
 	{
 		if (m_Handle != Other.m_Handle)
 		{
@@ -85,7 +75,7 @@ public:
 		return *this;
 	}
 
-	D3DHWObject& operator=(D3DHWObject&& Other) noexcept
+	D3DHwResource& operator=(D3DHwResource&& Other) noexcept
 	{
 		if (m_Handle != Other.m_Handle)
 		{
@@ -100,13 +90,13 @@ public:
 		return *this;
 	}
 
-	void SetDebugName(const char8_t* Name)
+	void SetDebugName(const char8_t* Name) override final
 	{
 		assert(name && m_Handle);
 		m_Handle->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<uint32_t>(std::strlen(Name)), Name);
 	}
 
-	virtual ~D3DHWObject()
+	virtual ~D3DHwResource()
 	{
 		if (m_Handle)
 		{

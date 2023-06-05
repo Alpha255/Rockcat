@@ -1,11 +1,9 @@
 #pragma once
 
-#include "Colorful/IRenderer/IRenderer.h"
-#include "Colorful/D3D/DXGI_Interface.h"
+#include "Runtime/Engine/RHI/RHIInterface.h"
+#include "RHI/D3D/DXGI_Interface.h"
 
-NAMESPACE_START(RHI)
-
-class D3D12Renderer final : public IRenderer
+class D3D12Renderer final : public RHIInterface
 {
 public:
 	D3D12Renderer(const RenderSettings* Settings, uint64_t WindowHandle);
@@ -32,5 +30,3 @@ private:
 	std::unique_ptr<class D3D12Device> m_Device;
 	std::unique_ptr<class D3D12Swapchain> m_Swapchain;
 };
-
-NAMESPACE_END(RHI)
