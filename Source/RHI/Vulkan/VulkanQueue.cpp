@@ -1,3 +1,4 @@
+#if 0
 #include "Colorful/Vulkan/VulkanQueue.h"
 #include "Colorful/Vulkan/VulkanDevice.h"
 #include "Colorful/Vulkan/VulkanSwapchain.h"
@@ -198,3 +199,4 @@ VulkanQueue::~VulkanQueue()
 }
 
 NAMESPACE_END(RHI)
+#endif

@@ -1,3 +1,4 @@
+#if 0
 #include "Colorful/Vulkan/VulkanCommand.h"
 #include "Colorful/Vulkan/VulkanCommandPool.h"
 #include "Colorful/Vulkan/VulkanDevice.h"
@@ -877,3 +878,5 @@ void VulkanCommandBuffer::VkResourceStateTracker::EnsureCorrectStates(VulkanPipe
 }
 
 NAMESPACE_END(RHI)
+
+#endif

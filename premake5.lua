@@ -45,6 +45,14 @@ workspace "Rockcat"
 			libdirs {
 				"$(VK_SDK_PATH)/Lib"
 			}
+			filter { "configurations:Debug" }
+				links {
+					"spirv-cross-cored"
+				}
+			filter { "configurations:Release" }
+				links {
+					"spirv-cross-core"
+				}
 
 		group "RHI"
 			project "VulkanRHI"
@@ -204,54 +212,19 @@ workspace "Rockcat"
 		links { 
 			"Runtime",  
 			"VulkanRHI",
-			"D3D12RHI",
+			--"D3D12RHI",
 			"vulkan-1",
 			"dxcompiler",
 			"d3dcompiler",
 			"assimp",
 			"imgui"
 		}
-		filter { "configurations:Debug" }
-			links {
-				"spirv-cross-cored"
-			}
-		filter { "configurations:Release" }
-			links {
-				"spirv-cross-core"
-			}
-		group "Test"
-			project "Test"
-			kind "WindowedApp"
-			language "C++"
-			location "./Out/Intermediate/VCProjects"
-			targetname "$(ProjectName)_$(Configuration)"
-			files {
-				"./Source/Test/**",
+		vpaths {
+			["Resource"] = {
 				"./Source/Runtime/Engine/Application/Resource.rc"
+			},
+			[""] = {
+				"./Source/Applications/RenderTest/**",
 			}
-			includedirs { 
-				"$(SolutionDir)",
-				"$(SolutionDir)/Source",
-				"$(SolutionDir)Submodules/cereal/include",
-				"$(SolutionDir)Submodules/spdlog/include"
-			}
-			libdirs {
-				"$(VK_SDK_PATH)/Lib"
-			}
-			targetdir "$(SolutionDir)Out"
-			links {
-				"Runtime",
-				"dxcompiler",
-				"d3dcompiler",
-				"VulkanRHI",
-				"assimp",
-				"vulkan-1",
-			}
-			filter { "configurations:Debug" }
-				links {
-				"spirv-cross-cored"
-				}
-			filter { "configurations:Release" }
-				links {
-					"spirv-cross-core"
-				}
+		}
+

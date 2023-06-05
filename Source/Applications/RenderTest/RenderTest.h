@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Runtime/Application/Application.h"
+#include "Runtime/Engine/Application/BaseApplication.h"
 
-class RenderTest final : public Application
+class RenderTest final : public BaseApplication
 {
 public:
-	using Application::Application;
+	using BaseApplication::BaseApplication;
 
 	void OnStartup() override final;
 
-	void RenderGUI() override final;
+	void OnRender() override final;
 protected:
 private:
 };

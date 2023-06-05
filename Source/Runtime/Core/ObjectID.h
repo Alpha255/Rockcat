@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Runtime/Core/Definitions.h"
+#include "Runtime/Core/Cereal.h"
 
 template<class TObject, class TIndex = uint32_t>
 class ObjectID

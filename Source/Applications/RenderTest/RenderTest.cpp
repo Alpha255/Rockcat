@@ -1,8 +1,11 @@
 #include "Applications/RenderTest/RenderTest.h"
-#include <Submodules/imgui/imgui.h>
+#include "Runtime/Core/Main.h"
+//#include <Submodules/imgui/imgui.h>
 
 void RenderTest::OnStartup()
 {
+	BaseApplication::OnStartup();
+#if 0
 	m_Scene = Scene::Load("RenderTest.json");
 	m_Camera = m_Scene->MainCamera();
 	//m_Camera->onWindowResized(1280, 720);
@@ -16,10 +19,12 @@ void RenderTest::OnStartup()
 	m_Scene->AddModel("outdoor_columns.obj", nullptr);
 	m_Scene->Save(true);
 #endif
+#endif
 }
 
-void RenderTest::RenderGUI()
+void RenderTest::OnRender()
 {
+#if 0
 	ImGui::Begin("Settings");
 
 	ImGui::Text("FrameTime %.2fms", RHI::Profiler::Stats::Get().AverageFrameTime());
@@ -29,6 +34,7 @@ void RenderTest::RenderGUI()
 	ImGui::ShowDemoWindow();
 	
 	ImGui::End();
+#endif
 }
 
-RUN_APPLICATION(RenderTest)
+REGISTER_APPLICATION(RenderTest, "RenderTest.json")

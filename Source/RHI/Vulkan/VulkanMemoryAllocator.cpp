@@ -1,3 +1,4 @@
+#if 0
 #include "Colorful/Vulkan/VulkanMemoryAllocator.h"
 #include "Colorful/Vulkan/VulkanDevice.h"
 
@@ -102,3 +103,4 @@ VulkanDeviceMemory VulkanMemoryAllocator::Alloc(const VkMemoryRequirements& Requ
 }
 
 NAMESPACE_END(RHI)
+#endif

@@ -1,3 +1,4 @@
+#if 0
 #include "Colorful/Vulkan/VulkanCommandPool.h"
 #include "Colorful/Vulkan/VulkanDevice.h"
 
@@ -132,3 +133,4 @@ VulkanCommandBufferPool::~VulkanCommandBufferPool()
 }
 
 NAMESPACE_END(RHI)
+#endif
