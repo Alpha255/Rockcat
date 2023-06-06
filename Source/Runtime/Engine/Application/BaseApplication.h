@@ -11,7 +11,9 @@ public:
 
 	virtual ~BaseApplication() = default;
 
-	virtual void OnStartup();
+	virtual void OnWindowCreation();
+
+	virtual void OnStartup() {}
 
 	virtual void OnRender() {}
 

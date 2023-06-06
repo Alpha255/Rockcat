@@ -150,7 +150,7 @@ BaseApplication::BaseApplication(const char8_t* ConfigurationName)
 	m_Configs = ApplicationConfigurations::Load(ConfigurationName ? ConfigurationName : "Defalut.json");
 }
 
-void BaseApplication::OnStartup()
+void BaseApplication::OnWindowCreation()
 {
 	if (m_Configs->IsEnableWindow())
 	{

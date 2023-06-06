@@ -20,6 +20,7 @@ void Engine::Run()
 
 	for each (auto& Application in m_Applications)
 	{
+		Application->OnWindowCreation();
 		Application->OnStartup();
 	}
 

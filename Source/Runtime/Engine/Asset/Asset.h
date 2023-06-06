@@ -18,18 +18,6 @@ struct AssetData
 	std::shared_ptr<byte8_t> RawData;
 };
 
-struct AssetType
-{
-	std::string_view AssetTypeName;
-	std::vector<std::string_view> AssetFileExtensions;
-
-	AssetType(const char8_t* TypeName, std::initializer_list<std::string_view>& Extensions)
-		: AssetTypeName(TypeName)
-		, AssetFileExtensions(Extensions)
-	{
-	}
-};
-
 class Asset
 {
 public:
@@ -124,4 +112,26 @@ private:
 	mutable bool8_t m_Dirty = false;
 	std::string m_Path;
 };
+
+struct AssetType
+{
+	std::string_view AssetTypeName;
+	std::vector<std::string_view> AssetFileExtensions;
+	std::unique_ptr<class IAssetLoader> AssetLoader;
+
+	AssetType(const char8_t* TypeName, std::vector<std::string_view>& Extensions, class IAssetLoader* Loader)
+		: AssetTypeName(TypeName)
+		, AssetFileExtensions(std::move(Extensions))
+		, AssetLoader(Loader)
+	{
+	}
+};
+
+#if 0
+
+template<class TConfiguration>
+class ConfigurationAsset : public SerializableAsset<TConfiguration>
+{
+};
+#endif
 

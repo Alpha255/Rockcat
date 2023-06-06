@@ -10,16 +10,24 @@ public:
 
 	const char8_t* GetAssetExtension() const override final { return ".scene"; }
 
+	const std::vector<std::string>& GetAssimpScenePath() const { return m_AssimpScenePaths; }
+	std::shared_ptr<Scene::SceneGraph> GetSceneGraph() const { return m_SceneGraph; }
+
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_NVP(m_SceneAssetPaths),
+			CEREAL_NVP(m_AssimpScenePaths),
 			CEREAL_NVP(m_SceneGraph)
 		);
 	}
 private:
-	std::vector<std::string> m_SceneAssetPaths;
+	std::vector<std::string> m_AssimpScenePaths;
 	std::shared_ptr<Scene::SceneGraph> m_SceneGraph;
 };
 
+class AssimpSceneAsset : public Asset
+{
+public:
+	using Asset::Asset;
+};

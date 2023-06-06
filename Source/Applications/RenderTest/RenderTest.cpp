@@ -6,7 +6,6 @@
 
 void RenderTest::OnStartup()
 {
-	BaseApplication::OnStartup();
 #if 0
 	m_Scene = Scene::Load("RenderTest.json");
 	m_Camera = m_Scene->MainCamera();

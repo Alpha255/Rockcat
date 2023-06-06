@@ -270,3 +270,13 @@ void Scene::Traverse(const SceneNode::VisitFunc& Visit) const
 	}
 }
 #endif
+
+#include "Runtime/Engine/Scene/Scene.h"
+#include "Runtime/Engine/Asset/SceneAsset.h"
+#include "Runtime/Engine/Engine.h"
+
+Scene::Scene(const char8_t* SceneAssetName)
+{
+	auto SceneAssetPath = std::string(ASSET_PATH_SCENES) + SceneAssetName;
+	m_Graph = Engine::Get().GetAssetDatabase().FindAsset<SceneAsset>(SceneAssetPath.c_str())->GetSceneGraph();
+}

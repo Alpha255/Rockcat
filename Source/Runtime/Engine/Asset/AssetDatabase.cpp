@@ -34,8 +34,31 @@ AssetDatabase::~AssetDatabase()
 #endif
 
 #include "Runtime/Engine/Asset/AssetDatabase.h"
+#include "Runtime/Engine/Asset/SceneAsset.h"
+#include "Runtime/Engine/Asset/ImageAsset.h"
+#include "Runtime/Engine/Asset/ShaderAsset.h"
+#include "Runtime/Engine/Asset/MaterialAsset.h"
+
+#define REGISTER_ASSET_TYPE(Type, Extensions, Loader) RegisterAssetType(#Type, Extensions, Loader)
+
+AssetDatabase::AssetDatabase()
+{
+	REGISTER_ASSET_TYPE(SceneAsset, { ".scene" }, nullptr);
+	REGISTER_ASSET_TYPE(AssimpSceneAsset, { ".scene" }, nullptr);
+}
+
+void AssetDatabase::RegisterAssetType(const char8_t* AssetTypeName, std::vector<std::string_view>& Extensions, IAssetLoader* Loader)
+{
+	assert(AssetTypeName && Loader && Extensions.size() > 0u);
+	m_SupportedAssetTypes.emplace_back(AssetType(AssetTypeName, Extensions, Loader));
+}
 
 const Asset* AssetDatabase::LoadAsset(const std::string& AssetPath)
 {
+	auto AssetExt = std::filesystem::path(AssetPath).extension().c_str();
 	return nullptr;
+}
+
+AssetDatabase::~AssetDatabase()
+{
 }

@@ -6,26 +6,13 @@
 class ShaderDefinitions
 {
 public:
-	void SetDefine(const char8_t* Name, const char8_t* Value)
-	{
-		m_Definitions[Name] = Value;
-	}
-
-	void SetDefine(const char8_t* Name, const std::string& Value)
-	{
-		m_Definitions[Name] = Value;
-	}
+	void SetDefine(const char8_t* Name, const char8_t* Value) { m_Definitions[Name] = Value; }
+	void SetDefine(const char8_t* Name, const std::string& Value) { m_Definitions[Name] = Value; }
 
 	template<class T>
-	void SetDefine(const char8_t* Name, T Value)
-	{
-		m_Definitions[Name] = (std::stringstream() << Value).str();
-	}
+	void SetDefine(const char8_t* Name, T Value) { m_Definitions[Name] = (std::stringstream() << Value).str(); }
 
-	void Merge(ShaderDefinitions&& Other)
-	{
-		m_Definitions.merge(Other.m_Definitions);
-	}
+	void Merge(ShaderDefinitions&& Other) { m_Definitions.merge(Other.m_Definitions); }
 
 	void Merge(const ShaderDefinitions& Other)
 	{
@@ -35,10 +22,7 @@ public:
 		}
 	}
 
-	const std::map<std::string, std::string>& GetDefinitions() const
-	{
-		return m_Definitions;
-	}
+	const std::map<std::string, std::string>& GetDefinitions() const { return m_Definitions; }
 
 	std::string GetPermutationString() const
 	{
@@ -76,15 +60,8 @@ public:
 		VERIFY(memcpy_s(RawData.get(), DataSize, Data, DataSize) == 0);
 	}
 
-	size_t GetSize() const
-	{
-		return SizeInBytes;
-	}
-
-	const byte8_t* GetBinary() const
-	{
-		return RawData.get();
-	}
+	size_t GetSize() const { return SizeInBytes; }
+	const byte8_t* GetBinary() const { return RawData.get(); }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -119,15 +96,8 @@ private:
 class ShaderAsset : public Asset
 {
 public:
-	const char8_t* const GetSourceCode() const
-	{
-		return GetData()->RawData.get();
-	}
-
-	const ShaderBinary* const GetShaderBinary(const ShaderDefinitions&) const
-	{
-		return nullptr;
-	}
+	const char8_t* const GetSourceCode() const { return GetData()->RawData.get(); }
+	const ShaderBinary* const GetShaderBinary(const ShaderDefinitions&) const { return nullptr; }
 };
 
 struct MemoryBlock : public SerializableAsset<MemoryBlock>
