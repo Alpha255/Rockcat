@@ -8,9 +8,9 @@ class SceneAsset : public SerializableAsset<SceneAsset>
 public:
 	ParentClass::ParentClass;
 
-	const char8_t* GetAssetExtension() const override final { return ".scene"; }
+	const char8_t* GetExtension() const override final { return ".scene"; }
 
-	const std::vector<std::string>& GetAssimpScenePath() const { return m_AssimpScenePaths; }
+	const std::vector<std::string>& GetAssimpSceneAssetPath() const { return m_AssimpScenePaths; }
 	std::shared_ptr<Scene::SceneGraph> GetSceneGraph() const { return m_SceneGraph; }
 
 	template<class Archive>

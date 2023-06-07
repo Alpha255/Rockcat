@@ -39,6 +39,7 @@ public:
 			LOG_TRACE("Create serializable asset: \"{}\".", GetPath());
 			Save(true);
 		}
+		InFileStream.close();
 	}
 
 	void Save(bool8_t Force = false, const char8_t* CustomPath = nullptr)
@@ -49,7 +50,7 @@ public:
 			
 			if (!std::filesystem::path(SavePath).has_extension())
 			{
-				SavePath += GetAssetExtension();
+				SavePath += GetExtension();
 			}
 
 			auto ParentPath = std::filesystem::path(SavePath).parent_path();
@@ -70,10 +71,11 @@ public:
 			{
 				LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath, PlatformMisc::GetErrorMessage());
 			}
+			OutFileStream.close();
 		}
 	}
 
-	virtual const char8_t* GetAssetExtension() const { return SERIALIZABLE_EXT; }
+	virtual const char8_t* GetExtension() const { return SERIALIZABLE_EXT; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)

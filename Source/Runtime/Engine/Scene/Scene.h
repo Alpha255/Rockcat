@@ -136,15 +136,12 @@ public:
 	{
 	};
 
-	const SceneGraph& GetSceneGraph() const { return *m_Graph; }
+	const SceneGraph& GetSceneGraph() const;
 	const SceneData& GetSceneData() const { return m_Data; }
 protected:
 	friend class SceneBuilder;
 private:
-	SceneGraph& GetSceneGraph() { return *m_Graph; }
-	SceneData& GetSceneData() { return m_Data; }
-
-	std::shared_ptr<SceneGraph> m_Graph;
+	std::unique_ptr<class SceneAsset> m_SceneAsset;
 	SceneData m_Data;
 };
 

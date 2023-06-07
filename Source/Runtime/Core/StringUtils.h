@@ -35,6 +35,15 @@ namespace StringUtils
 	int32_t ToHexDigit(char8_t C);
 
 	uint32_t ToHex(const char8_t* Str);
+
+	template<class StringTypeLeft, class StringTypeRight>
+	bool8_t Compare(const StringTypeLeft& Left, const StringTypeRight& Right, bool8_t CaseSensitive = true)
+	{
+		std::string_view LeftView(Left);
+		std::string_view RightView(Right);
+
+		return CaseSensitive ? stricmp(LeftView.data(), RightView.data()) == 0 ? LeftView == RightView;
+	}
 };
 
 

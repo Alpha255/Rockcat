@@ -277,6 +277,6 @@ void Scene::Traverse(const SceneNode::VisitFunc& Visit) const
 
 Scene::Scene(const char8_t* SceneAssetName)
 {
-	auto SceneAssetPath = std::string(ASSET_PATH_SCENES) + SceneAssetName;
-	m_Graph = Engine::Get().GetAssetDatabase().FindAsset<SceneAsset>(SceneAssetPath.c_str())->GetSceneGraph();
+	m_SceneAsset = std::make_unique<SceneAsset>(StringUtils::Format("%s%s", ASSET_PATH_SCENES, SceneAssetName));
+	m_SceneAsset->Load();
 }

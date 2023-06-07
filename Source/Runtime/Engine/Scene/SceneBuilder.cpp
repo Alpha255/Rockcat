@@ -1,11 +1,8 @@
 #pragma once
 
-#include "Runtime/Engine/Scene/Scene.h"
+#include "Runtime/Engine/Scene/SceneBuilder.h"
 
-class SceneBuilder
+std::unique_ptr<Scene> SceneBuilder::BuildSceneFromSceneAsset(const char8_t* AssetName)
 {
-public:
-protected:
-private:
-};
-
+    return std::unique_ptr<Scene>();
+}

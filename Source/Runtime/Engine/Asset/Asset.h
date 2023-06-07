@@ -44,8 +44,7 @@ public:
 	}
 
 	Asset(const std::string& Path)
-		: m_Path(Path)
-		, m_LastWriteTime(GetFileLastWriteTime(Path.c_str()))
+		: Asset(Path.c_str())
 	{
 	}
 
