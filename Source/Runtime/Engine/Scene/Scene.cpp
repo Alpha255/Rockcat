@@ -272,11 +272,9 @@ void Scene::Traverse(const SceneNode::VisitFunc& Visit) const
 #endif
 
 #include "Runtime/Engine/Scene/Scene.h"
-#include "Runtime/Engine/Asset/SceneAsset.h"
+#include "Runtime/Engine/Scene/SceneBuilder.h"
 #include "Runtime/Engine/Engine.h"
 
-Scene::Scene(const char8_t* SceneAssetName)
+void Scene::Merge(const Scene& OtherScene)
 {
-	m_SceneAsset = std::make_unique<SceneAsset>(StringUtils::Format("%s%s", ASSET_PATH_SCENES, SceneAssetName));
-	m_SceneAsset->Load();
 }

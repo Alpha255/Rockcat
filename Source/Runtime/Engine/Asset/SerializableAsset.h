@@ -5,7 +5,6 @@
 #include "Runtime/Core/PlatformMisc.h"
 #include "Runtime/Core/Cereal.h"
 
-#define SERIALIZABLE_EXT ".json"
 ///#define SERIALIZABLE_MEMORY_BLOCK_SIZE 128u
 
 template<class T>
@@ -18,10 +17,20 @@ public:
 	template<class... TArgs>
 	static std::shared_ptr<T> Load(const char8_t* Path, TArgs&&... Args)
 	{
-		auto NewAsset = std::make_shared<T>(Path, std::forward<TArgs>(Args)...);
-		NewAsset->Load();
+		if (!s_ThisAsset)
+		{
+			s_ThisAsset = std::make_shared<T>(Path, std::forward<TArgs>(Args)...);
+			s_ThisAsset->Load();
+			s_ThisAsset->SetStatus(Asset::EAssetStatus::Ready);
+		}
 
-		return NewAsset;
+		return s_ThisAsset;
+	}
+
+	template<class... TArgs>
+	static std::shared_ptr<T> Load(const std::string& Path, TArgs&&... Args)
+	{
+		return Load(Path.c_str(), std::forward<TArgs>(Args)...);
 	}
 
 	void Load()
@@ -75,7 +84,7 @@ public:
 		}
 	}
 
-	virtual const char8_t* GetExtension() const { return SERIALIZABLE_EXT; }
+	virtual const char8_t* GetExtension() const { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabricateAssetType::ConfigAsset); }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -84,5 +93,9 @@ public:
 			CEREAL_BASE(Asset)
 		);
 	}
+private:
+	static std::shared_ptr<T> s_ThisAsset;
 };
+
+template <class T> std::shared_ptr<T> SerializableAsset<T>::s_ThisAsset;
 

@@ -1,29 +1,34 @@
 #pragma once
 
 #include "Runtime/Engine/Asset/SerializableAsset.h"
-#include "Runtime/Engine/Scene/Scene.h"
+#include "Runtime/Engine/Scene/SceneGraph.h"
 
-class SceneAsset : public SerializableAsset<SceneAsset>
+class SceneGraphAsset : public SerializableAsset<SceneGraphAsset>
 {
 public:
-	ParentClass::ParentClass;
+	SceneGraphAsset(const char8_t* SceneGraphAssetName)
+		: ParentClass(Asset::GetPrefabricateAssetPath(SceneGraphAssetName, Asset::EPrefabricateAssetType::SceneAsset))
+	{
+		LoadAssimpScenes();
+	}
 
-	const char8_t* GetExtension() const override final { return ".scene"; }
+	const char8_t* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabricateAssetType::SceneAsset); }
 
-	const std::vector<std::string>& GetAssimpSceneAssetPath() const { return m_AssimpScenePaths; }
-	std::shared_ptr<Scene::SceneGraph> GetSceneGraph() const { return m_SceneGraph; }
+	std::shared_ptr<SceneGraph> GetSceneGraph() const { return m_Graph; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
 			CEREAL_NVP(m_AssimpScenePaths),
-			CEREAL_NVP(m_SceneGraph)
+			CEREAL_NVP(m_Graph)
 		);
 	}
 private:
+	void LoadAssimpScenes();
+
 	std::vector<std::string> m_AssimpScenePaths;
-	std::shared_ptr<Scene::SceneGraph> m_SceneGraph;
+	std::shared_ptr<SceneGraph> m_Graph;
 };
 
 class AssimpSceneAsset : public Asset

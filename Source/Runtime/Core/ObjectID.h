@@ -14,7 +14,7 @@ public:
 
 	constexpr ObjectID() = default;
 
-	constexpr explicit ObjectID(const TIndex Index)
+	constexpr explicit ObjectID(TIndex Index)
 		: m_Index(Index)
 	{
 		assert(m_Index < NullIndex);
@@ -27,11 +27,7 @@ public:
 		assert(m_Index < NullIndex);
 	}
 
-	constexpr TIndex GetIndex() const
-	{
-		assert(IsValid());
-		return m_Index;
-	}
+	constexpr TIndex GetIndex() const { assert(IsValid()); return m_Index; }
 
 	constexpr operator bool8_t() const { return IsValid(); }
 
@@ -81,16 +77,20 @@ public:
 	void Free(TIndex Index) { m_FreeIndices.push(Index); }
 
 	template<class Archive>
-	void serializie(Archive& Ar)
+	void serialize(Archive& Ar)
 	{
 		Ar(
 			CEREAL_NVP(m_MaxIndex),
 			CEREAL_NVP(m_FreeIndices)
-		)
+		);
 	}
 protected:
 private:
+#if 0
 	std::atomic<TIndex> m_MaxIndex = 0;
+#else
+	TIndex m_MaxIndex = 0;
+#endif
 	std::queue<TIndex> m_FreeIndices;
 };
 

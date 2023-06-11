@@ -22,7 +22,7 @@ void RenderTest::OnStartup()
 #endif
 #endif
 
-	m_Scene = std::make_unique<Scene>("RenderTest.scene");
+	m_Scene = Scene::Load("RenderTest.scene");
 }
 
 void RenderTest::OnRender()

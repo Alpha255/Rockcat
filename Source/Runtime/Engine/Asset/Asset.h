@@ -30,6 +30,14 @@ public:
 		Error
 	};
 
+	enum class EPrefabricateAssetType : uint8_t
+	{
+		ConfigAsset,
+		SceneAsset,
+		ShaderCacheAsset,
+		MaterialAsset
+	};
+
 	using AssetReadyCallback = std::function<void()>;
 	using AssetSavedCallback = std::function<void()>;
 	using AssetReloadedCallback = std::function<void()>;
@@ -68,6 +76,30 @@ public:
 			m_Dirty = m_LastWriteTime != LastWriteTime;
 		}
 		return m_Dirty;
+	}
+
+	static const char8_t* GetPrefabricateAssetExtension(EPrefabricateAssetType Type)
+	{
+		switch (Type)
+		{
+		case EPrefabricateAssetType::ConfigAsset: return ".json";
+		case EPrefabricateAssetType::SceneAsset: return ".scene";
+		case EPrefabricateAssetType::ShaderCacheAsset: return ".shadercache";
+		case EPrefabricateAssetType::MaterialAsset: return ".material";
+		default: return ".json";
+		}
+	}
+
+	static std::string GetPrefabricateAssetPath(const char8_t* AssetName, EPrefabricateAssetType Type)
+	{
+		switch (Type)
+		{
+		case EPrefabricateAssetType::ConfigAsset: return std::string(AssetName);
+		case EPrefabricateAssetType::SceneAsset: return std::string(ASSET_PATH_SCENES) + AssetName;
+		case EPrefabricateAssetType::ShaderCacheAsset: return std::string(ASSET_PATH_SHADERCACHE) + AssetName;
+		case EPrefabricateAssetType::MaterialAsset: return std::string(ASSET_PATH_MATERIALS) + AssetName;
+		default: return std::string(AssetName);
+		}
 	}
 
 	template<class Archive>

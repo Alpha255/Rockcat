@@ -43,14 +43,14 @@ AssetDatabase::~AssetDatabase()
 
 AssetDatabase::AssetDatabase()
 {
-	REGISTER_ASSET_TYPE(SceneAsset, { ".scene" }, nullptr);
-	REGISTER_ASSET_TYPE(AssimpSceneAsset, { ".scene" }, nullptr);
+	//REGISTER_ASSET_TYPE(SceneAsset, { ".scene" }, nullptr);
+	//REGISTER_ASSET_TYPE(AssimpSceneAsset, { ".scene" }, nullptr);
 }
 
 void AssetDatabase::RegisterAssetType(const char8_t* AssetTypeName, std::vector<std::string_view>& Extensions, IAssetLoader* Loader)
 {
-	assert(AssetTypeName && Loader && Extensions.size() > 0u);
-	m_SupportedAssetTypes.emplace_back(AssetType(AssetTypeName, Extensions, Loader));
+	//assert(AssetTypeName && Loader && Extensions.size() > 0u);
+	//m_SupportedAssetTypes.emplace_back(AssetType(AssetTypeName, Extensions, Loader));
 }
 
 const Asset* AssetDatabase::LoadAsset(const std::string& AssetPath)

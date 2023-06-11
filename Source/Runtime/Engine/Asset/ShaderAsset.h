@@ -41,7 +41,9 @@ class GlobalShaderConfigurations : public SerializableAsset<GlobalShaderConfigur
 {
 public:
 	GlobalShaderConfigurations()
-		: SerializableAsset(StringUtils::Format("%sGlobalShaderConfigs%s", ASSET_PATH_SHADERS, GetExtension()))
+		: SerializableAsset(StringUtils::Format("%sGlobalShaderConfigs%s", 
+			ASSET_PATH_SHADERS, 
+			Asset::GetPrefabricateAssetExtension(Asset::EPrefabricateAssetType::ConfigAsset)))
 	{
 	}
 };
@@ -81,7 +83,7 @@ public:
 	{
 	}
 
-	virtual const char8_t* GetExtension() const { return ".shadercache"; }
+	virtual const char8_t* GetExtension() const { Asset::GetPrefabricateAssetExtension(Asset::EPrefabricateAssetType::ShaderCacheAsset); }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
