@@ -39,11 +39,12 @@ public:
 	};
 
 	using AssetReadyCallback = std::function<void()>;
-	using AssetSavedCallback = std::function<void()>;
 	using AssetReloadedCallback = std::function<void()>;
-	using AssetUnloadedCallback = std::function<void()>;
 	using AssetErrorCallback = std::function<void()>;
 	using AssetCanceledCallback = std::function<void()>;
+
+	using AssetSavedCallback = std::function<void()>;
+	using AssetUnloadedCallback = std::function<void()>;
 
 	Asset(const char8_t* Path)
 		: m_Path(Path)
@@ -110,6 +111,7 @@ public:
 		);
 	}
 protected:
+	friend class AssetDatabase;
 	void SetStatus(EAssetStatus Status) { m_Status.store(Status); }
 
 	static std::time_t GetFileLastWriteTime(const char8_t* Path)
@@ -144,25 +146,24 @@ private:
 	std::string m_Path;
 };
 
-struct AssetType
+class IAssetImporter
 {
-	std::string_view AssetTypeName;
-	std::vector<std::string_view> AssetFileExtensions;
-	std::unique_ptr<class IAssetLoader> AssetLoader;
-
-	AssetType(const char8_t* TypeName, std::vector<std::string_view>& Extensions, class IAssetLoader* Loader)
-		: AssetTypeName(TypeName)
-		, AssetFileExtensions(std::move(Extensions))
-		, AssetLoader(Loader)
+public:
+	IAssetImporter(std::initializer_list<const char8_t*> Extensions)
+		: m_ValidExtensions(Extensions)
 	{
 	}
+
+	bool8_t IsValidAssetExtension(const char8_t* Extension) const
+	{
+		return std::find_if(m_ValidExtensions.begin(), m_ValidExtensions.end(), [Extension](const char8_t* Ext) {
+			return _stricmp(Extension, Ext) == 0;
+			}) != m_ValidExtensions.end();
+	}
+
+	virtual std::shared_ptr<Asset> CreateAsset(const char8_t* AssetPath) = 0;
+	virtual void Reimport(Asset& InAsset) = 0;
+protected:
+private:
+	std::vector<const char8_t*> m_ValidExtensions;
 };
-
-#if 0
-
-template<class TConfiguration>
-class ConfigurationAsset : public SerializableAsset<TConfiguration>
-{
-};
-#endif
-

@@ -5,14 +5,11 @@
 
 DECLARE_OBJECT_ID(Asset, uint32_t)
 
-class IAssetLoader
-{
-};
-
 class AssetDatabase
 {
 public:
 	AssetDatabase();
+
 	~AssetDatabase();
 
 	template<class TAsset>
@@ -20,7 +17,7 @@ public:
 	{
 		assert(AssetPath);
 
-		auto CaseInsensitiveAssetPath = StringUtils::Lowercase(AssetPath);
+		auto CaseInsensitiveAssetPath = StringUtils::Replace(StringUtils::Lowercase(AssetPath), "/", "\\");
 		auto AssetIt = m_Assets.find(CaseInsensitiveAssetPath);
 		if (AssetIt != m_Assets.end())
 		{
@@ -28,18 +25,16 @@ public:
 		}
 		else
 		{
-			return Cast<TAsset>(LoadAsset(CaseInsensitiveAssetPath));
+			return Cast<TAsset>(ReimportAsset(CaseInsensitiveAssetPath));
 		}
 	}
 private:
-	void RegisterAssetType(const char8_t* AssetTypeName, std::vector<std::string_view>& Extensions, IAssetLoader* Loader);
+	void CreateAssetImporters();
 
-	const Asset* LoadAsset(const std::string& AssetPath);
+	const Asset* ReimportAsset(const std::string& AssetPath);
 
-	std::unordered_map<std::string, std::unique_ptr<Asset>> m_Assets;
-
-	std::unordered_map<std::string, AssetID> m_AssetNameIDs;
-
-	std::vector<AssetType> m_SupportedAssetTypes;
+	std::unordered_map<std::string, std::shared_ptr<Asset>> m_Assets;
+	std::vector<std::unique_ptr<IAssetImporter>> m_AssetImporters;
+	bool8_t m_AsyncLoadAssets;
 };
 

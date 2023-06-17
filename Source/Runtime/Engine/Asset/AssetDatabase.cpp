@@ -1,61 +1,56 @@
 #if 0
-#include "Runtime/Asset/AssetDatabase.h"
-#include "Runtime/Asset/AssimpImporter.h"
-#include "Runtime/Asset/ImageImporter.h"
-#include "Runtime/Asset/ShaderImporter.h"
-#include "Colorful/IRenderer/IRenderer.h"
-#include "AssetDatabase.h"
-
 AssetDatabase::AssetDatabase()
 {
 	m_AsyncExecutor = std::make_shared<tf::Executor>();
-
-	auto RHIDevice = RHI::IRenderer::Get().Device();
-
-	m_Importers[IAsset::ECategory::Model] = std::make_shared<AssimpImporter>(RHIDevice);
-	m_Importers[IAsset::ECategory::Image] = std::make_shared<ImageImporter>(RHIDevice);
-	m_Importers[IAsset::ECategory::Shader] = std::make_shared<ShaderImporter>(RHIDevice);
-}
-
-AssetDatabase::~AssetDatabase()
-{
-	if (Material::DefaultImage)
-	{
-		Material::DefaultImage.reset();
-	}
-
-	m_AsyncExecutor->wait_for_all();
-
-	for (auto& AssetMap : m_Assets)
-	{
-		AssetMap.second.clear();
-	}
 }
 #endif
 
 #include "Runtime/Engine/Asset/AssetDatabase.h"
-#include "Runtime/Engine/Asset/SceneAsset.h"
-#include "Runtime/Engine/Asset/ImageAsset.h"
-#include "Runtime/Engine/Asset/ShaderAsset.h"
-#include "Runtime/Engine/Asset/MaterialAsset.h"
-
-#define REGISTER_ASSET_TYPE(Type, Extensions, Loader) RegisterAssetType(#Type, Extensions, Loader)
+#include "Runtime/Engine/Asset/Importers/AssimpSceneImporter.h"
+#include "Runtime/Engine/Asset/Importers/DDSImageImporter.h"
+#include "Runtime/Engine/Asset/Importers/StbImageImporter.h"
+#include "Runtime/Engine/Asset/Importers/ShaderAssetImporter.h"
 
 AssetDatabase::AssetDatabase()
-{
-	//REGISTER_ASSET_TYPE(SceneAsset, { ".scene" }, nullptr);
-	//REGISTER_ASSET_TYPE(AssimpSceneAsset, { ".scene" }, nullptr);
+	: m_AsyncLoadAssets(false)
+{ 
+	CreateAssetImporters();
 }
 
-void AssetDatabase::RegisterAssetType(const char8_t* AssetTypeName, std::vector<std::string_view>& Extensions, IAssetLoader* Loader)
+void AssetDatabase::CreateAssetImporters()
 {
-	//assert(AssetTypeName && Loader && Extensions.size() > 0u);
-	//m_SupportedAssetTypes.emplace_back(AssetType(AssetTypeName, Extensions, Loader));
+	m_AssetImporters.emplace_back(std::make_unique<AssimpSceneImporter>());
+	m_AssetImporters.emplace_back(std::make_unique<DDSImageImporter>());
+	m_AssetImporters.emplace_back(std::make_unique<StbImageImporter>());
+	m_AssetImporters.emplace_back(std::make_unique<ShaderAssetImporter>());
 }
 
-const Asset* AssetDatabase::LoadAsset(const std::string& AssetPath)
+const Asset* AssetDatabase::ReimportAsset(const std::string& AssetPath)
 {
-	auto AssetExt = std::filesystem::path(AssetPath).extension().c_str();
+	auto AssetExt = std::filesystem::path(AssetPath).extension().u8string();
+
+	for each (auto& AssetImporter in m_AssetImporters)
+	{
+		if (AssetImporter->IsValidAssetExtension(AssetExt.c_str()))
+		{
+			auto NewAsset = AssetImporter->CreateAsset(AssetPath.c_str());
+
+			if (m_AsyncLoadAssets)
+			{
+				NewAsset->SetStatus(Asset::EAssetStatus::Queued);
+			}
+			else
+			{
+				NewAsset->SetStatus(Asset::EAssetStatus::Loading);
+				AssetImporter->Reimport(*NewAsset);
+			}
+
+			m_Assets.insert(std::make_pair(AssetPath, NewAsset));
+			return NewAsset.get();
+		}
+	}
+
+	LOG_ERROR("AssetDatabase::Unknown asset type: AssetPath:\"{}\"", AssetPath);
 	return nullptr;
 }
 
