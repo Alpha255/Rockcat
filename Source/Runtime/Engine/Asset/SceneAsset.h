@@ -6,7 +6,8 @@
 class SceneGraphAsset : public SerializableAsset<SceneGraphAsset>
 {
 public:
-	SceneGraphAsset(const char8_t* SceneGraphAssetName)
+	template<class StringType>
+	SceneGraphAsset(StringType&& SceneGraphAssetName)
 		: ParentClass(Asset::GetPrefabricateAssetPath(SceneGraphAssetName, Asset::EPrefabricateAssetType::SceneAsset))
 	{
 		LoadAssimpScenes();

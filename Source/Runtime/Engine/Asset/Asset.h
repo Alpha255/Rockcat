@@ -46,14 +46,10 @@ public:
 	using AssetSavedCallback = std::function<void()>;
 	using AssetUnloadedCallback = std::function<void()>;
 
-	Asset(const char8_t* Path)
-		: m_Path(Path)
-		, m_LastWriteTime(GetFileLastWriteTime(Path))
-	{
-	}
-
-	Asset(const std::string& Path)
-		: Asset(Path.c_str())
+	template<class StringType>
+	Asset(StringType&& Path)
+		: m_Path(std::forward<StringType>(Path))
+		, m_LastWriteTime(GetFileLastWriteTime(m_Path))
 	{
 	}
 
@@ -65,7 +61,7 @@ public:
 		return Status == EAssetStatus::Loading || Status == EAssetStatus::Queued;
 	}
 	const AssetData* GetData() const { return &m_Data; }
-	const char8_t* GetPath() const { return m_Path.c_str(); }
+	const std::filesystem::path& GetPath() const { return m_Path; }
 	std::time_t GetLastWriteTime() const { return m_LastWriteTime; }
 
 	bool8_t IsDirty() const
@@ -73,7 +69,7 @@ public:
 		if (!m_Dirty)
 		{
 			std::time_t LastWriteTime = m_LastWriteTime;
-			m_LastWriteTime = GetFileLastWriteTime(m_Path.c_str());
+			m_LastWriteTime = GetFileLastWriteTime(m_Path);
 			m_Dirty = m_LastWriteTime != LastWriteTime;
 		}
 		return m_Dirty;
@@ -91,16 +87,28 @@ public:
 		}
 	}
 
-	static std::string GetPrefabricateAssetPath(const char8_t* AssetName, EPrefabricateAssetType Type)
+	template<class StringType>
+	static std::filesystem::path GetPrefabricateAssetPath(StringType&& AssetName, EPrefabricateAssetType Type)
 	{
+		auto Ret = std::filesystem::path();
 		switch (Type)
 		{
-		case EPrefabricateAssetType::ConfigAsset: return std::string(AssetName);
-		case EPrefabricateAssetType::SceneAsset: return std::string(ASSET_PATH_SCENES) + AssetName;
-		case EPrefabricateAssetType::ShaderCacheAsset: return std::string(ASSET_PATH_SHADERCACHE) + AssetName;
-		case EPrefabricateAssetType::MaterialAsset: return std::string(ASSET_PATH_MATERIALS) + AssetName;
-		default: return std::string(AssetName);
+		case EPrefabricateAssetType::ConfigAsset:
+			break;
+		case EPrefabricateAssetType::SceneAsset:
+			Ret += ASSET_PATH_SCENES;
+			break;
+		case EPrefabricateAssetType::ShaderCacheAsset: 
+			Ret += ASSET_PATH_SHADERCACHE;
+			break;
+		case EPrefabricateAssetType::MaterialAsset: 
+			Ret += ASSET_PATH_MATERIALS;
+			break;
+		default:
+			break;
 		}
+		Ret += AssetName;
+		return Ret;
 	}
 
 	template<class Archive>
@@ -114,7 +122,7 @@ protected:
 	friend class AssetDatabase;
 	void SetStatus(EAssetStatus Status) { m_Status.store(Status); }
 
-	static std::time_t GetFileLastWriteTime(const char8_t* Path)
+	static std::time_t GetFileLastWriteTime(const std::filesystem::path& Path)
 	{
 		if (std::filesystem::exists(Path))
 		{
@@ -124,7 +132,7 @@ protected:
 		return 0;
 	}
 
-	static size_t GetFileSize(const char8_t* Path)
+	static size_t GetFileSize(const std::filesystem::path& Path)
 	{
 		if (std::filesystem::exists(Path))
 		{
@@ -132,18 +140,13 @@ protected:
 		}
 		return 0u;
 	}
-
-	static bool8_t IsFileExists(const char8_t* Path)
-	{
-		return std::filesystem::exists(Path);
-	}
 private:
 	AssetData m_Data;
 	std::atomic<EAssetStatus> m_Status = EAssetStatus::NotLoaded;
 
+	std::filesystem::path m_Path; /// Notice the order of the members
 	mutable std::time_t m_LastWriteTime = 0u;
 	mutable bool8_t m_Dirty = false;
-	std::string m_Path;
 };
 
 class IAssetImporter
@@ -161,7 +164,7 @@ public:
 			}) != m_ValidExtensions.end();
 	}
 
-	virtual std::shared_ptr<Asset> CreateAsset(const char8_t* AssetPath) = 0;
+	virtual std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) = 0;
 	virtual void Reimport(Asset& InAsset) = 0;
 protected:
 private:

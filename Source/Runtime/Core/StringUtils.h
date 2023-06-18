@@ -14,6 +14,8 @@ namespace StringUtils
 
 	void Replace(std::string& Str, const std::string& Src, const std::string& Dst);
 
+	std::string Replace(const std::string& Str, const std::string& Src, const std::string& Dst);
+
 	bool8_t StartsWidth(const std::string& Str, const char8_t* Src);
 
 	bool8_t EndsWidth(const std::string& Str, const char8_t* Src);
@@ -42,7 +44,7 @@ namespace StringUtils
 		std::string_view LeftView(Left);
 		std::string_view RightView(Right);
 
-		return CaseSensitive ? stricmp(LeftView.data(), RightView.data()) == 0 ? LeftView == RightView;
+		return CaseSensitive ? _stricmp(LeftView.data(), RightView.data()) == 0 ? LeftView == RightView;
 	}
 };
 

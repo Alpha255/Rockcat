@@ -12,5 +12,5 @@ public:
 	void OnRender() override final;
 protected:
 private:
-	class Scene* m_Scene = nullptr;
+	std::shared_ptr<class Scene> m_Scene;
 };

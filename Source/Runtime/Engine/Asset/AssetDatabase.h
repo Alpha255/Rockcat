@@ -13,11 +13,11 @@ public:
 	~AssetDatabase();
 
 	template<class TAsset>
-	const TAsset* FindAsset(const char8_t* AssetPath)
+	const TAsset* FindAsset(const std::filesystem::path& AssetPath)
 	{
 		assert(AssetPath);
 
-		auto CaseInsensitiveAssetPath = StringUtils::Replace(StringUtils::Lowercase(AssetPath), "/", "\\");
+		auto CaseInsensitiveAssetPath = std::filesystem::path(StringUtils::Replace(StringUtils::Lowercase(AssetPath.u8string()), "/", "\\"));
 		auto AssetIt = m_Assets.find(CaseInsensitiveAssetPath);
 		if (AssetIt != m_Assets.end())
 		{
@@ -31,9 +31,9 @@ public:
 private:
 	void CreateAssetImporters();
 
-	const Asset* ReimportAsset(const std::string& AssetPath);
+	const Asset* ReimportAsset(const std::filesystem::path& AssetPath);
 
-	std::unordered_map<std::string, std::shared_ptr<Asset>> m_Assets;
+	std::unordered_map<std::filesystem::path, std::shared_ptr<Asset>> m_Assets;
 	std::vector<std::unique_ptr<IAssetImporter>> m_AssetImporters;
 	bool8_t m_AsyncLoadAssets;
 };

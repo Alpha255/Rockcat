@@ -7,7 +7,8 @@ class Scene : public SceneGraphAsset
 public:
 	using SceneGraphAsset::SceneGraphAsset;
 
-	static Scene* Load(const char8_t* SceneGraphAssetPath) { return Cast<Scene>(SceneGraphAsset::Load(SceneGraphAssetPath).get()); }
+	template<class StringType>
+	static std::shared_ptr<Scene> Load(StringType&& SceneGraphAssetPath) { return LoadAs<Scene>(std::forward<StringType>(SceneGraphAssetPath)); }
 
 	void Merge(const Scene& OtherScene);
 

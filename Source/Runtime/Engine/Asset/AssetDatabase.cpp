@@ -25,15 +25,17 @@ void AssetDatabase::CreateAssetImporters()
 	m_AssetImporters.emplace_back(std::make_unique<ShaderAssetImporter>());
 }
 
-const Asset* AssetDatabase::ReimportAsset(const std::string& AssetPath)
+const Asset* AssetDatabase::ReimportAsset(const std::filesystem::path& AssetPath)
 {
-	auto AssetExt = std::filesystem::path(AssetPath).extension().u8string();
+	assert(std::filesystem::exists(AssetPath));
+
+	auto AssetExt = AssetPath.extension().u8string();
 
 	for each (auto& AssetImporter in m_AssetImporters)
 	{
 		if (AssetImporter->IsValidAssetExtension(AssetExt.c_str()))
 		{
-			auto NewAsset = AssetImporter->CreateAsset(AssetPath.c_str());
+			auto NewAsset = AssetImporter->CreateAsset(AssetPath);
 
 			if (m_AsyncLoadAssets)
 			{
@@ -50,7 +52,7 @@ const Asset* AssetDatabase::ReimportAsset(const std::string& AssetPath)
 		}
 	}
 
-	LOG_ERROR("AssetDatabase::Unknown asset type: AssetPath:\"{}\"", AssetPath);
+	LOG_ERROR("AssetDatabase::Unknown asset type: AssetPath:\"{}\"", AssetPath.u8string());
 	return nullptr;
 }
 

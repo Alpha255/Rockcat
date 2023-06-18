@@ -58,6 +58,13 @@ namespace StringUtils
 		}
 	}
 
+	std::string Replace(const std::string& Str, const std::string& Src, const std::string& Dst)
+	{
+		std::string Ret(Str);
+		Replace(Ret, Src, Dst);
+		return Ret;
+	}
+
 	bool8_t StartsWidth(const std::string& Str, const char8_t* Src)
 	{
 		return strncmp(Str.data(), Src, strlen(Src)) == 0;

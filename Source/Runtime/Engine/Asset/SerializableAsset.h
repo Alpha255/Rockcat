@@ -14,27 +14,33 @@ public:
 	using Asset::Asset;
 	using ParentClass = SerializableAsset<T>;
 
-	template<class... TArgs>
-	static std::shared_ptr<T> Load(const char8_t* Path, TArgs&&... Args)
+	template<class StringType, class... TArgs>
+	static std::shared_ptr<T> Load(StringType&& Path, TArgs&&... Args)
 	{
 		if (!s_ThisAsset)
 		{
-			s_ThisAsset = std::make_shared<T>(Path, std::forward<TArgs>(Args)...);
-			s_ThisAsset->Load();
-			s_ThisAsset->SetStatus(Asset::EAssetStatus::Ready);
+			s_ThisAsset = std::make_shared<T>(std::forward<StringType>(Path), std::forward<TArgs>(Args)...);
+			s_ThisAsset->Reload();
 		}
 
 		return s_ThisAsset;
 	}
 
-	template<class... TArgs>
-	static std::shared_ptr<T> Load(const std::string& Path, TArgs&&... Args)
+	template<class AssetType, class StringType, class... TArgs>
+	static std::shared_ptr<AssetType> LoadAs(StringType&& Path, TArgs&&... Args)
 	{
-		return Load(Path.c_str(), std::forward<TArgs>(Args)...);
+		if (!s_ThisAsset)
+		{
+			s_ThisAsset = std::make_shared<T>(std::forward<StringType>(Path), std::forward<TArgs>(Args)...);
+			s_ThisAsset->Reload();
+		}
+
+		return Cast<AssetType>(s_ThisAsset);
 	}
 
-	void Load()
+	void Reload()
 	{
+		SetStatus(Asset::EAssetStatus::Loading);
 		std::ifstream InFileStream(GetPath());
 		if (InFileStream.is_open())
 		{
@@ -45,24 +51,25 @@ public:
 		}
 		else
 		{
-			LOG_TRACE("Create serializable asset: \"{}\".", GetPath());
+			LOG_TRACE("Create serializable asset: \"{}\".", GetPath().u8string());
 			Save(true);
 		}
 		InFileStream.close();
+		SetStatus(Asset::EAssetStatus::Ready);
 	}
 
-	void Save(bool8_t Force = false, const char8_t* CustomPath = nullptr)
+	void Save(bool8_t Force = false, const std::filesystem::path& CustomPath = std::filesystem::path())
 	{
 		if (IsDirty() || Force)
 		{
-			std::string SavePath = CustomPath ? CustomPath : GetPath();
+			std::filesystem::path SavePath = CustomPath.empty() ? GetPath() : CustomPath;
 			
-			if (!std::filesystem::path(SavePath).has_extension())
+			if (!SavePath.has_extension())
 			{
 				SavePath += GetExtension();
 			}
 
-			auto ParentPath = std::filesystem::path(SavePath).parent_path();
+			auto ParentPath = SavePath.parent_path();
 			if (!ParentPath.empty() && !std::filesystem::exists(ParentPath))
 			{
 				VERIFY(std::filesystem::create_directories(ParentPath));
@@ -78,7 +85,7 @@ public:
 			}
 			else
 			{
-				LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath, PlatformMisc::GetErrorMessage());
+				LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath.u8string(), PlatformMisc::GetErrorMessage());
 			}
 			OutFileStream.close();
 		}

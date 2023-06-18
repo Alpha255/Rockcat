@@ -10,7 +10,7 @@ public:
 	{
 	}
 
-	std::shared_ptr<Asset> CreateAsset(const char8_t* AssetPath) override final { return std::make_shared<ImageAsset>(AssetPath); }
+	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<ImageAsset>(AssetPath); }
 
 	void Reimport(Asset& InAsset) override final
 	{
