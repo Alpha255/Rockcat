@@ -34,13 +34,13 @@ private:
 		{
 			if (Percentage >= 1.0f)
 			{
-				LOG_INFO("\AssimpSceneImporter: Loading model \"{}\" succeeded", m_AssetPath.u8string());
+				LOG_INFO("AssimpSceneImporter: Loading model \"{}\" succeeded", m_AssetPath.u8string());
 				return true;
 			}
 
 			if (static_cast<int32_t>(Percentage * 100) % 10 == 0)
 			{
-				LOG_INFO("\AssimpSceneImporter: Loading model: \"{}\" in progress {:.2f}%", m_AssetPath.u8string(), Percentage * 100);
+				LOG_INFO("AssimpSceneImporter: Loading model: \"{}\" in progress {:.2f}%", m_AssetPath.u8string(), Percentage * 100);
 			}
 			return false;
 		}
@@ -51,11 +51,11 @@ private:
 	class AssimpLogger : public Assimp::Logger
 	{
 	public:
-		void OnDebug(const char* Message) override final { LOG_DEBUG("\AssimpSceneImporter: {}", Message); }
-		void OnVerboseDebug(const char* Message) override final { LOG_DEBUG("\AssimpSceneImporter: {}", Message); }
-		void OnInfo(const char* Message) override final { LOG_INFO("\AssimpSceneImporter: {}", Message); }
-		void OnWarn(const char* Message) override final { LOG_WARNING("\AssimpSceneImporter: {}", Message); }
-		void OnError(const char* Message) override final { LOG_ERROR("\AssimpSceneImporter: {}", Message); }
+		void OnDebug(const char* Message) override final { LOG_DEBUG("AssimpSceneImporter: {}", Message); }
+		void OnVerboseDebug(const char* Message) override final { LOG_DEBUG("AssimpSceneImporter: {}", Message); }
+		void OnInfo(const char* Message) override final { LOG_INFO("AssimpSceneImporter: {}", Message); }
+		void OnWarn(const char* Message) override final { LOG_WARNING("AssimpSceneImporter: {}", Message); }
+		void OnError(const char* Message) override final { LOG_ERROR("AssimpSceneImporter: {}", Message); }
 		bool8_t attachStream(Assimp::LogStream*, uint32_t) override final { return true; }
 		bool8_t detachStream(Assimp::LogStream*, uint32_t) override final { return true; }
 	};

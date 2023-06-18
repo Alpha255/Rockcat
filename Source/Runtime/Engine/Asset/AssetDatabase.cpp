@@ -10,6 +10,7 @@ AssetDatabase::AssetDatabase()
 #include "Runtime/Engine/Asset/Importers/DDSImageImporter.h"
 #include "Runtime/Engine/Asset/Importers/StbImageImporter.h"
 #include "Runtime/Engine/Asset/Importers/ShaderAssetImporter.h"
+#include "Runtime/Engine/Async/Task.h"
 
 AssetDatabase::AssetDatabase()
 	: m_AsyncLoadAssets(false)

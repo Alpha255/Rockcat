@@ -11,15 +11,17 @@ class Engine final : public NoneCopyable
 public:
 	static Engine& Get();
 
+	Engine();
+
 	~Engine() { Finalize(); }
 
-	SpdLogModule& GetSpdLogModule() { return m_SpdLogModule; }
+	SpdLogModule& GetSpdLogModule() { return *m_SpdLogModule; }
 
-	RenderModule& GetRenderModule() { return m_RenderModule; }
+	RenderModule& GetRenderModule() { return *m_RenderModule; }
 
-	TaskFlowModule& GetTaskFlowModule() { return m_TaskFlowModule; }
+	TaskFlowModule& GetTaskFlowModule() { return *m_TaskFlowModule; }
 
-	AssetDatabase& GetAssetDatabase() { return m_AssetDatabase; }
+	AssetDatabase& GetAssetDatabase() { return *m_AssetDatabase; }
 
 	void Run();
 
@@ -45,13 +47,16 @@ public:
 
 #define GetModule(ModuleType) GetModuleByName<ModuleType>(#ModuleType)
 private:
+	void PreInitializeModules();
+	void PostInitializeModules();
+
 	bool8_t Initialize();
 	void Finalize();
 
-	SpdLogModule m_SpdLogModule;
-	RenderModule m_RenderModule;
-	TaskFlowModule m_TaskFlowModule;
-	AssetDatabase m_AssetDatabase;
+	std::unique_ptr<SpdLogModule> m_SpdLogModule;
+	std::unique_ptr<RenderModule> m_RenderModule;
+	std::unique_ptr<TaskFlowModule> m_TaskFlowModule;
+	std::unique_ptr<AssetDatabase> m_AssetDatabase;
 
 	std::list<std::unique_ptr<BaseApplication>> m_Applications;
 

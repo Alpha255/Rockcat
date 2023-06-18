@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Runtime/Asset/IImporter.h"
-#include <Submodules/taskflow/taskflow/taskflow.hpp>
 
 class AssetDatabase : public LazySingleton<AssetDatabase>
 {
@@ -79,7 +78,6 @@ protected:
 
 	AssetDatabase();
 private:
-	std::shared_ptr<tf::Executor> m_AsyncExecutor;
 	bool8_t m_AsyncImporting = false;
 
 	std::array<std::shared_ptr<IImporter>, IAsset::ECategory::Unknown> m_Importers;

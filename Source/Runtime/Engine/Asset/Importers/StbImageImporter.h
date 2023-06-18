@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Runtime/Engine/Asset/ImageAsset.h"
+#pragma warning(disable:4244)
 #include <Submodules/stb/stb_image.h>
+#pragma warning(default:4244)
 
 class StbImageImporter : public IAssetImporter
 {
