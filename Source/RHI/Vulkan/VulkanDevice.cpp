@@ -551,7 +551,7 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 	{
 		if (Extension->IsEnabled())
 		{
-			Cast<VulkanDeviceExtension>(Extension)->PreDeviceCreation(Configs, CreateInfo);
+			Cast<VulkanDeviceExtension>(Extension.get())->PreDeviceCreation(Configs, CreateInfo);
 		}
 	}
 

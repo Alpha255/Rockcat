@@ -26,18 +26,6 @@ public:
 		return s_ThisAsset;
 	}
 
-	template<class AssetType, class StringType, class... TArgs>
-	static std::shared_ptr<AssetType> LoadAs(StringType&& Path, TArgs&&... Args)
-	{
-		if (!s_ThisAsset)
-		{
-			s_ThisAsset = std::make_shared<T>(std::forward<StringType>(Path), std::forward<TArgs>(Args)...);
-			s_ThisAsset->Reload();
-		}
-
-		return Cast<AssetType>(s_ThisAsset);
-	}
-
 	void Reload()
 	{
 		SetStatus(Asset::EAssetStatus::Loading);

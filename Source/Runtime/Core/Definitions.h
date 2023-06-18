@@ -298,13 +298,16 @@ template<class T, class Any>
 inline const T* Cast(const Any* Ptr) { return static_cast<T*>(Ptr); }
 
 template<class T, class Any>
-inline T* Cast(const std::shared_ptr<Any>& SharedPtr) { return static_cast<T*>(SharedPtr.get()); }
+inline T* Cast(const std::shared_ptr<Any>& SharedPtrRef) { return static_cast<T*>(SharedPtrRef.get()); }
 
 template<class T, class Any>
-inline std::shared_ptr<T> Cast(std::shared_ptr<Any>& SharedPtr) { return std::static_pointer_cast<T>(SharedPtr); }
+inline std::shared_ptr<T> Cast(const std::shared_ptr<Any>& SharedPtrRef) { return std::static_pointer_cast<T>(SharedPtrRef); }
 
 template<class T, class Any>
-inline std::shared_ptr<T> Cast(const std::shared_ptr<Any>& SharedPtr) { return std::static_pointer_cast<T>(SharedPtr); }
+inline std::shared_ptr<T> Cast(std::shared_ptr<Any>&& SharedPtrRef) { return std::static_pointer_cast<T>(SharedPtrRef); }
 
 template<class T, class Any>
-inline T* Cast(const std::unique_ptr<Any>& UniquePtr) { return static_cast<T*>(UniquePtr.get()); }
+inline T& Cast(Any& Ref) { return static_cast<T&>(Ref); }
+
+template<class T, class Any>
+inline const T& Cast(const Any& Ref) { return static_cast<const T&>(Ref); }

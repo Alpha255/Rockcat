@@ -198,7 +198,7 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 	{
 		if (Extension->IsEnabled())
 		{
-			Cast<VulkanInstanceExtension>(Extension)->PreInstanceCreation(const_cast<VulkanLayerExtensionConfigurations*>(Configs), CreateInfo);
+			Cast<VulkanInstanceExtension>(Extension.get())->PreInstanceCreation(const_cast<VulkanLayerExtensionConfigurations*>(Configs), CreateInfo);
 		}
 	}
 
