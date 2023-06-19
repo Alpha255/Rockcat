@@ -3,9 +3,13 @@
 #include "Runtime/Core/Module.h"
 #include "Runtime/Engine/Async/Task.h"
 
+#pragma warning(push)
+#pragma warning(disable:4244)
 #pragma warning(disable:4456)
 #include <Submodules/taskflow/taskflow/taskflow.hpp>
-#pragma warning(default:4456)
+#include <Submodules/taskflow/taskflow/algorithm/for_each.hpp>
+#include <Submodules/taskflow/taskflow/algorithm/sort.hpp>
+#pragma warning(pop)
 
 class TaskFlowModule : public IModule
 {
@@ -14,7 +18,7 @@ public:
 
 	~TaskFlowModule() {}
 
-	template<class Iterator, class Callable, bool8_t WaitDone = true>
+	template<bool8_t WaitDone = true, class Iterator, class Callable>
 	void ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function)
 	{
 		tf::Taskflow TempTaskflow;
@@ -29,11 +33,13 @@ public:
 		}
 	}
 
-	template<class Iterator, class Callable, size_t Step, bool8_t WaitDone = true>
-	void ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function)
+	template<size_t Step, bool8_t WaitDone = true, class Callable>
+	void ParallelForIndex(size_t Begin, size_t End, Callable&& Function)
 	{
+		assert(Step < (End - Begin));
+
 		tf::Taskflow TempTaskflow;
-		TempTaskflow.for_each_index(std::forward<Iterator>(Begin), std::forward<Iterator>(End), Step, std::forward<Callable>(Function));
+		TempTaskflow.for_each_index(Begin, End, Step, std::forward<Callable>(Function));
 		if (WaitDone)
 		{
 			m_Executor->run(TempTaskflow).wait();
@@ -44,7 +50,7 @@ public:
 		}
 	}
 
-	template<class Iterator, class CompareOp, bool8_t WaitDone = true>
+	template<bool8_t WaitDone = true, class Iterator, class CompareOp>
 	void ParallelSort(Iterator&& Begin, Iterator&& End, CompareOp&& Function)
 	{
 		tf::Taskflow TempTaskflow;
@@ -59,7 +65,7 @@ public:
 		}
 	}
 
-	template<class Callable, bool8_t WaitDone = false>
+	template<bool8_t WaitDone = false, class Callable>
 	void Async(Callable&& Function)
 	{
 		if (WaitDone)
@@ -72,7 +78,7 @@ public:
 		}
 	}
 
-	void RunTask(Task& InTask)
+	void DispatchTask(Task& InTask)
 	{
 		m_Executor->silent_async(std::string(InTask.GetName()), [&InTask]() {
 			InTask.DoTask();
@@ -80,7 +86,7 @@ public:
 	}
 
 	template<bool8_t WaitDone = false>
-	void RunTasks(std::vector<Task&>& InTasks)
+	void DispatchTasks(std::vector<Task&>& InTasks)
 	{
 		tf::Taskflow TempTaskflow;
 		for each (auto& Task in InTasks)

@@ -1,16 +1,34 @@
-#if 0
-AssetDatabase::AssetDatabase()
-{
-	m_AsyncExecutor = std::make_shared<tf::Executor>();
-}
-#endif
-
 #include "Runtime/Engine/Asset/AssetDatabase.h"
 #include "Runtime/Engine/Asset/Importers/AssimpSceneImporter.h"
 #include "Runtime/Engine/Asset/Importers/DDSImageImporter.h"
 #include "Runtime/Engine/Asset/Importers/StbImageImporter.h"
 #include "Runtime/Engine/Asset/Importers/ShaderAssetImporter.h"
 #include "Runtime/Engine/Async/Task.h"
+
+class AssetImportTask : public Task
+{
+public:
+	AssetImportTask(const std::filesystem::path& AssetPath, IAssetImporter& AssetImporter)
+		: Task(std::move(std::string("ImportAsset:") + AssetPath.u8string()), ETaskType::General)
+		, m_AssetImporter(AssetImporter)
+		, m_Asset(std::move(AssetImporter.CreateAsset(AssetPath)))
+	{
+	}
+
+	std::shared_ptr<Asset> GetAsset() const { return m_Asset; }
+
+	void DoTask() override final
+	{
+		m_Asset->SetStatus(Asset::EAssetStatus::Loading);
+
+		auto Succeed = m_AssetImporter.Reimport(*m_Asset);
+
+		m_Asset->SetStatus(Succeed ? Asset::EAssetStatus::Ready : Asset::EAssetStatus::Error);
+	}
+private:
+	IAssetImporter& m_AssetImporter;
+	std::shared_ptr<Asset> m_Asset;
+};
 
 AssetDatabase::AssetDatabase()
 	: m_AsyncLoadAssets(false)
@@ -36,16 +54,16 @@ const Asset* AssetDatabase::ReimportAsset(const std::filesystem::path& AssetPath
 	{
 		if (AssetImporter->IsValidAssetExtension(AssetExt.c_str()))
 		{
-			auto NewAsset = AssetImporter->CreateAsset(AssetPath);
+			AssetImportTask NewTask(AssetPath, *AssetImporter);
+			auto NewAsset = NewTask.GetAsset();
 
 			if (m_AsyncLoadAssets)
 			{
-				NewAsset->SetStatus(Asset::EAssetStatus::Queued);
+				TF_DispatchTask(NewTask);
 			}
 			else
 			{
-				NewAsset->SetStatus(Asset::EAssetStatus::Loading);
-				AssetImporter->Reimport(*NewAsset);
+				NewTask.DoTask();
 			}
 
 			m_Assets.insert(std::make_pair(AssetPath, NewAsset));

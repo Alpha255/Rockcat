@@ -2,6 +2,7 @@
 #include "Runtime/Engine/Scene/Scene.h"
 #include "Runtime/Engine/Asset/SceneAsset.h"
 #include "Runtime/Core/Main.h"
+#include "Runtime/Engine/Async/Task.h"
 //#include <Submodules/imgui/imgui.h>
 
 void RenderTest::OnStartup()

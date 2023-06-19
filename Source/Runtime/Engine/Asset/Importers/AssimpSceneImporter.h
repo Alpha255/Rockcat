@@ -17,8 +17,9 @@ public:
 
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<AssimpSceneAsset>(AssetPath); }
 
-	void Reimport(Asset& InAsset) override final
+	bool8_t Reimport(Asset& InAsset) override final
 	{
+		return false;
 	}
 protected:
 private:

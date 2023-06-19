@@ -14,7 +14,7 @@ public:
 
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<ImageAsset>(AssetPath); }
 
-	void Reimport(Asset& InAsset) override final
+	bool8_t Reimport(Asset& InAsset) override final
 	{
 		auto& Image = Cast<ImageAsset>(InAsset);
 #if 0
@@ -176,6 +176,8 @@ public:
 
 		return Desc;
 #endif
+
+		return false;
 	}
 private:
 	static DXGI_FORMAT GetDXGIFormat(const DirectX::DDS_PIXELFORMAT& PixelFormat)

@@ -102,7 +102,7 @@ class ShaderAsset : public Asset
 public:
 	using Asset::Asset;
 
-	const char8_t* const GetSourceCode() const { return GetData()->RawData.get(); }
+	const char8_t* const GetSourceCode() const { return GetData().RawData.get(); }
 	const ShaderBinary* const GetShaderBinary(const ShaderDefinitions&) const { return nullptr; }
 };
 

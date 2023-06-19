@@ -24,7 +24,6 @@ public:
 	enum class EAssetStatus : uint8_t
 	{
 		NotLoaded,
-		Queued,
 		Loading,
 		Ready,
 		Error
@@ -55,12 +54,8 @@ public:
 
 	EAssetStatus GetStatus() const { return m_Status.load(); }
 	bool8_t IsReady() const { return GetStatus() == EAssetStatus::Ready; }
-	bool8_t IsLoading() const 
-	{ 
-		EAssetStatus Status = GetStatus();
-		return Status == EAssetStatus::Loading || Status == EAssetStatus::Queued;
-	}
-	const AssetData* GetData() const { return &m_Data; }
+	bool8_t IsLoading() const { return GetStatus() == EAssetStatus::Loading; }
+	const AssetData& GetData() const { return m_Data; }
 	const std::filesystem::path& GetPath() const { return m_Path; }
 	std::time_t GetLastWriteTime() const { return m_LastWriteTime; }
 
@@ -119,7 +114,8 @@ public:
 		);
 	}
 protected:
-	friend class AssetDatabase;
+	friend class AssetImportTask;
+
 	void SetStatus(EAssetStatus Status) { m_Status.store(Status); }
 
 	static std::time_t GetFileLastWriteTime(const std::filesystem::path& Path)
@@ -165,7 +161,7 @@ public:
 	}
 
 	virtual std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) = 0;
-	virtual void Reimport(Asset& InAsset) = 0;
+	virtual bool8_t Reimport(Asset& InAsset) = 0;
 protected:
 private:
 	std::vector<const char8_t*> m_ValidExtensions;
