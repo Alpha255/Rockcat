@@ -17,7 +17,7 @@ public:
 	{
 		assert(AssetPath);
 
-		auto CaseInsensitiveAssetPath = std::filesystem::path(StringUtils::Replace(StringUtils::Lowercase(AssetPath.u8string()), "/", "\\"));
+		auto CaseInsensitiveAssetPath = std::filesystem::path(StringUtils::Replace(StringUtils::Lowercase(AssetPath.generic_string()), "/", "\\"));
 		auto AssetIt = m_Assets.find(CaseInsensitiveAssetPath);
 		if (AssetIt != m_Assets.end())
 		{

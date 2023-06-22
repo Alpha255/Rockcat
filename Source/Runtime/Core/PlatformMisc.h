@@ -8,15 +8,15 @@ class PlatformMisc
 public:
 	static std::string GetErrorMessage(uint32_t ErrorCode = ~0u);
 
-	static std::string GetCurrentWorkingDirectory();
+	static std::filesystem::path GetCurrentWorkingDirectory();
 
-	static void SetCurrentWorkingDirectory(const char8_t* Path);
+	static void SetCurrentWorkingDirectory(const std::filesystem::path& Directory);
 
 	static void Sleep(uint32_t Milliseconds);
 
 	static std::string GetEnvironmentVariables(const char8_t* Variable);
 
-	static std::string GetCurrentModuleDirectory();
+	static std::filesystem::path GetCurrentModuleDirectory();
 
 	static void* GetCurrentModuleHandle();
 

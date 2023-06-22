@@ -39,7 +39,7 @@ public:
 		}
 		else
 		{
-			LOG_TRACE("Create serializable asset: \"{}\".", GetPath().u8string());
+			LOG_TRACE("Create serializable asset: \"{}\".", GetPath().generic_string());
 			Save(true);
 		}
 		InFileStream.close();
@@ -73,7 +73,7 @@ public:
 			}
 			else
 			{
-				LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath.u8string(), PlatformMisc::GetErrorMessage());
+				LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath.generic_string(), PlatformMisc::GetErrorMessage());
 			}
 			OutFileStream.close();
 		}

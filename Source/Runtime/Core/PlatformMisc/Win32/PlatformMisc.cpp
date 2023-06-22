@@ -26,28 +26,28 @@ std::string PlatformMisc::GetErrorMessage(uint32_t ErrorCode)
 	return std::string(s_Buffer);
 }
 
-std::string PlatformMisc::GetCurrentModuleDirectory()
+std::filesystem::path PlatformMisc::GetCurrentModuleDirectory()
 {
-	static char8_t s_Buffer[FILE_PATH_LENGTH_MAX];
+	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
 	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
 
-	VERIFY_WITH_PLATFORM_MESSAGE(::GetModuleFileNameA(nullptr, s_Buffer, FILE_PATH_LENGTH_MAX) != 0);
-	return std::filesystem::path(s_Buffer).parent_path().string();
+	VERIFY_WITH_PLATFORM_MESSAGE(::GetModuleFileName(nullptr, s_Buffer, FILE_PATH_LENGTH_MAX) != 0);
+	return std::filesystem::path(s_Buffer).parent_path();
 }
 
-std::string PlatformMisc::GetCurrentWorkingDirectory()
+std::filesystem::path PlatformMisc::GetCurrentWorkingDirectory()
 {
-	static char8_t s_Buffer[FILE_PATH_LENGTH_MAX];
+	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
 	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
 
-	VERIFY_WITH_PLATFORM_MESSAGE(::GetCurrentDirectoryA(FILE_PATH_LENGTH_MAX, s_Buffer) != 0);
-	return std::string(s_Buffer);
+	VERIFY_WITH_PLATFORM_MESSAGE(::GetCurrentDirectory(FILE_PATH_LENGTH_MAX, s_Buffer) != 0);
+	return std::filesystem::path(s_Buffer);
 }
 
-void PlatformMisc::SetCurrentWorkingDirectory(const char8_t* Path)
+void PlatformMisc::SetCurrentWorkingDirectory(const std::filesystem::path& Directory)
 {
-	assert(std::filesystem::exists(Path));
-	VERIFY_WITH_PLATFORM_MESSAGE(::SetCurrentDirectoryA(Path) != 0);
+	assert(std::filesystem::exists(Directory));
+	VERIFY_WITH_PLATFORM_MESSAGE(::SetCurrentDirectory(Directory.c_str()) != 0);
 }
 
 void PlatformMisc::Sleep(uint32_t Milliseconds)

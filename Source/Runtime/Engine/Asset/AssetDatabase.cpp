@@ -9,7 +9,7 @@ class AssetImportTask : public Task
 {
 public:
 	AssetImportTask(const std::filesystem::path& AssetPath, IAssetImporter& AssetImporter)
-		: Task(std::move(std::string("ImportAsset:") + AssetPath.u8string()), ETaskType::General)
+		: Task(std::move(std::string("ImportAsset:") + AssetPath.generic_string()), ETaskType::General)
 		, m_AssetImporter(AssetImporter)
 		, m_Asset(std::move(AssetImporter.CreateAsset(AssetPath)))
 	{
@@ -48,7 +48,7 @@ const Asset* AssetDatabase::ReimportAsset(const std::filesystem::path& AssetPath
 {
 	assert(std::filesystem::exists(AssetPath));
 
-	auto AssetExt = AssetPath.extension().u8string();
+	auto AssetExt = AssetPath.extension().generic_string();
 
 	for each (auto& AssetImporter in m_AssetImporters)
 	{
@@ -71,7 +71,7 @@ const Asset* AssetDatabase::ReimportAsset(const std::filesystem::path& AssetPath
 		}
 	}
 
-	LOG_ERROR("AssetDatabase::Unknown asset type: AssetPath:\"{}\"", AssetPath.u8string());
+	LOG_ERROR("AssetDatabase::Unknown asset type: AssetPath:\"{}\"", AssetPath.generic_string());
 	return nullptr;
 }
 

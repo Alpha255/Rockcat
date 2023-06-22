@@ -35,13 +35,13 @@ private:
 		{
 			if (Percentage >= 1.0f)
 			{
-				LOG_INFO("AssimpSceneImporter: Loading model \"{}\" succeeded", m_AssetPath.u8string());
+				LOG_INFO("AssimpSceneImporter: Loading model \"{}\" succeeded", m_AssetPath.generic_string());
 				return true;
 			}
 
 			if (static_cast<int32_t>(Percentage * 100) % 10 == 0)
 			{
-				LOG_INFO("AssimpSceneImporter: Loading model: \"{}\" in progress {:.2f}%", m_AssetPath.u8string(), Percentage * 100);
+				LOG_INFO("AssimpSceneImporter: Loading model: \"{}\" in progress {:.2f}%", m_AssetPath.generic_string(), Percentage * 100);
 			}
 			return false;
 		}

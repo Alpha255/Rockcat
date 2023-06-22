@@ -125,7 +125,7 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 	std::vector<const char8_t*> EnabledLayers;
 	std::vector<const char8_t*> EnabledExtensions;
 
-	LOG_DEBUG("VulkanRHI: Found supported instance layers:");
+	LOG_DEBUG("VulkanRHI: Found valid instance layers:");
 	auto LayerProperties = vk::enumerateInstanceLayerProperties();
 	for each (const auto& LayerProperty in LayerProperties)
 	{
@@ -146,7 +146,7 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 	VulkanExtensionArray::iterator DebugUtilExt = WantedExtensions.end();
 	VulkanExtensionArray::iterator DebugReportExt = WantedExtensions.end();
 
-	LOG_DEBUG("VulkanRHI: Found supported instance extensions:");
+	LOG_DEBUG("VulkanRHI: Found valid instance extensions:");
 	auto ExtensionProperties = vk::enumerateInstanceExtensionProperties();
 	for each (const auto& ExtensionProperty in ExtensionProperties)
 	{

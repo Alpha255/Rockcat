@@ -480,7 +480,7 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 	std::vector<const char8_t*> EnabledLayers;
 	std::vector<const char8_t*> EnabledExtensions;
 
-	LOG_DEBUG("VulkanRHI: Found supported device layers:");
+	LOG_DEBUG("VulkanRHI: Found valid device layers:");
 	auto LayerProperties = m_PhysicalDevice.enumerateDeviceLayerProperties();
 	for each (const auto& LayerProperty in LayerProperties)
 	{
@@ -498,7 +498,7 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 		LOG_DEBUG("\t\t\t\t\"{}\"", LayerProperty.layerName.data());
 	}
 
-	LOG_DEBUG("VulkanRHI: Found supported device extensions:");
+	LOG_DEBUG("VulkanRHI: Found valid device extensions:");
 	auto ExtensionProperties = m_PhysicalDevice.enumerateDeviceExtensionProperties();
 	for each (const auto& ExtensionProperty in ExtensionProperties)
 	{

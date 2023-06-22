@@ -68,15 +68,15 @@ bool8_t Engine::Initialize()
 {
 	PostInitializeModules();
 
-	auto AssetsDirectory = PlatformMisc::GetCurrentModuleDirectory() + "\\..\\Assets";
+	auto AssetsDirectory = PlatformMisc::GetCurrentModuleDirectory().parent_path() / "Assets";
 	if (!std::filesystem::exists(AssetsDirectory))
 	{
 		LOG_ERROR("Invalid assets directory.");
 		return false;
 	}
 
-	PlatformMisc::SetCurrentWorkingDirectory(AssetsDirectory.c_str());
-	LOG_INFO("Mount working directory to \"{}\".", PlatformMisc::GetCurrentWorkingDirectory());
+	PlatformMisc::SetCurrentWorkingDirectory(AssetsDirectory);
+	LOG_INFO("Mount working directory to \"{}\".", PlatformMisc::GetCurrentWorkingDirectory().generic_string());
 
 	for each (auto& Application in m_Applications)
 	{
