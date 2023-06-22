@@ -516,7 +516,7 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 		LOG_DEBUG("\t\t\t\t\"{}\"", ExtensionProperty.extensionName.data());
 	}
 
-	LogEnableLayerAndExtensions(WantedLayers, WantedExtensions, "device");
+	LogEnabledLayerAndExtensions(WantedLayers, WantedExtensions, "device");
 
 	std::set<uint32_t> QueueFamilyIndices{ GraphicsQueueIndex, PresentQueueIndex };
 	if (VulkanRHI::GetGraphicsSettings()->EnableComputeQueue)

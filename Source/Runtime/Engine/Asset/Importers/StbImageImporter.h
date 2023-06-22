@@ -18,19 +18,41 @@ public:
 	bool8_t Reimport(Asset& InAsset) override final
 	{
 		auto& Image = Cast<ImageAsset>(InAsset);
-#if 0
-		assert(Data && Size);
 
-		int32_t Width = 0u;
-		int32_t Height = 0u;
-		int32_t Channels = 0u;
-		auto Pixels = stbi_load_from_memory(Data, static_cast<int32_t>(Size), &Width, &Height, &Channels, STBI_rgb_alpha);
-		if (!Pixels)
+		auto DataSize = static_cast<int32_t>(Image.GetRawData().SizeInBytes);
+		auto Data = reinterpret_cast<const stbi_uc*>(Image.GetRawData().Data.get());
+
+		int32_t Width = 0, Height = 0, Channels = 0, OriginalChannels = STBI_default;
+
+		if (!stbi_info_from_memory(Data, DataSize, &Width, &Height, &OriginalChannels))
 		{
-			LOG_ERROR("AssetLoader: Failed to load texture: \"{}\"", stbi_failure_reason());
-			assert(0);
+			LOG_ERROR("StbImageImporter: Couldn't parse image header \"{}\": {}", Image.GetPath().generic_string(), stbi_failure_reason());
+			return false;
 		}
 
+		stbi_uc* Bitmap = nullptr;
+		bool8_t IsHDR = stbi_is_hdr_from_memory(Data, DataSize);
+		Channels = OriginalChannels == STBI_rgb ? STBI_rgb_alpha : OriginalChannels;
+
+		if (IsHDR)
+		{
+			if (auto Pixels = stbi_loadf_from_memory(Data, DataSize, &Width, &Height, &OriginalChannels, Channels))
+			{
+				Bitmap = reinterpret_cast<stbi_uc*>(Pixels);
+			}
+		}
+		else
+		{
+			Bitmap = stbi_load_from_memory(Data, DataSize, &Width, &Height, &OriginalChannels, Channels);
+		}
+
+		if (!Bitmap)
+		{
+			LOG_ERROR("StbImageImporter: Failed to load image \"{}\": {}", Image.GetPath().generic_string(), stbi_failure_reason());
+		}
+
+		return false;
+#if 0
 		RHI::ImageDesc Desc;
 		Desc.Width = Width;
 		Desc.Height = Height;
@@ -47,11 +69,7 @@ public:
 		Desc.Asset.Data = Pixels;
 		Desc.Asset.Size = Bytes;
 
-#if 0
-		stbi_image_free(pixels);
-#endif
 		return Desc;
 #endif
-		return false;
 	}
 };

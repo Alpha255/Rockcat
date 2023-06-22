@@ -20,4 +20,8 @@ public:
 		: Task(ShaderName, ETaskType::ShaderCompile, EPriority::High)
 	{
 	}
+
+	void DoTask() override final
+	{
+	}
 };

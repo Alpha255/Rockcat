@@ -121,4 +121,4 @@ protected:
 	friend class VulkanDevice;
 };
 
-void LogEnableLayerAndExtensions(const VulkanLayerArray& Layers, const VulkanExtensionArray& Extensions, const char8_t* Category);
+void LogEnabledLayerAndExtensions(const VulkanLayerArray& Layers, const VulkanExtensionArray& Extensions, const char8_t* Category);

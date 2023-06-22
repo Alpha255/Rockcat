@@ -52,18 +52,18 @@ class ShaderVariantMask : public std::bitset<sizeof(uint32_t)>
 {
 };
 
-class ShaderBinary : private AssetData
+class ShaderBinary : private AssetRawData
 {
 public:
-	ShaderBinary(size_t DataSize, const byte8_t* const Data)
+	ShaderBinary(size_t DataSize, const byte8_t* const InData)
 	{
 		SizeInBytes = DataSize;
-		RawData.reset(new byte8_t[DataSize]());
-		VERIFY(memcpy_s(RawData.get(), DataSize, Data, DataSize) == 0);
+		Data.reset(new byte8_t[DataSize]());
+		VERIFY(memcpy_s(Data.get(), DataSize, InData, DataSize) == 0);
 	}
 
 	size_t GetSize() const { return SizeInBytes; }
-	const byte8_t* GetBinary() const { return RawData.get(); }
+	const byte8_t* GetBinary() const { return Data.get(); }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -102,7 +102,7 @@ class ShaderAsset : public Asset
 public:
 	using Asset::Asset;
 
-	const char8_t* const GetSourceCode() const { return GetData().RawData.get(); }
+	const char8_t* const GetSourceCode() const { return GetRawData().Data.get(); }
 	const ShaderBinary* const GetShaderBinary(const ShaderDefinitions&) const { return nullptr; }
 };
 

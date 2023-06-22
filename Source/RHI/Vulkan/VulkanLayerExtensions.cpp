@@ -205,7 +205,7 @@ VulkanExtensionArray VulkanExtension::GetWantedDeviceExtensions()
 #undef APPEND_EXT
 #undef APPEND_LAYER
 
-void LogEnableLayerAndExtensions(const VulkanLayerArray& Layers, const VulkanExtensionArray& Extensions, const char8_t* Category)
+void LogEnabledLayerAndExtensions(const VulkanLayerArray& Layers, const VulkanExtensionArray& Extensions, const char8_t* Category)
 {
 	for each (const auto &Layer in Layers)
 	{

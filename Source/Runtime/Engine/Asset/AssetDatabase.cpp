@@ -19,11 +19,20 @@ public:
 
 	void DoTask() override final
 	{
-		m_Asset->SetStatus(Asset::EAssetStatus::Loading);
+		if (std::filesystem::exists(m_Asset->GetPath()))
+		{
+			m_Asset->SetStatus(Asset::EAssetStatus::Loading);
 
-		auto Succeed = m_AssetImporter.Reimport(*m_Asset);
+			m_Asset->ReadRawData();
 
-		m_Asset->SetStatus(Succeed ? Asset::EAssetStatus::Ready : Asset::EAssetStatus::Error);
+			auto Succeed = m_AssetImporter.Reimport(*m_Asset);
+
+			m_Asset->SetStatus(Succeed ? Asset::EAssetStatus::Ready : Asset::EAssetStatus::Error);
+		}
+		else
+		{
+			LOG_ERROR("AssetImportTask:: Asset \"{}\" do not exists.", m_Asset->GetPath().generic_string());
+		}
 	}
 private:
 	IAssetImporter& m_AssetImporter;

@@ -184,7 +184,7 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 		}
 	}
 
-	LogEnableLayerAndExtensions(WantedLayers, WantedExtensions, "instance");
+	LogEnabledLayerAndExtensions(WantedLayers, WantedExtensions, "instance");
 
 	auto ApplicationInfo = vk::ApplicationInfo()
 		.setApplicationVersion(VK_HEADER_VERSION_COMPLETE);

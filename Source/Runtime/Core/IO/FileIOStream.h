@@ -26,18 +26,14 @@ struct IO
 class IFileIOStream : public IO
 {
 public:
-	IFileIOStream(const char8_t* FilePath)
-		: m_FilePath(FilePath)
-	{
-	}
-
-	IFileIOStream(const char8_t* FilePath, EOpenMode Mode = EOpenMode::Invalid)
-		: m_FilePath(FilePath)
+	template<class StringType>
+	IFileIOStream(StringType&& FilePath, EOpenMode Mode)
+		: m_FilePath(std::forward<StringType>(FilePath))
 		, m_OpenMode(Mode)
 	{
 	}
 
-	virtual ~IFileIOStream() { Close(); }
+	virtual ~IFileIOStream() = default;
 
 	virtual bool8_t Open(EOpenMode Mode) = 0;
 	virtual void Close() = 0;
@@ -49,21 +45,28 @@ public:
 	bool8_t CanRead() const { return IsOpen() && EnumHasAnyFlags(m_OpenMode, EOpenMode::Read); }
 	bool8_t CanWrite() const { return IsOpen() && EnumHasAnyFlags(m_OpenMode, EOpenMode::Write); }
 
-	const char8_t* GetFilePath() const { return m_FilePath.c_str(); }
+	const std::filesystem::path& GetFilePath() const { return m_FilePath; }
 protected:
 	EOpenMode m_OpenMode = EOpenMode::Invalid;
-	std::string m_FilePath;
+	std::filesystem::path m_FilePath;
 };
 
 class StdFileIOStream : public IFileIOStream
 {
 public:
-	using IFileIOStream::IFileIOStream;
-
-	StdFileIOStream(const char8_t* FilePath, EOpenMode Mode = EOpenMode::Invalid)
-		: IFileIOStream(FilePath, Mode)
+	template<class StringType>
+	StdFileIOStream(StringType&& FilePath, EOpenMode Mode)
+		: IFileIOStream(std::forward<StringType>(FilePath), Mode)
 	{
 		Open(Mode);
+	}
+
+	~StdFileIOStream()
+	{
+		if (IsOpen())
+		{
+			Close();
+		}
 	}
 
 	bool8_t Open(EOpenMode Mode) override
@@ -71,6 +74,11 @@ public:
 		if (IsOpen() && Mode == m_OpenMode) 
 		{ 
 			return false; 
+		}
+
+		if (Mode == EOpenMode::Invalid)
+		{
+			return false;
 		}
 
 		m_OpenMode = Mode;

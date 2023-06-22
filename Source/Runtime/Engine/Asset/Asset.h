@@ -12,10 +12,19 @@ DECLARE_OBJECT_ID(Asset, uint32_t)
 #define ASSET_PATH_AUDIOS       "Audios\\"
 #define ASSET_PATH_SCENES       "Scenes\\"
 
-struct AssetData
+struct AssetRawData
 {
 	size_t SizeInBytes = 0u;
-	std::shared_ptr<byte8_t> RawData;
+	std::unique_ptr<byte8_t> Data;
+private:
+	friend class Asset;
+
+	void Allocate(size_t DataSize)
+	{
+		assert(DataSize > 0u);
+		SizeInBytes = DataSize;
+		Data.reset(new byte8_t[DataSize]());
+	}
 };
 
 class Asset
@@ -55,7 +64,7 @@ public:
 	EAssetStatus GetStatus() const { return m_Status.load(); }
 	bool8_t IsReady() const { return GetStatus() == EAssetStatus::Ready; }
 	bool8_t IsLoading() const { return GetStatus() == EAssetStatus::Loading; }
-	const AssetData& GetData() const { return m_Data; }
+	const AssetRawData& GetRawData() const { return m_RawData; }
 	const std::filesystem::path& GetPath() const { return m_Path; }
 	std::time_t GetLastWriteTime() const { return m_LastWriteTime; }
 
@@ -93,10 +102,10 @@ public:
 		case EPrefabricateAssetType::SceneAsset:
 			Ret += ASSET_PATH_SCENES;
 			break;
-		case EPrefabricateAssetType::ShaderCacheAsset: 
+		case EPrefabricateAssetType::ShaderCacheAsset:
 			Ret += ASSET_PATH_SHADERCACHE;
 			break;
-		case EPrefabricateAssetType::MaterialAsset: 
+		case EPrefabricateAssetType::MaterialAsset:
 			Ret += ASSET_PATH_MATERIALS;
 			break;
 		default:
@@ -117,6 +126,7 @@ protected:
 	friend class AssetImportTask;
 
 	void SetStatus(EAssetStatus Status) { m_Status.store(Status); }
+	void ReadRawData();
 
 	static std::time_t GetFileLastWriteTime(const std::filesystem::path& Path)
 	{
@@ -137,7 +147,7 @@ protected:
 		return 0u;
 	}
 private:
-	AssetData m_Data;
+	AssetRawData m_RawData;
 	std::atomic<EAssetStatus> m_Status = EAssetStatus::NotLoaded;
 
 	std::filesystem::path m_Path; /// Notice the order of the members
