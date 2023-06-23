@@ -19,20 +19,13 @@ public:
 
 	void DoTask() override final
 	{
-		if (std::filesystem::exists(m_Asset->GetPath()))
-		{
-			m_Asset->SetStatus(Asset::EAssetStatus::Loading);
+		m_Asset->SetStatus(Asset::EAssetStatus::Loading);
 
-			m_Asset->ReadRawData();
+		m_Asset->ReadRawData();
 
-			auto Succeed = m_AssetImporter.Reimport(*m_Asset);
+		auto Succeed = m_AssetImporter.Reimport(*m_Asset);
 
-			m_Asset->SetStatus(Succeed ? Asset::EAssetStatus::Ready : Asset::EAssetStatus::Error);
-		}
-		else
-		{
-			LOG_ERROR("AssetImportTask:: Asset \"{}\" do not exists.", m_Asset->GetPath().generic_string());
-		}
+		m_Asset->SetStatus(Succeed ? Asset::EAssetStatus::Ready : Asset::EAssetStatus::Error);
 	}
 private:
 	IAssetImporter& m_AssetImporter;
@@ -55,32 +48,36 @@ void AssetDatabase::CreateAssetImporters()
 
 const Asset* AssetDatabase::ReimportAsset(const std::filesystem::path& AssetPath)
 {
-	assert(std::filesystem::exists(AssetPath));
-
-	auto AssetExt = AssetPath.extension().generic_string();
-
-	for each (auto& AssetImporter in m_AssetImporters)
+	if (std::filesystem::exists(AssetPath))
 	{
-		if (AssetImporter->IsValidAssetExtension(AssetExt.c_str()))
+		auto AssetExt = AssetPath.extension().generic_string();
+
+		for each (auto & AssetImporter in m_AssetImporters)
 		{
-			AssetImportTask NewTask(AssetPath, *AssetImporter);
-			auto NewAsset = NewTask.GetAsset();
-
-			if (m_AsyncLoadAssets)
+			if (AssetImporter->IsValidAssetExtension(AssetExt.c_str()))
 			{
-				TF_DispatchTask(NewTask);
-			}
-			else
-			{
-				NewTask.DoTask();
-			}
+				AssetImportTask NewTask(AssetPath, *AssetImporter);
+				auto NewAsset = NewTask.GetAsset();
 
-			m_Assets.insert(std::make_pair(AssetPath, NewAsset));
-			return NewAsset.get();
+				if (m_AsyncLoadAssets)
+				{
+					TF_DispatchTask(NewTask);
+				}
+				else
+				{
+					NewTask.DoTask();
+				}
+
+				m_Assets.insert(std::make_pair(AssetPath, NewAsset));
+				return NewAsset.get();
+			}
 		}
+
+		LOG_ERROR("AssetDatabase::Unknown asset type: AssetPath:\"{}\"", AssetPath.generic_string());
+		return nullptr;
 	}
 
-	LOG_ERROR("AssetDatabase::Unknown asset type: AssetPath:\"{}\"", AssetPath.generic_string());
+	LOG_ERROR("AssetDatabase:: Asset \"{}\" do not exists.", AssetPath.generic_string());
 	return nullptr;
 }
 

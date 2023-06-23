@@ -19,6 +19,31 @@ public:
 
 	bool8_t Reimport(Asset& InAsset) override final
 	{
+		auto Scene = Cast<AssimpSceneAsset>(InAsset);
+
+		const uint32_t PostprocessFlags = 
+			aiProcessPreset_TargetRealtime_MaxQuality | 
+			aiProcess_ConvertToLeftHanded | /// Use DirectX's left-hand coordinate system
+			aiProcess_GenBoundingBoxes;
+
+		Assimp::Importer AssimpNativeImporter;
+
+#if _DEBUG
+		Assimp::DefaultLogger::set(new AssimpLogger());
+		AssimpNativeImporter.SetProgressHandler(new AssimpProgressHandler(Scene.GetPath()));
+#endif
+
+		auto AssimpScene = AssimpNativeImporter.ReadFileFromMemory(Scene.GetRawData().Data.get(), Scene.GetRawData().SizeInBytes, PostprocessFlags);
+		if (AssimpScene && AssimpScene->HasMeshes())
+		{
+
+		}
+		else
+		{
+			auto ErrorInfo = AssimpNativeImporter.GetErrorString();
+			LOG_ERROR("AssimpSceneImporter:: Failed to load assimp scene \"{}\" : {}", Scene.GetPath().generic_string(), std::strlen(ErrorInfo) > 0u ? ErrorInfo : "Unknown exceptions");
+		}
+
 		return false;
 	}
 protected:
@@ -419,39 +444,5 @@ std::pair<std::shared_ptr<Mesh>, std::shared_ptr<Material>> AssimpImporter::Proc
 		AssimpMesh->mName.C_Str());
 
 	return Ret;
-}
-
-void AssimpImporter::Reimport(std::shared_ptr<IAsset> Asset)
-{
-	auto TempModel = std::static_pointer_cast<ModelAsset>(Asset);
-	assert(TempModel);
-
-	TempModel->Object = std::make_shared<Model>();
-
-	Model::LoadingSettings Settings;
-	uint32_t PostprocessFlags =
-		aiProcessPreset_TargetRealtime_MaxQuality |
-		(Settings.MakeLeftHanded ? aiProcess_ConvertToLeftHanded : 0u) |
-		(Settings.GenBoundingBoxes ? aiProcess_GenBoundingBoxes : 0u);
-
-#if _DEBUG
-	Assimp::DefaultLogger::set(new AssimpLogger());
-#endif
-	Assimp::Importer AssimpImporter;
-	AssimpImporter.SetProgressHandler(new ProgressReporter(TempModel->Path.c_str()));
-
-	auto AssimpScene = AssimpImporter.ReadFile(TempModel->Path.c_str(), PostprocessFlags);
-	assert(AssimpScene && AssimpScene->HasMeshes());
-
-	if (auto Error = AssimpImporter.GetErrorString())
-	{
-		if (std::strlen(Error) > 0u)
-		{
-			LOG_ERROR("AssimpImporter:: Failed to load \"{}\" : {}", TempModel->Path.c_str(), Error);
-			assert(0);
-		}
-	}
-
-	ProcessNode(AssimpScene, AssimpScene->mRootNode, TempModel.get());
 }
 #endif

@@ -68,6 +68,13 @@ public:
 	const std::filesystem::path& GetPath() const { return m_Path; }
 	std::time_t GetLastWriteTime() const { return m_LastWriteTime; }
 
+	virtual void OnPreLoad() {}
+	virtual void OnReady() {}
+	virtual void OnLoadError() {}
+	virtual void OnCanceledLoad() {}
+	virtual void OnSaved() {}
+	virtual void OnUnloaded() {}
+
 	bool8_t IsDirty() const
 	{
 		if (!m_Dirty)
