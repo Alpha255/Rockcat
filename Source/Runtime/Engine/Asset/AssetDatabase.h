@@ -12,26 +12,39 @@ public:
 
 	~AssetDatabase();
 
-	template<class TAsset>
-	const TAsset* FindAsset(const std::filesystem::path& AssetPath)
+	template<class TAsset, class StringType>
+	TAsset* FindAsset(StringType&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks)
 	{
-		assert(AssetPath);
-
-		auto CaseInsensitiveAssetPath = std::filesystem::path(StringUtils::Replace(StringUtils::Lowercase(AssetPath.generic_string()), "/", "\\"));
-		auto AssetIt = m_Assets.find(CaseInsensitiveAssetPath);
+		auto GenericAssetPath = GetGenericAssetPath(std::forward<StringType>(AssetPath));
+		auto AssetIt = m_Assets.find(GenericAssetPath);
 		if (AssetIt != m_Assets.end())
 		{
-			return Cast<TAsset>(*AssetIt);
+			return Cast<TAsset>(AssetIt->second.get());
 		}
 		else
 		{
-			return Cast<TAsset>(ReimportAsset(CaseInsensitiveAssetPath));
+			return Cast<TAsset>(ReimportAssetInternal(GenericAssetPath, AssetLoadCallbacks));
 		}
 	}
+
+	template<class StringType>
+	void ReimportAsset(StringType&& AssetPath)
+	{
+		return ReimportAssetInternal(GetGenericAssetPath(std::forward<StringType>(AssetPath)), std::nullopt);
+	}
 private:
+	template<class StringType>
+	static std::filesystem::path GetGenericAssetPath(StringType&& AssetPath)
+	{
+		return std::filesystem::path(
+			StringUtils::Replace(
+				StringUtils::Lowercase(
+					std::filesystem::path(std::forward<StringType>(AssetPath)).generic_string()), "/", "\\"));
+	}
+
 	void CreateAssetImporters();
 
-	const Asset* ReimportAsset(const std::filesystem::path& AssetPath);
+	Asset* ReimportAssetInternal(const std::filesystem::path& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks);
 
 	std::unordered_map<std::filesystem::path, std::shared_ptr<Asset>> m_Assets;
 	std::vector<std::unique_ptr<IAssetImporter>> m_AssetImporters;

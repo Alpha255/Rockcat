@@ -6,7 +6,12 @@ class ShaderAssetImporter : public IAssetImporter
 {
 public:
 	ShaderAssetImporter()
-		: IAssetImporter({".vert", ".frag", ".geo", ".comp", ".hlsl"})
+		: IAssetImporter({
+			AssetType("Vertex Shader", ".vert", AssetType::EContentsType::Text), 
+			AssetType("Fragment Shader", ".frag", AssetType::EContentsType::Text),
+			AssetType("Geometry Shader", ".geo", AssetType::EContentsType::Text),
+			AssetType("Compute Shader", ".comp", AssetType::EContentsType::Text),
+			AssetType("High-level shader language", ".hlsl", AssetType::EContentsType::Text)})
 	{
 	}
 

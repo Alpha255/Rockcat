@@ -8,10 +8,11 @@
 class AssetImportTask : public Task
 {
 public:
-	AssetImportTask(const std::filesystem::path& AssetPath, IAssetImporter& AssetImporter)
+	AssetImportTask(const std::filesystem::path& AssetPath, IAssetImporter& AssetImporter, const AssetType* Type)
 		: Task(std::move(std::string("ImportAsset:") + AssetPath.generic_string()), ETaskType::General)
 		, m_AssetImporter(AssetImporter)
 		, m_Asset(std::move(AssetImporter.CreateAsset(AssetPath)))
+		, m_AssetType(Type)
 	{
 	}
 
@@ -19,17 +20,29 @@ public:
 
 	void DoTask() override final
 	{
+		m_Asset->OnPreLoad();
+
 		m_Asset->SetStatus(Asset::EAssetStatus::Loading);
 
-		m_Asset->ReadRawData();
+		m_Asset->ReadRawData(m_AssetType->ContentsType);
 
 		auto Succeed = m_AssetImporter.Reimport(*m_Asset);
 
-		m_Asset->SetStatus(Succeed ? Asset::EAssetStatus::Ready : Asset::EAssetStatus::Error);
+		if (Succeed)
+		{
+			m_Asset->OnReady();
+			m_Asset->SetStatus(Asset::EAssetStatus::Ready);
+		}
+		else
+		{
+			m_Asset->OnLoadError();
+			m_Asset->SetStatus(Asset::EAssetStatus::Error);
+		}
 	}
 private:
 	IAssetImporter& m_AssetImporter;
 	std::shared_ptr<Asset> m_Asset;
+	const AssetType* m_AssetType;
 };
 
 AssetDatabase::AssetDatabase()
@@ -46,18 +59,21 @@ void AssetDatabase::CreateAssetImporters()
 	m_AssetImporters.emplace_back(std::make_unique<ShaderAssetImporter>());
 }
 
-const Asset* AssetDatabase::ReimportAsset(const std::filesystem::path& AssetPath)
+Asset* AssetDatabase::ReimportAssetInternal(const std::filesystem::path& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks)
 {
 	if (std::filesystem::exists(AssetPath))
 	{
-		auto AssetExt = AssetPath.extension().generic_string();
+		auto AssetExt = AssetPath.extension();
 
 		for each (auto & AssetImporter in m_AssetImporters)
 		{
-			if (AssetImporter->IsValidAssetExtension(AssetExt.c_str()))
+			if (auto AssetType = AssetImporter->FindValidAssetType(AssetExt))
 			{
-				AssetImportTask NewTask(AssetPath, *AssetImporter);
+				AssetImportTask NewTask(AssetPath, *AssetImporter, AssetType);
 				auto NewAsset = NewTask.GetAsset();
+				NewAsset->SetCallbacks(AssetLoadCallbacks);
+
+				m_Assets.insert(std::make_pair(AssetPath, NewAsset));
 
 				if (m_AsyncLoadAssets)
 				{
@@ -68,7 +84,6 @@ const Asset* AssetDatabase::ReimportAsset(const std::filesystem::path& AssetPath
 					NewTask.DoTask();
 				}
 
-				m_Assets.insert(std::make_pair(AssetPath, NewAsset));
 				return NewAsset.get();
 			}
 		}

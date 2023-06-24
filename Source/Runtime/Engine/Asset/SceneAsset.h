@@ -10,7 +10,6 @@ public:
 	SceneGraphAsset(StringType&& SceneGraphAssetName)
 		: ParentClass(Asset::GetPrefabricateAssetPath(SceneGraphAssetName, Asset::EPrefabricateAssetType::SceneAsset))
 	{
-		LoadAssimpScenes();
 	}
 
 	const char8_t* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabricateAssetType::SceneAsset); }
@@ -25,10 +24,11 @@ public:
 			CEREAL_NVP(m_Graph)
 		);
 	}
-private:
+protected:
 	void LoadAssimpScenes();
-
+private:
 	std::vector<std::string> m_AssimpScenePaths;
+	std::vector<const class AssimpSceneAsset*> m_AssimpScenes;
 	std::shared_ptr<SceneGraph> m_Graph;
 };
 

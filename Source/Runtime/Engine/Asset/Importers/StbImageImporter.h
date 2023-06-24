@@ -9,7 +9,14 @@ class StbImageImporter : public IAssetImporter
 {
 public:
 	StbImageImporter()
-		: IAssetImporter({".jpeg", ".jpg", ".png", ".bmp", ".tga", ".psd", ".hdr"})
+		: IAssetImporter({
+				AssetType("Joint Photographic Experts Group", ".jpeg"),
+				AssetType("Joint Photographic Experts Group", ".jpg"),
+				AssetType("Portable Network Graphics", ".png"), 
+				AssetType("Bitmap", ".bmp"), 
+				AssetType("Targa", ".tga"), 
+				AssetType("Photoshop Document", ".psd"),
+				AssetType("High-Dynamic Range", ".hdr")})
 	{
 	}
 

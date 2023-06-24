@@ -27,6 +27,26 @@ private:
 	}
 };
 
+struct AssetType
+{
+	enum class EContentsType
+	{
+		Text,
+		Binary
+	};
+
+	std::string_view Name;
+	std::string_view Extension;
+	EContentsType ContentsType;
+
+	AssetType(const char8_t* InName, const char8_t* InExtension, EContentsType InType = EContentsType::Binary)
+		: Name(InName)
+		, Extension(InExtension)
+		, ContentsType(InType)
+	{
+	}
+};
+
 class Asset
 {
 public:
@@ -46,13 +66,25 @@ public:
 		MaterialAsset
 	};
 
+	using AssetPreLoadCallback = std::function<void()>;
 	using AssetReadyCallback = std::function<void()>;
-	using AssetReloadedCallback = std::function<void()>;
+	using AssetReloadCallback = std::function<void()>;
 	using AssetErrorCallback = std::function<void()>;
 	using AssetCanceledCallback = std::function<void()>;
 
 	using AssetSavedCallback = std::function<void()>;
 	using AssetUnloadedCallback = std::function<void()>;
+
+	struct Callbacks
+	{
+		AssetPreLoadCallback PreLoadCallback;
+		AssetReadyCallback ReadyCallback;
+		AssetReloadCallback ReloadCallback;
+		AssetErrorCallback ErrorCallback;
+		AssetCanceledCallback CanceledCallback;
+		AssetSavedCallback SavedCallback;
+		AssetUnloadedCallback UnloadedCallback;
+	};
 
 	template<class StringType>
 	Asset(StringType&& Path)
@@ -67,13 +99,6 @@ public:
 	const AssetRawData& GetRawData() const { return m_RawData; }
 	const std::filesystem::path& GetPath() const { return m_Path; }
 	std::time_t GetLastWriteTime() const { return m_LastWriteTime; }
-
-	virtual void OnPreLoad() {}
-	virtual void OnReady() {}
-	virtual void OnLoadError() {}
-	virtual void OnCanceledLoad() {}
-	virtual void OnSaved() {}
-	virtual void OnUnloaded() {}
 
 	bool8_t IsDirty() const
 	{
@@ -122,6 +147,14 @@ public:
 		return Ret;
 	}
 
+	void SetCallbacks(std::optional<Callbacks>& InCallbacks)
+	{ 
+		if (InCallbacks) 
+		{ 
+			m_Callbacks = std::move(InCallbacks.value()); 
+		} 
+	}
+
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
@@ -129,11 +162,20 @@ public:
 			CEREAL_NVP(m_LastWriteTime)
 		);
 	}
+
+	static std::optional<Callbacks> s_DefaultNullCallbacks;
 protected:
 	friend class AssetImportTask;
 
 	void SetStatus(EAssetStatus Status) { m_Status.store(Status); }
-	void ReadRawData();
+	void ReadRawData(AssetType::EContentsType ContentsType);
+
+	virtual void OnPreLoad() { if (m_Callbacks.PreLoadCallback) { m_Callbacks.PreLoadCallback(); } }
+	virtual void OnReady() { if (m_Callbacks.ReadyCallback) { m_Callbacks.ReadyCallback(); } }
+	virtual void OnLoadError() { if (m_Callbacks.ErrorCallback) { m_Callbacks.ErrorCallback(); } }
+	virtual void OnCanceledLoad() { if (m_Callbacks.CanceledCallback) { m_Callbacks.CanceledCallback(); } }
+	virtual void OnSaved() { if (m_Callbacks.SavedCallback) { m_Callbacks.SavedCallback(); } }
+	virtual void OnUnloaded() { if (m_Callbacks.UnloadedCallback) { m_Callbacks.UnloadedCallback(); } }
 
 	static std::time_t GetFileLastWriteTime(const std::filesystem::path& Path)
 	{
@@ -157,6 +199,8 @@ private:
 	AssetRawData m_RawData;
 	std::atomic<EAssetStatus> m_Status = EAssetStatus::NotLoaded;
 
+	Callbacks m_Callbacks;
+
 	std::filesystem::path m_Path; /// Notice the order of the members
 	mutable std::time_t m_LastWriteTime = 0u;
 	mutable bool8_t m_Dirty = false;
@@ -165,21 +209,22 @@ private:
 class IAssetImporter
 {
 public:
-	IAssetImporter(std::initializer_list<const char8_t*> Extensions)
-		: m_ValidExtensions(Extensions)
+	IAssetImporter(std::vector<AssetType>&& ValidAssetTypes)
+		: m_ValidAssetTypes(std::move(ValidAssetTypes))
 	{
 	}
 
-	bool8_t IsValidAssetExtension(const char8_t* Extension) const
+	const AssetType* FindValidAssetType(const std::filesystem::path& Extension) const
 	{
-		return std::find_if(m_ValidExtensions.begin(), m_ValidExtensions.end(), [Extension](const char8_t* Ext) {
-			return _stricmp(Extension, Ext) == 0;
-			}) != m_ValidExtensions.end();
+		auto It = std::find_if(m_ValidAssetTypes.begin(), m_ValidAssetTypes.end(), [Extension](const AssetType& Type) {
+			return _stricmp(Extension.generic_string().c_str(), Type.Extension.data()) == 0;
+			});
+		return It == m_ValidAssetTypes.cend() ? nullptr : &(*It);
 	}
 
 	virtual std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) = 0;
 	virtual bool8_t Reimport(Asset& InAsset) = 0;
 protected:
 private:
-	std::vector<const char8_t*> m_ValidExtensions;
+	std::vector<AssetType> m_ValidAssetTypes;
 };

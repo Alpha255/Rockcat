@@ -8,7 +8,12 @@ public:
 	using SceneGraphAsset::SceneGraphAsset;
 
 	template<class StringType>
-	static std::shared_ptr<Scene> Load(StringType&& SceneGraphAssetPath) { return Cast<Scene>(SceneGraphAsset::Load(std::forward<StringType>(SceneGraphAssetPath))); }
+	static std::shared_ptr<Scene> Load(StringType&& SceneGraphAssetPath) 
+	{ 
+		auto Ret = Cast<Scene>(SceneGraphAsset::Load(std::forward<StringType>(SceneGraphAssetPath)));
+		Ret->LoadAssimpScenes();
+		return Ret;
+	}
 
 	void Merge(const Scene& OtherScene);
 

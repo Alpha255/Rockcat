@@ -8,7 +8,7 @@ class DDSImageImporter : public IAssetImporter
 {
 public:
 	DDSImageImporter()
-		: IAssetImporter({".dds"})
+		: IAssetImporter({ AssetType("DirectDraw Surface", ".dds")})
 	{
 	}
 

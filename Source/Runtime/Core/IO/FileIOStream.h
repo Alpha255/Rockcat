@@ -22,6 +22,7 @@ struct IO
 		End = std::ios::end
 	};
 };
+ENUM_FLAG_OPERATORS(IO::EOpenMode)
 
 class IFileIOStream : public IO
 {
@@ -117,7 +118,7 @@ public:
 	{
 		if (CanRead() && !m_Stream->eof())
 		{
-			return m_Stream->readsome(Buffer, static_cast<std::streamsize>(Bytes));
+			return m_Stream->read(Buffer, static_cast<std::streamsize>(Bytes)).gcount();
 		}
 
 		return 0u;
