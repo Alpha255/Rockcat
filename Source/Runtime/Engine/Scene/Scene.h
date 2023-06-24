@@ -17,6 +17,8 @@ public:
 
 	void Merge(const Scene& OtherScene);
 
+	void Merge(const SceneGraph& OtherSceneGraph);
+
 	struct SceneData
 	{
 	};

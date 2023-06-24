@@ -53,7 +53,7 @@ public:
 
 		if (AssimpScene && AssimpScene->HasMeshes())
 		{
-
+			return true;
 		}
 		else
 		{

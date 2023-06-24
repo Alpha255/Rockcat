@@ -5,7 +5,11 @@
 class SceneBuilder
 {
 public:
-	static std::unique_ptr<Scene> BuildSceneFromSceneAsset(const char8_t* AssetName);
+	void Merge(Scene& Target, const Scene& Other);
+
+	void MergeSceneGraph(SceneGraph& Target, const SceneGraph& Other);
+
+	std::shared_ptr<SceneGraph> MergeSceneGraph(const SceneGraph& Left, const SceneGraph& Right);
 protected:
 private:
 };

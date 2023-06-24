@@ -2,7 +2,15 @@
 
 #include "Runtime/Engine/Scene/SceneBuilder.h"
 
-std::unique_ptr<Scene> SceneBuilder::BuildSceneFromSceneAsset(const char8_t* AssetName)
+void SceneBuilder::Merge(Scene& Target, const Scene& Other)
 {
-    return std::unique_ptr<Scene>();
+}
+
+void SceneBuilder::MergeSceneGraph(SceneGraph& Target, const SceneGraph& Other)
+{
+}
+
+std::shared_ptr<SceneGraph> SceneBuilder::MergeSceneGraph(const SceneGraph& Left, const SceneGraph& Right)
+{
+	return std::shared_ptr<SceneGraph>();
 }

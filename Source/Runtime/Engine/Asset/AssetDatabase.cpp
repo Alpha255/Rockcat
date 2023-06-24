@@ -30,13 +30,13 @@ public:
 
 		if (Succeed)
 		{
-			m_Asset->OnReady();
 			m_Asset->SetStatus(Asset::EAssetStatus::Ready);
+			m_Asset->OnReady();
 		}
 		else
 		{
-			m_Asset->OnLoadError();
 			m_Asset->SetStatus(Asset::EAssetStatus::Error);
+			m_Asset->OnLoadError();
 		}
 	}
 private:

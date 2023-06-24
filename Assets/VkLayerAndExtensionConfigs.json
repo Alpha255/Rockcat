@@ -1,0 +1,19 @@
+{
+    "struct VulkanLayerExtensionConfigurations": {
+        "DebugLayerLevel": 3,
+        "HasKhronosValidationLayer": true,
+        "HasKHRSurfaceExt": true,
+        "HasDebugUtilsExt": true,
+        "HasDebugReportExt": true,
+        "HasValidationFeaturesExt": true,
+        "HasValidationFeaturesExt_GPUAssisted": false,
+        "HasValidationFeaturesExt_GPUAssistedReserveBindingSlot": false,
+        "HasValidationFeaturesExt_BestPractices": true,
+        "HasValidationFeaturesExt_DebugPrintf": false,
+        "HasValidationFeaturesExt_Synchronization": true,
+        "HasGetPhysicalDeviceProperties2": true,
+        "HasDebugMarkerExt": true,
+        "HasTimelineSemaphore": false,
+        "HasFullscreenExclusive": false
+    }
+}

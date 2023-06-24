@@ -66,14 +66,14 @@ public:
 		MaterialAsset
 	};
 
-	using AssetPreLoadCallback = std::function<void()>;
-	using AssetReadyCallback = std::function<void()>;
-	using AssetReloadCallback = std::function<void()>;
-	using AssetErrorCallback = std::function<void()>;
-	using AssetCanceledCallback = std::function<void()>;
+	using AssetPreLoadCallback = std::function<void(Asset&)>;
+	using AssetReadyCallback = std::function<void(Asset&)>;
+	using AssetReloadCallback = std::function<void(Asset&)>;
+	using AssetErrorCallback = std::function<void(Asset&)>;
+	using AssetCanceledCallback = std::function<void(Asset&)>;
 
-	using AssetSavedCallback = std::function<void()>;
-	using AssetUnloadedCallback = std::function<void()>;
+	using AssetSavedCallback = std::function<void(Asset&)>;
+	using AssetUnloadedCallback = std::function<void(Asset&)>;
 
 	struct Callbacks
 	{
@@ -170,12 +170,12 @@ protected:
 	void SetStatus(EAssetStatus Status) { m_Status.store(Status); }
 	void ReadRawData(AssetType::EContentsType ContentsType);
 
-	virtual void OnPreLoad() { if (m_Callbacks.PreLoadCallback) { m_Callbacks.PreLoadCallback(); } }
-	virtual void OnReady() { if (m_Callbacks.ReadyCallback) { m_Callbacks.ReadyCallback(); } }
-	virtual void OnLoadError() { if (m_Callbacks.ErrorCallback) { m_Callbacks.ErrorCallback(); } }
-	virtual void OnCanceledLoad() { if (m_Callbacks.CanceledCallback) { m_Callbacks.CanceledCallback(); } }
-	virtual void OnSaved() { if (m_Callbacks.SavedCallback) { m_Callbacks.SavedCallback(); } }
-	virtual void OnUnloaded() { if (m_Callbacks.UnloadedCallback) { m_Callbacks.UnloadedCallback(); } }
+	virtual void OnPreLoad() { if (m_Callbacks.PreLoadCallback) { m_Callbacks.PreLoadCallback(*this); } }
+	virtual void OnReady() { if (m_Callbacks.ReadyCallback) { m_Callbacks.ReadyCallback(*this); } }
+	virtual void OnLoadError() { if (m_Callbacks.ErrorCallback) { m_Callbacks.ErrorCallback(*this); } }
+	virtual void OnCanceledLoad() { if (m_Callbacks.CanceledCallback) { m_Callbacks.CanceledCallback(*this); } }
+	virtual void OnSaved() { if (m_Callbacks.SavedCallback) { m_Callbacks.SavedCallback(*this); } }
+	virtual void OnUnloaded() { if (m_Callbacks.UnloadedCallback) { m_Callbacks.UnloadedCallback(*this); } }
 
 	static std::time_t GetFileLastWriteTime(const std::filesystem::path& Path)
 	{

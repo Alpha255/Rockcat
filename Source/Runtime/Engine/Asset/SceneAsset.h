@@ -9,6 +9,7 @@ public:
 	template<class StringType>
 	SceneGraphAsset(StringType&& SceneGraphAssetName)
 		: ParentClass(Asset::GetPrefabricateAssetPath(SceneGraphAssetName, Asset::EPrefabricateAssetType::SceneAsset))
+		, m_Graph(std::move(std::make_shared<SceneGraph>()))
 	{
 	}
 
@@ -26,6 +27,7 @@ public:
 	}
 protected:
 	void LoadAssimpScenes();
+	void RebuildSceneWhenReady();
 private:
 	std::vector<std::string> m_AssimpScenePaths;
 	std::vector<const class AssimpSceneAsset*> m_AssimpScenes;
@@ -36,4 +38,9 @@ class AssimpSceneAsset : public Asset
 {
 public:
 	using Asset::Asset;
+
+	const SceneGraph& GetSceneGraph() const { return m_SceneGraph; }
+	SceneGraph& GetSceneGraph() { return m_SceneGraph; }
+private:
+	SceneGraph m_SceneGraph;
 };

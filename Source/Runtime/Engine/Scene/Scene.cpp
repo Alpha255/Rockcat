@@ -277,4 +277,12 @@ void Scene::Traverse(const SceneNode::VisitFunc& Visit) const
 
 void Scene::Merge(const Scene& OtherScene)
 {
+	SceneBuilder Builder;
+	Builder.Merge(*this, OtherScene);
+}
+
+void Scene::Merge(const SceneGraph& OtherSceneGraph)
+{
+	SceneBuilder Builder;
+	Builder.MergeSceneGraph(*GetSceneGraph(), OtherSceneGraph);
 }

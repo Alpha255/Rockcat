@@ -1,0 +1,12 @@
+{
+    "class SceneGraphAsset": {
+        "m_AssimpScenePaths": [
+            "glTF-Sample-Models\\2.0\\Box\\glTF\\Box.gltf"
+        ],
+        "m_Graph": {
+            "ptr_wrapper": {
+                "id": 0
+            }
+        }
+    }
+}

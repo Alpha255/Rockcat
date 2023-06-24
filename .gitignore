@@ -42,3 +42,4 @@ Assets/Configurations
 Assets/Shaders/Cache
 build
 Out/Intermediate
+Out/*.json
