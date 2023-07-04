@@ -3,7 +3,7 @@
 #include "Runtime/Engine/Engine.h"
 #include "Runtime/Engine/Async/Task.h"
 
-std::string ShaderCache::ConvertToShaderCachePath(const char8_t* ShaderName)
+std::string ShaderCache::GetShaderCachePath(const char8_t* ShaderName)
 {
 	return StringUtils::Format(
 		"%s%s.%s%s",
@@ -17,11 +17,13 @@ class ShaderCompileTask : public Task
 {
 public:
 	ShaderCompileTask(const char8_t* ShaderName)
-		: Task(ShaderName, ETaskType::ShaderCompile, EPriority::High)
+		: Task(std::move(std::string("Compile shader:") + ShaderName), ETaskType::ShaderCompile, EPriority::High)
 	{
 	}
 
 	void DoTask() override final
 	{
 	}
+private:
+	ShaderDefinitions m_Definitions;
 };

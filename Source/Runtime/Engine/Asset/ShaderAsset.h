@@ -79,7 +79,7 @@ class ShaderCache : public SerializableAsset<ShaderCache>
 {
 public:
 	ShaderCache(const char8_t* ShaderName)
-		: SerializableAsset(ConvertToShaderCachePath(ShaderName))
+		: SerializableAsset(GetShaderCachePath(ShaderName))
 	{
 	}
 
@@ -93,7 +93,7 @@ public:
 		);
 	}
 private:
-	std::string ConvertToShaderCachePath(const char8_t* ShaderName);
+	std::string GetShaderCachePath(const char8_t* ShaderName);
 	std::unordered_map<std::string, ShaderBinary> m_CachedShaderBinaries;
 };
 

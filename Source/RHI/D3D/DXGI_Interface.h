@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Runtime/Engine/RHI/RHIResource.h"
 #include <d3d11.h>
 #include <d3d11_1.h>
 #include <d3d11_2.h>
@@ -7,7 +8,6 @@
 #include <d3d11_4.h>
 #include <dxgi1_6.h>
 #include <d3dcompiler.h>
-#include "Runtime/Engine/RHI/RHIResource.h"
 
 template<class HwObjectType>
 class D3DHwResource : public RHIObject<HwObjectType>, public RHIResource
@@ -90,10 +90,11 @@ public:
 		return *this;
 	}
 
-	void SetDebugName(const char8_t* Name) override final
+	void SetDebugName(const char8_t* DebugName) override final
 	{
-		assert(name && m_Handle);
-		m_Handle->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<uint32_t>(std::strlen(Name)), Name);
+		assert(DebugName && m_Handle);
+		//m_Handle->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<uint32_t>(std::strlen(DebugName)), DebugName);
+		RHIResource::SetDebugName(DebugName);
 	}
 
 	virtual ~D3DHwResource()
@@ -123,11 +124,11 @@ namespace D3DResult
 	}                                                                          \
 }
 
-#define DECLARE_D3D_HWOBJECT(ClassName, THWInterface)    \
-class ClassName : public D3DHWObject<void, THWInterface> \
-{                                                        \
-public:                                                  \
-	using D3DHWObject::D3DHWObject;                      \
+#define DECLARE_D3D_HWOBJECT(ClassName, HWInterface) \
+class ClassName : public D3DHwResource<HWInterface>  \
+{                                                    \
+public:                                              \
+	using D3DHwResource::D3DHwResource;              \
 };
 
 DECLARE_D3D_HWOBJECT(DxgiFactory0, IDXGIFactory)
@@ -179,5 +180,3 @@ inline uint32_t CalcSubresource(uint32_t MipSlice, uint32_t ArraySlice, uint32_t
 {
 	return MipSlice + (ArraySlice * MipLevels) + (PlaneSlice * MipLevels * ArraySize);
 }
-
-NAMESPACE_END(RHI)

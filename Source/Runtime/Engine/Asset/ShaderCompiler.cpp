@@ -1,5 +1,9 @@
-#if 0
-#include "Runtime/Asset/ShaderCompiler.h"
+#include "Runtime/Engine/Asset/ShaderCompiler.h"
+#include "Runtime/Engine/Asset/ShaderAsset.h"
+#include <glslang/Include/ResourceLimits.h>
+#include <glslang/Public/ShaderLang.h>
+#include <glslang/SPIRV/GlslangToSpv.h>
+#include <spirv_cross/spirv_hlsl.hpp>
 
 #if !defined(DXIL_FOURCC)
 #define DXIL_FOURCC(ch0, ch1, ch2, ch3) (                                  \
@@ -7,77 +11,65 @@
 		(uint32_t)(uint8_t)(ch2) << 16  | (uint32_t)(uint8_t)(ch3) << 24)
 #endif
 
-#define CMD_SPRIV L"-spirv"
-
-DxcShaderCompiler::DxcShaderCompiler()
+DxcShaderCompiler::DxcShaderCompiler(bool8_t GenerateSpirv)
+	: m_GenSpirv(GenerateSpirv)
 {
 	VERIFY(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(m_Utils.Reference())) == S_OK);
 	VERIFY(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(m_Compiler.Reference())) == S_OK);
 }
 
-std::shared_ptr<RHI::ShaderDesc> DxcShaderCompiler::CompileWithArgs(
+std::shared_ptr<RHIShaderCreateInfo> DxcShaderCompiler::Compile(
 	const char8_t* SourceName,
-	const void* Source,
-	size_t Size,
-	const char8_t* Entry,
-	RHI::EShaderStage Stage,
-	const std::vector<RHI::ShaderMacro>& Macros,
-	std::vector<const wchar_t*>& Args)
+	const char8_t* SourceCode,
+	size_t SourceCodeSize,
+	const char8_t* ShaderEntryName,
+	ERHIShaderStage ShaderStage,
+	const ShaderDefinitions& Definitions)
 {
-	assert(Source && Entry && Stage < RHI::EShaderStage::ShaderStageCount);
+	assert(SourceCode && SourceCodeSize && ShaderEntryName && ShaderStage < ERHIShaderStage::Num);
 
-	VERIFY(m_Utils->CreateBlobFromPinned(Source, static_cast<uint32_t>(Size), DXC_CP_ACP, m_Blob.Reference()) == S_OK);
+	VERIFY(m_Utils->CreateBlobFromPinned(SourceCode, static_cast<uint32_t>(SourceCodeSize), DXC_CP_ACP, m_Blob.Reference()) == S_OK);
 
-	std::vector<const wchar_t*> CompileArgs(Args);
-
-	const bool8_t IsSpirv = std::find_if(CompileArgs.begin(), CompileArgs.end(), [](auto Arg) {
-		return lstrcmpW(Arg, CMD_SPRIV) == 0;
-	}) != CompileArgs.end();
-
-	struct ShaderDefine
+	struct LocalShaderDefinition
 	{
 		std::wstring Name;
 		std::wstring Value;
 	};
 
-	std::vector<ShaderDefine> Defines(Macros.size());
-	std::vector<DxcDefine> DXCDefines(IsSpirv ? Macros.size() + 1u: Macros.size());
+	std::vector<LocalShaderDefinition> LocalShaderDefinitions(Definitions.GetDefinitions().size());
+	std::vector<DxcDefine> DxcDefines(m_GenSpirv ? Definitions.GetDefinitions().size() + 1u : Definitions.GetDefinitions().size());
 
-	for (uint32_t Index = 0u; Index < Macros.size(); ++Index)
+	uint32_t Index = 0u;
+	for each (const auto& NameValue in Definitions.GetDefinitions())
 	{
-		Defines[Index] = ShaderDefine
-		{
-			StringUtils::ToWide(Macros[Index].Name),
-			StringUtils::ToWide(Macros[Index].Definition)
-		};
-		DXCDefines[Index] = DxcDefine
-		{
-			Defines[Index].Name.c_str(),
-			Defines[Index].Value.c_str()
-		};
+		LocalShaderDefinitions[Index].Name = std::move(StringUtils::ToWide(NameValue.first.c_str()));
+		LocalShaderDefinitions[Index].Value = std::move(StringUtils::ToWide(NameValue.second.c_str()));
+
+		DxcDefines[Index].Name = LocalShaderDefinitions.back().Name.c_str();
+		DxcDefines[Index].Value = LocalShaderDefinitions.back().Value.c_str();
+
+		++Index;
 	}
 
-	if (IsSpirv)
+	if (m_GenSpirv)
 	{
-		DXCDefines[DXCDefines.size() - 1ull]= DxcDefine
-		{
-			L"SPIRV",
-			L"1"
-		};
+		DxcDefines[Index].Name = L"SPIRV";
+		DxcDefines[Index].Value = L"1";
 	}
 
-	auto IncludeDirectoryArg = StringUtils::ToWide(StringUtils::Format("-I %s", Platform::GetCurrentWorkingDirectory().c_str()));
-	CompileArgs.push_back(IncludeDirectoryArg.c_str());
+	std::vector<const wchar_t*> OtherArgs;
+	auto IncludeDirectoryArg = StringUtils::ToWide(StringUtils::Format("-I %s", PlatformMisc::GetCurrentWorkingDirectory().generic_string().c_str()));
+	OtherArgs.push_back(IncludeDirectoryArg.c_str());
 
 	DxcCompilerArgs CompilerArgs;
 	m_Utils->BuildArguments(
-		StringUtils::ToWide(SourceName).c_str(),
-		StringUtils::ToWide(Entry).c_str(),
-		StringUtils::ToWide(ShaderModel(Stage, true)).c_str(),
-		CompileArgs.data(),
-		static_cast<uint32_t>(CompileArgs.size()),
-		DXCDefines.data(),
-		static_cast<uint32_t>(DXCDefines.size()),
+		SourceName ? StringUtils::ToWide(SourceName).c_str() : nullptr,
+		StringUtils::ToWide(ShaderEntryName).c_str(),
+		StringUtils::ToWide(GetShaderModelName(ShaderStage, true)).c_str(),
+		OtherArgs.data(),
+		static_cast<uint32_t>(OtherArgs.size()),
+		DxcDefines.data(),
+		static_cast<uint32_t>(DxcDefines.size()),
 		CompilerArgs.Reference());
 
 	DxcBuffer Buffer
@@ -112,17 +104,83 @@ std::shared_ptr<RHI::ShaderDesc> DxcShaderCompiler::CompileWithArgs(
 	DxcBlob Blob;
 	VERIFY(Result->GetResult(Blob.Reference()) == S_OK);
 
-	auto Desc = std::make_shared<RHI::ShaderDesc>();
-	Desc->Stage = Stage;
-	Desc->Language = RHI::EShaderLanguage::HLSL;
-	Desc->BinarySize = Blob->GetBufferSize();
-	Desc->Name = SourceName;
+	auto ShaderCreateInfo = std::make_shared<RHIShaderCreateInfo>();
+	ShaderCreateInfo->ShaderStage = ShaderStage;
+	ShaderCreateInfo->Language = ERHIShaderLanguage::HLSL;
+	//ShaderCreateInfo->BinarySize = Blob->GetBufferSize();
+	ShaderCreateInfo->Name = SourceName ? std::string(SourceName) : "";
 
-	Desc->Binary.resize(Align(Blob->GetBufferSize(), sizeof(uint32_t)) / sizeof(uint32_t));
-	VERIFY(memcpy_s(Desc->Binary.data(), Blob->GetBufferSize(), Blob->GetBufferPointer(), Blob->GetBufferSize()) == 0);
+	//ShaderCreateInfo->Binary.resize(Align(Blob->GetBufferSize(), sizeof(uint32_t)) / sizeof(uint32_t));
+	//VERIFY(memcpy_s(ShaderCreateInfo->Binary.data(), Blob->GetBufferSize(), Blob->GetBufferPointer(), Blob->GetBufferSize()) == 0);
 
-	return Desc;
+	return ShaderCreateInfo;
 }
+
+std::shared_ptr<RHIShaderCreateInfo> D3DShaderCompiler::Compile(
+	const char8_t* SourceName,
+	const char8_t* SourceCode,
+	size_t SourceCodeSize,
+	const char8_t* ShaderEntryName,
+	ERHIShaderStage ShaderStage,
+	const class ShaderDefinitions& Definitions)
+{
+	assert(SourceCode && SourceCodeSize && ShaderEntryName && ShaderStage < ERHIShaderStage::Num);
+
+	D3DBlob Binary;
+	D3DBlob Error;
+
+	// https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/d3dcompile-constants
+	// https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/d3dcompile-effect-constants
+#if defined(DEBUG) || defined(_DEBUG)
+	uint32_t Flags = D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY | D3DCOMPILE_DEBUG;
+#else
+	uint32_t Flags = D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY; /// Forces strict compile, which might not allow for legacy syntax.
+#endif
+
+	uint32_t Index = 0u;
+	std::vector<D3D_SHADER_MACRO> D3DMacros(Definitions.GetDefinitions().size());
+	for each (const auto& NameValue in Definitions.GetDefinitions())
+	{
+		D3DMacros[Index].Name = NameValue.first.c_str();
+		D3DMacros[Index].Definition = NameValue.second.c_str();
+	}
+
+	if (FAILED(::D3DCompile2(
+		SourceCode,
+		SourceCodeSize,
+		SourceName,
+		D3DMacros.data(),
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		ShaderEntryName,
+		GetShaderModelName(ShaderStage, false),
+		Flags,
+		0u,
+		0u,
+		nullptr,
+		0u,
+		Binary.Reference(),
+		Error.Reference())))
+	{
+		LOG_ERROR("D3DShaderCompiler:: Failed to compile shader: {}", reinterpret_cast<const char8_t* const>(Error->GetBufferPointer()));
+		assert(0);
+	}
+
+	auto ShaderCreateInfo = std::shared_ptr<RHIShaderCreateInfo>();
+	ShaderCreateInfo->ShaderStage = ShaderStage;
+	ShaderCreateInfo->Language = ERHIShaderLanguage::HLSL;
+	ShaderCreateInfo->Name = SourceName ? std::string(SourceName) : "";
+	//ShaderCreateInfo->BinarySize = Binary->GetBufferSize();
+	//ShaderCreateInfo->Binary.resize(Align(Binary->GetBufferSize(), sizeof(uint32_t)) / sizeof(uint32_t));
+	//VERIFY(memcpy_s(Desc->Binary.data(), Binary->GetBufferSize(), Binary->GetBufferPointer(), Binary->GetBufferSize()) == 0);
+
+	//GetReflectionInfo(Desc.get());
+
+	return ShaderCreateInfo;
+}
+
+#if 0
+
+#define CMD_SPRIV L"-spirv"
 
 void DxcShaderCompiler::GetReflectionInfo(RHI::ShaderDesc* const Desc)
 {
@@ -214,67 +272,6 @@ void DxcShaderCompiler::GetReflectionInfo(RHI::ShaderDesc* const Desc)
 			break;
 		}
 	}
-}
-
-std::shared_ptr<RHI::ShaderDesc> D3DShaderCompiler::Compile(
-	const char8_t* SourceName,
-	const void* Source,
-	size_t Size,
-	const char8_t* Entry,
-	RHI::EShaderStage Stage,
-	const std::vector<RHI::ShaderMacro>& Macros)
-{
-	assert(Source && Entry && Stage < RHI::EShaderStage::ShaderStageCount);
-
-	RHI::D3DBlob Binary;
-	RHI::D3DBlob Error;
-
-#if defined(DEBUG) || defined(_DEBUG)
-	uint32_t Flags = D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_DEBUG;
-#else
-	uint32_t Flags = D3DCOMPILE_ENABLE_STRICTNESS; /// Forces strict compile, which might not allow for legacy syntax.
-#endif
-
-	std::vector<D3D_SHADER_MACRO> D3DMacros(Macros.size());
-	for (uint32_t Index = 0u; Index < Macros.size(); ++Index)
-	{
-		D3DMacros[Index] = D3D_SHADER_MACRO
-		{
-			Macros[Index].Name.c_str(),
-			Macros[Index].Definition.c_str()
-		};
-	}
-
-	if (FAILED(::D3DCompile2(
-		Source,
-		Size,
-		SourceName,
-		D3DMacros.data(),
-		D3D_COMPILE_STANDARD_FILE_INCLUDE,
-		Entry,
-		ShaderModel(Stage, false),
-		Flags,
-		0u,
-		0u,
-		nullptr,
-		0u,
-		Binary.Reference(),
-		Error.Reference())))
-	{
-		LOG_ERROR("D3DShaderCompiler:: {}", reinterpret_cast<const char8_t* const>(Error->GetBufferPointer()));
-		assert(0);
-	}
-
-	auto Desc = std::shared_ptr<RHI::ShaderDesc>();
-	Desc->Stage = Stage;
-	Desc->Language = RHI::EShaderLanguage::HLSL;
-	Desc->BinarySize = Binary->GetBufferSize();
-	Desc->Binary.resize(Align(Binary->GetBufferSize(), sizeof(uint32_t)) / sizeof(uint32_t));
-	VERIFY(memcpy_s(Desc->Binary.data(), Binary->GetBufferSize(), Binary->GetBufferPointer(), Binary->GetBufferSize()) == 0);
-
-	GetReflectionInfo(Desc.get());
-
-	return Desc;
 }
 
 void D3DShaderCompiler::GetReflectionInfo(RHI::ShaderDesc* const Desc)
@@ -532,24 +529,22 @@ void VkShaderCompiler::GetReflectionInfo(RHI::ShaderDesc* const Desc)
 			});
 	}
 }
-
-std::shared_ptr<IShaderCompiler> IShaderCompiler::Create(RHI::ERenderer Eenderer)
-{
-	assert(Eenderer > RHI::ERenderer::Null);
-
-	switch (Eenderer)
-	{
-	case RHI::ERenderer::D3D11:
-		return std::make_shared<D3DShaderCompiler>();
-	case RHI::ERenderer::D3D12:
-		return std::make_shared<DxcShaderCompiler>();
-	case RHI::ERenderer::Vulkan:
-		return std::make_shared<VkShaderCompiler>();
-	case RHI::ERenderer::Software:
-		assert(0);
-		break;
-	}
-
-	return nullptr;
-}
 #endif
+
+std::shared_ptr<IShaderCompiler> IShaderCompiler::Create(ERenderHardwareInterface RHI)
+{
+	assert(RHI > ERenderHardwareInterface::Null);
+
+	switch (RHI)
+	{
+	case ERenderHardwareInterface::D3D11:
+		return std::make_shared<D3DShaderCompiler>();
+	case ERenderHardwareInterface::D3D12:
+		return std::make_shared<DxcShaderCompiler>(false);
+	case ERenderHardwareInterface::Vulkan:
+		return std::make_shared<DxcShaderCompiler>(true);
+	case ERenderHardwareInterface::Software:
+	default:
+		return nullptr;
+	}
+}

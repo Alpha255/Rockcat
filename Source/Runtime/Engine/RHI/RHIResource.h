@@ -167,7 +167,7 @@ public:
 	inline const bool8_t IsValid() const { return m_Handle != nullptr; }
 
 	inline intptr_t ToIntPtr() const { return reinterpret_cast<intptr_t>(m_Handle); }
-private:
+protected:
 	T* m_Handle = nullptr;
 };
 

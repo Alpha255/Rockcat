@@ -1,118 +1,90 @@
 #pragma once
 
-#if 0
-#include "Colorful/IRenderer/IShader.h"
-#include "Colorful/D3D/DXGI_Interface.h"
-#include "Colorful/IRenderer/IRenderer.h"
-#include <glslang/Include/ResourceLimits.h>
-#include <glslang/Public/ShaderLang.h>
-#include <glslang/SPIRV/GlslangToSpv.h>
-#include <spirv_cross/spirv_hlsl.hpp>
+#include "RHI/D3D/DXGI_Interface.h"
+#include "Runtime/Engine/RHI/RHIShader.h"
+#include "Runtime/Engine/Application/GraphicsSettings.h"
 #include <dxc/dxcapi.h>
 
 class IShaderCompiler
 {
 public:
-	virtual std::shared_ptr<RHI::ShaderDesc> Compile(
+	virtual std::shared_ptr<RHIShaderCreateInfo> Compile(
 		const char8_t* SourceName,
-		const void* Source,
-		size_t Size,
-		const char8_t* Entry,
-		RHI::EShaderStage Stage,
-		const std::vector<RHI::ShaderMacro>& Macros) = 0;
+		const char8_t* SourceCode,
+		size_t SourceCodeSize,
+		const char8_t* ShaderEntryName,
+		ERHIShaderStage ShaderStage,
+		const class ShaderDefinitions& Definitions) = 0;
 
-	static const char8_t* const ShaderModel(RHI::EShaderStage Stage, bool8_t DXC)
+	static const char8_t* const GetShaderModelName(ERHIShaderStage ShaderState, bool8_t DXC)
 	{
-		switch (Stage)
+		switch (ShaderState)
 		{
-		case RHI::EShaderStage::Vertex:   return DXC ? "vs_6_0" : "vs_5_0";
-		case RHI::EShaderStage::Hull:     return DXC ? "hs_6_0" : "hs_5_0";
-		case RHI::EShaderStage::Domain:   return DXC ? "ds_6_0" : "ds_5_0";
-		case RHI::EShaderStage::Geometry: return DXC ? "gs_6_0" : "gs_5_0";
-		case RHI::EShaderStage::Fragment: return DXC ? "ps_6_0" : "ps_5_0";
-		case RHI::EShaderStage::Compute:  return DXC ? "cs_6_0" : "cs_5_0";
+		case ERHIShaderStage::Vertex:   return DXC ? "vs_6_0" : "vs_5_0";
+		case ERHIShaderStage::Hull:     return DXC ? "hs_6_0" : "hs_5_0";
+		case ERHIShaderStage::Domain:   return DXC ? "ds_6_0" : "ds_5_0";
+		case ERHIShaderStage::Geometry: return DXC ? "gs_6_0" : "gs_5_0";
+		case ERHIShaderStage::Fragment: return DXC ? "ps_6_0" : "ps_5_0";
+		case ERHIShaderStage::Compute:  return DXC ? "cs_6_0" : "cs_5_0";
+		default:
+			return nullptr;
 		}
-
-		assert(0);
-		return nullptr;
 	}
 
-	static std::shared_ptr<IShaderCompiler> Create(RHI::ERenderer Renderer);
+	static std::shared_ptr<IShaderCompiler> Create(ERenderHardwareInterface RHI);
 protected:
-	virtual void GetReflectionInfo(RHI::ShaderDesc* const Desc) = 0;
+	virtual void GetShaderReflection(const class ShaderBinary& Binary) = 0;
 };
 
 class DxcShaderCompiler : public IShaderCompiler
 {
 public:
-	DxcShaderCompiler();
+	DxcShaderCompiler(bool8_t GenerateSpirv);
 
-	std::shared_ptr<RHI::ShaderDesc> Compile(
+	std::shared_ptr<RHIShaderCreateInfo> Compile(
 		const char8_t* SourceName,
-		const void* Source,
-		size_t Size,
-		const char8_t* Entry,
-		RHI::EShaderStage Stage,
-		const std::vector<RHI::ShaderMacro>& Macros) override
-	{
-		assert(Source && Entry && Stage < RHI::EShaderStage::ShaderStageCount);
-
-		std::vector<const wchar_t*> Args;
-		auto Desc = CompileWithArgs(
-			SourceName,
-			Source,
-			Size,
-			Entry,
-			Stage,
-			Macros,
-			Args
-		);
-
-		GetReflectionInfo(Desc.get());
-
-		return Desc;
-	}
-	std::shared_ptr<RHI::ShaderDesc> CompileWithArgs(
-		const char8_t* SourceName,
-		const void* Source,
-		size_t Size,
-		const char8_t* Entry,
-		RHI::EShaderStage Stage,
-		const std::vector<RHI::ShaderMacro>& Macros,
-		std::vector<const wchar_t*>& Args);
+		const char8_t* SourceCode,
+		size_t SourceCodeSize,
+		const char8_t* ShaderEntryName,
+		ERHIShaderStage ShaderStage,
+		const class ShaderDefinitions& Definitions) override final;
 protected:
-	class DxcCompiler final : public RHI::D3DHWObject<void, IDxcCompiler3> {};
-	class DxcBlobEncoding final : public RHI::D3DHWObject<void, IDxcBlobEncoding> {};
-	class DxcResult final : public RHI::D3DHWObject<void, IDxcResult> {};
-	class DxcBlob final : public RHI::D3DHWObject<void, IDxcBlob> {};
-	class DxcUtils final : public RHI::D3DHWObject<void, IDxcUtils> {};
-	class DxcCompilerArgs final : public RHI::D3DHWObject<void, IDxcCompilerArgs> {};
-	class DxcIncludeHandler final : public RHI::D3DHWObject<void, IDxcIncludeHandler> {};
-	class DxcContainerReflection final : public RHI::D3DHWObject<void, IDxcContainerReflection> {};
-	class D3D12LibraryReflection final : public RHI::D3DHWObject<void, ID3D12LibraryReflection> {};
-	class D3D12ShaderReflection final : public RHI::D3DHWObject<void, ID3D12ShaderReflection> {};
+	using DxcCompiler = D3DHwResource<IDxcCompiler3>;
+	using DxcBlobEncoding = D3DHwResource<IDxcBlobEncoding>;
+	using DxcResult = D3DHwResource<IDxcResult>;
+	using DxcBlob = D3DHwResource<IDxcBlob>;
+	using DxcUtils = D3DHwResource<IDxcUtils>;
+	using DxcCompilerArgs = D3DHwResource<IDxcCompilerArgs>;
+	using DxcIncludeHandler = D3DHwResource<IDxcIncludeHandler>;
+	using DxcContainerReflection = D3DHwResource<IDxcContainerReflection>;
+	using D3D12LibraryReflection = D3DHwResource<ID3D12LibraryReflection>;
+	using D3D12ShaderReflection = D3DHwResource<ID3D12ShaderReflection>;
 
-	void GetReflectionInfo(RHI::ShaderDesc* const Desc) override;
+	void GetShaderReflection(const class ShaderBinary& Binary) override final;
 private:
 	DxcUtils m_Utils;
 	DxcCompiler m_Compiler;
 	DxcBlobEncoding m_Blob;
+	bool8_t m_GenSpirv;
 };
 
 class D3DShaderCompiler : public IShaderCompiler
 {
 public:
-	std::shared_ptr<RHI::ShaderDesc> Compile(
+	std::shared_ptr<RHIShaderCreateInfo> Compile(
 		const char8_t* SourceName,
-		const void* Source,
-		size_t Size,
-		const char8_t* Entry,
-		RHI::EShaderStage Stage,
-		const std::vector<RHI::ShaderMacro>& Macros) override final;
+		const char8_t* SourceCode,
+		size_t SourceCodeSize,
+		const char8_t* ShaderEntryName,
+		ERHIShaderStage ShaderStage,
+		const class ShaderDefinitions& Definitions) override final;
 protected:
-	class D3D11ShaderReflection final : public RHI::D3DHWObject<void, ID3D11ShaderReflection> {};
-	void GetReflectionInfo(RHI::ShaderDesc* const Desc) override final;
+	using D3D11ShaderReflection = D3DHwResource<ID3D11ShaderReflection>;
+
+	void GetShaderReflection(const class ShaderBinary& Binary) override final;
 };
+
+#if 0
 
 class VkShaderCompiler : public DxcShaderCompiler
 {
