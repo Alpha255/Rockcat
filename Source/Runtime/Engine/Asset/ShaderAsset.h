@@ -78,12 +78,13 @@ public:
 class ShaderCache : public SerializableAsset<ShaderCache>
 {
 public:
-	ShaderCache(const char8_t* ShaderName)
-		: SerializableAsset(GetShaderCachePath(ShaderName))
+	template<class StringType>
+	ShaderCache(StringType&& ShaderName)
+		: ParentClass(GetShaderCachePath(std::filesystem::path(std::move(ShaderName)).u8string().c_str()))
 	{
 	}
 
-	virtual const char8_t* GetExtension() const { Asset::GetPrefabricateAssetExtension(Asset::EPrefabricateAssetType::ShaderCacheAsset); }
+	virtual const char8_t* GetExtension() const { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabricateAssetType::ShaderCacheAsset); }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -100,10 +101,17 @@ private:
 class ShaderAsset : public Asset
 {
 public:
-	using Asset::Asset;
+	template<class StringType>
+	ShaderAsset(StringType&& ShaderName)
+		: Asset(std::move(std::filesystem::path(ASSET_PATH_SHADERS) / std::filesystem::path(std::forward<StringType>(ShaderName))))
+		, m_Cache(ShaderCache::Load(std::forward<StringType>(ShaderName)))
+	{
+	}
 
 	const char8_t* const GetSourceCode() const { return GetRawData().Data.get(); }
 	const ShaderBinary* const GetShaderBinary(const ShaderDefinitions&) const { return nullptr; }
+private:
+	std::shared_ptr<ShaderCache> m_Cache;
 };
 
 struct MemoryBlock : public SerializableAsset<MemoryBlock>

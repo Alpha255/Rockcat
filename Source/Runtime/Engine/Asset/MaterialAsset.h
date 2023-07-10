@@ -2,17 +2,44 @@
 
 #include "Runtime/Engine/Asset/SerializableAsset.h"
 
-#define BEGIN_SHADER_PARAMETERS_STRUCT struct alignas(16) ShaderParameters {
-#define END_SHADER_PARAMETERS_STRUCT };
+#define BEGIN_SHADER_PARAMETERS_STRUCT \
+	struct alignas(16) ShaderParameters { \
+	private: \
+		struct FirstVariableID{}; \
+		using ThisShaderParametersStruct = ShaderParameters; \
+		typedef void* FuncPtr; \
+		typedef FuncPtr(*AddShaderVariableFunc)(FirstVariableID, std::vector<ShaderVariable>&); \
+		static FuncPtr AddShaderVariable(FirstVariableID, std::vector<ShaderVariable>&) { return nullptr; } \
+		typedef FirstVariableID
+
+#define END_SHADER_PARAMETERS_STRUCT \
+		LastVariableID; \
+	private: \
+		static void AddShaderVariables(std::vector<ShaderVariable>& Variables) { \
+			FuncPtr(*LastFunc)(LastVariableID, std::vector<ShaderVariable>& Variables); \
+			LastFunc = AddShaderVariable; \
+			FuncPtr Func = reinterpret_cast<FuncPtr>(LastFunc); \
+			do \
+			{ \
+				Func = reinterpret_cast<AddShaderVariableFunc>(Func)(FirstVariableID(), Variables); \
+			} while(Func); } \
+		std::vector<ShaderVariable> m_Variables; \
+	}; \
 
 #define DECLARE_SHADER_VARIABLE(BaseType, VariableName, VariableType) \
+	ThisVariableID##VariableName; \
 	public: \
 		BaseType VariableName; \
 	private: \
-		struct VariableID##VariableName {};	\
-		static AppendShaderVariableFuncPtr AppendShaderVariable(size_t Stride, const char8_t* Name, VariableType Type, std::vector<ShaderVariable>& Variables) \
+		struct NextVariableID_##VariableName {}; \
+		static FuncPtr AddShaderVariable(NextVariableID_##VariableName, std::vector<ShaderVariable>& Variables) \
 		{ \
-		}
+			Variables.emplace_back(ShaderVariable{ERHIShaderVariableType::VariableType, offsetof(ThisShaderParametersStruct, VariableName), sizeof(BaseType), #VariableName}); \
+			FuncPtr(*PreFunc)(ThisVariableID##VariableName, std::vector<ShaderVariable>&); \
+			PreFunc = AddShaderVariable; \
+			return reinterpret_cast<FuncPtr>(PreFunc); \
+		} \
+		typedef NextVariableID_##VariableName
 
 enum class ERHIShaderVariableType : uint32_t
 {
@@ -22,9 +49,12 @@ enum class ERHIShaderVariableType : uint32_t
 	RWBuffer
 };
 
-class ShaderVariable
+struct ShaderVariable
 {
-public:
+	ERHIShaderVariableType Type;
+	size_t Offset;
+	size_t Stride;
+	const char8_t* Name;
 };
 
 class MaterialAsset : public SerializableAsset<MaterialAsset>
@@ -52,9 +82,7 @@ class GenericVS
 {
 public:
 	BEGIN_SHADER_PARAMETERS_STRUCT
-		Math::Matrix World;
-		Math::Matrix View;
-		Math::Matrix Projection;
+		DECLARE_SHADER_VARIABLE(Math::Matrix, World, Uniform)
 	END_SHADER_PARAMETERS_STRUCT
 };
 
