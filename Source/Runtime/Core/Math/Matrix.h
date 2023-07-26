@@ -747,6 +747,14 @@ public:
 		return result;
 	}
 #endif
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(m)
+		);
+	}
 protected:
 #if !defined(USE_SSE)
 	void gaussJordanInverse();

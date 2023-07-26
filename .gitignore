@@ -39,6 +39,7 @@ Temp/
 .vs/
 __pycache__/
 Assets/Configurations
+Assets/Shaders/ShaderCache
 Assets/Shaders/Cache
 build
 Out/Intermediate
