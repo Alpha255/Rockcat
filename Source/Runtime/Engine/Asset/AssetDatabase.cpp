@@ -36,7 +36,7 @@ public:
 		else
 		{
 			m_Asset->SetStatus(Asset::EAssetStatus::Error);
-			m_Asset->OnLoadError();
+			m_Asset->OnLoadFailed();
 		}
 	}
 private:

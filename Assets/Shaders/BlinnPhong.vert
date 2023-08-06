@@ -1,61 +1,34 @@
-#include "Shaders/Definitions.hlsli"
-#include "Shaders/VertexInputLayout.hlsli"
+#include "Shaders/Definitions.h"
 
-#if 0
-cbuffer c_BlingPhong_vs
-{
-};
+DECLARE_GLOBAL_BLINN_PHONG_VS_VARIABLES
 
-void main(
-    in VertexInput i_Input,
-    in uint i_Instance : SV_InstanceID,
-    out VertexOutput o_Output)
-{
+cbuffer CBuffer : register(b0)
+{ 
+	UniformBuffer CBuffer; 
 }
-#else
-struct VSInput
+
+VSOutput main(VsInput Input)
 {
-    VK_LOCATION(0) float3 Pos : POSITION0;
-    VK_LOCATION(1) float2 UV : TEXCOORD0;
-    VK_LOCATION(2) float3 Normal : NORMAL0;
-};
+	VSOutput Output = (VSOutput)0;
 
-struct UBO
-{
-	float4x4 projection;
-	float4x4 model;
-	float4 viewPos;
-	float lodBias;
-};
+	float4 WorldPosition = mul(CBuffer.WorldMatrix, float4(Input.Position, 1.0));
 
-cbuffer ubo : register(b0) { UBO ubo; }
+	Output.WorldPosition = WorldPosition.xyz;
+	Output.Position = mul(CBuffer.ProjectionMatrix, mul(CBuffer.ViewMatrix, WorldPosition));
+	Output.WorldNormal = mul(CBuffer.WorldMatrix, float4(Input.Normal, 1.0)).xyz;
+	Output.UV0 = Input.UV0;
 
-struct VSOutput
-{
-	float4 Pos : SV_POSITION;
-    VK_LOCATION(0) float2 UV : TEXCOORD0;
-    VK_LOCATION(1) float LodBias : TEXCOORD3;
-    VK_LOCATION(2) float3 Normal : NORMAL0;
-    VK_LOCATION(3) float3 ViewVec : TEXCOORD1;
-    VK_LOCATION(4) float3 LightVec : TEXCOORD2;
-};
-
-VSOutput main(VSInput input)
-{
-	VSOutput output = (VSOutput)0;
-	output.UV = input.UV;
-	output.LodBias = ubo.lodBias;
-
-	float3 worldPos = mul(ubo.model, float4(input.Pos, 1.0)).xyz;
-
-	output.Pos = mul(ubo.projection, mul(ubo.model, float4(input.Pos.xyz, 1.0)));
-
-    float4 pos = mul(ubo.model, float4(input.Pos, 1.0));
-	output.Normal = mul((float3x3)ubo.model, input.Normal);
-	float3 lightPos = float3(0.0, 0.0, 0.0);
-	float3 lPos = mul((float3x3)ubo.model, lightPos.xyz);
-    output.LightVec = lPos - pos.xyz;
-    output.ViewVec = ubo.viewPos.xyz - pos.xyz;
-	return output;
-}
+#if _HAS_TANGENT_
+	Output.WorldTangent = mul(CBuffer.WorldMatrix, float4(Input.Tangent, 1.0)).xyz;
 #endif
+
+#if _HAS_UV1_
+	Output.UV1 = Input.UV1;
+#endif
+
+#if _HAS_COLOR_
+	Output.Color = Input.Color;
+#endif
+
+	return Output;
+}

@@ -31,11 +31,18 @@ workspace "Rockcat"
 			kind "StaticLib"
 			language "C++"
 			location "./Out/Intermediate/VCProjects"
-			files "./Source/Runtime/**"
+			files {
+				"./Source/Runtime/**",
+				"./Assets/Shaders/*.hlsli",
+				"./Assets/Shaders/*.vert",
+				"./Assets/Shaders/*.frag",
+				"./Assets/Shaders/*.comp",
+			}
 			defines { "STB_IMAGE_IMPLEMENTATION" }
 			includedirs {
 				"$(SolutionDir)",
 				"$(SolutionDir)Source",
+				"$(SolutionDir)Assets/",
 				"$(SolutionDir)Submodules/cereal/include",
 				"$(SolutionDir)Submodules/spdlog/include",
 				"$(SolutionDir)Submodules/assimp/build/include",
@@ -203,7 +210,8 @@ workspace "Rockcat"
 			"$(SolutionDir)",
 			"$(SolutionDir)/Source",
 			"$(SolutionDir)Submodules/cereal/include",
-			"$(SolutionDir)Submodules/spdlog/include"
+			"$(SolutionDir)Submodules/spdlog/include",
+			"$(VK_SDK_PATH)/Include",
 		}
 		libdirs {
 			"$(VK_SDK_PATH)/Lib"

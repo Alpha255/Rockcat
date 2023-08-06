@@ -21,4 +21,10 @@ public:
 	{
 		return false;
 	}
+private:
+	class GlobalShaderCompileConfigurations : public SerializableAsset<GlobalShaderCompileConfigurations>
+	{
+	public:
+		using ParentClass::ParentClass;
+	};
 };

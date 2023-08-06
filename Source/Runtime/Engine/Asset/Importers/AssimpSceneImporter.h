@@ -17,7 +17,6 @@ public:
 			AssetType("OpenCOLLADA", ".dae", AssetType::EContentsType::Text),
 			AssetType("Autodesk FBX", ".fbx"), 
 			AssetType("Graphics Language Transmission Format", ".gltf", AssetType::EContentsType::Text),
-			AssetType("MilkShape 3D", ".mdl"), 
 			AssetType("Wavefront", ".obj", AssetType::EContentsType::Text),
 			AssetType("Polygon File Format", ".ply", AssetType::EContentsType::Text),
 			AssetType("Stereolithography", ".stl", AssetType::EContentsType::Text),

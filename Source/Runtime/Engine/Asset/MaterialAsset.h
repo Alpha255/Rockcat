@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Runtime/Engine/Asset/SerializableAsset.h"
-#include "Runtime/Engine/Asset/GlobalShaderDefinitions.h"
 #include "Runtime/Engine/RHI/RHIShader.h"
 
 enum class EShadingMode
@@ -10,14 +9,6 @@ enum class EShadingMode
 	BlinnPhong,
 	Toon,
 	StandardPBR
-};
-
-enum class EShaderVariableType : uint32_t
-{
-	Uniform,
-	ImageView,
-	ImageSampler,
-	RWBuffer
 };
 
 struct ShaderMetaData
@@ -42,7 +33,8 @@ using ShaderVariant = std::variant<
 	Math::Vector2,
 	Math::Vector3,
 	Math::Vector4,
-	Math::Matrix>;
+	Math::Matrix,
+	RHIImage*>;
 
 
 struct MaterialProperty
@@ -51,6 +43,7 @@ struct MaterialProperty
 	using GetFunc = std::function<ShaderVariant(void)>;
 
 	EShaderVariableType Type;
+	uint32_t Binding;
 	size_t Offset;
 	size_t Stride;
 
@@ -107,14 +100,21 @@ private:
 	std::unordered_map<std::string, MaterialProperty> m_Properties;
 };
 
-class TestShader
+#define DECLARE_MATERIAL_PROPERTY(BaseType, PropertyName, DefaultValue) \
+private: \
+	BaseType m_#PropertyName = DefaultValue; \
+public: \
+	BaseType Get#PropertyName() const { return m_#PropertyName; } \
+	void Set#PropertyName(const BaseType& Value) { m_#PropertyName = Value; }
+
+class BaseMaterial : public MaterialAsset
 {
-	DECLARE_SHADER_PARAMETERS_BEGIN(TestShader)
-		DECLARE_UNIFORM_SHADER_VARIABLE(float4, Color)
-		DECLARE_UNIFORM_SHADER_VARIABLE(float3, Normal)
-	DECLARE_SHADER_PARAMETERS_END
+public:
+	using MaterialAsset::MaterialAsset;
 };
 
+using MaterialID = ObjectID<BaseMaterial>;
+#if 0
 template<class ShadingModeFS>
 class Material : public MaterialAsset, public ShadingModeFS
 {
@@ -130,3 +130,4 @@ public:
 	}
 private:
 };
+#endif

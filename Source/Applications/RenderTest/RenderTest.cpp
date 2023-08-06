@@ -3,7 +3,7 @@
 #include "Runtime/Engine/Asset/SceneAsset.h"
 #include "Runtime/Core/Main.h"
 #include "Runtime/Engine/Async/Task.h"
-#include "Runtime/Engine/Asset/ShaderAsset.h"
+#include "Runtime/Engine/Asset/GlobalShaders/BlinnPhong.h"
 //#include <Submodules/imgui/imgui.h>
 
 void RenderTest::OnStartup()
@@ -23,7 +23,12 @@ void RenderTest::OnStartup()
 	m_Scene->Save(true);
 #endif
 #endif
-	ShaderAsset Test("BlinnPhong.frag");
+	BlinnPhongVS Test_1;
+	BlinnPhongFS Test_2;
+
+	Test_1.GetShaderVariables()
+		.SetProjectionMatrix(Math::Matrix())
+		.SetViewMatrix(Math::Matrix());
 	
 	m_Scene = Scene::Load("RenderTest.scene");
 }

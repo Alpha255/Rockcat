@@ -39,10 +39,10 @@ struct AssetType
 	std::string_view Extension;
 	EContentsType ContentsType;
 
-	AssetType(const char8_t* InName, const char8_t* InExtension, EContentsType InType = EContentsType::Binary)
+	AssetType(const char8_t* InName, const char8_t* InExtension, EContentsType InContentsType = EContentsType::Binary)
 		: Name(InName)
 		, Extension(InExtension)
-		, ContentsType(InType)
+		, ContentsType(InContentsType)
 	{
 	}
 };
@@ -69,7 +69,7 @@ public:
 	using AssetPreLoadCallback = std::function<void(Asset&)>;
 	using AssetReadyCallback = std::function<void(Asset&)>;
 	using AssetReloadCallback = std::function<void(Asset&)>;
-	using AssetErrorCallback = std::function<void(Asset&)>;
+	using AssetLoadFailedCallback = std::function<void(Asset&)>;
 	using AssetCanceledCallback = std::function<void(Asset&)>;
 
 	using AssetSavedCallback = std::function<void(Asset&)>;
@@ -80,7 +80,7 @@ public:
 		AssetPreLoadCallback PreLoadCallback;
 		AssetReadyCallback ReadyCallback;
 		AssetReloadCallback ReloadCallback;
-		AssetErrorCallback ErrorCallback;
+		AssetLoadFailedCallback LoadFailedCallback;
 		AssetCanceledCallback CanceledCallback;
 		AssetSavedCallback SavedCallback;
 		AssetUnloadedCallback UnloadedCallback;
@@ -172,7 +172,7 @@ protected:
 
 	virtual void OnPreLoad() { if (m_Callbacks.PreLoadCallback) { m_Callbacks.PreLoadCallback(*this); } }
 	virtual void OnReady() { if (m_Callbacks.ReadyCallback) { m_Callbacks.ReadyCallback(*this); } }
-	virtual void OnLoadError() { if (m_Callbacks.ErrorCallback) { m_Callbacks.ErrorCallback(*this); } }
+	virtual void OnLoadFailed() { if (m_Callbacks.LoadFailedCallback) { m_Callbacks.LoadFailedCallback(*this); } }
 	virtual void OnCanceledLoad() { if (m_Callbacks.CanceledCallback) { m_Callbacks.CanceledCallback(*this); } }
 	virtual void OnSaved() { if (m_Callbacks.SavedCallback) { m_Callbacks.SavedCallback(*this); } }
 	virtual void OnUnloaded() { if (m_Callbacks.UnloadedCallback) { m_Callbacks.UnloadedCallback(*this); } }

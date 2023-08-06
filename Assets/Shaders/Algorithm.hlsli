@@ -1,5 +1,5 @@
-#ifndef _INCLUDE_ALGORITHM_
-#define _INCLUDE_ALGORITHM_
+#ifndef __INCLUDE_ALGORITHM__
+#define __INCLUDE_ALGORITHM__
 
 float min3(float A, float B, float C)
 {
@@ -129,4 +129,19 @@ half4 max3(half4 A, half4 B, half4 C)
     );
 }
 
+float3 ComputeWorldNormal(VSOutput Output, float3 NormalFromTexture)
+{
+    float3 WorldNormal = normalize(Output.WorldNormal);
+
+#if _HAS_TANGENT
+    float3 WorldTangent = normalize(Output.WorldTangent);
+    float3 Bitangent = normalize(cross(WorldNormal, WorldTangent));
+    float3x3 TBN = float3x3(WorldTangent, Bitangent, WorldNormal);
+
+    WorldNormal = NormalFromTexture * 2.0 - 1.0;
+    WorldNormal = mul(WorldNormal, TBN); // Transpose
 #endif
+    return WorldNormal;
+}
+
+#endif  // __INCLUDE_ALGORITHM__

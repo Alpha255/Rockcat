@@ -23,29 +23,8 @@ public:
 	}
 
 	const std::map<std::string, std::string>& GetDefinitions() const { return m_Definitions; }
-
-	std::string GetPermutationString() const
-	{
-		std::string PermutationString;
-		for each (const auto& NameValue in m_Definitions)
-		{
-			PermutationString += NameValue.first + "=" + NameValue.second + "\n";
-		}
-		return PermutationString;
-	}
 private:
 	std::map<std::string, std::string> m_Definitions;
-};
-
-class GlobalShaderConfigurations : public SerializableAsset<GlobalShaderConfigurations>
-{
-public:
-	GlobalShaderConfigurations()
-		: SerializableAsset(StringUtils::Format("%sGlobalShaderConfigs%s", 
-			ASSET_PATH_SHADERS, 
-			Asset::GetPrefabricateAssetExtension(Asset::EPrefabricateAssetType::ConfigAsset)))
-	{
-	}
 };
 
 class ShaderVariantMask : public std::bitset<sizeof(uint32_t)>
@@ -152,19 +131,6 @@ public:
 
 namespace cereal
 {
-	//template<> struct LoadAndConstruct<ShaderBinary>
-	//{
-	//	template<class Archive>
-	//	static void load_and_construct(Archive& Ar, cereal::construct<ShaderBinary>& Construct)
-	//	{
-	//		size_t DataSize = 0u;
-	//		const byte8_t* const Data = nullptr;
-	//		Ar(DataSize);
-	//		Ar(Data);
-	//		Construct(DataSize, Data);
-	//	}
-	//};
-
 	template<> struct LoadAndConstruct<ShaderCache>
 	{
 		template<class Archive>
