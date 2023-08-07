@@ -2,6 +2,7 @@
 
 #include "Runtime/Engine/Asset/SerializableAsset.h"
 #include "Runtime/Engine/RHI/RHIShader.h"
+#include "Runtime/Engine/RHI/RHIImage.h"
 
 enum class EShadingMode
 {
@@ -28,13 +29,27 @@ struct ShaderMetaData
 	}
 };
 
+struct RHIImageVariable
+{
+	std::string ImagePath;
+	RHIImage* Image = nullptr;
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(ImagePath)
+		);
+	}
+};
+
 using ShaderVariant = std::variant<
 	float32_t, int32_t, uint32_t,
 	Math::Vector2,
 	Math::Vector3,
 	Math::Vector4,
 	Math::Matrix,
-	RHIImage*>;
+	RHIImageVariable>;
 
 
 struct MaterialProperty
@@ -68,6 +83,16 @@ public:
 	MaterialAsset(StringType&& MaterialAssetName)
 		: ParentClass(Asset::GetPrefabricateAssetPath(MaterialAssetName, Asset::EPrefabricateAssetType::MaterialAsset))
 	{
+	}
+
+	~MaterialAsset()
+	{
+		for (auto& Property : m_Properties)
+		{
+			Property.second.Setter(Property.second.Value);
+		}
+
+		Save(true);
 	}
 
 	const char8_t* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabricateAssetType::MaterialAsset); }

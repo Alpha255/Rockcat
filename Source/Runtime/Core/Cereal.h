@@ -18,3 +18,4 @@
 #include <cereal/types/deque.hpp>
 #include <cereal/types/forward_list.hpp>
 #include <cereal/types/list.hpp>
+#include <cereal/types/variant.hpp>

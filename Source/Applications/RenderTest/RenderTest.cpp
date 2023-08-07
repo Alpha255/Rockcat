@@ -23,12 +23,15 @@ void RenderTest::OnStartup()
 	m_Scene->Save(true);
 #endif
 #endif
-	BlinnPhongVS Test_1;
-	BlinnPhongFS Test_2;
-
-	Test_1.GetShaderVariables()
-		.SetProjectionMatrix(Math::Matrix())
-		.SetViewMatrix(Math::Matrix());
+	{
+		Math::Matrix Identity;
+		MaterialBlinnPhong Material;
+		Material.BlinnPhongVS::GetShaderVariables()
+			.SetProjectionMatrix(Identity)
+			.SetViewMatrix(Identity);
+		Material.BlinnPhongFS::GetShaderVariables()
+			.SetDiffuseMap(RHIImageVariable{ "ToyCar\\glTF\\Fabric_baseColor.png" });
+	}
 	
 	m_Scene = Scene::Load("RenderTest.scene");
 }

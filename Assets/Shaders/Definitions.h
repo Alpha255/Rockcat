@@ -11,7 +11,7 @@ using float4 = Math::Vector4;
 using float4x4 = Math::Matrix;
 
 #define DECLARE_SHADER_VARIABLES_BEGIN(ShaderType) \
-private: \
+protected: \
 	using ThisShader = ShaderType; \
 	struct alignas(16) ShaderVariables { \
 	private: \
@@ -45,7 +45,7 @@ private: \
 
 #define DECLARE_SHADER_VARIABLES_END \
 		LastVariableID; \
-	private: \
+	public: \
 		static void AddShaderVariables(MaterialAsset& Owner, ThisShader& Shader) { \
 			FuncPtr(*LastFunc)(LastVariableID, MaterialAsset& Owner, ThisShader& Shader); \
 			LastFunc = AddShaderVariable; \
@@ -65,16 +65,16 @@ public: \
 
 #define DECLARE_SHADER_VARIABLE_UNIFORM(BaseType, VariableName, Binding) DECLARE_SHADER_VARIABLE(BaseType, VariableName, Uniform, Binding)
 
-#define DECLARE_SHADER_VARIABLE_TEXTURE_1D(VariableName, Binding) DECLARE_SHADER_VARIABLE(RHIImage*, VariableName, ImageSampler, Binding)
-#define DECLARE_SHADER_VARIABLE_TEXTURE_ARRAY_1D(VariableName, Binding) DECLARE_SHADER_VARIABLE(RHIImage*, VariableName, ImageSampler, Binding)
+#define DECLARE_SHADER_VARIABLE_TEXTURE_1D(VariableName, Binding) DECLARE_SHADER_VARIABLE(RHIImageVariable, VariableName, ImageSampler, Binding)
+#define DECLARE_SHADER_VARIABLE_TEXTURE_ARRAY_1D(VariableName, Binding) DECLARE_SHADER_VARIABLE(RHIImageVariable, VariableName, ImageSampler, Binding)
 
-#define DECLARE_SHADER_VARIABLE_TEXTURE_2D(VariableName, Binding) DECLARE_SHADER_VARIABLE(RHIImage*, VariableName, ImageSampler, Binding)
-#define DECLARE_SHADER_VARIABLE_TEXTURE_ARRAY_2D(VariableName, Binding) DECLARE_SHADER_VARIABLE(RHIImage*, VariableName, ImageSampler, Binding)
+#define DECLARE_SHADER_VARIABLE_TEXTURE_2D(VariableName, Binding) DECLARE_SHADER_VARIABLE(RHIImageVariable, VariableName, ImageSampler, Binding)
+#define DECLARE_SHADER_VARIABLE_TEXTURE_ARRAY_2D(VariableName, Binding) DECLARE_SHADER_VARIABLE(RHIImageVariable, VariableName, ImageSampler, Binding)
 
-#define DECLARE_SHADER_VARIABLE_TEXTURE_CUBE(VariableName, Binding) DECLARE_SHADER_VARIABLE(RHIImage*, VariableName, ImageSampler, Binding)
-#define DECLARE_SHADER_VARIABLE_TEXTURE_ARRAY_CUBE(VariableName, Binding) DECLARE_SHADER_VARIABLE(RHIImage*, VariableName, ImageSampler, Binding)
+#define DECLARE_SHADER_VARIABLE_TEXTURE_CUBE(VariableName, Binding) DECLARE_SHADER_VARIABLE(RHIImageVariable, VariableName, ImageSampler, Binding)
+#define DECLARE_SHADER_VARIABLE_TEXTURE_ARRAY_CUBE(VariableName, Binding) DECLARE_SHADER_VARIABLE(RHIImageVariable, VariableName, ImageSampler, Binding)
 
-#define DECLARE_SHADER_VARIABLE_TEXTURE_3D(VariableName, Binding) DECLARE_SHADER_VARIABLE(RHIImage*, VariableName, ImageSampler, Binding)
+#define DECLARE_SHADER_VARIABLE_TEXTURE_3D(VariableName, Binding) DECLARE_SHADER_VARIABLE(RHIImageVariable, VariableName, ImageSampler, Binding)
 
 #else  // __cplusplus
 #if _SPIRV_

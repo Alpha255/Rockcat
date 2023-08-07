@@ -101,7 +101,7 @@ public:
 	{
 		Ar(
 			CEREAL_NVP(x),
-			CEREAL_NVP(y),
+			CEREAL_NVP(y)
 		);
 	}
 };
