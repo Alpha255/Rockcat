@@ -24,13 +24,19 @@ void RenderTest::OnStartup()
 #endif
 #endif
 	{
-		Math::Matrix Identity;
-		MaterialBlinnPhong Material;
-		Material.BlinnPhongVS::GetShaderVariables()
-			.SetProjectionMatrix(Identity)
-			.SetViewMatrix(Identity);
+		MaterialLit Material;
+		Material.GenericVS::GetShaderVariables()
+			.SetProjectionMatrix(Math::Matrix())
+			.SetViewMatrix(Math::Matrix());
 		Material.BlinnPhongFS::GetShaderVariables()
 			.SetDiffuseMap(RHIImageVariable{ "ToyCar\\glTF\\Fabric_baseColor.png" });
+
+		/// Can't use load function to load instanced material
+		auto Lit = MaterialLit::Load("Lit.material"); // Get "MaterialAsset" here
+		if (Lit)
+		{
+		}
+		///
 	}
 	
 	m_Scene = Scene::Load("RenderTest.scene");

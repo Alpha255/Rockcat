@@ -1,6 +1,6 @@
 #include "Shaders/Definitions.h"
 
-DECLARE_GLOBAL_BLINN_PHONG_VS_VARIABLES
+DECLARE_GLOBAL_GENERIC_VS_VARIABLES
 
 cbuffer CBuffer : register(b0)
 { 

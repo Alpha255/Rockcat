@@ -29,6 +29,8 @@ public:
 	void Reload()
 	{
 		SetStatus(Asset::EAssetStatus::Loading);
+		PreLoad();
+
 		std::ifstream InFileStream(GetPath());
 		if (InFileStream.is_open())
 		{
@@ -43,6 +45,8 @@ public:
 			Save(true);
 		}
 		InFileStream.close();
+
+		PostLoad();
 		SetStatus(Asset::EAssetStatus::Ready);
 	}
 
@@ -80,6 +84,9 @@ public:
 	}
 
 	virtual const char8_t* GetExtension() const { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabricateAssetType::ConfigAsset); }
+
+	virtual void PreLoad() {}
+	virtual void PostLoad() {}
 
 	template<class Archive>
 	void serialize(Archive& Ar)

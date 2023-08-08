@@ -84,16 +84,7 @@ public:
 		: ParentClass(Asset::GetPrefabricateAssetPath(MaterialAssetName, Asset::EPrefabricateAssetType::MaterialAsset))
 	{
 	}
-
-	~MaterialAsset()
-	{
-		for (auto& Property : m_Properties)
-		{
-			Property.second.Setter(Property.second.Value);
-		}
-
-		Save(true);
-	}
+	virtual ~MaterialAsset() = default;
 
 	const char8_t* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabricateAssetType::MaterialAsset); }
 
@@ -120,8 +111,6 @@ public:
 		}
 	}
 protected:
-
-private:
 	std::unordered_map<std::string, MaterialProperty> m_Properties;
 };
 
@@ -132,13 +121,6 @@ public: \
 	BaseType Get#PropertyName() const { return m_#PropertyName; } \
 	void Set#PropertyName(const BaseType& Value) { m_#PropertyName = Value; }
 
-class BaseMaterial : public MaterialAsset
-{
-public:
-	using MaterialAsset::MaterialAsset;
-};
-
-using MaterialID = ObjectID<BaseMaterial>;
 #if 0
 template<class ShadingModeFS>
 class Material : public MaterialAsset, public ShadingModeFS

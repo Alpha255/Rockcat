@@ -2,14 +2,14 @@
 #include "Runtime/Engine/Asset/MaterialAsset.h"
 #include "Runtime/Engine/Asset/ShaderAsset.h"
 
-class BlinnPhongVS : public ShaderAsset
+class GenericVS : public ShaderAsset
 {
 public:
-	BlinnPhongVS()
-		: ShaderAsset("BlinnPhong.vert")
+	GenericVS()
+		: ShaderAsset("GenericVS.vert")
 	{
 	}
-	DECLARE_GLOBAL_BLINN_PHONG_VS_VARIABLES
+	DECLARE_GLOBAL_GENERIC_VS_VARIABLES
 };
 
 class BlinnPhongFS : public ShaderAsset
@@ -22,21 +22,58 @@ public:
 	DECLARE_GLOBAL_BLINN_PHONG_FS_VARIABLES
 };
 
-class MaterialBlinnPhong : public MaterialAsset, public BlinnPhongVS, public BlinnPhongFS
+template<class FS, class VS = GenericVS>
+class BaseMaterial : public MaterialAsset, public VS, public FS
 {
 public:
-	MaterialBlinnPhong()
-		: MaterialAsset("BlinnPhong")
+	BaseMaterial(const char8_t* MaterialAssetName)
+		: MaterialAsset(MaterialAssetName)
+		, m_Name(MaterialAssetName)
 	{
-		BlinnPhongVS::ShaderVariables::AddShaderVariables(*this, *this);
-		BlinnPhongFS::ShaderVariables::AddShaderVariables(*this, *this);
+		assert(MaterialAssetName);
+
+		VS::ShaderVariables::AddShaderVariables(*this, *this);
+		FS::ShaderVariables::AddShaderVariables(*this, *this);
 	}
+
+	virtual ~BaseMaterial()
+	{
+		for (auto& Property : m_Properties)
+		{
+			Property.second.Value = Property.second.Getter();
+		}
+		Save(true);
+	}
+
+	const char8_t* GetName() const { return m_Name.c_str(); }
+	void SetName(const char8_t* Name) { m_Name = Name; }
+
+	void CreateInstance();
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
 			CEREAL_BASE(MaterialAsset)
+		);
+	}
+private:
+	std::string m_Name;
+};
+
+class MaterialLit : public BaseMaterial<BlinnPhongFS>
+{
+public:
+	MaterialLit()
+		: BaseMaterial("Lit")
+	{
+	}
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(BaseMaterial)
 		);
 	}
 };

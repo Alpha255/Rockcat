@@ -28,7 +28,7 @@ protected: \
 		BaseType VariableName{}; \
 	public: \
 		inline BaseType Get##VariableName() const { return VariableName; } \
-		inline ShaderVariables& Set##VariableName(BaseType& Value) { VariableName = Value; return *this; } \
+		template<class Type> inline ShaderVariables& Set##VariableName(Type&& Value) { VariableName = std::forward<Type>(Value); return *this; } \
 	private: \
 		struct NextVariableID_##VariableName{}; \
 		static FuncPtr AddShaderVariable(NextVariableID_##VariableName, MaterialAsset& Owner, ThisShader& Shader) \
@@ -186,8 +186,8 @@ struct VsOutput
 
 #endif  // __cplusplus
 
-#define DECLARE_GLOBAL_BLINN_PHONG_VS_VARIABLES \
-	DECLARE_SHADER_VARIABLES_BEGIN(BlinnPhongVS) \
+#define DECLARE_GLOBAL_GENERIC_VS_VARIABLES \
+	DECLARE_SHADER_VARIABLES_BEGIN(GenericVS) \
 		DECLARE_UNIFORM_BUFFER_BEGIN \
 			DECLARE_SHADER_VARIABLE_UNIFORM(float4x4, WorldMatrix, 0) \
 			DECLARE_SHADER_VARIABLE_UNIFORM(float4x4, ViewMatrix, 0) \
