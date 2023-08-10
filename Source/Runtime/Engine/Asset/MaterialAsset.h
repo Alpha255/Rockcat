@@ -8,8 +8,8 @@ enum class EShadingMode
 {
 	Unlit,
 	BlinnPhong,
-	Toon,
-	StandardPBR
+	StandardPBR,
+	Toon
 };
 
 struct ShaderMetaData

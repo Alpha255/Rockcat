@@ -36,7 +36,7 @@ public:
 		{
 			cereal::JSONInputArchive Ar(InFileStream);
 			Ar(
-				cereal::make_nvp(typeid(T).name(), *static_cast<T*>(this))
+				cereal::make_nvp(typeid(*this).name(), *static_cast<T*>(this))
 			);
 		}
 		else
@@ -72,7 +72,7 @@ public:
 			{
 				cereal::JSONOutputArchive Ar(OutFileStream);
 				Ar(
-					cereal::make_nvp(typeid(T).name(), *static_cast<T*>(this))
+					cereal::make_nvp(typeid(*this).name(), *static_cast<T*>(this))
 				);
 			}
 			else

@@ -3,7 +3,7 @@
 #include "Runtime/Engine/Asset/SceneAsset.h"
 #include "Runtime/Core/Main.h"
 #include "Runtime/Engine/Async/Task.h"
-#include "Runtime/Engine/Asset/GlobalShaders/BlinnPhong.h"
+#include "Runtime/Engine/Asset/GlobalShaders/Lit.h"
 //#include <Submodules/imgui/imgui.h>
 
 void RenderTest::OnStartup()
@@ -28,14 +28,14 @@ void RenderTest::OnStartup()
 		Material.GenericVS::GetShaderVariables()
 			.SetProjectionMatrix(Math::Matrix())
 			.SetViewMatrix(Math::Matrix());
-		Material.BlinnPhongFS::GetShaderVariables()
+		Material.DefaultLitFS::GetShaderVariables()
 			.SetDiffuseMap(RHIImageVariable{ "ToyCar\\glTF\\Fabric_baseColor.png" });
 
 		/// Can't use load function to load instanced material
-		auto Lit = MaterialLit::Load("Lit.material"); // Get "MaterialAsset" here
-		if (Lit)
-		{
-		}
+		//auto Lit = MaterialLit::Load("Lit.material"); // Get "MaterialAsset" here
+		//if (Lit)
+		//{
+		//}
 		///
 	}
 	

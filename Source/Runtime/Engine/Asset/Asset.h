@@ -144,6 +144,10 @@ public:
 			break;
 		}
 		Ret += AssetName;
+		if (Ret.extension().empty())
+		{
+			Ret += GetPrefabricateAssetExtension(Type);
+		}
 		return Ret;
 	}
 

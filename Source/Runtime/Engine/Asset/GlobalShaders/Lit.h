@@ -12,20 +12,22 @@ public:
 	DECLARE_GLOBAL_GENERIC_VS_VARIABLES
 };
 
-class BlinnPhongFS : public ShaderAsset
+class DefaultLitFS : public ShaderAsset
 {
 public:
-	BlinnPhongFS()
-		: ShaderAsset("BlinnPhong.frag")
+	DefaultLitFS()
+		: ShaderAsset("DefaultLit.frag")
 	{
 	}
-	DECLARE_GLOBAL_BLINN_PHONG_FS_VARIABLES
+	DECLARE_GLOBAL_DEFAULT_LIT_FS_VARIABLES
 };
 
 template<class FS, class VS = GenericVS>
 class BaseMaterial : public MaterialAsset, public VS, public FS
 {
 public:
+	using BaseMaterialType = BaseMaterial<FS, VS>;
+
 	BaseMaterial(const char8_t* MaterialAssetName)
 		: MaterialAsset(MaterialAssetName)
 		, m_Name(MaterialAssetName)
@@ -48,32 +50,49 @@ public:
 	const char8_t* GetName() const { return m_Name.c_str(); }
 	void SetName(const char8_t* Name) { m_Name = Name; }
 
+	ERHICullMode GetCullMode() const { return m_CullMode; }
+	void SetCullMode(ERHICullMode CullMode) { m_CullMode = CullMode; }
+
+	bool8_t IsTwoSide() const { return m_TwoSide; }
+	void SetTwoSide(bool8_t TwoSide) { m_TwoSide = TwoSide; }
+
 	void CreateInstance();
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(MaterialAsset)
+			CEREAL_BASE(MaterialAsset),
+			CEREAL_NVP(m_Name),
+			CEREAL_NVP(m_CullMode),
+			CEREAL_NVP(m_TwoSide)
 		);
 	}
 private:
 	std::string m_Name;
+	ERHICullMode m_CullMode = ERHICullMode::BackFace;
+	bool8_t m_TwoSide = false;
 };
 
-class MaterialLit : public BaseMaterial<BlinnPhongFS>
+class MaterialLit : public BaseMaterial<DefaultLitFS>
 {
 public:
 	MaterialLit()
-		: BaseMaterial("Lit")
+		: BaseMaterial("DefaultLit")
 	{
 	}
+
+	EShadingMode GetShadingMode() const { return m_ShadingMode; }
+	void SetShadingMode(EShadingMode ShadingMode) { m_ShadingMode = ShadingMode; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(BaseMaterial)
+			CEREAL_BASE(BaseMaterialType),
+			CEREAL_NVP(m_ShadingMode)
 		);
 	}
+private:
+	EShadingMode m_ShadingMode = EShadingMode::BlinnPhong;
 };
