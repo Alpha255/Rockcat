@@ -38,15 +38,6 @@ public:
 		FS::ShaderVariables::AddShaderVariables(*this, *this);
 	}
 
-	virtual ~BaseMaterial()
-	{
-		for (auto& Property : m_Properties)
-		{
-			Property.second.Value = Property.second.Getter();
-		}
-		Save(true);
-	}
-
 	const char8_t* GetName() const { return m_Name.c_str(); }
 	void SetName(const char8_t* Name) { m_Name = Name; }
 
@@ -68,6 +59,14 @@ public:
 			CEREAL_NVP(m_DoubleSided)
 		);
 	}
+protected:
+	void SerializeProperties()
+	{
+		for (auto& Property : m_Properties)
+		{
+			Property.second.Value = Property.second.Getter();
+		}
+	}
 private:
 	std::string m_Name;
 	ERHICullMode m_CullMode = ERHICullMode::BackFace;
@@ -84,6 +83,12 @@ public:
 
 	EShadingMode GetShadingMode() const { return m_ShadingMode; }
 	void SetShadingMode(EShadingMode ShadingMode) { m_ShadingMode = ShadingMode; }
+
+	void TrySave()
+	{
+		SerializeProperties();
+		Save<MaterialLit>(true);
+	}
 
 	template<class Archive>
 	void serialize(Archive& Ar)

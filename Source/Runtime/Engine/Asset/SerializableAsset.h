@@ -14,18 +14,20 @@ public:
 	using Asset::Asset;
 	using ParentClass = SerializableAsset<T>;
 
-	template<class StringType, class... TArgs>
+	template<class Type = T, class StringType, class... TArgs>
 	static std::shared_ptr<T> Load(StringType&& Path, TArgs&&... Args)
 	{
-		if (!s_ThisAsset)
+		static std::shared_ptr<Type> s_Asset;
+		if (!s_Asset)
 		{
-			s_ThisAsset = std::make_shared<T>(std::forward<StringType>(Path), std::forward<TArgs>(Args)...);
-			s_ThisAsset->Reload();
+			s_Asset = std::make_shared<Type>(std::forward<StringType>(Path), std::forward<TArgs>(Args)...);
+			s_Asset->Reload<Type>();
 		}
 
-		return s_ThisAsset;
+		return s_Asset;
 	}
 
+	template<class Type = T>
 	void Reload()
 	{
 		SetStatus(Asset::EAssetStatus::Loading);
@@ -36,7 +38,7 @@ public:
 		{
 			cereal::JSONInputArchive Ar(InFileStream);
 			Ar(
-				cereal::make_nvp(typeid(*this).name(), *static_cast<T*>(this))
+				cereal::make_nvp(typeid(Type).name(), *static_cast<Type*>(this))
 			);
 		}
 		else
@@ -50,6 +52,7 @@ public:
 		SetStatus(Asset::EAssetStatus::Ready);
 	}
 
+	template<class Type = T>
 	void Save(bool8_t Force = false, const std::filesystem::path& CustomPath = std::filesystem::path())
 	{
 		if (IsDirty() || Force)
@@ -72,7 +75,7 @@ public:
 			{
 				cereal::JSONOutputArchive Ar(OutFileStream);
 				Ar(
-					cereal::make_nvp(typeid(*this).name(), *static_cast<T*>(this))
+					cereal::make_nvp(typeid(Type).name(), *static_cast<Type*>(this))
 				);
 			}
 			else
@@ -95,9 +98,5 @@ public:
 			CEREAL_BASE(Asset)
 		);
 	}
-private:
-	static std::shared_ptr<T> s_ThisAsset;
 };
-
-template<class T> std::shared_ptr<T> SerializableAsset<T>::s_ThisAsset;
 

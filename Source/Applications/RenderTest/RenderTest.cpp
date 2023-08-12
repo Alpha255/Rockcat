@@ -31,6 +31,8 @@ void RenderTest::OnStartup()
 		Material.DefaultLitFS::GetShaderVariables()
 			.SetDiffuseMap(RHIImageVariable{ "ToyCar\\glTF\\Fabric_baseColor.png" });
 
+		Material.TrySave();
+
 		/// Can't use load function to load instanced material
 		//auto Lit = MaterialLit::Load("Lit.material"); // Get "MaterialAsset" here
 		//if (Lit)
