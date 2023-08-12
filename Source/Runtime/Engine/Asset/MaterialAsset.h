@@ -114,12 +114,7 @@ protected:
 	std::unordered_map<std::string, MaterialProperty> m_Properties;
 };
 
-#define DECLARE_MATERIAL_PROPERTY(BaseType, PropertyName, DefaultValue) \
-private: \
-	BaseType m_#PropertyName = DefaultValue; \
-public: \
-	BaseType Get#PropertyName() const { return m_#PropertyName; } \
-	void Set#PropertyName(const BaseType& Value) { m_#PropertyName = Value; }
+using MaterialID = ObjectID<MaterialAsset, uint32_t>;
 
 #if 0
 template<class ShadingModeFS>

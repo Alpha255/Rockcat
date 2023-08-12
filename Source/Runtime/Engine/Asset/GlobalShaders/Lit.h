@@ -53,8 +53,8 @@ public:
 	ERHICullMode GetCullMode() const { return m_CullMode; }
 	void SetCullMode(ERHICullMode CullMode) { m_CullMode = CullMode; }
 
-	bool8_t IsTwoSide() const { return m_TwoSide; }
-	void SetTwoSide(bool8_t TwoSide) { m_TwoSide = TwoSide; }
+	bool8_t IsDoubleSided() const { return m_DoubleSided; }
+	void SetDoubleSided(bool8_t DoubleSided) { m_DoubleSided = DoubleSided; }
 
 	void CreateInstance();
 
@@ -65,13 +65,13 @@ public:
 			CEREAL_BASE(MaterialAsset),
 			CEREAL_NVP(m_Name),
 			CEREAL_NVP(m_CullMode),
-			CEREAL_NVP(m_TwoSide)
+			CEREAL_NVP(m_DoubleSided)
 		);
 	}
 private:
 	std::string m_Name;
 	ERHICullMode m_CullMode = ERHICullMode::BackFace;
-	bool8_t m_TwoSide = false;
+	bool8_t m_DoubleSided = false;
 };
 
 class MaterialLit : public BaseMaterial<DefaultLitFS>

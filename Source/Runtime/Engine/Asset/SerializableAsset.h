@@ -99,5 +99,5 @@ private:
 	static std::shared_ptr<T> s_ThisAsset;
 };
 
-template <class T> std::shared_ptr<T> SerializableAsset<T>::s_ThisAsset;
+template<class T> std::shared_ptr<T> SerializableAsset<T>::s_ThisAsset;
 
