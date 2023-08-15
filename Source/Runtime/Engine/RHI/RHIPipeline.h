@@ -5,10 +5,10 @@
 struct RHIGraphicsPipelineCreateInfo : public RHIHashedObject
 {
 	ERHIPrimitiveTopology PrimitiveTopology = ERHIPrimitiveTopology::TriangleList;
-	RHIRasterizationStateDesc RasterizationState;
+	RHIRasterizationStateCreateInfo RasterizationState;
 	RHIBlendStateCreateInfo BlendState;
-	RHIDepthStencilStateDesc DepthStencilState;
-	RHIMultisampleStateDesc MultisampleState;
+	RHIDepthStencilStateCreateInfo DepthStencilState;
+	RHIMultisampleStateCreateInfo MultisampleState;
 
 	RHIInputLayout* InputLayout = nullptr;
 	RHIFrameBuffer* FrameBuffer = nullptr;
@@ -29,7 +29,7 @@ struct RHIGraphicsPipelineCreateInfo : public RHIHashedObject
 	}
 };
 
-struct RHIComputePipelineDesc : public RHIHashedObject
+struct RHIComputePipelineCreateInfo
 {
 };
 

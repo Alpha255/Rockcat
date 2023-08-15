@@ -165,7 +165,7 @@ enum class ESamplerReduction : uint8_t
 	Maximum
 };
 
-struct RHISamplerCreateInfo : public RHIHashedObject
+struct RHISamplerCreateInfo
 {
 	ERHIFilter MinMagFilter = ERHIFilter::Nearest;
 	ERHIFilter MipmapMode = ERHIFilter::Nearest;
@@ -180,28 +180,6 @@ struct RHISamplerCreateInfo : public RHIHashedObject
 	float32_t MipLODBias = 0.0f;
 	float32_t MinLOD = 0.0f;
 	float32_t MaxLOD = 0.0f;
-
-	size_t GetHash() const override final
-	{
-		if (HashValue == InvalidHash)
-		{
-			HashValue = ComputeHash(
-				MinMagFilter,
-				MipmapMode,
-				Reduction,
-				AddressModeU,
-				AddressModeV,
-				AddressModeW,
-				CompareOp,
-				BorderColor,
-				MaxAnisotropy,
-				MipLODBias,
-				MinLOD,
-				MaxLOD);
-		}
-
-		return HashValue;
-	}
 	
 	inline RHISamplerCreateInfo& SetMinMagFilter(ERHIFilter Filter) { MinMagFilter = Filter; return *this; }
 	inline RHISamplerCreateInfo& SetMipmapMode(ERHIFilter Mode) { MipmapMode = Mode; return *this; }

@@ -36,7 +36,7 @@ protected:
 	void* m_MappedMemory = nullptr;
 };
 
-struct RHIFrameBufferCreateInfo : public RHIHashedObject
+struct RHIFrameBufferCreateInfo
 {
 	std::vector<RHIImage*> ColorAttachments;
 	RHIImage* DepthStencilAttachment = nullptr;
@@ -79,31 +79,6 @@ struct RHIFrameBufferCreateInfo : public RHIHashedObject
 
 		DepthStencilAttachment = Attachment;
 		return *this;
-	}
-
-	size_t GetHash() const override final
-	{
-		if (HashValue == InvalidHash)
-		{
-			HashValue = ComputeHash(
-				Width,
-				Height,
-				Depth);
-
-			HashCombine(HashValue, ColorAttachments.size());
-
-			for (auto& Attachment : ColorAttachments)
-			{
-				assert(Attachment);
-				HashCombine(HashValue, Attachment->GetFormat());
-			}
-
-			if (DepthStencilAttachment)
-			{
-				HashCombine(HashValue, DepthStencilAttachment->GetFormat());
-			}
-		}
-		return HashValue;
 	}
 
 	uint32_t Width = 0u;

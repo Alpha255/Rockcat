@@ -164,7 +164,7 @@ struct RHIRenderTargetBlendDesc
 };
 
 /// Move AlphaToCoverage/IndependentBlend to MultisampleState
-struct RHIBlendStateCreateInfo : public RHIHashedObject
+struct RHIBlendStateCreateInfo
 {
 	bool8_t EnableLogicOp = false;
 	ERHILogicOp LogicOp = ERHILogicOp::No;
@@ -173,34 +173,9 @@ struct RHIBlendStateCreateInfo : public RHIHashedObject
 
 	inline RHIBlendStateCreateInfo& SetEnableLogicOp(bool8_t Enable) { EnableLogicOp = Enable; return *this; }
 	inline RHIBlendStateCreateInfo& SetLogicOp(ERHILogicOp Op) { LogicOp = Op; return *this; }
-
-	size_t GetHash() const override final
-	{
-		if (HashValue == InvalidHash)
-		{
-			HashValue = ComputeHash(EnableLogicOp, LogicOp);
-			for (uint32_t Index = 0u; Index < ERHILimitations::MaxRenderTargets; ++Index)
-			{
-				if (RenderTargetBlends[Index].Index != ERHILimitations::MaxRenderTargets)
-				{
-					HashCombine(HashValue, ComputeHash(
-						RenderTargetBlends[Index].Index,
-						RenderTargetBlends[Index].Enable,
-						RenderTargetBlends[Index].ColorMask,
-						RenderTargetBlends[Index].SrcColor,
-						RenderTargetBlends[Index].DstColor,
-						RenderTargetBlends[Index].ColorOp,
-						RenderTargetBlends[Index].SrcAlpha,
-						RenderTargetBlends[Index].DstAlpha,
-						RenderTargetBlends[Index].AlphaOp));
-				}
-			}
-		}
-		return HashValue;
-	}
 };
 
-struct RHIRasterizationStateDesc : public RHIHashedObject
+struct RHIRasterizationStateCreateInfo
 {
 	ERHIPolygonMode PolygonMode = ERHIPolygonMode::Solid;
 	ERHICullMode CullMode = ERHICullMode::BackFace;
@@ -212,31 +187,14 @@ struct RHIRasterizationStateDesc : public RHIHashedObject
 	float32_t DepthBiasSlope = 0.0f;  /// A scalar factor applied to a fragment¡¯s slope in depth bias calculations.
 	float32_t LineWidth = 1.0f;
 
-	inline RHIRasterizationStateDesc& SetPolygonMode(ERHIPolygonMode Mode) { PolygonMode = Mode; return *this; }
-	inline RHIRasterizationStateDesc& SetCullMode(ERHICullMode Mode) { CullMode = Mode; return *this; }
-	inline RHIRasterizationStateDesc& SetFrontFace(ERHIFrontFace Face) { FrontFace = Face; return *this; }
-	inline RHIRasterizationStateDesc& SetEnableDepthClamp(bool8_t Enable) { EnableDepthClamp = Enable; return *this; }
-	inline RHIRasterizationStateDesc& SetDepthBias(float32_t Bias) { DepthBias = Bias; return *this; }
-	inline RHIRasterizationStateDesc& SetDepthBiasClamp(float32_t BiasClamp) { DepthBiasClamp = BiasClamp; return *this; }
-	inline RHIRasterizationStateDesc& SetDepthBiasSlope(float32_t BiasSlope) { DepthBiasSlope = BiasSlope; return *this; }
-	inline RHIRasterizationStateDesc& SetLineWidth(float32_t Width) { LineWidth = Width; return *this; }
-
-	size_t GetHash() const override final
-	{
-		if (HashValue == InvalidHash)
-		{
-			HashValue = ComputeHash(
-				PolygonMode,
-				CullMode,
-				FrontFace,
-				EnableDepthClamp,
-				DepthBias,
-				DepthBiasClamp,
-				DepthBiasSlope,
-				LineWidth);
-		}
-		return HashValue;
-	}
+	inline RHIRasterizationStateCreateInfo& SetPolygonMode(ERHIPolygonMode Mode) { PolygonMode = Mode; return *this; }
+	inline RHIRasterizationStateCreateInfo& SetCullMode(ERHICullMode Mode) { CullMode = Mode; return *this; }
+	inline RHIRasterizationStateCreateInfo& SetFrontFace(ERHIFrontFace Face) { FrontFace = Face; return *this; }
+	inline RHIRasterizationStateCreateInfo& SetEnableDepthClamp(bool8_t Enable) { EnableDepthClamp = Enable; return *this; }
+	inline RHIRasterizationStateCreateInfo& SetDepthBias(float32_t Bias) { DepthBias = Bias; return *this; }
+	inline RHIRasterizationStateCreateInfo& SetDepthBiasClamp(float32_t BiasClamp) { DepthBiasClamp = BiasClamp; return *this; }
+	inline RHIRasterizationStateCreateInfo& SetDepthBiasSlope(float32_t BiasSlope) { DepthBiasSlope = BiasSlope; return *this; }
+	inline RHIRasterizationStateCreateInfo& SetLineWidth(float32_t Width) { LineWidth = Width; return *this; }
 };
 
 struct RHIStencilStateDesc
@@ -249,7 +207,7 @@ struct RHIStencilStateDesc
 	uint32_t Ref = 0u;
 };
 
-struct RHIDepthStencilStateDesc : public RHIHashedObject
+struct RHIDepthStencilStateCreateInfo
 {
 	bool8_t EnableDepth = true;
 	bool8_t EnableDepthWrite = false;
@@ -265,57 +223,27 @@ struct RHIDepthStencilStateDesc : public RHIHashedObject
 	RHIStencilStateDesc FrontFaceStencil;
 	RHIStencilStateDesc BackFaceStencil;
 
-	inline RHIDepthStencilStateDesc& SetEnableDepth(bool8_t Enable) { EnableDepth = Enable; return *this; }
-	inline RHIDepthStencilStateDesc& SetEnableDepthWrite(bool8_t Enable) { EnableDepthWrite = Enable; return *this; }
-	inline RHIDepthStencilStateDesc& SetEnableDepthBoundsTest(bool8_t Enable) { EnableDepthBoundsTest = Enable; return *this; }
-	inline RHIDepthStencilStateDesc& SetEnableStencil(bool8_t Enable) { EnableStencil = Enable; return *this; }
-	inline RHIDepthStencilStateDesc& SetDepthCompareFunc(ERHICompareFunc CompareFunc) { DepthCompareFunc = CompareFunc; return *this; }
-	inline RHIDepthStencilStateDesc& SetStencilReadMask(uint8_t Mask) { StencilReadMask = Mask; return *this; }
-	inline RHIDepthStencilStateDesc& SetStencilWriteMask(uint8_t Mask) { StencilWriteMask = Mask; return *this; }
-	inline RHIDepthStencilStateDesc& SetDepthBounds(const Math::Vector2& Bounds) { DepthBounds = Bounds; return *this; }
-	inline RHIDepthStencilStateDesc& SetStencilFailOpFrontFace(ERHIStencilOp Op) { FrontFaceStencil.FailOp = Op; return *this; }
-	inline RHIDepthStencilStateDesc& SetStencilPassOpFrontFace(ERHIStencilOp Op) { FrontFaceStencil.PassOp = Op; return *this; }
-	inline RHIDepthStencilStateDesc& SetDepthFailOpFrontFace(ERHIStencilOp Op) { FrontFaceStencil.DepthFailOp = Op; return *this; }
-	inline RHIDepthStencilStateDesc& SetCompareFuncFrontFace(ERHICompareFunc Func) { FrontFaceStencil.CompareFunc = Func; return *this; }
-	inline RHIDepthStencilStateDesc& SetRefFrontFace(uint32_t Ref) { FrontFaceStencil.Ref = Ref; return *this; }
-	inline RHIDepthStencilStateDesc& SetStencilFailOpBackFace(ERHIStencilOp Op) { BackFaceStencil.FailOp = Op; return *this; }
-	inline RHIDepthStencilStateDesc& SetStencilPassOpBackFace(ERHIStencilOp Op) { BackFaceStencil.PassOp = Op; return *this; }
-	inline RHIDepthStencilStateDesc& SetDepthFailOpBackFace(ERHIStencilOp Op) { BackFaceStencil.DepthFailOp = Op; return *this; }
-	inline RHIDepthStencilStateDesc& SetCompareFuncBackFace(ERHICompareFunc Func) { BackFaceStencil.CompareFunc = Func; return *this; }
-	inline RHIDepthStencilStateDesc& SetRefBackFace(uint32_t Ref) { BackFaceStencil.Ref = Ref; return *this; }
-
-	size_t GetHash() const override final
-	{
-		if (HashValue == InvalidHash)
-		{
-			HashValue = ComputeHash(
-				EnableDepth,
-				EnableDepthWrite,
-				EnableDepthBoundsTest,
-				EnableStencil,
-				DepthCompareFunc,
-				StencilReadMask,
-				StencilWriteMask);
-
-			HashCombine(HashValue, ComputeHash(
-				FrontFaceStencil.FailOp,
-				FrontFaceStencil.PassOp,
-				FrontFaceStencil.DepthFailOp,
-				FrontFaceStencil.CompareFunc,
-				FrontFaceStencil.Ref));
-
-			HashCombine(HashValue, ComputeHash(
-				BackFaceStencil.FailOp,
-				BackFaceStencil.PassOp,
-				BackFaceStencil.DepthFailOp,
-				BackFaceStencil.CompareFunc,
-				BackFaceStencil.Ref));
-		}
-		return HashValue;
-	}
+	inline RHIDepthStencilStateCreateInfo& SetEnableDepth(bool8_t Enable) { EnableDepth = Enable; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetEnableDepthWrite(bool8_t Enable) { EnableDepthWrite = Enable; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetEnableDepthBoundsTest(bool8_t Enable) { EnableDepthBoundsTest = Enable; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetEnableStencil(bool8_t Enable) { EnableStencil = Enable; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetDepthCompareFunc(ERHICompareFunc CompareFunc) { DepthCompareFunc = CompareFunc; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetStencilReadMask(uint8_t Mask) { StencilReadMask = Mask; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetStencilWriteMask(uint8_t Mask) { StencilWriteMask = Mask; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetDepthBounds(const Math::Vector2& Bounds) { DepthBounds = Bounds; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetStencilFailOpFrontFace(ERHIStencilOp Op) { FrontFaceStencil.FailOp = Op; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetStencilPassOpFrontFace(ERHIStencilOp Op) { FrontFaceStencil.PassOp = Op; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetDepthFailOpFrontFace(ERHIStencilOp Op) { FrontFaceStencil.DepthFailOp = Op; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetCompareFuncFrontFace(ERHICompareFunc Func) { FrontFaceStencil.CompareFunc = Func; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetRefFrontFace(uint32_t Ref) { FrontFaceStencil.Ref = Ref; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetStencilFailOpBackFace(ERHIStencilOp Op) { BackFaceStencil.FailOp = Op; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetStencilPassOpBackFace(ERHIStencilOp Op) { BackFaceStencil.PassOp = Op; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetDepthFailOpBackFace(ERHIStencilOp Op) { BackFaceStencil.DepthFailOp = Op; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetCompareFuncBackFace(ERHICompareFunc Func) { BackFaceStencil.CompareFunc = Func; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetRefBackFace(uint32_t Ref) { BackFaceStencil.Ref = Ref; return *this; }
 };
 
-struct RHIMultisampleStateDesc : public RHIHashedObject
+struct RHIMultisampleStateCreateInfo
 {
 	ERHISampleCount SampleCount = ERHISampleCount::Sample_1_Bit;
 	bool8_t EnableSampleShading = false;
@@ -325,27 +253,12 @@ struct RHIMultisampleStateDesc : public RHIHashedObject
 	float32_t MinSampleShading = 0.0f;
 	uint32_t* SampleMask = nullptr; /// ??? 
 
-	inline RHIMultisampleStateDesc& SetSampleCount(ERHISampleCount Count) { SampleCount = Count; return *this; }
-	inline RHIMultisampleStateDesc& SetEnableSampleShading(bool8_t Enable) { EnableSampleShading = Enable; return *this; }
-	inline RHIMultisampleStateDesc& SetEnableAlphaToCoverage(bool8_t Enable) { EnableAlphaToCoverage = Enable; return *this; }
-	inline RHIMultisampleStateDesc& SetEnableAlphaToOne(bool8_t Enable) { EnableAlphaToOne = Enable; return *this; }
-	inline RHIMultisampleStateDesc& SetMinSampleShading(float32_t SampleShading) { MinSampleShading = SampleShading; return *this; }
-	inline RHIMultisampleStateDesc& SetSampleMask(uint32_t* Mask) { SampleMask = Mask; return *this; }
-
-	size_t GetHash() const override final
-	{
-		if (HashValue == InvalidHash)
-		{
-			HashValue = ComputeHash(
-				SampleCount,
-				EnableSampleShading,
-				EnableAlphaToCoverage,
-				EnableAlphaToOne,
-				MinSampleShading,
-				SampleMask);
-		}
-		return HashValue;
-	}
+	inline RHIMultisampleStateCreateInfo& SetSampleCount(ERHISampleCount Count) { SampleCount = Count; return *this; }
+	inline RHIMultisampleStateCreateInfo& SetEnableSampleShading(bool8_t Enable) { EnableSampleShading = Enable; return *this; }
+	inline RHIMultisampleStateCreateInfo& SetEnableAlphaToCoverage(bool8_t Enable) { EnableAlphaToCoverage = Enable; return *this; }
+	inline RHIMultisampleStateCreateInfo& SetEnableAlphaToOne(bool8_t Enable) { EnableAlphaToOne = Enable; return *this; }
+	inline RHIMultisampleStateCreateInfo& SetMinSampleShading(float32_t SampleShading) { MinSampleShading = SampleShading; return *this; }
+	inline RHIMultisampleStateCreateInfo& SetSampleMask(uint32_t* Mask) { SampleMask = Mask; return *this; }
 };
 
 struct RHIViewport
@@ -442,7 +355,7 @@ struct RHIAttachmentDesc
 	ERHIResourceState FinalState = ERHIResourceState::Unknown;
 };
 
-struct RHISubPassDependency
+struct RHISubpassDependency
 {
 	uint32_t SrcSubpassIndex = ~0u;  /// VK_SUBPASS_EXTERNAL
 	uint32_t DstSubpassIndex = ~0u;
@@ -452,7 +365,7 @@ struct RHISubPassDependency
 	//GfxFlags DstAccessFlags = 0u;
 };
 
-struct RHISubPassDesc
+struct RHISubpassDesc
 {
 	std::vector<RHIAttachmentReference> InputAttachments;
 	std::vector<RHIAttachmentReference> ColorAttachments;
@@ -461,11 +374,11 @@ struct RHISubPassDesc
 	RHIAttachmentReference DepthStencilAttachment;
 };
 
-struct RHIRenderPassDesc : public RHIHashedObject
+struct RHIRenderPassCreateInfo : public RHIHashedObject
 {
 	std::vector<RHIAttachmentDesc> AttachmentDescs;
-	std::vector<RHISubPassDesc> SubPasses;
-	std::vector<RHISubPassDependency> SubPassDependencies;
+	std::vector<RHISubpassDesc> SubPasses;
+	std::vector<RHISubpassDependency> SubPassDependencies;
 
 	size_t GetHash() const override final
 	{

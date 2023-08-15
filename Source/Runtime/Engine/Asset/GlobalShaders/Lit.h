@@ -38,8 +38,15 @@ public:
 		FS::ShaderVariables::AddShaderVariables(*this, *this);
 	}
 
+	MaterialID GetID() const { return m_ID; }
+
 	const char8_t* GetName() const { return m_Name.c_str(); }
-	void SetName(const char8_t* Name) { m_Name = Name; }
+	void SetName(const char8_t* Name) 
+	{ 
+		assert(Name);
+		m_Name = Name; 
+		SetPath(Asset::GetPrefabricateAssetPath(Name, Asset::EPrefabricateAssetType::MaterialAsset));
+	}
 
 	ERHICullMode GetCullMode() const { return m_CullMode; }
 	void SetCullMode(ERHICullMode CullMode) { m_CullMode = CullMode; }
@@ -47,7 +54,7 @@ public:
 	bool8_t IsDoubleSided() const { return m_DoubleSided; }
 	void SetDoubleSided(bool8_t DoubleSided) { m_DoubleSided = DoubleSided; }
 
-	void CreateInstance();
+	void CreateInstance(const char8_t* InstanceName);
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -56,7 +63,8 @@ public:
 			CEREAL_BASE(MaterialAsset),
 			CEREAL_NVP(m_Name),
 			CEREAL_NVP(m_CullMode),
-			CEREAL_NVP(m_DoubleSided)
+			CEREAL_NVP(m_DoubleSided),
+			CEREAL_NVP(m_ID)
 		);
 	}
 protected:
@@ -71,6 +79,7 @@ private:
 	std::string m_Name;
 	ERHICullMode m_CullMode = ERHICullMode::BackFace;
 	bool8_t m_DoubleSided = false;
+	MaterialID m_ID;
 };
 
 class MaterialLit : public BaseMaterial<DefaultLitFS>
@@ -84,7 +93,7 @@ public:
 	EShadingMode GetShadingMode() const { return m_ShadingMode; }
 	void SetShadingMode(EShadingMode ShadingMode) { m_ShadingMode = ShadingMode; }
 
-	void TrySave()
+	~MaterialLit()
 	{
 		SerializeProperties();
 		Save<MaterialLit>(true);

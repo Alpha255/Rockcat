@@ -181,6 +181,9 @@ protected:
 	virtual void OnSaved() { if (m_Callbacks.SavedCallback) { m_Callbacks.SavedCallback(*this); } }
 	virtual void OnUnloaded() { if (m_Callbacks.UnloadedCallback) { m_Callbacks.UnloadedCallback(*this); } }
 
+	template<class StringType>
+	void SetPath(StringType&& Path) { m_Path = std::filesystem::path(std::forward<StringType>(Path)); }
+
 	static std::time_t GetFileLastWriteTime(const std::filesystem::path& Path)
 	{
 		if (std::filesystem::exists(Path))
