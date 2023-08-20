@@ -27,10 +27,9 @@ public:
 	}
 protected:
 	void LoadAssimpScenes();
-	void RebuildSceneWhenReady();
+	void RebuildSceneWhenReady(std::vector<const class AssimpSceneAsset*>& AssimpScenes);
 private:
 	std::vector<std::string> m_AssimpScenePaths;
-	std::vector<const class AssimpSceneAsset*> m_AssimpScenes;
 	std::shared_ptr<SceneGraph> m_Graph;
 };
 

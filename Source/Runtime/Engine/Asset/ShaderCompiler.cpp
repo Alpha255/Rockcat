@@ -62,7 +62,7 @@ std::shared_ptr<RHIShaderCreateInfo> DxcShaderCompiler::Compile(
 	OtherArgs.push_back(IncludeDirectoryArg.c_str());
 
 	DxcCompilerArgs CompilerArgs;
-	m_Utils->BuildArguments(
+	VERIFY(m_Utils->BuildArguments(
 		SourceName ? StringUtils::ToWide(SourceName).c_str() : nullptr,
 		StringUtils::ToWide(ShaderEntryName).c_str(),
 		StringUtils::ToWide(GetShaderModelName(ShaderStage, true)).c_str(),
@@ -70,7 +70,7 @@ std::shared_ptr<RHIShaderCreateInfo> DxcShaderCompiler::Compile(
 		static_cast<uint32_t>(OtherArgs.size()),
 		DxcDefines.data(),
 		static_cast<uint32_t>(DxcDefines.size()),
-		CompilerArgs.Reference());
+		CompilerArgs.Reference()) == S_OK);
 
 	DxcBuffer Buffer
 	{

@@ -13,7 +13,7 @@ public:
 	~AssetDatabase();
 
 	template<class TAsset, class StringType>
-	TAsset* FindAsset(StringType&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks)
+	TAsset* FindOrLoadAsset(StringType&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks)
 	{
 		auto GenericAssetPath = GetGenericAssetPath(std::forward<StringType>(AssetPath));
 		auto AssetIt = m_Assets.find(GenericAssetPath);

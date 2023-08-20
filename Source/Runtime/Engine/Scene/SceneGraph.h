@@ -4,7 +4,10 @@
 
 struct SceneGraph
 {
-	DECLARE_OBJECT_ID(Node, uint32_t)
+	DECLARE_OBJECT_ID(Node, uint32_t);
+
+	using MeshID = uint32_t;
+	using TransformID = uint32_t;
 
 	class Node
 	{

@@ -19,25 +19,10 @@ public:
 	{
 	}
 
-	inline Vector3 Min() const
-	{
-		return m_Min;
-	}
-
-	inline Vector3 Max() const
-	{
-		return m_Max;
-	}
-
-	inline Vector3 Center() const
-	{
-		return (m_Max + m_Min) * 0.5f;
-	}
-
-	inline Vector3 Extents() const
-	{
-		return (m_Max - m_Min) * 0.5f;
-	}
+	inline Vector3 GetMin() const { return m_Min; }
+	inline Vector3 GetMax() const { return m_Max; }
+	inline Vector3 GetCenter() const { return (m_Max + m_Min) * 0.5f; }
+	inline Vector3 GetExtents() const { return (m_Max - m_Min) * 0.5f; }
 
 	inline static AABB CreateFromVertices(const Vector3* Data, uint32_t Count)
 	{

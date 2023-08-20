@@ -114,8 +114,7 @@ protected:
 	std::unordered_map<std::string, MaterialProperty> m_Properties;
 };
 
-using MaterialIDAllocator = ObjectIDAllocator<MaterialAsset, uint32_t>;
-using MaterialID = MaterialIDAllocator::TID;
+using MaterialID = uint32_t;
 
 #if 0
 template<class ShadingModeFS>

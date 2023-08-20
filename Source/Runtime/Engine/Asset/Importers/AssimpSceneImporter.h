@@ -37,17 +37,17 @@ public:
 			aiProcess_FlipWindingOrder |
 			aiProcess_GenBoundingBoxes);
 
-		Assimp::Importer AssimpNativeImporter;
+		Assimp::Importer AssimpImporter;
 
 #if _DEBUG
 		Assimp::DefaultLogger::set(new AssimpLogger());
-		AssimpNativeImporter.SetProgressHandler(new AssimpProgressHandler(Scene.GetPath()));
+		AssimpImporter.SetProgressHandler(new AssimpProgressHandler(Scene.GetPath()));
 #endif
 		auto OldWorkingDirectory = PlatformMisc::GetCurrentWorkingDirectory();
 		auto CurrentWorkingDirectory = (OldWorkingDirectory / Scene.GetPath()).parent_path();
 
 		PlatformMisc::SetCurrentWorkingDirectory(CurrentWorkingDirectory);
-		auto AssimpScene = AssimpNativeImporter.ReadFileFromMemory(Scene.GetRawData().Data.get(), Scene.GetRawData().SizeInBytes, PostprocessFlags);
+		auto AssimpScene = AssimpImporter.ReadFileFromMemory(Scene.GetRawData().Data.get(), Scene.GetRawData().SizeInBytes, PostprocessFlags);
 		PlatformMisc::SetCurrentWorkingDirectory(OldWorkingDirectory);
 
 		if (AssimpScene && AssimpScene->HasMeshes())
@@ -56,11 +56,36 @@ public:
 		}
 		else
 		{
-			auto ErrorInfo = AssimpNativeImporter.GetErrorString();
-			LOG_ERROR("AssimpSceneImporter:: Failed to load assimp scene \"{}\" : {}", Scene.GetPath().generic_string(), std::strlen(ErrorInfo) > 0u ? ErrorInfo : "Unknown exceptions");
+			LOG_ERROR("AssimpSceneImporter:: Failed to load assimp scene \"{}\" : {}", Scene.GetPath().generic_string(), AssimpImporter.GetErrorString());
 		}
 
 		return false;
+	}
+
+	void ProcessNode(const aiScene* Scene, const aiNode* Node)
+	{
+		assert(Scene && Node);
+
+		for (uint32_t MeshIndex = 0u; MeshIndex < Node->mNumMeshes; ++MeshIndex)
+		{
+			auto SubMesh = ProcessMesh(Scene, Scene->mMeshes[Node->mMeshes[MeshIndex]]);
+
+			Model->Object->m_Meshes.emplace_back(MeshInstance(SubMesh.first, SubMesh.second));
+			Model->Object->VertexCount += SubMesh.first->VertexCount;
+			Model->Object->FaceCount += SubMesh.first->FaceCount;
+			Model->Object->IndexCount += SubMesh.first->IndexCount;
+
+			auto BoundingBox = Model->Object->BoundingBox();
+			auto SubBoundingBox = SubMesh.first->BoundingBox();
+			auto Min = Math::Min(BoundingBox.Min(), SubBoundingBox.Min());
+			auto Max = Math::Max(BoundingBox.Max(), SubBoundingBox.Max());
+			Model->Object->AxisAlignedBoundingBox = AABB(Min, Max);
+		}
+
+		for (uint32_t Index = 0u; Index < Node->mNumChildren; ++Index)
+		{
+			ProcessNode(Scene, Node->mChildren[Index]);
+		}
 	}
 protected:
 private:
@@ -107,31 +132,6 @@ private:
 };
 
 #if 0
-void AssimpImporter::ProcessNode(const aiScene* AssimpScene, const aiNode* AssimpNode, ModelAsset* Model)
-{
-	assert(AssimpScene && AssimpNode && Model);
-
-	for (uint32_t MeshIndex = 0u; MeshIndex < AssimpNode->mNumMeshes; ++MeshIndex)
-	{
-		auto SubMesh = ProcessMesh(AssimpScene, AssimpScene->mMeshes[AssimpNode->mMeshes[MeshIndex]], Model);
-
-		Model->Object->m_Meshes.emplace_back(MeshInstance(SubMesh.first, SubMesh.second));
-		Model->Object->VertexCount += SubMesh.first->VertexCount;
-		Model->Object->FaceCount += SubMesh.first->FaceCount;
-		Model->Object->IndexCount += SubMesh.first->IndexCount;
-
-		auto BoundingBox = Model->Object->BoundingBox();
-		auto SubBoundingBox = SubMesh.first->BoundingBox();
-		auto Min = Math::Min(BoundingBox.Min(), SubBoundingBox.Min());
-		auto Max = Math::Max(BoundingBox.Max(), SubBoundingBox.Max());
-		Model->Object->AxisAlignedBoundingBox = AABB(Min, Max);
-	}
-
-	for (uint32_t Index = 0u; Index < AssimpNode->mNumChildren; ++Index)
-	{
-		ProcessNode(AssimpScene, AssimpNode->mChildren[Index], Model);
-	}
-}
 
 std::shared_ptr<Material> AssimpImporter::ProcessMaterial(const aiScene* AssimpScene, const aiMesh* AssimpMesh, ModelAsset* Model)
 {
