@@ -1,6 +1,6 @@
 #include "RHI/Vulkan/VulkanDescriptor.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "Runtime/Engine/Engine.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 
 static constexpr uint32_t DescriptorPoolLimits[] =
 {

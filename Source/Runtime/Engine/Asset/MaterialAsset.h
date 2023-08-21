@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Runtime/Core/Math/Matrix.h"
 #include "Runtime/Engine/Asset/SerializableAsset.h"
 #include "Runtime/Engine/RHI/RHIShader.h"
 #include "Runtime/Engine/RHI/RHIImage.h"
@@ -81,12 +82,12 @@ class MaterialAsset : public SerializableAsset<MaterialAsset>
 public:
 	template<class StringType>
 	MaterialAsset(StringType&& MaterialAssetName)
-		: ParentClass(Asset::GetPrefabricateAssetPath(MaterialAssetName, Asset::EPrefabricateAssetType::MaterialAsset))
+		: ParentClass(Asset::GetPrefabricateAssetPath(MaterialAssetName, Asset::EPrefabAssetType::Material))
 	{
 	}
 	virtual ~MaterialAsset() = default;
 
-	const char8_t* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabricateAssetType::MaterialAsset); }
+	const char8_t* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::Material); }
 
 	template<class Archive>
 	void serialize(Archive& Ar)

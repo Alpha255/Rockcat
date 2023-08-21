@@ -1,10 +1,9 @@
-#include "Runtime/Engine/Modules/RenderModule.h"
-#include "Runtime/Engine/Modules/SpdLogModule.h"
-#include "Runtime/Engine/Engine.h"
+#include "Runtime/Engine/Modules/RenderService.h"
+#include "Runtime/Engine/Modules/SpdLogService.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanDevice.h"
 
-void RenderModule::InitializeRHI(const GraphicsSettings& GfxSettings)
+void RenderService::InitializeRHI(const GraphicsSettings& GfxSettings)
 {
 	assert(GfxSettings.RenderHardwareInterface < ERenderHardwareInterface::Null);
 
@@ -28,7 +27,7 @@ void RenderModule::InitializeRHI(const GraphicsSettings& GfxSettings)
 	}
 }
 
-void RenderModule::Finalize()
+void RenderService::OnShutdown()
 {
 	for (auto& RHI : m_RHIs)
 	{

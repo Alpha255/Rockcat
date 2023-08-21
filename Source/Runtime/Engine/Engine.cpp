@@ -3,28 +3,13 @@
 #include "Runtime/Engine/Application/BaseApplication.h"
 #include "Runtime/Engine/Application/ApplicationConfigurations.h"
 #include "Runtime/Engine/Profile/CpuTimer.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Runtime/Engine/Services/RenderService.h"
 
 Engine& Engine::Get()
 {
 	static Engine s_Engine;
 	return s_Engine;
-}
-
-Engine::Engine()
-{
-	PreInitializeModules();
-}
-
-void Engine::PreInitializeModules()
-{
-	m_SpdLogModule = std::make_unique<SpdLogModule>();
-}
-
-void Engine::PostInitializeModules()
-{
-	m_TaskFlowModule = std::make_unique<TaskFlowModule>();
-	m_RenderModule = std::make_unique<RenderModule>();
-	m_AssetDatabase = std::make_unique<AssetDatabase>();
 }
 
 void Engine::Run()
@@ -66,8 +51,6 @@ void Engine::Run()
 
 bool8_t Engine::Initialize()
 {
-	PostInitializeModules();
-
 	auto AssetsDirectory = PlatformMisc::GetCurrentModuleDirectory().parent_path() / "Assets";
 	if (!std::filesystem::exists(AssetsDirectory))
 	{
@@ -82,7 +65,7 @@ bool8_t Engine::Initialize()
 	{
 		if (Application->GetConfigurations().IsEnableRendering())
 		{
-			m_RenderModule->InitializeRHI(Application->GetConfigurations().GetGraphicsSettings());
+			RenderService::Get().InitializeRHI(Application->GetConfigurations().GetGraphicsSettings());
 		}
 	}
 
@@ -91,5 +74,5 @@ bool8_t Engine::Initialize()
 
 void Engine::Finalize()
 {
-	m_RenderModule->Finalize();
+	RenderService::Get().OnShutdown();
 }

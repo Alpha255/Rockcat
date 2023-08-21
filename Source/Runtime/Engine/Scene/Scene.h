@@ -2,30 +2,11 @@
 
 #include "Runtime/Core/Math/Transform.h"
 #include "Runtime/Engine/Asset/SceneAsset.h"
-#include "Runtime/Engine/Scene/Components/StaticMesh.h"
 
-class Scene : public SceneGraphAsset
+class Scene : public SceneAsset
 {
 public:
-	using SceneGraphAsset::SceneGraphAsset;
-
-	struct SceneData
-	{
-		std::vector<StaticMesh> StaticMeshes;
-		std::vector<Math::Transform> Transforms;
-	};
-
-	template<class StringType>
-	static std::shared_ptr<Scene> Load(StringType&& SceneGraphAssetPath) 
-	{ 
-		auto Ret = Cast<Scene>(SceneGraphAsset::Load(std::forward<StringType>(SceneGraphAssetPath)));
-		Ret->LoadAssimpScenes();
-		return Ret;
-	}
-
-	void Merge(const Scene& OtherScene);
-
-	void Merge(const SceneGraph& OtherSceneGraph);
+	using SceneAsset::SceneAsset;
 
 	const SceneData& GetSceneData() const { return m_Data; }
 
@@ -33,8 +14,8 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(SceneGraphAsset);
-		)
+			CEREAL_BASE(SceneAsset)
+		);
 	}
 protected:
 	friend class SceneBuilder;

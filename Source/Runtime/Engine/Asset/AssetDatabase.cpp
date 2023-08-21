@@ -1,4 +1,6 @@
 #include "Runtime/Engine/Asset/AssetDatabase.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Runtime/Engine/Services/TaskFlowService.h"
 #include "Runtime/Engine/Asset/Importers/AssimpSceneImporter.h"
 #include "Runtime/Engine/Asset/Importers/DDSImageImporter.h"
 #include "Runtime/Engine/Asset/Importers/StbImageImporter.h"
@@ -26,9 +28,7 @@ public:
 
 		m_Asset->ReadRawData(m_AssetType->ContentsType);
 
-		auto Succeed = m_AssetImporter.Reimport(*m_Asset);
-
-		if (Succeed)
+		if (m_AssetImporter.Reimport(*m_Asset))
 		{
 			m_Asset->SetStatus(Asset::EAssetStatus::Ready);
 			m_Asset->OnReady();
@@ -44,6 +44,12 @@ private:
 	std::shared_ptr<Asset> m_Asset;
 	const AssetType* m_AssetType;
 };
+
+AssetDatabase& AssetDatabase::Get()
+{
+	static AssetDatabase s_AssetDatabase;
+	return s_AssetDatabase;
+}
 
 AssetDatabase::AssetDatabase()
 	: m_AsyncLoadAssets(false)

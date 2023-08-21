@@ -247,8 +247,8 @@ void Camera::Tick(float32_t ElapsedSeconds)
 
 void Camera::FocusToBounds(const Math::AABB& Bounds)
 {
-	auto Center = Bounds.Center();
-	auto Extents = Bounds.Extents();
+	auto Center = Bounds.GetCenter();
+	auto Extents = Bounds.GetExtents();
 	auto Expand = Extents * 1.5f;
 
 	auto Eye = Math::Vector3(Center.x, Center.y + Expand.y, Center.z + Expand.z);

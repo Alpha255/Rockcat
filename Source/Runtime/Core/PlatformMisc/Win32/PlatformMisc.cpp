@@ -1,5 +1,5 @@
 #include "Runtime/Core/PlatformMisc.h"
-#include "Runtime/Engine/Engine.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 
 #if defined(PLATFORM_WIN32)
 

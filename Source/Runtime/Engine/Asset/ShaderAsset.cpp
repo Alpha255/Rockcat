@@ -1,6 +1,5 @@
 #include "Runtime/Engine/Asset/ShaderAsset.h"
 #include "Runtime/Engine/Asset/ShaderCompiler.h"
-#include "Runtime/Engine/Engine.h"
 #include "Runtime/Engine/Async/Task.h"
 
 std::string ShaderCache::GetShaderCachePath(const char8_t* ShaderName)
@@ -10,7 +9,7 @@ std::string ShaderCache::GetShaderCachePath(const char8_t* ShaderName)
 		ASSET_PATH_SHADERCACHE,
 		ShaderName,
 		"Vulkan",
-		Asset::GetPrefabricateAssetExtension(Asset::EPrefabricateAssetType::ShaderCacheAsset));
+		Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::ShaderCache));
 }
 
 class ShaderCompileTask : public Task

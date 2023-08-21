@@ -1,6 +1,6 @@
 #include "RHI/Vulkan/VulkanInstance.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
-#include "Runtime/Engine/Engine.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 
 #if !USE_DYNAMIC_VK_LOADER
 PFN_vkCreateDebugUtilsMessengerEXT PFN_CreateDebugUtilsMessengerEXT;

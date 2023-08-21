@@ -273,16 +273,3 @@ void Scene::Traverse(const SceneNode::VisitFunc& Visit) const
 
 #include "Runtime/Engine/Scene/Scene.h"
 #include "Runtime/Engine/Scene/SceneBuilder.h"
-#include "Runtime/Engine/Engine.h"
-
-void Scene::Merge(const Scene& OtherScene)
-{
-	SceneBuilder Builder;
-	Builder.Merge(*this, OtherScene);
-}
-
-void Scene::Merge(const SceneGraph& OtherSceneGraph)
-{
-	SceneBuilder Builder;
-	Builder.MergeSceneGraph(*GetSceneGraph(), OtherSceneGraph);
-}

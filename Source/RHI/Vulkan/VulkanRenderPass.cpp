@@ -145,7 +145,7 @@ VulkanRenderPass::~VulkanRenderPass()
 
 #include "RHI/Vulkan/VulkanRenderPass.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "Runtime/Engine/Engine.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 
 VulkanFramebuffer::VulkanFramebuffer(const VulkanDevice& Device, const RHIFrameBufferCreateInfo& CreateInfo)
 	: VkHwResource(Device)

@@ -1,6 +1,7 @@
 #include "RHI/Vulkan/VulkanBuffer.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "Runtime/Engine/Engine.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Runtime/Engine/RHI/RHIInterface.h"
 
 VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo& CreateInfo)
 	: VkHwResource(Device)

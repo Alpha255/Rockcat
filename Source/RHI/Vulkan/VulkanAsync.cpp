@@ -2,7 +2,7 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
-#include "Runtime/Engine/Engine.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 
 VulkanFence::VulkanFence(const VulkanDevice& Device, bool8_t Signaled)
 	: VkHwResource(Device)

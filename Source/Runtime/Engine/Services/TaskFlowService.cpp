@@ -1,8 +1,8 @@
-#include "Runtime/Engine/Modules/TaskFlowModule.h"
+#include "Runtime/Engine/Services/TaskFlowService.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 #include "Runtime/Core/PlatformMisc.h"
-#include "Runtime/Engine/Engine.h"
 
-TaskFlowModule::TaskFlowModule()
+TaskFlowService::TaskFlowService()
 	: m_UseHyperThreading(true)
 {
 	auto ThreadsCount = PlatformMisc::GetHardwareConcurrencyThreadsCount(m_UseHyperThreading);

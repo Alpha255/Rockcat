@@ -2,7 +2,7 @@
 
 #include "Runtime/Engine/RHI/RHIBuffer.h"
 
-struct RHIGraphicsPipelineCreateInfo : public RHIHashedObject
+struct RHIGraphicsPipelineCreateInfo
 {
 	ERHIPrimitiveTopology PrimitiveTopology = ERHIPrimitiveTopology::TriangleList;
 	RHIRasterizationStateCreateInfo RasterizationState;
@@ -12,21 +12,6 @@ struct RHIGraphicsPipelineCreateInfo : public RHIHashedObject
 
 	RHIInputLayout* InputLayout = nullptr;
 	RHIFrameBuffer* FrameBuffer = nullptr;
-
-	size_t GetHash() const override final
-	{
-		if (HashValue == InvalidHash)
-		{
-			HashValue = ComputeHash(PrimitiveTopology, InputLayout);
-
-			HashCombine(HashValue, FrameBuffer);
-			HashCombine(HashValue, RasterizationState.GetHash());
-			HashCombine(HashValue, BlendState.GetHash());
-			HashCombine(HashValue, DepthStencilState.GetHash());
-			HashCombine(HashValue, MultisampleState.GetHash());
-		}
-		return HashValue;
-	}
 };
 
 struct RHIComputePipelineCreateInfo

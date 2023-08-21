@@ -58,12 +58,12 @@ public:
 		Error
 	};
 
-	enum class EPrefabricateAssetType : uint8_t
+	enum class EPrefabAssetType : uint8_t
 	{
-		ConfigAsset,
-		SceneAsset,
-		ShaderCacheAsset,
-		MaterialAsset
+		Config,
+		Scene,
+		ShaderCache,
+		Material
 	};
 
 	using AssetPreLoadCallback = std::function<void(Asset&)>;
@@ -111,33 +111,33 @@ public:
 		return m_Dirty;
 	}
 
-	static const char8_t* GetPrefabricateAssetExtension(EPrefabricateAssetType Type)
+	static const char8_t* GetPrefabricateAssetExtension(EPrefabAssetType Type)
 	{
 		switch (Type)
 		{
-		case EPrefabricateAssetType::ConfigAsset: return ".json";
-		case EPrefabricateAssetType::SceneAsset: return ".scene";
-		case EPrefabricateAssetType::ShaderCacheAsset: return ".shadercache";
-		case EPrefabricateAssetType::MaterialAsset: return ".material";
+		case EPrefabAssetType::Config: return ".json";
+		case EPrefabAssetType::Scene: return ".scene";
+		case EPrefabAssetType::ShaderCache: return ".shadercache";
+		case EPrefabAssetType::Material: return ".material";
 		default: return ".json";
 		}
 	}
 
 	template<class StringType>
-	static std::filesystem::path GetPrefabricateAssetPath(StringType&& AssetName, EPrefabricateAssetType Type)
+	static std::filesystem::path GetPrefabricateAssetPath(StringType&& AssetName, EPrefabAssetType Type)
 	{
 		auto Ret = std::filesystem::path();
 		switch (Type)
 		{
-		case EPrefabricateAssetType::ConfigAsset:
+		case EPrefabAssetType::Config:
 			break;
-		case EPrefabricateAssetType::SceneAsset:
+		case EPrefabAssetType::Scene:
 			Ret += ASSET_PATH_SCENES;
 			break;
-		case EPrefabricateAssetType::ShaderCacheAsset:
+		case EPrefabAssetType::ShaderCache:
 			Ret += ASSET_PATH_SHADERCACHE;
 			break;
-		case EPrefabricateAssetType::MaterialAsset:
+		case EPrefabAssetType::Material:
 			Ret += ASSET_PATH_MATERIALS;
 			break;
 		default:
@@ -177,7 +177,7 @@ protected:
 	virtual void OnPreLoad() { if (m_Callbacks.PreLoadCallback) { m_Callbacks.PreLoadCallback(*this); } }
 	virtual void OnReady() { if (m_Callbacks.ReadyCallback) { m_Callbacks.ReadyCallback(*this); } }
 	virtual void OnLoadFailed() { if (m_Callbacks.LoadFailedCallback) { m_Callbacks.LoadFailedCallback(*this); } }
-	virtual void OnCanceledLoad() { if (m_Callbacks.CanceledCallback) { m_Callbacks.CanceledCallback(*this); } }
+	virtual void OnLoadCanceled() { if (m_Callbacks.CanceledCallback) { m_Callbacks.CanceledCallback(*this); } }
 	virtual void OnSaved() { if (m_Callbacks.SavedCallback) { m_Callbacks.SavedCallback(*this); } }
 	virtual void OnUnloaded() { if (m_Callbacks.UnloadedCallback) { m_Callbacks.UnloadedCallback(*this); } }
 

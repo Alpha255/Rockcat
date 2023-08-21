@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Runtime/Engine/Asset/Asset.h"
-#include "Runtime/Engine/Engine.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 #include "Runtime/Core/PlatformMisc.h"
 #include "Runtime/Core/Cereal.h"
 
@@ -15,7 +15,7 @@ public:
 	using ParentClass = SerializableAsset<T>;
 
 	template<class Type = T, class StringType, class... TArgs>
-	static std::shared_ptr<T> Load(StringType&& Path, TArgs&&... Args)
+	static std::shared_ptr<Type> Load(StringType&& Path, TArgs&&... Args)
 	{
 		static std::shared_ptr<Type> s_Asset;
 		if (!s_Asset)
@@ -86,7 +86,7 @@ public:
 		}
 	}
 
-	virtual const char8_t* GetExtension() const { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabricateAssetType::ConfigAsset); }
+	virtual const char8_t* GetExtension() const { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::Config); }
 
 	virtual void PreLoad() {}
 	virtual void PostLoad() {}

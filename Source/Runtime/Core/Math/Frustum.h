@@ -69,8 +69,8 @@ public:
 		for (uint32_t Index = EPlane::Near; Index < EPlane::Counts; ++Index)
 		{
 			Vector3 Normal = m_Planes[Index].Normal();
-			Vector3 Min = Box.Min();
-			Vector3 Max = Box.Max();
+			Vector3 Min = Box.GetMin();
+			Vector3 Max = Box.GetMax();
 
 			float32_t X = Normal.x > 0 ? Min.x : Max.x;
 			float32_t Y = Normal.y > 0 ? Min.y : Max.y;

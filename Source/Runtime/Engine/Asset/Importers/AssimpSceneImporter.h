@@ -66,6 +66,7 @@ public:
 	{
 		assert(Scene && Node);
 
+#if 0
 		for (uint32_t MeshIndex = 0u; MeshIndex < Node->mNumMeshes; ++MeshIndex)
 		{
 			auto SubMesh = ProcessMesh(Scene, Scene->mMeshes[Node->mMeshes[MeshIndex]]);
@@ -81,6 +82,7 @@ public:
 			auto Max = Math::Max(BoundingBox.Max(), SubBoundingBox.Max());
 			Model->Object->AxisAlignedBoundingBox = AABB(Min, Max);
 		}
+#endif
 
 		for (uint32_t Index = 0u; Index < Node->mNumChildren; ++Index)
 		{

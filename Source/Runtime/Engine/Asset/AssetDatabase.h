@@ -12,6 +12,8 @@ public:
 
 	~AssetDatabase();
 
+	static AssetDatabase& Get();
+
 	template<class TAsset, class StringType>
 	TAsset* FindOrLoadAsset(StringType&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks)
 	{

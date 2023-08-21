@@ -1,19 +1,27 @@
 #pragma once
 
+#include "Runtime/Core/Math/Transform.h"
 #include "Runtime/Engine/Asset/SerializableAsset.h"
 #include "Runtime/Engine/Scene/SceneGraph.h"
+#include "Runtime/Engine/Scene/Components/StaticMesh.h"
 
-class SceneGraphAsset : public SerializableAsset<SceneGraphAsset>
+struct SceneData
+{
+	std::vector<StaticMesh> StaticMeshes;
+	std::vector<Math::Transform> Transforms;
+};
+
+class SceneAsset : public SerializableAsset<SceneAsset>
 {
 public:
 	template<class StringType>
-	SceneGraphAsset(StringType&& SceneGraphAssetName)
-		: ParentClass(Asset::GetPrefabricateAssetPath(SceneGraphAssetName, Asset::EPrefabricateAssetType::SceneAsset))
+	SceneAsset(StringType&& SceneAssetName)
+		: ParentClass(Asset::GetPrefabricateAssetPath(SceneAssetName, Asset::EPrefabAssetType::Scene))
 		, m_Graph(std::move(std::make_shared<SceneGraph>()))
 	{
 	}
 
-	const char8_t* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabricateAssetType::SceneAsset); }
+	const char8_t* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::Scene); }
 
 	std::shared_ptr<SceneGraph> GetSceneGraph() const { return m_Graph; }
 
@@ -25,9 +33,9 @@ public:
 			CEREAL_NVP(m_Graph)
 		);
 	}
+
+	void PostLoad() override final;
 protected:
-	void LoadAssimpScenes();
-	void RebuildSceneWhenReady(std::vector<const class AssimpSceneAsset*>& AssimpScenes);
 private:
 	std::vector<std::string> m_AssimpScenePaths;
 	std::shared_ptr<SceneGraph> m_Graph;
@@ -40,6 +48,9 @@ public:
 
 	const SceneGraph& GetSceneGraph() const { return m_SceneGraph; }
 	SceneGraph& GetSceneGraph() { return m_SceneGraph; }
+
+	const SceneData& GetSceneData() const { return m_SceneData; }
 private:
 	SceneGraph m_SceneGraph;
+	SceneData m_SceneData;
 };

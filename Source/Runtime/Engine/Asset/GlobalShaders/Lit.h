@@ -45,7 +45,7 @@ public:
 	{ 
 		assert(Name);
 		m_Name = Name; 
-		SetPath(Asset::GetPrefabricateAssetPath(Name, Asset::EPrefabricateAssetType::MaterialAsset));
+		SetPath(Asset::GetPrefabricateAssetPath(Name, Asset::EPrefabAssetType::Material));
 	}
 
 	ERHICullMode GetCullMode() const { return m_CullMode; }

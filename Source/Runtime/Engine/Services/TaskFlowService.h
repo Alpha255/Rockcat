@@ -11,12 +11,10 @@
 #include <Submodules/taskflow/taskflow/algorithm/sort.hpp>
 #pragma warning(pop)
 
-class TaskFlowModule : public IModule
+class TaskFlowService : public IService<TaskFlowService>
 {
 public:
-	TaskFlowModule();
-
-	~TaskFlowModule() {}
+	TaskFlowService();
 
 	template<bool8_t WaitDone = true, class Iterator, class Callable>
 	void ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function)

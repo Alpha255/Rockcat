@@ -1,7 +1,7 @@
 #include "Runtime/Core/Window.h"
-#include "Runtime/Engine/Engine.h"
 #include "Runtime/Core/PlatformMisc.h"
 #include "Runtime/Engine/Application/Resource.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 
 #if defined(PLATFORM_WIN32)
 	#include <Windows.h>

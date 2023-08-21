@@ -3,7 +3,7 @@
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 #include "Runtime/Core/PlatformMisc.h"
-#include "Runtime/Engine/Engine.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 
 VulkanSurface::VulkanSurface(const VulkanDevice& Device, const void* WindowHandle)
 	: VkDeviceResource(Device)
