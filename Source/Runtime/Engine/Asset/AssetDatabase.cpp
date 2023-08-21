@@ -52,7 +52,7 @@ AssetDatabase& AssetDatabase::Get()
 }
 
 AssetDatabase::AssetDatabase()
-	: m_AsyncLoadAssets(false)
+	: m_SupportAsyncLoad(false)
 { 
 	CreateAssetImporters();
 }
@@ -65,7 +65,7 @@ void AssetDatabase::CreateAssetImporters()
 	m_AssetImporters.emplace_back(std::make_unique<ShaderAssetImporter>());
 }
 
-Asset* AssetDatabase::ReimportAssetInternal(const std::filesystem::path& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks)
+Asset* AssetDatabase::ReimportAssetInternal(const std::filesystem::path& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks, bool8_t Async)
 {
 	if (std::filesystem::exists(AssetPath))
 	{
@@ -81,7 +81,7 @@ Asset* AssetDatabase::ReimportAssetInternal(const std::filesystem::path& AssetPa
 
 				m_Assets.insert(std::make_pair(AssetPath, NewAsset));
 
-				if (m_AsyncLoadAssets)
+				if (Async && m_SupportAsyncLoad)
 				{
 					TF_DispatchTask(NewTask);
 				}

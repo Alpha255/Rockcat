@@ -15,7 +15,7 @@ public:
 	static AssetDatabase& Get();
 
 	template<class TAsset, class StringType>
-	TAsset* FindOrLoadAsset(StringType&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks)
+	TAsset* FindOrImportAsset(StringType&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool8_t Async = true)
 	{
 		auto GenericAssetPath = GetGenericAssetPath(std::forward<StringType>(AssetPath));
 		auto AssetIt = m_Assets.find(GenericAssetPath);
@@ -25,14 +25,14 @@ public:
 		}
 		else
 		{
-			return Cast<TAsset>(ReimportAssetInternal(GenericAssetPath, AssetLoadCallbacks));
+			return Cast<TAsset>(ReimportAssetInternal(GenericAssetPath, AssetLoadCallbacks, Async));
 		}
 	}
 
 	template<class StringType>
-	void ReimportAsset(StringType&& AssetPath)
+	void ReimportAsset(StringType&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool8_t Async = true)
 	{
-		return ReimportAssetInternal(GetGenericAssetPath(std::forward<StringType>(AssetPath)), std::nullopt);
+		return ReimportAssetInternal(GetGenericAssetPath(std::forward<StringType>(AssetPath)), AssetLoadCallbacks, Async);
 	}
 private:
 	template<class StringType>
@@ -46,10 +46,10 @@ private:
 
 	void CreateAssetImporters();
 
-	Asset* ReimportAssetInternal(const std::filesystem::path& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks);
+	Asset* ReimportAssetInternal(const std::filesystem::path& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks, bool8_t Async);
 
 	std::unordered_map<std::filesystem::path, std::shared_ptr<Asset>> m_Assets;
 	std::vector<std::unique_ptr<IAssetImporter>> m_AssetImporters;
-	bool8_t m_AsyncLoadAssets;
+	bool8_t m_SupportAsyncLoad;
 };
 

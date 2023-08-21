@@ -41,16 +41,10 @@ private:
 	std::shared_ptr<SceneGraph> m_Graph;
 };
 
-class AssimpSceneAsset : public Asset
+struct AssimpScene : public Asset
 {
-public:
 	using Asset::Asset;
 
-	const SceneGraph& GetSceneGraph() const { return m_SceneGraph; }
-	SceneGraph& GetSceneGraph() { return m_SceneGraph; }
-
-	const SceneData& GetSceneData() const { return m_SceneData; }
-private:
-	SceneGraph m_SceneGraph;
-	SceneData m_SceneData;
+	SceneGraph Graph;
+	SceneData Data;
 };

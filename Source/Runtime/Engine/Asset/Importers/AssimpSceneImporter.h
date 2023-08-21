@@ -24,18 +24,19 @@ public:
 	{
 	}
 
-	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<AssimpSceneAsset>(AssetPath); }
+	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<AssimpScene>(AssetPath); }
 
 	bool8_t Reimport(Asset& InAsset) override final
 	{
-		auto& Scene = Cast<AssimpSceneAsset>(InAsset);
+		auto& Scene = Cast<AssimpScene>(InAsset);
 
 		const uint32_t PostprocessFlags = static_cast<uint32_t>(
 			aiProcessPreset_TargetRealtime_MaxQuality | 
 			aiProcess_MakeLeftHanded |  /// Use DirectX's left-hand coordinate system
 			aiProcess_FlipUVs |
 			aiProcess_FlipWindingOrder |
-			aiProcess_GenBoundingBoxes);
+			aiProcess_GenBoundingBoxes |
+			aiProcess_TransformUVCoords);
 
 		Assimp::Importer AssimpImporter;
 
@@ -47,12 +48,16 @@ public:
 		auto CurrentWorkingDirectory = (OldWorkingDirectory / Scene.GetPath()).parent_path();
 
 		PlatformMisc::SetCurrentWorkingDirectory(CurrentWorkingDirectory);
-		auto AssimpScene = AssimpImporter.ReadFileFromMemory(Scene.GetRawData().Data.get(), Scene.GetRawData().SizeInBytes, PostprocessFlags);
+		auto AiScene = AssimpImporter.ReadFileFromMemory(Scene.GetRawData().Data.get(), Scene.GetRawData().SizeInBytes, PostprocessFlags);
 		PlatformMisc::SetCurrentWorkingDirectory(OldWorkingDirectory);
 
-		if (AssimpScene && AssimpScene->HasMeshes())
+		if (AiScene && AiScene->HasMeshes())
 		{
-			return true;
+			if (ProcessMaterials(AiScene, Scene))
+			{
+				return ProcessNode(AiScene, AiScene->mRootNode, Scene);
+			}
+			return false;
 		}
 		else
 		{
@@ -62,10 +67,250 @@ public:
 		return false;
 	}
 
-	void ProcessNode(const aiScene* Scene, const aiNode* Node)
+	bool8_t ProcessNode(const aiScene* AiScene, const aiNode* AiNode, AssimpScene& AssimpScene)
 	{
-		assert(Scene && Node);
+		if (!AiNode)
+		{
+			return false;
+		}
 
+		if (!ProcessMeshes(AiScene, AiNode, AssimpScene))
+		{
+			return false;
+		}
+
+		for (uint32_t NodeIndex = 0u; NodeIndex < AiNode->mNumChildren; ++NodeIndex)
+		{
+			if (!ProcessNode(AiScene, AiNode->mChildren[NodeIndex], AssimpScene))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool8_t ProcessMaterials(const aiScene* AiScene, AssimpScene& AssimpScene)
+	{
+#if 0
+		if (AssimpScene->HasMaterials())
+		{
+			assert(AssimpMesh->mMaterialIndex < AssimpScene->mNumMaterials);
+			auto CurrentMaterial = AssimpScene->mMaterials[AssimpMesh->mMaterialIndex];
+
+			auto ModelName = File::NameWithoutExtension(Model->Path);
+
+			aiString MaterialName;
+			aiGetMaterialString(CurrentMaterial, AI_MATKEY_NAME, &MaterialName);
+
+			std::string Path;
+			if (MaterialName.length == 0)
+			{
+				Path = StringUtils::Format("%s.json", ModelName.c_str());
+			}
+			else
+			{
+				Path = StringUtils::Format("%s_%s.json", ModelName.c_str(), MaterialName.C_Str());
+			}
+
+			if (File::Exists(IAsset::CatPath(ASSET_PATH_MATERIALS, Path.c_str()).c_str()))
+			{
+				return Material::Load(Path.c_str());
+			}
+			else
+			{
+				auto Ret = std::make_shared<Material>(Path.c_str());
+
+				aiShadingMode ShadingMode = aiShadingMode::aiShadingMode_Flat;
+				aiColor4D Albedo{ 1.0f };
+				aiColor4D Ambient{ 1.0f };
+				aiColor4D Specular{ 0.0f };
+				aiColor4D Emissive{ 0.0f };
+				aiColor4D Transparent{ 0.0f };
+				aiColor4D Reflective{ 0.0f };
+				ai_real Opacity = 1.0f;
+				ai_real Metallic = 0.0f;
+				ai_real Roughness = 0.0f;
+				ai_real Glossiness = 0.0f;
+				ai_real SpecularFactor = 0.0f;
+				ai_real Shiness = 0.0f;
+				ai_int Twoside = 0;
+
+				if (AI_SUCCESS == aiGetMaterialInteger(CurrentMaterial, AI_MATKEY_SHADING_MODEL, reinterpret_cast<int32_t*>(&ShadingMode)))
+				{
+					if (ShadingMode == aiShadingMode::aiShadingMode_PBR_BRDF)
+					{
+						Ret->SetShadingMode(Material::EShadingMode::PhysicallyBasedRendering);
+
+						if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_BASE_COLOR, &Albedo))
+						{
+							Ret->SetAlbedoOrDiffuse(Color(Albedo.r, Albedo.g, Albedo.b, Albedo.a));
+						}
+						if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_METALLIC_FACTOR, &Metallic))
+						{
+							Ret->SetMetallic(Metallic);
+						}
+						if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_ROUGHNESS_FACTOR, &Roughness))
+						{
+							Ret->SetRoughness(Roughness);
+						}
+						else if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_GLOSSINESS_FACTOR, &Glossiness))
+						{
+							Ret->SetRoughness(1.0f - Glossiness);
+						}
+						if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_SPECULAR_FACTOR, &SpecularFactor))
+						{
+							Ret->SetSpecularFactor(SpecularFactor);
+						}
+					}
+					else if (ShadingMode == aiShadingMode::aiShadingMode_Toon)
+					{
+						Ret->SetShadingMode(Material::EShadingMode::Toon);
+
+						assert(0);
+					}
+					else
+					{
+						Ret->SetShadingMode(Material::EShadingMode::BlinnPhong);
+
+						if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_DIFFUSE, &Albedo))
+						{
+							Ret->SetAlbedoOrDiffuse(Color(Albedo.r, Albedo.g, Albedo.b, Albedo.a));
+						}
+					}
+				}
+				else
+				{
+					Ret->SetShadingMode(Material::EShadingMode::BlinnPhong);
+
+					if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_DIFFUSE, &Albedo))
+					{
+						Ret->SetAlbedoOrDiffuse(Color(Albedo.r, Albedo.g, Albedo.b, Albedo.a));
+					}
+				}
+
+				if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_SPECULAR, &Specular))
+				{
+					Ret->SetSpecular(Color(Specular.r, Specular.g, Specular.b, Specular.a));
+				}
+				if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_EMISSIVE, &Emissive))
+				{
+					Ret->SetEmissive(Color(Emissive.r, Emissive.g, Emissive.b, Emissive.a));
+				}
+				if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_TRANSPARENT, &Transparent))
+				{
+					Ret->SetTransparent(Color(Transparent.r, Transparent.g, Transparent.b, Transparent.a));
+				}
+				if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_REFLECTIVE, &Reflective))
+				{
+					Ret->SetReflective(Color(Reflective.r, Reflective.g, Reflective.b, Reflective.a));
+				}
+				if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_OPACITY, &Opacity))
+				{
+					Ret->SetOpacity(Opacity);
+				}
+				if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_SHININESS, &Shiness))
+				{
+					Ret->SetShiness(Shiness);
+				}
+				if (AI_SUCCESS == aiGetMaterialInteger(CurrentMaterial, AI_MATKEY_TWOSIDED, &Twoside))
+				{
+					Ret->SetTwoSide(Twoside);
+				}
+
+				for (uint32_t ImageType = aiTextureType::aiTextureType_DIFFUSE; ImageType < aiTextureType::aiTextureType_TRANSMISSION; ++ImageType)
+				{
+					if (CurrentMaterial->GetTextureCount(static_cast<aiTextureType>(ImageType)) > 0u)
+					{
+						aiString ImageName;
+						if (aiReturn_SUCCESS == CurrentMaterial->GetTexture(static_cast<aiTextureType>(ImageType), 0u, &ImageName))
+						{
+							std::string ImagePath = StringUtils::Format("%s\\%s", File::Directory(Model->Path).c_str(), ImageName.C_Str());
+							switch (ImageType)
+							{
+							case aiTextureType::aiTextureType_DIFFUSE:
+							case aiTextureType::aiTextureType_BASE_COLOR:
+								Ret->SetImage(Material::EImageType::AlbedoOrDiffuse, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_SPECULAR:
+								Ret->SetImage(Material::EImageType::Specular, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_AMBIENT:
+								Ret->SetImage(Material::EImageType::Ambient, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_EMISSIVE:
+								Ret->SetImage(Material::EImageType::Emissive, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_HEIGHT:
+								Ret->SetImage(Material::EImageType::Height, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_NORMALS:
+								Ret->SetImage(Material::EImageType::Normal, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_SHININESS:
+								Ret->SetImage(Material::EImageType::Shininess, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_OPACITY:
+								Ret->SetImage(Material::EImageType::Opacity, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_DISPLACEMENT:
+								Ret->SetImage(Material::EImageType::Displacement, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_LIGHTMAP:
+								Ret->SetImage(Material::EImageType::Lightmap, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_REFLECTION:
+								Ret->SetImage(Material::EImageType::Reflection, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_METALNESS:
+								Ret->SetImage(Material::EImageType::Metalness, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_DIFFUSE_ROUGHNESS:
+								Ret->SetImage(Material::EImageType::Roughness, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_AMBIENT_OCCLUSION:
+								Ret->SetImage(Material::EImageType::Occlusion, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_SHEEN:
+								Ret->SetImage(Material::EImageType::Sheen, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_CLEARCOAT:
+								Ret->SetImage(Material::EImageType::ClearCoat, ImagePath.c_str());
+								break;
+							case aiTextureType::aiTextureType_TRANSMISSION:
+								Ret->SetImage(Material::EImageType::Transmission, ImagePath.c_str());
+								break;
+							default:
+								Ret->SetImage(Material::EImageType::Unknown, ImagePath.c_str());
+								break;
+							}
+						}
+					}
+				}
+
+				Ret->Save();
+				return Ret;
+			}
+		}
+
+		const char8_t* DefaultMaterial = "Default.json";
+		std::string Path = StringUtils::Format("%s%s", ASSET_PATH_MATERIALS, DefaultMaterial);
+
+		if (!File::Exists(Path.c_str()))
+		{
+			auto TempMaterial = std::make_shared<Material>(DefaultMaterial);
+			TempMaterial->SetShadingMode(Material::EShadingMode::BlinnPhong);
+			TempMaterial->Save();
+			return TempMaterial;
+		}
+
+		return Material::Load(DefaultMaterial);
+#endif
+		return false;
+	}
+
+	bool8_t ProcessMeshes(const aiScene* AiScene, const aiNode* AiNode, AssimpScene& AssimpScene)
+	{
 #if 0
 		for (uint32_t MeshIndex = 0u; MeshIndex < Node->mNumMeshes; ++MeshIndex)
 		{
@@ -83,11 +328,7 @@ public:
 			Model->Object->AxisAlignedBoundingBox = AABB(Min, Max);
 		}
 #endif
-
-		for (uint32_t Index = 0u; Index < Node->mNumChildren; ++Index)
-		{
-			ProcessNode(Scene, Node->mChildren[Index]);
-		}
+		return false;
 	}
 protected:
 private:
@@ -134,223 +375,6 @@ private:
 };
 
 #if 0
-
-std::shared_ptr<Material> AssimpImporter::ProcessMaterial(const aiScene* AssimpScene, const aiMesh* AssimpMesh, ModelAsset* Model)
-{
-	if (AssimpScene->HasMaterials())
-	{
-		assert(AssimpMesh->mMaterialIndex < AssimpScene->mNumMaterials);
-		auto CurrentMaterial = AssimpScene->mMaterials[AssimpMesh->mMaterialIndex];
-
-		auto ModelName = File::NameWithoutExtension(Model->Path);
-
-		aiString MaterialName;
-		aiGetMaterialString(CurrentMaterial, AI_MATKEY_NAME, &MaterialName);
-
-		std::string Path;
-		if (MaterialName.length == 0)
-		{
-			Path = StringUtils::Format("%s.json", ModelName.c_str());
-		}
-		else
-		{
-			Path = StringUtils::Format("%s_%s.json", ModelName.c_str(), MaterialName.C_Str());
-		}
-
-		if (File::Exists(IAsset::CatPath(ASSET_PATH_MATERIALS, Path.c_str()).c_str()))
-		{
-			return Material::Load(Path.c_str());
-		}
-		else
-		{
-			auto Ret = std::make_shared<Material>(Path.c_str());
-
-			aiShadingMode ShadingMode = aiShadingMode::aiShadingMode_Flat;
-			aiColor4D Albedo{ 1.0f };
-			aiColor4D Ambient{ 1.0f };
-			aiColor4D Specular{ 0.0f };
-			aiColor4D Emissive{ 0.0f };
-			aiColor4D Transparent{ 0.0f };
-			aiColor4D Reflective{ 0.0f };
-			ai_real Opacity = 1.0f;
-			ai_real Metallic = 0.0f;
-			ai_real Roughness = 0.0f;
-			ai_real Glossiness = 0.0f;
-			ai_real SpecularFactor = 0.0f;
-			ai_real Shiness = 0.0f;
-			ai_int Twoside = 0;
-
-			if (AI_SUCCESS == aiGetMaterialInteger(CurrentMaterial, AI_MATKEY_SHADING_MODEL, reinterpret_cast<int32_t*>(&ShadingMode)))
-			{
-				if (ShadingMode == aiShadingMode::aiShadingMode_PBR_BRDF)
-				{
-					Ret->SetShadingMode(Material::EShadingMode::PhysicallyBasedRendering);
-
-					if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_BASE_COLOR, &Albedo))
-					{
-						Ret->SetAlbedoOrDiffuse(Color(Albedo.r, Albedo.g, Albedo.b, Albedo.a));
-					}
-					if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_METALLIC_FACTOR, &Metallic))
-					{
-						Ret->SetMetallic(Metallic);
-					}
-					if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_ROUGHNESS_FACTOR, &Roughness))
-					{
-						Ret->SetRoughness(Roughness);
-					}
-					else if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_GLOSSINESS_FACTOR, &Glossiness))
-					{
-						Ret->SetRoughness(1.0f - Glossiness);
-					}
-					if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_SPECULAR_FACTOR, &SpecularFactor))
-					{
-						Ret->SetSpecularFactor(SpecularFactor);
-					}
-				}
-				else if (ShadingMode == aiShadingMode::aiShadingMode_Toon)
-				{
-					Ret->SetShadingMode(Material::EShadingMode::Toon);
-
-					assert(0);
-				}
-				else
-				{
-					Ret->SetShadingMode(Material::EShadingMode::BlinnPhong);
-
-					if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_DIFFUSE, &Albedo))
-					{
-						Ret->SetAlbedoOrDiffuse(Color(Albedo.r, Albedo.g, Albedo.b, Albedo.a));
-					}
-				}
-			}
-			else
-			{
-				Ret->SetShadingMode(Material::EShadingMode::BlinnPhong);
-
-				if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_DIFFUSE, &Albedo))
-				{
-					Ret->SetAlbedoOrDiffuse(Color(Albedo.r, Albedo.g, Albedo.b, Albedo.a));
-				}
-			}
-
-			if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_SPECULAR, &Specular))
-			{
-				Ret->SetSpecular(Color(Specular.r, Specular.g, Specular.b, Specular.a));
-			}
-			if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_EMISSIVE, &Emissive))
-			{
-				Ret->SetEmissive(Color(Emissive.r, Emissive.g, Emissive.b, Emissive.a));
-			}
-			if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_TRANSPARENT, &Transparent))
-			{
-				Ret->SetTransparent(Color(Transparent.r, Transparent.g, Transparent.b, Transparent.a));
-			}
-			if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_REFLECTIVE, &Reflective))
-			{
-				Ret->SetReflective(Color(Reflective.r, Reflective.g, Reflective.b, Reflective.a));
-			}
-			if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_OPACITY, &Opacity))
-			{
-				Ret->SetOpacity(Opacity);
-			}
-			if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_SHININESS, &Shiness))
-			{
-				Ret->SetShiness(Shiness);
-			}
-			if (AI_SUCCESS == aiGetMaterialInteger(CurrentMaterial, AI_MATKEY_TWOSIDED, &Twoside))
-			{
-				Ret->SetTwoSide(Twoside);
-			}
-
-			for (uint32_t ImageType = aiTextureType::aiTextureType_DIFFUSE; ImageType < aiTextureType::aiTextureType_TRANSMISSION; ++ImageType)
-			{
-				if (CurrentMaterial->GetTextureCount(static_cast<aiTextureType>(ImageType)) > 0u)
-				{
-					aiString ImageName;
-					if (aiReturn_SUCCESS == CurrentMaterial->GetTexture(static_cast<aiTextureType>(ImageType), 0u, &ImageName))
-					{
-						std::string ImagePath = StringUtils::Format("%s\\%s", File::Directory(Model->Path).c_str(), ImageName.C_Str());
-						switch (ImageType)
-						{
-						case aiTextureType::aiTextureType_DIFFUSE:
-						case aiTextureType::aiTextureType_BASE_COLOR:
-							Ret->SetImage(Material::EImageType::AlbedoOrDiffuse, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_SPECULAR:
-							Ret->SetImage(Material::EImageType::Specular, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_AMBIENT:
-							Ret->SetImage(Material::EImageType::Ambient, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_EMISSIVE:
-							Ret->SetImage(Material::EImageType::Emissive, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_HEIGHT:
-							Ret->SetImage(Material::EImageType::Height, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_NORMALS:
-							Ret->SetImage(Material::EImageType::Normal, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_SHININESS:
-							Ret->SetImage(Material::EImageType::Shininess, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_OPACITY:
-							Ret->SetImage(Material::EImageType::Opacity, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_DISPLACEMENT:
-							Ret->SetImage(Material::EImageType::Displacement, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_LIGHTMAP:
-							Ret->SetImage(Material::EImageType::Lightmap, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_REFLECTION:
-							Ret->SetImage(Material::EImageType::Reflection, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_METALNESS:
-							Ret->SetImage(Material::EImageType::Metalness, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_DIFFUSE_ROUGHNESS:
-							Ret->SetImage(Material::EImageType::Roughness, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_AMBIENT_OCCLUSION:
-							Ret->SetImage(Material::EImageType::Occlusion, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_SHEEN:
-							Ret->SetImage(Material::EImageType::Sheen, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_CLEARCOAT:
-							Ret->SetImage(Material::EImageType::ClearCoat, ImagePath.c_str());
-							break;
-						case aiTextureType::aiTextureType_TRANSMISSION:
-							Ret->SetImage(Material::EImageType::Transmission, ImagePath.c_str());
-							break;
-						default:
-							Ret->SetImage(Material::EImageType::Unknown, ImagePath.c_str());
-							break;
-						}
-					}
-				}
-			}
-
-			Ret->Save();
-			return Ret;
-		}
-	}
-
-	const char8_t* DefaultMaterial = "Default.json";
-	std::string Path = StringUtils::Format("%s%s", ASSET_PATH_MATERIALS, DefaultMaterial);
-
-	if (!File::Exists(Path.c_str()))
-	{
-		auto TempMaterial = std::make_shared<Material>(DefaultMaterial);
-		TempMaterial->SetShadingMode(Material::EShadingMode::BlinnPhong);
-		TempMaterial->Save();
-		return TempMaterial;
-	}
-
-	return Material::Load(DefaultMaterial);
-}
-
 std::pair<std::shared_ptr<Mesh>, std::shared_ptr<Material>> AssimpImporter::ProcessMesh(const aiScene* AssimpScene, const aiMesh* AssimpMesh, ModelAsset* Model)
 {
 	assert(AssimpMesh && AssimpMesh->HasPositions());

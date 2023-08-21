@@ -5,12 +5,12 @@
 
 void SceneAsset::PostLoad()
 {
-	std::vector<const AssimpSceneAsset*> AssimpScenes;
+	std::vector<const AssimpScene*> AssimpScenes;
 
 	auto AssetLoadCallbacks = std::make_optional(Asset::Callbacks{});
 
 	AssetLoadCallbacks.value().PreLoadCallback = [this, &AssimpScenes](Asset& InAsset) {
-		AssimpScenes.push_back(Cast<AssimpSceneAsset>(&InAsset));
+		AssimpScenes.push_back(Cast<AssimpScene>(&InAsset));
 	};
 
 	AssetLoadCallbacks.value().ReadyCallback = [this, &AssimpScenes](Asset&) {
@@ -25,12 +25,12 @@ void SceneAsset::PostLoad()
 		SceneGraph NewGraph;
 		for each (auto AssimpScene in AssimpScenes)
 		{
-			SceneBuilder::MergeSceneGraph(NewGraph, AssimpScene->GetSceneGraph());
+			SceneBuilder::MergeSceneGraph(NewGraph, AssimpScene->Graph);
 		}
 	};
 
 	for each (const auto& Path in m_AssimpScenePaths)
 	{
-		AssetDatabase::Get().FindOrLoadAsset<AssimpSceneAsset>(Path, AssetLoadCallbacks);
+		AssetDatabase::Get().FindOrImportAsset<AssimpScene>(Path, AssetLoadCallbacks);
 	}
 }
