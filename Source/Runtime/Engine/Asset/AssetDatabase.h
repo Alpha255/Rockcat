@@ -10,7 +10,7 @@ class AssetDatabase
 public:
 	AssetDatabase();
 
-	~AssetDatabase();
+	~AssetDatabase() = default;
 
 	static AssetDatabase& Get();
 

@@ -26,7 +26,10 @@ public:
 
 		m_Asset->SetStatus(Asset::EAssetStatus::Loading);
 
-		m_Asset->ReadRawData(m_AssetType->ContentsType);
+		if (!m_AssetImporter.NeedLoadFromFile())
+		{
+			m_Asset->ReadRawData(m_AssetType->ContentsType);
+		}
 
 		if (m_AssetImporter.Reimport(*m_Asset))
 		{
@@ -38,6 +41,8 @@ public:
 			m_Asset->SetStatus(Asset::EAssetStatus::Error);
 			m_Asset->OnLoadFailed();
 		}
+
+		m_Asset->FreeRawData();
 	}
 private:
 	IAssetImporter& m_AssetImporter;
@@ -100,8 +105,4 @@ Asset* AssetDatabase::ReimportAssetInternal(const std::filesystem::path& AssetPa
 
 	LOG_ERROR("AssetDatabase:: Asset \"{}\" do not exists.", AssetPath.generic_string());
 	return nullptr;
-}
-
-AssetDatabase::~AssetDatabase()
-{
 }

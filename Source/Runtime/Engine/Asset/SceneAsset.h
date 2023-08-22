@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Runtime/Core/Math/Transform.h"
-#include "Runtime/Engine/Asset/SerializableAsset.h"
+#include "Runtime/Engine/Asset/MaterialAsset.h"
 #include "Runtime/Engine/Scene/SceneGraph.h"
 #include "Runtime/Engine/Scene/Components/StaticMesh.h"
 
@@ -9,6 +9,7 @@ struct SceneData
 {
 	std::vector<StaticMesh> StaticMeshes;
 	std::vector<Math::Transform> Transforms;
+	std::vector<MaterialInstance*> Materials;
 };
 
 class SceneAsset : public SerializableAsset<SceneAsset>

@@ -24,13 +24,15 @@ public:
 	{
 	}
 
+	bool8_t NeedLoadFromFile() override final { return true; }
+
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<AssimpScene>(AssetPath); }
 
 	bool8_t Reimport(Asset& InAsset) override final
 	{
 		auto& Scene = Cast<AssimpScene>(InAsset);
 
-		const uint32_t PostprocessFlags = static_cast<uint32_t>(
+		const uint32_t ProcessFlags = static_cast<uint32_t>(
 			aiProcessPreset_TargetRealtime_MaxQuality | 
 			aiProcess_MakeLeftHanded |  /// Use DirectX's left-hand coordinate system
 			aiProcess_FlipUVs |
@@ -44,293 +46,24 @@ public:
 		Assimp::DefaultLogger::set(new AssimpLogger());
 		AssimpImporter.SetProgressHandler(new AssimpProgressHandler(Scene.GetPath()));
 #endif
-		auto OldWorkingDirectory = PlatformMisc::GetCurrentWorkingDirectory();
-		auto CurrentWorkingDirectory = (OldWorkingDirectory / Scene.GetPath()).parent_path();
-
-		PlatformMisc::SetCurrentWorkingDirectory(CurrentWorkingDirectory);
-		auto AiScene = AssimpImporter.ReadFileFromMemory(Scene.GetRawData().Data.get(), Scene.GetRawData().SizeInBytes, PostprocessFlags);
-		PlatformMisc::SetCurrentWorkingDirectory(OldWorkingDirectory);
-
-		if (AiScene && AiScene->HasMeshes())
+		if (auto AiScene = AssimpImporter.ReadFile(Scene.GetPath().u8string(), ProcessFlags))
 		{
-			if (ProcessMaterials(AiScene, Scene))
+			if (AiScene->HasMeshes())
 			{
+				ProcessMaterials(AiScene, Scene);
 				return ProcessNode(AiScene, AiScene->mRootNode, Scene);
 			}
-			return false;
-		}
-		else
-		{
-			LOG_ERROR("AssimpSceneImporter:: Failed to load assimp scene \"{}\" : {}", Scene.GetPath().generic_string(), AssimpImporter.GetErrorString());
-		}
-
-		return false;
-	}
-
-	bool8_t ProcessNode(const aiScene* AiScene, const aiNode* AiNode, AssimpScene& AssimpScene)
-	{
-		if (!AiNode)
-		{
-			return false;
-		}
-
-		if (!ProcessMeshes(AiScene, AiNode, AssimpScene))
-		{
-			return false;
-		}
-
-		for (uint32_t NodeIndex = 0u; NodeIndex < AiNode->mNumChildren; ++NodeIndex)
-		{
-			if (!ProcessNode(AiScene, AiNode->mChildren[NodeIndex], AssimpScene))
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	bool8_t ProcessMaterials(const aiScene* AiScene, AssimpScene& AssimpScene)
-	{
-#if 0
-		if (AssimpScene->HasMaterials())
-		{
-			assert(AssimpMesh->mMaterialIndex < AssimpScene->mNumMaterials);
-			auto CurrentMaterial = AssimpScene->mMaterials[AssimpMesh->mMaterialIndex];
-
-			auto ModelName = File::NameWithoutExtension(Model->Path);
-
-			aiString MaterialName;
-			aiGetMaterialString(CurrentMaterial, AI_MATKEY_NAME, &MaterialName);
-
-			std::string Path;
-			if (MaterialName.length == 0)
-			{
-				Path = StringUtils::Format("%s.json", ModelName.c_str());
-			}
 			else
 			{
-				Path = StringUtils::Format("%s_%s.json", ModelName.c_str(), MaterialName.C_Str());
-			}
-
-			if (File::Exists(IAsset::CatPath(ASSET_PATH_MATERIALS, Path.c_str()).c_str()))
-			{
-				return Material::Load(Path.c_str());
-			}
-			else
-			{
-				auto Ret = std::make_shared<Material>(Path.c_str());
-
-				aiShadingMode ShadingMode = aiShadingMode::aiShadingMode_Flat;
-				aiColor4D Albedo{ 1.0f };
-				aiColor4D Ambient{ 1.0f };
-				aiColor4D Specular{ 0.0f };
-				aiColor4D Emissive{ 0.0f };
-				aiColor4D Transparent{ 0.0f };
-				aiColor4D Reflective{ 0.0f };
-				ai_real Opacity = 1.0f;
-				ai_real Metallic = 0.0f;
-				ai_real Roughness = 0.0f;
-				ai_real Glossiness = 0.0f;
-				ai_real SpecularFactor = 0.0f;
-				ai_real Shiness = 0.0f;
-				ai_int Twoside = 0;
-
-				if (AI_SUCCESS == aiGetMaterialInteger(CurrentMaterial, AI_MATKEY_SHADING_MODEL, reinterpret_cast<int32_t*>(&ShadingMode)))
-				{
-					if (ShadingMode == aiShadingMode::aiShadingMode_PBR_BRDF)
-					{
-						Ret->SetShadingMode(Material::EShadingMode::PhysicallyBasedRendering);
-
-						if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_BASE_COLOR, &Albedo))
-						{
-							Ret->SetAlbedoOrDiffuse(Color(Albedo.r, Albedo.g, Albedo.b, Albedo.a));
-						}
-						if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_METALLIC_FACTOR, &Metallic))
-						{
-							Ret->SetMetallic(Metallic);
-						}
-						if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_ROUGHNESS_FACTOR, &Roughness))
-						{
-							Ret->SetRoughness(Roughness);
-						}
-						else if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_GLOSSINESS_FACTOR, &Glossiness))
-						{
-							Ret->SetRoughness(1.0f - Glossiness);
-						}
-						if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_SPECULAR_FACTOR, &SpecularFactor))
-						{
-							Ret->SetSpecularFactor(SpecularFactor);
-						}
-					}
-					else if (ShadingMode == aiShadingMode::aiShadingMode_Toon)
-					{
-						Ret->SetShadingMode(Material::EShadingMode::Toon);
-
-						assert(0);
-					}
-					else
-					{
-						Ret->SetShadingMode(Material::EShadingMode::BlinnPhong);
-
-						if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_DIFFUSE, &Albedo))
-						{
-							Ret->SetAlbedoOrDiffuse(Color(Albedo.r, Albedo.g, Albedo.b, Albedo.a));
-						}
-					}
-				}
-				else
-				{
-					Ret->SetShadingMode(Material::EShadingMode::BlinnPhong);
-
-					if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_DIFFUSE, &Albedo))
-					{
-						Ret->SetAlbedoOrDiffuse(Color(Albedo.r, Albedo.g, Albedo.b, Albedo.a));
-					}
-				}
-
-				if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_SPECULAR, &Specular))
-				{
-					Ret->SetSpecular(Color(Specular.r, Specular.g, Specular.b, Specular.a));
-				}
-				if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_EMISSIVE, &Emissive))
-				{
-					Ret->SetEmissive(Color(Emissive.r, Emissive.g, Emissive.b, Emissive.a));
-				}
-				if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_TRANSPARENT, &Transparent))
-				{
-					Ret->SetTransparent(Color(Transparent.r, Transparent.g, Transparent.b, Transparent.a));
-				}
-				if (AI_SUCCESS == aiGetMaterialColor(CurrentMaterial, AI_MATKEY_COLOR_REFLECTIVE, &Reflective))
-				{
-					Ret->SetReflective(Color(Reflective.r, Reflective.g, Reflective.b, Reflective.a));
-				}
-				if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_OPACITY, &Opacity))
-				{
-					Ret->SetOpacity(Opacity);
-				}
-				if (AI_SUCCESS == aiGetMaterialFloat(CurrentMaterial, AI_MATKEY_SHININESS, &Shiness))
-				{
-					Ret->SetShiness(Shiness);
-				}
-				if (AI_SUCCESS == aiGetMaterialInteger(CurrentMaterial, AI_MATKEY_TWOSIDED, &Twoside))
-				{
-					Ret->SetTwoSide(Twoside);
-				}
-
-				for (uint32_t ImageType = aiTextureType::aiTextureType_DIFFUSE; ImageType < aiTextureType::aiTextureType_TRANSMISSION; ++ImageType)
-				{
-					if (CurrentMaterial->GetTextureCount(static_cast<aiTextureType>(ImageType)) > 0u)
-					{
-						aiString ImageName;
-						if (aiReturn_SUCCESS == CurrentMaterial->GetTexture(static_cast<aiTextureType>(ImageType), 0u, &ImageName))
-						{
-							std::string ImagePath = StringUtils::Format("%s\\%s", File::Directory(Model->Path).c_str(), ImageName.C_Str());
-							switch (ImageType)
-							{
-							case aiTextureType::aiTextureType_DIFFUSE:
-							case aiTextureType::aiTextureType_BASE_COLOR:
-								Ret->SetImage(Material::EImageType::AlbedoOrDiffuse, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_SPECULAR:
-								Ret->SetImage(Material::EImageType::Specular, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_AMBIENT:
-								Ret->SetImage(Material::EImageType::Ambient, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_EMISSIVE:
-								Ret->SetImage(Material::EImageType::Emissive, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_HEIGHT:
-								Ret->SetImage(Material::EImageType::Height, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_NORMALS:
-								Ret->SetImage(Material::EImageType::Normal, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_SHININESS:
-								Ret->SetImage(Material::EImageType::Shininess, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_OPACITY:
-								Ret->SetImage(Material::EImageType::Opacity, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_DISPLACEMENT:
-								Ret->SetImage(Material::EImageType::Displacement, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_LIGHTMAP:
-								Ret->SetImage(Material::EImageType::Lightmap, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_REFLECTION:
-								Ret->SetImage(Material::EImageType::Reflection, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_METALNESS:
-								Ret->SetImage(Material::EImageType::Metalness, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_DIFFUSE_ROUGHNESS:
-								Ret->SetImage(Material::EImageType::Roughness, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_AMBIENT_OCCLUSION:
-								Ret->SetImage(Material::EImageType::Occlusion, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_SHEEN:
-								Ret->SetImage(Material::EImageType::Sheen, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_CLEARCOAT:
-								Ret->SetImage(Material::EImageType::ClearCoat, ImagePath.c_str());
-								break;
-							case aiTextureType::aiTextureType_TRANSMISSION:
-								Ret->SetImage(Material::EImageType::Transmission, ImagePath.c_str());
-								break;
-							default:
-								Ret->SetImage(Material::EImageType::Unknown, ImagePath.c_str());
-								break;
-							}
-						}
-					}
-				}
-
-				Ret->Save();
-				return Ret;
+				LOG_WARNING("AssimpSceneImporter:: Assimp scene \"{}\" has no meshes");
+				return true;
 			}
 		}
 
-		const char8_t* DefaultMaterial = "Default.json";
-		std::string Path = StringUtils::Format("%s%s", ASSET_PATH_MATERIALS, DefaultMaterial);
-
-		if (!File::Exists(Path.c_str()))
-		{
-			auto TempMaterial = std::make_shared<Material>(DefaultMaterial);
-			TempMaterial->SetShadingMode(Material::EShadingMode::BlinnPhong);
-			TempMaterial->Save();
-			return TempMaterial;
-		}
-
-		return Material::Load(DefaultMaterial);
-#endif
+		LOG_ERROR("AssimpSceneImporter:: Failed to load assimp scene \"{}\" : {}", Scene.GetPath().generic_string(), AssimpImporter.GetErrorString());
 		return false;
 	}
 
-	bool8_t ProcessMeshes(const aiScene* AiScene, const aiNode* AiNode, AssimpScene& AssimpScene)
-	{
-#if 0
-		for (uint32_t MeshIndex = 0u; MeshIndex < Node->mNumMeshes; ++MeshIndex)
-		{
-			auto SubMesh = ProcessMesh(Scene, Scene->mMeshes[Node->mMeshes[MeshIndex]]);
-
-			Model->Object->m_Meshes.emplace_back(MeshInstance(SubMesh.first, SubMesh.second));
-			Model->Object->VertexCount += SubMesh.first->VertexCount;
-			Model->Object->FaceCount += SubMesh.first->FaceCount;
-			Model->Object->IndexCount += SubMesh.first->IndexCount;
-
-			auto BoundingBox = Model->Object->BoundingBox();
-			auto SubBoundingBox = SubMesh.first->BoundingBox();
-			auto Min = Math::Min(BoundingBox.Min(), SubBoundingBox.Min());
-			auto Max = Math::Max(BoundingBox.Max(), SubBoundingBox.Max());
-			Model->Object->AxisAlignedBoundingBox = AABB(Min, Max);
-		}
-#endif
-		return false;
-	}
-protected:
 private:
 	class AssimpProgressHandler : public Assimp::ProgressHandler
 	{
@@ -344,13 +77,13 @@ private:
 		{
 			if (Percentage >= 1.0f)
 			{
-				LOG_INFO("AssimpSceneImporter: Loading model \"{}\" succeeded", m_AssetPath.generic_string());
+				LOG_DEBUG("AssimpSceneImporter: Loading model \"{}\" succeeded", m_AssetPath.generic_string());
 				return true;
 			}
 
 			if (static_cast<int32_t>(Percentage * 100) % 10 == 0)
 			{
-				LOG_INFO("AssimpSceneImporter: Loading model: \"{}\" in progress {:.2f}%", m_AssetPath.generic_string(), Percentage * 100);
+				LOG_DEBUG("AssimpSceneImporter: Loading model: \"{}\" in progress {:.2f}%", m_AssetPath.generic_string(), Percentage * 100);
 			}
 			return false;
 		}
@@ -369,40 +102,185 @@ private:
 		bool8_t attachStream(Assimp::LogStream*, uint32_t) override final { return true; }
 		bool8_t detachStream(Assimp::LogStream*, uint32_t) override final { return true; }
 	};
-	//void ProcessNode(const aiScene* AssimpScene, const aiNode* AssimpNode, ModelAsset* Model);
-	//std::pair<std::shared_ptr<Mesh>, std::shared_ptr<Material>> ProcessMesh(const aiScene* AssimpScene, const aiMesh* AssimpMesh, ModelAsset* Model);
-	//std::shared_ptr<Material> ProcessMaterial(const aiScene* AssimpScene, const aiMesh* AssimpMesh, ModelAsset* Model);
+
+	bool8_t ProcessNode(const aiScene* AiScene, const aiNode* AiNode, AssimpScene& AssimpScene)
+	{
+		if (!AiNode)
+		{
+			return false;
+		}
+
+		ProcessMeshes(AiScene, AiNode, AssimpScene);
+
+		for (uint32_t NodeIndex = 0u; NodeIndex < AiNode->mNumChildren; ++NodeIndex)
+		{
+			if (!ProcessNode(AiScene, AiNode->mChildren[NodeIndex], AssimpScene))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	void ProcessMaterials(const aiScene* AiScene, AssimpScene& AssimpScene)
+	{
+		if (!AiScene->HasMaterials())
+		{
+			return;
+		}
+
+		AssimpScene.Data.Materials.resize(AiScene->mNumMaterials);
+		for (uint32_t Index = 0u; Index < AiScene->mNumMaterials; ++Index)
+		{
+			if (auto Material = AiScene->mMaterials[Index])
+			{
+				aiString Name;
+				Material->Get(AI_MATKEY_NAME, Name);
+
+				aiShadingMode ShadingMode = aiShadingMode::aiShadingMode_Unlit;
+				Material->Get(AI_MATKEY_SHADING_MODEL, ShadingMode);
+
+				aiColor4D BaseColor(1.0f, 1.0f, 1.0f, 1.0f);
+				Material->Get(AI_MATKEY_BASE_COLOR, BaseColor);
+
+				aiColor4D DiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+				Material->Get(AI_MATKEY_COLOR_DIFFUSE, DiffuseColor);
+
+				aiColor4D SpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
+				Material->Get(AI_MATKEY_COLOR_SPECULAR, SpecularColor);
+
+				aiColor4D EmissiveColor(1.0f, 1.0f, 1.0f, 1.0f);
+				Material->Get(AI_MATKEY_COLOR_EMISSIVE, EmissiveColor);
+
+				aiColor4D TransparentColor(1.0f, 1.0f, 1.0f, 1.0f);
+				Material->Get(AI_MATKEY_COLOR_TRANSPARENT, TransparentColor);
+
+				aiColor4D ReflectiveColor(1.0f, 1.0f, 1.0f, 1.0f);
+				Material->Get(AI_MATKEY_COLOR_REFLECTIVE, ReflectiveColor);
+
+				ai_real MetallicFactor = 1.0f;
+				Material->Get(AI_MATKEY_METALLIC_FACTOR, MetallicFactor);
+
+				ai_real RoughnessFactor = 1.0f;
+				Material->Get(AI_MATKEY_ROUGHNESS_FACTOR, RoughnessFactor);
+
+				ai_real GlossinessFactor = 1.0f;
+				Material->Get(AI_MATKEY_GLOSSINESS_FACTOR, GlossinessFactor);
+
+				ai_real SpecularFactor = 1.0f;
+				Material->Get(AI_MATKEY_SPECULAR_FACTOR, SpecularFactor);
+
+				ai_real Opacity = 1.0f;
+				Material->Get(AI_MATKEY_OPACITY, Opacity);
+
+				ai_real Shininess = 1.0f;
+				Material->Get(AI_MATKEY_SHININESS, Shininess);
+
+				bool8_t TwoSided = false;
+				Material->Get(AI_MATKEY_TWOSIDED, TwoSided);
+
+				ProcessTextures(Material, AssimpScene.GetPath().parent_path());
+			}
+			else
+			{
+			}
+		}
+	}
+
+	void ProcessTextures(const aiMaterial* Material, const std::filesystem::path& RootPath)
+	{
+		for (uint32_t Index = aiTextureType_DIFFUSE; Index < aiTextureType_TRANSMISSION; ++Index)
+		{
+			auto TextureType = static_cast<aiTextureType>(Index);
+			if (Material->GetTextureCount(TextureType) == 0u || TextureType == aiTextureType_UNKNOWN)
+			{
+				continue;
+			}
+
+			aiString Path;
+			if (AI_SUCCESS == Material->GetTexture(TextureType, 0u, &Path))  /// How to do if the material has more than one textures for some texture type
+			{
+				std::filesystem::path TexturePath = RootPath / Path.C_Str();
+				if (std::filesystem::exists(TexturePath))
+				{
+					switch (TextureType)
+					{
+					case aiTextureType_DIFFUSE:
+						break;
+					case aiTextureType_SPECULAR:
+						break;
+					case aiTextureType_AMBIENT:
+						break;
+					case aiTextureType_EMISSIVE:
+						break;
+					case aiTextureType_HEIGHT:
+						break;
+					case aiTextureType_NORMALS:
+						break;
+					case aiTextureType_SHININESS:
+						break;
+					case aiTextureType_OPACITY:
+						break;
+					case aiTextureType_DISPLACEMENT:
+						break;
+					case aiTextureType_LIGHTMAP:
+						break;
+					case aiTextureType_REFLECTION:
+						break;
+					case aiTextureType_BASE_COLOR:
+						break;
+					case aiTextureType_NORMAL_CAMERA:
+						break;
+					case aiTextureType_EMISSION_COLOR:
+						break;
+					case aiTextureType_METALNESS:
+						break;
+					case aiTextureType_DIFFUSE_ROUGHNESS:
+						break;
+					case aiTextureType_AMBIENT_OCCLUSION:
+						break;
+					case aiTextureType_SHEEN:
+						break;
+					case aiTextureType_CLEARCOAT:
+						break;
+					case aiTextureType_TRANSMISSION:
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	void ProcessMeshes(const aiScene* AiScene, const aiNode* AiNode, AssimpScene& AssimpScene)
+	{
+		for (uint32_t Index = 0u; Index < AiNode->mNumMeshes; ++Index)
+		{
+			const auto MeshIndex = AiNode->mMeshes[Index];
+			const auto Mesh = AiScene->mMeshes[MeshIndex];
+
+			if (!Mesh)
+			{
+				continue;
+			}
+			if (!Mesh->HasPositions())
+			{
+				continue;
+			}
+			if (Mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
+			{
+				LOG_ERROR("AssimpSceneImporter: Detected others primitive type, this should never be happen!");
+				continue;
+			}
+
+			Math::AABB BoundingBox = Math::AABB(
+				Math::Vector3(Mesh->mAABB.mMin.x, Mesh->mAABB.mMin.y, Mesh->mAABB.mMin.z),
+				Math::Vector3(Mesh->mAABB.mMax.x, Mesh->mAABB.mMax.y, Mesh->mAABB.mMax.z));
+		}
+	}
 };
 
 #if 0
-std::pair<std::shared_ptr<Mesh>, std::shared_ptr<Material>> AssimpImporter::ProcessMesh(const aiScene* AssimpScene, const aiMesh* AssimpMesh, ModelAsset* Model)
-{
-	assert(AssimpMesh && AssimpMesh->HasPositions());
-
-	std::pair<std::shared_ptr<Mesh>, std::shared_ptr<Material>> Ret;
-
-	RHI::EPrimitiveTopology Topology = RHI::EPrimitiveTopology::TriangleList;
-	switch (AssimpMesh->mPrimitiveTypes)
-	{
-	case aiPrimitiveType_POINT:
-		assert(0);
-		Topology = RHI::EPrimitiveTopology::PointList;
-		break;
-	case aiPrimitiveType_LINE:
-		assert(0);
-		Topology = RHI::EPrimitiveTopology::LineList;
-		break;
-	case aiPrimitiveType_TRIANGLE:
-		Topology = RHI::EPrimitiveTopology::TriangleList;
-		break;
-	case aiPrimitiveType_POLYGON:
-		assert(0);
-		break;
-	}
-
-	AABB BoundingBox = AABB(
-		Vector3(AssimpMesh->mAABB.mMin.x, AssimpMesh->mAABB.mMin.y, AssimpMesh->mAABB.mMin.z),
-		Vector3(AssimpMesh->mAABB.mMax.x, AssimpMesh->mAABB.mMax.y, AssimpMesh->mAABB.mMax.z));
 
 	std::vector<uint32_t> UVs;
 	std::vector<uint32_t> Colors;
@@ -475,16 +353,4 @@ std::pair<std::shared_ptr<Mesh>, std::shared_ptr<Material>> AssimpImporter::Proc
 			Layout.SetColor(VertexIndex, ColorIndex, Color(ColorValue.r, ColorValue.g, ColorValue.b, ColorValue.a));
 		}
 	}
-
-	Ret.second = ProcessMaterial(AssimpScene, AssimpMesh, Model);
-
-	Ret.first = std::make_shared<Mesh>(
-		Layout,
-		Topology,
-		*Ret.second->Shader(RHI::EShaderStage::Vertex)->Desc(),
-		BoundingBox,
-		AssimpMesh->mName.C_Str());
-
-	return Ret;
-}
 #endif

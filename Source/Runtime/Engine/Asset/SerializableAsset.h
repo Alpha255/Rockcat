@@ -44,7 +44,7 @@ public:
 		else
 		{
 			LOG_TRACE("Create serializable asset: \"{}\".", GetPath().generic_string());
-			Save(true);
+			Save<Type>(true);
 		}
 		InFileStream.close();
 

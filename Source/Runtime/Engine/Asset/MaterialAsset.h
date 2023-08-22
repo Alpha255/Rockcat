@@ -117,6 +117,10 @@ protected:
 
 using MaterialID = uint32_t;
 
+class MaterialInstance
+{
+};
+
 #if 0
 template<class ShadingModeFS>
 class Material : public MaterialAsset, public ShadingModeFS

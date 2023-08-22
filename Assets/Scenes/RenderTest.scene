@@ -1,20 +1,22 @@
 {
-    "class SceneAsset": {
-        "m_AssimpScenePaths": [
-            "glTF-Sample-Models\\2.0\\Box\\glTF\\Box.gltf"
-        ],
-        "m_Graph": {
-            "ptr_wrapper": {
-                "id": 2147483649,
-                "data": {
-                    "Root": {
-                        "m_Index": 4294967295
-                    },
-                    "Nodes": [],
-                    "IDAllocator": {
-                        "m_MaxIndex": 0,
-                        "m_FreeIndices": {
-                            "container": []
+    "class Scene": {
+        "class SceneAsset": {
+            "m_AssimpScenePaths": [
+                "glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf"
+            ],
+            "m_Graph": {
+                "ptr_wrapper": {
+                    "id": 2147483649,
+                    "data": {
+                        "Root": {
+                            "m_Index": 4294967295
+                        },
+                        "Nodes": [],
+                        "IDAllocator": {
+                            "m_MaxIndex": 0,
+                            "m_FreeIndices": {
+                                "container": []
+                            }
                         }
                     }
                 }
