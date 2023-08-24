@@ -88,17 +88,16 @@ struct SceneGraph
 	NodeID AddChild(NodeID Parent, const char8_t* Name)
 	{
 		assert(Parent.IsValid() && Parent.GetIndex() < Nodes.size());
-		Node& ParentNode = Nodes[Parent.GetIndex()];
-		if (ParentNode.HasChild())
+		if (Nodes[Parent.GetIndex()].HasChild())
 		{
-			return AddSibling(ParentNode.GetChild(), Name);
+			return AddSibling(Nodes[Parent.GetIndex()].GetChild(), Name);
 		}
 		else
 		{
-			return AddNode(Parent, Name);
+			auto NextID = AddNode(Parent, Name);
+			Nodes[Parent.GetIndex()].SetChild(NextID);
+			return NextID;
 		}
-
-		return NodeID();
 	}
 
 	NodeID AddNode(NodeID Parent, const char8_t* Name)

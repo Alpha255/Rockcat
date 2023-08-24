@@ -51,7 +51,13 @@ public:
 			if (AiScene->HasMeshes())
 			{
 				ProcessMaterials(AiScene, Scene);
-				return ProcessNode(AiScene, AiScene->mRootNode, Scene);
+
+				if (AiScene->mRootNode)
+				{
+					Scene.Graph.Root = Scene.Graph.AddNode(SceneGraph::NodeID(), AiScene->mRootNode->mName.C_Str());
+					return ProcessNode(AiScene, AiScene->mRootNode, Scene.Graph.Root, Scene);
+				}
+				return false;
 			}
 			else
 			{
@@ -103,18 +109,19 @@ private:
 		bool8_t detachStream(Assimp::LogStream*, uint32_t) override final { return true; }
 	};
 
-	bool8_t ProcessNode(const aiScene* AiScene, const aiNode* AiNode, AssimpScene& AssimpScene)
+	bool8_t ProcessNode(const aiScene* AiScene, const aiNode* AiNode, SceneGraph::NodeID GraphNode, AssimpScene& AssimpScene)
 	{
 		if (!AiNode)
 		{
 			return false;
 		}
 
-		ProcessMeshes(AiScene, AiNode, AssimpScene);
+		auto Node = AiScene->mRootNode == AiNode ? GraphNode : AssimpScene.Graph.AddChild(GraphNode, AiNode->mName.C_Str());
+		ProcessMeshes(AiScene, AiNode, AssimpScene, Node);
 
 		for (uint32_t NodeIndex = 0u; NodeIndex < AiNode->mNumChildren; ++NodeIndex)
 		{
-			if (!ProcessNode(AiScene, AiNode->mChildren[NodeIndex], AssimpScene))
+			if (!ProcessNode(AiScene, AiNode->mChildren[NodeIndex], Node, AssimpScene))
 			{
 				return false;
 			}
@@ -252,7 +259,7 @@ private:
 		}
 	}
 
-	void ProcessMeshes(const aiScene* AiScene, const aiNode* AiNode, AssimpScene& AssimpScene)
+	void ProcessMeshes(const aiScene* AiScene, const aiNode* AiNode, AssimpScene& AssimpScene, SceneGraph::NodeID GraphNode)
 	{
 		for (uint32_t Index = 0u; Index < AiNode->mNumMeshes; ++Index)
 		{
@@ -272,6 +279,8 @@ private:
 				LOG_ERROR("AssimpSceneImporter: Detected others primitive type, this should never be happen!");
 				continue;
 			}
+
+			AssimpScene.Graph.AddChild(GraphNode, Mesh->mName.C_Str());
 
 			Math::AABB BoundingBox = Math::AABB(
 				Math::Vector3(Mesh->mAABB.mMin.x, Mesh->mAABB.mMin.y, Mesh->mAABB.mMin.z),
