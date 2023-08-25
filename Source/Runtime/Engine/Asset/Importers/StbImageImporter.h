@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Runtime/Engine/Asset/ImageAsset.h"
+#include "Runtime/Engine/RHI/RHIImage.h"
 #pragma warning(disable:4244)
 #include <Submodules/stb/stb_image.h>
 #pragma warning(default:4244)
@@ -57,6 +58,13 @@ public:
 		{
 			LOG_ERROR("StbImageImporter: Failed to load image \"{}\": {}", Image.GetPath().generic_string(), stbi_failure_reason());
 		}
+
+		RHIImageCreateInfo CreateInfo = RHIImageCreateInfo()
+			.SetWidth(Width)
+			.SetHeight(Height)
+			.SetImageType(ERHIImageType::T_2D)
+			.SetFormat(ERHIFormat::RGBA8_UNorm)
+			.SetName(InAsset.GetPath().filename().generic_string());
 
 		return false;
 #if 0

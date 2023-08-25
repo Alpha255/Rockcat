@@ -12,6 +12,16 @@ public:
 	DECLARE_GLOBAL_GENERIC_VS_VARIABLES
 };
 
+class DefaultUnlitFS : public ShaderAsset
+{
+public:
+	DefaultUnlitFS()
+		: ShaderAsset("DefaultUnlit.frag")
+	{
+	}
+	DECLARE_GLOBAL_DEFAULT_UNLIT_FS_VARIABLES
+};
+
 class DefaultLitFS : public ShaderAsset
 {
 public:
@@ -20,6 +30,16 @@ public:
 	{
 	}
 	DECLARE_GLOBAL_DEFAULT_LIT_FS_VARIABLES
+};
+
+class DefaultToonFS : public ShaderAsset
+{
+public:
+	DefaultToonFS()
+		: ShaderAsset("DefaultToon.frag")
+	{
+	}
+	DECLARE_GLOBAL_DEFAULT_TOON_FS_VARIABLES
 };
 
 template<class FS, class VS = GenericVS>
@@ -79,7 +99,31 @@ private:
 	std::string m_Name;
 	ERHICullMode m_CullMode = ERHICullMode::BackFace;
 	bool8_t m_DoubleSided = false;
-	MaterialID m_ID;
+	MaterialID m_ID = ~0;
+};
+
+class MaterialUnlit : public BaseMaterial<DefaultUnlitFS>
+{
+public:
+	MaterialUnlit()
+		: BaseMaterial("DefaultUnlit")
+	{
+	}
+
+	~MaterialUnlit()
+	{
+		SerializeProperties();
+		Save<MaterialUnlit>(true);
+	}
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(BaseMaterialType)
+		);
+	}
+private:
 };
 
 class MaterialLit : public BaseMaterial<DefaultLitFS>
@@ -109,4 +153,28 @@ public:
 	}
 private:
 	EShadingMode m_ShadingMode = EShadingMode::BlinnPhong;
+};
+
+class MaterialToon : public BaseMaterial<DefaultToonFS>
+{
+public:
+	MaterialToon()
+		: BaseMaterial("DefaultToon")
+	{
+	}
+
+	~MaterialToon()
+	{
+		SerializeProperties();
+		Save<MaterialToon>(true);
+	}
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(BaseMaterialType)
+		);
+	}
+private:
 };

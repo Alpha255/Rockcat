@@ -101,6 +101,8 @@ public:
 	const AssetRawData& GetRawData() const { return m_RawData; }
 	const std::filesystem::path& GetPath() const { return m_Path; }
 	std::time_t GetLastWriteTime() const { return m_LastWriteTime; }
+	void ReadRawData(AssetType::EContentsType ContentsType);
+	void FreeRawData() { m_RawData.Deallocate(); }
 
 	bool8_t IsDirty() const
 	{
@@ -174,8 +176,6 @@ protected:
 	friend class AssetImportTask;
 
 	void SetStatus(EAssetStatus Status) { m_Status.store(Status); }
-	void ReadRawData(AssetType::EContentsType ContentsType);
-	void FreeRawData() { m_RawData.Deallocate(); }
 
 	virtual void OnPreLoad() { if (m_Callbacks.PreLoadCallback) { m_Callbacks.PreLoadCallback(*this); } }
 	virtual void OnReady() { if (m_Callbacks.ReadyCallback) { m_Callbacks.ReadyCallback(*this); } }
@@ -205,7 +205,7 @@ protected:
 		}
 		return 0u;
 	}
-private:
+
 	AssetRawData m_RawData;
 	std::atomic<EAssetStatus> m_Status = EAssetStatus::NotLoaded;
 
@@ -232,7 +232,10 @@ public:
 		return It == m_ValidAssetTypes.cend() ? nullptr : &(*It);
 	}
 
-	virtual bool8_t NeedLoadFromFile() { return false; }
+	virtual void LoadAssetData(std::shared_ptr<Asset>& Asset, AssetType::EContentsType ContentsType) 
+	{ 
+		Asset->ReadRawData(ContentsType); 
+	}
 
 	virtual std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) = 0;
 	virtual bool8_t Reimport(Asset& InAsset) = 0;

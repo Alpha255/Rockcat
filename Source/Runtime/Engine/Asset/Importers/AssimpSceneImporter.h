@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Runtime/Engine/Asset/SceneAsset.h"
+#include "Runtime/Engine/Asset/AssetDatabase.h"
+#include "Runtime/Engine/Asset/ImageAsset.h"
 #include <Submodules/assimp/include/assimp/Importer.hpp>
 #include <Submodules/assimp/include/assimp/ProgressHandler.hpp>
 #include <Submodules/assimp/include/assimp/scene.h>
@@ -24,7 +26,7 @@ public:
 	{
 	}
 
-	bool8_t NeedLoadFromFile() override final { return true; }
+	void LoadAssetData(std::shared_ptr<Asset>&, AssetType::EContentsType) override final {} /// Just load from file to avoid base path of texture broken
 
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<AssimpScene>(AssetPath); }
 
@@ -206,11 +208,19 @@ private:
 			}
 
 			aiString Path;
-			if (AI_SUCCESS == Material->GetTexture(TextureType, 0u, &Path))  /// How to do if the material has more than one textures for some texture type
+			if (AI_SUCCESS == Material->GetTexture(TextureType, 0u, &Path))  /// TODO: How to do if the material has more than one textures for some texture type ???
 			{
 				std::filesystem::path TexturePath = RootPath / Path.C_Str();
 				if (std::filesystem::exists(TexturePath))
 				{
+					auto AssetLoadCallbacks = std::make_optional(Asset::Callbacks{});
+					AssetLoadCallbacks.value().PreLoadCallback = [this](Asset& InAsset) {
+						Cast<ImageAsset>(InAsset);
+						/// Set sRGB
+					};
+
+					AssetDatabase::Get().FindOrImportAsset<ImageAsset>(TexturePath, AssetLoadCallbacks);
+
 					switch (TextureType)
 					{
 					case aiTextureType_DIFFUSE:
@@ -268,10 +278,12 @@ private:
 
 			if (!Mesh)
 			{
+				LOG_ERROR("AssimpSceneImporter: Detected invalid mesh!");
 				continue;
 			}
 			if (!Mesh->HasPositions())
 			{
+				LOG_ERROR("AssimpSceneImporter: The mesh contains no vertices data!");
 				continue;
 			}
 			if (Mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
@@ -280,86 +292,57 @@ private:
 				continue;
 			}
 
+			if (!Mesh->HasFaces())
+			{
+				LOG_ERROR("AssimpSceneImporter: The mesh constains no indices data!");
+				continue;
+			}
+
 			AssimpScene.Graph.AddChild(GraphNode, Mesh->mName.C_Str());
 
 			Math::AABB BoundingBox = Math::AABB(
 				Math::Vector3(Mesh->mAABB.mMin.x, Mesh->mAABB.mMin.y, Mesh->mAABB.mMin.z),
 				Math::Vector3(Mesh->mAABB.mMax.x, Mesh->mAABB.mMax.y, Mesh->mAABB.mMax.z));
+
+			for (uint32_t FaceIndex = 0u; FaceIndex < Mesh->mNumFaces; ++FaceIndex)
+			{
+				const auto& Face = Mesh->mFaces[FaceIndex];
+				assert(Face.mNumIndices == 3u);
+				//Layout.SetFace(FaceIndex, Face.mIndices[0], Face.mIndices[1], Face.mIndices[2]);
+			}
+
+			for (uint32_t VIndex = 0u; VIndex < Mesh->mNumVertices; ++VIndex)
+			{
+				const auto& Position = Mesh->mVertices[VIndex];
+				//Layout.SetPosition(VertexIndex, Vector3(Position.x, Position.y, Position.z));
+				if (Mesh->HasNormals())
+				{
+					const auto& Normal = Mesh->mNormals[VIndex];
+					//Layout.SetNormal(VertexIndex, Vector3(Normal.x, Normal.y, Normal.z));
+				}
+				if (Mesh->HasTangentsAndBitangents())
+				{
+					const auto& Tangent = Mesh->mTangents[VIndex];
+					//Layout.SetTangent(VertexIndex, Vector3(Tangent.x, Tangent.y, Tangent.z));
+
+					const auto& Bitangent = Mesh->mBitangents[VIndex];
+					//Layout.SetBitangent(VertexIndex, Vector3(Bitangent.x, Bitangent.y, Bitangent.z));
+				}
+
+				if (Mesh->HasTextureCoords(0))
+				{
+					const auto& UV0 = Mesh->mTextureCoords[0u][VIndex];
+				}
+				if (Mesh->HasTextureCoords(1))
+				{
+					const auto& UV1 = Mesh->mTextureCoords[0u][VIndex];
+				}
+
+				if (Mesh->HasVertexColors(0))
+				{
+					const auto& Color = Mesh->mColors[0u][VIndex];
+				}
+			}
 		}
 	}
 };
-
-#if 0
-
-	std::vector<uint32_t> UVs;
-	std::vector<uint32_t> Colors;
-	for (uint32_t UVIndex = 0u; UVIndex < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++UVIndex)
-	{
-		if (UVs.size() >= Mesh::VertexLayout::ELimits::MaxUVs)
-		{
-			break;
-		}
-		if (AssimpMesh->HasTextureCoords(UVIndex))
-		{
-			UVs.push_back(UVIndex);
-		}
-	}
-	for (uint32_t ColorIndex = 0u; ColorIndex < AI_MAX_NUMBER_OF_COLOR_SETS; ++ColorIndex)
-	{
-		if (Colors.size() >= Mesh::VertexLayout::ELimits::MaxColors)
-		{
-			break;
-		}
-		if (AssimpMesh->HasVertexColors(ColorIndex))
-		{
-			Colors.push_back(ColorIndex);
-		}
-	}
-
-	Mesh::VertexLayout Layout(
-		AssimpMesh->mNumVertices,
-		AssimpMesh->mNumFaces * 3u,
-		AssimpMesh->HasNormals(),
-		AssimpMesh->HasTangentsAndBitangents(),
-		static_cast<uint32_t>(UVs.size()),
-		static_cast<uint32_t>(Colors.size()));
-
-	assert(AssimpMesh->HasFaces());
-	for (uint32_t FaceIndex = 0u; FaceIndex < AssimpMesh->mNumFaces; ++FaceIndex)
-	{
-		const auto& Face = AssimpMesh->mFaces[FaceIndex];
-		assert(Face.mNumIndices == 3u);
-		Layout.SetFace(FaceIndex, Face.mIndices[0], Face.mIndices[1], Face.mIndices[2]);
-	}
-
-	for (uint32_t VertexIndex = 0u; VertexIndex < AssimpMesh->mNumVertices; ++VertexIndex)
-	{
-		const auto& Position = AssimpMesh->mVertices[VertexIndex];
-		Layout.SetPosition(VertexIndex, Vector3(Position.x, Position.y, Position.z));
-		if (AssimpMesh->HasNormals())
-		{
-			const auto& Normal = AssimpMesh->mNormals[VertexIndex];
-			Layout.SetNormal(VertexIndex, Vector3(Normal.x, Normal.y, Normal.z));
-		}
-		if (AssimpMesh->HasTangentsAndBitangents())
-		{
-			const auto& Tangent = AssimpMesh->mTangents[VertexIndex];
-			Layout.SetTangent(VertexIndex, Vector3(Tangent.x, Tangent.y, Tangent.z));
-
-			const auto& Bitangent = AssimpMesh->mBitangents[VertexIndex];
-			Layout.SetBitangent(VertexIndex, Vector3(Bitangent.x, Bitangent.y, Bitangent.z));
-		}
-		for (uint32_t UVIndex = 0u; UVIndex < UVs.size(); ++UVIndex)
-		{
-			auto Index = UVs[UVIndex];
-			const auto& UV = AssimpMesh->mTextureCoords[Index][VertexIndex];
-			Layout.SetUV(VertexIndex, Index, Vector3(UV.x, UV.y, UV.z));
-		}
-		for (uint32_t ColorIndex = 0u; ColorIndex < Colors.size(); ++ColorIndex)
-		{
-			auto Index = Colors[ColorIndex];
-			const auto& ColorValue = AssimpMesh->mColors[Index][VertexIndex];
-			Layout.SetColor(VertexIndex, ColorIndex, Color(ColorValue.r, ColorValue.g, ColorValue.b, ColorValue.a));
-		}
-	}
-#endif

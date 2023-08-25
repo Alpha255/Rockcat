@@ -36,12 +36,10 @@ public:
 	}
 private:
 	template<class StringType>
-	static std::filesystem::path GetGenericAssetPath(StringType&& AssetPath)
+	static std::filesystem::path GetGenericAssetPath(StringType&& AssetPath, bool8_t Lowercase = false)
 	{
-		return std::filesystem::path(
-			StringUtils::Replace(
-				StringUtils::Lowercase(
-					std::filesystem::path(std::forward<StringType>(AssetPath)).generic_string()), "/", "\\"));
+		auto GenericPath = std::filesystem::path(std::forward<StringType>(AssetPath)).make_preferred();
+		return Lowercase ? std::filesystem::path(StringUtils::Lowercase(std::filesystem::path(GenericPath).generic_string())) : GenericPath;
 	}
 
 	void CreateAssetImporters();

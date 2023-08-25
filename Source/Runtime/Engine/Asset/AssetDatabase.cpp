@@ -26,10 +26,7 @@ public:
 
 		m_Asset->SetStatus(Asset::EAssetStatus::Loading);
 
-		if (!m_AssetImporter.NeedLoadFromFile())
-		{
-			m_Asset->ReadRawData(m_AssetType->ContentsType);
-		}
+		m_AssetImporter.LoadAssetData(m_Asset, m_AssetType->ContentsType);
 
 		if (m_AssetImporter.Reimport(*m_Asset))
 		{

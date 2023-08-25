@@ -3,7 +3,7 @@
 #include "Runtime/Engine/Asset/SceneAsset.h"
 #include "Runtime/Core/Main.h"
 #include "Runtime/Engine/Async/Task.h"
-#include "Runtime/Engine/Asset/GlobalShaders/Lit.h"
+#include "Runtime/Engine/Asset/GlobalShaders/DefaultShading.h"
 //#include <Submodules/imgui/imgui.h>
 
 void RenderTest::OnStartup()
