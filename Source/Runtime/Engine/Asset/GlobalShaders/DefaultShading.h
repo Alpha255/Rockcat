@@ -48,8 +48,18 @@ class BaseMaterial : public MaterialAsset, public VS, public FS
 public:
 	using BaseMaterialType = BaseMaterial<FS, VS>;
 
-	BaseMaterial(const char8_t* MaterialAssetName)
+	template<class StringType>
+	BaseMaterial(StringType&& MaterialAssetName)
+		: MaterialAsset(std::forward<StringType>(MaterialAssetName))
+	{
+		VS::ShaderVariables::AddShaderVariables(*this, *this);
+		FS::ShaderVariables::AddShaderVariables(*this, *this);
+	}
+
+	BaseMaterial(MaterialID ID, EShadingMode ShadingMode, const char8_t* MaterialAssetName)
 		: MaterialAsset(MaterialAssetName)
+		, m_ID(ID)
+		, m_ShadingMode(ShadingMode)
 		, m_Name(MaterialAssetName)
 	{
 		assert(MaterialAssetName);
@@ -58,7 +68,7 @@ public:
 		FS::ShaderVariables::AddShaderVariables(*this, *this);
 	}
 
-	MaterialID GetID() const { return m_ID; }
+	const MaterialID& GetID() const { return m_ID; }
 
 	const char8_t* GetName() const { return m_Name.c_str(); }
 	void SetName(const char8_t* Name) 
@@ -74,17 +84,17 @@ public:
 	bool8_t IsDoubleSided() const { return m_DoubleSided; }
 	void SetDoubleSided(bool8_t DoubleSided) { m_DoubleSided = DoubleSided; }
 
-	void CreateInstance(const char8_t* InstanceName);
+	EShadingMode GetShadingMode() const { return m_ShadingMode; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
 			CEREAL_BASE(MaterialAsset),
-			CEREAL_NVP(m_Name),
 			CEREAL_NVP(m_CullMode),
 			CEREAL_NVP(m_DoubleSided),
-			CEREAL_NVP(m_ID)
+			CEREAL_NVP(m_ShadingMode),
+			CEREAL_NVP(m_Name)
 		);
 	}
 protected:
@@ -95,18 +105,25 @@ protected:
 			Property.second.Value = Property.second.Getter();
 		}
 	}
+
+	static constexpr bool8_t IsValidName(const char8_t* Name) { return Name ? strlen(Name) > 0u : false; }
+
+	void SetShadingMode(EShadingMode ShadingMode) { m_ShadingMode = ShadingMode; }
 private:
-	std::string m_Name;
+	MaterialID m_ID;
 	ERHICullMode m_CullMode = ERHICullMode::BackFace;
 	bool8_t m_DoubleSided = false;
-	MaterialID m_ID = ~0;
+	EShadingMode m_ShadingMode = EShadingMode::Unlit;
+	std::string m_Name;
 };
 
 class MaterialUnlit : public BaseMaterial<DefaultUnlitFS>
 {
 public:
-	MaterialUnlit()
-		: BaseMaterial("DefaultUnlit")
+	using BaseMaterial::BaseMaterial;
+
+	MaterialUnlit(MaterialID ID = MaterialID::NullIndex, const char8_t* Name = nullptr)
+		: BaseMaterial(ID, EShadingMode::Unlit, IsValidName(Name) ? Name : "DefaultUnlit")
 	{
 	}
 
@@ -129,13 +146,19 @@ private:
 class MaterialLit : public BaseMaterial<DefaultLitFS>
 {
 public:
-	MaterialLit()
-		: BaseMaterial("DefaultLit")
+	using BaseMaterial::BaseMaterial;
+
+	MaterialLit(MaterialID ID = MaterialID::NullIndex, EShadingMode ShadingMode = EShadingMode::BlinnPhong, const char8_t* Name = nullptr)
+		: BaseMaterial(ID, ShadingMode, IsValidName(Name) ? Name : "DefaultLit")
 	{
+		assert(ShadingMode == EShadingMode::BlinnPhong || ShadingMode == EShadingMode::StandardPBR);
 	}
 
-	EShadingMode GetShadingMode() const { return m_ShadingMode; }
-	void SetShadingMode(EShadingMode ShadingMode) { m_ShadingMode = ShadingMode; }
+	void SetShadingMode(EShadingMode ShadingMode) 
+	{ 
+		assert(ShadingMode == EShadingMode::BlinnPhong || ShadingMode == EShadingMode::StandardPBR);
+		BaseMaterial::SetShadingMode(ShadingMode);
+	}
 
 	~MaterialLit()
 	{
@@ -147,19 +170,18 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(BaseMaterialType),
-			CEREAL_NVP(m_ShadingMode)
+			CEREAL_BASE(BaseMaterialType)
 		);
 	}
-private:
-	EShadingMode m_ShadingMode = EShadingMode::BlinnPhong;
 };
 
 class MaterialToon : public BaseMaterial<DefaultToonFS>
 {
 public:
-	MaterialToon()
-		: BaseMaterial("DefaultToon")
+	using BaseMaterial::BaseMaterial;
+
+	MaterialToon(MaterialID ID = MaterialID::NullIndex, const char8_t* Name = nullptr)
+		: BaseMaterial(ID, EShadingMode::Toon, IsValidName(Name) ? Name : "DefaultToon")
 	{
 	}
 

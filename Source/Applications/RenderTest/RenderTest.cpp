@@ -1,8 +1,6 @@
 #include "Applications/RenderTest/RenderTest.h"
-#include "Runtime/Engine/Scene/Scene.h"
-#include "Runtime/Engine/Asset/SceneAsset.h"
 #include "Runtime/Core/Main.h"
-#include "Runtime/Engine/Async/Task.h"
+#include "Runtime/Engine/Scene/Scene.h"
 #include "Runtime/Engine/Asset/GlobalShaders/DefaultShading.h"
 //#include <Submodules/imgui/imgui.h>
 
@@ -29,13 +27,21 @@ void RenderTest::OnStartup()
 			.SetProjectionMatrix(Math::Matrix())
 			.SetViewMatrix(Math::Matrix());
 		Material.DefaultLitFS::GetShaderVariables()
-			.SetDiffuseMap(RHIImageVariable{ "ToyCar\\glTF\\Fabric_baseColor.png" });
+			.SetBaseColorMap("ToyCar\\glTF\\Fabric_baseColor.png");
+
+		int x = 0;
 	}
+
+	auto Mat = MaterialLit::Load<MaterialLit>("DefaultLit");
 	
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");
 }
 
-void RenderTest::OnRender()
+void RenderTest::OnRenderScene()
+{
+}
+
+void RenderTest::OnRenderGUI()
 {
 #if 0
 	ImGui::Begin("Settings");
@@ -45,7 +51,7 @@ void RenderTest::OnRender()
 	ImGui::Text("FPS %.2f", RHI::Profiler::Stats::Get().FPS());
 
 	ImGui::ShowDemoWindow();
-	
+
 	ImGui::End();
 #endif
 }

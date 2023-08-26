@@ -2,6 +2,7 @@
 
 #include "Runtime/Core/Math/Matrix.h"
 #include "Runtime/Engine/Asset/SerializableAsset.h"
+#include "Runtime/Engine/Asset/ImageAsset.h"
 #include "Runtime/Engine/RHI/RHIShader.h"
 #include "Runtime/Engine/RHI/RHIImage.h"
 
@@ -13,44 +14,13 @@ enum class EShadingMode
 	Toon
 };
 
-struct ShaderMetaData
-{
-	ERHIShaderStage Stage;
-	std::string SourceFilePath;
-	std::string EntryName;
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(Stage),
-			CEREAL_NVP(SourceFilePath),
-			CEREAL_NVP(EntryName)
-		);
-	}
-};
-
-struct RHIImageVariable
-{
-	std::string ImagePath;
-	RHIImage* Image = nullptr;
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(ImagePath)
-		);
-	}
-};
-
 using ShaderVariant = std::variant<
 	float32_t, int32_t, uint32_t,
 	Math::Vector2,
 	Math::Vector3,
 	Math::Vector4,
 	Math::Matrix,
-	RHIImageVariable>;
+	std::shared_ptr<ImageAsset>>;
 
 
 struct MaterialProperty
@@ -115,26 +85,4 @@ protected:
 	std::unordered_map<std::string, MaterialProperty> m_Properties;
 };
 
-using MaterialID = uint32_t;
-
-class MaterialInstance
-{
-};
-
-#if 0
-template<class ShadingModeFS>
-class Material : public MaterialAsset, public ShadingModeFS
-{
-public:
-	using MaterialAsset::MaterialAsset;
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_BASE(MaterialAsset)
-		);
-	}
-private:
-};
-#endif
+using MaterialID = ObjectID<MaterialAsset, uint32_t>;

@@ -24,7 +24,7 @@ std::shared_ptr<RHIShaderCreateInfo> DxcShaderCompiler::Compile(
 	size_t SourceCodeSize,
 	const char8_t* ShaderEntryName,
 	ERHIShaderStage ShaderStage,
-	const ShaderDefinitions& Definitions)
+	const ShaderDefines& Definitions)
 {
 	assert(SourceCode && SourceCodeSize && ShaderEntryName && ShaderStage < ERHIShaderStage::Num);
 
@@ -122,7 +122,7 @@ std::shared_ptr<RHIShaderCreateInfo> D3DShaderCompiler::Compile(
 	size_t SourceCodeSize,
 	const char8_t* ShaderEntryName,
 	ERHIShaderStage ShaderStage,
-	const class ShaderDefinitions& Definitions)
+	const class ShaderDefines& Definitions)
 {
 	assert(SourceCode && SourceCodeSize && ShaderEntryName && ShaderStage < ERHIShaderStage::Num);
 

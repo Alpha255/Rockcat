@@ -14,18 +14,25 @@ public:
 
 	constexpr ObjectID() = default;
 
-	constexpr explicit ObjectID(TIndex Index)
+	constexpr ObjectID(TIndex Index)
 		: m_Index(Index)
 	{
-		assert(m_Index < NullIndex);
 	}
 
-	template<class UIndex>
-	constexpr explicit ObjectID(UIndex Index)
-		: m_Index(static_cast<IndexType>(Index))
+	constexpr ObjectID(const ObjectID& Other)
+		: m_Index(Other.m_Index)
 	{
-		assert(m_Index < NullIndex);
 	}
+
+	constexpr ObjectID(ObjectID&& Other)
+		: m_Index(Other.m_Index)
+	{
+		Other.m_Index = NullIndex;
+	}
+
+	constexpr ObjectID& operator=(const TIndex Index) { m_Index = Index; return *this; }
+
+	constexpr ObjectID& operator=(const ObjectID& Other) { m_Index = Other.m_Index; return *this; }
 
 	constexpr TIndex GetIndex() const { assert(IsValid()); return m_Index; }
 

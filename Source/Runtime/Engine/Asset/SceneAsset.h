@@ -9,7 +9,7 @@ struct SceneData
 {
 	std::vector<StaticMesh> StaticMeshes;
 	std::vector<Math::Transform> Transforms;
-	std::vector<MaterialInstance*> Materials;
+	std::vector<std::shared_ptr<MaterialAsset>> Materials;
 };
 
 class SceneAsset : public SerializableAsset<SceneAsset>

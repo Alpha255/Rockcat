@@ -15,7 +15,7 @@ DECLARE_OBJECT_ID(Asset, uint32_t)
 struct AssetRawData
 {
 	size_t SizeInBytes = 0u;
-	std::unique_ptr<byte8_t> Data;
+	std::shared_ptr<byte8_t> Data;
 private:
 	friend class Asset;
 

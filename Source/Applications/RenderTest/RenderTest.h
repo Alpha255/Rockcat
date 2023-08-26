@@ -9,7 +9,9 @@ public:
 
 	void OnStartup() override final;
 
-	void OnRender() override final;
+	void OnRenderScene() override final;
+
+	void OnRenderGUI() override final;
 protected:
 private:
 	std::shared_ptr<class Scene> m_Scene;

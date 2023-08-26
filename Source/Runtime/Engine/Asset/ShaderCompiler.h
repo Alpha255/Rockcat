@@ -14,7 +14,7 @@ public:
 		size_t SourceCodeSize,
 		const char8_t* ShaderEntryName,
 		ERHIShaderStage ShaderStage,
-		const class ShaderDefinitions& Definitions) = 0;
+		const class ShaderDefines& Definitions) = 0;
 
 	static const char8_t* const GetShaderModelName(ERHIShaderStage ShaderState, bool8_t DXC)
 	{
@@ -47,7 +47,7 @@ public:
 		size_t SourceCodeSize,
 		const char8_t* ShaderEntryName,
 		ERHIShaderStage ShaderStage,
-		const class ShaderDefinitions& Definitions) override final;
+		const class ShaderDefines& Definitions) override final;
 protected:
 	using DxcCompiler = D3DHwResource<IDxcCompiler3>;
 	using DxcBlobEncoding = D3DHwResource<IDxcBlobEncoding>;
@@ -77,7 +77,7 @@ public:
 		size_t SourceCodeSize,
 		const char8_t* ShaderEntryName,
 		ERHIShaderStage ShaderStage,
-		const class ShaderDefinitions& Definitions) override final;
+		const class ShaderDefines& Definitions) override final;
 protected:
 	using D3D11ShaderReflection = D3DHwResource<ID3D11ShaderReflection>;
 

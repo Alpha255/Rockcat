@@ -3,7 +3,7 @@
 #include "Runtime/Core/StringUtils.h"
 #include "Runtime/Engine/Asset/SerializableAsset.h"
 
-class ShaderDefinitions
+class ShaderDefines
 {
 public:
 	void SetDefine(const char8_t* Name, const char8_t* Value) { m_Definitions[Name] = Value; }
@@ -12,9 +12,9 @@ public:
 	template<class T>
 	void SetDefine(const char8_t* Name, T Value) { m_Definitions[Name] = (std::stringstream() << Value).str(); }
 
-	void Merge(ShaderDefinitions&& Other) { m_Definitions.merge(Other.m_Definitions); }
+	void Merge(ShaderDefines&& Other) { m_Definitions.merge(Other.m_Definitions); }
 
-	void Merge(const ShaderDefinitions& Other)
+	void Merge(const ShaderDefines& Other)
 	{
 		for each (const auto& NameValue in Other.m_Definitions)
 		{
@@ -88,7 +88,7 @@ public:
 	}
 
 	const char8_t* const GetSourceCode() const { return GetRawData().Data.get(); }
-	const ShaderBinary* const GetShaderBinary(const ShaderDefinitions&) const { return nullptr; }
+	const ShaderBinary* const GetShaderBinary(const ShaderDefines&) const { return nullptr; }
 private:
 	std::shared_ptr<ShaderCache> m_Cache;
 };
@@ -136,9 +136,9 @@ namespace cereal
 		template<class Archive>
 		static void load_and_construct(Archive& Ar, cereal::construct<ShaderCache>& Construct)
 		{
-			const char8_t* ShaderName = nullptr;
-			Ar(ShaderName);
-			Construct(ShaderName);
+			std::string NullShaderName;
+			Ar(NullShaderName);
+			Construct(NullShaderName);
 		}
 	};
 }

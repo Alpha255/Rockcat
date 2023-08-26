@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Runtime/Engine/Asset/AssetDatabase.h"
 #include "Runtime/Engine/Application/BaseApplication.h"
 
 class Engine final : public NoneCopyable

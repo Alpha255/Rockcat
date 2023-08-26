@@ -2,9 +2,12 @@
 
 #include "Runtime/Core/StringUtils.h"
 #include "Runtime/Core/Module.h"
+#pragma warning(push)
+#pragma warning(disable:4702)
 #include <Submodules/spdlog/include/spdlog/spdlog.h>
 #include <Submodules/spdlog/include/spdlog/async_logger.h>
 #include <Submodules/spdlog/include/spdlog/sinks/windebug_sink.h>
+#pragma warning(pop)
 
 class SpdLogService : public IService<SpdLogService>
 {

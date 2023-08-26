@@ -24,5 +24,5 @@ public:
 	{
 	}
 private:
-	ShaderDefinitions m_Definitions;
+	ShaderDefines m_Definitions;
 };

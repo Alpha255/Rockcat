@@ -1,7 +1,7 @@
 #include "Runtime/Engine/Asset/SceneAsset.h"
 #include "Runtime/Engine/Scene/Scene.h"
 #include "Runtime/Engine/Scene/SceneBuilder.h"
-#include "Runtime/Engine/Engine.h"
+#include "Runtime/Engine/Asset/AssetDatabase.h"
 
 void SceneAsset::PostLoad()
 {

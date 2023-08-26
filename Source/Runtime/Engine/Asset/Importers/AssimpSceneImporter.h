@@ -2,7 +2,6 @@
 
 #include "Runtime/Engine/Asset/SceneAsset.h"
 #include "Runtime/Engine/Asset/AssetDatabase.h"
-#include "Runtime/Engine/Asset/ImageAsset.h"
 #include <Submodules/assimp/include/assimp/Importer.hpp>
 #include <Submodules/assimp/include/assimp/ProgressHandler.hpp>
 #include <Submodules/assimp/include/assimp/scene.h>

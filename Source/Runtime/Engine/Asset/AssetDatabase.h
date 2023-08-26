@@ -15,36 +15,36 @@ public:
 	static AssetDatabase& Get();
 
 	template<class TAsset, class StringType>
-	TAsset* FindOrImportAsset(StringType&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool8_t Async = true)
+	std::shared_ptr<TAsset> FindOrImportAsset(StringType&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool8_t Async = true)
 	{
-		auto GenericAssetPath = GetGenericAssetPath(std::forward<StringType>(AssetPath));
-		auto AssetIt = m_Assets.find(GenericAssetPath);
+		auto UnifyPath = GetUnifyAssetPath(std::forward<StringType>(AssetPath));
+		auto AssetIt = m_Assets.find(UnifyPath);
 		if (AssetIt != m_Assets.end())
 		{
-			return Cast<TAsset>(AssetIt->second.get());
+			return Cast<TAsset, Asset>(AssetIt->second);
 		}
 		else
 		{
-			return Cast<TAsset>(ReimportAssetInternal(GenericAssetPath, AssetLoadCallbacks, Async));
+			return Cast<TAsset>(ReimportAssetInternal(UnifyPath, AssetLoadCallbacks, Async));
 		}
 	}
 
 	template<class StringType>
 	void ReimportAsset(StringType&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool8_t Async = true)
 	{
-		return ReimportAssetInternal(GetGenericAssetPath(std::forward<StringType>(AssetPath)), AssetLoadCallbacks, Async);
+		ReimportAssetInternal(GetUnifyAssetPath(std::forward<StringType>(AssetPath)), AssetLoadCallbacks, Async);
 	}
 private:
 	template<class StringType>
-	static std::filesystem::path GetGenericAssetPath(StringType&& AssetPath, bool8_t Lowercase = false)
+	static std::filesystem::path GetUnifyAssetPath(StringType&& AssetPath, bool8_t Lowercase = false)
 	{
-		auto GenericPath = std::filesystem::path(std::forward<StringType>(AssetPath)).make_preferred();
-		return Lowercase ? std::filesystem::path(StringUtils::Lowercase(std::filesystem::path(GenericPath).generic_string())) : GenericPath;
+		auto UnifyPath = std::filesystem::path(std::forward<StringType>(AssetPath)).make_preferred();
+		return Lowercase ? std::filesystem::path(StringUtils::Lowercase(std::filesystem::path(UnifyPath).generic_string())) : UnifyPath;
 	}
 
 	void CreateAssetImporters();
 
-	Asset* ReimportAssetInternal(const std::filesystem::path& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks, bool8_t Async);
+	std::shared_ptr<Asset> ReimportAssetInternal(const std::filesystem::path& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks, bool8_t Async);
 
 	std::unordered_map<std::filesystem::path, std::shared_ptr<Asset>> m_Assets;
 	std::vector<std::unique_ptr<IAssetImporter>> m_AssetImporters;

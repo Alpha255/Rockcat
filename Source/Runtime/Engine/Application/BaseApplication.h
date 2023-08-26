@@ -15,7 +15,9 @@ public:
 
 	virtual void OnStartup() {}
 
-	virtual void OnRender() {}
+	virtual void OnRenderScene() {}
+
+	virtual void OnRenderGUI() {}
 
 	virtual void OnShutdown() {}
 

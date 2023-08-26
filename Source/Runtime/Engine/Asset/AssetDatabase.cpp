@@ -1,10 +1,10 @@
 #include "Runtime/Engine/Asset/AssetDatabase.h"
 #include "Runtime/Engine/Services/SpdLogService.h"
 #include "Runtime/Engine/Services/TaskFlowService.h"
-#include "Runtime/Engine/Asset/Importers/AssimpSceneImporter.h"
 #include "Runtime/Engine/Asset/Importers/DDSImageImporter.h"
 #include "Runtime/Engine/Asset/Importers/StbImageImporter.h"
 #include "Runtime/Engine/Asset/Importers/ShaderAssetImporter.h"
+#include "Runtime/Engine/Asset/Importers/AssimpSceneImporter.h"
 #include "Runtime/Engine/Async/Task.h"
 
 class AssetImportTask : public Task
@@ -61,13 +61,13 @@ AssetDatabase::AssetDatabase()
 
 void AssetDatabase::CreateAssetImporters()
 {
-	m_AssetImporters.emplace_back(std::make_unique<AssimpSceneImporter>());
 	m_AssetImporters.emplace_back(std::make_unique<DDSImageImporter>());
 	m_AssetImporters.emplace_back(std::make_unique<StbImageImporter>());
 	m_AssetImporters.emplace_back(std::make_unique<ShaderAssetImporter>());
+	m_AssetImporters.emplace_back(std::make_unique<AssimpSceneImporter>());
 }
 
-Asset* AssetDatabase::ReimportAssetInternal(const std::filesystem::path& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks, bool8_t Async)
+std::shared_ptr<Asset> AssetDatabase::ReimportAssetInternal(const std::filesystem::path& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks, bool8_t Async)
 {
 	if (std::filesystem::exists(AssetPath))
 	{
@@ -92,7 +92,7 @@ Asset* AssetDatabase::ReimportAssetInternal(const std::filesystem::path& AssetPa
 					NewTask.DoTask();
 				}
 
-				return NewAsset.get();
+				return NewAsset;
 			}
 		}
 
