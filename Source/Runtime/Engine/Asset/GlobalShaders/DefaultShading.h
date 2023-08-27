@@ -47,14 +47,7 @@ class BaseMaterial : public MaterialAsset, public VS, public FS
 {
 public:
 	using BaseMaterialType = BaseMaterial<FS, VS>;
-
-	template<class StringType>
-	BaseMaterial(StringType&& MaterialAssetName)
-		: MaterialAsset(std::forward<StringType>(MaterialAssetName))
-	{
-		VS::ShaderVariables::AddShaderVariables(*this, *this);
-		FS::ShaderVariables::AddShaderVariables(*this, *this);
-	}
+	using MaterialAsset::MaterialAsset;
 
 	BaseMaterial(MaterialID ID, EShadingMode ShadingMode, const char8_t* MaterialAssetName)
 		: MaterialAsset(MaterialAssetName)
@@ -109,6 +102,12 @@ protected:
 	static constexpr bool8_t IsValidName(const char8_t* Name) { return Name ? strlen(Name) > 0u : false; }
 
 	void SetShadingMode(EShadingMode ShadingMode) { m_ShadingMode = ShadingMode; }
+
+	void PostLoad() override final
+	{
+		VS::ShaderVariables::AddShaderVariables(*this, *this);
+		FS::ShaderVariables::AddShaderVariables(*this, *this);
+	}
 private:
 	MaterialID m_ID;
 	ERHICullMode m_CullMode = ERHICullMode::BackFace;

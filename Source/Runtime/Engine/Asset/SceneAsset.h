@@ -34,9 +34,8 @@ public:
 			CEREAL_NVP(m_Graph)
 		);
 	}
-
-	void PostLoad() override final;
 protected:
+	void PostLoad() override final;
 private:
 	std::vector<std::string> m_AssimpScenePaths;
 	std::shared_ptr<SceneGraph> m_Graph;

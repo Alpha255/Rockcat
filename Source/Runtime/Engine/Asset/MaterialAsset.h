@@ -74,7 +74,9 @@ public:
 		auto It = m_Properties.find(Name);
 		if (It != m_Properties.end())
 		{
-			It->second.Setter(It->second.Value);
+			auto Value = It->second.Value;
+			(*It).second = std::move(Property);
+			It->second.Setter(Value);
 		}
 		else
 		{

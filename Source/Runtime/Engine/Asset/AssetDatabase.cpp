@@ -11,7 +11,7 @@ class AssetImportTask : public Task
 {
 public:
 	AssetImportTask(const std::filesystem::path& AssetPath, IAssetImporter& AssetImporter, const AssetType* Type)
-		: Task(std::move(std::string("ImportAsset:") + AssetPath.generic_string()), ETaskType::General)
+		: Task(std::move(StringUtils::Format("ImportAsset: %s", AssetPath.generic_string().c_str())), ETaskType::General)
 		, m_AssetImporter(AssetImporter)
 		, m_Asset(std::move(AssetImporter.CreateAsset(AssetPath)))
 		, m_AssetType(Type)

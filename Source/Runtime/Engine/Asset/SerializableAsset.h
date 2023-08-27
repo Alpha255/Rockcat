@@ -88,9 +88,6 @@ public:
 
 	virtual const char8_t* GetExtension() const { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::Config); }
 
-	virtual void PreLoad() {}
-	virtual void PostLoad() {}
-
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
@@ -98,5 +95,8 @@ public:
 			CEREAL_BASE(Asset)
 		);
 	}
+protected:
+	virtual void PreLoad() {}
+	virtual void PostLoad() {}
 };
 
