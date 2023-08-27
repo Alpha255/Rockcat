@@ -130,6 +130,15 @@ public:
 	BIND_WITH_CONFIG(HasDynamicState)
 };
 
+class VkDepthStencilResolveExt : public VulkanDeviceExtension
+{
+public:
+	VkDepthStencilResolveExt()
+		: VulkanDeviceExtension(VK_KHR_DEPTH_STENCIL_RESOLVE_EXTENSION_NAME, false)
+	{
+	}
+};
+
 class VkValidationFeaturesExt : public VulkanInstanceExtension
 {
 public:
