@@ -26,13 +26,6 @@ enum class ERHIVertexInputRate : uint8_t
 	Instance,
 };
 
-enum class EShaderVariableType : uint32_t
-{
-	Uniform,
-	ImageSampler,
-	RWBuffer
-};
-
 struct RHIInputLayoutCreateInfo : public RHIHashedObject
 {
 	struct RHIVertexAttribute

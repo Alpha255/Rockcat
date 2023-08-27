@@ -207,6 +207,7 @@ VulkanExtensionArray VulkanExtension::GetWantedDeviceExtensions()
 	APPEND_EXT(VkDebugMarkerExt);
 	APPEND_EXT(VkTimelineSemaphoreExt);
 	APPEND_EXT(VkFullscreenExclusiveExt);
+	APPEND_EXT(VkDepthStencilResolveExt);
 
 	return WantedExts;
 }

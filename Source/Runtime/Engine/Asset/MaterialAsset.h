@@ -3,8 +3,7 @@
 #include "Runtime/Core/Math/Matrix.h"
 #include "Runtime/Engine/Asset/SerializableAsset.h"
 #include "Runtime/Engine/Asset/ImageAsset.h"
-#include "Runtime/Engine/RHI/RHIShader.h"
-#include "Runtime/Engine/RHI/RHIImage.h"
+#include "Runtime/Engine/RHI/RHIDeclarations.h"
 
 enum class EShadingMode
 {
@@ -14,7 +13,15 @@ enum class EShadingMode
 	Toon
 };
 
+enum class EShaderVariableType : uint32_t
+{
+	Uniform,
+	ImageSampler,
+	RWBuffer
+};
+
 using ShaderVariant = std::variant<
+	std::monostate,
 	float32_t, int32_t, uint32_t,
 	Math::Vector2,
 	Math::Vector3,
@@ -38,6 +45,8 @@ struct MaterialProperty
 
 	ShaderVariant Value;
 
+	bool8_t IsValueValid() const { return Value.index() != 0u; }
+
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
@@ -59,14 +68,7 @@ public:
 
 	const char8_t* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::Material); }
 
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_BASE(ParentClass),
-			CEREAL_NVP(m_Properties)
-		);
-	}
+	EShadingMode GetShadingMode() const { return m_ShadingMode; }
 
 	void RegisterProperty(const char8_t* InName, MaterialProperty&& Property)
 	{
@@ -76,15 +78,33 @@ public:
 		{
 			auto Value = It->second.Value;
 			(*It).second = std::move(Property);
-			It->second.Setter(Value);
+			if (It->second.IsValueValid())
+			{
+				It->second.Setter(Value);
+			}
 		}
 		else
 		{
 			m_Properties.insert(std::make_pair(Name, std::forward<MaterialProperty>(Property)));
 		}
 	}
+
+	virtual void Compile() {}
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(ParentClass),
+			CEREAL_NVP(m_Properties)
+		);
+	}
 protected:
+	void SetShadingMode(EShadingMode ShadingMode) { m_ShadingMode = ShadingMode; }
+
+	friend class AssimpSceneImporter;
 	std::unordered_map<std::string, MaterialProperty> m_Properties;
+	EShadingMode m_ShadingMode = EShadingMode::Unlit;
 };
 
 using MaterialID = ObjectID<MaterialAsset, uint32_t>;

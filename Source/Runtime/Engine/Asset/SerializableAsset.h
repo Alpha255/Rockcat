@@ -14,13 +14,13 @@ public:
 	using Asset::Asset;
 	using ParentClass = SerializableAsset<T>;
 
-	template<class Type = T, class StringType, class... TArgs>
-	static std::shared_ptr<Type> Load(StringType&& Path, TArgs&&... Args)
+	template<class Type = T, class... TArgs>
+	static std::shared_ptr<Type> Load(TArgs&&... Args)
 	{
 		static std::shared_ptr<Type> s_Asset;
 		if (!s_Asset)
 		{
-			s_Asset = std::make_shared<Type>(std::forward<StringType>(Path), std::forward<TArgs>(Args)...);
+			s_Asset = std::make_shared<Type>(std::forward<TArgs>(Args)...);
 			s_Asset->Reload<Type>();
 		}
 

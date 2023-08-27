@@ -63,7 +63,7 @@ public:
 			.SetWidth(Width)
 			.SetHeight(Height)
 			.SetImageType(ERHIImageType::T_2D)
-			.SetFormat(ERHIFormat::RGBA8_UNorm)
+			.SetFormat(Image.IsSRGB() ? ERHIFormat::RGBA8_UNorm_SRGB : ERHIFormat::RGBA8_UNorm)
 			.SetName(InAsset.GetPath().filename().generic_string());
 
 		return false;

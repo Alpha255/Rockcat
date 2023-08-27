@@ -10,12 +10,18 @@
 class AssetImportTask : public Task
 {
 public:
-	AssetImportTask(const std::filesystem::path& AssetPath, IAssetImporter& AssetImporter, const AssetType* Type)
+	AssetImportTask(
+		Asset* TargetAsset,
+		const std::filesystem::path& AssetPath, 
+		IAssetImporter& AssetImporter, 
+		const AssetType* Type,
+		std::optional<Asset::Callbacks>& AssetLoadCallbacks)
 		: Task(std::move(StringUtils::Format("ImportAsset: %s", AssetPath.generic_string().c_str())), ETaskType::General)
 		, m_AssetImporter(AssetImporter)
-		, m_Asset(std::move(AssetImporter.CreateAsset(AssetPath)))
+		, m_Asset(TargetAsset ? std::move(std::shared_ptr<Asset>(TargetAsset)) : std::move(AssetImporter.CreateAsset(AssetPath)))
 		, m_AssetType(Type)
 	{
+		m_Asset->SetCallbacks(AssetLoadCallbacks);
 	}
 
 	std::shared_ptr<Asset> GetAsset() const { return m_Asset; }
@@ -67,7 +73,11 @@ void AssetDatabase::CreateAssetImporters()
 	m_AssetImporters.emplace_back(std::make_unique<AssimpSceneImporter>());
 }
 
-std::shared_ptr<Asset> AssetDatabase::ReimportAssetInternal(const std::filesystem::path& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks, bool8_t Async)
+std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(
+	Asset* TargetAsset,
+	const std::filesystem::path& AssetPath, 
+	std::optional<Asset::Callbacks>& AssetLoadCallbacks, 
+	bool8_t Async)
 {
 	if (std::filesystem::exists(AssetPath))
 	{
@@ -77,9 +87,8 @@ std::shared_ptr<Asset> AssetDatabase::ReimportAssetInternal(const std::filesyste
 		{
 			if (auto AssetType = AssetImporter->FindValidAssetType(AssetExt))
 			{
-				AssetImportTask NewTask(AssetPath, *AssetImporter, AssetType);
+				AssetImportTask NewTask(TargetAsset, AssetPath, *AssetImporter, AssetType, AssetLoadCallbacks);
 				auto NewAsset = NewTask.GetAsset();
-				NewAsset->SetCallbacks(AssetLoadCallbacks);
 
 				m_Assets.insert(std::make_pair(AssetPath, NewAsset));
 

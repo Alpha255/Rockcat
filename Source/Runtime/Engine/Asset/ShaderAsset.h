@@ -59,7 +59,7 @@ class ShaderCache : public SerializableAsset<ShaderCache>
 public:
 	template<class StringType>
 	ShaderCache(StringType&& ShaderName)
-		: ParentClass(GetShaderCachePath(std::filesystem::path(std::move(ShaderName)).u8string().c_str()))
+		: ParentClass(GetShaderCachePath(std::filesystem::path(std::move(ShaderName)).generic_string().c_str()))
 	{
 	}
 
@@ -77,7 +77,7 @@ private:
 	std::unordered_map<std::string, ShaderBinary> m_CachedShaderBinaries;
 };
 
-class ShaderAsset : public Asset
+class ShaderAsset : public Asset, public ShaderDefines
 {
 public:
 	template<class StringType>
@@ -87,8 +87,9 @@ public:
 	{
 	}
 
+	void Compile() {}
+
 	const char8_t* const GetSourceCode() const { return GetRawData().Data.get(); }
-	const ShaderBinary* const GetShaderBinary(const ShaderDefines&) const { return nullptr; }
 private:
 	std::shared_ptr<ShaderCache> m_Cache;
 };
