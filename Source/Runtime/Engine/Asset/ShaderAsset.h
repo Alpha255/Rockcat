@@ -59,7 +59,7 @@ class ShaderCache : public SerializableAsset<ShaderCache>
 public:
 	template<class StringType>
 	ShaderCache(StringType&& ShaderName)
-		: ParentClass(GetShaderCachePath(std::filesystem::path(std::move(ShaderName)).generic_string().c_str()))
+		: BaseClass(GetShaderCachePath(std::filesystem::path(std::move(ShaderName)).generic_string().c_str()))
 	{
 	}
 
@@ -69,7 +69,7 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(ParentClass)
+			CEREAL_BASE(BaseClass)
 		);
 	}
 private:
@@ -87,9 +87,7 @@ public:
 	{
 	}
 
-	void Compile() {}
-
-	const char8_t* const GetSourceCode() const { return GetRawData().Data.get(); }
+	void Compile();
 private:
 	std::shared_ptr<ShaderCache> m_Cache;
 };
@@ -97,7 +95,7 @@ private:
 struct MemoryBlock : public SerializableAsset<MemoryBlock>
 {
 public:
-	using ParentClass::ParentClass;
+	using BaseClass::BaseClass;
 
 	size_t SizeInBytes = 0u;
 	std::shared_ptr<byte8_t> RawData;
@@ -106,7 +104,7 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(ParentClass),
+			CEREAL_BASE(BaseClass),
 			CEREAL_NVP(SizeInBytes)
 		);
 

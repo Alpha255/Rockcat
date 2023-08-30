@@ -96,7 +96,7 @@ public:
 	}
 
 	EAssetStatus GetStatus() const { return m_Status.load(); }
-	bool8_t IsReady() const { return GetStatus() == EAssetStatus::Ready; }
+	virtual bool8_t IsReady() const { return GetStatus() == EAssetStatus::Ready; }
 	bool8_t IsLoading() const { return GetStatus() == EAssetStatus::Loading; }
 	const AssetRawData& GetRawData() const { return m_RawData; }
 	const std::filesystem::path& GetPath() const { return m_Path; }

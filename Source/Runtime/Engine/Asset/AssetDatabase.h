@@ -2,17 +2,16 @@
 
 #include "Runtime/Engine/Asset/Asset.h"
 #include "Runtime/Core/StringUtils.h"
+#include "Runtime/Core/Module.h"
 
 DECLARE_OBJECT_ID(Asset, uint32_t)
 
-class AssetDatabase
+class AssetDatabase : public IService<AssetDatabase>
 {
 public:
 	AssetDatabase();
 
-	~AssetDatabase() = default;
-
-	static AssetDatabase& Get();
+	void OnShutdown() override final;
 
 	template<class TAsset, class StringType>
 	std::shared_ptr<TAsset> FindOrImportAsset(StringType&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool8_t Async = true)

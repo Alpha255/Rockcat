@@ -17,8 +17,7 @@ class SceneAsset : public SerializableAsset<SceneAsset>
 public:
 	template<class StringType>
 	SceneAsset(StringType&& SceneAssetName)
-		: ParentClass(Asset::GetPrefabricateAssetPath(SceneAssetName, Asset::EPrefabAssetType::Scene))
-		, m_Graph(std::move(std::make_shared<SceneGraph>()))
+		: BaseClass(Asset::GetPrefabricateAssetPath(SceneAssetName, Asset::EPrefabAssetType::Scene))
 	{
 	}
 

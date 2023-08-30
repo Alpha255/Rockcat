@@ -41,6 +41,7 @@ __pycache__/
 Assets/Configurations
 Assets/Shaders/ShaderCache
 Assets/Shaders/Cache
+Assets/Materials/*.material
 build
 Out/Intermediate
 Out/*.json

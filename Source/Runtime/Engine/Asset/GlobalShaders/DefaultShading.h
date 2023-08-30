@@ -78,11 +78,9 @@ public:
 	bool8_t IsDoubleSided() const { return m_DoubleSided; }
 	void SetDoubleSided(bool8_t DoubleSided) { m_DoubleSided = DoubleSided; }
 
-	void Compile() override final
-	{
-		VS::Compile();
-		FS::Compile();
-	}
+	bool8_t IsReady() const override final { return Asset::IsReady() && VS::IsReady() && FS::IsReady(); }
+
+	void Compile() override final { VS::Compile(); FS::Compile(); }
 
 	template<class Archive>
 	void serialize(Archive& Ar)

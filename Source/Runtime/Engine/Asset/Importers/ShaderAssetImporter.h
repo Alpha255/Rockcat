@@ -25,6 +25,6 @@ private:
 	class GlobalShaderCompileConfigurations : public SerializableAsset<GlobalShaderCompileConfigurations>
 	{
 	public:
-		using ParentClass::ParentClass;
+		using BaseClass::BaseClass;
 	};
 };

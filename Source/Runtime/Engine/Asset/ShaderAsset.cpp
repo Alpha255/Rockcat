@@ -16,13 +16,15 @@ class ShaderCompileTask : public Task
 {
 public:
 	ShaderCompileTask(const char8_t* ShaderName)
-		: Task(std::move(std::string("Compile shader:") + ShaderName), ETaskType::ShaderCompile, EPriority::High)
+		: Task(std::move(StringUtils::Format("Compile shader: %s ...", ShaderName)), ETaskType::ShaderCompile, EPriority::High)
 	{
 	}
 
 	void DoTask() override final
 	{
 	}
-private:
-	ShaderDefines m_Definitions;
 };
+
+void ShaderAsset::Compile()
+{
+}

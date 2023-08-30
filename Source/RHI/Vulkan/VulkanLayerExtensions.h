@@ -18,7 +18,7 @@ inline void SetPNext(LastStruct& Last, NextStruct& Next)
 
 struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayerExtensionConfigurations>
 {
-	using ParentClass::ParentClass;
+	using BaseClass::BaseClass;
 
 	ERHIDebugLayerLevel DebugLayerLevel = ERHIDebugLayerLevel::Error;
 

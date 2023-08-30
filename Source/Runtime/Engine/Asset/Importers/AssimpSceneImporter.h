@@ -219,12 +219,9 @@ private:
 					break;
 				}
 
-				AssimpScene.Data.Materials[Index]->SetStatus(Asset::EAssetStatus::Loading);
+				AssimpScene.Data.Materials[Index]->Compile();
 
 				ProcessTextures(Material, AssimpScene.Data.Materials[Index].get(), AssimpScene.GetPath().parent_path());
-
-				AssimpScene.Data.Materials[Index]->Compile();
-				AssimpScene.Data.Materials[Index]->SetStatus(Asset::EAssetStatus::Ready);
 			}
 			else
 			{
@@ -396,15 +393,19 @@ private:
 				LOG_ERROR("AssimpSceneImporter: The mesh contains no vertices data!");
 				continue;
 			}
-			if (Mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
+			if (!Mesh->HasNormals())
 			{
-				LOG_ERROR("AssimpSceneImporter: Detected others primitive type, this should never be happen!");
+				LOG_ERROR("AssimpSceneImporter: The mesh constains normals!");
 				continue;
 			}
-
 			if (!Mesh->HasFaces())
 			{
 				LOG_ERROR("AssimpSceneImporter: The mesh constains no indices data!");
+				continue;
+			}
+			if (Mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
+			{
+				LOG_ERROR("AssimpSceneImporter: Detected others primitive type, this should never be happen!");
 				continue;
 			}
 

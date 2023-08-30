@@ -12,7 +12,7 @@ class SerializableAsset : public Asset
 {
 public:
 	using Asset::Asset;
-	using ParentClass = SerializableAsset<T>;
+	using BaseClass = SerializableAsset<T>;
 
 	template<class Type = T, class... TArgs>
 	static std::shared_ptr<Type> Load(TArgs&&... Args)

@@ -53,12 +53,6 @@ private:
 	const AssetType* m_AssetType;
 };
 
-AssetDatabase& AssetDatabase::Get()
-{
-	static AssetDatabase s_AssetDatabase;
-	return s_AssetDatabase;
-}
-
 AssetDatabase::AssetDatabase()
 	: m_SupportAsyncLoad(false)
 { 
@@ -111,4 +105,10 @@ std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(
 
 	LOG_ERROR("AssetDatabase:: Asset \"{}\" do not exists.", AssetPath.generic_string());
 	return nullptr;
+}
+
+void AssetDatabase::OnShutdown()
+{
+	m_Assets.clear();
+	m_AssetImporters.clear();
 }

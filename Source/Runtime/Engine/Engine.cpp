@@ -5,6 +5,7 @@
 #include "Runtime/Engine/Profile/CpuTimer.h"
 #include "Runtime/Engine/Services/SpdLogService.h"
 #include "Runtime/Engine/Services/RenderService.h"
+#include "Runtime/Engine/Asset/AssetDatabase.h"
 
 Engine& Engine::Get()
 {
@@ -74,5 +75,6 @@ bool8_t Engine::Initialize()
 
 void Engine::Finalize()
 {
+	AssetDatabase::Get().OnShutdown();
 	RenderService::Get().OnShutdown();
 }

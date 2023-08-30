@@ -7,7 +7,7 @@
 class ApplicationConfigurations : public SerializableAsset<ApplicationConfigurations>
 {
 public:
-	using ParentClass::ParentClass;
+	using BaseClass::BaseClass;
 
 	bool8_t IsEnableWindow() const { return m_EnableWindow; }
 	bool8_t IsEnableRendering() const { return m_EnableRendering; }

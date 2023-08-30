@@ -61,7 +61,7 @@ class MaterialAsset : public SerializableAsset<MaterialAsset>
 public:
 	template<class StringType>
 	MaterialAsset(StringType&& MaterialAssetName)
-		: ParentClass(Asset::GetPrefabricateAssetPath(MaterialAssetName, Asset::EPrefabAssetType::Material))
+		: BaseClass(Asset::GetPrefabricateAssetPath(MaterialAssetName, Asset::EPrefabAssetType::Material))
 	{
 	}
 	virtual ~MaterialAsset() = default;
@@ -95,7 +95,7 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(ParentClass),
+			CEREAL_BASE(BaseClass),
 			CEREAL_NVP(m_Properties)
 		);
 	}
