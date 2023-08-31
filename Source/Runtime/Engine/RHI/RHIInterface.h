@@ -3,6 +3,15 @@
 #include "Runtime/Core/Definitions.h"
 #include "Runtime/Engine/Application/GraphicsSettings.h"
 
+/// <summary>
+/// ****  Front face CCW
+/// ****  Matrix is in row major in Cpp
+/// ****  Matrix is in row major in shader
+/// ****  Cull back face
+/// ****  Left-hand coordinate
+/// ****  Depth range [0-1]
+/// </summary>
+
 class RHIInterface
 {
 public:

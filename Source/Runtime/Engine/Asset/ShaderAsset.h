@@ -6,29 +6,41 @@
 class ShaderDefines
 {
 public:
-	void SetDefine(const char8_t* Name, const char8_t* Value) { m_Definitions[Name] = Value; }
-	void SetDefine(const char8_t* Name, const std::string& Value) { m_Definitions[Name] = Value; }
+	void SetDefine(const char8_t* Name, const char8_t* Value) { m_Defines[Name] = Value; }
+	void SetDefine(const char8_t* Name, const std::string& Value) { m_Defines[Name] = Value; }
 
 	template<class T>
-	void SetDefine(const char8_t* Name, T Value) { m_Definitions[Name] = (std::stringstream() << Value).str(); }
+	void SetDefine(const char8_t* Name, T Value) { m_Defines[Name] = (std::stringstream() << Value).str(); }
 
-	void Merge(ShaderDefines&& Other) { m_Definitions.merge(Other.m_Definitions); }
+	void Merge(ShaderDefines&& Other) { m_Defines.merge(Other.m_Defines); }
 
 	void Merge(const ShaderDefines& Other)
 	{
-		for each (const auto& NameValue in Other.m_Definitions)
+		for each (const auto& NameValue in Other.m_Defines)
 		{
 			SetDefine(NameValue.first.c_str(), NameValue.second);
 		}
 	}
 
-	const std::map<std::string, std::string>& GetDefinitions() const { return m_Definitions; }
+	const std::map<std::string, std::string>& GetDefines() const { return m_Defines; }
 private:
-	std::map<std::string, std::string> m_Definitions;
+	std::map<std::string, std::string> m_Defines;
 };
 
 class ShaderVariantMask : public std::bitset<sizeof(uint32_t)>
 {
+public:
+	ShaderVariantMask(const std::map<std::string, std::string>& Defines)
+	{
+		assert(Defines.size() <= count());
+		uint32_t Index = 0u;
+		for (auto& [Name, Value] : Defines)
+		{
+			set(Index++, atoi(Value.c_str()) > 0);
+		}
+	}
+
+	uint32_t GetMask() const { return to_ulong(); }
 };
 
 class ShaderBinary : private AssetRawData
@@ -87,7 +99,7 @@ public:
 	{
 	}
 
-	void Compile();
+	void Compile(bool8_t Force = false);
 private:
 	std::shared_ptr<ShaderCache> m_Cache;
 };

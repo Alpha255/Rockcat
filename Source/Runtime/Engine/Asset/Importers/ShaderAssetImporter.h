@@ -26,5 +26,22 @@ private:
 	{
 	public:
 		using BaseClass::BaseClass;
+
+		const std::vector<std::string>& GetDefines(const std::filesystem::path& ShaderPath) const 
+		{
+			static std::vector<std::string> NullDefines;
+			const auto It = m_ShaderDefines.find(ShaderPath.generic_string());
+			return It == m_ShaderDefines.cend() ? NullDefines : (*It).second;
+		}
+
+		template<class Archive>
+		void serialize(Archive& Ar)
+		{
+			Ar(
+				CEREAL_NVP(m_ShaderDefines)
+			);
+		}
+	private:
+		std::map<std::string, std::vector<std::string>> m_ShaderDefines;
 	};
 };

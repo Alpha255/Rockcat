@@ -12,6 +12,12 @@ std::string ShaderCache::GetShaderCachePath(const char8_t* ShaderName)
 		Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::ShaderCache));
 }
 
+class GlobalShaderCompileConfigurations : public SerializableAsset<GlobalShaderCompileConfigurations>
+{
+public:
+	using BaseClass::BaseClass;
+};
+
 class ShaderCompileTask : public Task
 {
 public:
@@ -25,6 +31,12 @@ public:
 	}
 };
 
-void ShaderAsset::Compile()
+void ShaderAsset::Compile(bool8_t Force)
 {
+	bool8_t NeedRecompile = Force || IsDirty();
+	
+	if (!IsLoading() && NeedRecompile)
+	{
+		SetStatus(Asset::EAssetStatus::Loading);
+	}
 }
