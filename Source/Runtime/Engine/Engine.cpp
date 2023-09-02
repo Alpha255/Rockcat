@@ -21,7 +21,7 @@ void Engine::Run()
 		assert(m_Initialized);
 	}
 
-	for each (auto& Application in m_Applications)
+	for (auto& Application : m_Applications)
 	{
 		Application->OnWindowCreation();
 		Application->OnStartup();
@@ -43,7 +43,7 @@ void Engine::Run()
 			return false;
 		});
 
-		for each (auto& Application in m_Applications)
+		for (auto& Application : m_Applications)
 		{
 			Application->Tick(0.0f);
 		}
@@ -62,7 +62,7 @@ bool8_t Engine::Initialize()
 	PlatformMisc::SetCurrentWorkingDirectory(AssetsDirectory);
 	LOG_INFO("Mount working directory to \"{}\".", PlatformMisc::GetCurrentWorkingDirectory().generic_string());
 
-	for each (auto& Application in m_Applications)
+	for (auto& Application : m_Applications)
 	{
 		if (Application->GetConfigurations().IsEnableRendering())
 		{

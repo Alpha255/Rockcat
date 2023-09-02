@@ -10,6 +10,14 @@ public:
 	{
 	}
 	DECLARE_GLOBAL_GENERIC_VS_VARIABLES
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(ShaderAsset)
+		);
+	}
 };
 
 class DefaultUnlitFS : public ShaderAsset
@@ -20,6 +28,14 @@ public:
 	{
 	}
 	DECLARE_GLOBAL_DEFAULT_UNLIT_FS_VARIABLES
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(ShaderAsset)
+		);
+	}
 };
 
 class DefaultLitFS : public ShaderAsset
@@ -30,6 +46,14 @@ public:
 	{
 	}
 	DECLARE_GLOBAL_DEFAULT_LIT_FS_VARIABLES
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(ShaderAsset)
+		);
+	}
 };
 
 class DefaultToonFS : public ShaderAsset
@@ -40,6 +64,14 @@ public:
 	{
 	}
 	DECLARE_GLOBAL_DEFAULT_TOON_FS_VARIABLES
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(ShaderAsset)
+		);
+	}
 };
 
 template<class FS, class VS = GenericVS>
@@ -87,6 +119,8 @@ public:
 	{
 		Ar(
 			CEREAL_BASE(MaterialAsset),
+			CEREAL_BASE(VS),
+			CEREAL_BASE(FS),
 			CEREAL_NVP(m_CullMode),
 			CEREAL_NVP(m_DoubleSided),
 			CEREAL_NVP(m_ShadingMode),

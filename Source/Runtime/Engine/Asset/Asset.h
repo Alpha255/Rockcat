@@ -98,11 +98,14 @@ public:
 	EAssetStatus GetStatus() const { return m_Status.load(); }
 	virtual bool8_t IsReady() const { return GetStatus() == EAssetStatus::Ready; }
 	bool8_t IsLoading() const { return GetStatus() == EAssetStatus::Loading; }
-	const AssetRawData& GetRawData() const { return m_RawData; }
+
 	const std::filesystem::path& GetPath() const { return m_Path; }
+
 	std::time_t GetLastWriteTime() const { return m_LastWriteTime; }
+
 	void ReadRawData(AssetType::EContentsType ContentsType);
 	void FreeRawData() { m_RawData.Deallocate(); }
+	const AssetRawData& GetRawData() const { return m_RawData; }
 
 	bool8_t IsDirty() const
 	{
@@ -242,4 +245,46 @@ public:
 protected:
 private:
 	std::vector<AssetType> m_ValidAssetTypes;
+};
+
+struct MemoryBlock
+{
+	MemoryBlock() = default;
+
+	MemoryBlock(size_t DataSize, const byte8_t* const InData)
+		: SizeInBytes(DataSize)
+		, RawData(new byte8_t[DataSize]())
+	{
+		VERIFY(memcpy_s(RawData.get(), DataSize, InData, DataSize) == 0);
+	}
+
+	size_t SizeInBytes = 0u;
+	std::shared_ptr<byte8_t> RawData;
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(BaseClass),
+			CEREAL_NVP(SizeInBytes)
+		);
+
+		if (Archive::is_loading::value)
+		{
+			std::vector<uint64_t> Buffer;
+			Ar(
+				cereal::make_nvp("RawData", Buffer)
+			);
+			RawData.reset(new byte8_t[SizeInBytes]);
+			memcpy_s(RawData.get(), SizeInBytes, Buffer.data(), SizeInBytes);
+		}
+		else
+		{
+			std::vector<uint64_t> Buffer(SizeInBytes / sizeof(uint64_t) + 1u);
+			memcpy_s(Buffer.data(), SizeInBytes, RawData.get(), SizeInBytes);
+			Ar(
+				cereal::make_nvp("RawData", Buffer)
+			);
+		}
+	}
 };

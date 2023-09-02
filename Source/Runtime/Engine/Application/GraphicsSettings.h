@@ -13,9 +13,9 @@ enum class ERenderingPath : uint8_t
 enum class EShadowTechnique : uint8_t
 {
 	None,
-	ShadowMap,
-	PCF, DESCRIPTION("Percentage - Closer Filtering")
-	PCSS, DESCRIPTION("Percentage - Closer Soft Shadows")
+	Generic,
+	//PCF, DESCRIPTION("Percentage - Closer Filtering")
+	//PCSS, DESCRIPTION("Percentage - Closer Soft Shadows")
 	Cascade
 };
 

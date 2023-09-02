@@ -1,7 +1,6 @@
 #include "Runtime/Engine/Services/RenderService.h"
 #include "Runtime/Engine/Services/SpdLogService.h"
 #include "RHI/Vulkan/VulkanRHI.h"
-#include "RHI/Vulkan/VulkanDevice.h"
 
 void RenderService::InitializeRHI(const GraphicsSettings& GfxSettings)
 {

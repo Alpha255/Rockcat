@@ -36,14 +36,14 @@ std::shared_ptr<RHIShaderCreateInfo> DxcShaderCompiler::Compile(
 		std::wstring Value;
 	};
 
-	std::vector<LocalShaderDefinition> LocalShaderDefinitions(Definitions.GetDefinitions().size());
-	std::vector<DxcDefine> DxcDefines(m_GenSpirv ? Definitions.GetDefinitions().size() + 1u : Definitions.GetDefinitions().size());
+	std::vector<LocalShaderDefinition> LocalShaderDefinitions(Definitions.GetDefines().size());
+	std::vector<DxcDefine> DxcDefines(m_GenSpirv ? Definitions.GetDefines().size() + 1u : Definitions.GetDefines().size());
 
 	uint32_t Index = 0u;
-	for each (const auto& NameValue in Definitions.GetDefinitions())
+	for (const auto& [Name, Value] : Definitions.GetDefines())
 	{
-		LocalShaderDefinitions[Index].Name = std::move(StringUtils::ToWide(NameValue.first.c_str()));
-		LocalShaderDefinitions[Index].Value = std::move(StringUtils::ToWide(NameValue.second.c_str()));
+		LocalShaderDefinitions[Index].Name = std::move(StringUtils::ToWide(Name.c_str()));
+		LocalShaderDefinitions[Index].Value = std::move(StringUtils::ToWide(Value.c_str()));
 
 		DxcDefines[Index].Name = LocalShaderDefinitions.back().Name.c_str();
 		DxcDefines[Index].Value = LocalShaderDefinitions.back().Value.c_str();
@@ -138,8 +138,8 @@ std::shared_ptr<RHIShaderCreateInfo> D3DShaderCompiler::Compile(
 #endif
 
 	uint32_t Index = 0u;
-	std::vector<D3D_SHADER_MACRO> D3DMacros(Definitions.GetDefinitions().size());
-	for each (const auto& NameValue in Definitions.GetDefinitions())
+	std::vector<D3D_SHADER_MACRO> D3DMacros(Definitions.GetDefines().size());
+	for each (const auto& NameValue in Definitions.GetDefines())
 	{
 		D3DMacros[Index].Name = NameValue.first.c_str();
 		D3DMacros[Index].Definition = NameValue.second.c_str();
