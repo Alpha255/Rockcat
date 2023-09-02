@@ -6,6 +6,7 @@
 #include "Runtime/Engine/Services/SpdLogService.h"
 #include "Runtime/Engine/Services/RenderService.h"
 #include "Runtime/Engine/Asset/AssetDatabase.h"
+#include "Runtime/Engine/Asset/ShaderCompiler.h"
 
 Engine& Engine::Get()
 {
@@ -70,6 +71,8 @@ bool8_t Engine::Initialize()
 		}
 	}
 
+	ShaderCompileService::Get().OnStartup();
+
 	return true;
 }
 
@@ -77,4 +80,5 @@ void Engine::Finalize()
 {
 	AssetDatabase::Get().OnShutdown();
 	RenderService::Get().OnShutdown();
+	ShaderCompileService::Get().OnShutdown();
 }

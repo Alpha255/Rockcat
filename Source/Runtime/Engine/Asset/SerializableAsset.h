@@ -17,14 +17,10 @@ public:
 	template<class Type = T, class... TArgs>
 	static std::shared_ptr<Type> Load(TArgs&&... Args)
 	{
-		static std::shared_ptr<Type> s_Asset;
-		if (!s_Asset)
-		{
-			s_Asset = std::make_shared<Type>(std::forward<TArgs>(Args)...);
-			s_Asset->Reload<Type>();
-		}
+		auto NewAsset = std::make_shared<Type>(std::forward<TArgs>(Args)...);
+		NewAsset->Reload<Type>();
 
-		return s_Asset;
+		return NewAsset;
 	}
 
 	template<class Type = T>

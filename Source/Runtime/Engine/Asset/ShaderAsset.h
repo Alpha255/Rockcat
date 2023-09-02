@@ -52,25 +52,16 @@ private:
 	std::map<std::string, std::string> m_Defines;
 };
 
-class ShaderVariantMask : public std::bitset<sizeof(uint32_t)>
-{
-public:
-	ShaderVariantMask(const std::map<std::string, std::string>& Defines)
-	{
-		assert(Defines.size() <= count());
-		uint32_t Index = 0u;
-		for (auto& [Name, Value] : Defines)
-		{
-			set(Index++, atoi(Value.c_str()) > 0);
-		}
-	}
-
-	uint32_t GetMask() const { return to_ulong(); }
-};
-
 class ShaderBinary : private MemoryBlock
 {
 public:
+	enum class EStatus
+	{
+		None,
+		Compiling,
+		Compiled
+	};
+
 	using MemoryBlock::MemoryBlock;
 
 	size_t GetSize() const { return SizeInBytes; }
@@ -83,11 +74,16 @@ public:
 			CEREAL_BASE(MemoryBlock)
 		);
 	}
+private:
+	void SetStatus(EStatus Status) { m_Status.store(Status); }
+	bool8_t IsCompiling() const { return m_Status.load() == EStatus::Compiling; }
+	bool8_t IsCompiled() const { return m_Status.load() == EStatus::Compiled; }
+
+	std::atomic<EStatus> m_Status;
 };
 
-class ShaderCache : public SerializableAsset<ShaderCache>
+struct ShaderCache : public SerializableAsset<ShaderCache>
 {
-public:
 	template<class StringType>
 	ShaderCache(StringType&& Path)
 		: BaseClass(std::forward<StringType>(Path))
@@ -104,8 +100,7 @@ public:
 			CEREAL_NVP(m_CompiledBinaries)
 		);
 	}
-private:
-	std::unordered_map<size_t, ShaderBinary> m_CompiledBinaries;
+	std::unordered_map<size_t, ShaderBinary> CompiledBinaries;
 };
 
 class ShaderAsset : public Asset, public ShaderDefines

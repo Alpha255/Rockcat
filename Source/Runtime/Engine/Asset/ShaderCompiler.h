@@ -3,20 +3,23 @@
 #include "RHI/D3D/DXGI_Interface.h"
 #include "Runtime/Engine/RHI/RHIShader.h"
 #include "Runtime/Engine/Application/GraphicsSettings.h"
+#include "Runtime/Engine/Asset/ShaderAsset.h"
 #include <dxc/dxcapi.h>
 
 class IShaderCompiler
 {
 public:
-	virtual std::shared_ptr<RHIShaderCreateInfo> Compile(
+	virtual ShaderBinary Compile(
 		const char8_t* SourceName,
 		const char8_t* SourceCode,
 		size_t SourceCodeSize,
-		const char8_t* ShaderEntryName,
+		const char8_t* EntryPoint,
 		ERHIShaderStage ShaderStage,
 		const class ShaderDefines& Definitions) = 0;
+protected:
+	virtual void GetShaderReflection(const ShaderBinary& Binary) = 0;
 
-	static const char8_t* const GetShaderModelName(ERHIShaderStage ShaderState, bool8_t DXC)
+	static const char8_t* const GetProfile(ERHIShaderStage ShaderState, bool8_t DXC)
 	{
 		switch (ShaderState)
 		{
@@ -30,10 +33,6 @@ public:
 			return nullptr;
 		}
 	}
-
-	static std::shared_ptr<IShaderCompiler> Create(ERenderHardwareInterface RHI);
-protected:
-	virtual void GetShaderReflection(const class ShaderBinary& Binary) = 0;
 };
 
 class DxcShaderCompiler : public IShaderCompiler
@@ -41,11 +40,11 @@ class DxcShaderCompiler : public IShaderCompiler
 public:
 	DxcShaderCompiler(bool8_t GenerateSpirv);
 
-	std::shared_ptr<RHIShaderCreateInfo> Compile(
+	ShaderBinary Compile(
 		const char8_t* SourceName,
 		const char8_t* SourceCode,
 		size_t SourceCodeSize,
-		const char8_t* ShaderEntryName,
+		const char8_t* EntryPoint,
 		ERHIShaderStage ShaderStage,
 		const class ShaderDefines& Definitions) override final;
 protected:
@@ -60,7 +59,7 @@ protected:
 	using D3D12LibraryReflection = D3DHwResource<ID3D12LibraryReflection>;
 	using D3D12ShaderReflection = D3DHwResource<ID3D12ShaderReflection>;
 
-	void GetShaderReflection(const class ShaderBinary& Binary) override final;
+	void GetShaderReflection(const ShaderBinary&) override final {}
 private:
 	DxcUtils m_Utils;
 	DxcCompiler m_Compiler;
@@ -71,17 +70,69 @@ private:
 class D3DShaderCompiler : public IShaderCompiler
 {
 public:
-	std::shared_ptr<RHIShaderCreateInfo> Compile(
+	ShaderBinary Compile(
 		const char8_t* SourceName,
 		const char8_t* SourceCode,
 		size_t SourceCodeSize,
-		const char8_t* ShaderEntryName,
+		const char8_t* EntryPoint,
 		ERHIShaderStage ShaderStage,
 		const class ShaderDefines& Definitions) override final;
 protected:
 	using D3D11ShaderReflection = D3DHwResource<ID3D11ShaderReflection>;
 
-	void GetShaderReflection(const class ShaderBinary& Binary) override final;
+	void GetShaderReflection(const ShaderBinary&) override final {}
+};
+
+class ShaderCompileService : public IService<ShaderCompileService>
+{
+public:
+	void OnStartup() override final;
+
+	void OnShutdown() override final;
+
+	void Compile(const ShaderAsset& Shader);
+protected:
+	static ERHIShaderStage GetStage(const std::filesystem::path& ShaderPath)
+	{
+		auto Extension = StringUtils::Lowercase(ShaderPath.extension().generic_string());
+		if (Extension == ".vert")
+		{
+			return ERHIShaderStage::Vertex;
+		}
+		else if (Extension == ".hull")
+		{
+			return ERHIShaderStage::Hull;
+		}
+		else if (Extension == ".domain")
+		{
+			return ERHIShaderStage::Domain;
+		}
+		else if (Extension == ".geom")
+		{
+			return ERHIShaderStage::Geometry;
+		}
+		else if (Extension == ".frag")
+		{
+			return ERHIShaderStage::Fragment;
+		}
+		else if (Extension == ".comp")
+		{
+			return ERHIShaderStage::Compute;
+		}
+		return ERHIShaderStage::Num;
+	}
+
+	IShaderCompiler& GetCompiler(ERenderHardwareInterface RHI)
+	{
+		assert(RHI < ERenderHardwareInterface::Null && RHI > ERenderHardwareInterface::Software);
+		return *m_Compilers[(size_t)RHI];
+	}
+
+	bool8_t RegisterCompileTask(ERenderHardwareInterface RHI, size_t Hash);
+	void DeregisterCompileTask(ERenderHardwareInterface RHI, size_t Hash);
+private:
+	std::array<std::unique_ptr<IShaderCompiler>, (size_t)ERenderHardwareInterface::Null> m_Compilers;
+	std::array<std::set<size_t>, (size_t)ERenderHardwareInterface::Null> m_CompilingTasks;
 };
 
 #if 0

@@ -1,5 +1,5 @@
 #include "Runtime/Engine/Asset/ShaderCompiler.h"
-#include "Runtime/Engine/Asset/ShaderAsset.h"
+#include "Runtime/Engine/Async/Task.h"
 #include <glslang/Include/ResourceLimits.h>
 #include <glslang/Public/ShaderLang.h>
 #include <glslang/SPIRV/GlslangToSpv.h>
@@ -18,15 +18,15 @@ DxcShaderCompiler::DxcShaderCompiler(bool8_t GenerateSpirv)
 	VERIFY(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(m_Compiler.Reference())) == S_OK);
 }
 
-std::shared_ptr<RHIShaderCreateInfo> DxcShaderCompiler::Compile(
+ShaderBinary DxcShaderCompiler::Compile(
 	const char8_t* SourceName,
 	const char8_t* SourceCode,
 	size_t SourceCodeSize,
-	const char8_t* ShaderEntryName,
+	const char8_t* EntryPoint,
 	ERHIShaderStage ShaderStage,
 	const ShaderDefines& Definitions)
 {
-	assert(SourceCode && SourceCodeSize && ShaderEntryName && ShaderStage < ERHIShaderStage::Num);
+	assert(SourceCode && SourceCodeSize && EntryPoint && ShaderStage < ERHIShaderStage::Num);
 
 	VERIFY(m_Utils->CreateBlobFromPinned(SourceCode, static_cast<uint32_t>(SourceCodeSize), DXC_CP_ACP, m_Blob.Reference()) == S_OK);
 
@@ -64,8 +64,8 @@ std::shared_ptr<RHIShaderCreateInfo> DxcShaderCompiler::Compile(
 	DxcCompilerArgs CompilerArgs;
 	VERIFY(m_Utils->BuildArguments(
 		SourceName ? StringUtils::ToWide(SourceName).c_str() : nullptr,
-		StringUtils::ToWide(ShaderEntryName).c_str(),
-		StringUtils::ToWide(GetShaderModelName(ShaderStage, true)).c_str(),
+		StringUtils::ToWide(EntryPoint).c_str(),
+		StringUtils::ToWide(GetProfile(ShaderStage, true)).c_str(),
 		OtherArgs.data(),
 		static_cast<uint32_t>(OtherArgs.size()),
 		DxcDefines.data(),
@@ -113,18 +113,18 @@ std::shared_ptr<RHIShaderCreateInfo> DxcShaderCompiler::Compile(
 	//ShaderCreateInfo->Binary.resize(Align(Blob->GetBufferSize(), sizeof(uint32_t)) / sizeof(uint32_t));
 	//VERIFY(memcpy_s(ShaderCreateInfo->Binary.data(), Blob->GetBufferSize(), Blob->GetBufferPointer(), Blob->GetBufferSize()) == 0);
 
-	return ShaderCreateInfo;
+	return ShaderBinary();
 }
 
-std::shared_ptr<RHIShaderCreateInfo> D3DShaderCompiler::Compile(
+ShaderBinary D3DShaderCompiler::Compile(
 	const char8_t* SourceName,
 	const char8_t* SourceCode,
 	size_t SourceCodeSize,
-	const char8_t* ShaderEntryName,
+	const char8_t* EntryPoint,
 	ERHIShaderStage ShaderStage,
 	const class ShaderDefines& Definitions)
 {
-	assert(SourceCode && SourceCodeSize && ShaderEntryName && ShaderStage < ERHIShaderStage::Num);
+	assert(SourceCode && SourceCodeSize && EntryPoint && ShaderStage < ERHIShaderStage::Num);
 
 	D3DBlob Binary;
 	D3DBlob Error;
@@ -151,8 +151,8 @@ std::shared_ptr<RHIShaderCreateInfo> D3DShaderCompiler::Compile(
 		SourceName,
 		D3DMacros.data(),
 		D3D_COMPILE_STANDARD_FILE_INCLUDE,
-		ShaderEntryName,
-		GetShaderModelName(ShaderStage, false),
+		EntryPoint,
+		GetProfile(ShaderStage, false),
 		Flags,
 		0u,
 		0u,
@@ -175,7 +175,7 @@ std::shared_ptr<RHIShaderCreateInfo> D3DShaderCompiler::Compile(
 
 	//GetReflectionInfo(Desc.get());
 
-	return ShaderCreateInfo;
+	return ShaderBinary();
 }
 
 #if 0
@@ -531,20 +531,73 @@ void VkShaderCompiler::GetReflectionInfo(RHI::ShaderDesc* const Desc)
 }
 #endif
 
-std::shared_ptr<IShaderCompiler> IShaderCompiler::Create(ERenderHardwareInterface RHI)
+class ShaderCompileTask : public Task
 {
-	assert(RHI > ERenderHardwareInterface::Null);
-
-	switch (RHI)
+public:
+	ShaderCompileTask(const char8_t* ShaderName)
+		: Task(std::move(StringUtils::Format("Compile shader: %s ...", ShaderName)), ETaskType::ShaderCompile, EPriority::High)
 	{
-	case ERenderHardwareInterface::D3D11:
-		return std::make_shared<D3DShaderCompiler>();
-	case ERenderHardwareInterface::D3D12:
-		return std::make_shared<DxcShaderCompiler>(false);
-	case ERenderHardwareInterface::Vulkan:
-		return std::make_shared<DxcShaderCompiler>(true);
-	case ERenderHardwareInterface::Software:
-	default:
-		return nullptr;
 	}
+
+	void DoTask() override final
+	{
+	}
+};
+
+void ShaderCompileService::OnStartup()
+{
+	m_Compilers[(size_t)ERenderHardwareInterface::Vulkan] = std::make_unique<DxcShaderCompiler>(true);
+	m_Compilers[(size_t)ERenderHardwareInterface::D3D11] = std::make_unique<D3DShaderCompiler>();
+	m_Compilers[(size_t)ERenderHardwareInterface::D3D12] = std::make_unique<DxcShaderCompiler>(false);
+}
+
+void ShaderCompileService::OnShutdown()
+{
+	for (uint32_t Index = 0u; Index < m_Compilers.size(); ++Index)
+	{
+		m_Compilers[Index].reset();
+	}
+}
+
+void ShaderCompileService::Compile(const ShaderAsset& Shader)
+{
+	const size_t Hash = Shader.ComputeHash();
+
+	for (uint32_t Index = (uint32_t)ERenderHardwareInterface::Vulkan; Index < (uint32_t)ERenderHardwareInterface::Null; ++Index)
+	{
+		auto RHI = static_cast<ERenderHardwareInterface>(Index);
+		if (RegisterCompileTask(RHI, Hash))
+		{
+			auto FileName = Shader.GetPath().filename().generic_string();
+			const auto SourceCode = static_cast<const char8_t*>(Shader.GetRawData().Data.get());
+			auto Size = Shader.GetRawData().SizeInBytes;
+
+			auto Binary = GetCompiler(RHI).Compile(
+				FileName.c_str(),
+				SourceCode,
+				Size,
+				"main",
+				GetStage(Shader.GetPath()),
+				Shader);
+		}
+	}
+}
+
+bool8_t ShaderCompileService::RegisterCompileTask(ERenderHardwareInterface RHI, size_t Hash)
+{
+	assert(RHI < ERenderHardwareInterface::Null);
+
+	if (m_CompilingTasks[size_t(RHI)].find(Hash) != m_CompilingTasks[size_t(RHI)].cend())
+	{
+		return false;
+	}
+
+	m_CompilingTasks[size_t(RHI)].insert(Hash);
+	return true;
+}
+
+void ShaderCompileService::DeregisterCompileTask(ERenderHardwareInterface RHI, size_t Hash)
+{
+	assert(RHI < ERenderHardwareInterface::Null);
+	m_CompilingTasks[size_t(RHI)].erase(Hash);
 }

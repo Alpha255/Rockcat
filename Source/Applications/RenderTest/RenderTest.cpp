@@ -31,6 +31,8 @@ void RenderTest::OnStartup()
 	}
 
 	auto Mat = MaterialLit::Load<MaterialLit>("DefaultLit");
+	auto Mat1 = MaterialLit::Load<MaterialLit>("Texture");
+	auto Mat2 = MaterialLit::Load<MaterialLit>("DefaultLit");
 	
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");
 }

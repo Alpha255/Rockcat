@@ -20,6 +20,11 @@ VSOutput main(VsInput Input)
 
 #if _HAS_TANGENT_
 	Output.WorldTangent = mul(CBuffer.WorldMatrix, float4(Input.Tangent, 1.0)).xyz;
+	Output.WorldBiTangent = mul(CBuffer.WorldMatrix, float4(Input.BiTangent, 1.0)).xyz;
+#endif
+
+#if _HAS_UV0_
+	Output.UV0 = Input.UV0;
 #endif
 
 #if _HAS_UV1_

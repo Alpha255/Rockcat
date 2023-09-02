@@ -1,6 +1,5 @@
 #include "Runtime/Engine/Asset/ShaderAsset.h"
 #include "Runtime/Engine/Asset/ShaderCompiler.h"
-#include "Runtime/Engine/Async/Task.h"
 #include "Runtime/Engine/RHI/RHIInterface.h"
 
 class GlobalShaderCompileConfigurations : public SerializableAsset<GlobalShaderCompileConfigurations>
@@ -47,25 +46,12 @@ void ShaderAsset::GetDefaultDefines()
 	Merge(GlobalShaderCompileConfigurations::Get()->GetDefines(GetPath()));
 }
 
-class ShaderCompileTask : public Task
-{
-public:
-	ShaderCompileTask(const char8_t* ShaderName)
-		: Task(std::move(StringUtils::Format("Compile shader: %s ...", ShaderName)), ETaskType::ShaderCompile, EPriority::High)
-	{
-	}
-
-	void DoTask() override final
-	{
-	}
-};
-
 void ShaderAsset::Compile(bool8_t Force)
 {
-	bool8_t NeedRecompile = Force || IsDirty();
-	
-	if (!IsLoading() && NeedRecompile)
+	if (Force || IsDirty())
 	{
 		SetStatus(Asset::EAssetStatus::Loading);
+
+		size_t Hash = ComputeHash();
 	}
 }
