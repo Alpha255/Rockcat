@@ -258,6 +258,8 @@ struct MemoryBlock
 		VERIFY(memcpy_s(RawData.get(), DataSize, InData, DataSize) == 0);
 	}
 
+	MemoryBlock(const MemoryBlock&) = default;
+
 	size_t SizeInBytes = 0u;
 	std::shared_ptr<byte8_t> RawData;
 
@@ -265,7 +267,6 @@ struct MemoryBlock
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(BaseClass),
 			CEREAL_NVP(SizeInBytes)
 		);
 

@@ -33,14 +33,6 @@ private:
 	std::map<std::string, ShaderDefines> m_DefaultDefines;
 };
 
-std::filesystem::path ShaderAsset::GetShaderCachePath(ERenderHardwareInterface RHI) const
-{
-	return std::filesystem::path(ASSET_PATH_SHADERCACHE) / 
-		GetPath().filename() / 
-		RHIInterface::GetRHIName(RHI) / 
-		Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::ShaderCache);
-}
-
 void ShaderAsset::GetDefaultDefines()
 {
 	Merge(GlobalShaderCompileConfigurations::Get()->GetDefines(GetPath()));
@@ -48,10 +40,10 @@ void ShaderAsset::GetDefaultDefines()
 
 void ShaderAsset::Compile(bool8_t Force)
 {
-	if (Force || IsDirty())
+	if (Force || IsDirty() || !GetCache().Contains(ComputeHash()))
 	{
-		SetStatus(Asset::EAssetStatus::Loading);
-
-		size_t Hash = ComputeHash();
+		ReadRawData(AssetType::EContentsType::Text);
+		ShaderCompileService::Get().Compile(*this);
+		FreeRawData();
 	}
 }

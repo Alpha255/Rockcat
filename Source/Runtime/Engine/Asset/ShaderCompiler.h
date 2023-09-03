@@ -63,7 +63,6 @@ protected:
 private:
 	DxcUtils m_Utils;
 	DxcCompiler m_Compiler;
-	DxcBlobEncoding m_Blob;
 	bool8_t m_GenSpirv;
 };
 

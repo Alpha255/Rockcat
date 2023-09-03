@@ -5,6 +5,7 @@
 #include "Runtime/Engine/Profile/CpuTimer.h"
 #include "Runtime/Engine/Services/SpdLogService.h"
 #include "Runtime/Engine/Services/RenderService.h"
+#include "Runtime/Engine/Services/TaskFlowService.h"
 #include "Runtime/Engine/Asset/AssetDatabase.h"
 #include "Runtime/Engine/Asset/ShaderCompiler.h"
 
@@ -73,6 +74,9 @@ bool8_t Engine::Initialize()
 		}
 	}
 
+	TaskFlowService::Get().OnStartup();
+	AssetDatabase::Get().OnStartup();
+	RenderService::Get().OnStartup();
 	ShaderCompileService::Get().OnStartup();
 
 	return true;
@@ -80,6 +84,7 @@ bool8_t Engine::Initialize()
 
 void Engine::Finalize()
 {
+	TaskFlowService::Get().OnShutdown();
 	AssetDatabase::Get().OnShutdown();
 	RenderService::Get().OnShutdown();
 	ShaderCompileService::Get().OnShutdown();

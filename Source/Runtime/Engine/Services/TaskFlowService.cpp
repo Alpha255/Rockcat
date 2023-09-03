@@ -17,3 +17,11 @@ TaskFlowService::TaskFlowService()
 		m_UseHyperThreading ? "enabled" : "disabled",
 		tf::version());
 }
+
+void TaskFlowService::OnStartup()
+{
+}
+
+void TaskFlowService::OnShutdown()
+{
+}

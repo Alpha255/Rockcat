@@ -52,7 +52,7 @@ private:
 	std::map<std::string, std::string> m_Defines;
 };
 
-class ShaderBinary : private MemoryBlock
+class ShaderBinary : public MemoryBlock
 {
 public:
 	enum class EStatus
@@ -66,6 +66,7 @@ public:
 
 	size_t GetSize() const { return SizeInBytes; }
 	const byte8_t* GetBinary() const { return RawData.get(); }
+	bool8_t IsValid() const { return SizeInBytes > 0u; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -75,11 +76,11 @@ public:
 		);
 	}
 private:
-	void SetStatus(EStatus Status) { m_Status.store(Status); }
-	bool8_t IsCompiling() const { return m_Status.load() == EStatus::Compiling; }
-	bool8_t IsCompiled() const { return m_Status.load() == EStatus::Compiled; }
+	//void SetStatus(EStatus Status) { m_Status.store(Status); }
+	//bool8_t IsCompiling() const { return m_Status.load() == EStatus::Compiling; }
+	//bool8_t IsCompiled() const { return m_Status.load() == EStatus::Compiled; }
 
-	std::atomic<EStatus> m_Status;
+	//std::atomic<EStatus> m_Status;
 };
 
 struct ShaderCache : public SerializableAsset<ShaderCache>
@@ -92,15 +93,17 @@ struct ShaderCache : public SerializableAsset<ShaderCache>
 
 	virtual const char8_t* GetExtension() const { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::ShaderCache); }
 
+	bool8_t Contains(size_t Hash) const { return CompiledBinaries.find(Hash) != CompiledBinaries.cend(); }
+
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(BaseClass),
-			CEREAL_NVP(m_CompiledBinaries)
+			CEREAL_NVP(CompiledBinaries)
 		);
 	}
-	std::unordered_map<size_t, ShaderBinary> CompiledBinaries;
+
+	std::unordered_map<size_t, std::array<ShaderBinary, (size_t)ERenderHardwareInterface::Null>> CompiledBinaries;
 };
 
 class ShaderAsset : public Asset, public ShaderDefines
@@ -113,8 +116,6 @@ public:
 		GetDefaultDefines();
 	}
 
-	std::filesystem::path GetShaderCachePath(ERenderHardwareInterface RHI) const;
-
 	void Compile(bool8_t Force = false);
 
 	template<class Archive>
@@ -125,8 +126,29 @@ public:
 		);
 	}
 protected:
+	ShaderCache& GetCache()
+	{
+		if (!m_Cache)
+		{
+			m_Cache = ShaderCache::Load(GetShaderCachePath());
+		}
+		if (m_Cache->IsDirty())
+		{
+			m_Cache->Reload();
+		}
+		return *m_Cache;
+	}
 private:
 	void GetDefaultDefines();
+
+	std::filesystem::path GetShaderCachePath() const
+	{
+		auto Path = std::filesystem::path(ASSET_PATH_SHADERCACHE) / GetPath().filename();
+		Path += Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::ShaderCache);
+		return Path;
+	}
+
+	std::shared_ptr<ShaderCache> m_Cache;
 };
 
 namespace cereal

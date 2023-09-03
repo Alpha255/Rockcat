@@ -27,7 +27,9 @@ ShaderBinary DxcShaderCompiler::Compile(
 {
 	assert(SourceCode && SourceCodeSize && EntryPoint && ShaderStage < ERHIShaderStage::Num);
 
-	VERIFY(m_Utils->CreateBlobFromPinned(SourceCode, static_cast<uint32_t>(SourceCodeSize), DXC_CP_ACP, m_Blob.Reference()) == S_OK);
+	DxcBlobEncoding SourceBlob;
+
+	VERIFY(m_Utils->CreateBlobFromPinned(SourceCode, static_cast<uint32_t>(SourceCodeSize), DXC_CP_ACP, SourceBlob.Reference()) == S_OK);
 
 	struct LocalShaderDefinition
 	{
@@ -43,38 +45,42 @@ ShaderBinary DxcShaderCompiler::Compile(
 	{
 		LocalShaderDefinitions[Index].Name = std::move(StringUtils::ToWide(Name.c_str()));
 		LocalShaderDefinitions[Index].Value = std::move(StringUtils::ToWide(Value.c_str()));
+		++Index;
+	}
 
-		DxcDefines[Index].Name = LocalShaderDefinitions.back().Name.c_str();
-		DxcDefines[Index].Value = LocalShaderDefinitions.back().Value.c_str();
-
+	Index = 0u;
+	for (const auto& Define : LocalShaderDefinitions)
+	{
+		DxcDefines[Index].Name = Define.Name.c_str();
+		DxcDefines[Index].Value = Define.Value.c_str();
 		++Index;
 	}
 
 	if (m_GenSpirv)
 	{
-		DxcDefines[Index].Name = L"SPIRV";
+		DxcDefines[Index].Name = L"_SPIRV_";
 		DxcDefines[Index].Value = L"1";
 	}
 
-	std::vector<const wchar_t*> OtherArgs;
-	auto IncludeDirectoryArg = StringUtils::ToWide(StringUtils::Format("-I %s", PlatformMisc::GetCurrentWorkingDirectory().generic_string().c_str()));
-	OtherArgs.push_back(IncludeDirectoryArg.c_str());
+	//std::vector<const wchar_t*> OtherArgs;
+	//auto IncludeDirectoryArg = StringUtils::ToWide(StringUtils::Format("-I %s", ASSET_PATH_SHADERS));
+	//OtherArgs.push_back(IncludeDirectoryArg.c_str());
 
 	DxcCompilerArgs CompilerArgs;
 	VERIFY(m_Utils->BuildArguments(
 		SourceName ? StringUtils::ToWide(SourceName).c_str() : nullptr,
 		StringUtils::ToWide(EntryPoint).c_str(),
 		StringUtils::ToWide(GetProfile(ShaderStage, true)).c_str(),
-		OtherArgs.data(),
-		static_cast<uint32_t>(OtherArgs.size()),
+		nullptr,
+		0u,
 		DxcDefines.data(),
 		static_cast<uint32_t>(DxcDefines.size()),
 		CompilerArgs.Reference()) == S_OK);
 
 	DxcBuffer Buffer
 	{
-		m_Blob->GetBufferPointer(),
-		m_Blob->GetBufferSize(),
+		SourceBlob->GetBufferPointer(),
+		SourceBlob->GetBufferSize(),
 		DXC_CP_ACP
 	};
 
@@ -583,6 +589,7 @@ void ShaderCompileService::Compile(const ShaderAsset& Shader)
 	for (uint32_t Index = (uint32_t)ERenderHardwareInterface::Vulkan; Index < (uint32_t)ERenderHardwareInterface::Null; ++Index)
 	{
 		auto RHI = static_cast<ERenderHardwareInterface>(Index);
+
 		if (RegisterCompileTask(RHI, Hash))
 		{
 			auto FileName = Shader.GetPath().filename().generic_string();
@@ -596,6 +603,8 @@ void ShaderCompileService::Compile(const ShaderAsset& Shader)
 				"main",
 				GetStage(Shader.GetPath()),
 				Shader);
+
+			DeregisterCompileTask(RHI, Hash);
 		}
 	}
 }

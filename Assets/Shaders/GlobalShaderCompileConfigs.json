@@ -6,7 +6,7 @@
                 "value": {
                     "m_Defines": [
                         {
-                            "key": "_HAS_NORMAL_",
+                            "key": "_HAS_TANGENT_",
                             "value": "0"
                         }
                     ]

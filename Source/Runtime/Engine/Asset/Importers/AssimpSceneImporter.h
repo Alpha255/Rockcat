@@ -58,7 +58,11 @@ public:
 				if (AiScene->mRootNode)
 				{
 					Scene.Graph.Root = Scene.Graph.AddNode(SceneGraph::NodeID(), AiScene->mRootNode->mName.C_Str());
-					return ProcessNode(AiScene, AiScene->mRootNode, Scene.Graph.Root, Scene);
+					if (ProcessNode(AiScene, AiScene->mRootNode, Scene.Graph.Root, Scene))
+					{
+						CompileMaterials(Scene);
+						return true;
+					}
 				}
 				return false;
 			}
@@ -219,8 +223,6 @@ private:
 					break;
 				}
 
-				AssimpScene.Data.Materials[Index]->Compile();
-
 				ProcessTextures(Material, AssimpScene.Data.Materials[Index].get(), AssimpScene.GetPath().parent_path());
 			}
 			else
@@ -336,6 +338,40 @@ private:
 		return Image;
 	}
 
+	ShaderAsset& GetVertexShader(AssimpScene& AssimpScene, uint32_t MaterialIndex)
+	{
+		auto& Material = *AssimpScene.Data.Materials[MaterialIndex].get();
+		switch (Material.GetShadingMode())
+		{
+		case EShadingMode::Unlit:
+		default:
+			return Cast<GenericVS>(Cast<MaterialUnlit>(Material));
+		case EShadingMode::BlinnPhong:
+			return Cast<GenericVS>(Cast<MaterialLit>(Material));
+		case EShadingMode::StandardPBR:
+			return Cast<GenericVS>(Cast<MaterialLit>(Material));
+		case EShadingMode::Toon:
+			return Cast<GenericVS>(Cast<MaterialToon>(Material));
+		}
+	}
+
+	ShaderAsset& GetFragmentShader(AssimpScene& AssimpScene, uint32_t MaterialIndex)
+	{
+		auto& Material = *AssimpScene.Data.Materials[MaterialIndex].get();
+		switch (Material.GetShadingMode())
+		{
+		case EShadingMode::Unlit:
+		default:
+			return Cast<DefaultUnlitFS>(Cast<MaterialUnlit>(Material));
+		case EShadingMode::BlinnPhong:
+			return Cast<DefaultLitFS>(Cast<MaterialLit>(Material));
+		case EShadingMode::StandardPBR:
+			return Cast<DefaultLitFS>(Cast<MaterialLit>(Material));
+		case EShadingMode::Toon:
+			return Cast<DefaultToonFS>(Cast<MaterialToon>(Material));
+		}
+	}
+
 	void ProcessTextures(const aiMaterial* AiMaterial, MaterialAsset* Material, const std::filesystem::path& RootPath)
 	{
 		for (uint32_t Index = aiTextureType_DIFFUSE; Index < aiTextureType_TRANSMISSION; ++Index)
@@ -440,7 +476,7 @@ private:
 					//Layout.SetBitangent(VertexIndex, Vector3(Bitangent.x, Bitangent.y, Bitangent.z));
 				}
 
-				if (Mesh->HasTextureCoords(0))
+				if (Mesh->HasTextureCoords(0u))
 				{
 					const auto& UV0 = Mesh->mTextureCoords[0u][VIndex];
 				}
@@ -449,11 +485,37 @@ private:
 					const auto& UV1 = Mesh->mTextureCoords[0u][VIndex];
 				}
 
-				if (Mesh->HasVertexColors(0))
+				if (Mesh->HasVertexColors(0u))
 				{
 					const auto& Color = Mesh->mColors[0u][VIndex];
 				}
 			}
+
+			if (Mesh->HasTangentsAndBitangents())
+			{
+				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_TANGENT_", true);
+				GetFragmentShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_TANGENT_", true);
+			}
+			if (Mesh->HasTextureCoords(0u))
+			{
+				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_UV0_", true);
+			}
+			if (Mesh->HasTextureCoords(1u))
+			{
+				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_UV1_", true);
+			}
+			if (Mesh->HasVertexColors(0u))
+			{
+				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_COLOR_", true);
+			}
+		}
+	}
+
+	void CompileMaterials(AssimpScene& Scene)
+	{
+		for (auto& Material : Scene.Data.Materials)
+		{
+			Material->Compile();
 		}
 	}
 };

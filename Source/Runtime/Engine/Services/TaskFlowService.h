@@ -16,6 +16,10 @@ class TaskFlowService : public IService<TaskFlowService>
 public:
 	TaskFlowService();
 
+	void OnStartup() override final;
+
+	void OnShutdown() override final;
+
 	template<bool8_t WaitDone = true, class Iterator, class Callable>
 	void ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function)
 	{

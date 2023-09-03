@@ -187,7 +187,7 @@ public:
 		assert(ShadingMode == EShadingMode::BlinnPhong || ShadingMode == EShadingMode::StandardPBR);
 		if (ShadingMode == EShadingMode::StandardPBR)
 		{
-			DefaultLitFS::SetDefine("_SHADING_PBR_", 1u);
+			DefaultLitFS::SetDefine("_SHADING_MODE_STANDARD_PBR_", true);
 		}
 	}
 
