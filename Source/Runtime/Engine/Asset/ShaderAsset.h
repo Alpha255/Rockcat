@@ -113,6 +113,8 @@ public:
 		GetDefaultDefines();
 	}
 
+	std::filesystem::path GetShaderCachePath(ERenderHardwareInterface RHI) const;
+
 	void Compile(bool8_t Force = false);
 
 	template<class Archive>
@@ -124,7 +126,6 @@ public:
 	}
 protected:
 private:
-	std::filesystem::path GetShaderCachePath(ERenderHardwareInterface RHI) const;
 	void GetDefaultDefines();
 };
 

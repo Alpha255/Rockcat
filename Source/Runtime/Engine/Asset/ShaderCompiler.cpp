@@ -1,9 +1,8 @@
 #include "Runtime/Engine/Asset/ShaderCompiler.h"
 #include "Runtime/Engine/Async/Task.h"
-#include <glslang/Include/ResourceLimits.h>
-#include <glslang/Public/ShaderLang.h>
-#include <glslang/SPIRV/GlslangToSpv.h>
-#include <spirv_cross/spirv_hlsl.hpp>
+#pragma warning(disable:4068)
+#include <Submodules/filewatch/FileWatch.hpp>
+#pragma warning(default:4068)
 
 #if !defined(DXIL_FOURCC)
 #define DXIL_FOURCC(ch0, ch1, ch2, ch3) (                                  \
@@ -179,6 +178,10 @@ ShaderBinary D3DShaderCompiler::Compile(
 }
 
 #if 0
+#include <glslang/Include/ResourceLimits.h>
+#include <glslang/Public/ShaderLang.h>
+#include <glslang/SPIRV/GlslangToSpv.h>
+#include <spirv_cross/spirv_hlsl.hpp>
 
 #define CMD_SPRIV L"-spirv"
 
@@ -544,11 +547,23 @@ public:
 	}
 };
 
+using FileWatcher = filewatch::FileWatch<std::string>;
+static std::unique_ptr<FileWatcher> s_ShaderWatcher;
 void ShaderCompileService::OnStartup()
 {
 	m_Compilers[(size_t)ERenderHardwareInterface::Vulkan] = std::make_unique<DxcShaderCompiler>(true);
 	m_Compilers[(size_t)ERenderHardwareInterface::D3D11] = std::make_unique<D3DShaderCompiler>();
 	m_Compilers[(size_t)ERenderHardwareInterface::D3D12] = std::make_unique<DxcShaderCompiler>(false);
+
+	s_ShaderWatcher = std::make_unique<FileWatcher>(ASSET_PATH_SHADERS/*, std::regex("[*.vert, *.frag, *.comp, *.geom]")*/,
+		[](const std::string& Path, filewatch::Event FileEvent) {
+			switch (FileEvent)
+			{
+			case filewatch::Event::modified:
+				LOG_INFO("{} is modified.", Path);
+				break;
+			}
+		});
 }
 
 void ShaderCompileService::OnShutdown()
@@ -557,6 +572,8 @@ void ShaderCompileService::OnShutdown()
 	{
 		m_Compilers[Index].reset();
 	}
+
+	s_ShaderWatcher.reset();
 }
 
 void ShaderCompileService::Compile(const ShaderAsset& Shader)
