@@ -11,14 +11,14 @@ class AssetImportTask : public Task
 {
 public:
 	AssetImportTask(
-		Asset* TargetAsset,
+		std::shared_ptr<Asset>& TargetAsset,
 		const std::filesystem::path& AssetPath, 
 		IAssetImporter& AssetImporter, 
 		const AssetType* Type,
 		std::optional<Asset::Callbacks>& AssetLoadCallbacks)
 		: Task(std::move(StringUtils::Format("ImportAsset: %s", AssetPath.generic_string().c_str())), ETaskType::General)
 		, m_AssetImporter(AssetImporter)
-		, m_Asset(TargetAsset ? std::move(std::shared_ptr<Asset>(TargetAsset)) : std::move(AssetImporter.CreateAsset(AssetPath)))
+		, m_Asset(TargetAsset ? TargetAsset : AssetImporter.CreateAsset(AssetPath))
 		, m_AssetType(Type)
 	{
 		m_Asset->SetCallbacks(AssetLoadCallbacks);
@@ -68,7 +68,7 @@ void AssetDatabase::CreateAssetImporters()
 }
 
 std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(
-	Asset* TargetAsset,
+	std::shared_ptr<Asset>& TargetAsset,
 	const std::filesystem::path& AssetPath, 
 	std::optional<Asset::Callbacks>& AssetLoadCallbacks, 
 	bool8_t Async)

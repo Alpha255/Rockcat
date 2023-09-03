@@ -24,7 +24,8 @@ public:
 		}
 		else
 		{
-			return Cast<TAsset>(ReimportAssetImpl(nullptr, UnifyPath, AssetLoadCallbacks, Async));
+			std::shared_ptr<Asset> EmptyAsset;
+			return Cast<TAsset>(ReimportAssetImpl(EmptyAsset, UnifyPath, AssetLoadCallbacks, Async));
 		}
 	}
 
@@ -40,7 +41,7 @@ public:
 		}
 		else
 		{
-			ReimportAssetImpl(TargetAsset.get(), UnifyPath, AssetLoadCallbacks, Async);
+			ReimportAssetImpl(TargetAsset, UnifyPath, AssetLoadCallbacks, Async);
 		}
 	}
 
@@ -54,7 +55,7 @@ public:
 	{
 		assert(TargetAsset);
 
-		ReimportAssetImpl(TargetAsset.get(), GetUnifyAssetPath(TargetAsset->GetPath()), AssetLoadCallbacks, Async);
+		ReimportAssetImpl(TargetAsset, GetUnifyAssetPath(TargetAsset->GetPath()), AssetLoadCallbacks, Async);
 	}
 private:
 	template<class StringType>
@@ -67,7 +68,7 @@ private:
 	void CreateAssetImporters();
 
 	std::shared_ptr<Asset> ReimportAssetImpl(
-		Asset* TargetAsset, 
+		std::shared_ptr<Asset>& TargetAsset,
 		const std::filesystem::path& AssetPath, 
 		std::optional<Asset::Callbacks>& AssetLoadCallbacks, 
 		bool8_t Async);

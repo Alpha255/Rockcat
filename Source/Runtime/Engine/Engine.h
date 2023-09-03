@@ -9,7 +9,7 @@ public:
 
 	Engine() = default;
 
-	~Engine() { Finalize(); }
+	~Engine() = default;
 
 	void Run();
 

@@ -49,6 +49,8 @@ void Engine::Run()
 			Application->Tick(0.0f);
 		}
 	}
+
+	Finalize();
 }
 
 bool8_t Engine::Initialize()
