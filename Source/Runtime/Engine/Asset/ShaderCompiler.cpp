@@ -62,17 +62,30 @@ ShaderBinary DxcShaderCompiler::Compile(
 		DxcDefines[Index].Value = L"1";
 	}
 
-	//std::vector<const wchar_t*> OtherArgs;
+	auto WSourceName = SourceName ? StringUtils::ToWide(SourceName).c_str() : std::wstring();
+	auto WEntryPoint = StringUtils::ToWide(EntryPoint);
+	auto WProfile = StringUtils::ToWide(GetProfile(ShaderStage, true));
+
+	std::vector<const wchar_t*> Args;
 	//auto IncludeDirectoryArg = StringUtils::ToWide(StringUtils::Format("-I %s", ASSET_PATH_SHADERS));
-	//OtherArgs.push_back(IncludeDirectoryArg.c_str());
+	//Args.push_back(IncludeDirectoryArg.c_str());
+	if (m_GenSpirv)
+	{
+		Args.push_back(L"-spirv");
+		//Args.push_back(L"-fspv-debug=vulkan-with-source");
+	}
+#if _DEBUG
+	Args.push_back(L"-Zi");
+	Args.push_back(L"-Qembed_debug");
+#endif
 
 	DxcCompilerArgs CompilerArgs;
 	VERIFY(m_Utils->BuildArguments(
-		SourceName ? StringUtils::ToWide(SourceName).c_str() : nullptr,
-		StringUtils::ToWide(EntryPoint).c_str(),
-		StringUtils::ToWide(GetProfile(ShaderStage, true)).c_str(),
-		nullptr,
-		0u,
+		WSourceName.c_str(),
+		WEntryPoint.c_str(),
+		WProfile.c_str(),
+		Args.data(),
+		static_cast<uint32_t>(Args.size()),
 		DxcDefines.data(),
 		static_cast<uint32_t>(DxcDefines.size()),
 		CompilerArgs.Reference()) == S_OK);
@@ -109,16 +122,7 @@ ShaderBinary DxcShaderCompiler::Compile(
 	DxcBlob Blob;
 	VERIFY(Result->GetResult(Blob.Reference()) == S_OK);
 
-	auto ShaderCreateInfo = std::make_shared<RHIShaderCreateInfo>();
-	ShaderCreateInfo->ShaderStage = ShaderStage;
-	ShaderCreateInfo->Language = ERHIShaderLanguage::HLSL;
-	//ShaderCreateInfo->BinarySize = Blob->GetBufferSize();
-	ShaderCreateInfo->Name = SourceName ? std::string(SourceName) : "";
-
-	//ShaderCreateInfo->Binary.resize(Align(Blob->GetBufferSize(), sizeof(uint32_t)) / sizeof(uint32_t));
-	//VERIFY(memcpy_s(ShaderCreateInfo->Binary.data(), Blob->GetBufferSize(), Blob->GetBufferPointer(), Blob->GetBufferSize()) == 0);
-
-	return ShaderBinary();
+	return ShaderBinary(Blob->GetBufferSize(), Blob->GetBufferPointer());
 }
 
 ShaderBinary D3DShaderCompiler::Compile(
@@ -144,10 +148,11 @@ ShaderBinary D3DShaderCompiler::Compile(
 
 	uint32_t Index = 0u;
 	std::vector<D3D_SHADER_MACRO> D3DMacros(Definitions.GetDefines().size());
-	for each (const auto& NameValue in Definitions.GetDefines())
+	for (const auto& [Name, Value] : Definitions.GetDefines())
 	{
-		D3DMacros[Index].Name = NameValue.first.c_str();
-		D3DMacros[Index].Definition = NameValue.second.c_str();
+		D3DMacros[Index].Name = Name.c_str();
+		D3DMacros[Index].Definition = Value.c_str();
+		++Index;
 	}
 
 	if (FAILED(::D3DCompile2(
@@ -170,17 +175,7 @@ ShaderBinary D3DShaderCompiler::Compile(
 		assert(0);
 	}
 
-	auto ShaderCreateInfo = std::shared_ptr<RHIShaderCreateInfo>();
-	ShaderCreateInfo->ShaderStage = ShaderStage;
-	ShaderCreateInfo->Language = ERHIShaderLanguage::HLSL;
-	ShaderCreateInfo->Name = SourceName ? std::string(SourceName) : "";
-	//ShaderCreateInfo->BinarySize = Binary->GetBufferSize();
-	//ShaderCreateInfo->Binary.resize(Align(Binary->GetBufferSize(), sizeof(uint32_t)) / sizeof(uint32_t));
-	//VERIFY(memcpy_s(Desc->Binary.data(), Binary->GetBufferSize(), Binary->GetBufferPointer(), Binary->GetBufferSize()) == 0);
-
-	//GetReflectionInfo(Desc.get());
-
-	return ShaderBinary();
+	return ShaderBinary(Binary->GetBufferSize(), Binary->GetBufferPointer());
 }
 
 #if 0
@@ -585,6 +580,9 @@ void ShaderCompileService::OnShutdown()
 void ShaderCompileService::Compile(const ShaderAsset& Shader)
 {
 	const size_t Hash = Shader.ComputeHash();
+	const auto FileName = Shader.GetPath().filename().generic_string();
+	const auto SourceCode = static_cast<const char8_t*>(Shader.GetRawData().Data.get());
+	const auto Size = Shader.GetRawData().SizeInBytes;
 
 	for (uint32_t Index = (uint32_t)ERenderHardwareInterface::Vulkan; Index < (uint32_t)ERenderHardwareInterface::Null; ++Index)
 	{
@@ -592,10 +590,6 @@ void ShaderCompileService::Compile(const ShaderAsset& Shader)
 
 		if (RegisterCompileTask(RHI, Hash))
 		{
-			auto FileName = Shader.GetPath().filename().generic_string();
-			const auto SourceCode = static_cast<const char8_t*>(Shader.GetRawData().Data.get());
-			auto Size = Shader.GetRawData().SizeInBytes;
-
 			auto Binary = GetCompiler(RHI).Compile(
 				FileName.c_str(),
 				SourceCode,

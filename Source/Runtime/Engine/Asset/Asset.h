@@ -251,7 +251,7 @@ struct MemoryBlock
 {
 	MemoryBlock() = default;
 
-	MemoryBlock(size_t DataSize, const byte8_t* const InData)
+	MemoryBlock(size_t DataSize, const void* InData)
 		: SizeInBytes(DataSize)
 		, RawData(new byte8_t[DataSize]())
 	{

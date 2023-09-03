@@ -60,7 +60,7 @@ public: \
 	ShaderVariables& GetShaderVariables() { return m_ShaderVariables; } \
 	const ShaderVariables& GetShaderVariables() const { return m_ShaderVariables; }
 
-#define DECLARE_UNIFORM_BUFFER_BEGIN
+#define DECLARE_UNIFORM_BUFFER_BEGIN(Binding)
 #define DECLARE_UNIFORM_BUFFER_END
 
 #define DECLARE_SHADER_VARIABLE_SETER_GETTER_DEFAULT(BaseType, VariableName) \
@@ -86,6 +86,7 @@ public: \
 #define DECLARE_SHADER_VARIABLE_TEXTURE_3D(VariableName, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, VariableName, ImageSampler, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_BY_PATH(std::shared_ptr<ImageAsset>, VariableName))
 
 #else  // __cplusplus
+
 #if _SPIRV_
     #define VK_PUSH_CONSTANT      [[vk::push_constant]]
     #define VK_BINDING(Slot, Set) [[vk::binding(Slot, Set)]]
@@ -105,14 +106,26 @@ public: \
 #define MATH_PI_INV 0.318309886f
 #define MATH_PI_2_INV 0.159154943f
 
-#pragma pack_matrix(row_major)
+// #pragma pack_matrix(row_major)
 
-#define DECLARE_SHADER_PARAMETERS_BEGIN(ShaderType)
+#define DECLARE_SHADER_VARIABLES_BEGIN(ShaderType)
 #define DECLARE_SHADER_VARIABLE
-#define DECLARE_UNIFORM_SHADER_VARIABLE(BaseType, VariableName) BaseType VariableName;
-#define DECLARE_UNIFORM_BUFFER_BEGIN struct UniformBuffer {
+#define DECLARE_SHADER_VARIABLE_UNIFORM(BaseType, VariableName, Binding) BaseType VariableName;
+#define DECLARE_UNIFORM_BUFFER_BEGIN(Binding) cbuffer UniformBuffer : register(b##Binding) {
 #define DECLARE_UNIFORM_BUFFER_END };
-#define DECLARE_SHADER_PARAMETERS_END
+#define DECLARE_SHADER_VARIABLES_END
+
+#define DECLARE_SHADER_VARIABLE_TEXTURE_1D(TextureName, Binding) \
+	Texture1D TextureName : register(t##Binding); \
+	SamplerState TextureName##_Sampler : register(s##Binding);
+
+#define DECLARE_SHADER_VARIABLE_TEXTURE_2D(TextureName, Binding) \
+	Texture2D TextureName : register(t##Binding); \
+	SamplerState TextureName##_Sampler : register(s##Binding);
+
+#define DECLARE_SHADER_VARIABLE_TEXTURE_CUBE(TextureName, Binding) \
+	Texture2D TextureName : register(t##Binding); \
+	SamplerState TextureName##_Sampler : register(s##Binding);
 
 struct VSInput
 {
@@ -121,11 +134,18 @@ struct VSInput
     
 #if _HAS_TANGENT_
     VK_LOCATION(2) float3 Tangent : TANGENT;
-	VK_LOCATION(3) float2 UV0 : TEXCOORD0;
-	#if _HAS_UV1_
-    	VK_LOCATION(4) float2 UV1 : TEXCOORD;
-		#if _HAS_COLOR_
-    		VK_LOCATION(5) float4 Color : COLOR;
+	VK_LOCATION(3) float3 BiTangent : BITANGENT;
+	#if _HAS_UV0_
+		VK_LOCATION(4) float2 UV0 : TEXCOORD0;
+		#if _HAS_UV1_
+    		VK_LOCATION(5) float2 UV1 : TEXCOORD1;
+			#if _HAS_COLOR_
+    			VK_LOCATION(6) float4 Color : COLOR;
+			#endif
+		#else
+			#if _HAS_COLOR_
+				VK_LOCATION(5) float4 Color : COLOR;
+			#endif
 		#endif
 	#else
 		#if _HAS_COLOR_
@@ -133,21 +153,27 @@ struct VSInput
 		#endif
 	#endif
 #else
-	VK_LOCATION(2) float2 UV0 : TEXCOORD0;
-	#if _HAS_UV1_
-    	VK_LOCATION(3) float2 UV1 : TEXCOORD;
-		#if _HAS_COLOR_
-    		VK_LOCATION(4) float4 Color : COLOR;
+	#if _HAS_UV0_
+		VK_LOCATION(2) float2 UV0 : TEXCOORD0;
+		#if _HAS_UV1_
+    		VK_LOCATION(3) float2 UV1 : TEXCOORD1;
+			#if _HAS_COLOR_	
+    			VK_LOCATION(4) float4 Color : COLOR;
+			#endif
+		#else
+			#if _HAS_COLOR_
+				VK_LOCATION(3) float4 Color : COLOR;
+			#endif
 		#endif
 	#else
 		#if _HAS_COLOR_
-    		VK_LOCATION(3) float4 Color : COLOR;
+    		VK_LOCATION(2) float4 Color : COLOR;
 		#endif
 	#endif
 #endif
 };
 
-struct VsOutput
+struct VSOutput
 {
 	float4 Position : SV_POSITION;
 	VK_LOCATION(0) float3 WorldPosition : POSITION;
@@ -155,11 +181,18 @@ struct VsOutput
     
 #if _HAS_TANGENT_
     VK_LOCATION(2) float3 WorldTangent : TANGENT;
-	VK_LOCATION(3) float2 UV0 : TEXCOORD0;
-	#if _HAS_UV1_
-    	VK_LOCATION(4) float2 UV1 : TEXCOORD;
-		#if _HAS_COLOR_
-    		VK_LOCATION(5) float4 Color : COLOR;
+	VK_LOCATION(3) float3 WorldBiTangent : BITANGENT;
+	#if _HAS_UV0_
+		VK_LOCATION(4) float2 UV0 : TEXCOORD0;
+		#if _HAS_UV1_
+    		VK_LOCATION(5) float2 UV1 : TEXCOORD1;
+			#if _HAS_COLOR_
+    			VK_LOCATION(6) float4 Color : COLOR;
+			#endif
+		#else
+			#if _HAS_COLOR_
+				VK_LOCATION(5) float4 Color : COLOR;
+			#endif
 		#endif
 	#else
 		#if _HAS_COLOR_
@@ -167,11 +200,17 @@ struct VsOutput
 		#endif
 	#endif
 #else
-	VK_LOCATION(2) float2 UV0 : TEXCOORD0;
-	#if _HAS_UV1_
-    	VK_LOCATION(3) float2 UV1 : TEXCOORD;
-		#if _HAS_COLOR_
-    		VK_LOCATION(4) float4 Color : COLOR;
+	#if _HAS_UV0_
+		VK_LOCATION(2) float2 UV0 : TEXCOORD0;
+		#if _HAS_UV1_
+    		VK_LOCATION(3) float2 UV1 : TEXCOORD1;
+			#if _HAS_COLOR_
+    			VK_LOCATION(4) float4 Color : COLOR;
+			#endif
+		#else
+			#if _HAS_COLOR_
+				VK_LOCATION(3) float4 Color : COLOR;
+			#endif
 		#endif
 	#else
 		#if _HAS_COLOR_
@@ -181,23 +220,11 @@ struct VsOutput
 #endif
 };
 
-#define DECLARE_TEXTURE_1D(TextureName, Slot) \
-	Texture1D TextureName : register(t#Slot); \
-	SamplerState TextureName#_Sampler : register(s#Slot);
-
-#define DECLARE_TEXTURE_2D(TextureName, Slot) \
-	Texture2D TextureName : register(t#Slot); \
-	SamplerState TextureName#_Sampler : register(s#Slot);
-
-#define DECLARE_TEXTURE_CUBE(TextureName, Slot) \
-	Texture2D TextureName : register(t#Slot); \
-	SamplerState TextureName#_Sampler : register(s#Slot);
-
 #endif  // __cplusplus
 
 #define DECLARE_GLOBAL_GENERIC_VS_VARIABLES \
 	DECLARE_SHADER_VARIABLES_BEGIN(GenericVS) \
-		DECLARE_UNIFORM_BUFFER_BEGIN \
+		DECLARE_UNIFORM_BUFFER_BEGIN(0) \
 			DECLARE_SHADER_VARIABLE_UNIFORM(float4x4, WorldMatrix, 0) \
 			DECLARE_SHADER_VARIABLE_UNIFORM(float4x4, ViewMatrix, 0) \
 			DECLARE_SHADER_VARIABLE_UNIFORM(float4x4, ProjectionMatrix, 0) \
@@ -206,26 +233,26 @@ struct VsOutput
 
 #define DECLARE_GLOBAL_DEFAULT_UNLIT_FS_VARIABLES \
 	DECLARE_SHADER_VARIABLES_BEGIN(DefaultUnlitFS) \
-		DECLARE_UNIFORM_BUFFER_BEGIN \
+		DECLARE_UNIFORM_BUFFER_BEGIN(1) \
 		DECLARE_UNIFORM_BUFFER_END \
-		DECLARE_SHADER_VARIABLE_TEXTURE_2D(DiffuseMap, 1) \
+		DECLARE_SHADER_VARIABLE_TEXTURE_2D(DiffuseMap, 2) \
 	DECLARE_SHADER_VARIABLES_END \
 
 #define DECLARE_GLOBAL_DEFAULT_LIT_FS_VARIABLES \
 	DECLARE_SHADER_VARIABLES_BEGIN(DefaultLitFS) \
-		DECLARE_UNIFORM_BUFFER_BEGIN \
+		DECLARE_UNIFORM_BUFFER_BEGIN(1) \
 		DECLARE_UNIFORM_BUFFER_END \
-		DECLARE_SHADER_VARIABLE_TEXTURE_2D(BaseColorMap, 1) \
-		DECLARE_SHADER_VARIABLE_TEXTURE_2D(NormalMap, 2) \
-		DECLARE_SHADER_VARIABLE_TEXTURE_2D(MetallicRoughnessMap, 3) \
-		DECLARE_SHADER_VARIABLE_TEXTURE_2D(AOMap, 4) \
+		DECLARE_SHADER_VARIABLE_TEXTURE_2D(BaseColorMap, 2) \
+		DECLARE_SHADER_VARIABLE_TEXTURE_2D(NormalMap, 3) \
+		DECLARE_SHADER_VARIABLE_TEXTURE_2D(MetallicRoughnessMap, 4) \
+		DECLARE_SHADER_VARIABLE_TEXTURE_2D(AOMap, 5) \
 	DECLARE_SHADER_VARIABLES_END \
 
 #define DECLARE_GLOBAL_DEFAULT_TOON_FS_VARIABLES \
 	DECLARE_SHADER_VARIABLES_BEGIN(DefaultToonFS) \
-		DECLARE_UNIFORM_BUFFER_BEGIN \
+		DECLARE_UNIFORM_BUFFER_BEGIN(1) \
 		DECLARE_UNIFORM_BUFFER_END \
-		DECLARE_SHADER_VARIABLE_TEXTURE_2D(BaseColorMap, 1) \
+		DECLARE_SHADER_VARIABLE_TEXTURE_2D(BaseColorMap, 2) \
 	DECLARE_SHADER_VARIABLES_END \
 
 #endif  // __INCLUDE_DEFINITIONS__
