@@ -2,11 +2,16 @@
 
 #include "Runtime/Core/Definitions.h"
 #include "Runtime/Core/Cereal.h"
-#include <DirectXMath.h>
-#include <DirectXCollision.h>
 
 #define USE_SSE 1
-///#define FORCE_ALIGN_16
+//#define FORCE_ALIGN_16
+
+#if !USE_SSE
+	#define _XM_NO_INTRINSICS_
+#endif
+
+#include <DirectXMath.h>
+#include <DirectXCollision.h>
 
 NAMESPACE_START(Math)
 
