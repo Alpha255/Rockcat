@@ -447,50 +447,6 @@ private:
 
 			AssimpScene.Graph.AddChild(GraphNode, Mesh->mName.C_Str());
 
-			Math::AABB BoundingBox = Math::AABB(
-				Math::Vector3(Mesh->mAABB.mMin.x, Mesh->mAABB.mMin.y, Mesh->mAABB.mMin.z),
-				Math::Vector3(Mesh->mAABB.mMax.x, Mesh->mAABB.mMax.y, Mesh->mAABB.mMax.z));
-
-			for (uint32_t FaceIndex = 0u; FaceIndex < Mesh->mNumFaces; ++FaceIndex)
-			{
-				const auto& Face = Mesh->mFaces[FaceIndex];
-				assert(Face.mNumIndices == 3u);
-				//Layout.SetFace(FaceIndex, Face.mIndices[0], Face.mIndices[1], Face.mIndices[2]);
-			}
-
-			for (uint32_t VIndex = 0u; VIndex < Mesh->mNumVertices; ++VIndex)
-			{
-				const auto& Position = Mesh->mVertices[VIndex];
-				//Layout.SetPosition(VertexIndex, Vector3(Position.x, Position.y, Position.z));
-				if (Mesh->HasNormals())
-				{
-					const auto& Normal = Mesh->mNormals[VIndex];
-					//Layout.SetNormal(VertexIndex, Vector3(Normal.x, Normal.y, Normal.z));
-				}
-				if (Mesh->HasTangentsAndBitangents())
-				{
-					const auto& Tangent = Mesh->mTangents[VIndex];
-					//Layout.SetTangent(VertexIndex, Vector3(Tangent.x, Tangent.y, Tangent.z));
-
-					const auto& Bitangent = Mesh->mBitangents[VIndex];
-					//Layout.SetBitangent(VertexIndex, Vector3(Bitangent.x, Bitangent.y, Bitangent.z));
-				}
-
-				if (Mesh->HasTextureCoords(0u))
-				{
-					const auto& UV0 = Mesh->mTextureCoords[0u][VIndex];
-				}
-				if (Mesh->HasTextureCoords(1))
-				{
-					const auto& UV1 = Mesh->mTextureCoords[0u][VIndex];
-				}
-
-				if (Mesh->HasVertexColors(0u))
-				{
-					const auto& Color = Mesh->mColors[0u][VIndex];
-				}
-			}
-
 			if (Mesh->HasTangentsAndBitangents())
 			{
 				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_TANGENT_", true);
@@ -507,6 +463,74 @@ private:
 			if (Mesh->HasVertexColors(0u))
 			{
 				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_COLOR_", true);
+			}
+
+			Math::AABB BoundingBox = Math::AABB(
+				Math::Vector3(Mesh->mAABB.mMin.x, Mesh->mAABB.mMin.y, Mesh->mAABB.mMin.z),
+				Math::Vector3(Mesh->mAABB.mMax.x, Mesh->mAABB.mMax.y, Mesh->mAABB.mMax.z));
+
+			MeshData MeshDataBlock(
+				Mesh->mNumVertices,
+				Mesh->mNumFaces * 3u,
+				Mesh->mNumFaces,
+				Mesh->HasTangentsAndBitangents(),
+				Mesh->HasTextureCoords(0u),
+				Mesh->HasTextureCoords(1u),
+				Mesh->HasVertexColors(0u),
+				ERHIPrimitiveTopology::TriangleList,
+				BoundingBox);
+
+			for (uint32_t FaceIndex = 0u; FaceIndex < Mesh->mNumFaces; ++FaceIndex)
+			{
+				const auto& Face = Mesh->mFaces[FaceIndex];
+				assert(Face.mNumIndices == 3u);
+				MeshDataBlock.SetFace(FaceIndex, Face.mIndices[0], Face.mIndices[1], Face.mIndices[2]);
+			}
+
+			for (uint32_t VIndex = 0u; VIndex < Mesh->mNumVertices; ++VIndex)
+			{
+				const auto& Position = Mesh->mVertices[VIndex];
+				MeshDataBlock.SetPosition(VIndex, Math::Vector3(Position.x, Position.y, Position.z));
+
+				if (Mesh->HasNormals())
+				{
+					const auto& Normal = Mesh->mNormals[VIndex];
+					MeshDataBlock.SetNormal(VIndex, Math::Vector3(Normal.x, Normal.y, Normal.z));
+				}
+				if (Mesh->HasTangentsAndBitangents())
+				{
+					const auto& Tangent = Mesh->mTangents[VIndex];
+					MeshDataBlock.SetTangent(VIndex, Math::Vector3(Tangent.x, Tangent.y, Tangent.z));
+
+					const auto& Bitangent = Mesh->mBitangents[VIndex];
+					MeshDataBlock.SetBitangent(VIndex, Math::Vector3(Bitangent.x, Bitangent.y, Bitangent.z));
+				}
+
+				if (Mesh->HasTextureCoords(0u))
+				{
+					const auto& UV = Mesh->mTextureCoords[0u][VIndex];
+					MeshDataBlock.SetUV0(VIndex, Math::Vector3(UV.x, UV.y, UV.z));
+				}
+				if (Mesh->HasTextureCoords(1))
+				{
+					const auto& UV = Mesh->mTextureCoords[1u][VIndex];
+					MeshDataBlock.SetUV0(VIndex, Math::Vector3(UV.x, UV.y, UV.z));
+				}
+
+				if (Mesh->HasVertexColors(0u))
+				{
+					const auto& Color = Mesh->mColors[0u][VIndex];
+					MeshDataBlock.SetColor(VIndex, Math::Color(Color.r, Color.g, Color.b, Color.a));
+				}
+			}
+
+			if (Mesh->HasBones())
+			{
+				assert(false);
+			}
+			else
+			{
+				AssimpScene.Data.StaticMeshes.emplace_back(std::make_shared<StaticMesh>(MeshDataBlock, Mesh->mMaterialIndex));
 			}
 		}
 	}

@@ -26,7 +26,7 @@ enum class ERHIVertexInputRate : uint8_t
 	Instance,
 };
 
-struct RHIInputLayoutCreateInfo : public RHIHashedObject
+struct RHIInputLayoutCreateInfo
 {
 	struct RHIVertexAttribute
 	{
@@ -54,24 +54,6 @@ struct RHIInputLayoutCreateInfo : public RHIHashedObject
 	};
 
 	std::vector<RHIVertexInputBinding> Bindings;
-
-	size_t Hash() const
-	{
-		if (HashValue == InvalidHash)
-		{
-			HashValue = ComputeHash(Bindings.size());
-			for (auto& Binding : Bindings)
-			{
-				HashCombine(HashValue, ComputeHash(Binding.Binding, Binding.Stride, Binding.InputRate));
-
-				for (auto& Attr : Binding.Attributes)
-				{
-					HashCombine(HashValue, ComputeHash(Attr.Location, Attr.Stride, Attr.Format));
-				}
-			}
-		}
-		return HashValue;
-	}
 };
 
 class RHIInputLayout : public RHIResource

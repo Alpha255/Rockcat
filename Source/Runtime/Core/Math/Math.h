@@ -22,7 +22,8 @@ static constexpr float32_t PI_Div2 = DirectX::XM_PIDIV2;
 static constexpr float32_t PI_Div4 = DirectX::XM_PIDIV4;
 static constexpr float32_t Epsilon = std::numeric_limits<float32_t>().epsilon();
 
-template<typename T> inline T Clamp(const T& X, const T& Low, const T& High)
+template<typename T> 
+inline T Clamp(const T& X, const T& Low, const T& High)
 {
 	return X < Low ? Low : (X > High ? High : X);
 }
