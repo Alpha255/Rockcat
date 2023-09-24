@@ -8,8 +8,6 @@ class Scene : public SceneAsset
 public:
 	using SceneAsset::SceneAsset;
 
-	const SceneData& GetSceneData() const { return m_Data; }
-
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
@@ -18,8 +16,6 @@ public:
 		);
 	}
 protected:
-	friend class SceneBuilder;
 private:
-	SceneData m_Data;
 };
 

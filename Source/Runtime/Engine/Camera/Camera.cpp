@@ -19,7 +19,7 @@ void Camera::SetLookAt(const Math::Vector3& Eye, const Math::Vector3& LookAt)
 	if (m_Mode == EMode::ModelViewer)
 	{
 		Math::Matrix Rotate = Math::Matrix::LookAtLH(Eye, LookAt, Up);
-		m_QuatCurrent = Math::Quaternion::RotationMatrix(Rotate);
+		m_QuatCurrent.RotationMatrix(Rotate);
 
 		auto EyeToPoint = LookAt - Eye;
 		SetRadius(EyeToPoint.Length());

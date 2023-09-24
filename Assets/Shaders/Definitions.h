@@ -176,7 +176,7 @@ struct VSInput
 struct VSOutput
 {
 	float4 Position : SV_POSITION;
-	VK_LOCATION(0) float3 WorldPosition : POSITION;
+	VK_LOCATION(0) float3 WorldPosition : POSITIONT;
     VK_LOCATION(1) float3 WorldNormal : NORMAL;
     
 #if _HAS_TANGENT_

@@ -9,97 +9,99 @@ NAMESPACE_START(Math)
 class Transform
 {
 public:
-	inline void Reset()
+	Transform()
 	{
-		m_Scaling = Vector3(0.0f, 0.0f, 0.0f);
-		m_Translation = Vector3(0.0f, 0.0f, 0.0f);
-		m_Rotation = Vector4(0.0f, 0.0f, 0.0f, 0.0f);
-		m_Matrix.Identity();
+		Identity();
 	}
 
-	inline Matrix GetMatrix()
+	Transform(const Vector3& Translation, const Vector3& Scalling, const Quaternion& Rotation)
+		: m_Translation(Translation)
+		, m_Scalling(Scalling)
+		, m_Rotation(Rotation)
 	{
-		Build();
-		return m_Matrix;
 	}
 
-	inline void Scale(const Vector3& Factor)
+	inline void Identity()
 	{
-		m_Scaling *= Factor;
+		m_Scalling = Vector3(1.0f);
+		m_Translation = Vector3(0.0f);
+		m_Rotation = Quaternion();
 	}
 
-	inline void Scale(const float32_t X, const float32_t Y, const float32_t Z)
+	inline Transform& SetTranslation(const Vector3& Translation)
 	{
-		m_Scaling *= Vector3(X, Y, Z);
+		m_Translation = Translation;
+		return *this;
 	}
 
-	inline void Scale(const float32_t Factor)
+	inline Transform& SetTranslation(const float32_t X, const float32_t Y, const float32_t Z)
 	{
-		m_Scaling *= Vector3(Factor, Factor, Factor);
+		m_Translation = Vector3(X, Y, Z);
+		return *this;
 	}
 
-	inline void Translate(const Vector3& Translation)
+	inline Vector3 GetTranslation() const { return m_Translation; }
+
+	inline Transform& SetScale(const Vector3& Scalling)
 	{
-		m_Translation += Translation;
+		m_Scalling = Scalling;
+		return *this;
 	}
 
-	inline void Translate(const float32_t X, const float32_t Y, const float32_t Z)
+	inline Transform& SetScale(const float32_t X, const float32_t Y, const float32_t Z)
 	{
-		m_Translation += Vector3(X, Y, Z);
+		m_Scalling = Vector3(X, Y, Z);
+		return *this;
 	}
 
-	inline void RotateXAxis(const float32_t Angle)
+	inline Transform& SetScale(const float32_t Scalling)
 	{
-		m_Rotation += Vector4(1.0f, 0.0f, 0.0f, Angle);
+		m_Scalling = Vector3(Scalling);
+		return *this;
 	}
 
-	inline void RotateYAxis(const float32_t Angle)
+	inline Vector3 GetScalling() const { return m_Scalling; }
+
+	inline Transform& SetRotationXAxis(const float32_t Angle)
 	{
-		m_Rotation += Vector4(0.0f, 1.0f, 0.0f, Angle);
+		m_Rotation.RotationXAxis(Angle);
+		return *this;
 	}
 
-	inline void RotateZAxis(const float32_t Angle)
+	inline Transform& SetRotationYAxis(const float32_t Angle)
 	{
-		m_Rotation += Vector4(0.0f, 1.0f, 0.0f, Angle);
+		m_Rotation.RotationYAxis(Angle);
+		return *this;
 	}
 
-	inline void RotateAxis(const Vector3& Axis, const float32_t Angle)
+	inline Transform& SetRotationZAxis(const float32_t Angle)
 	{
-		m_Rotation += Vector4(Axis, Angle);
+		m_Rotation.RotationZAxis(Angle);
+		return *this;
 	}
 
-	inline Matrix TransposedMatrix()
+	inline Transform& SetRotationAxis(const Vector3& Axis, const float32_t Angle)
 	{
-		Build();
-		return Matrix::Transpose(m_Matrix);
+		m_Rotation.RotationAxis(Axis, Angle);
+		return *this;
 	}
 
-	inline Matrix InversedMatrix()
-	{
-		Build();
-		return Matrix::Inverse(m_Matrix);
-	}
+	inline Quaternion GetRotation() const { return m_Rotation; }
 
-	inline Matrix InverseTransposedMatrix()
+	template<class Archive>
+	void serialize(Archive& Ar)
 	{
-		Build();
-		return Matrix::InverseTranspose(m_Matrix);
+		Ar(
+			CEREAL_NVP(m_Translation),
+			CEREAL_NVP(m_Scalling),
+			CEREAL_NVP(m_Rotation)
+		);
 	}
 protected:
-	void Build()
-	{
-		Reset();
-
-		m_Matrix = 
-			Matrix::Translation(m_Translation) * 
-			Matrix::Rotation(m_Rotation.x, m_Rotation.y, m_Rotation.z, m_Rotation.w) * 
-			Matrix::Scaling(m_Scaling);
-	}
 private:
-	Matrix m_Matrix;
-	Vector3 m_Scaling;
 	Vector3 m_Translation;
-	Vector4 m_Rotation;
+	Vector3 m_Scalling;
+	Quaternion m_Rotation;
 };
 
 NAMESPACE_END(Math)

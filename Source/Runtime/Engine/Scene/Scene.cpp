@@ -272,4 +272,3 @@ void Scene::Traverse(const SceneNode::VisitFunc& Visit) const
 #endif
 
 #include "Runtime/Engine/Scene/Scene.h"
-#include "Runtime/Engine/Scene/SceneBuilder.h"

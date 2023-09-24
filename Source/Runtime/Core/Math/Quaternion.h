@@ -9,8 +9,8 @@ class Quaternion : public Float4
 public:
 	/// The DirectXMath quaternion functions use an XMVECTOR 4-vector to represent quaternions, 
 	/// where the X, Y, and Z components are the vector part and the W component is the scalar part.
-	Quaternion(float32_t I, float32_t J, float32_t K, float32_t S)
-		: Float4(I, J, K, S)
+	Quaternion(float32_t X, float32_t Y, float32_t Z, float32_t W)
+		: Float4(X, Y, Z, W)
 	{
 	}
 
@@ -140,32 +140,42 @@ public:
 		return DirectX::XMVectorGetX(DirectX::XMQuaternionReciprocalLength(VECTOR_LOAD(4, this)));
 	}
 
-	inline static Quaternion RotationRollPitchYaw(float32_t Pitch, float32_t Yaw, float32_t Roll)
+	inline void RotationRollPitchYaw(float32_t Pitch, float32_t Yaw, float32_t Roll)
 	{
-		Quaternion Ret(0.0f, 0.0f, 0.0f, 0.0f);
-		VECTOR_STORE(4, &Ret, DirectX::XMQuaternionRotationRollPitchYaw(Pitch, Yaw, Roll));
-		return Ret;
+		VECTOR_STORE(4, this, DirectX::XMQuaternionRotationRollPitchYaw(Pitch, Yaw, Roll));
 	}
 
-	inline static Quaternion RotationRollPitchYaw(const Vector3& PitchYawRoll)
+	inline void RotationRollPitchYaw(const Vector3& PitchYawRoll)
 	{
-		Quaternion Ret(0.0f, 0.0f, 0.0f, 0.0f);
-		VECTOR_STORE(4, &Ret, DirectX::XMQuaternionRotationRollPitchYaw(PitchYawRoll.x, PitchYawRoll.y, PitchYawRoll.z));
-		return Ret;
+		VECTOR_STORE(4, this, DirectX::XMQuaternionRotationRollPitchYaw(PitchYawRoll.x, PitchYawRoll.y, PitchYawRoll.z));
 	}
 
-	inline static Quaternion RotationAxis(const Vector3& Axis, float32_t Angle)
+	inline void RotationAxis(const Vector3& Axis, float32_t Angle)
 	{
-		Quaternion Ret(0.0f, 0.0f, 0.0f, 0.0f);
-		VECTOR_STORE(4, &Ret, DirectX::XMQuaternionRotationAxis(VECTOR_LOAD(3, &Axis), Angle));
-		return Ret;
+		VECTOR_STORE(4, this, DirectX::XMQuaternionRotationAxis(VECTOR_LOAD(3, &Axis), Angle));
 	}
 
-	inline static Quaternion RotationMatrix(const Matrix& Matrix)
+	inline void RotationXAxis(float32_t Angle)
 	{
-		Quaternion Ret(0.0f, 0.0f, 0.0f, 0.0f);
-		VECTOR_STORE(4, &Ret, DirectX::XMQuaternionRotationMatrix(MATRIX_LOAD(&Matrix)));
-		return Ret;
+		static Vector3 s_XAxis(1.0f, 0.0f, 0.0f);
+		RotationAxis(s_XAxis, Angle);
+	}
+
+	inline void RotationYAxis(float32_t Angle)
+	{
+		static Vector3 s_YAxis(0.0f, 1.0f, 0.0f);
+		RotationAxis(s_YAxis, Angle);
+	}
+
+	inline void RotationZAxis(float32_t Angle)
+	{
+		static Vector3 s_ZAxis(0.0f, 0.0f, 1.0f);
+		RotationAxis(s_ZAxis, Angle);
+	}
+
+	inline void RotationMatrix(const Matrix& Matrix)
+	{
+		VECTOR_STORE(4, this, DirectX::XMQuaternionRotationMatrix(MATRIX_LOAD(&Matrix)));
 	}
 
 	inline Matrix GetRotationMatrix()
@@ -175,14 +185,11 @@ public:
 		return Ret;
 	}
 
-	inline std::pair<Vector3, float32_t> GetAxisAngle()
+	inline void GetAxisAngle(Vector3& Axis, float32_t& Angle)
 	{
 		DirectX::XMVECTOR AxisV;
-		Vector3 Axis;
-		float32_t Angle = 0.0f;
 		DirectX::XMQuaternionToAxisAngle(&AxisV, &Angle, VECTOR_LOAD(4, this));
 		VECTOR_STORE(3, &Axis, AxisV);
-		return std::make_pair(Axis, Angle);
 	}
 
 	template<class Archive>

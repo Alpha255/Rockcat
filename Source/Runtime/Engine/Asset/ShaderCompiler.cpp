@@ -25,7 +25,7 @@ ShaderBinary DxcShaderCompiler::Compile(
 	ERHIShaderStage ShaderStage,
 	const ShaderDefines& Definitions)
 {
-	assert(SourceCode && SourceCodeSize && EntryPoint && ShaderStage < ERHIShaderStage::Num);
+	assert(SourceCode && SourceCodeSize && EntryPoint);
 
 	DxcBlobEncoding SourceBlob;
 
@@ -131,9 +131,9 @@ ShaderBinary D3DShaderCompiler::Compile(
 	size_t SourceCodeSize,
 	const char8_t* EntryPoint,
 	ERHIShaderStage ShaderStage,
-	const class ShaderDefines& Definitions)
+	const ShaderDefines& Definitions)
 {
-	assert(SourceCode && SourceCodeSize && EntryPoint && ShaderStage < ERHIShaderStage::Num);
+	assert(SourceCode && SourceCodeSize && EntryPoint);
 
 	D3DBlob Binary;
 	D3DBlob Error;
@@ -146,8 +146,9 @@ ShaderBinary D3DShaderCompiler::Compile(
 	uint32_t Flags = D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY; /// Forces strict compile, which might not allow for legacy syntax.
 #endif
 
+	// The last structure in the array serves as a terminator and must have all members set to NULL.
 	uint32_t Index = 0u;
-	std::vector<D3D_SHADER_MACRO> D3DMacros(Definitions.GetDefines().size());
+	std::vector<D3D_SHADER_MACRO> D3DMacros(Definitions.GetDefines().size() + 1u);
 	for (const auto& [Name, Value] : Definitions.GetDefines())
 	{
 		D3DMacros[Index].Name = Name.c_str();
@@ -155,6 +156,9 @@ ShaderBinary D3DShaderCompiler::Compile(
 		++Index;
 	}
 
+	// This default include handler includes files that are relative to the current directory and files that are relative to the directory of the initial source file. 
+	// When you use D3D_COMPILE_STANDARD_FILE_INCLUDE, you must specify the source file name in the pSourceName parameter; 
+	// the compiler will derive the initial relative directory from pSourceName.
 	if (FAILED(::D3DCompile2(
 		SourceCode,
 		SourceCodeSize,

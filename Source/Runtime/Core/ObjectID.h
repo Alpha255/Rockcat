@@ -14,17 +14,17 @@ public:
 
 	constexpr ObjectID() = default;
 
-	constexpr ObjectID(TIndex Index)
+	constexpr ObjectID(TIndex Index) noexcept
 		: m_Index(Index)
 	{
 	}
 
-	constexpr ObjectID(const ObjectID& Other)
+	constexpr ObjectID(const ObjectID& Other) noexcept
 		: m_Index(Other.m_Index)
 	{
 	}
 
-	constexpr ObjectID(ObjectID&& Other)
+	constexpr ObjectID(ObjectID&& Other) noexcept
 		: m_Index(Other.m_Index)
 	{
 		Other.m_Index = NullIndex;
@@ -34,15 +34,27 @@ public:
 
 	constexpr ObjectID& operator=(const ObjectID& Other) { m_Index = Other.m_Index; return *this; }
 
+	constexpr ObjectID& operator+=(const TIndex Value) { m_Index += Value; return *this; }
+
+	constexpr ObjectID& operator-=(const TIndex Value) { m_Index -= Value; return *this; }
+
+	friend ObjectID operator+(const ObjectID& Src, const TIndex Value) { return ObjectID(Src.GetIndex() + Value); }
+
+	friend ObjectID operator-(const ObjectID& Src, const TIndex Value) { return ObjectID(Src.GetIndex() - Value); }
+
 	constexpr TIndex GetIndex() const { assert(IsValid()); return m_Index; }
 
 	constexpr operator bool8_t() const { return IsValid(); }
 
 	constexpr bool8_t IsValid() const { return m_Index != NullIndex; }
 
-	constexpr bool8_t operator==(const ObjectID& Other) const { return m_Index == Other.m_Index; };
+	constexpr bool8_t operator==(const ObjectID& Other) const { return m_Index == Other.m_Index; }
 
-	constexpr bool8_t operator!=(const ObjectID& Other) const { return m_Index != Other.m_Index; };
+	constexpr bool8_t operator!=(const ObjectID& Other) const { return m_Index != Other.m_Index; }
+
+	constexpr bool8_t operator==(const TIndex Index) const { return m_Index == Index; }
+
+	constexpr bool8_t operator!=(const TIndex Index) const { return m_Index != Index; }
 
 	struct Hasher
 	{

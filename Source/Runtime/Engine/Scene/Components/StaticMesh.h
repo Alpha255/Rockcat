@@ -140,6 +140,10 @@ public:
 
 	MaterialID GetMaterialID() const { return m_Material; }
 private:
+protected:
+	friend class SceneBuilder;
+	void SetMaterialID(MaterialID ID) { m_Material = ID; }
+
 	MaterialID m_Material;
 
 	RHIBufferPtr m_VertexBuffer;

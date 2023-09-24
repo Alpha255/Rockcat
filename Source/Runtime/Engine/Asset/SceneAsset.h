@@ -10,6 +10,14 @@ struct SceneData
 	std::vector<std::shared_ptr<StaticMesh>> StaticMeshes;
 	std::vector<std::shared_ptr<MaterialAsset>> Materials;
 	std::vector<Math::Transform> Transforms;
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(Transforms)
+		);
+	}
 };
 
 class SceneAsset : public SerializableAsset<SceneAsset>
@@ -23,21 +31,26 @@ public:
 
 	const char8_t* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::Scene); }
 
-	std::shared_ptr<SceneGraph> GetSceneGraph() const { return m_Graph; }
+	const SceneGraph& GetSceneGraph() const { return *m_Graph; }
+
+	const SceneData& GetSceneData() const { return *m_Data; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
 			CEREAL_NVP(m_AssimpScenePaths),
-			CEREAL_NVP(m_Graph)
+			CEREAL_NVP(m_Graph),
+			CEREAL_NVP(m_Data)
 		);
 	}
 protected:
+	friend class SceneBuilder;
 	void PostLoad() override final;
 private:
 	std::vector<std::string> m_AssimpScenePaths;
 	std::shared_ptr<SceneGraph> m_Graph;
+	std::shared_ptr<SceneData> m_Data;
 };
 
 struct AssimpScene : public Asset
