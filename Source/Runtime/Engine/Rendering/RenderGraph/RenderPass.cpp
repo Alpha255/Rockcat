@@ -1,7 +1,9 @@
-#if 0
-#include "Colorful/IRenderer/RenderGraph/RenderPass.h"
+#include "Runtime/Engine/Rendering/RenderGraph/RenderPass.h"
+#include "Runtime/Engine/Rendering/RenderGraph/ResourceManager.h"
 
-NAMESPACE_START(RHI)
-
-NAMESPACE_END(RHI)
-#endif
+Field& RenderPass::RegisterField(const char8_t* Name, Field::EVisibility Visibility, Field::EResourceType Type)
+{
+    auto Ret = m_ResourceMgr.GetOrAllocateField(Name, Visibility, Type);
+    m_Fields.emplace_back(RenderPassField{Ret.GetID(), Visibility});
+    return Ret;
+}

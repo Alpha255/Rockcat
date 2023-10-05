@@ -1,161 +1,26 @@
 #pragma once
 
-#include "Colorful/IRenderer/IImage.h"
-#include "Colorful/IRenderer/IBuffer.h"
+#include "Runtime/Core/DirectedAcyclicGraph.h"
+#include "Runtime/Engine/Rendering/RenderGraph/RenderPassField.h"
 
-NAMESPACE_START(RHI)
-
-using FieldID = ObjectID<class Field, uint16_t>;
-using RenderPassID = DirectedAcyclicGraph::NodeID;
-
-class Field
+class RenderPass : public DirectedAcyclicGraph::Node
 {
 public:
-	enum class EVisibility
-	{
-		None = 0x0,
-		Input = 0x1,
-		Output = 0x2,
-		Internal = 0x4
-	};
-
-	enum class EType
-	{
-		Image1D,
-		Image2D,
-		Image3D,
-		ImageCube,
-		Buffer
-	};
-
-	Field(const char8_t* Name, EVisibility Visibility, EType Type)
-		: m_Name(Name)
-		, m_Visibility(Visibility)
-		, m_Type(Type)
-		, m_Attributes({})
-	{
-	}
-
-	Field& SetName(const char8_t* Name)
-	{
-		m_Name = Name;
-		return *this;
-	}
-
-	const char8_t* GetName() const
-	{
-		return m_Name.c_str();
-	}
-
-	EVisibility GetVisibility() const
-	{
-		return m_Visibility;
-	}
-
-	Field SetVisibility(EVisibility Visibility)
-	{
-		m_Visibility = Visibility;
-	}
-
-	EType GetType() const
-	{
-		return m_Type;
-	}
-
-	FieldID GetID() const
-	{
-		return m_ID;
-	}
-
-	const BufferDesc& GetBufferAttributes() const
-	{
-		assert(m_Type == EType::Buffer);
-		return m_Attributes.BufferAttributes;
-	}
-
-	bool8_t operator==(const Field& Other) const
-	{
-		assert(m_Type == Other.m_Type);
-		return m_ID == Other.m_ID;
-	}
-
-	bool8_t operator!=(const Field& Other) const
-	{
-		assert(m_Type == Other.m_Type);
-		return m_ID != Other.m_ID;
-	}
-
-	static std::shared_ptr<Field> CreateBuffer(size_t Size);
-	//static std::shared_ptr<Field> CreateRenderTargetView(const ImageAttributes& Attributes);
-	//static std::shared_ptr<Field> CreateShaderResourceView(const ImageAttributes& Attributes);
-	//static std::shared_ptr<Field> CreateDepthStencilView(const ImageAttributes& Attributes);
-	//static std::shared_ptr<Field> CreateUnorderedAccessView(const ImageAttributes& Attributes);
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(m_ID),
-			CEREAL_NVP(m_Visibility),
-			CEREAL_NVP(m_Type),
-			CEREAL_NVP(m_Attributes),
-			CEREAL_NVP(m_Name)
-		);
-	}
-protected:
-private:
-	FieldID m_ID;
-	EVisibility m_Visibility = EVisibility::None;
-	EType m_Type = EType::Image2D;
-	union
-	{
-		//ImageAttributes ImagesAttributes;
-		BufferDesc BufferAttributes;
-	}m_Attributes;
-	std::string m_Name;
-};
-ENUM_FLAG_OPERATORS(Field::EVisibility)
-
-class IRenderPass : public DirectedAcyclicGraph::Node
-{
-public:
-	IRenderPass(const char8_t* Name)
-		: DirectedAcyclicGraph::Node(RenderPassID())
+	RenderPass(DirectedAcyclicGraph::NodeID ID, const char8_t* Name, class ResourceManager& ResourceMgr)
+		: DirectedAcyclicGraph::Node(ID)
 		, m_Name(Name)
+		, m_ResourceMgr(ResourceMgr)
 	{
 	}
 
-	void AddField(const char8_t* Name, Field::EVisibility Visibility, Field::EType Type)
-	{
-		m_Fields.emplace_back(Field(Name, Visibility, Type));
-	}
+	const char8_t* GetName() const { return m_Name.data(); }
+	class ResourceManager& GetResourceManager() { return m_ResourceMgr; }
 
-	const char8_t* GetName() const
-	{
-		return m_Name.c_str();
-	}
+	Field& RegisterField(const char8_t* Name, Field::EVisibility Visibility, Field::EResourceType Type);
 
-	RenderPassID GetID() const
-	{
-		return Node::GetID();
-	}
-
-	virtual void Execute() = 0;
-
-	virtual void OnResize(uint32_t Width, uint32_t Height) { (void)Width; (void)Height; }
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(m_Name),
-			CEREAL_NVP(m_Fields)
-		);
-	}
-protected:
+	virtual void Execute(class RHIDevice&) = 0;
 private:
-	std::string m_Name;
-	std::vector<Field> m_Fields;
+	std::string_view m_Name;
+	std::vector<RenderPassField> m_Fields;
+	class ResourceManager& m_ResourceMgr;
 };
-
-NAMESPACE_END(RHI)
