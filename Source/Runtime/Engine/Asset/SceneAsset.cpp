@@ -13,7 +13,7 @@ public:
 
 	static void MergeSceneGraph(SceneGraph& Target, const SceneGraph& Other)
 	{
-		if (Target.GetNodeCount() == 0u)
+		if (Target.IsEmpty())
 		{
 			Target.Root = Other.Root;
 			Target.IDAllocator = Other.IDAllocator;
@@ -21,7 +21,21 @@ public:
 		}
 		else
 		{
-			// Traverse
+			auto const StartIndex = static_cast<SceneGraph::NodeID::IndexType>(Target.GetNodeCount());
+			for (auto& Node : Other.Nodes)
+			{
+				auto GraphNodeID = Target.AddNode(SceneGraph::NodeID(), Node.GetName(), Node.GetMasks());
+				auto& GraphNode = Target.GetNode(GraphNodeID);
+				auto Parent = Node.HasParent() ? Node.GetParent() + StartIndex : Target.Root;
+				auto Child = Node.HasChild() ? Node.GetChild() + StartIndex : SceneGraph::NodeID();
+				auto Sibling = Node.HasSibling() ? Node.GetSibling() + StartIndex : SceneGraph::NodeID();
+				
+				GraphNode.SetAlive(Node.IsAlive())
+					.SetVisible(Node.IsAlive())
+					.SetParent(Parent)
+					.SetChild(Child)
+					.SetSibling(Sibling);
+			}
 		}
 	}
 
@@ -68,6 +82,11 @@ void SceneAsset::PostLoad()
 		{
 			SceneBuilder::MergeSceneGraph(*NewGraph, AssimpScene->Graph);
 			SceneBuilder::MergeSceneData(*NewData, AssimpScene->Data);
+		}
+
+		if (NewData->Transforms.empty())
+		{
+			NewData->Transforms.resize(NewGraph->GetNodeCount());
 		}
 
 		// TODO: Thread safe??

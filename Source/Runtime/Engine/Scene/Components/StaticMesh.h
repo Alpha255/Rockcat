@@ -46,6 +46,25 @@ struct MeshProperty
 
 	Math::AABB BoundingBox;
 	Math::Sphere BoundingSphere;
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(NumVertex),
+			CEREAL_NVP(NumIndex),
+			CEREAL_NVP(NumPrimitive),
+			CEREAL_NVP(VertexStride),
+			CEREAL_NVP(HasTangent),
+			CEREAL_NVP(HasUV0),
+			CEREAL_NVP(HasUV1),
+			CEREAL_NVP(HasColor),
+			CEREAL_NVP(IndexFormat),
+			CEREAL_NVP(PrimitiveTopology),
+			CEREAL_NVP(BoundingBox),
+			CEREAL_NVP(BoundingSphere)
+		);
+	}
 };
 
 struct MeshData : public MeshProperty
@@ -148,6 +167,15 @@ protected:
 
 	RHIBufferPtr m_VertexBuffer;
 	RHIBufferPtr m_IndexBuffer;
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(MeshProperty),
+			CEREAL_NVP(m_Material)
+		);
+	}
 };
 
 class SkeletalMesh : public StaticMesh

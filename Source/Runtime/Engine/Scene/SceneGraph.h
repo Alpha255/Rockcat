@@ -12,34 +12,56 @@ struct SceneGraph
 	class Node
 	{
 	public:
+		enum class ENodeMasks
+		{
+			None,
+			StaticMesh = 1 << 0,
+			SkeletalMesh = 1 << 1,
+			Light = 1 << 2,
+			Camera = 1 << 3
+		};
+
 		Node() = default;
 
-		Node(const char8_t* Name, NodeID ParentID = NodeID())
-			: m_Name(Name)
-			, m_Parent(ParentID)
+		Node(const char8_t* Name, NodeID ParentID = NodeID(), ENodeMasks Masks = ENodeMasks::None)
+			: m_Parent(ParentID)
+			, m_Masks(Masks)
+			, m_Name(Name ? Name : "")
 		{
 		}
 
+		Node(const Node&) = default;
+		Node(Node&&) = default;
+		Node& operator=(const Node&) = default;
+
 		bool8_t HasParent() const { return m_Parent.IsValid(); }
 		NodeID GetParent() const { return m_Parent; }
-		void SetParent(NodeID ParentID) { m_Parent = ParentID; }
+		Node& SetParent(NodeID ParentID) { m_Parent = ParentID; return *this; }
 
 		bool8_t HasChild() const { return m_Child.IsValid(); }
 		NodeID GetChild() const { return m_Child; }
-		void SetChild(NodeID ChildID) { m_Child = ChildID; }
+		Node& SetChild(NodeID ChildID) { m_Child = ChildID; return *this; }
 
 		bool8_t HasSibling() const { return m_Sibling.IsValid(); }
 		NodeID GetSibling() const { return m_Sibling; }
-		void SetSibling(NodeID SiblingID) { m_Sibling = SiblingID; }
+		Node& SetSibling(NodeID SiblingID) { m_Sibling = SiblingID; return *this; }
 
 		bool8_t IsAlive() const { return m_Alive; }
-		void SetAlive(bool8_t Alive) { m_Alive = Alive; }
+		Node& SetAlive(bool8_t Alive) { m_Alive = Alive; return *this; }
 
 		bool8_t IsVisible() const { return m_Visible; }
-		void SetVisible(bool8_t Visible) { m_Visible = Visible; }
+		Node& SetVisible(bool8_t Visible) { m_Visible = Visible; return *this; }
 
 		const char8_t* GetName() const { return m_Name.c_str(); }
-		void SetName(const char8_t* Name) { m_Name = Name; }
+		Node& SetName(const char8_t* Name) { m_Name = Name; return *this; }
+
+		ENodeMasks GetMasks() const { return m_Masks; }
+		Node& SetMasks(ENodeMasks Masks);
+
+		bool8_t IsStaticMesh() const;
+		bool8_t IsSkeletalMesh() const;
+		bool8_t IsLight() const;
+		bool8_t IsCamera() const;
 
 		template<class Archive>
 		void serialize(Archive& Ar)
@@ -48,30 +70,39 @@ struct SceneGraph
 				CEREAL_NVP(m_Parent),
 				CEREAL_NVP(m_Child),
 				CEREAL_NVP(m_Sibling),
+				CEREAL_NVP(m_Masks),
 				CEREAL_NVP(m_Alive),
 				CEREAL_NVP(m_Visible),
 				CEREAL_NVP(m_Name)
 			);
 		}
 	protected:
+		friend class AssimpSceneImporter;
+		uint32_t GetDataIndex() const { return m_DataIndex; }
+		void SetDataIndex(uint32_t Index) { m_DataIndex = Index; }
 	private:
 		NodeID m_Parent;
 		NodeID m_Child;
 		NodeID m_Sibling;
+
+		ENodeMasks m_Masks = ENodeMasks::None;
+		uint32_t m_DataIndex = 0u;
 
 		bool8_t m_Alive = true;
 		bool8_t m_Visible = true;
 
 		std::string m_Name;
 	};
+	using NodeList = std::vector<Node>;
 
 	NodeID Root;
-	std::vector<Node> Nodes;
+	NodeList Nodes;
 	NodeIDAllocator IDAllocator;
 
 	size_t GetNodeCount() const { return Nodes.size(); }
+	bool8_t IsEmpty() const { return Nodes.empty(); }
 
-	NodeID AddSibling(NodeID Sibling, const char8_t* Name)
+	NodeID AddSibling(NodeID Sibling, const char8_t* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
 	{
 		assert(Sibling.IsValid() && Sibling.GetIndex() < Nodes.size());
 		NodeID::IndexType SiblingIndex = Sibling.GetIndex();
@@ -80,12 +111,12 @@ struct SceneGraph
 			SiblingIndex = Nodes[SiblingIndex].GetSibling().GetIndex();
 		}
 
-		NodeID SiblingNode = AddNode(Nodes[SiblingIndex].GetParent(), Name);
+		NodeID SiblingNode = AddNode(Nodes[SiblingIndex].GetParent(), Name, Masks);
 		Nodes[Sibling.GetIndex()].SetSibling(SiblingNode);
 		return SiblingNode;
 	}
 
-	NodeID AddChild(NodeID Parent, const char8_t* Name)
+	NodeID AddChild(NodeID Parent, const char8_t* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
 	{
 		assert(Parent.IsValid() && Parent.GetIndex() < Nodes.size());
 		if (Nodes[Parent.GetIndex()].HasChild())
@@ -94,22 +125,22 @@ struct SceneGraph
 		}
 		else
 		{
-			auto NextID = AddNode(Parent, Name);
+			auto NextID = AddNode(Parent, Name, Masks);
 			Nodes[Parent.GetIndex()].SetChild(NextID);
 			return NextID;
 		}
 	}
 
-	NodeID AddNode(NodeID Parent, const char8_t* Name)
+	NodeID AddNode(NodeID Parent, const char8_t* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
 	{
-		NodeID NextID = IDAllocator.Allocate();
-		Nodes.emplace_back(Node(Name, Parent));
+		NodeID NextID = IDAllocator.Allocate();  /// +1
+		Nodes.emplace_back(Node(Name, Parent, Masks));
 		return NextID;
 	}
 
 	const Node* FindNode(const char8_t* NodeName) const
 	{
-		for each (auto & Node in Nodes)
+		for (auto& Node : Nodes)
 		{
 			if (strcmp(Node.GetName(), NodeName) == 0)
 			{
@@ -117,6 +148,18 @@ struct SceneGraph
 			}
 		}
 		return nullptr;
+	}
+
+	Node& GetNode(const NodeID& ID) 
+	{ 
+		assert(ID.IsValid() && ID.GetIndex() < Nodes.size());
+		return Nodes[ID.GetIndex()]; 
+	}
+
+	const Node& GetNode(const NodeID& ID) const
+	{
+		assert(ID.IsValid() && ID.GetIndex() < Nodes.size());
+		return Nodes[ID.GetIndex()];
 	}
 
 	template<class Archive>
@@ -129,3 +172,5 @@ struct SceneGraph
 		);
 	}
 };
+
+ENUM_FLAG_OPERATORS(SceneGraph::Node::ENodeMasks)

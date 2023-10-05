@@ -9,15 +9,124 @@
                     "id": 2147483649,
                     "data": {
                         "Root": {
-                            "m_Index": 4294967295
+                            "m_Index": 0
                         },
-                        "Nodes": [],
+                        "Nodes": [
+                            {
+                                "m_Parent": {
+                                    "m_Index": 4294967295
+                                },
+                                "m_Child": {
+                                    "m_Index": 1
+                                },
+                                "m_Sibling": {
+                                    "m_Index": 4294967295
+                                },
+                                "m_Masks": 0,
+                                "m_Alive": true,
+                                "m_Visible": true,
+                                "m_Name": "nodes[0]"
+                            },
+                            {
+                                "m_Parent": {
+                                    "m_Index": 0
+                                },
+                                "m_Child": {
+                                    "m_Index": 2
+                                },
+                                "m_Sibling": {
+                                    "m_Index": 4294967295
+                                },
+                                "m_Masks": 0,
+                                "m_Alive": true,
+                                "m_Visible": true,
+                                "m_Name": "nodes[1]"
+                            },
+                            {
+                                "m_Parent": {
+                                    "m_Index": 1
+                                },
+                                "m_Child": {
+                                    "m_Index": 4294967295
+                                },
+                                "m_Sibling": {
+                                    "m_Index": 4294967295
+                                },
+                                "m_Masks": 1,
+                                "m_Alive": true,
+                                "m_Visible": true,
+                                "m_Name": "Mesh"
+                            }
+                        ],
                         "IDAllocator": {
-                            "m_MaxIndex": 0,
+                            "m_MaxIndex": 3,
                             "m_FreeIndices": {
                                 "container": []
                             }
                         }
+                    }
+                }
+            },
+            "m_Data": {
+                "ptr_wrapper": {
+                    "id": 2147483650,
+                    "data": {
+                        "Transforms": [
+                            {
+                                "m_Translation": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0
+                                },
+                                "m_Scalling": {
+                                    "x": 1.0,
+                                    "y": 1.0,
+                                    "z": 1.0
+                                },
+                                "m_Rotation": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0,
+                                    "w": 1.0
+                                }
+                            },
+                            {
+                                "m_Translation": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0
+                                },
+                                "m_Scalling": {
+                                    "x": 1.0,
+                                    "y": 1.0,
+                                    "z": 1.0
+                                },
+                                "m_Rotation": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0,
+                                    "w": 1.0
+                                }
+                            },
+                            {
+                                "m_Translation": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0
+                                },
+                                "m_Scalling": {
+                                    "x": 1.0,
+                                    "y": 1.0,
+                                    "z": 1.0
+                                },
+                                "m_Rotation": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0,
+                                    "w": 1.0
+                                }
+                            }
+                        ]
                     }
                 }
             }

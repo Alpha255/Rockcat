@@ -445,7 +445,7 @@ private:
 				continue;
 			}
 
-			AssimpScene.Graph.AddChild(GraphNode, Mesh->mName.C_Str());
+			auto GraphNodeID = AssimpScene.Graph.AddChild(GraphNode, Mesh->mName.C_Str(), SceneGraph::Node::ENodeMasks::StaticMesh);
 
 			if (Mesh->HasTangentsAndBitangents())
 			{
@@ -530,6 +530,7 @@ private:
 			}
 			else
 			{
+				AssimpScene.Graph.GetNode(GraphNodeID).SetDataIndex(static_cast<uint32_t>(AssimpScene.Data.StaticMeshes.size()));
 				AssimpScene.Data.StaticMeshes.emplace_back(std::make_shared<StaticMesh>(MeshDataBlock, Mesh->mMaterialIndex));
 			}
 		}
