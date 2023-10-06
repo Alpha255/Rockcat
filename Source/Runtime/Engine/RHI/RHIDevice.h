@@ -2,7 +2,7 @@
 
 #include "Runtime/Engine/RHI/RHICommandBuffer.h"
 
-enum class ERHIDeviceQueueType : uint8_t
+enum class ERHIDeviceQueue : uint8_t
 {
 	Graphics,
 	Transfer,
@@ -65,17 +65,13 @@ public:
 
 	virtual RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& RHICreateInfo) = 0;
 
-	virtual RHICommandBufferPoolPtr CreateCommandBufferPool(ERHIDeviceQueueType QueueType) = 0;
+	virtual RHICommandBufferPoolPtr CreateCommandBufferPool(ERHIDeviceQueue QueueType) = 0;
 
-	virtual void SubmitCommandBuffers(ERHIDeviceQueueType QueueType, const std::vector<RHICommandBuffer*>& Commands) = 0;
-
-	virtual void SubmitCommandBuffer(ERHIDeviceQueueType QueueType, RHICommandBuffer* Command) = 0;
-
-	virtual void SubmitCommandBuffers(const std::vector<RHICommandBuffer*>& Commands) = 0;
+	virtual void SubmitCommandBuffer(ERHIDeviceQueue QueueType, RHICommandBuffer* Command) = 0;
 
 	virtual void SubmitCommandBuffer(RHICommandBuffer* Command) = 0;
 
-	virtual RHICommandBufferPtr GetOrAllocateCommandBuffer(ERHIDeviceQueueType QueueType, ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary, bool8_t AutoBegin = true) = 0;
+	virtual RHICommandBufferPtr GetActiveCommandBuffer(ERHIDeviceQueue QueueType, ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary) = 0;
 
 	RHIImagePtr CreateColorAttachment(
 		uint32_t Width,
@@ -87,83 +83,75 @@ public:
 	{
 		assert(RHI::IsColor(Format));
 
-		RHIImageCreateInfo RHICreateInfo
-		{
-			Width,
-			Height,
-			1u,
-			1u,
-			1u,
-			ERHIImageType::T_2D,
-			Format,
-			SampleCount,
-			UseForShaderResource ? ERHIBufferUsageFlags::RenderTarget | ERHIBufferUsageFlags::ShaderResource : ERHIBufferUsageFlags::RenderTarget,
-			ERHIResourceState::RenderTarget,
-			Name
-		};
+		RHIImageCreateInfo RHICreateInfo;
+		RHICreateInfo.SetWidth(Width)
+			.SetHeight(Height)
+			.SetDepth(1u)
+			.SetArrayLayers(1u)
+			.SetMipLevels(1u)
+			.SetImageType(ERHIImageType::T_2D)
+			.SetFormat(Format)
+			.SetSampleCount(SampleCount)
+			.SetUsages(UseForShaderResource ? ERHIBufferUsageFlags::RenderTarget | ERHIBufferUsageFlags::ShaderResource : ERHIBufferUsageFlags::RenderTarget)
+			.SetRequiredState(ERHIResourceState::RenderTarget)
+			.SetName(Name);
 		return CreateImage(RHICreateInfo);
 	}
 
-	RHIImagePtr CreateDepthStencil(uint32_t Width, uint32_t Height, ERHIFormat Format, const char8_t* Name = "NamelessDepthStencil")
+	RHIImagePtr CreateDepthStencilAttachment(
+		uint32_t Width, 
+		uint32_t Height, 
+		ERHIFormat Format,
+		ERHISampleCount SampleCount = ERHISampleCount::Sample_1_Bit,
+		const char8_t* Name = "NamelessDepthStencil")
 	{
 		assert(RHI::IsDepthStenci(Format));
 
-		RHIImageCreateInfo RHICreateInfo
-		{
-			Width,
-			Height,
-			1u,
-			1u,
-			1u,
-			ERHIImageType::T_2D,
-			Format,
-			ERHISampleCount::Sample_1_Bit,
-			ERHIBufferUsageFlags::DepthStencil,
-			ERHIResourceState::DepthWrite,
-			Name
-		};
+		RHIImageCreateInfo RHICreateInfo;
+		RHICreateInfo.SetWidth(Width)
+			.SetHeight(Height)
+			.SetDepth(1u)
+			.SetArrayLayers(1u)
+			.SetMipLevels(1u)
+			.SetImageType(ERHIImageType::T_2D)
+			.SetFormat(Format)
+			.SetSampleCount(SampleCount)
+			.SetUsages(ERHIBufferUsageFlags::DepthStencil)
+			.SetRequiredState(ERHIResourceState::DepthWrite)
+			.SetName(Name);
 		return CreateImage(RHICreateInfo);
 	}
 
 	RHIBufferPtr CreateUniformBuffer(size_t Size)
 	{
-		return CreateBuffer(
-			RHIBufferCreateInfo
-			{
-				ERHIBufferUsageFlags::UniformBuffer,
-				ERHIDeviceAccessFlags::GpuReadCpuWrite,
-				ERHIResourceState::UniformBuffer,
-				Size
-			}
-		);
+		RHIBufferCreateInfo RHICreateInfo;
+		RHICreateInfo.SetUsages(ERHIBufferUsageFlags::UniformBuffer)
+			.SetAccessFlags(ERHIDeviceAccessFlags::GpuReadCpuWrite)
+			.SetRequiredState(ERHIResourceState::UniformBuffer)
+			.SetSize(Size);
+		return CreateBuffer(RHICreateInfo);
 	}
 
 	RHIBufferPtr CreateVertexBuffer(size_t Size, ERHIDeviceAccessFlags AccessFlags, const void* InitialData)
 	{
-		return CreateBuffer(
-			RHIBufferCreateInfo
-			{
-				ERHIBufferUsageFlags::VertexBuffer,
-				AccessFlags,
-				ERHIResourceState::VertexBuffer,
-				Size,
-				InitialData
-			}
-		);
+		RHIBufferCreateInfo RHICreateInfo;
+		RHICreateInfo.SetUsages(ERHIBufferUsageFlags::VertexBuffer)
+			.SetAccessFlags(AccessFlags)
+			.SetRequiredState(ERHIResourceState::VertexBuffer)
+			.SetSize(Size)
+			.SetInitialData(InitialData);
+		return CreateBuffer(RHICreateInfo);
 	}
 
 	RHIBufferPtr CreateIndexBuffer(size_t Size, ERHIDeviceAccessFlags AccessFlags, const void* InitialData)
 	{
-		return CreateBuffer(
-			RHIBufferCreateInfo
-			{
-				ERHIBufferUsageFlags::IndexBuffer,
-				AccessFlags,
-				ERHIResourceState::IndexBuffer,
-				Size,
-				InitialData
-			}
-		);
+		RHIBufferCreateInfo RHICreateInfo;
+		RHICreateInfo.SetUsages(ERHIBufferUsageFlags::IndexBuffer)
+			.SetAccessFlags(AccessFlags)
+			.SetRequiredState(ERHIResourceState::IndexBuffer)
+			.SetSize(Size)
+			.SetInitialData(InitialData);
+		return CreateBuffer(RHICreateInfo);
 	}
 
 	const char8_t* const GetAdapterName() const { return m_AdapterName.c_str(); }

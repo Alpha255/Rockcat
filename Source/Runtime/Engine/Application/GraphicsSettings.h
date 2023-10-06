@@ -10,6 +10,14 @@ enum class ERenderingPath : uint8_t
 	DeferredLighting,
 };
 
+enum class ELightingPolicy : uint8_t
+{
+	None,
+	TiledBased,
+	ClusterBased,
+	StencilBased
+};
+
 enum class EShadowTechnique : uint8_t
 {
 	None,
@@ -101,6 +109,7 @@ struct GraphicsSettings
 	bool8_t BatchResourceBarrier = false;
 	bool8_t AsyncCommandlistSubmission = false;
 	ERenderingPath RenderingPath = ERenderingPath::ForwardShading;
+	ELightingPolicy LightingPolicy = ELightingPolicy::None;
 	EShadowTechnique ShadowTechnique = EShadowTechnique::None;
 	EAntiAliasingTechnique AntiAliasingTechnique = EAntiAliasingTechnique::None;
 	ERenderHardwareInterface RenderHardwareInterface = ERenderHardwareInterface::Null;
@@ -125,6 +134,7 @@ struct GraphicsSettings
 			CEREAL_NVP(BatchResourceBarrier),
 			CEREAL_NVP(AsyncCommandlistSubmission),
 			CEREAL_NVP(RenderingPath),
+			CEREAL_NVP(LightingPolicy),
 			CEREAL_NVP(ShadowTechnique),
 			CEREAL_NVP(AntiAliasingTechnique),
 			CEREAL_NVP(RenderHardwareInterface),

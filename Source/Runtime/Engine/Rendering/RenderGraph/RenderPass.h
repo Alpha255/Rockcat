@@ -1,13 +1,12 @@
 #pragma once
 
-#include "Runtime/Core/DirectedAcyclicGraph.h"
 #include "Runtime/Engine/Rendering/RenderGraph/RenderPassField.h"
 
-class RenderPass : public DirectedAcyclicGraph::Node
+class RenderPass
 {
 public:
-	RenderPass(DirectedAcyclicGraph::NodeID ID, const char8_t* Name, class ResourceManager& ResourceMgr)
-		: DirectedAcyclicGraph::Node(ID)
+	RenderPass(DAGNodeID ID, const char8_t* Name, class ResourceManager& ResourceMgr)
+		: m_NodeID(ID)
 		, m_Name(Name)
 		, m_ResourceMgr(ResourceMgr)
 	{
@@ -15,12 +14,22 @@ public:
 
 	const char8_t* GetName() const { return m_Name.data(); }
 	class ResourceManager& GetResourceManager() { return m_ResourceMgr; }
+	const std::vector<RenderPassField>& GetFields() const { return m_Fields; }
+	DAGNodeID GetNodeID() const { return m_NodeID; }
 
 	Field& RegisterField(const char8_t* Name, Field::EVisibility Visibility, Field::EResourceType Type);
 
-	virtual void Execute(class RHIDevice&) = 0;
+	virtual void Execute(class RHIDevice&, const class Scene&) = 0;
+
+	virtual void OnGUI(class Canvas&) {};
 private:
+	DAGNodeID m_NodeID;
 	std::string_view m_Name;
 	std::vector<RenderPassField> m_Fields;
 	class ResourceManager& m_ResourceMgr;
 };
+
+#define DECLARE_RENDERPASS_CONSTRUCTOR(Pass, Parent) \
+	Pass(DAGNodeID ID, class ResourceManager& ResourceMgr) \
+		: Parent(ID, #Pass, ResourceMgr) \
+	{} \

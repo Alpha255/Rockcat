@@ -1,10 +1,16 @@
+#include "Runtime/Engine/Rendering/RenderGraph/RenderPass/ImGuiPass.h"
+#include <Submodules/imgui/imgui.h>
+
+ImGUIPass::~ImGUIPass()
+{
+	ImGui::DestroyContext();
+}
+
 #if 0
 #include "Colorful/IRenderer/RenderGraph/RenderPass/ImGUIPass.h"
 #include "Colorful/IRenderer/IRenderer.h"
 #include "Runtime/Asset/Material.h"
 #include "Runtime/Asset/Model.h"
-#include <Submodules/imgui/imgui.h>
-#include <Submodules/imgui/imgui_internal.h>
 
 NAMESPACE_START(RHI)
 
@@ -293,11 +299,6 @@ void ImGUIPass::CustomStyles()
 #undef MAP_KEY
 
 	ImGui::StyleColorsClassic();
-}
-
-ImGUIPass::~ImGUIPass()
-{
-	ImGui::DestroyContext();
 }
 
 NAMESPACE_END(RHI)

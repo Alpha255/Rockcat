@@ -1,9 +1,10 @@
 #pragma once
 
+#include "Runtime/Core/DirectedAcyclicGraph.h"
 #include "Runtime/Engine/RHI/RHIBuffer.h"
-#include "Runtime/Core/ObjectID.h"
 
-DECLARE_OBJECT_ID(Field, uint32_t)
+using DAGNodeID = DirectedAcyclicGraph::NodeID;
+
 class Field
 {
 public:
@@ -21,10 +22,10 @@ public:
 		Buffer
 	};
 
-	Field(FieldID ID, const char8_t* Name, EVisibility Visibility, EResourceType Type)
+	Field(DAGNodeID ID, const char8_t* Name, EVisibility Visibility, EResourceType Type)
 		: m_Visibility(Visibility)
 		, m_ResourceType(Type)
-		, m_ID(ID)
+		, m_NodeID(ID)
 		, m_Name(Name)
 	{
 		assert(Name);
@@ -38,7 +39,7 @@ public:
 
 	EResourceType GetResourceType() const { return m_ResourceType; }
 
-	FieldID GetID() const { return m_ID; }
+	DAGNodeID GetNodeID() const { return m_NodeID; }
 
 	RHIBufferCreateInfo& GetBufferCreateInfo() 
 	{ 
@@ -59,7 +60,7 @@ public:
 			CEREAL_NVP(m_Visibility),
 			CEREAL_NVP(m_ResourceType),
 			CEREAL_NVP(m_Name),
-			CEREAL_NVP(m_ID),
+			CEREAL_NVP(m_NodeID),
 			CEREAL_NVP(m_ResourceCreateInfo)
 		);
 	}
@@ -67,7 +68,7 @@ protected:
 private:
 	EVisibility m_Visibility = EVisibility::None;
 	EResourceType m_ResourceType = EResourceType::Image;
-	FieldID m_ID;
+	DAGNodeID m_NodeID;
 	std::string_view m_Name;
 
 	std::variant<RHIBufferCreateInfo, RHIImageCreateInfo> m_ResourceCreateInfo;
@@ -77,6 +78,6 @@ ENUM_FLAG_OPERATORS(Field::EVisibility)
 
 struct RenderPassField
 {
-	FieldID ID;
+	DAGNodeID ID;
 	Field::EVisibility Visibility;
 };

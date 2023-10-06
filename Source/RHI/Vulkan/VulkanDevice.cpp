@@ -654,20 +654,12 @@ RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& /*RHICreat
 	return RHISamplerPtr();
 }
 
-RHICommandBufferPoolPtr VulkanDevice::CreateCommandBufferPool(ERHIDeviceQueueType /*QueueType*/)
+RHICommandBufferPoolPtr VulkanDevice::CreateCommandBufferPool(ERHIDeviceQueue /*QueueType*/)
 {
 	return RHICommandBufferPoolPtr();
 }
 
-void VulkanDevice::SubmitCommandBuffers(ERHIDeviceQueueType /*QueueType*/, const std::vector<RHICommandBuffer*>& /*Commands*/)
-{
-}
-
-void VulkanDevice::SubmitCommandBuffer(ERHIDeviceQueueType /*QueueType*/, RHICommandBuffer* /*Command*/)
-{
-}
-
-void VulkanDevice::SubmitCommandBuffers(const std::vector<RHICommandBuffer*>& /*Commands*/)
+void VulkanDevice::SubmitCommandBuffer(ERHIDeviceQueue /*QueueType*/, RHICommandBuffer* /*Command*/)
 {
 }
 
@@ -675,7 +667,7 @@ void VulkanDevice::SubmitCommandBuffer(RHICommandBuffer* /*Command*/)
 {
 }
 
-RHICommandBufferPtr VulkanDevice::GetOrAllocateCommandBuffer(ERHIDeviceQueueType /*QueueType*/, ERHICommandBufferLevel /*Level*/, bool8_t /*AutoBegin*/)
+RHICommandBufferPtr VulkanDevice::GetActiveCommandBuffer(ERHIDeviceQueue /*QueueType*/, ERHICommandBufferLevel /*Level*/)
 {
 	return RHICommandBufferPtr();
 }

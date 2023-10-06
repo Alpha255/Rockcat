@@ -5,9 +5,14 @@
 class ResourceManager
 {
 public:
+	ResourceManager(class RHIDevice& RenderDevice, DirectedAcyclicGraph& Graph);
+
 	Field& GetOrAllocateField(const char8_t* Name, Field::EVisibility Visibility, Field::EResourceType Type, 
-		FieldID RefID = FieldID());
+		DAGNodeID RefID = DAGNodeID());
+
+	void CreateAllResources();
 private:
-	std::vector<Field> m_Fields;
-	FieldIDAllocator m_FieldIDAllocator;
+	std::unordered_map<DAGNodeID::IndexType, std::shared_ptr<Field>> m_Fields;
+	class RHIDevice& m_RenderDevice;
+	DirectedAcyclicGraph& m_Graph;
 };

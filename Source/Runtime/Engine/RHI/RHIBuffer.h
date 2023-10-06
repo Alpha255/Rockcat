@@ -16,6 +16,7 @@ struct RHIBufferCreateInfo
 	inline RHIBufferCreateInfo& SetAccessFlags(ERHIDeviceAccessFlags Flags) { AccessFlags = Flags | AccessFlags; return *this; }
 	inline RHIBufferCreateInfo& SetSize(size_t DataSize) { Size = DataSize; return *this; }
 	inline RHIBufferCreateInfo& SetInitialData(const void* Data) { InitialData = Data; return *this; }
+	inline RHIBufferCreateInfo& SetRequiredState(ERHIResourceState State) { RequiredState = State; }
 };
 
 class RHIBuffer

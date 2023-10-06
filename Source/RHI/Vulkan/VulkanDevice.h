@@ -49,17 +49,13 @@ public:
 
 	virtual RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& RHICreateInfo) override final;
 
-	virtual RHICommandBufferPoolPtr CreateCommandBufferPool(ERHIDeviceQueueType QueueType) override final;
+	virtual RHICommandBufferPoolPtr CreateCommandBufferPool(ERHIDeviceQueue QueueType) override final;
 
-	virtual void SubmitCommandBuffers(ERHIDeviceQueueType QueueType, const std::vector<RHICommandBuffer*>& Commands) override final;
-
-	virtual void SubmitCommandBuffer(ERHIDeviceQueueType QueueType, RHICommandBuffer* Command) override final;
-
-	virtual void SubmitCommandBuffers(const std::vector<RHICommandBuffer*>& Commands) override final;
+	virtual void SubmitCommandBuffer(ERHIDeviceQueue QueueType, RHICommandBuffer* Command) override final;
 
 	virtual void SubmitCommandBuffer(RHICommandBuffer* Command) override final;
 
-	virtual RHICommandBufferPtr GetOrAllocateCommandBuffer(ERHIDeviceQueueType QueueType, ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary, bool8_t AutoBegin = true) override final;
+	virtual RHICommandBufferPtr GetActiveCommandBuffer(ERHIDeviceQueue QueueType, ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary) override final;
 
 	inline const vk::Device& GetNative() const { return m_LogicalDevice; }
 

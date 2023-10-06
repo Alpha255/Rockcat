@@ -1,13 +1,12 @@
 #pragma once
 
-#include "Colorful/IRenderer/RenderGraph/IFrameGraph.h"
+#include "Runtime/Engine/Rendering/RenderGraph/RenderPass/MeshPass.h"
 
-NAMESPACE_START(RHI)
-
-class TransparencyPass : public IFrameGraphPass
+class TransparencyPass : public MeshPass
 {
 public:
-	using IFrameGraphPass::IFrameGraphPass;
+	TransparencyPass(DAGNodeID ID, class ResourceManager& ResourceMgr)
+		: MeshPass(ID, "TransparencyPass", ResourceMgr)
+	{
+	}
 };
-
-NAMESPACE_END(RHI)

@@ -105,11 +105,7 @@ public:
 	}
 protected:
 private:
-#if 0
-	std::atomic<TIndex> m_MaxIndex = 0;
-#else
 	TIndex m_MaxIndex = 0;
-#endif
 	std::queue<TIndex> m_FreeIndices;
 };
 

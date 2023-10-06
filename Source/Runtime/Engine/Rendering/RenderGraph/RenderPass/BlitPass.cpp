@@ -1,3 +1,4 @@
+#include "Runtime/Engine/Rendering/RenderGraph/RenderPass/BlitPass.h"
 #if 0
 #include "Colorful/IRenderer/RenderGraph/RenderPass/BlitPass.h"
 #include "Colorful/IRenderer/RenderGraph/RenderPass/ForwardShadingPass.h"

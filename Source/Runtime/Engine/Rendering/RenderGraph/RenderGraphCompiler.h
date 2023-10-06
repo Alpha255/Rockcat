@@ -1,23 +1,17 @@
 #pragma once
 
-#include "Colorful/IRenderer/RenderGraph/RenderPass.h"
-
-NAMESPACE_START(RHI)
+#include "Runtime/Engine/Rendering/RenderGraph/RenderPass.h"
 
 class RenderGraphCompiler
 {
 public:
-    RenderGraphCompiler(class RenderGraph& Graph)
-        : m_Graph(Graph)
-    {
-    }
+    RenderGraphCompiler(class RenderGraph& Graph);
 
     void Compile();
 protected:
-    void ResolveExecutionList();
+    void InsertResourceBarrierPass();
+    void InsertResolvePass();
 private:
     class RenderGraph& m_Graph;
-    std::vector<std::shared_ptr<IRenderPass>> m_Passes;
+    std::vector<std::shared_ptr<RenderPass>> m_Passes;
 };
-
-NAMESPACE_END(RHI)

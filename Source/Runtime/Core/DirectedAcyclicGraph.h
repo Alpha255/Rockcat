@@ -5,10 +5,10 @@
 class DirectedAcyclicGraph
 {
 public:
-	using NodeIDAllocator = ObjectIDAllocator<class Node, uint16_t>;
+	using NodeIDAllocator = ObjectIDAllocator<class Node, uint32_t>;
 	using NodeID = NodeIDAllocator::TID;
 
-	using EdgeIDAllocator = ObjectIDAllocator<class Edge, uint16_t>;
+	using EdgeIDAllocator = ObjectIDAllocator<class Edge, uint32_t>;
 	using EdgeID = EdgeIDAllocator::TID;
 
 	DECLARE_SMART_PTR(Node)
@@ -49,20 +49,10 @@ public:
 			}
 		}
 
-		const std::vector<EdgeID>& GetInputEdges() const
-		{
-			return m_InputEdges;
-		}
+		const std::vector<EdgeID>& GetInputEdges() const { return m_InputEdges; }
+		const std::vector<EdgeID>& GetOutputEdges() const { return m_OutputEdges; }
 
-		const std::vector<EdgeID>& GetOutputEdges() const
-		{
-			return m_OutputEdges;
-		}
-
-		NodeID GetID() const
-		{
-			return m_ID;
-		}
+		NodeID GetID() const { return m_ID; }
 
 		template<class Archive>
 		void serialize(Archive& Ar)
@@ -90,20 +80,10 @@ public:
 		{
 		}
 
-		NodeID GetSourceNode() const
-		{
-			return m_SrcNode;
-		}
+		NodeID GetSourceNode() const { return m_SrcNode; }
+		NodeID GetDestinationNode() const { return m_DstNode; }
 
-		NodeID GetDestinationNode() const
-		{
-			return m_DstNode;
-		}
-
-		EdgeID GetID() const
-		{
-			return m_ID;
-		}
+		EdgeID GetID() const { return m_ID; }
 
 		template<class Archive>
 		void serialize(Archive& Ar)
@@ -121,21 +101,14 @@ public:
 		EdgeID m_ID;
 	};
 
-	bool8_t IsNodeExists(const NodeID& ID) const
-	{
-		return m_Nodes.find(ID.GetIndex()) != m_Nodes.end();
-	}
-
-	bool8_t IsEdgeExists(const EdgeID& ID) const
-	{
-		return m_Edges.find(ID.GetIndex()) != m_Edges.end();
-	}
+	bool8_t IsNodeExists(const NodeID& ID) const { return m_Nodes.find(ID.GetIndex()) != m_Nodes.end(); }
+	bool8_t IsEdgeExists(const EdgeID& ID) const { return m_Edges.find(ID.GetIndex()) != m_Edges.end(); }
 
 	const Node* FindNode(const NodeID& ID) const
 	{
 		if (IsNodeExists(ID))
 		{
-			return m_Nodes.at(ID.GetIndex()).get();
+			return &m_Nodes.at(ID.GetIndex());
 		}
 
 		return nullptr;
@@ -145,7 +118,7 @@ public:
 	{
 		if (IsEdgeExists(ID))
 		{
-			return m_Edges.at(ID.GetIndex()).get();
+			return &m_Edges.at(ID.GetIndex());
 		}
 
 		return nullptr;
@@ -153,14 +126,9 @@ public:
 
 	NodeID AddNode()
 	{
-		auto NewNode = std::make_shared<Node>(m_NodeIDAllocator.Allocate());
-		m_Nodes.insert(std::make_pair(NewNode->GetID().GetIndex(), NewNode));
-		return NewNode->GetID();
-	}
-
-	void AddNode(const NodeSharedPtr& NewNode)
-	{
-		m_Nodes.insert(std::make_pair(NewNode->GetID().GetIndex(), NewNode));
+		auto NewNodeID = m_NodeIDAllocator.Allocate();
+		m_Nodes.insert(std::make_pair(NewNodeID.GetIndex(), Node(NewNodeID)));
+		return NewNodeID;
 	}
 
 	std::vector<EdgeID> RemoveNode(const NodeID& ID)
@@ -174,10 +142,10 @@ public:
 
 			for (auto& EdgeID : EdgesToRemove)
 			{
-				m_Edges.at(EdgeID.GetIndex()).reset();
+				m_Edges.erase(EdgeID.GetIndex());
 			}
 
-			m_Nodes.at(ID.GetIndex()).reset();
+			m_Nodes.erase(ID.GetIndex());
 		}
 
 		return EdgesToRemove;
@@ -187,12 +155,12 @@ public:
 	{
 		if (IsNodeExists(SrcNode) && IsNodeExists(DstNode))
 		{
-			auto ID = m_EdgeIDAllocator.Allocate();
-			m_Nodes.at(SrcNode.GetIndex())->ConnectOutputEdge(ID);
-			m_Nodes.at(DstNode.GetIndex())->ConnectInputEdge(ID);
-			m_Edges.insert(std::make_pair(ID.GetIndex(), std::make_shared<Edge>(ID, SrcNode, DstNode)));
+			auto NewEdgeID = m_EdgeIDAllocator.Allocate();
+			m_Nodes.at(SrcNode.GetIndex()).ConnectOutputEdge(NewEdgeID);
+			m_Nodes.at(DstNode.GetIndex()).ConnectInputEdge(NewEdgeID);
+			m_Edges.insert(std::make_pair(NewEdgeID.GetIndex(), Edge(NewEdgeID, SrcNode, DstNode)));
 
-			return ID;
+			return NewEdgeID;
 		}
 
 		return EdgeID();
@@ -202,10 +170,10 @@ public:
 	{
 		if (auto Edge = FindEdge(ID))
 		{
-			m_Nodes.at(Edge->GetSourceNode().GetIndex())->RemoveEdge(ID);
-			m_Nodes.at(Edge->GetDestinationNode().GetIndex())->RemoveEdge(ID);
+			m_Nodes.at(Edge->GetSourceNode().GetIndex()).RemoveEdge(ID);
+			m_Nodes.at(Edge->GetDestinationNode().GetIndex()).RemoveEdge(ID);
 
-			m_Edges.at(ID.GetIndex()).reset();
+			m_Edges.erase(ID.GetIndex());
 		}
 	}
 
@@ -221,8 +189,8 @@ public:
 	}
 protected:
 private:
-	std::unordered_map<NodeID::IndexType, NodeSharedPtr> m_Nodes;
-	std::unordered_map<EdgeID::IndexType, EdgeSharedPtr> m_Edges;
+	std::unordered_map<NodeID::IndexType, Node> m_Nodes;
+	std::unordered_map<EdgeID::IndexType, Edge> m_Edges;
 
 	NodeIDAllocator m_NodeIDAllocator;
 	EdgeIDAllocator m_EdgeIDAllocator;

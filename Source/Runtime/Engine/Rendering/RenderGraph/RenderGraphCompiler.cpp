@@ -1,18 +1,19 @@
-#if 0
-#include "Colorful/IRenderer/RenderGraph/RenderGraphCompiler.h"
-#include "Colorful/IRenderer/RenderGraph/RenderGraph.h"
+#include "Runtime/Engine/Rendering/RenderGraph/RenderGraphCompiler.h"
+#include "Runtime/Engine/Rendering/RenderGraph/RenderGraph.h"
 
-NAMESPACE_START(RHI)
+RenderGraphCompiler::RenderGraphCompiler(RenderGraph& Graph)
+	: m_Graph(Graph)
+{
+}
 
 void RenderGraphCompiler::Compile()
 {
-    ResolveExecutionList();
 }
 
-void RenderGraphCompiler::ResolveExecutionList()
+void RenderGraphCompiler::InsertResourceBarrierPass()
 {
-    
 }
 
-NAMESPACE_END(RHI)
-#endif
+void RenderGraphCompiler::InsertResolvePass()
+{
+}

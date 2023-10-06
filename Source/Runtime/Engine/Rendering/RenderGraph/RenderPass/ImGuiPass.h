@@ -1,57 +1,16 @@
 #pragma once
 
-#include "Colorful/IRenderer/RenderGraph/IFrameGraph.h"
+#include "Runtime/Engine/Rendering/RenderGraph/RenderPass.h"
 
-struct ImGuiContext;
-
-NAMESPACE_START(RHI)
-
-class ImGUIPass : public IFrameGraphPass, public IInputHandler, public ITickable
+class ImGUIPass : public RenderPass
 {
 public:
-	ImGUIPass(const Scene* TargetScene, const Camera* ViewCamera);
-	
+	DECLARE_RENDERPASS_CONSTRUCTOR(ImGUIPass, RenderPass)
+
 	~ImGUIPass();
 
-	using OnBuildImGUIWidgets = std::function<void()>;
-
-	void ApplyRenderSettings(const RenderSettings* Settings) override final;
-
-	void Render(class ICommandBuffer* Command) override final;
-
-	void BindBuildWidgetsFunc(OnBuildImGUIWidgets Func)
-	{
-		m_BuildWidgetsFunc = Func;
-	}
-
-	void OnMouseEvent(const MouseEvent& Mouse) override final;
-
-	void OnKeyboardEvent(const KeyboardEvent& Keyboard) override final;
-
-	void OnWindowResized(uint32_t Width, uint32_t Height) override final;
-
-	void Tick(float32_t ElapsedSeconds) override final;
-
-	bool8_t WantCaptureInput() const;
+	void Execute(class RHIDevice&, const class Scene&) override final {}
 protected:
-	void FlushDrawData(class ICommandBuffer* Command);
-	void CustomStyles();
 private:
-	ImGuiContext* m_Context = nullptr;
-	IBufferSharedPtr m_VertexBuffer;
-	IBufferSharedPtr m_IndexBuffer;
-	IBufferSharedPtr m_UniformBuffer;
-	IPipelineSharedPtr m_GraphicsPipeline;
-	IInputLayoutSharedPtr m_InputLayout;
-	IImageSharedPtr m_FontImage;
-	ISamplerSharedPtr m_LinearSampler;
-	IDevice* m_Device = nullptr;
-	std::shared_ptr<Material> m_Material;
-	GraphicsPipelineDesc m_GraphicsPipelineDesc;
-	OnBuildImGUIWidgets m_BuildWidgetsFunc;
-
-	int32_t m_LastVertexCount = 0;
-	int32_t m_LastIndexCount = 0;
+	struct ImGuiContext* m_Context = nullptr;
 };
-
-NAMESPACE_END(RHI)

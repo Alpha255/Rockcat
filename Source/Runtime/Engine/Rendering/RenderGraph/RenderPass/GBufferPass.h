@@ -1,13 +1,9 @@
 #pragma once
 
-#include "Colorful/IRenderer/RenderGraph/IFrameGraph.h"
+#include "Runtime/Engine/Rendering/RenderGraph/RenderPass/MeshPass.h"
 
-NAMESPACE_START(RHI)
-
-class GBufferPass : public OpaquePass
+class GeometryBufferPass : public MeshPass
 {
 public:
-	using OpaquePass::OpaquePass;
+	DECLARE_RENDERPASS_CONSTRUCTOR(GeometryBufferPass, MeshPass)
 };
-
-NAMESPACE_END(RHI)

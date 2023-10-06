@@ -1,16 +1,28 @@
 #include "Runtime/Engine/Rendering/RenderGraph/ResourceManager.h"
+#include "Runtime/Engine/RHI/RHIDevice.h"
+
+ResourceManager::ResourceManager(RHIDevice& RenderDevice, DirectedAcyclicGraph& Graph)
+	: m_RenderDevice(RenderDevice)
+	, m_Graph(Graph)
+{
+}
 
 Field& ResourceManager::GetOrAllocateField(
 	const char8_t* Name, 
 	Field::EVisibility Visibility, 
 	Field::EResourceType Type, 
-	FieldID RefID)
+	DAGNodeID RefID)
 {
 	if (RefID.IsValid())
 	{
-		return m_Fields[RefID.GetIndex()];
+		return *m_Fields[RefID.GetIndex()];
 	}
 
-	m_Fields.emplace_back(Field(m_FieldIDAllocator.Allocate(), Name, Visibility, Type));
-	return m_Fields.back();
+	auto NewField = std::make_shared<Field>(m_Graph.AddNode(), Name, Visibility, Type);
+	m_Fields.insert(std::make_pair(NewField->GetNodeID().GetIndex(), NewField));
+	return *NewField;
+}
+
+void ResourceManager::CreateAllResources()
+{
 }

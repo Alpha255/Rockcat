@@ -1,10 +1,8 @@
 #pragma once
 
-#include "Colorful/IRenderer/RenderGraph/IFrameGraph.h"
+#include "Runtime/Engine/Rendering/RenderGraph/RenderPass.h"
 
-NAMESPACE_START(RHI)
-
-class BlitPass : public IFrameGraphPass
+class BlitPass : public RenderPass
 {
 public:
 	enum class EMode
@@ -22,32 +20,13 @@ public:
 		Linear
 	};
 
-	BlitPass(const Scene* TargetScene, const Camera* ViewCamera);
+	DECLARE_RENDERPASS_CONSTRUCTOR(BlitPass, RenderPass)
 
-	void SetSource(IImageSharedPtr Src)
-	{
-		m_BlitSrc = Src;
-	}
+	void SetMode(EMode Mode) { m_Mode = Mode; }
 
-	void ApplyRenderSettings(const RenderSettings* Settings) override final;
-
-	void Render(ICommandBuffer* Command) override final;
-
-	void SetupMaterial(const MeshInstance*) override final;
-
-	void SetMode(EMode Mode);
+	void Execute(class RHIDevice&, const class Scene&) override final {}
 protected:
 private:
 	EMode m_Mode = EMode::FullscreenTriangle;
 	ESampler m_Sampler = ESampler::Point;
-	Drawable m_Drawable;
-	std::unordered_map<size_t, IPipelineSharedPtr> m_GraphicsPipelines;
-	std::shared_ptr<MeshInstance> m_FullscreenTriangle;
-	std::shared_ptr<MeshInstance> m_FullscreenQuad;
-	IImageSharedPtr m_BlitSrc;
-	ISamplerSharedPtr m_LinearSampler;
-	ISamplerSharedPtr m_PointSampler;
-	static ImageSlice AllSlice;
 };
-
-NAMESPACE_END(RHI)

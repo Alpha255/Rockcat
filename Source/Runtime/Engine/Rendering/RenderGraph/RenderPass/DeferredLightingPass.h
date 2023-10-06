@@ -1,13 +1,11 @@
 #pragma once
 
-#include "Colorful/IRenderer/RenderGraph/IFrameGraph.h"
+#include "Runtime/Engine/Rendering/RenderGraph/RenderPass.h"
 
-NAMESPACE_START(RHI)
-
-class DeferredLightingPass : public IFrameGraphPass
+class DeferredLightingPass : public RenderPass
 {
 public:
-	using IFrameGraphPass::IFrameGraphPass;
-};
+	DECLARE_RENDERPASS_CONSTRUCTOR(DeferredLightingPass, RenderPass)
 
-NAMESPACE_END(RHI)
+	void Execute(class RHIDevice&, const class Scene&) override final {}
+};

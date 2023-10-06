@@ -1,33 +1,34 @@
 #pragma once
 
-#include "Colorful/IRenderer/RenderGraph/RenderPass.h"
+#include "Runtime/Engine/Rendering/RenderGraph/RenderPass.h"
 
-NAMESPACE_START(RHI)
-
-class RenderGraph : public Serializeable<RenderGraph>
+class RenderGraph
 {
 public:
-	RenderGraph(bool8_t EnableAsyncTasks);
+	RenderGraph(class RHIDevice& RenderDevice, class Scene& RenderScene);
 
-	void AddRenderPass(const IRenderPassSharedPtr& RenderPass);
-
-	void RemoveRenderPass(RenderPassID PassID);
-
-	IRenderPassSharedPtr GetRenderPass();
-
-	void Compile();
+	template<class TPass>
+	TPass& CreateRenderPass()
+	{
+		auto GraphNodeID = m_Graph.AddNode();
+		auto Pass = std::make_shared<TPass>(GraphNodeID, *m_ResourceMgr);
+		m_RenderPasses.insert(std::make_pair(GraphNodeID.GetIndex(), Pass));
+		return *Pass;
+	}
 
 	void Execute();
 
-	SERIALIZE_START
-		CEREAL_NVP(m_Graph)
-	SERIALIZE_END
+	const Scene& GetScene() const { return m_RenderScene; }
+
+	virtual void Setup() = 0;
 protected:
 private:
-	bool8_t m_NeedRecompile = true;
-	bool8_t m_EnableAsyncTasks = false;
-	DirectedAcyclicGraph m_Graph;
-	std::vector<IRenderPassSharedPtr> m_RenderPasses;
-};
+	void Compile();
 
-NAMESPACE_END(RHI)
+	bool8_t m_NeedRecompile = true;
+	DirectedAcyclicGraph m_Graph;
+	class RHIDevice& m_RenderDevice;
+	const class Scene& m_RenderScene;
+	std::unique_ptr<class ResourceManager> m_ResourceMgr;
+	std::unordered_map<DAGNodeID::IndexType, std::shared_ptr<RenderPass>> m_RenderPasses;
+};
