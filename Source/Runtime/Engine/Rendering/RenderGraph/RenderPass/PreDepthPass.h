@@ -5,5 +5,8 @@
 class PreDepthPass : public MeshPass
 {
 public:
-	DECLARE_RENDERPASS_CONSTRUCTOR(PreDepthPass, MeshPass)
+	PreDepthPass(DAGNodeID ID, class ResourceManager& ResourceMgr)
+		: MeshPass(ID, "PreDepthPass", ResourceMgr, MeshPass::EMeshDrawFilter::All)
+	{
+	}
 };

@@ -2,7 +2,7 @@
 
 #include "Runtime/Engine/Rendering/RenderGraph/RenderGraph.h"
 
-class ForwardShadingPath : public RenderGraph
+class ForwardRenderingPath : public RenderGraph
 {
 public:
 	using RenderGraph::RenderGraph;

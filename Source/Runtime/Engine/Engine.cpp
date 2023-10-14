@@ -25,7 +25,6 @@ void Engine::Run()
 
 	for (auto& Application : m_Applications)
 	{
-		Application->OnWindowCreation();
 		Application->OnStartup();
 	}
 

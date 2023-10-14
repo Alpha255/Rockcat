@@ -11,13 +11,9 @@ public:
 
 	virtual ~BaseApplication() = default;
 
-	virtual void OnWindowCreation();
+	virtual void OnStartup();
 
-	virtual void OnStartup() {}
-
-	virtual void OnRenderScene() {}
-
-	virtual void OnRenderGUI() {}
+	virtual void OnRenderFrame();
 
 	virtual void OnShutdown() {}
 
@@ -34,6 +30,10 @@ public:
 	const class ApplicationConfigurations& GetConfigurations() const;
 
 	bool8_t IsRequestingQuit() const;
+protected:
+	virtual void OnWindowCreation();
+	virtual void OnInitialize() {}
+	virtual void OnGUI(class Canvas&) {}
 private:
 	std::shared_ptr<class ApplicationConfigurations> m_Configs;
 	std::shared_ptr<class Window> m_Window;

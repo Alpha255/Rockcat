@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Runtime/Engine/RHI/RHIBuffer.h"
 #include "Runtime/Engine/RHI/RHIShader.h"
 #include "Runtime/Core/Math/AABB.h"

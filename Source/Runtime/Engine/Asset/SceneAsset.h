@@ -35,6 +35,24 @@ public:
 
 	const SceneData& GetSceneData() const { return *m_Data; }
 
+	const StaticMesh* GetStaticMesh(uint32_t Index) const
+	{
+		assert(Index < m_Data->StaticMeshes.size());
+		return m_Data->StaticMeshes[Index].get();
+	}
+
+	const Math::Transform* GetTransform(uint32_t Index) const
+	{
+		assert(Index < m_Data->StaticMeshes.size());
+		return &m_Data->Transforms[Index];
+	}
+
+	const MaterialAsset* GetMaterial(uint32_t Index) const
+	{
+		assert(Index < m_Data->Materials.size());
+		return m_Data->Materials[Index].get();
+	}
+
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{

@@ -6,13 +6,9 @@ class RenderTest final : public BaseApplication
 {
 public:
 	using BaseApplication::BaseApplication;
-
-	void OnStartup() override final;
-
-	void OnRenderScene() override final;
-
-	void OnRenderGUI() override final;
 protected:
+	void OnInitialize() override final;
+	void OnGUI(class Canvas&) override final {}
 private:
 	std::shared_ptr<class Scene> m_Scene;
 };

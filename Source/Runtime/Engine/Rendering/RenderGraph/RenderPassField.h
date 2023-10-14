@@ -59,7 +59,7 @@ public:
 		Ar(
 			CEREAL_NVP(m_Visibility),
 			CEREAL_NVP(m_ResourceType),
-			CEREAL_NVP(m_Name),
+			//CEREAL_NVP(m_Name),
 			CEREAL_NVP(m_NodeID),
 			CEREAL_NVP(m_ResourceCreateInfo)
 		);

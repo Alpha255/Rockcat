@@ -18,6 +18,7 @@ ShadowPass::ShadowPass(DAGNodeID ID, ResourceManager& ResourceMgr)
 	: MeshPass(
 		ID, 
 		GetNameByShadowTechnique(RHIInterface::GetGraphicsSettings()->ShadowTechnique), 
-		ResourceMgr)
+		ResourceMgr,
+		MeshPass::EMeshDrawFilter::ShadowCaster)
 {
 }

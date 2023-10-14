@@ -8,7 +8,7 @@ public:
 	RenderGraph(class RHIDevice& RenderDevice, class Scene& RenderScene);
 
 	template<class TPass>
-	TPass& CreateRenderPass()
+	TPass& AddPass()
 	{
 		auto GraphNodeID = m_Graph.AddNode();
 		auto Pass = std::make_shared<TPass>(GraphNodeID, *m_ResourceMgr);

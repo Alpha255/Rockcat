@@ -1,4 +1,4 @@
-#include "Runtime/Engine/Rendering/RenderGraph/RenderPass/ForwardShadingPass.h"
+#include "Runtime/Engine/Rendering/RenderGraph/RenderPass/OpaquePass.h"
 #if 0
 #include "Colorful/IRenderer/RenderGraph/RenderPass/ForwardShadingPass.h"
 #include "Colorful/IRenderer/IRenderer.h"

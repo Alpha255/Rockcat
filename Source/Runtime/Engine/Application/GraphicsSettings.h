@@ -5,7 +5,7 @@
 
 enum class ERenderingPath : uint8_t
 {
-	ForwardShading,  /// Tiled Based/Cluster Based/Stencil Based
+	ForwardRendering,  /// Tiled Based/Cluster Based/Stencil Based
 	DeferredShading, /// Tiled Based/Cluster Based/Stencil Based
 	DeferredLighting,
 };
@@ -108,7 +108,7 @@ struct GraphicsSettings
 	bool8_t BatchResourceDataTransfer = false;
 	bool8_t BatchResourceBarrier = false;
 	bool8_t AsyncCommandlistSubmission = false;
-	ERenderingPath RenderingPath = ERenderingPath::ForwardShading;
+	ERenderingPath RenderingPath = ERenderingPath::ForwardRendering;
 	ELightingPolicy LightingPolicy = ELightingPolicy::None;
 	EShadowTechnique ShadowTechnique = EShadowTechnique::None;
 	EAntiAliasingTechnique AntiAliasingTechnique = EAntiAliasingTechnique::None;

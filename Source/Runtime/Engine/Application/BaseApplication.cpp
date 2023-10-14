@@ -150,12 +150,22 @@ BaseApplication::BaseApplication(const char8_t* ConfigurationName)
 	m_Configs = ApplicationConfigurations::Load(ConfigurationName ? ConfigurationName : "Defalut.json");
 }
 
+void BaseApplication::OnStartup()
+{
+	OnWindowCreation();
+	OnInitialize();
+}
+
 void BaseApplication::OnWindowCreation()
 {
 	if (m_Configs->IsEnableWindow())
 	{
 		m_Window = std::make_shared<Window>(m_Configs->GetWindowCreateInfo(), nullptr);
 	}
+}
+
+void BaseApplication::OnRenderFrame()
+{
 }
 
 void BaseApplication::Tick(float32_t /*ElapsedSeconds*/)

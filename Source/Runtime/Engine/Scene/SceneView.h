@@ -4,13 +4,12 @@
 
 struct DepthFirst {};
 struct BreadthFirst {};
+using SceneNodeIterator = SceneGraph::NodeList::const_iterator;
 
 template<class Policy = DepthFirst>
 class SceneView
 {
 public:
-	using SceneNodeIterator = SceneGraph::NodeList::const_iterator;
-
 	SceneView(const Scene& TargetScene)
 		: SceneView(TargetScene.GetSceneGraph())
 	{

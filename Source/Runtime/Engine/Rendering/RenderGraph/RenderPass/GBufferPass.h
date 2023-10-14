@@ -5,5 +5,8 @@
 class GeometryBufferPass : public MeshPass
 {
 public:
-	DECLARE_RENDERPASS_CONSTRUCTOR(GeometryBufferPass, MeshPass)
+	GeometryBufferPass(DAGNodeID ID, class ResourceManager& ResourceMgr)
+		: MeshPass(ID, "GBufferPass", ResourceMgr, MeshPass::EMeshDrawFilter::Opaque)
+	{
+	}
 };

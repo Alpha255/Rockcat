@@ -52,6 +52,9 @@ struct SceneGraph
 		bool8_t IsVisible() const { return m_Visible; }
 		Node& SetVisible(bool8_t Visible) { m_Visible = Visible; return *this; }
 
+		bool8_t IsSelected() const { return m_Selected; }
+		Node& SetSelected(bool8_t Selected) { m_Selected = Selected; return *this; }
+
 		const char8_t* GetName() const { return m_Name.c_str(); }
 		Node& SetName(const char8_t* Name) { m_Name = Name; return *this; }
 
@@ -63,6 +66,8 @@ struct SceneGraph
 		bool8_t IsLight() const;
 		bool8_t IsCamera() const;
 
+		uint32_t GetDataIndex() const { return m_DataIndex; }
+
 		template<class Archive>
 		void serialize(Archive& Ar)
 		{
@@ -73,12 +78,12 @@ struct SceneGraph
 				CEREAL_NVP(m_Masks),
 				CEREAL_NVP(m_Alive),
 				CEREAL_NVP(m_Visible),
+				CEREAL_NVP(m_Selected),
 				CEREAL_NVP(m_Name)
 			);
 		}
 	protected:
 		friend class AssimpSceneImporter;
-		uint32_t GetDataIndex() const { return m_DataIndex; }
 		void SetDataIndex(uint32_t Index) { m_DataIndex = Index; }
 	private:
 		NodeID m_Parent;
@@ -90,6 +95,7 @@ struct SceneGraph
 
 		bool8_t m_Alive = true;
 		bool8_t m_Visible = true;
+		bool8_t m_Selected = false;
 
 		std::string m_Name;
 	};

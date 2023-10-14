@@ -21,7 +21,7 @@ public:
 
 	virtual void Execute(class RHIDevice&, const class Scene&) = 0;
 
-	virtual void OnGUI(class Canvas&) {};
+	virtual void OnGUI() {};
 private:
 	DAGNodeID m_NodeID;
 	std::string_view m_Name;

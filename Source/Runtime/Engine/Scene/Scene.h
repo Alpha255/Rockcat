@@ -16,7 +16,10 @@ public:
 			CEREAL_BASE(SceneAsset)
 		);
 	}
+
+	bool8_t IsDirty() const { return m_Dirty; }
 protected:
 private:
+	bool8_t m_Dirty = false;
 };
 

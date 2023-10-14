@@ -4,7 +4,7 @@
 #include "Runtime/Engine/Asset/GlobalShaders/DefaultShading.h"
 //#include <Submodules/imgui/imgui.h>
 
-void RenderTest::OnStartup()
+void RenderTest::OnInitialize()
 {
 #if 0
 	m_Scene = Scene::Load("RenderTest.json");
@@ -33,13 +33,9 @@ void RenderTest::OnStartup()
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");
 }
 
-void RenderTest::OnRenderScene()
-{
-}
-
+#if 0
 void RenderTest::OnRenderGUI()
 {
-#if 0
 	ImGui::Begin("Settings");
 
 	ImGui::Text("FrameTime %.2fms", RHI::Profiler::Stats::Get().AverageFrameTime());
@@ -49,7 +45,7 @@ void RenderTest::OnRenderGUI()
 	ImGui::ShowDemoWindow();
 
 	ImGui::End();
-#endif
 }
+#endif
 
 REGISTER_APPLICATION(RenderTest, "RenderTest.json")
