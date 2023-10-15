@@ -31,7 +31,14 @@ public:
 		assert(Name);
 	}
 
-	Field& SetName(const char8_t* Name) { m_Name = Name; return *this; }
+	Field& SetName(const char8_t* Name) 
+	{ 
+		if (Name && m_Name != Name)
+		{
+			m_Name = Name;
+		}
+		return *this; 
+	}
 	const char8_t* GetName() const { return m_Name.data(); }
 
 	EVisibility GetVisibility() const { return m_Visibility; }
