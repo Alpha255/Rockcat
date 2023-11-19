@@ -28,6 +28,18 @@ inline T Clamp(const T& X, const T& Low, const T& High)
 	return X < Low ? Low : (X > High ? High : X);
 }
 
+template<class T>
+static constexpr inline T DivideAndRoundUp(T Dividend, T Divisor)
+{
+	return (Dividend + Divisor - 1) / Divisor;
+}
+
+template<class T>
+static constexpr inline T DivideAndRoundDown(T Dividend, T Divisor)
+{
+	return Dividend / Divisor;
+}
+
 inline float32_t DegreeToRadians(float32_t Degree)
 {
 	return DirectX::XMConvertToRadians(Degree);
