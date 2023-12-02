@@ -2,6 +2,8 @@
 #include "Runtime/Engine/Asset/MaterialAsset.h"
 #include "Runtime/Engine/Asset/ShaderAsset.h"
 
+#pragma warning(push)
+#pragma warning(disable:4324)
 class GenericVS : public ShaderAsset
 {
 public:
@@ -237,3 +239,5 @@ public:
 	}
 private:
 };
+
+#pragma warning(pop)

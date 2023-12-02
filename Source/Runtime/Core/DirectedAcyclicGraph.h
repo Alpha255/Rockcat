@@ -196,3 +196,15 @@ private:
 	EdgeIDAllocator m_EdgeIDAllocator;
 };
 
+template<>
+struct std::hash<DirectedAcyclicGraph::NodeID>
+{
+	std::size_t operator()(const DirectedAcyclicGraph::NodeID& ID) const { return ID.GetIndex(); }
+};
+
+template<>
+struct std::hash<DirectedAcyclicGraph::EdgeID>
+{
+	std::size_t operator()(const DirectedAcyclicGraph::EdgeID& ID) const { return ID.GetIndex(); }
+};
+

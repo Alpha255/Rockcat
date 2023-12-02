@@ -12,7 +12,7 @@ public:
 	{
 		auto GraphNodeID = m_Graph.AddNode();
 		auto Pass = std::make_shared<TPass>(GraphNodeID, *m_ResourceMgr);
-		m_RenderPasses.insert(std::make_pair(GraphNodeID.GetIndex(), Pass));
+		m_RenderPasses.insert(std::make_pair(GraphNodeID, Pass));
 		return *Pass;
 	}
 
@@ -30,5 +30,5 @@ private:
 	class RHIDevice& m_RenderDevice;
 	const class Scene& m_RenderScene;
 	std::unique_ptr<class ResourceManager> m_ResourceMgr;
-	std::unordered_map<DAGNodeID::IndexType, std::shared_ptr<RenderPass>> m_RenderPasses;
+	std::unordered_map<DAGNodeID, std::shared_ptr<RenderPass>> m_RenderPasses;
 };

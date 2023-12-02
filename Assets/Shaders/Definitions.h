@@ -11,10 +11,12 @@ using float3 = Math::Vector3;
 using float4 = Math::Vector4;
 using float4x4 = Math::Matrix;
 
+#define SHADER_VARIABLES_ALIGN_AS alignas(sizeof(Math::Vector4))
+
 #define DECLARE_SHADER_VARIABLES_BEGIN(ShaderType) \
 protected: \
 	using ThisShader = ShaderType; \
-	struct alignas(16) ShaderVariables { \
+	struct alignas(sizeof(Math::Vector4)) ShaderVariables { \
 	private: \
 	struct FirstVariableID{}; \
 	using ThisShaderVariablesStruct = ShaderVariables; \

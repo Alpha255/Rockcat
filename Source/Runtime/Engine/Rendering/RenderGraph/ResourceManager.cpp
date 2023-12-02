@@ -17,8 +17,8 @@ Field& ResourceManager::GetOrAllocateField(
 {
 	if (RefID.IsValid())
 	{
-		assert(m_Fields.find(RefID.GetIndex()) != m_Fields.end());
-		auto Ret = m_Fields[RefID.GetIndex()];
+		assert(m_Fields.find(RefID) != m_Fields.end());
+		auto Ret = m_Fields[RefID];
 		Ret->SetName(Name)
 			.SetVisibility(Visibility);
 
@@ -26,7 +26,7 @@ Field& ResourceManager::GetOrAllocateField(
 	}
 
 	auto NewField = std::make_shared<Field>(m_Graph.AddNode(), Name, Visibility, Type);
-	m_Fields.insert(std::make_pair(NewField->GetNodeID().GetIndex(), NewField));
+	m_Fields.insert(std::make_pair(NewField->GetNodeID(), NewField));
 	return *NewField;
 }
 

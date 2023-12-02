@@ -25,6 +25,7 @@ workspace "Rockcat"
 		system "Windows"
 		architecture "x64"
 	filter {}
+	disablewarnings { "4996" }
 
 	group "Gear"
 		project "Runtime"

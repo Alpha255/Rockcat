@@ -32,7 +32,7 @@ public:
 private:
 	void AllocateSceneImageFields();
 
-	std::unordered_map<DAGNodeID::IndexType, std::shared_ptr<Field>> m_Fields;
+	std::unordered_map<DAGNodeID, std::shared_ptr<Field>> m_Fields;
 	class RHIDevice& m_RenderDevice;
 	DirectedAcyclicGraph& m_Graph;
 	SceneImages m_SceneImages;
