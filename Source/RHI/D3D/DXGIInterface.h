@@ -10,81 +10,66 @@
 #include <d3dcompiler.h>
 
 template<class HwObjectType>
-class D3DHwResource : public RHIObject<HwObjectType>, public RHIResource
+class D3DHwResource : public RHIResource
 {
 public:
+	using NativeType = std::remove_extent_t<HwObjectType>;
+
 	D3DHwResource() = default;
 
-	D3DHwResource(HwObjectType* Handle, bool8_t AddRef = true)
-		: RHIResource<HwObjectType>(Handle)
+	D3DHwResource(HwObjectType* Handle)
+		: m_Native(Handle)
 	{
-		if (AddRef)
-		{
-			Handle->AddRef();
-		}
+		assert(Handle);
+		Handle->AddRef();
 	}
 
 	D3DHwResource(const D3DHwResource& Other)
 	{
-		if (m_Handle != Other.m_Handle)
+		if (m_Native != Other.m_Native)
 		{
-			if (m_Handle)
+			if (m_Native)
 			{
-				m_Handle->Release();
+				m_Native->Release();
 			}
 
-			if (Other.m_Handle)
+			if (Other.m_Native)
 			{
-				Other.m_Handle->AddRef();
+				Other.m_Native->AddRef();
 			}
 
-			m_Handle = Other.m_Handle;
+			m_Native = Other.m_Native;
 		}
 	}
 
 	D3DHwResource(D3DHwResource&& Other)
 	{
-		if (m_Handle != Other.m_Handle)
+		if (m_Native != Other.m_Native)
 		{
-			if (m_Handle)
+			if (m_Native)
 			{
-				m_Handle->Release();
+				m_Native->Release();
 			}
 
-			m_Handle = std::exchange(Other.m_Handle, {});
+			m_Native = std::exchange(Other.m_Native, nullptr);
 		}
 	}
 
 	D3DHwResource& operator=(const D3DHwResource& Other)
 	{
-		if (m_Handle != Other.m_Handle)
+		if (m_Native != Other.m_Native)
 		{
-			if (m_Handle)
+			if (m_Native)
 			{
-				m_Handle->Release();
+				m_Native->Release();
 			}
 
-			if (Other.m_Handle)
+			if (Other.m_Native)
 			{
-				Other.m_Handle->AddRef();
+				Other.m_Native->AddRef();
 			}
 
-			m_Handle = Other.m_Handle;
-		}
-
-		return *this;
-	}
-
-	D3DHwResource& operator=(D3DHwResource&& Other) noexcept
-	{
-		if (m_Handle != Other.m_Handle)
-		{
-			if (m_Handle)
-			{
-				m_Handle->Release();
-			}
-
-			m_Handle = std::exchange(Other.m_Handle, {});
+			m_Native = Other.m_Native;
 		}
 
 		return *this;
@@ -92,20 +77,32 @@ public:
 
 	void SetDebugName(const char8_t* DebugName) override final
 	{
-		assert(DebugName && m_Handle);
-		//m_Handle->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<uint32_t>(std::strlen(DebugName)), DebugName);
+		assert(DebugName && m_Native);
+		//m_Native->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<uint32_t>(std::strlen(DebugName)), DebugName);
 		RHIResource::SetDebugName(DebugName);
 	}
 
+	inline HwObjectType** Reference() { return &m_Native; }
+	inline const HwObjectType** Reference() const { return &m_Native; }
+
+	inline HwObjectType* operator->() { assert(m_Native); return m_Native; }
+	inline HwObjectType* operator->() const { assert(m_Native); return m_Native; }
+
+	inline HwObjectType* GetNative() { assert(m_Native); return m_Native; }
+	inline HwObjectType* GetNative() const { assert(m_Native); return m_Native; }
+
+	inline bool8_t IsValid() const { return m_Native != nullptr; }
+
 	virtual ~D3DHwResource()
 	{
-		if (m_Handle)
+		if (m_Native)
 		{
-			m_Handle->Release();
-			m_Handle = nullptr;
+			m_Native->Release();
+			m_Native = nullptr;
 		}
 	}
 protected:
+	HwObjectType* m_Native = nullptr;
 private:
 };
 
@@ -173,7 +170,7 @@ class DxgiAdapter : public DxgiAdapter0
 {
 public:
 	using DxgiAdapter0::DxgiAdapter0;
-	DxgiAdapter(DxgiFactory* Factory);
+	DxgiAdapter(const DxgiFactory& Factory);
 };
 
 inline uint32_t CalcSubresource(uint32_t MipSlice, uint32_t ArraySlice, uint32_t PlaneSlice, uint32_t MipLevels, uint32_t ArraySize)

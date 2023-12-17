@@ -1,12 +1,9 @@
-#include "Colorful/D3D/D3D12/D3D12CommandQueue.h"
-#include "Colorful/D3D/D3D12/D3D12Device.h"
+#include "RHI/D3D/D3D12/D3D12CommandQueue.h"
+#include "RHI/D3D/D3D12/D3D12Device.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 
-NAMESPACE_START(RHI)
-
-D3D12CommandQueue::D3D12CommandQueue(ID3D12Device* Device, EQueueType Type)
+D3D12CommandQueue::D3D12CommandQueue(const D3D12Device& Device, ERHIDeviceQueue Type)
 {
-	assert(Device);
-
 	D3D12_COMMAND_QUEUE_DESC Desc
 	{
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
@@ -18,27 +15,23 @@ D3D12CommandQueue::D3D12CommandQueue(ID3D12Device* Device, EQueueType Type)
 	std::wstring_view Name;
 	switch (Type)
 	{
-	case EQueueType::Graphics:
+	case ERHIDeviceQueue::Graphics:
 		Desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 		Name = L"D3D12 Graphics Queue";
 		break;
-	case EQueueType::Transfer:
+	case ERHIDeviceQueue::Transfer:
 		Desc.Type = D3D12_COMMAND_LIST_TYPE_COPY;
 		Name = L"D3D12 Transfer Queue";
 		break;
-	case EQueueType::Compute:
+	case ERHIDeviceQueue::Compute:
 		Desc.Type = D3D12_COMMAND_LIST_TYPE_COMPUTE;
 		Name = L"D3D12 Compute Queue";
 		break;
 	}
 
 	VERIFY_D3D(Device->CreateCommandQueue(&Desc, IID_PPV_ARGS(Reference())));
-
-	Get()->SetName(Name.data());
 }
 
 D3D12CommandQueue::~D3D12CommandQueue()
 {
 }
-
-NAMESPACE_END(RHI)

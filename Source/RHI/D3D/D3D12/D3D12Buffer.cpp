@@ -1,19 +1,16 @@
-#include "Colorful/D3D/D3D12/D3D12Buffer.h"
-#include "Colorful/D3D/D3D12/D3D12Device.h"
+#include "RHI/D3D/D3D12/D3D12Buffer.h"
+#include "RHI/D3D/D3D12/D3D12Device.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 
-NAMESPACE_START(RHI)
-
-D3D12Buffer::D3D12Buffer(D3D12Device* Device, const BufferDesc& Desc)
+D3D12Buffer::D3D12Buffer(const D3D12Device& Device, const RHIBufferCreateInfo& RHICreateInfo)
 {
-	assert(Device);
-
 	static const size_t ConstantsBufferAlignment = 256ull;
 	
 	D3D12_RESOURCE_DESC CreateDesc
 	{
 		D3D12_RESOURCE_DIMENSION_BUFFER,
 		0u,
-		Desc.Size,
+		RHICreateInfo.Size,
 		1u,
 		1u,
 		1u,
@@ -27,11 +24,11 @@ D3D12Buffer::D3D12Buffer(D3D12Device* Device, const BufferDesc& Desc)
 		D3D12_RESOURCE_FLAG_NONE
 	};
 
-	if (EnumHasAnyFlags(Desc.UsageFlags, EBufferUsageFlags::UniformBuffer))
+	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UniformBuffer))
 	{
 		CreateDesc.Width = Align(CreateDesc.Width, ConstantsBufferAlignment); /// TODO ???
 	}
-	if (EnumHasAnyFlags(Desc.UsageFlags, EBufferUsageFlags::UnorderedAccess))
+	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UnorderedAccess))
 	{
 		CreateDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 	}
@@ -46,17 +43,17 @@ D3D12Buffer::D3D12Buffer(D3D12Device* Device, const BufferDesc& Desc)
 	};
 
 	D3D12_RESOURCE_STATES States = D3D12_RESOURCE_STATE_COMMON;
-	if (Desc.AccessFlags == EDeviceAccessFlags::None)
+	if (RHICreateInfo.AccessFlags == ERHIDeviceAccessFlags::None)
 	{
 		assert(0);
 	}
-	if (EnumHasAnyFlags(Desc.AccessFlags, EDeviceAccessFlags::CpuRead))
+	if (EnumHasAnyFlags(RHICreateInfo.AccessFlags, ERHIDeviceAccessFlags::CpuRead))
 	{
 		HeapProperties.Type = D3D12_HEAP_TYPE_READBACK;
 		States = D3D12_RESOURCE_STATE_COPY_DEST;
 		m_HostVisible = true;
 	}
-	if (EnumHasAnyFlags(Desc.AccessFlags, EDeviceAccessFlags::CpuWrite) || EnumHasAnyFlags(Desc.AccessFlags, EDeviceAccessFlags::GpuReadCpuWrite))
+	if (EnumHasAnyFlags(RHICreateInfo.AccessFlags, ERHIDeviceAccessFlags::CpuWrite) || EnumHasAnyFlags(RHICreateInfo.AccessFlags, ERHIDeviceAccessFlags::GpuReadCpuWrite))
 	{
 		HeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
 		States = D3D12_RESOURCE_STATE_GENERIC_READ;
@@ -68,7 +65,7 @@ D3D12Buffer::D3D12Buffer(D3D12Device* Device, const BufferDesc& Desc)
 	/// Creates both a resource and an implicit heap, 
 	/// such that the heap is big enough to contain the entire resource, 
 	/// and the resource is mapped to the heap.
-	VERIFY_D3D(Device->Get()->CreateCommittedResource(
+	VERIFY_D3D(Device->CreateCommittedResource(
 		&HeapProperties, 
 		D3D12_HEAP_FLAG_NONE, 
 		&CreateDesc, 
@@ -87,7 +84,7 @@ void* D3D12Buffer::Map(size_t Size, size_t Offset)
 		Offset + Size
 	};
 
-	VERIFY_D3D(m_Handle->Map(0u, &Range, &m_MappedMemory));
+	VERIFY_D3D(GetNative()->Map(0u, &Range, &m_MappedMemory));
 
 	return m_MappedMemory;
 }
@@ -96,7 +93,7 @@ void D3D12Buffer::Unmap()
 {
 	assert(m_HostVisible && m_MappedMemory);
 
-	m_Handle->Unmap(0u, nullptr);
+	GetNative()->Unmap(0u, nullptr);
 
 	m_MappedMemory = nullptr;
 }
@@ -127,7 +124,7 @@ bool8_t D3D12Buffer::Update(const void* Data, size_t Size, size_t SrcOffset, siz
 			reinterpret_cast<const byte8_t*>(Data) + SrcOffset,
 			Size) == 0);
 
-		///if (!m_IsCoherent)
+		if (!m_HostVisible)
 		{
 			FlushMappedRange(Size, DstOffset);
 		}
@@ -145,5 +142,3 @@ D3D12Buffer::~D3D12Buffer()
 		Unmap();
 	}
 }
-
-NAMESPACE_END(RHI)

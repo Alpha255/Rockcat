@@ -1,25 +1,23 @@
-#include "Colorful/D3D/D3D12/D3D12Image.h"
-#include "Colorful/D3D/D3D12/D3D12Device.h"
+#include "RHI/D3D/D3D12/D3D12Image.h"
+#include "RHI/D3D/D3D12/D3D12Device.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Runtime/Core/Math/Color.h"
 
-NAMESPACE_START(RHI)
-
-D3D12Image::D3D12Image(D3D12Device* Device, const ImageDesc& Desc)
-	: D3DHWObject(Desc)
+D3D12Image::D3D12Image(const D3D12Device& Device, const RHIImageCreateInfo& RHICreateInfo)
+	: RHIImage(RHICreateInfo)
 {
-	assert(Device);
-
 	D3D12_RESOURCE_DESC CreateDesc
 	{
-		D3D12Type::ImageDimension(Desc.Type),
+		GetImageDimension(RHICreateInfo.ImageType),
 		0u,
-		Desc.Width,
-		Desc.Height,
-		static_cast<uint16_t>(Desc.Type == EImageType::T_3D ? Desc.Depth : Desc.ArrayLayers),
-		static_cast<uint16_t>(Desc.MipLevels),
-		D3D12Type::Format(Desc.Format),
+		RHICreateInfo.Width,
+		RHICreateInfo.Height,
+		static_cast<uint16_t>(RHICreateInfo.ImageType == ERHIImageType::T_3D ? RHICreateInfo.Depth : RHICreateInfo.ArrayLayers),
+		static_cast<uint16_t>(RHICreateInfo.MipLevels),
+		::GetFormat(RHICreateInfo.Format),
 		DXGI_SAMPLE_DESC
 		{
-			static_cast<uint32_t>(Desc.SampleCount),
+			static_cast<uint32_t>(RHICreateInfo.SampleCount),
 			0u
 		},
 		D3D12_TEXTURE_LAYOUT_UNKNOWN,
@@ -31,21 +29,21 @@ D3D12Image::D3D12Image(D3D12Device* Device, const ImageDesc& Desc)
 		CreateDesc.Format
 	};
 
-	if (EnumHasAnyFlags(Desc.Usages, EBufferUsageFlags::RenderTarget))
+	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::RenderTarget))
 	{
 		CreateDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-		ClearValue.Color[0] = Color::Black.x;
-		ClearValue.Color[1] = Color::Black.y;
-		ClearValue.Color[2] = Color::Black.z;
-		ClearValue.Color[3] = Color::Black.w;
+		ClearValue.Color[0] = Math::Color::Black.x;
+		ClearValue.Color[1] = Math::Color::Black.y;
+		ClearValue.Color[2] = Math::Color::Black.z;
+		ClearValue.Color[3] = Math::Color::Black.w;
 	}
-	if (EnumHasAnyFlags(Desc.Usages, EBufferUsageFlags::DepthStencil))
+	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::DepthStencil))
 	{
 		CreateDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 		ClearValue.DepthStencil.Depth = 1.0f;
 		ClearValue.DepthStencil.Stencil = 0xF;
 	}
-	if (EnumHasAnyFlags(Desc.Usages, EBufferUsageFlags::UnorderedAccess))
+	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UnorderedAccess))
 	{
 		CreateDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 	}
@@ -60,7 +58,7 @@ D3D12Image::D3D12Image(D3D12Device* Device, const ImageDesc& Desc)
 	};
 
 	assert(false); /// #TODO ResourceStates
-	VERIFY_D3D(Device->Get()->CreateCommittedResource(
+	VERIFY_D3D(Device->CreateCommittedResource(
 		&HeapProperties,
 		D3D12_HEAP_FLAG_NONE,
 		&CreateDesc,
@@ -68,38 +66,28 @@ D3D12Image::D3D12Image(D3D12Device* Device, const ImageDesc& Desc)
 		&ClearValue,
 		IID_PPV_ARGS(Reference())));
 
-#if 1
-	Get()->SetName(StringUtils::ToWide(Desc.Name).c_str());
-#else
-	SetDebugName(Desc.Name.c_str());
-#endif
+	SetDebugName(RHICreateInfo.Name.c_str());
 }
 
-D3D12Sampler::D3D12Sampler(D3D12Device* Device, const SamplerDesc& Desc)
+D3D12Sampler::D3D12Sampler(const D3D12Device& Device, const RHISamplerCreateInfo& RHICreateInfo)
 {
-	assert(Device && false);
+	assert(false);
 
-	Vector4 BorderColor = D3D12Type::BorderColor(Desc.BorderColor);
+	Math::Vector4 BorderColor = GetBorderColor(RHICreateInfo.BorderColor);
 
 	D3D12_SAMPLER_DESC CreateDesc
 	{
-		D3D12Type::Filter(Desc.MinMagFilter, Desc.MipmapMode, Desc.MaxAnisotropy),
-		D3D12Type::SamplerAddressMode(Desc.AddressModeU),
-		D3D12Type::SamplerAddressMode(Desc.AddressModeV),
-		D3D12Type::SamplerAddressMode(Desc.AddressModeW),
-		Desc.MipLODBias,
-		Desc.MaxAnisotropy,
-		D3D12Type::CompareFunc(Desc.CompareOp),
+		GetFilter(RHICreateInfo.MinMagFilter, RHICreateInfo.MipmapMode, RHICreateInfo.MaxAnisotropy),
+		GetSamplerAddressMode(RHICreateInfo.AddressModeU),
+		GetSamplerAddressMode(RHICreateInfo.AddressModeV),
+		GetSamplerAddressMode(RHICreateInfo.AddressModeW),
+		RHICreateInfo.MipLODBias,
+		RHICreateInfo.MaxAnisotropy,
+		GetCompareFunc(RHICreateInfo.CompareOp),
 		{BorderColor.x, BorderColor.y, BorderColor.z, BorderColor.w},
-		Desc.MinLOD,
-		Desc.MaxLOD
+		RHICreateInfo.MinLOD,
+		RHICreateInfo.MaxLOD
 	};
 
-	Device->Get()->CreateSampler(&CreateDesc, m_Descriptor);
+	Device->CreateSampler(&CreateDesc, m_Descriptor);
 }
-
-D3D12Sampler::~D3D12Sampler()
-{
-}
-
-NAMESPACE_END(RHI)

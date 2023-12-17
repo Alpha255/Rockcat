@@ -1,15 +1,13 @@
-#include "Colorful/D3D/D3D12/D3D12Async.h"
-#include "Colorful/D3D/D3D12/D3D12Device.h"
-#include "Colorful/D3D/D3D12/D3D12CommandList.h"
+#include "RHI/D3D/D3D12/D3D12Async.h"
+#include "RHI/D3D/D3D12/D3D12Device.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 
-NAMESPACE_START(RHI)
-
-D3D12Fence::D3D12Fence(D3D12Device* Device)
+D3D12Fence::D3D12Fence(const D3D12Device& Device)
 {
-	assert(Device);
-	VERIFY_D3D(Device->Get()->CreateFence(0u, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(Reference())));
+	VERIFY_D3D(Device->CreateFence(0u, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(Reference())));
 }
 
+#if 0
 D3D12ResourceBarrier& D3D12ResourceBarrier::Transition(D3D12Image* Image, EResourceState Src, EResourceState Dst, const ImageSubresourceRange& SubresourceRange)
 {
 	assert(Image);
@@ -106,5 +104,4 @@ void D3D12ResourceBarrier::Commit()
 		Barriers.clear();
 	}
 }
-
-NAMESPACE_END(RHI)
+#endif

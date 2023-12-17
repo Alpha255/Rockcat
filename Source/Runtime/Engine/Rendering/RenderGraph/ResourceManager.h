@@ -23,8 +23,7 @@ public:
 
 	ResourceManager(class RHIDevice& RenderDevice, DirectedAcyclicGraph& Graph);
 
-	Field& GetOrAllocateField(const char8_t* Name, Field::EVisibility Visibility, Field::EResourceType Type,
-		DAGNodeID RefID = DAGNodeID());
+	Field& GetOrAllocateField(const char8_t* Name, Field::EVisibility Visibility, Field::EResourceType Type);
 
 	const SceneImages& GetSceneImages() const { return m_SceneImages; }
 
@@ -32,7 +31,7 @@ public:
 private:
 	void AllocateSceneImageFields();
 
-	std::unordered_map<DAGNodeID, std::shared_ptr<Field>> m_Fields;
+	std::unordered_map<std::string_view, std::shared_ptr<Field>> m_Fields;
 	class RHIDevice& m_RenderDevice;
 	DirectedAcyclicGraph& m_Graph;
 	SceneImages m_SceneImages;

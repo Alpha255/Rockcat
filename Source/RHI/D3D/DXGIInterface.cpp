@@ -1,7 +1,6 @@
-#include "Colorful/D3D/DXGI_Interface.h"
-#include "Colorful/IRenderer/IDevice.h"
-
-NAMESPACE_START(RHI)
+#include "RHI/D3D/DXGIInterface.h"
+#include "Runtime/Engine/RHI/RHIDevice.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 
 namespace D3DResult
 {
@@ -42,7 +41,7 @@ namespace D3DResult
 			return "Successed";
 		}
 
-		return "Unknown error";
+		return "Unknown";
 	}
 }
 
@@ -69,11 +68,9 @@ DxgiFactory::DxgiFactory(bool8_t EnableDebug)
 	}
 }
 
-DxgiAdapter::DxgiAdapter(DxgiFactory* Factory)
+DxgiAdapter::DxgiAdapter(const DxgiFactory& Factory)
 {
 	/// https://docs.microsoft.com/en-us/windows/win32/api/dxgi1_6/nf-dxgi1_6-idxgifactory6-enumadapterbygpupreference
-
-	assert(Factory);
 
 	uint32_t AdapterIndex = 0u;
 
@@ -90,14 +87,14 @@ DxgiAdapter::DxgiAdapter(DxgiFactory* Factory)
 	};
 
 	DxgiFactory6 Factory6;
-	if (SUCCEEDED(Factory->Get()->QueryInterface(Factory6.Reference())))
+	if (SUCCEEDED(Factory->QueryInterface(Factory6.Reference())))
 	{
 		DxgiAdapter1 Adapter1;
 		while (SUCCEEDED(Factory6->EnumAdapterByGpuPreference(AdapterIndex++, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(Adapter1.Reference()))))
 		{
 			if (IsDedicateAdapter1(Adapter1))
 			{
-				new (this) DxgiAdapter(static_cast<IDXGIAdapter*>(Adapter1.Get()));
+				new (this) DxgiAdapter(static_cast<IDXGIAdapter*>(Adapter1.GetNative()));
 				break;
 			}
 		}
@@ -105,14 +102,14 @@ DxgiAdapter::DxgiAdapter(DxgiFactory* Factory)
 	else
 	{
 		DxgiFactory1 Factory1;
-		if (SUCCEEDED(Factory->Get()->QueryInterface(Factory1.Reference())))
+		if (SUCCEEDED(Factory->QueryInterface(Factory1.Reference())))
 		{
 			DxgiAdapter1 Adapter1;
 			while (SUCCEEDED(Factory1->EnumAdapters1(AdapterIndex++, Adapter1.Reference())))
 			{
 				if (IsDedicateAdapter1(Adapter1))
 				{
-					new (this) DxgiAdapter(static_cast<IDXGIAdapter*>(Adapter1.Get()));
+					new (this) DxgiAdapter(static_cast<IDXGIAdapter*>(Adapter1.GetNative()));
 					break;
 				}
 			}
@@ -120,12 +117,12 @@ DxgiAdapter::DxgiAdapter(DxgiFactory* Factory)
 		else
 		{
 			DxgiAdapter0 Adapter0;
-			while (SUCCEEDED(Factory->Get()->EnumAdapters(AdapterIndex++, Adapter0.Reference())))
+			while (SUCCEEDED(Factory->EnumAdapters(AdapterIndex++, Adapter0.Reference())))
 			{
 				DXGI_ADAPTER_DESC Desc;
 				VERIFY_D3D(Adapter0->GetDesc(&Desc));
 
-				if (IDevice::IsPreferDedicatedDevice(Desc.VendorId))
+				if (RHIDevice::IsDedicatedDevice(Desc.VendorId))
 				{
 					break;
 				}
@@ -133,5 +130,3 @@ DxgiAdapter::DxgiAdapter(DxgiFactory* Factory)
 		}
 	}
 }
-
-NAMESPACE_END(RHI)

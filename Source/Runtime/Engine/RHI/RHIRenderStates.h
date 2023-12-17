@@ -374,31 +374,9 @@ struct RHISubpassDesc
 	RHIAttachmentReference DepthStencilAttachment;
 };
 
-struct RHIRenderPassCreateInfo : public RHIHashedObject
+struct RHIRenderPassCreateInfo
 {
 	std::vector<RHIAttachmentDesc> AttachmentDescs;
 	std::vector<RHISubpassDesc> SubPasses;
 	std::vector<RHISubpassDependency> SubPassDependencies;
-
-	size_t GetHash() const override final
-	{
-		assert(0);
-		if (HashValue == InvalidHash)
-		{
-			HashValue = ComputeHash(AttachmentDescs.size());
-			for (auto& AttachmentDesc : AttachmentDescs)
-			{
-				HashCombine(HashValue, ComputeHash(
-					AttachmentDesc.Format,
-					AttachmentDesc.SampleCount,
-					AttachmentDesc.LoadOp,
-					AttachmentDesc.StoreOp,
-					AttachmentDesc.StencilLoadOp,
-					AttachmentDesc.StencilStoreOp,
-					AttachmentDesc.InitialState,
-					AttachmentDesc.FinalState));
-			}
-		}
-		return HashValue;
-	}
 };

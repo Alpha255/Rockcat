@@ -101,14 +101,6 @@ enum class ERHIDebugLayerLevel
 	Verbose
 };
 
-struct RHIHashedObject
-{
-	virtual size_t GetHash() const = 0;
-protected:
-	static constexpr size_t InvalidHash = ~0u;
-	mutable size_t HashValue = InvalidHash;
-};
-
 template<class T>
 class RHIObject
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RHI/D3D/DXGI_Interface.h"
+#include "RHI/D3D/DXGIInterface.h"
 #include "Runtime/Engine/RHI/RHIShader.h"
 #include "Runtime/Engine/Application/GraphicsSettings.h"
 #include "Runtime/Engine/Asset/ShaderAsset.h"

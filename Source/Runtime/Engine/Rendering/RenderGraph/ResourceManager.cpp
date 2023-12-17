@@ -9,24 +9,18 @@ ResourceManager::ResourceManager(RHIDevice& RenderDevice, DirectedAcyclicGraph& 
 	AllocateSceneImageFields();
 }
 
-Field& ResourceManager::GetOrAllocateField(
-	const char8_t* Name,
-	Field::EVisibility Visibility,
-	Field::EResourceType Type,
-	DAGNodeID RefID)
+Field& ResourceManager::GetOrAllocateField(const char8_t* Name, Field::EVisibility Visibility, Field::EResourceType Type)
 {
-	if (RefID.IsValid())
+	auto It = m_Fields.find(Name);
+	if (It != m_Fields.end())
 	{
-		assert(m_Fields.find(RefID) != m_Fields.end());
-		auto Ret = m_Fields[RefID];
-		Ret->SetName(Name)
+		It->second->SetName(Name)
 			.SetVisibility(Visibility);
-
-		return *Ret;
+		return *It->second;
 	}
 
 	auto NewField = std::make_shared<Field>(m_Graph.AddNode(), Name, Visibility, Type);
-	m_Fields.insert(std::make_pair(NewField->GetNodeID(), NewField));
+	m_Fields.insert(std::make_pair(std::string_view(Name), NewField));
 	return *NewField;
 }
 

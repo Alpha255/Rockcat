@@ -1,7 +1,6 @@
-#include "Colorful/D3D/D3D12/D3D12Descriptor.h"
-#include "Colorful/D3D/D3D12/D3D12Device.h"
-
-NAMESPACE_START(RHI)
+#include "RHI/D3D/D3D12/D3D12Descriptor.h"
+#include "RHI/D3D/D3D12/D3D12Device.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 
 static constexpr uint32_t DescriptorHeapLimits[] =
 {
@@ -11,10 +10,10 @@ static constexpr uint32_t DescriptorHeapLimits[] =
 	256u,  DESCRIPTION(D3D12_DESCRIPTOR_HEAP_TYPE_DSV)
 };
 
-D3D12DescriptorHeap::D3D12DescriptorHeap(D3D12Device* Device, const D3D12_DESCRIPTOR_HEAP_DESC& DescriptorHeapDesc, const uint32_t DescriptorSize)
+D3D12DescriptorHeap::D3D12DescriptorHeap(const D3D12Device& Device, const D3D12_DESCRIPTOR_HEAP_DESC& DescriptorHeapDesc, const uint32_t DescriptorSize)
 	: m_DescriptorSize(DescriptorSize)
 {
-	assert(Device && DescriptorHeapDesc.Type < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES);
+	assert(DescriptorHeapDesc.Type < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES);
 
 	/******************************************************************************************************
 		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
@@ -23,12 +22,12 @@ D3D12DescriptorHeap::D3D12DescriptorHeap(D3D12Device* Device, const D3D12_DESCRI
 		as a convenience. But it is also fine for applications to directly create descriptors into shader visible descriptor heaps with no requirement to stage anything on the CPU.
 	*******************************************************************************************************/
 
-	VERIFY_D3D(Device->Get()->CreateDescriptorHeap(&DescriptorHeapDesc, IID_PPV_ARGS(Reference())));
+	VERIFY_D3D(Device->CreateDescriptorHeap(&DescriptorHeapDesc, IID_PPV_ARGS(Reference())));
 
-	m_CpuHandleStart = m_Handle->GetCPUDescriptorHandleForHeapStart();
+	m_CpuHandleStart = GetNative()->GetCPUDescriptorHandleForHeapStart();
 	if (DescriptorHeapDesc.Flags & D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE)
 	{
-		m_GpuHandleStart = m_Handle->GetGPUDescriptorHandleForHeapStart();
+		m_GpuHandleStart = GetNative()->GetGPUDescriptorHandleForHeapStart();
 	}
 
 	m_FreeRanges.push_back(FreeRange{ m_CpuHandleStart.ptr, m_CpuHandleStart.ptr + DescriptorHeapDesc.NumDescriptors * m_DescriptorSize });
@@ -79,12 +78,10 @@ void D3D12DescriptorHeap::Free(const D3D12_CPU_DESCRIPTOR_HANDLE& CpuDescriptorH
 	assert(false);
 }
 
-D3D12DescriptorAllocator::D3D12DescriptorAllocator(D3D12Device* Device, D3D12_DESCRIPTOR_HEAP_TYPE DescriptorHeapType)
+D3D12DescriptorAllocator::D3D12DescriptorAllocator(const D3D12Device& Device, D3D12_DESCRIPTOR_HEAP_TYPE DescriptorHeapType)
 	: m_Device(Device)
 {
-	assert(m_Device);
-
-	m_DescriptorSize = Device->Get()->GetDescriptorHandleIncrementSize(DescriptorHeapType);
+	m_DescriptorSize = Device->GetDescriptorHandleIncrementSize(DescriptorHeapType);
 
 	m_Description = D3D12_DESCRIPTOR_HEAP_DESC
 	{
@@ -126,5 +123,3 @@ void D3D12DescriptorAllocator::Free(const D3D12DescriptorHandle& DescriptorHandl
 	assert(DescriptorHandle.Index < m_Heaps.size());
 	m_Heaps[DescriptorHandle.Index]->Free(DescriptorHandle.Handle);
 }
-
-NAMESPACE_END(RHI)

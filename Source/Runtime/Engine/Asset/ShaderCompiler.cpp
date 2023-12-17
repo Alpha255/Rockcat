@@ -105,7 +105,7 @@ ShaderBinary DxcShaderCompiler::Compile(
 		&Buffer,
 		CompilerArgs->GetArguments(),
 		CompilerArgs->GetCount(),
-		IncludeHandler.Get(),
+		IncludeHandler.GetNative(),
 		IID_PPV_ARGS(Result.Reference())) == S_OK);
 
 	::HRESULT HR = E_FAIL;

@@ -1,13 +1,11 @@
 #pragma once
 
-#include "Colorful/D3D/D3D12/D3D12Types.h"
+#include "RHI/D3D/D3D12/D3D12Types.h"
 
-NAMESPACE_START(RHI)
-
-class D3D12Buffer : public D3DHWObject<IBuffer, ID3D12Resource>
+class D3D12Buffer : public D3DHwResource<ID3D12Resource>, public RHIBuffer
 {
 public:
-	D3D12Buffer(class D3D12Device* Device, const BufferDesc& Desc);
+	D3D12Buffer(const class D3D12Device& Device, const RHIBufferCreateInfo& RHICreateInfo);
 
 	~D3D12Buffer();
 
@@ -25,5 +23,3 @@ private:
 	size_t m_Size = 0ull;
 	bool8_t m_HostVisible = false;
 };
-
-NAMESPACE_END(RHI)

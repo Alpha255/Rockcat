@@ -1,106 +1,37 @@
 #pragma once
 
-#include "Colorful/D3D/D3D12/D3D12CommandQueue.h"
-#include "Colorful/D3D/D3D12/D3D12Buffer.h"
-#include "Colorful/D3D/D3D12/D3D12Shader.h"
-#include "Colorful/D3D/D3D12/D3D12Image.h"
-#include "Colorful/D3D/D3D12/D3D12Pipeline.h"
-#include "Colorful/D3D/D3D12/D3D12Descriptor.h"
+#include "Runtime/Engine/RHI/RHIDevice.h"
+#include "RHI/D3D/D3D12/D3D12Types.h"
 
-NAMESPACE_START(RHI)
-
-struct D3D12Features
-{
-	bool8_t WaveOps = false;
-	bool8_t ShadingRate = false;
-	bool8_t MeshShader = false;
-	D3D_ROOT_SIGNATURE_VERSION RootSignatureVersion = D3D_ROOT_SIGNATURE_VERSION_1;
-	D3D12_RESOURCE_BINDING_TIER ResourceBindingTier = D3D12_RESOURCE_BINDING_TIER_1;
-	D3D12_RESOURCE_HEAP_TIER ResourceHeapTier = D3D12_RESOURCE_HEAP_TIER_1;
-	D3D12_VARIABLE_SHADING_RATE_TIER ShadingRateTier = D3D12_VARIABLE_SHADING_RATE_TIER_NOT_SUPPORTED;
-};
-
-class D3D12Device final : public D3DHWObject<IDevice, ID3D12Device>
+class D3D12Device final : public D3DHwResource<ID3D12Device>, public RHIDevice
 {
 public:
-	D3D12Device(DxgiFactory* Factory);
+	D3D12Device(const DxgiFactory& Factory);
 
-	void WaitIdle() override final
-	{
-	}
+	void WaitIdle() const override final {}
 
-	IShaderSharedPtr CreateShader(const ShaderDesc& Desc) override final
-	{
-		return std::make_shared<D3D12Shader>(Desc);
-	}
+	RHIShaderPtr CreateShader(const RHIShaderCreateInfo& RHICreateInfo) override final;
 
-	IImageSharedPtr CreateImage(const ImageDesc& Desc) override final
-	{
-		return std::make_shared<D3D12Image>(this, Desc);
-	}
+	RHIImagePtr CreateImage(const RHIImageCreateInfo& RHICreateInfo) override final;
 
-	IInputLayoutSharedPtr CreateInputLayout(const InputLayoutDesc& Desc, const ShaderDesc&) override final
-	{
-		return std::make_shared<D3D12InputLayout>(Desc);
-	}
+	RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo) override final;
 
-	IFrameBufferSharedPtr CreateFrameBuffer(const FrameBufferDesc& Desc) override final
-	{
-		return std::make_shared<D3D12FrameBuffer>(Desc);
-	}
+	RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo) override final;
 
-	IPipelineSharedPtr CreateGraphicsPipeline(const GraphicsPipelineDesc& Desc) override final
-	{
-		return std::make_shared<D3D12GraphicsPipeline>(this, Desc);
-	}
+	RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) override final;
 
-	IBufferSharedPtr CreateBuffer(const BufferDesc& Desc) override final
-	{
-		return std::make_shared<D3D12Buffer>(this, Desc);
-	}
+	RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo) override final;
 
-	ISamplerSharedPtr CreateSampler(const SamplerDesc& Desc) override final
-	{
-		return std::make_shared<D3D12Sampler>(this, Desc);
-	}
+	RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& RHICreateInfo) override final;
 
-	ICommandBufferPoolSharedPtr CreateCommandBufferPool(EQueueType QueueType) override final
-	{
-		(void)QueueType;
-		return nullptr;
-	}
+	RHICommandBufferPoolPtr CreateCommandBufferPool(ERHIDeviceQueue QueueType) override final;
 
-	void SubmitCommandBuffers(EQueueType QueueType, const std::vector<ICommandBufferSharedPtr>& Commands) override final
-	{
-		(void)QueueType;
-		(void)Commands;
-	}
+	void SubmitCommandBuffer(ERHIDeviceQueue QueueType, RHICommandBuffer* Commands) override final;
 
-	void SubmitCommandBuffer(EQueueType QueueType, ICommandBufferSharedPtr& Command) override final
-	{
-		(void)QueueType;
-		(void)Command;
-	}
+	void SubmitCommandBuffer(RHICommandBuffer* Command) override final;
 
-	void SubmitCommandBuffers(const std::vector<ICommandBufferSharedPtr>& Commands) override final
-	{
-		(void)Commands;
-	}
-
-	void SubmitCommandBuffer(ICommandBufferSharedPtr& Command) override final
-	{
-		(void)Command;
-	}
-
-	ICommandBufferSharedPtr GetOrAllocateCommandBuffer(EQueueType QueueType, ECommandBufferLevel Level, bool8_t AutoBegin, bool8_t UseForTransfer) override final
-	{
-		(void)QueueType;
-		(void)Level;
-		(void)AutoBegin;
-		(void)UseForTransfer;
-		return nullptr;
-	}
-
+	RHICommandBufferPtr GetActiveCommandBuffer(ERHIDeviceQueue QueueType, ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary) override final;
+#if 0
 	D3D12CommandQueue* CommandQueue(EQueueType QueueType)
 	{
 		assert(QueueType <= EQueueType::Compute);
@@ -116,17 +47,10 @@ public:
 #endif
 		return m_Queues[QueueIndex] ? m_Queues[QueueIndex].get() : m_Queues[GraphicsQueueIndex].get();
 	}
-
-	const D3D12Features& Features() const
-	{
-		return m_Features;
-	}
+#endif
 protected:
 private:
-	D3D12Features m_Features;
-	std::array<std::unique_ptr<D3D12CommandQueue>, static_cast<size_t>(EQueueType::Compute) + 1ull> m_Queues;
-	std::array<std::unique_ptr<D3D12DescriptorAllocator>, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES> m_DescriptorAllocators;
+	//std::array<std::unique_ptr<D3D12CommandQueue>, static_cast<size_t>(ERHIDeviceQueue::Compute) + 1ull> m_Queues;
+	//std::array<std::unique_ptr<D3D12DescriptorAllocator>, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES> m_DescriptorAllocators;
 	std::unique_ptr<DxgiAdapter> m_Adapter;
 };
-
-NAMESPACE_END(RHI)

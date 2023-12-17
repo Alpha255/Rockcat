@@ -1,17 +1,16 @@
 #pragma once
 
-#include "Colorful/D3D/D3D12/D3D12Types.h"
+#include "RHI/D3D/D3D12/D3D12Types.h"
 
-NAMESPACE_START(RHI)
-
-class D3D12Fence : public D3DHWObject<void, ID3D12Fence>
+class D3D12Fence : public D3DHwResource<ID3D12Fence>
 {
 public:
-	D3D12Fence(class D3D12Device* Device);
+	D3D12Fence(const class D3D12Device& Device);
 protected:
 private:
 };
 
+#if 0
 struct D3D12ResourceBarrier
 {
 	D3D12ResourceBarrier(class D3D12CommandList* CommandList)
@@ -28,5 +27,4 @@ protected:
 	std::vector<D3D12_RESOURCE_BARRIER> Barriers;
 	class D3D12CommandList* Command = nullptr;
 };
-
-NAMESPACE_END(RHI)
+#endif

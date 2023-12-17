@@ -33,7 +33,7 @@ public:
 		case ERenderHardwareInterface::Vulkan: return "Vulkan";
 		case ERenderHardwareInterface::D3D11: return "D3D11";
 		case ERenderHardwareInterface::D3D12: return "D3D12";
-		default: return "Null";
+		default: return "None";
 		} 
 	}
 

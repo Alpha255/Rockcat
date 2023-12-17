@@ -1,22 +1,19 @@
 #pragma once
 
-#include "Colorful/IRenderer/IDevice.h"
-#include "Colorful/D3D/DXGI_Interface.h"
+#include "RHI/D3D/DXGIInterface.h"
 
-NAMESPACE_START(RHI)
-
-class D3D12Swapchain : public D3DHWObject<ISwapchain, IDXGISwapChain>
+class D3D12Swapchain : public D3DHwResource<IDXGISwapChain>
 {
 public:
 	D3D12Swapchain(
-		DxgiFactory* Factory,
-		class D3D12Device* Device,
+		const DxgiFactory& Factory,
+		const class D3D12Device& Device,
 		uint64_t WindowHandle,
 		uint32_t Width,
 		uint32_t Height,
 		bool8_t Fullscreen,
 		bool8_t VSync,
-		bool8_t SRgb);
+		bool8_t sRGB);
 
 	~D3D12Swapchain();
 protected:
@@ -29,5 +26,3 @@ private:
 	DxgiSwapChain3 m_Swapchain3;
 	DxgiSwapChain4 m_Swapchain4;
 };
-
-NAMESPACE_END(RHI)

@@ -81,14 +81,15 @@ workspace "Rockcat"
 				location "./Out/Intermediate/VCProjects"
 				files { 
 					"./Source/RHI/D3D/D3D12/**",
-					"./Source/RHI/D3D/DXGI_Interface.h",
-					"./Source/RHI/D3D/DXGI_Interface.cpp",
+					"./Source/RHI/D3D/DXGIInterface.h",
+					"./Source/RHI/D3D/DXGIInterface.cpp",
 				}
 				includedirs { 
 					"$(SolutionDir)",
 					"$(SolutionDir)Source",
 					"$(SolutionDir)Submodules/cereal/include",
 					"$(SolutionDir)Submodules/spdlog/include",
+					"$(VK_SDK_PATH)/Include",
 				}
 				links {
 					"d3d12",
