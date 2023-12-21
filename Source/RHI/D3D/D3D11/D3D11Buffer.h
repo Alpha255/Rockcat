@@ -1,19 +1,21 @@
 #pragma once
 
-#include "Colorful/D3D/DXGI_Interface.h"
+#include "RHI/D3D/D3D11/D3D11Types.h"
+#include "Runtime/Engine/RHI/RHIBuffer.h"
 
-NAMESPACE_START(Gfx)
-
-class D3D11Buffer final : public D3DObject<ID3D11Buffer>, public IBuffer
+class D3D11Buffer final : public D3DHwObject<ID3D11Buffer>, public RHIBuffer
 {
 public:
-	D3D11Buffer(ID3D11Device* device, EResourceUsages usages, EDeviceAccessMode accessMode, size_t size, const void* data);
+	D3D11Buffer(const class D3D11Device& Device, const RHIBufferCreateInfo& RHICreateInfo);
 
-	void unmap() override final;
+	void* Map(size_t Size, size_t Offset) override final;
+
+	void Unmap() override final;
+
+	void FlushMappedRange(size_t Size, size_t Offset) override final;
+
+	virtual void InvalidateMappedRange(size_t Size, size_t Offset) override final;
+
+	virtual bool8_t Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset) override final;
 protected:
-	void* map_native(size_t size, size_t offset) override final;
-	void update_native(const void* data, size_t size, size_t offset, bool8_t persistence) override final;
-	void flushMappedRange_native(size_t size, size_t offset) override final;
 };
-
-NAMESPACE_END(Gfx)

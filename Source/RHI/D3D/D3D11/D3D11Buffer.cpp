@@ -1,146 +1,144 @@
-#include "Colorful/D3D/D3D11/D3D11Buffer.h"
-#include "Colorful/D3D/D3D11/D3D11EnumTranslator.h"
+#include "RHI/D3D/D3D11/D3D11Buffer.h"
+#include "RHI/D3D/D3D11/D3D11Device.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 
-NAMESPACE_START(Gfx)
-
-D3D11Buffer::D3D11Buffer(ID3D11Device* device, EResourceUsages usages, EDeviceAccessMode accessMode, size_t size, const void* data)
+D3D11Buffer::D3D11Buffer(const D3D11Device& Device, const RHIBufferCreateInfo& RHICreateInfo)
 {
-	/// https://docs.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-resources-subresources
-
-	assert(device);
-
-	///m_Size = size;
-
-	D3D11_BUFFER_DESC desc
-	{
-		static_cast<uint32_t>(size),
-		D3D11_USAGE_DEFAULT,
-		0u,
-		0u,
-		0u,
-		0u
-	};
-
-	if (!!(accessMode & EDeviceAccessMode::GpuRead))
-	{
-		desc.Usage = D3D11_USAGE_IMMUTABLE;
-	}
-	else if (!!(accessMode & EDeviceAccessMode::GpuReadWrite))
-	{
-		desc.Usage = D3D11_USAGE_DEFAULT;
-	}
-	else if (!!(accessMode & EDeviceAccessMode::GpuReadCpuWrite))
-	{
-		desc.Usage = D3D11_USAGE_DYNAMIC;
-	}
-	else if (!!(accessMode & EDeviceAccessMode::Staging))
-	{
-		desc.Usage = D3D11_USAGE_STAGING;
-	}
-
-	if (!!(accessMode & EDeviceAccessMode::CpuRead))
-	{
-		desc.CPUAccessFlags |= D3D11_CPU_ACCESS_READ;
-	}
-	if (!!(accessMode & EDeviceAccessMode::CpuWrite))
-	{
-		desc.CPUAccessFlags |= D3D11_CPU_ACCESS_WRITE;
-	}
-
-	if (!!(usages & EResourceUsages::VertexBuffer))
-	{
-		desc.BindFlags |= D3D11_BIND_VERTEX_BUFFER;
-	}
-	else if (!!(usages & EResourceUsages::IndexBuffer))
-	{
-		desc.BindFlags |= D3D11_BIND_INDEX_BUFFER;
-	}
-	else if (!!(usages & EResourceUsages::UniformBuffer))
-	{
-		desc.BindFlags |= D3D11_BIND_CONSTANT_BUFFER;
-	}
-	else if (!!(usages & EResourceUsages::UnorderedAccess))
-	{
-		desc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
-	}
+	static const size_t ConstantsBufferAlignment = 256ull;
 	
-	if (!!(usages & EResourceUsages::ShaderResource))
+	D3D11_RESOURCE_DESC CreateDesc
 	{
-		desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+		D3D11_RESOURCE_DIMENSION_BUFFER,
+		0u,
+		RHICreateInfo.Size,
+		1u,
+		1u,
+		1u,
+		DXGI_FORMAT_UNKNOWN,
+		DXGI_SAMPLE_DESC
+		{
+			1u,
+			0u
+		},
+		D3D11_TEXTURE_LAYOUT_ROW_MAJOR,
+		D3D11_RESOURCE_FLAG_NONE
+	};
+
+	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UniformBuffer))
+	{
+		CreateDesc.Width = Align(CreateDesc.Width, ConstantsBufferAlignment); /// TODO ???
 	}
-	if (!!(usages & EResourceUsages::IndirectBuffer))
+	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UnorderedAccess))
 	{
-		desc.MiscFlags |= D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS;
-	}
-	if (!!(usages & EResourceUsages::RawBuffer))
-	{
-		desc.MiscFlags |= D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
-	}
-	if (!!(usages & EResourceUsages::StructuredBuffer))
-	{
-		desc.MiscFlags |= D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		CreateDesc.Flags |= D3D11_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 	}
 
-	D3D11_SUBRESOURCE_DATA subresource
+	D3D11_HEAP_PROPERTIES HeapProperties
 	{
-		data,
-		size,
+		D3D11_HEAP_TYPE_DEFAULT,
+		D3D11_CPU_PAGE_PROPERTY_UNKNOWN,
+		D3D11_MEMORY_POOL_UNKNOWN,
+		0u,
 		0u
 	};
 
-	VERIFY_D3D(device->CreateBuffer(&desc, ((nullptr == data) ? nullptr : &subresource), reference()));
-}
-
-void* D3D11Buffer::map_native(size_t size, size_t offset)
-{
-	assert(isValid() && offset < m_Size && (~size == 0ULL || offset + size <= m_Size));
-
-	if (!m_MappedMemory.Memory)
+	D3D11_RESOURCE_STATES States = D3D11_RESOURCE_STATE_COMMON;
+	if (RHICreateInfo.AccessFlags == ERHIDeviceAccessFlags::None)
 	{
-		D3D11_MAPPED_SUBRESOURCE mappedSubresource;
-		VERIFY_D3D(s_IMContext->Map(get(), 0u, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0u, &mappedSubresource));
-		m_MappedMemory.Memory = mappedSubresource.pData;
-		m_MappedMemory.Size = size;
-		m_MappedMemory.Offset = offset;
+		assert(0);
+	}
+	if (EnumHasAnyFlags(RHICreateInfo.AccessFlags, ERHIDeviceAccessFlags::CpuRead))
+	{
+		HeapProperties.Type = D3D11_HEAP_TYPE_READBACK;
+		States = D3D11_RESOURCE_STATE_COPY_DEST;
+		m_HostVisible = true;
+	}
+	if (EnumHasAnyFlags(RHICreateInfo.AccessFlags, ERHIDeviceAccessFlags::CpuWrite) || EnumHasAnyFlags(RHICreateInfo.AccessFlags, ERHIDeviceAccessFlags::GpuReadCpuWrite))
+	{
+		HeapProperties.Type = D3D11_HEAP_TYPE_UPLOAD;
+		States = D3D11_RESOURCE_STATE_GENERIC_READ;
 	}
 
-	return m_MappedMemory.Memory;
+	m_Size = CreateDesc.Width;
+
+	/// https://docs.microsoft.com/en-us/windows/win32/api/D3D11/ne-D3D11-D3D11_resource_states
+	/// Creates both a resource and an implicit heap, 
+	/// such that the heap is big enough to contain the entire resource, 
+	/// and the resource is mapped to the heap.
+	VERIFY_D3D(Device->CreateCommittedResource(
+		&HeapProperties, 
+		D3D11_HEAP_FLAG_NONE, 
+		&CreateDesc, 
+		States, 
+		nullptr, 
+		IID_PPV_ARGS(Reference())));
 }
 
-void D3D11Buffer::update_native(const void* data, size_t size, size_t offset, bool8_t persistence)
+void* D3D11Buffer::Map(size_t Size, size_t Offset)
 {
-	assert(isValid() && offset < m_Size && (~size == 0ULL || offset + size <= m_Size));
+	assert(m_HostVisible && m_MappedMemory == nullptr && (Size == WHOLE_SIZE || Offset + Size <= m_Size));
 
-	map(size, offset);
-	VERIFY(memcpy_s(m_MappedMemory.Memory, size, data, size) == 0);
-	if (persistence)
+	D3D11_RANGE Range
 	{
-		flushMappedRange(size, offset);
-	}
-	else
-	{
-		unmap();
-	}
+		Offset,
+		Offset + Size
+	};
+
+	VERIFY_D3D(GetNative()->Map(0u, &Range, &m_MappedMemory));
+
+	return m_MappedMemory;
 }
 
-void D3D11Buffer::flushMappedRange_native(size_t size, size_t offset)
+void D3D11Buffer::Unmap()
 {
-	assert(0);
-	(void)size;
-	(void)offset;
+	assert(m_HostVisible && m_MappedMemory);
+
+	GetNative()->Unmap(0u, nullptr);
+
+	m_MappedMemory = nullptr;
 }
 
-void D3D11Buffer::unmap()
+void D3D11Buffer::FlushMappedRange(size_t Size, size_t Offset)
 {
-	assert(isValid());
+	(void)Size;
+	(void)Offset;
+	assert(false);
+}
 
-	if (m_MappedMemory.Memory)
+void D3D11Buffer::InvalidateMappedRange(size_t Size, size_t Offset)
+{
+	(void)Size;
+	(void)Offset;
+	assert(false);
+}
+
+bool8_t D3D11Buffer::Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset)
+{
+	assert(Data && Size && Size <= m_Size);
+
+	if (m_MappedMemory)
 	{
-		s_IMContext->Unmap(get(), 0u);
-		m_MappedMemory.Memory = nullptr;
-		m_MappedMemory.Size = 0u;
-		m_MappedMemory.Offset = 0u;
+		VERIFY(memcpy_s(
+			reinterpret_cast<byte8_t*>(m_MappedMemory) + DstOffset,
+			Size,
+			reinterpret_cast<const byte8_t*>(Data) + SrcOffset,
+			Size) == 0);
+
+		if (!m_HostVisible)
+		{
+			FlushMappedRange(Size, DstOffset);
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+D3D11Buffer::~D3D11Buffer()
+{
+	if (m_MappedMemory)
+	{
+		Unmap();
 	}
 }
-
-NAMESPACE_END(Gfx)
