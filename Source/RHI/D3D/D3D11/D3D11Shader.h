@@ -1,166 +1,48 @@
 #pragma once
 
-#include "Colorful/D3D/D3D11/D3D11EnumTranslator.h"
+#include "RHI/D3D/D3D11/D3D11Types.h"
+#include "Runtime/Engine/RHI/RHIShader.h"
 
-NAMESPACE_START(Gfx)
-
-class D3D11VertexShader final : public D3DObject<ID3D11VertexShader>, public IShader
+class D3D11VertexShader final : public D3DHwObject<ID3D11VertexShader>, public RHIShader
 {
 public:
-	D3D11VertexShader(ID3D11Device* device, ShaderDesc& desc)
-		: IShader(EShaderStage::Vertex, desc.ResourceList)
-	{
-		assert(device && desc.BinarySize);
-		VERIFY_D3D(device->CreateVertexShader(desc.Binary.get(), desc.BinarySize, nullptr, reference()));
-	}
+	D3D11VertexShader(const class D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo);
 };
 
-class D3D11HullShader final : public D3DObject<ID3D11HullShader>, public IShader
+class D3D11HullShader final : public D3DHwObject<ID3D11HullShader>, public RHIShader
 {
 public:
-	D3D11HullShader(ID3D11Device* device, ShaderDesc& desc)
-		: IShader(EShaderStage::Hull, desc.ResourceList)
-	{
-		assert(device && desc.BinarySize);
-		VERIFY_D3D(device->CreateHullShader(desc.Binary.get(), desc.BinarySize, nullptr, reference()));
-	}
+	D3D11HullShader(const class D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo);
 };
 
-class D3D11DomainShader final : public D3DObject<ID3D11DomainShader>, public IShader
+class D3D11DomainShader final : public D3DHwObject<ID3D11DomainShader>, public RHIShader
 {
 public:
-	D3D11DomainShader(ID3D11Device* device, ShaderDesc& desc)
-		: IShader(EShaderStage::Domain, desc.ResourceList)
-	{
-		assert(device && desc.BinarySize);
-		VERIFY_D3D(device->CreateDomainShader(desc.Binary.get(), desc.BinarySize, nullptr, reference()));
-	}
+	D3D11DomainShader(const class D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo);
 };
 
-class D3D11GeometryShader final : public D3DObject<ID3D11GeometryShader>, public IShader
+class D3D11GeometryShader final : public D3DHwObject<ID3D11GeometryShader>, public RHIShader
 {
 public:
-	D3D11GeometryShader(ID3D11Device* device, ShaderDesc& desc)
-		: IShader(EShaderStage::Geometry, desc.ResourceList)
-	{
-		assert(device && desc.BinarySize);
-		VERIFY_D3D(device->CreateGeometryShader(desc.Binary.get(), desc.BinarySize, nullptr, reference()));
-	}
+	D3D11GeometryShader(const class D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo);
 };
 
-class D3D11FragmentShader final : public D3DObject<ID3D11PixelShader>, public IShader
+class D3D11FragmentShader final : public D3DHwObject<ID3D11PixelShader>, public RHIShader
 {
 public:
-	D3D11FragmentShader(ID3D11Device* device, ShaderDesc& desc)
-		: IShader(EShaderStage::Fragment, desc.ResourceList)
-	{
-		assert(device && desc.BinarySize);
-		VERIFY_D3D(device->CreatePixelShader(desc.Binary.get(), desc.BinarySize, nullptr, reference()));
-	}
+	D3D11FragmentShader(const class D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo);
 };
 
-class D3D11ComputeShader final : public D3DObject<ID3D11ComputeShader>, public IShader
+class D3D11ComputeShader final : public D3DHwObject<ID3D11ComputeShader>, public RHIShader
 {
 public:
-	D3D11ComputeShader(ID3D11Device* device, ShaderDesc& desc)
-		: IShader(EShaderStage::Fragment, desc.ResourceList)
-	{
-		assert(device && desc.BinarySize);
-		VERIFY_D3D(device->CreateComputeShader(desc.Binary.get(), desc.BinarySize, nullptr, reference()));
-	}
+	D3D11ComputeShader(const class D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo);
 };
 
-class D3D11Shader final : public D3DObject<ID3D11DeviceChild>, public IShader
+class D3D11InputLayout final : public D3DHwObject<ID3D11InputLayout>, public RHIInputLayout
 {
 public:
-	D3D11Shader(ID3D11Device* device, ShaderDesc& desc)
-		: IShader(desc.Stage, desc.ResourceList)
-	{
-		assert(device && desc.BinarySize);
-
-		switch (desc.Stage)
-		{
-		case EShaderStage::Vertex:
-			VERIFY_D3D(device->CreateVertexShader(desc.Binary.get(), desc.BinarySize, nullptr, reinterpret_cast<ID3D11VertexShader**>(reference())));
-			m_Shader.VertexShader = reinterpret_cast<ID3D11VertexShader*>(get());
-			break;
-		case EShaderStage::Hull:
-			VERIFY_D3D(device->CreateHullShader(desc.Binary.get(), desc.BinarySize, nullptr, reinterpret_cast<ID3D11HullShader**>(reference())));
-			m_Shader.HullShader = reinterpret_cast<ID3D11HullShader*>(get());
-			break;
-		case EShaderStage::Domain:
-			VERIFY_D3D(device->CreateDomainShader(desc.Binary.get(), desc.BinarySize, nullptr, reinterpret_cast<ID3D11DomainShader**>(reference())));
-			m_Shader.DomainShader = reinterpret_cast<ID3D11DomainShader*>(get());
-			break;
-		case EShaderStage::Geometry:
-			VERIFY_D3D(device->CreateGeometryShader(desc.Binary.get(), desc.BinarySize, nullptr, reinterpret_cast<ID3D11GeometryShader**>(reference())));
-			m_Shader.GeometryShader = reinterpret_cast<ID3D11GeometryShader*>(get());
-			break;
-		case EShaderStage::Fragment:
-			VERIFY_D3D(device->CreatePixelShader(desc.Binary.get(), desc.BinarySize, nullptr, reinterpret_cast<ID3D11PixelShader**>(reference())));
-			m_Shader.FragmentShader = reinterpret_cast<ID3D11PixelShader*>(get());
-			break;
-		case EShaderStage::Compute:
-			VERIFY_D3D(device->CreateComputeShader(desc.Binary.get(), desc.BinarySize, nullptr, reinterpret_cast<ID3D11ComputeShader**>(reference())));
-			m_Shader.ComputeShader = reinterpret_cast<ID3D11ComputeShader*>(get());
-			break;
-		default:
-			assert(0);
-			break;
-		}
-	}
-
-	ID3D11VertexShader* vs() const
-	{
-		assert(m_Stage == EShaderStage::Vertex);
-		return m_Shader.VertexShader;
-	}
-
-	ID3D11HullShader* hs() const
-	{
-		assert(m_Stage == EShaderStage::Hull);
-		return m_Shader.HullShader;
-	}
-
-	ID3D11DomainShader* ds() const
-	{
-		assert(m_Stage == EShaderStage::Domain);
-		return m_Shader.DomainShader;
-	}
-
-	ID3D11GeometryShader* gs() const
-	{
-		assert(m_Stage == EShaderStage::Geometry);
-		return m_Shader.GeometryShader;
-	}
-
-	ID3D11PixelShader* fs() const
-	{
-		assert(m_Stage == EShaderStage::Fragment);
-		return m_Shader.FragmentShader;
-	}
-
-	ID3D11ComputeShader* cs() const
-	{
-		assert(m_Stage == EShaderStage::Compute);
-		return m_Shader.ComputeShader;
-	}
-private:
-	union 
-	{
-		ID3D11VertexShader* VertexShader;
-		ID3D11HullShader* HullShader;
-		ID3D11DomainShader* DomainShader;
-		ID3D11GeometryShader* GeometryShader;
-		ID3D11PixelShader* FragmentShader;
-		ID3D11ComputeShader* ComputeShader;
-	} m_Shader{};
-};
-
-class D3D11InputLayout final : public D3DObject<ID3D11InputLayout>, public IInputLayout
-{
-public:
-	D3D11InputLayout(ID3D11Device* device, const InputLayoutDesc& desc, const ShaderDesc& shaderDesc)
+	D3D11InputLayout(const class D3D11Device& Device, const RHIInputLayoutCreateInfo& RHICreateInfo)
 	{
 		assert(device && shaderDesc.BinarySize);
 
@@ -195,5 +77,3 @@ public:
 			reference()));
 	}
 };
-
-NAMESPACE_END(Gfx)
