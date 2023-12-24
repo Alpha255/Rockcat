@@ -121,10 +121,10 @@ D3D11_FILL_MODE GetPolygonMode(ERHIPolygonMode Mode)
 {
 	switch (Mode)
 	{
-	case ERHIPolygonMode::Solid:     return D3D11_FILL_MODE_SOLID;
-	case ERHIPolygonMode::Wireframe: return D3D11_FILL_MODE_WIREFRAME;
+	case ERHIPolygonMode::Solid:     return D3D11_FILL_SOLID;
+	case ERHIPolygonMode::Wireframe: return D3D11_FILL_WIREFRAME;
 	default:
-		return D3D11_FILL_MODE_SOLID;
+		return D3D11_FILL_SOLID;
 	}
 }
 
@@ -132,11 +132,11 @@ D3D11_CULL_MODE GetCullMode(ERHICullMode Mode)
 {
 	switch (Mode)
 	{
-	case ERHICullMode::None:      return D3D11_CULL_MODE_NONE;
-	case ERHICullMode::FrontFace: return D3D11_CULL_MODE_FRONT;
-	case ERHICullMode::BackFace:  return D3D11_CULL_MODE_BACK;
+	case ERHICullMode::None:      return D3D11_CULL_NONE;
+	case ERHICullMode::FrontFace: return D3D11_CULL_FRONT;
+	case ERHICullMode::BackFace:  return D3D11_CULL_BACK;
 	default:
-		return D3D11_CULL_MODE_BACK;
+		return D3D11_CULL_BACK;
 	}
 }
 
@@ -144,16 +144,16 @@ D3D11_COMPARISON_FUNC GetCompareFunc(ERHICompareFunc Func)
 {
 	switch (Func)
 	{
-	case ERHICompareFunc::Never:          return D3D11_COMPARISON_FUNC_NEVER;
-	case ERHICompareFunc::Less:           return D3D11_COMPARISON_FUNC_LESS;
-	case ERHICompareFunc::Equal:          return D3D11_COMPARISON_FUNC_EQUAL;
-	case ERHICompareFunc::LessOrEqual:    return D3D11_COMPARISON_FUNC_LESS_EQUAL;
-	case ERHICompareFunc::Greater:        return D3D11_COMPARISON_FUNC_GREATER;
-	case ERHICompareFunc::NotEqual:       return D3D11_COMPARISON_FUNC_NOT_EQUAL;
-	case ERHICompareFunc::GreaterOrEqual: return D3D11_COMPARISON_FUNC_GREATER_EQUAL;
-	case ERHICompareFunc::Always:         return D3D11_COMPARISON_FUNC_ALWAYS;
+	case ERHICompareFunc::Never:          return D3D11_COMPARISON_NEVER;
+	case ERHICompareFunc::Less:           return D3D11_COMPARISON_LESS;
+	case ERHICompareFunc::Equal:          return D3D11_COMPARISON_EQUAL;
+	case ERHICompareFunc::LessOrEqual:    return D3D11_COMPARISON_LESS_EQUAL;
+	case ERHICompareFunc::Greater:        return D3D11_COMPARISON_GREATER;
+	case ERHICompareFunc::NotEqual:       return D3D11_COMPARISON_NOT_EQUAL;
+	case ERHICompareFunc::GreaterOrEqual: return D3D11_COMPARISON_GREATER_EQUAL;
+	case ERHICompareFunc::Always:         return D3D11_COMPARISON_ALWAYS;
 	default:
-		return D3D11_COMPARISON_FUNC_ALWAYS;
+		return D3D11_COMPARISON_ALWAYS;
 	}
 }
 
@@ -174,22 +174,21 @@ D3D11_STENCIL_OP GetStencilOp(ERHIStencilOp Op)
 	}
 }
 
-D3D11_PRIMITIVE_TOPOLOGY_TYPE PrimitiveTopology(ERHIPrimitiveTopology Topology)
+D3D_PRIMITIVE_TOPOLOGY PrimitiveTopology(ERHIPrimitiveTopology Topology)
 {
 	switch (Topology)
 	{
-	case ERHIPrimitiveTopology::PointList:              return D3D11_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-	case ERHIPrimitiveTopology::LineList:               return D3D11_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-	case ERHIPrimitiveTopology::LineStrip:              return D3D11_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-	case ERHIPrimitiveTopology::TriangleList:           return D3D11_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	case ERHIPrimitiveTopology::TriangleStrip:          return D3D11_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	case ERHIPrimitiveTopology::LineListAdjacency:      return D3D11_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-	case ERHIPrimitiveTopology::LineStripAdjacency:     return D3D11_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-	case ERHIPrimitiveTopology::TriangleListAdjacency:  return D3D11_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	case ERHIPrimitiveTopology::TriangleStripAdjacency: return D3D11_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	case ERHIPrimitiveTopology::PatchList:              return D3D11_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
+	case ERHIPrimitiveTopology::PointList:              return D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+	case ERHIPrimitiveTopology::LineList:               return D3D_PRIMITIVE_TOPOLOGY_LINELIST;
+	case ERHIPrimitiveTopology::LineStrip:              return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
+	case ERHIPrimitiveTopology::TriangleList:           return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	case ERHIPrimitiveTopology::TriangleStrip:          return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+	case ERHIPrimitiveTopology::LineListAdjacency:      return D3D_PRIMITIVE_TOPOLOGY_LINELIST_ADJ;
+	case ERHIPrimitiveTopology::LineStripAdjacency:     return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ;
+	case ERHIPrimitiveTopology::TriangleListAdjacency:  return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
+	case ERHIPrimitiveTopology::TriangleStripAdjacency: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ;
 	default:
-		return D3D11_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	}
 }
 
@@ -224,13 +223,13 @@ D3D11_TEXTURE_ADDRESS_MODE GetSamplerAddressMode(ERHISamplerAddressMode AddressM
 {
 	switch (AddressMode)
 	{
-	case ERHISamplerAddressMode::Repeat:            return D3D11_TEXTURE_ADDRESS_MODE_WRAP;
-	case ERHISamplerAddressMode::MirroredRepeat:    return D3D11_TEXTURE_ADDRESS_MODE_MIRROR;
-	case ERHISamplerAddressMode::ClampToEdge:       return D3D11_TEXTURE_ADDRESS_MODE_CLAMP;
-	case ERHISamplerAddressMode::ClampToBorder:     return D3D11_TEXTURE_ADDRESS_MODE_BORDER;
-	case ERHISamplerAddressMode::MirrorClampToEdge: return D3D11_TEXTURE_ADDRESS_MODE_MIRROR_ONCE;
+	case ERHISamplerAddressMode::Repeat:            return D3D11_TEXTURE_ADDRESS_WRAP;
+	case ERHISamplerAddressMode::MirroredRepeat:    return D3D11_TEXTURE_ADDRESS_MIRROR;
+	case ERHISamplerAddressMode::ClampToEdge:       return D3D11_TEXTURE_ADDRESS_CLAMP;
+	case ERHISamplerAddressMode::ClampToBorder:     return D3D11_TEXTURE_ADDRESS_BORDER;
+	case ERHISamplerAddressMode::MirrorClampToEdge: return D3D11_TEXTURE_ADDRESS_MIRROR_ONCE;
 	default:
-		return D3D11_TEXTURE_ADDRESS_MODE_WRAP;
+		return D3D11_TEXTURE_ADDRESS_WRAP;
 	}
 }
 
@@ -252,6 +251,7 @@ Math::Vector4 GetBorderColor(ERHIBorderColor Color)
 	}
 }
 
+#if 0
 D3D11_RESOURCE_STATES GetResourceStates(ERHIResourceState States)
 {
 	D3D11_RESOURCE_STATES Ret = D3D11_RESOURCE_STATE_COMMON;
@@ -344,3 +344,4 @@ D3D11_RESOURCE_STATES GetResourceStates(ERHIResourceState States)
 
 	return Ret;
 }
+#endif

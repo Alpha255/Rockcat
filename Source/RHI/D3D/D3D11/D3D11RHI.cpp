@@ -1,41 +1,17 @@
-#include "Colorful/D3D/D3D11/D3D11Renderer.h"
+#include "RHI/D3D/D3D11/D3D11RHI.h"
 
-NAMESPACE_START(Gfx)
-
-void D3D11Renderer::initialize(uint64_t windowHandle, uint32_t width, uint32_t height, bool8_t fullscreen, bool8_t vSync)
+D3D11RHI::D3D11RHI(const GraphicsSettings* GfxSettings)
+	: RHIInterface(GfxSettings)
 {
-	std::unique_ptr<DXGIFactory> Factory = std::make_unique<DXGIFactory>();
-	std::unique_ptr<DXGIAdapterList> AdapterList  = std::make_unique<DXGIAdapterList>(Factory->get(), Factory->get6());
+	assert(GfxSettings);
 
-	m_Device = std::make_unique<D3D11Device>(AdapterList->get1(), AdapterList->get4());
-
-	(void)windowHandle;
-	(void)width;
-	(void)height;
-	(void)fullscreen;
-	(void)vSync;
+	InitializeGraphicsDevices();
 }
 
-void D3D11Renderer::toggleFullScreen(bool8_t fullscreen)
-{
-	(void)fullscreen;
-}
-
-void D3D11Renderer::toggleVSync(bool8_t vSync)
-{
-	(void)vSync;
-}
-
-void D3D11Renderer::finalize()
+D3D11RHI::~D3D11RHI()
 {
 }
 
-extern "C"
+void D3D11RHI::InitializeGraphicsDevices()
 {
-	EXPORT_API void createRenderer(IRendererPtr& ptr)
-	{
-		ptr = std::make_unique<D3D11Renderer>();
-	}
 }
-
-NAMESPACE_END(Gfx)

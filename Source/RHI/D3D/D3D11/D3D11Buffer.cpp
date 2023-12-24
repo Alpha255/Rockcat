@@ -4,6 +4,7 @@
 
 D3D11Buffer::D3D11Buffer(const D3D11Device& Device, const RHIBufferCreateInfo& RHICreateInfo)
 {
+#if 0
 	static const size_t ConstantsBufferAlignment = 256ull;
 	
 	D3D11_RESOURCE_DESC CreateDesc
@@ -72,10 +73,12 @@ D3D11Buffer::D3D11Buffer(const D3D11Device& Device, const RHIBufferCreateInfo& R
 		States, 
 		nullptr, 
 		IID_PPV_ARGS(Reference())));
+#endif
 }
 
 void* D3D11Buffer::Map(size_t Size, size_t Offset)
 {
+#if 0
 	assert(m_HostVisible && m_MappedMemory == nullptr && (Size == WHOLE_SIZE || Offset + Size <= m_Size));
 
 	D3D11_RANGE Range
@@ -85,17 +88,20 @@ void* D3D11Buffer::Map(size_t Size, size_t Offset)
 	};
 
 	VERIFY_D3D(GetNative()->Map(0u, &Range, &m_MappedMemory));
+#endif
 
 	return m_MappedMemory;
 }
 
 void D3D11Buffer::Unmap()
 {
+#if 0
 	assert(m_HostVisible && m_MappedMemory);
 
 	GetNative()->Unmap(0u, nullptr);
 
 	m_MappedMemory = nullptr;
+#endif
 }
 
 void D3D11Buffer::FlushMappedRange(size_t Size, size_t Offset)
@@ -114,6 +120,7 @@ void D3D11Buffer::InvalidateMappedRange(size_t Size, size_t Offset)
 
 bool8_t D3D11Buffer::Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset)
 {
+#if 0
 	assert(Data && Size && Size <= m_Size);
 
 	if (m_MappedMemory)
@@ -131,6 +138,7 @@ bool8_t D3D11Buffer::Update(const void* Data, size_t Size, size_t SrcOffset, siz
 
 		return true;
 	}
+#endif
 
 	return false;
 }

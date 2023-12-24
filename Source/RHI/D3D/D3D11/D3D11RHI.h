@@ -1,26 +1,17 @@
 #pragma once
 
-#include "Colorful/D3D/D3D11/D3D11Device.h"
+#include "Runtime/Engine/RHI/RHIInterface.h"
+#include "RHI/D3D/D3D11/D3D11Types.h"
 
-NAMESPACE_START(Gfx)
-
-class D3D11Renderer final : public IRenderer
+class D3D11RHI final : public RHIInterface
 {
 public:
-	void initialize(uint64_t windowHandle, uint32_t width, uint32_t height, bool8_t fullscreen, bool8_t vSync) override final;
+	D3D11RHI(const GraphicsSettings* GfxSettings);
 
-	void toggleFullScreen(bool8_t fullscreen) override final;
-	void toggleVSync(bool8_t VSync) override final;
+	~D3D11RHI();
 
-	IDevice* device() override final
-	{
-		return m_Device.get();
-	}
-
-	void finalize() override;
+	ERenderHardwareInterface GetRHIType() const override final { return ERenderHardwareInterface::D3D11; }
 protected:
+	void InitializeGraphicsDevices() override final;
 private:
-	std::unique_ptr<D3D11Device> m_Device;
 };
-
-NAMESPACE_END(Gfx)

@@ -1,8 +1,6 @@
-#include "Colorful/D3D/D3D11/D3D11Pipeline.h"
-#include "Colorful/D3D/D3D11/D3D11EnumTranslator.h"
+#include "RHI/D3D/D3D11/D3D11Pipeline.h"
 
-NAMESPACE_START(Gfx)
-
+#if 0
 D3D11RasterizerState::D3D11RasterizerState(ID3D11Device* device, const RasterizationStateDesc& rasterizationStateDesc, const MultisampleStateDesc& multisampleStateDesc)
 {
 	assert(device);
@@ -305,4 +303,5 @@ void D3D11Context::setShaderResources(const D3D11GraphicsPipelinePtr& pipeline)
 	assert(0);
 #endif
 }
+#endif
 #endif

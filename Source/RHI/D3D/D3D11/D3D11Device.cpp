@@ -19,10 +19,25 @@ D3D11Device::D3D11Device(const DxgiFactory& Factory)
 		D3D_FEATURE_LEVEL_9_1
 	};
 
+	uint32_t Flags = 0u;
+#if defined(_DEBUG)
+	Flags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
 	D3D_FEATURE_LEVEL FeatureLevel = D3D_FEATURE_LEVEL_1_0_CORE;
 	for (auto Level : FeatureLevels)
 	{
-		if (SUCCEEDED(D3D11CreateDevice(m_Adapter->GetNative(), Level, IID_PPV_ARGS(Reference()))))
+		if (SUCCEEDED(D3D11CreateDevice(
+			m_Adapter->GetNative(), 
+			D3D_DRIVER_TYPE_UNKNOWN,
+			nullptr,
+			Flags,
+			&Level,
+			1u, 
+			D3D11_SDK_VERSION,
+			Reference(),
+			nullptr,
+			nullptr)))
 		{
 			FeatureLevel = Level;
 			break;
@@ -88,24 +103,6 @@ D3D11Device::D3D11Device(const DxgiFactory& Factory)
 		{
 		}
 
-		D3D11_FEATURE_DATA_D3D11_OPTIONS6 FeatureOptions6{};
-		if (SUCCEEDED(GetNative()->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS6, &FeatureOptions6, sizeof(D3D11_FEATURE_DATA_D3D11_OPTIONS6))))
-		{
-		}
-
-		D3D11_FEATURE_DATA_D3D11_OPTIONS7 FeatureOptions7{};
-		if (SUCCEEDED(GetNative()->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS7, &FeatureOptions7, sizeof(D3D11_FEATURE_DATA_D3D11_OPTIONS7))))
-		{
-		}
-
-		D3D11_FEATURE_DATA_ROOT_SIGNATURE FeatureDataRootSignature{ D3D_ROOT_SIGNATURE_VERSION_1_1 };
-		if (SUCCEEDED(GetNative()->CheckFeatureSupport(D3D11_FEATURE_ROOT_SIGNATURE, &FeatureDataRootSignature, sizeof(D3D11_FEATURE_DATA_ROOT_SIGNATURE))))
-		{
-		}
-		else
-		{
-		}
-
 		const std::array<ERHIDeviceQueue, static_cast<size_t>(ERHIDeviceQueue::Num)> QueueTypes
 		{
 			ERHIDeviceQueue::Graphics,
@@ -115,11 +112,6 @@ D3D11Device::D3D11Device(const DxgiFactory& Factory)
 		for (uint32_t QueueIndex = 0u; QueueIndex < QueueTypes.size(); ++QueueIndex)
 		{
 			//m_Queues[QueueIndex] = std::make_unique<D3D11CommandQueue>(Get(), QueueTypes[QueueIndex]);
-		}
-
-		for (uint32_t HeapIndex = D3D11_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV; HeapIndex < D3D11_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++HeapIndex)
-		{
-			//m_DescriptorAllocators[HeapIndex] = std::make_unique<D3D11DescriptorAllocator>(this, static_cast<D3D11_DESCRIPTOR_HEAP_TYPE>(HeapIndex));
 		}
 	}
 	else

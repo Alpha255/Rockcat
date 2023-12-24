@@ -95,6 +95,26 @@ workspace "Rockcat"
 					"d3d12",
 					"dxgi"
 				}
+				project "D3D11RHI"
+				kind "StaticLib"
+				language "C++"
+				location "./Out/Intermediate/VCProjects"
+				files { 
+					"./Source/RHI/D3D/D3D11/**",
+					"./Source/RHI/D3D/DXGIInterface.h",
+					"./Source/RHI/D3D/DXGIInterface.cpp",
+				}
+				includedirs { 
+					"$(SolutionDir)",
+					"$(SolutionDir)Source",
+					"$(SolutionDir)Submodules/cereal/include",
+					"$(SolutionDir)Submodules/spdlog/include",
+					"$(VK_SDK_PATH)/Include",
+				}
+				links {
+					"d3d11",
+					"dxgi"
+				}
 	group "Submodules"
 		project "imgui"
 			kind "StaticLib"

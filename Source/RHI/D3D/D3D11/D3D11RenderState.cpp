@@ -1,8 +1,4 @@
-#include "Colorful/D3D/D3D11/D3D11RenderState.h"
-
-NAMESPACE_START(Gfx)
-
-NAMESPACE_END(Gfx)
+#include "RHI/D3D/D3D11/D3D11RenderState.h"
 
 #if 0
 #include "Colorful/D3D/D3D11/D3D11Pipeline.h"

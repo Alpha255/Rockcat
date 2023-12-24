@@ -15,7 +15,7 @@ D3D11_FILL_MODE GetPolygonMode(ERHIPolygonMode Mode);
 D3D11_CULL_MODE GetCullMode(ERHICullMode Mode);
 D3D11_COMPARISON_FUNC GetCompareFunc(ERHICompareFunc Func);
 D3D11_STENCIL_OP GetStencilOp(ERHIStencilOp Op);
-D3D11_PRIMITIVE_TOPOLOGY_TYPE GetPrimitiveTopology(ERHIPrimitiveTopology PrimitiveTopology);
+D3D_PRIMITIVE_TOPOLOGY GetPrimitiveTopology(ERHIPrimitiveTopology PrimitiveTopology);
 D3D11_FILTER GetFilter(ERHIFilter MinmagFilter, ERHIFilter MipmapFilter, uint32_t MaxAnisotropy);
 D3D11_TEXTURE_ADDRESS_MODE GetSamplerAddressMode(ERHISamplerAddressMode AddressMode);
 Math::Vector4 GetBorderColor(ERHIBorderColor Color);

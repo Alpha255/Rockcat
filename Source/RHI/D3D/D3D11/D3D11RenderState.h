@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Colorful/D3D/D3D11/D3D11Device.h"
-
-NAMESPACE_START(Gfx)
+#if 0
 
 struct D3D11RenderState
 {
@@ -29,4 +27,4 @@ struct D3D11RenderState
 	ID3D11DepthStencilView* DepthStencilView = nullptr;
 };
 
-NAMESPACE_END(Gfx)
+#endif
