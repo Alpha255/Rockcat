@@ -37,9 +37,7 @@ public:
 
 		const uint32_t ProcessFlags = static_cast<uint32_t>(
 			aiProcessPreset_TargetRealtime_MaxQuality | 
-			aiProcess_MakeLeftHanded |  /// Use DirectX's left-hand coordinate system
-			aiProcess_FlipUVs |
-			aiProcess_FlipWindingOrder |
+			aiProcess_ConvertToLeftHanded |  /// Use DirectX's left-hand coordinate system
 			aiProcess_GenBoundingBoxes |
 			aiProcess_TransformUVCoords);
 
@@ -54,6 +52,8 @@ public:
 			if (AiScene->HasMeshes())
 			{
 				ProcessMaterials(AiScene, Scene);
+
+				ProcessMeshes(AiScene, Scene);
 
 				if (AiScene->mRootNode)
 				{
@@ -124,7 +124,22 @@ private:
 		}
 
 		auto Node = AiScene->mRootNode == AiNode ? GraphNode : AssimpScene.Graph.AddChild(GraphNode, AiNode->mName.C_Str());
-		ProcessMeshes(AiScene, AiNode, AssimpScene, Node);
+		for (uint32_t Index = 0u; Index < AiNode->mNumMeshes; ++Index)
+		{
+			const auto MeshIndex = AiNode->mMeshes[Index];
+			const auto Mesh = AiScene->mMeshes[MeshIndex];
+
+			auto GraphNodeID = AssimpScene.Graph.AddChild(GraphNode, Mesh->mName.C_Str(), SceneGraph::Node::ENodeMasks::StaticMesh);
+
+			if (Mesh->HasBones())
+			{
+				assert(false);
+			}
+			else
+			{
+				AssimpScene.Graph.GetNode(GraphNodeID).SetDataIndex(static_cast<uint32_t>(AssimpScene.Data.StaticMeshes.size()));
+			}
+		}
 
 		for (uint32_t NodeIndex = 0u; NodeIndex < AiNode->mNumChildren; ++NodeIndex)
 		{
@@ -200,26 +215,28 @@ private:
 				bool8_t TwoSided = false;
 				Material->Get(AI_MATKEY_TWOSIDED, TwoSided);
 
+				auto MaterialAssetName = (AssimpScene.GetPath().stem() / Name.C_Str()).u8string();
+
 				switch (ShadingMode)
 				{
 				case aiShadingMode_Flat:
 				case aiShadingMode_Gouraud:
 				case aiShadingMode_Phong:
 				case aiShadingMode_Blinn:
-					AssimpScene.Data.Materials[Index] = MaterialAsset::Load<MaterialLit>(Index, EShadingMode::BlinnPhong, Name.C_Str());
+					AssimpScene.Data.Materials[Index] = MaterialAsset::Load<MaterialLit>(Index, EShadingMode::BlinnPhong, MaterialAssetName.c_str());
 					break;
 				case aiShadingMode_Toon:
-					AssimpScene.Data.Materials[Index] = MaterialAsset::Load<MaterialToon>(Index, Name.C_Str());
+					AssimpScene.Data.Materials[Index] = MaterialAsset::Load<MaterialToon>(Index, MaterialAssetName.c_str());
 					break;
 				case aiShadingMode_OrenNayar:
 				case aiShadingMode_Minnaert:
 				case aiShadingMode_CookTorrance:
 				case aiShadingMode_Fresnel:
 				case aiShadingMode_PBR_BRDF:
-					AssimpScene.Data.Materials[Index] = MaterialAsset::Load<MaterialLit>(Index, EShadingMode::StandardPBR, Name.C_Str());
+					AssimpScene.Data.Materials[Index] = MaterialAsset::Load<MaterialLit>(Index, EShadingMode::StandardPBR, MaterialAssetName.c_str());
 					break;
 				case aiShadingMode_NoShading:
-					AssimpScene.Data.Materials[Index] = MaterialAsset::Load<MaterialUnlit>(Index, Name.C_Str());
+					AssimpScene.Data.Materials[Index] = MaterialAsset::Load<MaterialUnlit>(Index, MaterialAssetName.c_str());
 					break;
 				}
 
@@ -227,6 +244,126 @@ private:
 			}
 			else
 			{
+			}
+		}
+	}
+
+	void ProcessMeshes(const aiScene* AiScene, AssimpScene& AssimpScene)
+	{
+		for (uint32_t Index = 0u; Index < AiScene->mNumMeshes; ++Index)
+		{
+			const auto Mesh = AiScene->mMeshes[Index];
+
+			if (!Mesh)
+			{
+				LOG_ERROR("AssimpSceneImporter: Detected invalid mesh!");
+				continue;
+			}
+			if (!Mesh->HasPositions())
+			{
+				LOG_ERROR("AssimpSceneImporter: The mesh has no vertices data!");
+				continue;
+			}
+			if (!Mesh->HasNormals())
+			{
+				LOG_ERROR("AssimpSceneImporter: The mesh has no normals!");
+				continue;
+			}
+			if (!Mesh->HasFaces())
+			{
+				LOG_ERROR("AssimpSceneImporter: The mesh has no indices data!");
+				continue;
+			}
+			if (Mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
+			{
+				LOG_ERROR("AssimpSceneImporter: Detected others primitive type, should never be happen!");
+				continue;
+			}
+
+			if (Mesh->HasTangentsAndBitangents())
+			{
+				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_TANGENT_", true);
+				GetFragmentShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_TANGENT_", true);
+			}
+			if (Mesh->HasTextureCoords(0u))
+			{
+				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_UV0_", true);
+			}
+			if (Mesh->HasTextureCoords(1u))
+			{
+				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_UV1_", true);
+			}
+			if (Mesh->HasVertexColors(0u))
+			{
+				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_COLOR_", true);
+			}
+
+			Math::AABB BoundingBox = Math::AABB(
+				Math::Vector3(Mesh->mAABB.mMin.x, Mesh->mAABB.mMin.y, Mesh->mAABB.mMin.z),
+				Math::Vector3(Mesh->mAABB.mMax.x, Mesh->mAABB.mMax.y, Mesh->mAABB.mMax.z));
+
+			MeshData MeshDataBlock(
+				Mesh->mNumVertices,
+				Mesh->mNumFaces * 3u,
+				Mesh->mNumFaces,
+				Mesh->HasTangentsAndBitangents(),
+				Mesh->HasTextureCoords(0u),
+				Mesh->HasTextureCoords(1u),
+				Mesh->HasVertexColors(0u),
+				ERHIPrimitiveTopology::TriangleList,
+				BoundingBox);
+
+			for (uint32_t FaceIndex = 0u; FaceIndex < Mesh->mNumFaces; ++FaceIndex)
+			{
+				const auto& Face = Mesh->mFaces[FaceIndex];
+				assert(Face.mNumIndices == 3u);
+				MeshDataBlock.SetFace(FaceIndex, Face.mIndices[0], Face.mIndices[1], Face.mIndices[2]);
+			}
+
+			for (uint32_t VIndex = 0u; VIndex < Mesh->mNumVertices; ++VIndex)
+			{
+				const auto& Position = Mesh->mVertices[VIndex];
+				MeshDataBlock.SetPosition(VIndex, Math::Vector3(Position.x, Position.y, Position.z));
+
+				if (Mesh->HasNormals())
+				{
+					const auto& Normal = Mesh->mNormals[VIndex];
+					MeshDataBlock.SetNormal(VIndex, Math::Vector3(Normal.x, Normal.y, Normal.z));
+				}
+				if (Mesh->HasTangentsAndBitangents())
+				{
+					const auto& Tangent = Mesh->mTangents[VIndex];
+					MeshDataBlock.SetTangent(VIndex, Math::Vector3(Tangent.x, Tangent.y, Tangent.z));
+
+					const auto& Bitangent = Mesh->mBitangents[VIndex];
+					MeshDataBlock.SetBitangent(VIndex, Math::Vector3(Bitangent.x, Bitangent.y, Bitangent.z));
+				}
+
+				if (Mesh->HasTextureCoords(0u))
+				{
+					const auto& UV = Mesh->mTextureCoords[0u][VIndex];
+					MeshDataBlock.SetUV0(VIndex, Math::Vector3(UV.x, UV.y, UV.z));
+				}
+				if (Mesh->HasTextureCoords(1))
+				{
+					const auto& UV = Mesh->mTextureCoords[1u][VIndex];
+					MeshDataBlock.SetUV0(VIndex, Math::Vector3(UV.x, UV.y, UV.z));
+				}
+
+				if (Mesh->HasVertexColors(0u))
+				{
+					const auto& Color = Mesh->mColors[0u][VIndex];
+					MeshDataBlock.SetColor(VIndex, Math::Color(Color.r, Color.g, Color.b, Color.a));
+				}
+			}
+
+			if (Mesh->HasBones())
+			{
+				assert(false);
+			}
+			else
+			{
+				AssimpScene.Data.StaticMeshes.emplace_back(std::make_shared<StaticMesh>(MeshDataBlock, Mesh->mMaterialIndex));
 			}
 		}
 	}
@@ -408,130 +545,6 @@ private:
 						AssetDatabase::Get().FindOrImportAsset(Image, AssetLoadCallbacks);
 					}
 				}
-			}
-		}
-	}
-
-	void ProcessMeshes(const aiScene* AiScene, const aiNode* AiNode, AssimpScene& AssimpScene, SceneGraph::NodeID GraphNode)
-	{
-		for (uint32_t Index = 0u; Index < AiNode->mNumMeshes; ++Index)
-		{
-			const auto MeshIndex = AiNode->mMeshes[Index];
-			const auto Mesh = AiScene->mMeshes[MeshIndex];
-
-			if (!Mesh)
-			{
-				LOG_ERROR("AssimpSceneImporter: Detected invalid mesh!");
-				continue;
-			}
-			if (!Mesh->HasPositions())
-			{
-				LOG_ERROR("AssimpSceneImporter: The mesh contains no vertices data!");
-				continue;
-			}
-			if (!Mesh->HasNormals())
-			{
-				LOG_ERROR("AssimpSceneImporter: The mesh constains normals!");
-				continue;
-			}
-			if (!Mesh->HasFaces())
-			{
-				LOG_ERROR("AssimpSceneImporter: The mesh constains no indices data!");
-				continue;
-			}
-			if (Mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
-			{
-				LOG_ERROR("AssimpSceneImporter: Detected others primitive type, this should never be happen!");
-				continue;
-			}
-
-			auto GraphNodeID = AssimpScene.Graph.AddChild(GraphNode, Mesh->mName.C_Str(), SceneGraph::Node::ENodeMasks::StaticMesh);
-
-			if (Mesh->HasTangentsAndBitangents())
-			{
-				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_TANGENT_", true);
-				GetFragmentShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_TANGENT_", true);
-			}
-			if (Mesh->HasTextureCoords(0u))
-			{
-				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_UV0_", true);
-			}
-			if (Mesh->HasTextureCoords(1u))
-			{
-				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_UV1_", true);
-			}
-			if (Mesh->HasVertexColors(0u))
-			{
-				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_COLOR_", true);
-			}
-
-			Math::AABB BoundingBox = Math::AABB(
-				Math::Vector3(Mesh->mAABB.mMin.x, Mesh->mAABB.mMin.y, Mesh->mAABB.mMin.z),
-				Math::Vector3(Mesh->mAABB.mMax.x, Mesh->mAABB.mMax.y, Mesh->mAABB.mMax.z));
-
-			MeshData MeshDataBlock(
-				Mesh->mNumVertices,
-				Mesh->mNumFaces * 3u,
-				Mesh->mNumFaces,
-				Mesh->HasTangentsAndBitangents(),
-				Mesh->HasTextureCoords(0u),
-				Mesh->HasTextureCoords(1u),
-				Mesh->HasVertexColors(0u),
-				ERHIPrimitiveTopology::TriangleList,
-				BoundingBox);
-
-			for (uint32_t FaceIndex = 0u; FaceIndex < Mesh->mNumFaces; ++FaceIndex)
-			{
-				const auto& Face = Mesh->mFaces[FaceIndex];
-				assert(Face.mNumIndices == 3u);
-				MeshDataBlock.SetFace(FaceIndex, Face.mIndices[0], Face.mIndices[1], Face.mIndices[2]);
-			}
-
-			for (uint32_t VIndex = 0u; VIndex < Mesh->mNumVertices; ++VIndex)
-			{
-				const auto& Position = Mesh->mVertices[VIndex];
-				MeshDataBlock.SetPosition(VIndex, Math::Vector3(Position.x, Position.y, Position.z));
-
-				if (Mesh->HasNormals())
-				{
-					const auto& Normal = Mesh->mNormals[VIndex];
-					MeshDataBlock.SetNormal(VIndex, Math::Vector3(Normal.x, Normal.y, Normal.z));
-				}
-				if (Mesh->HasTangentsAndBitangents())
-				{
-					const auto& Tangent = Mesh->mTangents[VIndex];
-					MeshDataBlock.SetTangent(VIndex, Math::Vector3(Tangent.x, Tangent.y, Tangent.z));
-
-					const auto& Bitangent = Mesh->mBitangents[VIndex];
-					MeshDataBlock.SetBitangent(VIndex, Math::Vector3(Bitangent.x, Bitangent.y, Bitangent.z));
-				}
-
-				if (Mesh->HasTextureCoords(0u))
-				{
-					const auto& UV = Mesh->mTextureCoords[0u][VIndex];
-					MeshDataBlock.SetUV0(VIndex, Math::Vector3(UV.x, UV.y, UV.z));
-				}
-				if (Mesh->HasTextureCoords(1))
-				{
-					const auto& UV = Mesh->mTextureCoords[1u][VIndex];
-					MeshDataBlock.SetUV0(VIndex, Math::Vector3(UV.x, UV.y, UV.z));
-				}
-
-				if (Mesh->HasVertexColors(0u))
-				{
-					const auto& Color = Mesh->mColors[0u][VIndex];
-					MeshDataBlock.SetColor(VIndex, Math::Color(Color.r, Color.g, Color.b, Color.a));
-				}
-			}
-
-			if (Mesh->HasBones())
-			{
-				assert(false);
-			}
-			else
-			{
-				AssimpScene.Graph.GetNode(GraphNodeID).SetDataIndex(static_cast<uint32_t>(AssimpScene.Data.StaticMeshes.size()));
-				AssimpScene.Data.StaticMeshes.emplace_back(std::make_shared<StaticMesh>(MeshDataBlock, Mesh->mMaterialIndex));
 			}
 		}
 	}

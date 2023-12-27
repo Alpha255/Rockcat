@@ -25,6 +25,7 @@
                                 "m_Masks": 0,
                                 "m_Alive": true,
                                 "m_Visible": true,
+                                "m_Selected": false,
                                 "m_Name": "nodes[0]"
                             },
                             {
@@ -32,19 +33,20 @@
                                     "m_Index": 0
                                 },
                                 "m_Child": {
-                                    "m_Index": 2
+                                    "m_Index": 4294967295
                                 },
                                 "m_Sibling": {
-                                    "m_Index": 4294967295
+                                    "m_Index": 2
                                 },
                                 "m_Masks": 0,
                                 "m_Alive": true,
                                 "m_Visible": true,
+                                "m_Selected": false,
                                 "m_Name": "nodes[1]"
                             },
                             {
                                 "m_Parent": {
-                                    "m_Index": 1
+                                    "m_Index": 0
                                 },
                                 "m_Child": {
                                     "m_Index": 4294967295
@@ -52,9 +54,10 @@
                                 "m_Sibling": {
                                     "m_Index": 4294967295
                                 },
-                                "m_Masks": 1,
+                                "m_Masks": 0,
                                 "m_Alive": true,
                                 "m_Visible": true,
+                                "m_Selected": false,
                                 "m_Name": "Mesh"
                             }
                         ],
