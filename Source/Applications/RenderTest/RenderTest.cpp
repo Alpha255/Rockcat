@@ -2,7 +2,9 @@
 #include "Runtime/Core/Main.h"
 #include "Runtime/Engine/Scene/Scene.h"
 #include "Runtime/Engine/Asset/GlobalShaders/DefaultShading.h"
-//#include <Submodules/imgui/imgui.h>
+#include "Runtime/Engine/Application/ApplicationConfigurations.h"
+#include "Runtime/Engine/Rendering/RenderGraph/ForwardRenderingPath.h"
+#include "Runtime/Engine/Services/RenderService.h"
 
 void RenderTest::OnInitialize()
 {
@@ -31,6 +33,25 @@ void RenderTest::OnInitialize()
 	}
 	
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");
+
+	auto& GfxSettings = GetConfigurations().GetGraphicsSettings();
+
+	switch (GfxSettings.RenderingPath)
+	{
+	case ERenderingPath::ForwardRendering:
+		m_RenderGraph = std::make_shared<ForwardRenderingPath>(RenderService::Get().GetRHIInterface(GfxSettings.RenderHardwareInterface), *m_Scene);
+		break;
+	case ERenderingPath::DeferredShading:
+		break;
+	case ERenderingPath::DeferredLighting:
+		break;
+	}
+	m_RenderGraph->Setup();
+}
+
+void RenderTest::OnRenderFrame()
+{
+	m_RenderGraph->Execute();
 }
 
 #if 0

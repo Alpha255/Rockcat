@@ -162,60 +162,61 @@ private:
 		AssimpScene.Data.Materials.resize(AiScene->mNumMaterials);
 		for (uint32_t Index = 0u; Index < AiScene->mNumMaterials; ++Index)
 		{
-			if (auto Material = AiScene->mMaterials[Index])
+			if (auto AiMaterial = AiScene->mMaterials[Index])
 			{
 				aiString Name;
-				Material->Get(AI_MATKEY_NAME, Name);
+				AiMaterial->Get(AI_MATKEY_NAME, Name);
 
 				aiString AlphaMode;
-				Material->Get(AI_MATKEY_GLTF_ALPHAMODE, AlphaMode);
+				AiMaterial->Get(AI_MATKEY_GLTF_ALPHAMODE, AlphaMode);
 
 				aiShadingMode ShadingMode = aiShadingMode_Unlit;
-				Material->Get(AI_MATKEY_SHADING_MODEL, ShadingMode);
+				AiMaterial->Get(AI_MATKEY_SHADING_MODEL, ShadingMode);
 
 				aiColor4D BaseColor(1.0f, 1.0f, 1.0f, 1.0f);
-				Material->Get(AI_MATKEY_BASE_COLOR, BaseColor);
+				AiMaterial->Get(AI_MATKEY_BASE_COLOR, BaseColor);
 
 				aiColor4D DiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-				Material->Get(AI_MATKEY_COLOR_DIFFUSE, DiffuseColor);
+				AiMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, DiffuseColor);
 
 				aiColor4D SpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
-				Material->Get(AI_MATKEY_COLOR_SPECULAR, SpecularColor);
+				AiMaterial->Get(AI_MATKEY_COLOR_SPECULAR, SpecularColor);
 
 				aiColor4D EmissiveColor(1.0f, 1.0f, 1.0f, 1.0f);
-				Material->Get(AI_MATKEY_COLOR_EMISSIVE, EmissiveColor);
+				AiMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, EmissiveColor);
 
 				aiColor4D TransparentColor(1.0f, 1.0f, 1.0f, 1.0f);
-				Material->Get(AI_MATKEY_COLOR_TRANSPARENT, TransparentColor);
+				AiMaterial->Get(AI_MATKEY_COLOR_TRANSPARENT, TransparentColor);
 
 				aiColor4D ReflectiveColor(1.0f, 1.0f, 1.0f, 1.0f);
-				Material->Get(AI_MATKEY_COLOR_REFLECTIVE, ReflectiveColor);
+				AiMaterial->Get(AI_MATKEY_COLOR_REFLECTIVE, ReflectiveColor);
 
 				ai_real MetallicFactor = 1.0f;
-				Material->Get(AI_MATKEY_METALLIC_FACTOR, MetallicFactor);
+				AiMaterial->Get(AI_MATKEY_METALLIC_FACTOR, MetallicFactor);
 
 				ai_real RoughnessFactor = 1.0f;
-				Material->Get(AI_MATKEY_ROUGHNESS_FACTOR, RoughnessFactor);
+				AiMaterial->Get(AI_MATKEY_ROUGHNESS_FACTOR, RoughnessFactor);
 
 				ai_real GlossinessFactor = 1.0f;
-				Material->Get(AI_MATKEY_GLOSSINESS_FACTOR, GlossinessFactor);
+				AiMaterial->Get(AI_MATKEY_GLOSSINESS_FACTOR, GlossinessFactor);
 
 				ai_real SpecularFactor = 1.0f;
-				Material->Get(AI_MATKEY_SPECULAR_FACTOR, SpecularFactor);
+				AiMaterial->Get(AI_MATKEY_SPECULAR_FACTOR, SpecularFactor);
 
 				ai_real Opacity = 1.0f;
-				Material->Get(AI_MATKEY_OPACITY, Opacity);
+				AiMaterial->Get(AI_MATKEY_OPACITY, Opacity);
 
 				ai_real Shininess = 1.0f;
-				Material->Get(AI_MATKEY_SHININESS, Shininess);
+				AiMaterial->Get(AI_MATKEY_SHININESS, Shininess);
 
 				ai_real AlphaCutoff = 0.0f;
-				Material->Get(AI_MATKEY_GLTF_ALPHACUTOFF, AlphaCutoff);
+				AiMaterial->Get(AI_MATKEY_GLTF_ALPHACUTOFF, AlphaCutoff);
 
 				bool8_t TwoSided = false;
-				Material->Get(AI_MATKEY_TWOSIDED, TwoSided);
+				AiMaterial->Get(AI_MATKEY_TWOSIDED, TwoSided);
 
 				auto MaterialAssetName = (AssimpScene.GetPath().stem() / Name.C_Str()).u8string();
+				auto& Material = AssimpScene.Data.Materials.at(Index);
 
 				switch (ShadingMode)
 				{
@@ -223,24 +224,24 @@ private:
 				case aiShadingMode_Gouraud:
 				case aiShadingMode_Phong:
 				case aiShadingMode_Blinn:
-					AssimpScene.Data.Materials[Index] = MaterialAsset::Load<MaterialLit>(Index, EShadingMode::BlinnPhong, MaterialAssetName.c_str());
+					Material = MaterialAsset::Load<MaterialLit>(Index, EShadingMode::BlinnPhong, MaterialAssetName.c_str());
 					break;
 				case aiShadingMode_Toon:
-					AssimpScene.Data.Materials[Index] = MaterialAsset::Load<MaterialToon>(Index, MaterialAssetName.c_str());
+					Material = MaterialAsset::Load<MaterialToon>(Index, MaterialAssetName.c_str());
 					break;
 				case aiShadingMode_OrenNayar:
 				case aiShadingMode_Minnaert:
 				case aiShadingMode_CookTorrance:
 				case aiShadingMode_Fresnel:
 				case aiShadingMode_PBR_BRDF:
-					AssimpScene.Data.Materials[Index] = MaterialAsset::Load<MaterialLit>(Index, EShadingMode::StandardPBR, MaterialAssetName.c_str());
+					Material = MaterialAsset::Load<MaterialLit>(Index, EShadingMode::StandardPBR, MaterialAssetName.c_str());
 					break;
 				case aiShadingMode_NoShading:
-					AssimpScene.Data.Materials[Index] = MaterialAsset::Load<MaterialUnlit>(Index, MaterialAssetName.c_str());
+					Material = MaterialAsset::Load<MaterialUnlit>(Index, MaterialAssetName.c_str());
 					break;
 				}
 
-				ProcessTextures(Material, AssimpScene.Data.Materials[Index].get(), AssimpScene.GetPath().parent_path());
+				ProcessTextures(AiMaterial, Material.get(), AssimpScene.GetPath().parent_path());
 			}
 			else
 			{

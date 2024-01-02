@@ -33,6 +33,11 @@ VulkanRHI::~VulkanRHI()
 	LOG_INFO("VulkanRHI: Finalized");
 }
 
+RHIDevice& VulkanRHI::GetDevice()
+{
+	return *m_Device;
+}
+
 #if 0
 VulkanRenderer::VulkanRenderer(const RenderSettings* Settings, uint64_t WindowHandle)
 	: IRenderer(Settings)

@@ -18,6 +18,11 @@ D3D12RHI::~D3D12RHI()
 {
 }
 
+RHIDevice& D3D12RHI::GetDevice()
+{
+	return *m_Device;
+}
+
 void D3D12RHI::InitializeGraphicsDevices()
 {
 #if defined(_DEBUG)

@@ -12,6 +12,8 @@ public:
 
 	ERenderHardwareInterface GetRHIType() const override final { return ERenderHardwareInterface::Vulkan; }
 
+	RHIDevice& GetDevice() override final;
+
 	static const struct VulkanLayerExtensionConfigurations& GetLayerExtensionConfigs() { return *s_LayerExtensionConfigs; }
 protected:
 	void InitializeGraphicsDevices() override final;

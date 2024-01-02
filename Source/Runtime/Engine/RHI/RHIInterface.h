@@ -2,6 +2,7 @@
 
 #include "Runtime/Core/Definitions.h"
 #include "Runtime/Engine/Application/GraphicsSettings.h"
+#include "Runtime/Engine/RHI/RHIDevice.h"
 
 /// <summary>
 /// ****  Front face CCW
@@ -37,9 +38,11 @@ public:
 		} 
 	}
 
-	static const GraphicsSettings* GetGraphicsSettings() { assert(s_GraphicsSettings); return s_GraphicsSettings; }
+	static const GraphicsSettings& GetGraphicsSettings() { assert(s_GraphicsSettings); return *s_GraphicsSettings; }
 
-	const char8_t* GetRHIName() const { return GetRHIName(GetRHIType()); }
+	const char8_t* GetName() const { return GetRHIName(GetRHIType()); }
+
+	virtual RHIDevice& GetDevice() = 0;
 protected:
 	virtual void InitializeGraphicsDevices() = 0;
 private:

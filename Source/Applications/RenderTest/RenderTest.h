@@ -9,6 +9,8 @@ public:
 protected:
 	void OnInitialize() override final;
 	void OnGUI(class Canvas&) override final {}
+	void OnRenderFrame() override final;
 private:
 	std::shared_ptr<class Scene> m_Scene;
+	std::shared_ptr<class RenderGraph> m_RenderGraph;
 };

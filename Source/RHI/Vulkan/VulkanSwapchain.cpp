@@ -34,9 +34,9 @@ VulkanSwapchain::VulkanSwapchain(const VulkanDevice& Device, const void* WindowH
 	//, m_PresentComplete(std::move(std::make_unique<VulkanSemaphore>(Device)))
 {
 	auto GfxSettings = RHIInterface::GetGraphicsSettings();
-	m_VSync = GfxSettings->VSync;
-	m_Fullscreen = GfxSettings->FullScreen;
-	m_ColorFormat = GfxSettings->SRGBSwapchain ? vk::Format::eR8G8B8A8Srgb : vk::Format::eR8G8B8A8Unorm;
+	m_VSync = VulkanRHI::GetGraphicsSettings().VSync;
+	m_Fullscreen = VulkanRHI::GetGraphicsSettings().FullScreen;
+	m_ColorFormat = VulkanRHI::GetGraphicsSettings().SRGBSwapchain ? vk::Format::eR8G8B8A8Srgb : vk::Format::eR8G8B8A8Unorm;
 
 	Create(true);
 }

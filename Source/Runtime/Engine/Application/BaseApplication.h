@@ -13,7 +13,7 @@ public:
 
 	virtual void OnStartup();
 
-	virtual void OnRenderFrame();
+	virtual void OnRenderFrame() {}
 
 	virtual void OnShutdown() {}
 

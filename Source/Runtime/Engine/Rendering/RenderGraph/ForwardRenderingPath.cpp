@@ -7,9 +7,9 @@
 
 void ForwardRenderingPath::Setup()
 {
-	auto& PreDepthNode = AddPass<PreDepthPass>();
-	auto& ShadowNode = AddPass<ShadowPass>();
-	auto& OpaqueNode = AddPass<OpaquePass>();
-	auto& TranslucentNode = AddPass<TranslucentPass>();
-	auto& FinalBlitNode = AddPass<BlitPass>();
+	this->AddPass<PreDepthPass>()
+		.AddPass<ShadowPass>()
+		.AddPass<OpaquePass>()
+		.AddPass<TranslucentPass>()
+		.AddPass<BlitPass>();
 }

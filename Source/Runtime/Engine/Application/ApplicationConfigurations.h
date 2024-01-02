@@ -13,7 +13,6 @@ public:
 	bool8_t IsEnableRendering() const { return m_EnableRendering; }
 	const WindowCreateInfo& GetWindowCreateInfo() const { return m_WindowCreateInfo; }
 	const GraphicsSettings& GetGraphicsSettings() const { return m_GraphicsSettings; }
-	GraphicsSettings& GetGraphicsSettings() { return m_GraphicsSettings; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)

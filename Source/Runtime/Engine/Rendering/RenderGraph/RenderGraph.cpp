@@ -1,13 +1,14 @@
 #include "Runtime/Engine/Rendering/RenderGraph/RenderGraph.h"
 #include "Runtime/Engine/Rendering/RenderGraph/ResourceManager.h"
 #include "Runtime/Engine/Rendering/RenderGraph/RenderGraphCompiler.h"
+#include "Runtime/Engine/RHI/RHIInterface.h"
 #include "Runtime/Engine/RHI/RHIDevice.h"
 #include "Runtime/Engine/Scene/Scene.h"
 
-RenderGraph::RenderGraph(RHIDevice& RenderDevice, Scene& RenderScene)
-	: m_RenderDevice(RenderDevice)
+RenderGraph::RenderGraph(RHIInterface& RHI, Scene& RenderScene)
+	: m_RenderDevice(RHI.GetDevice())
 	, m_RenderScene(RenderScene)
-	, m_ResourceMgr(std::move(std::make_unique<ResourceManager>(RenderDevice, m_Graph)))
+	, m_ResourceMgr(std::move(std::make_shared<ResourceManager>(RHI.GetDevice(), m_Graph)))
 {
 }
 

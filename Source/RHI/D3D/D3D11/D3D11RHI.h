@@ -11,7 +11,10 @@ public:
 	~D3D11RHI();
 
 	ERenderHardwareInterface GetRHIType() const override final { return ERenderHardwareInterface::D3D11; }
+
+	RHIDevice& GetDevice() override final;
 protected:
 	void InitializeGraphicsDevices() override final;
 private:
+	std::unique_ptr<class D3D11Device> m_Device;
 };

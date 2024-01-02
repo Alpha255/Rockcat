@@ -5,15 +5,15 @@
 class RenderGraph
 {
 public:
-	RenderGraph(class RHIDevice& RenderDevice, class Scene& RenderScene);
+	RenderGraph(class RHIInterface& RHI, class Scene& RenderScene);
 
 	template<class TPass>
-	TPass& AddPass()
+	RenderGraph& AddPass()
 	{
 		auto GraphNodeID = m_Graph.AddNode();
 		auto Pass = std::make_shared<TPass>(GraphNodeID, *m_ResourceMgr);
 		m_RenderPasses.insert(std::make_pair(GraphNodeID, Pass));
-		return *Pass;
+		return *this;
 	}
 
 	void Execute();
@@ -29,6 +29,6 @@ private:
 	DirectedAcyclicGraph m_Graph;
 	class RHIDevice& m_RenderDevice;
 	const class Scene& m_RenderScene;
-	std::unique_ptr<class ResourceManager> m_ResourceMgr;
+	std::shared_ptr<class ResourceManager> m_ResourceMgr;
 	std::unordered_map<DAGNodeID, std::shared_ptr<RenderPass>> m_RenderPasses;
 };

@@ -9,6 +9,10 @@ ResourceManager::ResourceManager(RHIDevice& RenderDevice, DirectedAcyclicGraph& 
 	AllocateSceneImageFields();
 }
 
+ResourceManager::~ResourceManager()
+{
+}
+
 Field& ResourceManager::GetOrAllocateField(const char8_t* Name, Field::EVisibility Visibility, Field::EResourceType Type)
 {
 	auto It = m_Fields.find(Name);
@@ -39,7 +43,7 @@ void ResourceManager::AllocateSceneImageFields()
 	m_SceneImages.ShadowMap = GetOrAllocateField(
 		"SceneShadowMap", Field::EVisibility::None, Field::EResourceType::Image).GetNodeID();
 
-	auto RenderingPath = RHIInterface::GetGraphicsSettings()->RenderingPath;
+	auto RenderingPath = RHIInterface::GetGraphicsSettings().RenderingPath;
 	if (RenderingPath == ERenderingPath::DeferredShading || RenderingPath == ERenderingPath::DeferredLighting)
 	{
 		m_SceneImages.GBuffer.Albedo = GetOrAllocateField(

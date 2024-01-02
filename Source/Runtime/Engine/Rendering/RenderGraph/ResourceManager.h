@@ -23,6 +23,8 @@ public:
 
 	ResourceManager(class RHIDevice& RenderDevice, DirectedAcyclicGraph& Graph);
 
+	~ResourceManager();
+
 	Field& GetOrAllocateField(const char8_t* Name, Field::EVisibility Visibility, Field::EResourceType Type);
 
 	const SceneImages& GetSceneImages() const { return m_SceneImages; }

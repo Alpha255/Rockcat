@@ -114,7 +114,7 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 		}
 		else
 		{
-			if (RHIInterface::GetGraphicsSettings()->BatchResourceDataTransfer)
+			if (RHIInterface::GetGraphicsSettings().BatchResourceDataTransfer)
 			{
 			}
 			else

@@ -100,7 +100,7 @@ VulkanImage::VulkanImage(const VulkanDevice& Device, const RHIImageCreateInfo& C
 			.setInitialLayout(vk::ImageLayout::eUndefined);
 		VERIFY_VK(GetNativeDevice().createImage(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
-		if (RHIInterface::GetGraphicsSettings()->BatchResourceDataTransfer)
+		if (RHIInterface::GetGraphicsSettings().BatchResourceDataTransfer)
 		{
 		}
 		else

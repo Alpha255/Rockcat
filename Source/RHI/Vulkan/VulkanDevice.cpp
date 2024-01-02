@@ -519,11 +519,11 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 	LogEnabledLayerAndExtensions(WantedLayers, WantedExtensions, "device");
 
 	std::set<uint32_t> QueueFamilyIndices{ GraphicsQueueIndex, PresentQueueIndex };
-	if (VulkanRHI::GetGraphicsSettings()->EnableComputeQueue)
+	if (VulkanRHI::GetGraphicsSettings().EnableComputeQueue)
 	{
 		QueueFamilyIndices.insert(ComputeQueueIndex);
 	}
-	if (VulkanRHI::GetGraphicsSettings()->EnableTransferQueue)
+	if (VulkanRHI::GetGraphicsSettings().EnableTransferQueue)
 	{
 		QueueFamilyIndices.insert(TransferQueueIndex);
 	}

@@ -21,6 +21,8 @@ private:
 	const MeshPass::MeshDrawCommand* m_Command;
 };
 
+std::vector<MeshPass::MeshDrawCommand> MeshPass::s_Commands;
+
 void MeshPass::Execute(RHIDevice& RenderDevice, const Scene& RenderScene)
 {
 	GenerateMeshDrawCommands(RenderScene);
@@ -59,8 +61,7 @@ void MeshPass::GenerateMeshDrawCommands(const Scene& RenderScene)
 			NewCommand.IsSelected = Node->IsSelected();
 			s_Commands.emplace_back(std::move(NewCommand));
 		}
-
-		if (Node->IsSkeletalMesh())
+		else if (Node->IsSkeletalMesh())
 		{
 			// TODO
 		}

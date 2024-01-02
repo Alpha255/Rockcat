@@ -5,17 +5,10 @@
 class RenderPass
 {
 public:
-	RenderPass(DAGNodeID ID, const char8_t* Name, class ResourceManager& ResourceMgr)
-		: m_NodeID(ID)
-		, m_Name(Name)
-		, m_ResourceMgr(ResourceMgr)
-	{
-		assert(Name);
-	}
+	RenderPass(DAGNodeID ID, const char8_t* Name, class ResourceManager& ResourceMgr);
 
 	const char8_t* GetName() const { return m_Name.data(); }
 
-	class ResourceManager& GetResourceManager() { return m_ResourceMgr; }
 	const std::vector<RenderPassField>& GetFields() const { return m_Fields; }
 	DAGNodeID GetNodeID() const { return m_NodeID; }
 
@@ -24,6 +17,8 @@ public:
 	virtual void Execute(class RHIDevice&, const class Scene&) = 0;
 
 	virtual void OnGUI() {};
+protected:
+	class ResourceManager& GetResourceManager() { return m_ResourceMgr; }
 private:
 	DAGNodeID m_NodeID;
 	std::string_view m_Name;

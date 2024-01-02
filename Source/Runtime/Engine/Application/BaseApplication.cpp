@@ -164,10 +164,6 @@ void BaseApplication::OnWindowCreation()
 	}
 }
 
-void BaseApplication::OnRenderFrame()
-{
-}
-
 void BaseApplication::Tick(float32_t /*ElapsedSeconds*/)
 {
 	if (m_Window)
