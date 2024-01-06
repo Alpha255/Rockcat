@@ -3,15 +3,15 @@
 #include "Runtime/Engine/RHI/RHIRenderStates.h"
 #include "Runtime/Engine/RHI/RHIImage.h"
 
-template<class RHIState>
-class RHIStaticState : public RHIResource
+template<class RHIResource>
+class RHIStaticResource : public RHIResource
 {
 protected:
-	static std::shared_ptr<RHIState> s_RHIState;
+	static std::shared_ptr<RHIResource> s_Resource;
 };
 
-template<class RHIState>
-std::shared_ptr<RHIState> RHIStaticState<RHIState>::s_RHIState;
+template<class RHIResource>
+std::shared_ptr<RHIResource> RHIStaticResource<RHIResource>::s_Resource;
 
 template<
 	ERHIFilter MinMagFilter = ERHIFilter::Nearest,
@@ -26,12 +26,12 @@ template<
 class RHISamplerStatic : public RHIStaticState<RHISampler>
 {
 public:
-	static RHISamplerPtr Get(RHIDevice* Device)
+	static RHISamplerPtr Get(const RHIDevice& Device)
 	{
-		if (!s_RHIState)
+		if (!s_Resource)
 		{
-			RHISamplerCreateInfo CreateInfo;
-			CreateInfo.SetMinMagFilter(MinMagFilter)
+			RHISamplerCreateInfo RHICreateInfo;
+			RHICreateInfo.SetMinMagFilter(MinMagFilter)
 				.SetMipmapMode(MipmapMode)
 				.SetSamplerReduction(Reduction)
 				.SetAddressModeU(AddressModeU)
@@ -43,8 +43,9 @@ public:
 				.SetMipLODBias(0.0f)
 				.SetMinLOD(0.0f)
 				.SetMaxLOD(0.0f);
-			s_RHIState = Device->CreateSampler(CreateInfo);
+			s_Resource = Device.CreateSampler(RHICreateInfo);
 		}
+		return s_Resource;
 	}
 };
 
@@ -65,13 +66,13 @@ template<
 	ERHICullMode CullMode = ERHICullMode::BackFace,
 	ERHIFrontFace FrontFace = ERHIFrontFace::Clockwise,
 	bool8_t EnableDepthClamp = false>
-class RHIRasterizationStateStatic : public RHIStaticState<RHIRasterizationState>
+class RHIRasterizationStateStatic : public RHIStaticResource<RHIRasterizationState>
 {
 public:
-	static std::shared_ptr<RHIRasterizationState> Get(RHIDevice* Device)
+	static std::shared_ptr<RHIRasterizationState> Get(const RHIDevice& Device)
 	{
-		RHIRasterizationStateCreateInfo CreateInfo;
-		CreateInfo.SetPolygonMode(PolygonMode)
+		RHIRasterizationStateCreateInfo RHICreateInfo;
+		RHICreateInfo.SetPolygonMode(PolygonMode)
 			.SetCullMode(CullMode)
 			.SetFrontFace(FrontFace)
 			.SetEnableDepthClamp(EnableDepthClamp);

@@ -4,12 +4,12 @@
             "class MaterialAsset": {
                 "class SerializableAsset<class MaterialAsset>": {
                     "class Asset": {
-                        "m_LastWriteTime": 133481675625492511
+                        "m_LastWriteTime": 133486866560631718
                     }
                 },
                 "m_Properties": [
                     {
-                        "key": "ProjectionMatrix",
+                        "key": "ViewMatrix",
                         "value": {
                             "Value": {
                                 "index": 7,
@@ -45,7 +45,7 @@
                         }
                     },
                     {
-                        "key": "ViewMatrix",
+                        "key": "ProjectionMatrix",
                         "value": {
                             "Value": {
                                 "index": 7,
@@ -128,7 +128,7 @@
                         }
                     },
                     {
-                        "key": "MetallicRoughnessMap",
+                        "key": "NormalMap",
                         "value": {
                             "Value": {
                                 "index": 8,
@@ -139,7 +139,7 @@
                         }
                     },
                     {
-                        "key": "NormalMap",
+                        "key": "MetallicRoughnessMap",
                         "value": {
                             "Value": {
                                 "index": 8,

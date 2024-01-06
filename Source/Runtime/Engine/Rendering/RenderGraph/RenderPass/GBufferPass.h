@@ -9,4 +9,6 @@ public:
 		: MeshPass(ID, "GBufferPass", ResourceMgr, MeshPass::EMeshDrawFilter::Opaque)
 	{
 	}
+
+	void Compile() override final {}
 };

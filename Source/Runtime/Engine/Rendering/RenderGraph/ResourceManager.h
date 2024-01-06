@@ -29,7 +29,7 @@ public:
 
 	const SceneImages& GetSceneImages() const { return m_SceneImages; }
 
-	void CreateAllResources();
+	void CreateResources();
 private:
 	void AllocateSceneImageFields();
 

@@ -28,7 +28,7 @@ Field& ResourceManager::GetOrAllocateField(const char8_t* Name, Field::EVisibili
 	return *NewField;
 }
 
-void ResourceManager::CreateAllResources()
+void ResourceManager::CreateResources()
 {
 }
 

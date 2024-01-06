@@ -24,6 +24,8 @@ public:
 
 	void SetMode(EMode Mode) { m_Mode = Mode; }
 
+	void Compile() override final {}
+
 	void Execute(class RHIDevice&, const class Scene&) override final {}
 protected:
 private:

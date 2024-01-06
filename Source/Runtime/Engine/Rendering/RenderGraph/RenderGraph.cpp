@@ -1,6 +1,5 @@
 #include "Runtime/Engine/Rendering/RenderGraph/RenderGraph.h"
 #include "Runtime/Engine/Rendering/RenderGraph/ResourceManager.h"
-#include "Runtime/Engine/Rendering/RenderGraph/RenderGraphCompiler.h"
 #include "Runtime/Engine/RHI/RHIInterface.h"
 #include "Runtime/Engine/RHI/RHIDevice.h"
 #include "Runtime/Engine/Scene/Scene.h"
@@ -16,7 +15,10 @@ void RenderGraph::Compile()
 {
 	if (m_NeedRecompile)
 	{
-		RenderGraphCompiler(*this).Compile();
+		for (auto& Pass : m_RenderPasses)
+		{
+			Pass->Compile();
+		}
 
 		m_NeedRecompile = false;
 	}
@@ -26,5 +28,10 @@ void RenderGraph::Execute()
 {
 	Compile();
 
-	m_ResourceMgr->CreateAllResources();
+	m_ResourceMgr->CreateResources();
+
+	for (auto& Pass : m_RenderPasses)
+	{
+		Pass->Execute(m_RenderDevice, m_RenderScene);
+	}
 }

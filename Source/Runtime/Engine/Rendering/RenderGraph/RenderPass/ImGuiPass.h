@@ -9,6 +9,8 @@ public:
 
 	~ImGUIPass();
 
+	void Compile() override final {}
+
 	void Execute(class RHIDevice&, const class Scene&) override final {}
 protected:
 private:

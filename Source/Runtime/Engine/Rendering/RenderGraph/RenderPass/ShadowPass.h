@@ -6,6 +6,8 @@ class ShadowPass : public MeshPass
 {
 public:
 	ShadowPass(DAGNodeID ID, class ResourceManager& ResourceMgr);
+
+	void Compile() override final {}
 protected:
 private:
 };

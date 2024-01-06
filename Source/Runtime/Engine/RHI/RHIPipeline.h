@@ -10,8 +10,7 @@ struct RHIGraphicsPipelineCreateInfo
 	RHIDepthStencilStateCreateInfo DepthStencilState;
 	RHIMultisampleStateCreateInfo MultisampleState;
 
-	RHIInputLayout* InputLayout = nullptr;
-	RHIFrameBuffer* FrameBuffer = nullptr;
+	inline RHIGraphicsPipelineCreateInfo& SetPrimitiveTopology(ERHIPrimitiveTopology Topology) { PrimitiveTopology = Topology; return *this; }
 };
 
 struct RHIComputePipelineCreateInfo

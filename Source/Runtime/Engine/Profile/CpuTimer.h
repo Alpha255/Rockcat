@@ -13,7 +13,7 @@ public:
 		m_LastTime = std::chrono::high_resolution_clock::now();
 	}
 
-	inline float32_t ElapsedMilliseconds()
+	inline float32_t GetElapsedMilliseconds()
 	{
 		if (m_State == EState::Tick)
 		{
@@ -26,7 +26,7 @@ public:
 		return 0.0;
 	}
 
-	inline float32_t ElapsedSeconds()
+	inline float32_t GetElapsedSeconds()
 	{
 		if (m_State == EState::Tick)
 		{

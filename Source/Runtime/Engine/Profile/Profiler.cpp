@@ -1,3 +1,41 @@
+#include "Runtime/Engine/Profile/Profiler.h"
+#include "Runtime/Engine/RHI/RHIDevice.h"
+
+Profiler::Event::Event(const char8_t* Name, EEventFlags Flags)
+	: m_Name(Name)
+	, m_Flags(Flags)
+{
+}
+
+void Profiler::Event::Start(RHIDevice& Device)
+{
+}
+
+void Profiler::Event::Stop(RHIDevice& Device)
+{
+}
+
+Profiler::Profiler(RHIDevice& Device, bool8_t Enabled)
+	: m_Enabled(Enabled)
+	, m_Device(Device)
+{
+}
+
+void Profiler::Tick(float32_t ElapsedSeconds)
+{
+}
+
+Profiler::ScopedEvent Profiler::ScopeEvent(const char8_t* Name, EEventFlags Flags)
+{
+	auto It = m_Events.find(Name);
+	if (It == m_Events.end())
+	{
+		It = m_Events.insert(std::make_pair(std::string_view(Name), std::make_shared<Event>(Name, Flags))).first;
+	}
+
+	return ScopedEvent(*It->second, m_Device);
+}
+
 #if 0
 
 #include "Colorful/IRenderer/Profiler.h"
@@ -6,38 +44,6 @@ NAMESPACE_START(RHI)
 
 namespace Profiler
 {
-	void Stats::Event::Start()
-	{
-		m_CpuStopWatch.Start();
-		m_GpuStopWatch.Start();
-	}
-
-	void Stats::Event::Stop()
-	{
-		m_CpuStopWatch.Stop();
-		m_GpuStopWatch.Stop();
-
-		m_CpuTime = m_CpuStopWatch.ElapsedMilliseconds();
-		m_GpuTime = m_GpuStopWatch.ElapsedMilliseconds();
-	}
-
-	Stats& Stats::Get()
-	{
-		static Stats Instance;
-		return Instance;
-	}
-
-	Stats::ScopedEvent Stats::CreateScopedEvent(const char8_t* Name)
-	{
-		auto& Scope = m_Events[Name];
-		if (!Scope)
-		{
-			Scope = std::move(std::make_shared<Event>(Name));
-		}
-
-		return ScopedEvent(Scope.get());
-	}
-
 	void Stats::Tick(float32_t ElapsedSeconds)
 	{
 		m_TotalTime += ElapsedSeconds;

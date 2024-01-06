@@ -10,9 +10,7 @@ public:
 	template<class TPass>
 	RenderGraph& AddPass()
 	{
-		auto GraphNodeID = m_Graph.AddNode();
-		auto Pass = std::make_shared<TPass>(GraphNodeID, *m_ResourceMgr);
-		m_RenderPasses.insert(std::make_pair(GraphNodeID, Pass));
+		m_RenderPasses.emplace_back(std::make_shared<TPass>(m_Graph.AddNode(), *m_ResourceMgr));
 		return *this;
 	}
 
@@ -30,5 +28,5 @@ private:
 	class RHIDevice& m_RenderDevice;
 	const class Scene& m_RenderScene;
 	std::shared_ptr<class ResourceManager> m_ResourceMgr;
-	std::unordered_map<DAGNodeID, std::shared_ptr<RenderPass>> m_RenderPasses;
+	std::vector<std::shared_ptr<RenderPass>> m_RenderPasses;
 };

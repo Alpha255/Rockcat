@@ -9,4 +9,6 @@ public:
 		: MeshPass(ID, "PreDepthPass", ResourceMgr, MeshPass::EMeshDrawFilter::All)
 	{
 	}
+
+	void Compile() override final;
 };

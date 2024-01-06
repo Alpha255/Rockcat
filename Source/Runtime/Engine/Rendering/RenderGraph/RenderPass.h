@@ -14,6 +14,8 @@ public:
 
 	Field& RegisterField(const char8_t* Name, Field::EVisibility Visibility, Field::EResourceType Type);
 
+	virtual void Compile() = 0;
+
 	virtual void Execute(class RHIDevice&, const class Scene&) = 0;
 
 	virtual void OnGUI() {};

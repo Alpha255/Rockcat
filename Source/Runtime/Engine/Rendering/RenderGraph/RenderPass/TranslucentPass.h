@@ -9,4 +9,6 @@ public:
 		: MeshPass(ID, "TranslucentPass", ResourceMgr, MeshPass::EMeshDrawFilter::Translucent)
 	{
 	}
+
+	void Compile() override final {}
 };
