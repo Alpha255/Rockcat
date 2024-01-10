@@ -107,8 +107,6 @@ VulkanPipeline::VulkanPipeline(const VulkanDevice& Device)
 VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::PipelineCache PipelineCache, const RHIGraphicsPipelineCreateInfo& CreateInfo)
 	: VulkanPipeline(Device)
 {
-	assert(CreateInfo.FrameBuffer);
-
 	std::vector<vk::PipelineShaderStageCreateInfo> ShaderStageCreateInfos;
 	//CreateInfo.Shaders.ForEach([&ShaderStageCreateInfos](RHIShader* Shader) {
 	//	ShaderStageCreateInfos.emplace_back(

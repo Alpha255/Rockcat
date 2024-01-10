@@ -51,7 +51,7 @@ void RenderTest::OnInitialize()
 
 void RenderTest::OnRenderFrame()
 {
-	m_RenderGraph->Execute();
+	//m_RenderGraph->Execute();
 }
 
 #if 0
@@ -69,4 +69,11 @@ void RenderTest::OnRenderGUI()
 }
 #endif
 
+class RenderTest2 final : public BaseApplication
+{
+public:
+	using BaseApplication::BaseApplication;
+};
+
 REGISTER_APPLICATION(RenderTest, "RenderTest.json")
+REGISTER_APPLICATION(RenderTest2, "RenderTest2.json")

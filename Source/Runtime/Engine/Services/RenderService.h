@@ -2,7 +2,6 @@
 
 #include "Runtime/Core/Module.h"
 #include "Runtime/Engine/RHI/RHIInterface.h"
-#include "Runtime/Engine/Application/GraphicsSettings.h"
 
 class RenderService : public IService<RenderService>
 {

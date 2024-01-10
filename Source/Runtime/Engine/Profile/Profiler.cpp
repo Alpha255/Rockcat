@@ -21,6 +21,15 @@ Profiler::Profiler(RHIDevice& Device, bool8_t Enabled)
 {
 }
 
+void Profiler::OnStartup()
+{
+}
+
+void Profiler::Event::SetFlags(EEventFlags Flags)
+{ 
+	m_Flags = m_Flags | Flags;
+}
+
 void Profiler::Tick(float32_t ElapsedSeconds)
 {
 }
@@ -30,7 +39,12 @@ Profiler::ScopedEvent Profiler::ScopeEvent(const char8_t* Name, EEventFlags Flag
 	auto It = m_Events.find(Name);
 	if (It == m_Events.end())
 	{
-		It = m_Events.insert(std::make_pair(std::string_view(Name), std::make_shared<Event>(Name, Flags))).first;
+		auto NewEvent = std::make_shared<Event>(Name, Flags);
+		It = m_Events.insert(std::make_pair(std::string_view(NewEvent->GetName()), NewEvent)).first;
+	}
+	else
+	{
+		It->second->SetFlags(Flags);
 	}
 
 	return ScopedEvent(*It->second, m_Device);

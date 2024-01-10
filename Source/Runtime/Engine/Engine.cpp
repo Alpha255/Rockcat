@@ -2,7 +2,7 @@
 #include "Runtime/Core/PlatformMisc.h"
 #include "Runtime/Engine/Application/BaseApplication.h"
 #include "Runtime/Engine/Application/ApplicationConfigurations.h"
-#include "Runtime/Engine/Profile/CpuTimer.h"
+#include "Runtime/Engine/Profile/Profiler.h"
 #include "Runtime/Engine/Services/SpdLogService.h"
 #include "Runtime/Engine/Services/RenderService.h"
 #include "Runtime/Engine/Services/TaskFlowService.h"
@@ -46,7 +46,11 @@ void Engine::Run()
 
 		for (auto& Application : m_Applications)
 		{
+			//PROFILE_EVENT("%s.Frame", Application->GetConfigurations().GetWindowCreateInfo().Title.c_str());
+
 			Application->Tick(0.0f);
+
+			Application->OnRenderFrame();
 		}
 	}
 
