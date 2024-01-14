@@ -144,6 +144,7 @@ Application::~Application()
 #include "Runtime/Engine/Application/BaseApplication.h"
 #include "Runtime/Engine/Application/ApplicationConfigurations.h"
 #include "Runtime/Core/Window.h"
+#include "Runtime/Engine/Services/RenderService.h"
 
 BaseApplication::BaseApplication(const char8_t* ConfigurationName)
 { 
@@ -177,7 +178,17 @@ const ApplicationConfigurations& BaseApplication::GetConfigurations() const
 	return *m_Configs;
 }
 
+const GraphicsSettings& BaseApplication::GetGraphicsSettings() const
+{
+	return m_Configs->GetGraphicsSettings();
+}
+
 bool8_t BaseApplication::IsRequestingQuit() const
 {
 	return m_Window ? m_Window->IsDestroyed() : false;
+}
+
+RHIInterface& BaseApplication::GetRHI()
+{
+	return RenderService::Get().GetRHIInterface(m_Configs->GetGraphicsSettings().RenderHardwareInterface);
 }

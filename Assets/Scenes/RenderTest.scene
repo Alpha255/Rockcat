@@ -54,7 +54,7 @@
                                 "m_Sibling": {
                                     "m_Index": 4294967295
                                 },
-                                "m_Masks": 0,
+                                "m_Masks": 1,
                                 "m_Alive": true,
                                 "m_Visible": true,
                                 "m_Selected": false,

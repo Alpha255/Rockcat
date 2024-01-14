@@ -15,7 +15,7 @@ public:
 	{
 	}
 
-	void Next() { Next(Policy()); }
+	SceneNodeIterator Next() { return Next(Policy()); }
 
 	SceneNodeIterator& Get() { return m_Iterator; }
 private:
@@ -28,7 +28,7 @@ private:
 	void MoveTo(const SceneGraph::NodeID& Diff) { MoveTo(Diff.GetIndex()); }
 	void MoveTo(const SceneGraph::NodeID::IndexType Diff) { m_Iterator = std::next(m_Graph.Nodes.cbegin(), Diff); }
 
-	void Next(DepthFirst)
+	SceneNodeIterator Next(DepthFirst)
 	{
 		if (m_Iterator->HasSibling())
 		{
@@ -48,9 +48,11 @@ private:
 		{
 			m_Iterator = SceneNodeIterator();
 		}
+
+		return m_Iterator;
 	}
 
-	void Next(BreadthFirst)
+	SceneNodeIterator Next(BreadthFirst)
 	{
 		if (m_Iterator->HasChild())
 		{
@@ -70,6 +72,8 @@ private:
 		{
 			m_Iterator = SceneNodeIterator();
 		}
+
+		return m_Iterator;
 	}
 
 	const SceneGraph& m_Graph;

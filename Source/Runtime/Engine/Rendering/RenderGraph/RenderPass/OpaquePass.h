@@ -6,7 +6,7 @@ class OpaquePass : public MeshPass
 {
 public:
 	OpaquePass(DAGNodeID ID, class ResourceManager& ResourceMgr)
-		: MeshPass(ID, "OpaquePass", ResourceMgr, MeshPass::EMeshDrawFilter::Opaque)
+		: MeshPass(ID, "OpaquePass", ResourceMgr, EMeshPass::Opaque)
 	{
 	}
 

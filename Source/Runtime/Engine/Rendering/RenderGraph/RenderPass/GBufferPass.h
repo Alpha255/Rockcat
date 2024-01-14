@@ -6,7 +6,7 @@ class GeometryBufferPass : public MeshPass
 {
 public:
 	GeometryBufferPass(DAGNodeID ID, class ResourceManager& ResourceMgr)
-		: MeshPass(ID, "GBufferPass", ResourceMgr, MeshPass::EMeshDrawFilter::Opaque)
+		: MeshPass(ID, "GBufferPass", ResourceMgr, EMeshPass::Opaque)
 	{
 	}
 

@@ -7,5 +7,5 @@ class DeferredLightingPass : public RenderPass
 public:
 	DECLARE_RENDERPASS_CONSTRUCTOR(DeferredLightingPass, RenderPass)
 
-	void Execute(class RHIDevice&, const class Scene&) override final {}
+	void Execute(class RHIDevice&, const RenderScene&) override final {}
 };

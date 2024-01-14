@@ -1,6 +1,44 @@
 #pragma once
 
 #include "Runtime/Engine/Rendering/RenderGraph/RenderPassField.h"
+#include "Runtime/Core/Math/Transform.h"
+
+enum EMeshPass
+{
+	PreDepth,
+	Opaque,
+	Translucent,
+	ShadowCaster,
+	Num
+};
+
+struct MeshDrawCommand
+{
+	const class StaticMesh* Mesh = nullptr;
+	const Math::Transform* WorldTransform = nullptr;
+	uint32_t NumInstances = 1u;
+
+	bool8_t CastShadow = true;
+	bool8_t IsTranslucent = false;
+	bool8_t IsSelected = false;
+};
+
+class RenderScene
+{
+public:
+	RenderScene(const class Scene& InScene)
+		: m_Scene(InScene)
+	{
+	}
+
+	const std::vector<const MeshDrawCommand*>& GetDrawCommands(EMeshPass MeshPass) const { return m_MeshPassDrawCommands[MeshPass]; }
+	void GenerateDrawCommands();
+protected:
+private:
+	const class Scene& m_Scene;
+	std::array<std::vector<const MeshDrawCommand*>, EMeshPass::Num> m_MeshPassDrawCommands;
+	std::vector<MeshDrawCommand> m_DrawCommands;
+};
 
 class RenderPass
 {
@@ -16,7 +54,7 @@ public:
 
 	virtual void Compile() = 0;
 
-	virtual void Execute(class RHIDevice&, const class Scene&) = 0;
+	virtual void Execute(class RHIDevice&, const RenderScene&) = 0;
 
 	virtual void OnGUI() {};
 protected:

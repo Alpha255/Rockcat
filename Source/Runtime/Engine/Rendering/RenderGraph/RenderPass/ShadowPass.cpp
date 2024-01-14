@@ -1,7 +1,7 @@
 #include "Runtime/Engine/Rendering/RenderGraph/RenderPass/ShadowPass.h"
 #include "Runtime/Engine/RHI/RHIInterface.h"
 
-const char8_t* GetNameByShadowTechnique(EShadowTechnique Technique)
+const char8_t* GetShadowTechniqueName(EShadowTechnique Technique)
 {
 	switch (Technique)
 	{
@@ -17,8 +17,8 @@ const char8_t* GetNameByShadowTechnique(EShadowTechnique Technique)
 ShadowPass::ShadowPass(DAGNodeID ID, ResourceManager& ResourceMgr)
 	: MeshPass(
 		ID, 
-		GetNameByShadowTechnique(RHIInterface::GetGraphicsSettings().ShadowTechnique), 
+		GetShadowTechniqueName(RHIInterface::GetGraphicsSettings().ShadowTechnique),
 		ResourceMgr,
-		MeshPass::EMeshDrawFilter::ShadowCaster)
+		EMeshPass::ShadowCaster)
 {
 }

@@ -2,8 +2,8 @@
 #include "Runtime/Engine/RHI/RHIDevice.h"
 #include "Runtime/Engine/RHI/RHIInterface.h"
 
-ResourceManager::ResourceManager(RHIDevice& RenderDevice, DirectedAcyclicGraph& Graph)
-	: m_RenderDevice(RenderDevice)
+ResourceManager::ResourceManager(RHIDevice& Device, DirectedAcyclicGraph& Graph)
+	: m_RHIDevice(Device)
 	, m_Graph(Graph)
 {
 	AllocateSceneImageFields();

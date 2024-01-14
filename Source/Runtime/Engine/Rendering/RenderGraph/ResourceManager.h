@@ -21,7 +21,7 @@ public:
 		GeometryBuffer GBuffer;
 	};
 
-	ResourceManager(class RHIDevice& RenderDevice, DirectedAcyclicGraph& Graph);
+	ResourceManager(class RHIDevice& Device, DirectedAcyclicGraph& Graph);
 
 	~ResourceManager();
 
@@ -34,7 +34,7 @@ private:
 	void AllocateSceneImageFields();
 
 	std::unordered_map<std::string_view, std::shared_ptr<Field>> m_Fields;
-	class RHIDevice& m_RenderDevice;
+	class RHIDevice& m_RHIDevice;
 	DirectedAcyclicGraph& m_Graph;
 	SceneImages m_SceneImages;
 };

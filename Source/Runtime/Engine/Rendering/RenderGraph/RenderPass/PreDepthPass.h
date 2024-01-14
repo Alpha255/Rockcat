@@ -6,7 +6,7 @@ class PreDepthPass : public MeshPass
 {
 public:
 	PreDepthPass(DAGNodeID ID, class ResourceManager& ResourceMgr)
-		: MeshPass(ID, "PreDepthPass", ResourceMgr, MeshPass::EMeshDrawFilter::All)
+		: MeshPass(ID, "PreDepthPass", ResourceMgr, EMeshPass::PreDepth)
 	{
 	}
 

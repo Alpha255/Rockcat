@@ -12,22 +12,19 @@ public:
 	virtual ~BaseApplication() = default;
 
 	virtual void OnStartup();
-
 	virtual void OnRenderFrame() {}
-
 	virtual void OnShutdown() {}
 
 	void OnMouseEvent(const MouseEvent& /*Mouse*/) override {}
-
 	void OnKeyboardEvent(const KeyboardEvent& /*Keyboard*/) override {}
-
 	void OnWindowResized(uint32_t /*Width*/, uint32_t /*Height*/) override {}
 
 	void Tick(float32_t ElapsedSeconds) override;
 
 	class Window* GetAssociatedWindow() const { return m_Window.get(); }
-
 	const class ApplicationConfigurations& GetConfigurations() const;
+	const struct GraphicsSettings& GetGraphicsSettings() const;
+	class RHIInterface& GetRHI();
 
 	bool8_t IsRequestingQuit() const;
 protected:

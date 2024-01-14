@@ -34,12 +34,10 @@ void RenderTest::OnInitialize()
 	
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");
 
-	auto& GfxSettings = GetConfigurations().GetGraphicsSettings();
-
-	switch (GfxSettings.RenderingPath)
+	switch (GetGraphicsSettings().RenderingPath)
 	{
 	case ERenderingPath::ForwardRendering:
-		m_RenderGraph = std::make_shared<ForwardRenderingPath>(RenderService::Get().GetRHIInterface(GfxSettings.RenderHardwareInterface), *m_Scene);
+		m_RenderGraph = std::make_shared<ForwardRenderingPath>(GetRHI(), *m_Scene);
 		break;
 	case ERenderingPath::DeferredShading:
 		break;
@@ -51,7 +49,7 @@ void RenderTest::OnInitialize()
 
 void RenderTest::OnRenderFrame()
 {
-	//m_RenderGraph->Execute();
+	m_RenderGraph->Execute();
 }
 
 #if 0
@@ -69,11 +67,4 @@ void RenderTest::OnRenderGUI()
 }
 #endif
 
-class RenderTest2 final : public BaseApplication
-{
-public:
-	using BaseApplication::BaseApplication;
-};
-
 REGISTER_APPLICATION(RenderTest, "RenderTest.json")
-REGISTER_APPLICATION(RenderTest2, "RenderTest2.json")

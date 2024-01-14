@@ -127,7 +127,7 @@ struct SceneGraph
 		assert(Parent.IsValid() && Parent.GetIndex() < Nodes.size());
 		if (Nodes[Parent.GetIndex()].HasChild())
 		{
-			return AddSibling(Nodes[Parent.GetIndex()].GetChild(), Name);
+			return AddSibling(Nodes[Parent.GetIndex()].GetChild(), Name, Masks);
 		}
 		else
 		{

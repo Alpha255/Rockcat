@@ -9,5 +9,5 @@ public:
 
 	void Compile() override final {}
 
-	void Execute(class RHIDevice&, const class Scene&) override final {}
+	void Execute(class RHIDevice&, const RenderScene&) override final {}
 };

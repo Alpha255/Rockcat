@@ -137,7 +137,7 @@ private:
 			}
 			else
 			{
-				AssimpScene.Graph.GetNode(GraphNodeID).SetDataIndex(static_cast<uint32_t>(AssimpScene.Data.StaticMeshes.size()));
+				AssimpScene.Graph.GetNode(GraphNodeID).SetDataIndex(MeshIndex);
 			}
 		}
 
