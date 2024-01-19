@@ -3,10 +3,10 @@
 class DynamicLinkLibrary
 {
 public:
-	DynamicLinkLibrary(const char8_t* LibraryName);
+	DynamicLinkLibrary(const char* LibraryName);
 	virtual ~DynamicLinkLibrary();
 
-	void* GetProcAddress(const char8_t* FunctionName);
+	void* GetProcAddress(const char* FunctionName);
 protected:
 private:
 	void* m_Handle = nullptr;

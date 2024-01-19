@@ -5,7 +5,7 @@
 
 #if PLATFORM_WIN32
 
-size_t File::Size(const char8_t* Path)
+size_t File::Size(const char* Path)
 {
 	if (Exists(Path))
 	{
@@ -15,12 +15,12 @@ size_t File::Size(const char8_t* Path)
 	return 0u;
 }
 
-bool8_t File::Exists(const char8_t* Path)
+bool8_t File::Exists(const char* Path)
 {
 	return std::filesystem::exists(Path);
 }
 
-FileTime File::LastWriteTime(const char8_t* Path)
+FileTime File::LastWriteTime(const char* Path)
 {
 	if (Exists(Path))
 	{
@@ -125,7 +125,7 @@ void TryToFindFile(const std::string& Path, const std::string& Name, _Inout_ std
 	}
 }
 
-std::vector<std::string> File::GetFileList(const char8_t* Path, const std::vector<std::string>& Filters, bool8_t ToLower)
+std::vector<std::string> File::GetFileList(const char* Path, const std::vector<std::string>& Filters, bool8_t ToLower)
 {
 	std::vector<std::string> Ret;
 
@@ -137,7 +137,7 @@ std::vector<std::string> File::GetFileList(const char8_t* Path, const std::vecto
 	return Ret;
 }
 
-std::string File::Find(const char8_t* Path, const char8_t* Name)
+std::string File::Find(const char* Path, const char* Name)
 {
 	std::string Ret;
 	if (File::Exists(Path))
@@ -148,7 +148,7 @@ std::string File::Find(const char8_t* Path, const char8_t* Name)
 	return Ret;
 }
 
-void File::CreateDirectories(const char8_t* Path)
+void File::CreateDirectories(const char* Path)
 {
 	VERIFY_WITH_PLATFORM_MESSAGE(std::filesystem::create_directories(Path));
 }

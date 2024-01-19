@@ -8,13 +8,13 @@
 #include <windowsx.h>
 #include <shlobj.h>
 
-DynamicLinkLibrary::DynamicLinkLibrary(const char8_t* ModuleName)
+DynamicLinkLibrary::DynamicLinkLibrary(const char* ModuleName)
 {
 	m_Handle = reinterpret_cast<void*>(::LoadLibraryA(ModuleName));
 	VERIFY_WITH_PLATFORM_MESSAGE(m_Handle);
 }
 
-void* DynamicLinkLibrary::GetProcAddress(const char8_t* FunctionName)
+void* DynamicLinkLibrary::GetProcAddress(const char* FunctionName)
 {
 	assert(m_Handle);
 	return ::GetProcAddress(reinterpret_cast<::HMODULE>(m_Handle), FunctionName);

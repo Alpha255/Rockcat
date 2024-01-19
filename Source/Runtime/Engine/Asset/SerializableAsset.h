@@ -82,7 +82,7 @@ public:
 		}
 	}
 
-	virtual const char8_t* GetExtension() const { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::Config); }
+	virtual const char* GetExtension() const { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::Config); }
 
 	template<class Archive>
 	void serialize(Archive& Ar)

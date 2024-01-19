@@ -64,7 +64,7 @@ void D3D12CommandList::Reset()
 	SetState(EState::Initial);
 }
 
-void D3D12CommandList::BeginDebugMarker(const char8_t* Name, const Math::Color& Color)
+void D3D12CommandList::BeginDebugMarker(const char* Name, const Math::Color& Color)
 {
 	uint32_t RGBA = Color.RGBA8();
 	PIXBeginEvent(GetNative(), PIX_COLOR(uint8_t(RGBA && 0x000F), uint8_t(RGBA && 0x00F0 >> 8), uint8_t(RGBA & 0x0F00 >> 16)), Name);

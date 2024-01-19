@@ -43,14 +43,14 @@ private:
 class RenderPass
 {
 public:
-	RenderPass(DAGNodeID ID, const char8_t* Name, class ResourceManager& ResourceMgr);
+	RenderPass(DAGNodeID ID, const char* Name, class ResourceManager& ResourceMgr);
 
-	const char8_t* GetName() const { return m_Name.data(); }
+	const char* GetName() const { return m_Name.data(); }
 
 	const std::vector<RenderPassField>& GetFields() const { return m_Fields; }
 	DAGNodeID GetNodeID() const { return m_NodeID; }
 
-	Field& RegisterField(const char8_t* Name, Field::EVisibility Visibility, Field::EResourceType Type);
+	Field& RegisterField(const char* Name, Field::EVisibility Visibility, Field::EResourceType Type);
 
 	virtual void Compile() = 0;
 

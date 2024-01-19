@@ -96,7 +96,7 @@ void VulkanLoader::LoadExtFuncs(VkInstance Instance, VkDevice Device, bool8_t Su
 
 namespace VulkanResult
 {
-	const char8_t* const ToString(VkResult result)
+	const char* const ToString(VkResult result)
 	{
 		switch (result)
 		{
@@ -154,20 +154,11 @@ const vk::Instance& VkDeviceResource::GetNativeInstance() const
 	return m_Device.GetInstance();
 }
 
-void VkDeviceResource::SetObjectName(vk::ObjectType Type, uint64_t Object, const char8_t* Name)
+void VkDeviceResource::SetObjectName(vk::ObjectType Type, uint64_t Object, const char* Name)
 {
 	assert(Object && Name && Type != vk::ObjectType::eUnknown);
 
-	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarkerExt)
-	{
-		auto DebugMarkerObjectNameInfo = vk::DebugMarkerObjectNameInfoEXT()
-			.setObjectType(GetDebugReportObjectType(Type))
-			.setObject(Object)
-			.setPObjectName(Name);
-
-		VERIFY_VK(GetNativeDevice().debugMarkerSetObjectNameEXT(&DebugMarkerObjectNameInfo));
-	}
-	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtilsExt)
+	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtilsExt)
 	{
 		auto DebugUtilsObjectNameInfo = vk::DebugUtilsObjectNameInfoEXT()
 			.setObjectType(Type)
@@ -175,5 +166,14 @@ void VkDeviceResource::SetObjectName(vk::ObjectType Type, uint64_t Object, const
 			.setPObjectName(Name);
 
 		VERIFY_VK(GetNativeDevice().setDebugUtilsObjectNameEXT(&DebugUtilsObjectNameInfo));
+	}
+	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarkerExt)
+	{
+		auto DebugMarkerObjectNameInfo = vk::DebugMarkerObjectNameInfoEXT()
+			.setObjectType(GetDebugReportObjectType(Type))
+			.setObject(Object)
+			.setPObjectName(Name);
+
+		VERIFY_VK(GetNativeDevice().debugMarkerSetObjectNameEXT(&DebugMarkerObjectNameInfo));
 	}
 }

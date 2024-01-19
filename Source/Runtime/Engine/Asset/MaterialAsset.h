@@ -66,11 +66,11 @@ public:
 	}
 	virtual ~MaterialAsset() = default;
 
-	const char8_t* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::Material); }
+	const char* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::Material); }
 
 	EShadingMode GetShadingMode() const { return m_ShadingMode; }
 
-	void RegisterProperty(const char8_t* InName, MaterialProperty&& Property)
+	void RegisterProperty(const char* InName, MaterialProperty&& Property)
 	{
 		std::string Name(InName);
 		auto It = m_Properties.find(Name);

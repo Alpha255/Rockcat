@@ -10,7 +10,7 @@ struct Guid
 		DigitsWithHyphens
 	};
 
-	static const char8_t Hyphen = '-';
+	static const char Hyphen = '-';
 
 	uint32_t A = 0u;
 	uint32_t B = 0u;
@@ -97,7 +97,7 @@ struct Guid
 	{
 	}
 
-	Guid(const char8_t* GuidStr)
+	Guid(const char* GuidStr)
 	{
 		*this = FromString(GuidStr);
 	}

@@ -47,7 +47,7 @@ public:
 		Assimp::DefaultLogger::set(new AssimpLogger());
 		AssimpImporter.SetProgressHandler(new AssimpProgressHandler(Scene.GetPath()));
 #endif
-		if (auto AiScene = AssimpImporter.ReadFile(Scene.GetPath().u8string(), ProcessFlags))
+		if (auto AiScene = AssimpImporter.ReadFile(Scene.GetPath().string(), ProcessFlags))
 		{
 			if (AiScene->HasMeshes())
 			{
@@ -215,7 +215,7 @@ private:
 				bool8_t TwoSided = false;
 				AiMaterial->Get(AI_MATKEY_TWOSIDED, TwoSided);
 
-				auto MaterialAssetName = (AssimpScene.GetPath().stem() / Name.C_Str()).u8string();
+				auto MaterialAssetName = (AssimpScene.GetPath().stem() / Name.C_Str()).string();
 				auto& Material = AssimpScene.Data.Materials.at(Index);
 
 				switch (ShadingMode)

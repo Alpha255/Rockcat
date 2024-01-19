@@ -23,7 +23,7 @@ struct SceneGraph
 
 		Node() = default;
 
-		Node(const char8_t* Name, NodeID ParentID = NodeID(), ENodeMasks Masks = ENodeMasks::None)
+		Node(const char* Name, NodeID ParentID = NodeID(), ENodeMasks Masks = ENodeMasks::None)
 			: m_Parent(ParentID)
 			, m_Masks(Masks)
 			, m_Name(Name ? Name : "")
@@ -55,8 +55,8 @@ struct SceneGraph
 		bool8_t IsSelected() const { return m_Selected; }
 		Node& SetSelected(bool8_t Selected) { m_Selected = Selected; return *this; }
 
-		const char8_t* GetName() const { return m_Name.c_str(); }
-		Node& SetName(const char8_t* Name) { m_Name = Name; return *this; }
+		const char* GetName() const { return m_Name.c_str(); }
+		Node& SetName(const char* Name) { m_Name = Name; return *this; }
 
 		ENodeMasks GetMasks() const { return m_Masks; }
 		Node& SetMasks(ENodeMasks Masks);
@@ -108,7 +108,7 @@ struct SceneGraph
 	size_t GetNodeCount() const { return Nodes.size(); }
 	bool8_t IsEmpty() const { return Nodes.empty(); }
 
-	NodeID AddSibling(NodeID Sibling, const char8_t* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
+	NodeID AddSibling(NodeID Sibling, const char* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
 	{
 		assert(Sibling.IsValid() && Sibling.GetIndex() < Nodes.size());
 		NodeID::IndexType SiblingIndex = Sibling.GetIndex();
@@ -122,7 +122,7 @@ struct SceneGraph
 		return SiblingNode;
 	}
 
-	NodeID AddChild(NodeID Parent, const char8_t* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
+	NodeID AddChild(NodeID Parent, const char* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
 	{
 		assert(Parent.IsValid() && Parent.GetIndex() < Nodes.size());
 		if (Nodes[Parent.GetIndex()].HasChild())
@@ -137,14 +137,14 @@ struct SceneGraph
 		}
 	}
 
-	NodeID AddNode(NodeID Parent, const char8_t* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
+	NodeID AddNode(NodeID Parent, const char* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
 	{
 		NodeID NextID = IDAllocator.Allocate();  /// +1
 		Nodes.emplace_back(Node(Name, Parent, Masks));
 		return NextID;
 	}
 
-	const Node* FindNode(const char8_t* NodeName) const
+	const Node* FindNode(const char* NodeName) const
 	{
 		for (auto& Node : Nodes)
 		{

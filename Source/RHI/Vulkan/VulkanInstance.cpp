@@ -91,8 +91,8 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugReportCallback(
 	uint64_t Handle,
 	size_t Location,
 	int32_t MessageCode,
-	const char8_t* LayerPrefix,
-	const char8_t* Message,
+	const char* LayerPrefix,
+	const char* Message,
 	void* UserData)
 {
 	(void)Type;
@@ -122,12 +122,12 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 	auto WantedLayers = VulkanLayer::GetWantedInstanceLayers();
 	auto WantedExtensions = VulkanExtension::GetWantedInstanceExtensions();
 
-	std::vector<const char8_t*> EnabledLayers;
-	std::vector<const char8_t*> EnabledExtensions;
+	std::vector<const char*> EnabledLayers;
+	std::vector<const char*> EnabledExtensions;
 
 	LOG_DEBUG("VulkanRHI: Found valid instance layers:");
 	auto LayerProperties = vk::enumerateInstanceLayerProperties();
-	for each (const auto& LayerProperty in LayerProperties)
+	for (const auto& LayerProperty : LayerProperties)
 	{
 		auto LayerIt = std::find_if(WantedLayers.begin(), WantedLayers.end(), [&LayerProperty](const std::unique_ptr<VulkanLayer>& Layer) {
 			return strcmp(Layer->GetName(), LayerProperty.layerName.data()) == 0;
@@ -148,7 +148,7 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 
 	LOG_DEBUG("VulkanRHI: Found valid instance extensions:");
 	auto ExtensionProperties = vk::enumerateInstanceExtensionProperties();
-	for each (const auto& ExtensionProperty in ExtensionProperties)
+	for (const auto& ExtensionProperty : ExtensionProperties)
 	{
 		auto ExtensionIt = std::find_if(WantedExtensions.begin(), WantedExtensions.end(), [&ExtensionProperty](const std::unique_ptr<VulkanExtension>& Extension) {
 			return strcmp(Extension->GetName(), ExtensionProperty.extensionName.data()) == 0;
@@ -178,7 +178,7 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 		if (DebugReportExt != WantedExtensions.end() && (*DebugReportExt)->IsEnabled())
 		{
 			(*DebugReportExt)->SetEnabled(Configs, false);
-			EnabledExtensions.erase(std::find_if(EnabledExtensions.begin(), EnabledExtensions.end(), [](const char8_t* ExtensionName) {
+			EnabledExtensions.erase(std::find_if(EnabledExtensions.begin(), EnabledExtensions.end(), [](const char* ExtensionName) {
 				return strcmp(ExtensionName, VK_EXT_DEBUG_REPORT_EXTENSION_NAME) == 0;
 				}));
 		}
@@ -194,7 +194,7 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 		.setPEnabledExtensionNames(EnabledExtensions)
 		.setPApplicationInfo(&ApplicationInfo);
 
-	for each (auto& Extension in WantedExtensions)
+	for (auto& Extension : WantedExtensions)
 	{
 		if (Extension->IsEnabled())
 		{

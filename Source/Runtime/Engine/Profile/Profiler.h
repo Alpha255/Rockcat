@@ -17,9 +17,9 @@ public:
 	class Event
 	{
 	public:
-		Event(const char8_t* Name, EEventFlags Flags);
+		Event(const char* Name, EEventFlags Flags);
 
-		const char8_t* GetName() { return m_Name.c_str(); }
+		const char* GetName() { return m_Name.c_str(); }
 
 		float32_t GetCpuTime() const { return m_CpuTime.MomentaryTime; }
 		float32_t GetCpuTimeAverage() const { return m_CpuTime.AverageTime; }
@@ -67,7 +67,7 @@ public:
 
 	void OnStartup() override final;
 
-	ScopedEvent ScopeEvent(const char8_t* Name, EEventFlags Flags);
+	ScopedEvent ScopeEvent(const char* Name, EEventFlags Flags);
 
 	bool8_t IsEnabled() const { return m_Enabled; }
 	void SetEnabled(bool8_t Enable) { m_Enabled = Enable; }

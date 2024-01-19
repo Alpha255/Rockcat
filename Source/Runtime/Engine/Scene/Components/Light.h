@@ -14,7 +14,7 @@ public:
 	};
 
 	Light() = default;
-	Light(const char8_t* Name)
+	Light(const char* Name)
 		: m_Color(Math::Color::White)
 		, m_Name(Name)
 	{
@@ -23,8 +23,8 @@ public:
 	const Math::Color& GetColor() const { return m_Color; }
 	void SetColor(const Math::Color& Value) { m_Color = Value; }
 
-	const char8_t* GetName() const { return m_Name.c_str(); }
-	void SetName(const char8_t* Name) { m_Name = Name; }
+	const char* GetName() const { return m_Name.c_str(); }
+	void SetName(const char* Name) { m_Name = Name; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)

@@ -6,7 +6,7 @@
 class MeshPass : public RenderPass
 {
 public:
-	MeshPass(DAGNodeID ID, const char8_t* Name, class ResourceManager& ResourceMgr, EMeshPass Filter)
+	MeshPass(DAGNodeID ID, const char* Name, class ResourceManager& ResourceMgr, EMeshPass Filter)
 		: RenderPass(ID, Name, ResourceMgr)
 		, m_Filter(Filter)
 	{

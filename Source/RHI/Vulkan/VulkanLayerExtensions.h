@@ -65,7 +65,7 @@ struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayer
 class VulkanLayer
 {
 public:
-	VulkanLayer(const char8_t* Name, bool8_t Needed)
+	VulkanLayer(const char* Name, bool8_t Needed)
 		: m_Name(Name)
 		, m_Needed(Needed)
 	{
@@ -73,7 +73,7 @@ public:
 
 	inline bool8_t IsEnabled() const { return m_Enabled; }
 	inline bool8_t IsNeeded() const { return m_Needed; }
-	inline const char8_t* GetName() const { return m_Name.data(); }
+	inline const char* GetName() const { return m_Name.data(); }
 
 	static VulkanLayerArray GetWantedInstanceLayers();
 
@@ -121,4 +121,4 @@ protected:
 	friend class VulkanDevice;
 };
 
-void LogEnabledLayerAndExtensions(const VulkanLayerArray& Layers, const VulkanExtensionArray& Extensions, const char8_t* Category);
+void LogEnabledLayerAndExtensions(const VulkanLayerArray& Layers, const VulkanExtensionArray& Extensions, const char* Category);

@@ -122,7 +122,7 @@ public:
 	RHIObject(RHIObject&& Other)
 		: m_Handle(Other.m_Handle)
 	{
-		std::exchange(other.m_Handle, {});
+		std::exchange(Other.m_Handle, {});
 	}
 
 	RHIObject& operator=(const RHIObject& Other)
@@ -169,13 +169,13 @@ public:
 	RHIResource() = default;
 	virtual ~RHIResource() = default;
 
-	RHIResource(const char8_t* DebugName)
+	RHIResource(const char* DebugName)
 		: m_DebugName(DebugName)
 	{
 	}
 
-	inline virtual void SetDebugName(const char8_t* DebugName) { m_DebugName = DebugName; }
-	inline const char8_t* GetDebugName() const { return m_DebugName.c_str(); }
+	virtual void SetDebugName(const char* DebugName) { m_DebugName = DebugName; }
+	inline const char* GetDebugName() const { return m_DebugName.c_str(); }
 private:
 	std::string m_DebugName;
 };

@@ -25,7 +25,7 @@ public:
 	};
 
 	template<class IDType>
-	static const char8_t* const GetVendorName(IDType VendorID)
+	static const char* const GetVendorName(IDType VendorID)
 	{
 		switch (static_cast<EVendorID>(VendorID))
 		{
@@ -78,7 +78,7 @@ public:
 		uint32_t Height,
 		ERHIFormat Format,
 		ERHISampleCount SampleCount = ERHISampleCount::Sample_1_Bit,
-		const char8_t* Name = "NamelessRenderTarget",
+		const char* Name = "NamelessRenderTarget",
 		bool8_t UseForShaderResource = false)
 	{
 		assert(RHI::IsColor(Format));
@@ -103,7 +103,7 @@ public:
 		uint32_t Height, 
 		ERHIFormat Format,
 		ERHISampleCount SampleCount = ERHISampleCount::Sample_1_Bit,
-		const char8_t* Name = "NamelessDepthStencil")
+		const char* Name = "NamelessDepthStencil")
 	{
 		assert(RHI::IsDepthStenci(Format));
 
@@ -154,7 +154,7 @@ public:
 		return CreateBuffer(RHICreateInfo);
 	}
 
-	const char8_t* const GetAdapterName() const { return m_AdapterName.c_str(); }
+	const char* const GetAdapterName() const { return m_AdapterName.c_str(); }
 private:
 	std::string m_AdapterName;
 };

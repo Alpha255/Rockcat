@@ -7,7 +7,7 @@
 class BaseApplication : public NoneCopyable, public ITickable, public IInputHandler
 {
 public:
-	BaseApplication(const char8_t* ConfigurationName);
+	BaseApplication(const char* ConfigurationName);
 
 	virtual ~BaseApplication() = default;
 

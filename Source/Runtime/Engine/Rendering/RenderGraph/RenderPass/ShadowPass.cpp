@@ -1,7 +1,7 @@
 #include "Runtime/Engine/Rendering/RenderGraph/RenderPass/ShadowPass.h"
 #include "Runtime/Engine/RHI/RHIInterface.h"
 
-const char8_t* GetShadowTechniqueName(EShadowTechnique Technique)
+const char* GetShadowTechniqueName(EShadowTechnique Technique)
 {
 	switch (Technique)
 	{

@@ -22,7 +22,7 @@ public:
 		Buffer
 	};
 
-	Field(DAGNodeID ID, const char8_t* Name, EVisibility Visibility, EResourceType Type)
+	Field(DAGNodeID ID, const char* Name, EVisibility Visibility, EResourceType Type)
 		: m_Visibility(Visibility)
 		, m_ResourceType(Type)
 		, m_NodeID(ID)
@@ -31,7 +31,7 @@ public:
 		assert(Name);
 	}
 
-	Field& SetName(const char8_t* Name) 
+	Field& SetName(const char* Name) 
 	{ 
 		if (Name && m_Name != Name)
 		{
@@ -39,7 +39,7 @@ public:
 		}
 		return *this; 
 	}
-	const char8_t* GetName() const { return m_Name.data(); }
+	const char* GetName() const { return m_Name.data(); }
 
 	EVisibility GetVisibility() const { return m_Visibility; }
 	Field& SetVisibility(EVisibility Visibility);

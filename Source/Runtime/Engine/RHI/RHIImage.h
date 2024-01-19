@@ -95,7 +95,7 @@ struct RHIImageCreateInfo
 	inline RHIImageCreateInfo& SetSampleCount(ERHISampleCount Count) { SampleCount = Count; return *this; }
 	inline RHIImageCreateInfo& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; };
 	inline RHIImageCreateInfo& SetRequiredState(ERHIResourceState State) { RequiredState = State; return *this; }
-	inline RHIImageCreateInfo& SetName(const char8_t* Value) { Name = Value; return *this; }
+	inline RHIImageCreateInfo& SetName(const char* Value) { Name = Value; return *this; }
 	inline RHIImageCreateInfo& SetName(const std::string& Value) { Name = Value; return *this; }
 };
 

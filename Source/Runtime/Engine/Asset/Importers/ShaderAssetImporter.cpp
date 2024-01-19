@@ -5,7 +5,7 @@
 
 static std::shared_ptr<ShaderCompileConfigs> CompileConfigs;
 
-RHI::EShaderStage ParseStage(const char8_t* Path)
+RHI::EShaderStage ParseStage(const char* Path)
 {
 	std::string Ext = File::Extension(Path, true);
 
@@ -67,7 +67,7 @@ void ShaderImporter::Reimport(std::shared_ptr<IAsset> Asset)
 	{
 		Shader->Object->LastWriteTime = LastWriteTime;
 
-		auto CompileShaderTask = [&](const char8_t* SourceName, const void* Source, size_t Size, const std::vector<RHI::ShaderMacro>& Macros) {
+		auto CompileShaderTask = [&](const char* SourceName, const void* Source, size_t Size, const std::vector<RHI::ShaderMacro>& Macros) {
 			auto Permutation = RHI::ShaderMacro::ToPermutation(Macros);
 
 			if (Permutation.length() > 0u)

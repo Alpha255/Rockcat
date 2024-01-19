@@ -83,7 +83,7 @@ public:
 	using BaseMaterialType = BaseMaterial<FS, VS>;
 	using MaterialAsset::MaterialAsset;
 
-	BaseMaterial(MaterialID ID, EShadingMode ShadingMode, const char8_t* MaterialAssetName)
+	BaseMaterial(MaterialID ID, EShadingMode ShadingMode, const char* MaterialAssetName)
 		: MaterialAsset(MaterialAssetName)
 		, m_ID(ID)
 		, m_Name(MaterialAssetName)
@@ -98,8 +98,8 @@ public:
 
 	const MaterialID& GetID() const { return m_ID; }
 
-	const char8_t* GetName() const { return m_Name.c_str(); }
-	void SetName(const char8_t* Name) 
+	const char* GetName() const { return m_Name.c_str(); }
+	void SetName(const char* Name) 
 	{ 
 		assert(Name);
 		m_Name = Name; 
@@ -138,7 +138,7 @@ protected:
 		}
 	}
 
-	static constexpr bool8_t IsValidName(const char8_t* Name) { return Name ? strlen(Name) > 0u : false; }
+	static constexpr bool8_t IsValidName(const char* Name) { return Name ? strlen(Name) > 0u : false; }
 
 	void PostLoad() override final
 	{
@@ -157,7 +157,7 @@ class MaterialUnlit : public BaseMaterial<DefaultUnlitFS>
 public:
 	using BaseMaterial::BaseMaterial;
 
-	MaterialUnlit(MaterialID ID = MaterialID::NullIndex, const char8_t* Name = nullptr)
+	MaterialUnlit(MaterialID ID = MaterialID::NullIndex, const char* Name = nullptr)
 		: BaseMaterial(ID, EShadingMode::Unlit, IsValidName(Name) ? Name : "DefaultUnlit")
 	{
 	}
@@ -183,7 +183,7 @@ class MaterialLit : public BaseMaterial<DefaultLitFS>
 public:
 	using BaseMaterial::BaseMaterial;
 
-	MaterialLit(MaterialID ID = MaterialID::NullIndex, EShadingMode ShadingMode = EShadingMode::BlinnPhong, const char8_t* Name = nullptr)
+	MaterialLit(MaterialID ID = MaterialID::NullIndex, EShadingMode ShadingMode = EShadingMode::BlinnPhong, const char* Name = nullptr)
 		: BaseMaterial(ID, ShadingMode, IsValidName(Name) ? Name : "DefaultLit")
 	{
 		assert(ShadingMode == EShadingMode::BlinnPhong || ShadingMode == EShadingMode::StandardPBR);
@@ -219,7 +219,7 @@ class MaterialToon : public BaseMaterial<DefaultToonFS>
 public:
 	using BaseMaterial::BaseMaterial;
 
-	MaterialToon(MaterialID ID = MaterialID::NullIndex, const char8_t* Name = nullptr)
+	MaterialToon(MaterialID ID = MaterialID::NullIndex, const char* Name = nullptr)
 		: BaseMaterial(ID, EShadingMode::Toon, IsValidName(Name) ? Name : "DefaultToon")
 	{
 	}

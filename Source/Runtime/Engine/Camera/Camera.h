@@ -120,7 +120,6 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(SceneNode),
 			CEREAL_NVP(m_Eye),
 			CEREAL_NVP(m_LookAt),
 			CEREAL_NVP(m_DefaultEye),

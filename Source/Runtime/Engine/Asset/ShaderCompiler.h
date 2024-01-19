@@ -10,16 +10,16 @@ class IShaderCompiler
 {
 public:
 	virtual ShaderBinary Compile(
-		const char8_t* SourceName,
-		const char8_t* SourceCode,
+		const char* SourceName,
+		const char* SourceCode,
 		size_t SourceCodeSize,
-		const char8_t* EntryPoint,
+		const char* EntryPoint,
 		ERHIShaderStage ShaderStage,
 		const class ShaderDefines& Definitions) = 0;
 protected:
 	virtual void GetShaderReflection(const ShaderBinary& Binary) = 0;
 
-	static const char8_t* const GetProfile(ERHIShaderStage ShaderState, bool8_t DXC)
+	static const char* const GetProfile(ERHIShaderStage ShaderState, bool8_t DXC)
 	{
 		switch (ShaderState)
 		{
@@ -41,10 +41,10 @@ public:
 	DxcShaderCompiler(bool8_t GenerateSpirv);
 
 	ShaderBinary Compile(
-		const char8_t* SourceName,
-		const char8_t* SourceCode,
+		const char* SourceName,
+		const char* SourceCode,
 		size_t SourceCodeSize,
-		const char8_t* EntryPoint,
+		const char* EntryPoint,
 		ERHIShaderStage ShaderStage,
 		const class ShaderDefines& Definitions) override final;
 protected:
@@ -70,10 +70,10 @@ class D3DShaderCompiler : public IShaderCompiler
 {
 public:
 	ShaderBinary Compile(
-		const char8_t* SourceName,
-		const char8_t* SourceCode,
+		const char* SourceName,
+		const char* SourceCode,
 		size_t SourceCodeSize,
-		const char8_t* EntryPoint,
+		const char* EntryPoint,
 		ERHIShaderStage ShaderStage,
 		const class ShaderDefines& Definitions) override final;
 protected:
@@ -140,10 +140,10 @@ class VkShaderCompiler : public DxcShaderCompiler
 {
 public:
 	std::shared_ptr<RHI::ShaderDesc> Compile(
-		const char8_t* SourceName,
+		const char* SourceName,
 		const void* Source,
 		size_t Size,
-		const char8_t* Entry,
+		const char* Entry,
 		RHI::EShaderStage Stage,
 		const std::vector<RHI::ShaderMacro>& Macros) override final;
 protected:

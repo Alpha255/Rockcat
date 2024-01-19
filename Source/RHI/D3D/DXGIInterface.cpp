@@ -4,7 +4,7 @@
 
 namespace D3DResult
 {
-	const char8_t* const ToString(::HRESULT Result)
+	const char* const ToString(::HRESULT Result)
 	{
 		/// https://docs.microsoft.com/en-us/windows/win32/direct3d11/d3d11-graphics-reference-returnvalues
 		switch (Result)

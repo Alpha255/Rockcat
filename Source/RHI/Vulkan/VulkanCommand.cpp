@@ -179,7 +179,7 @@ void VulkanCommandBuffer::Reset()
 	m_UseForTransfer = false;
 }
 
-void VulkanCommandBuffer::BeginDebugMarker(const char8_t* Name, const Color& MarkerColor)
+void VulkanCommandBuffer::BeginDebugMarker(const char* Name, const Color& MarkerColor)
 {
 	assert(m_State == EState::Recording && Name);
 

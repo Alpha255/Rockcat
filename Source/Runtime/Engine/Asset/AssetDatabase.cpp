@@ -77,7 +77,7 @@ std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(
 	{
 		auto AssetExt = AssetPath.extension();
 
-		for each (auto & AssetImporter in m_AssetImporters)
+		for (auto& AssetImporter : m_AssetImporters)
 		{
 			if (auto AssetType = AssetImporter->FindValidAssetType(AssetExt))
 			{

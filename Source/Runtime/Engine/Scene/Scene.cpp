@@ -1,7 +1,7 @@
 #if 0
 #include "Runtime/Scene/Scene.h"
 
-Scene::Scene(const char8_t* Path)
+Scene::Scene(const char* Path)
 	: Serializeable(IAsset::CatPath(ASSET_PATH_SCENES, Path))
 {
 }
@@ -215,7 +215,7 @@ void Scene::SetRoot(std::shared_ptr<SceneNode>& Root)
 	}
 }
 
-std::shared_ptr<ModelInstance> Scene::AddModel(const char8_t* ModelPath, const std::shared_ptr<SceneNode>& Parent)
+std::shared_ptr<ModelInstance> Scene::AddModel(const char* ModelPath, const std::shared_ptr<SceneNode>& Parent)
 {
 	auto Model = std::make_shared<ModelInstance>(ModelPath);
 	

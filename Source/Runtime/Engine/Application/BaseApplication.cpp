@@ -3,7 +3,7 @@
 
 RHI::IRenderer* Application::GRenderer = nullptr;
 
-Application::Application(const char8_t* SettingPath)
+Application::Application(const char* SettingPath)
 	: m_RenderSettings(RHI::RenderSettings::Load(SettingPath))
 {
 }
@@ -146,7 +146,7 @@ Application::~Application()
 #include "Runtime/Core/Window.h"
 #include "Runtime/Engine/Services/RenderService.h"
 
-BaseApplication::BaseApplication(const char8_t* ConfigurationName)
+BaseApplication::BaseApplication(const char* ConfigurationName)
 { 
 	m_Configs = ApplicationConfigurations::Load(ConfigurationName ? ConfigurationName : "Defalut.json");
 }

@@ -514,7 +514,7 @@ VulkanPipelineBarrier::VkResourceState VulkanPipelineBarrier::TranslateResourceS
 	return VkResourceState(std::move(std::make_tuple(PipelineStageMask, AccessMask, ImageLayout)));
 }
 
-const char8_t* NameofVkImageLayout(VkImageLayout Layout)
+const char* NameofVkImageLayout(VkImageLayout Layout)
 {
 	switch (Layout)
 	{

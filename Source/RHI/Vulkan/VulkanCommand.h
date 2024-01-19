@@ -42,7 +42,7 @@ public:
 	void BeginRenderPass(IFrameBuffer* FrameBuffer);
 	void EndRenderPass();
 
-	void BeginDebugMarker(const char8_t* Name, const Color& Markercolor) override final;
+	void BeginDebugMarker(const char* Name, const Color& Markercolor) override final;
 	void EndDebugMarker() override final;
 
 	void Draw(uint32_t VertexCount, uint32_t FirstVertex) override final;

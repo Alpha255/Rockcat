@@ -16,20 +16,20 @@ public:
 	template<class TApplication>
 	struct ApplicationRegister
 	{
-		ApplicationRegister(const char8_t* ConfigurationName)
+		ApplicationRegister(const char* ConfigurationName)
 		{
 			Engine::Get().RegisterApplication<TApplication>(ConfigurationName);
 		}
 	};
 
 	template<class TApplication>
-	void RegisterApplication(const char8_t* ConfigurationName)
+	void RegisterApplication(const char* ConfigurationName)
 	{
 		m_Applications.emplace_back(std::make_unique<TApplication>(ConfigurationName));
 	}
 
 	template<class TModule>
-	TModule& GetModuleByName(const char8_t* ModuleName)
+	TModule& GetModuleByName(const char* ModuleName)
 	{
 	}
 

@@ -133,9 +133,9 @@ static const std::vector<FormatAttributes> s_FormatAttributes
 
 namespace RHI
 {
-	ERHIFormat GetRHIFormatByName(const char8_t* Name)
+	ERHIFormat GetRHIFormatByName(const char* Name)
 	{
-		for each (auto& Attrs in s_FormatAttributes)
+		for (auto& Attrs : s_FormatAttributes)
 		{
 			if (Attrs.Name == Name)
 			{
@@ -159,7 +159,7 @@ namespace RHI
 
 	ERHIFormat GetRHIFormat(vk::Format vkFormat)
 	{
-		for each (auto& Attrs in s_FormatAttributes)
+		for (auto& Attrs : s_FormatAttributes)
 		{
 			if (static_cast<vk::Format>(Attrs.VulkanFormat) == vkFormat)
 			{
@@ -171,7 +171,7 @@ namespace RHI
 
 	ERHIFormat GetRHIFormat(DXGI_FORMAT DXGIFormat)
 	{
-		for each (auto & Attrs in s_FormatAttributes)
+		for (auto & Attrs : s_FormatAttributes)
 		{
 			if (Attrs.DXGIFormat == DXGIFormat)
 			{

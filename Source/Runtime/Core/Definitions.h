@@ -30,7 +30,7 @@
 #include <string_view>
 #include <filesystem>
 #include <variant>
-///#include <span>  /// cpp20
+#include <span>
 
 #if defined(_WIN32)
 	#if !defined(VK_USE_PLATFORM_WIN32_KHR)
@@ -52,7 +52,6 @@
 
 #define NOMINMAX 1
 
-using char8_t = char;
 using uchar8_t = unsigned char;
 using float32_t = float;
 using double64_t = double;
@@ -63,7 +62,6 @@ using long64_t = long long;
 using ulong64_t = unsigned long long;
 using byte8_t = char;
 
-static_assert(sizeof(char8_t) == 1ull, "Size of char miss match.");
 static_assert(sizeof(uchar8_t) == 1ull, "Size of unsigned char miss match.");
 static_assert(sizeof(float32_t) == 4ull, "Size of float miss match.");
 static_assert(sizeof(double64_t) == 8ull, "Size of double miss match.");
@@ -253,7 +251,7 @@ size_t PopulationCount(size_t Value);
 
 std::string TrimEnumString(const std::string& Name);
 
-void SplitEnumArgs(const char8_t* Args, std::string Names[], uint32_t Max);
+void SplitEnumArgs(const char* Args, std::string Names[], uint32_t Max);
 
 static constexpr unsigned long long Kilobyte = 1 << 10ull;
 static constexpr unsigned long long Megabyte = 1 << 20ull;
@@ -268,7 +266,7 @@ public:                                                        \
 		__VA_ARGS__,                                           \
 		Max                                                    \
 	};                                                         \
-	static constexpr const char8_t* ToString(Value& EnumName)  \
+	static constexpr const char* ToString(Value& EnumName)  \
 	{                                                          \
 		static std::string Names[Max];                         \
 		if (Names[0].empty())                                  \

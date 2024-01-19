@@ -24,7 +24,7 @@ public:
 	virtual void End() = 0;
 	virtual void Reset() = 0;
 
-	virtual void BeginDebugMarker(const char8_t* Name, const Math::Color& Color) = 0;
+	virtual void BeginDebugMarker(const char* Name, const Math::Color& Color) = 0;
 	virtual void EndDebugMarker() = 0;
 
 	virtual void Draw(uint32_t VertexCount, uint32_t FirstVertex = 0u) = 0;

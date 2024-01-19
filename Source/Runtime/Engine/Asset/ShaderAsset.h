@@ -7,13 +7,13 @@
 class ShaderDefines
 {
 public:
-	void SetDefine(const char8_t* Name, const char8_t* Value) { m_Defines[Name] = Value; }
-	void SetDefine(const char8_t* Name, const std::string& Value) { m_Defines[Name] = Value; }
+	void SetDefine(const char* Name, const char* Value) { m_Defines[Name] = Value; }
+	void SetDefine(const char* Name, const std::string& Value) { m_Defines[Name] = Value; }
 	void SetDefine(const std::string& Name, const std::string& Value) { m_Defines[Name] = Value; }
-	void SetDefine(const std::string& Name, const char8_t* Value) { m_Defines[Name] = Value; }
+	void SetDefine(const std::string& Name, const char* Value) { m_Defines[Name] = Value; }
 
 	template<class T>
-	void SetDefine(const char8_t* Name, T Value) { m_Defines[Name] = (std::stringstream() << Value).str(); }
+	void SetDefine(const char* Name, T Value) { m_Defines[Name] = (std::stringstream() << Value).str(); }
 
 	template<class T>
 	void SetDefine(const std::string& Name, T Value) { m_Defines[Name] = (std::stringstream() << Value).str(); }
@@ -91,7 +91,7 @@ struct ShaderCache : public SerializableAsset<ShaderCache>
 	{
 	}
 
-	virtual const char8_t* GetExtension() const { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::ShaderCache); }
+	virtual const char* GetExtension() const { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::ShaderCache); }
 
 	bool8_t Contains(size_t Hash) const { return CompiledBinaries.find(Hash) != CompiledBinaries.cend(); }
 

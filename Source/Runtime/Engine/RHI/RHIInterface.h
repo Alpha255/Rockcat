@@ -26,7 +26,7 @@ public:
 
 	virtual ERenderHardwareInterface GetRHIType() const { return ERenderHardwareInterface::Null; }
 
-	static const char8_t* GetRHIName(ERenderHardwareInterface RHI)
+	static const char* GetRHIName(ERenderHardwareInterface RHI)
 	{ 
 		switch (RHI)
 		{
@@ -40,7 +40,7 @@ public:
 
 	static const GraphicsSettings& GetGraphicsSettings() { assert(s_GraphicsSettings); return *s_GraphicsSettings; }
 
-	const char8_t* GetName() const { return GetRHIName(GetRHIType()); }
+	const char* GetName() const { return GetRHIName(GetRHIType()); }
 
 	virtual RHIDevice& GetDevice() = 0;
 protected:

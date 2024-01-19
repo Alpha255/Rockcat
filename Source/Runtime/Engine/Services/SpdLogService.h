@@ -25,22 +25,22 @@ public:
 	}
 
 	template<class... Args>
-	void Info(const char8_t* Format, Args&&... ArgList) { m_AsyncLogger->info(Format, std::forward<Args>(ArgList)...); }
+	void Info(const char* Format, Args&&... ArgList) { m_AsyncLogger->info(Format, std::forward<Args>(ArgList)...); }
 
 	template<class... Args>
-	void Warning(const char8_t* Format, Args&&... ArgList) { m_AsyncLogger->warn(Format, std::forward<Args>(ArgList)...); }
+	void Warning(const char* Format, Args&&... ArgList) { m_AsyncLogger->warn(Format, std::forward<Args>(ArgList)...); }
 
 	template<class... Args>
-	void Error(const char8_t* Format, Args&&... ArgList) { m_AsyncLogger->error(Format, std::forward<Args>(ArgList)...); }
+	void Error(const char* Format, Args&&... ArgList) { m_AsyncLogger->error(Format, std::forward<Args>(ArgList)...); }
 
 	template<class... Args>
-	void Debug(const char8_t* Format, Args&&... ArgList) { m_AsyncLogger->debug(Format, std::forward<Args>(ArgList)...); }
+	void Debug(const char* Format, Args&&... ArgList) { m_AsyncLogger->debug(Format, std::forward<Args>(ArgList)...); }
 
 	template<class... Args>
-	void Trace(const char8_t* Format, Args&&... ArgList) { m_AsyncLogger->trace(Format, std::forward<Args>(ArgList)...); }
+	void Trace(const char* Format, Args&&... ArgList) { m_AsyncLogger->trace(Format, std::forward<Args>(ArgList)...); }
 
 	template<class... Args>
-	void Critical(const char8_t* Format, Args&&... ArgList) { m_AsyncLogger->critical(Format, std::forward<Args>(ArgList)...); }
+	void Critical(const char* Format, Args&&... ArgList) { m_AsyncLogger->critical(Format, std::forward<Args>(ArgList)...); }
 private:
 	std::shared_ptr<spdlog::logger> m_AsyncLogger;
 };

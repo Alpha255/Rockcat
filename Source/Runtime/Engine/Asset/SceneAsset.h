@@ -29,7 +29,7 @@ public:
 	{
 	}
 
-	const char8_t* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::Scene); }
+	const char* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::Scene); }
 
 	const SceneGraph& GetSceneGraph() const { return *m_Graph; }
 

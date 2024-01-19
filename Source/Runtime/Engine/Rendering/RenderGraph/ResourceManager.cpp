@@ -13,7 +13,7 @@ ResourceManager::~ResourceManager()
 {
 }
 
-Field& ResourceManager::GetOrAllocateField(const char8_t* Name, Field::EVisibility Visibility, Field::EResourceType Type)
+Field& ResourceManager::GetOrAllocateField(const char* Name, Field::EVisibility Visibility, Field::EResourceType Type)
 {
 	auto It = m_Fields.find(Name);
 	if (It != m_Fields.end())

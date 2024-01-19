@@ -31,7 +31,7 @@ public:
 	{
 	}
 
-	const char8_t* GetName() const { return m_Name.c_str(); }
+	const char* GetName() const { return m_Name.c_str(); }
 	ETaskType GetType() const { return m_Type; }
 	EPriority GetPriority() const { return m_Priority; }
 

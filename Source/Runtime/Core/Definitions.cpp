@@ -17,7 +17,7 @@ std::string TrimEnumString(const std::string& Name)
 	return std::string(It, ReverseIt.base());
 }
 
-void SplitEnumArgs(const char8_t* Args, std::string Names[], uint32_t Max)
+void SplitEnumArgs(const char* Args, std::string Names[], uint32_t Max)
 {
 	std::stringstream SS(Args);
 	std::string SubStr;

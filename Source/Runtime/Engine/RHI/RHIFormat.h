@@ -130,7 +130,7 @@ namespace RHI
 	DXGI_FORMAT GetDXGIFormat(ERHIFormat Format);
 	vk::Format GetVulkanFormat(ERHIFormat Format);
 	ERHIFormat GetSRGBFormat(ERHIFormat Format);
-	ERHIFormat GetRHIFormatByName(const char8_t* Name);
+	ERHIFormat GetRHIFormatByName(const char* Name);
 	ERHIFormat GetRHIFormat(vk::Format vkFormat);
 	ERHIFormat GetRHIFormat(DXGI_FORMAT DXGIFormat);
 

@@ -14,13 +14,13 @@ public:
 
 	static void Sleep(uint32_t Milliseconds);
 
-	static std::string GetEnvironmentVariables(const char8_t* Variable);
+	static std::string GetEnvironmentVariables(const char* Variable);
 
 	static std::filesystem::path GetCurrentModuleDirectory();
 
 	static void* GetCurrentModuleHandle();
 
-	static void ExecuteProcess(const char8_t* Commandline, bool8_t WaitDone = true);
+	static void ExecuteProcess(const char* Commandline, bool8_t WaitDone = true);
 
 	static Guid CreateGUID();
 

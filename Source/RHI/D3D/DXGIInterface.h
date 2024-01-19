@@ -75,7 +75,7 @@ public:
 		return *this;
 	}
 
-	void SetDebugName(const char8_t* DebugName) override final
+	void SetDebugName(const char* DebugName) override final
 	{
 		assert(DebugName && m_Native);
 		//m_Native->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<uint32_t>(std::strlen(DebugName)), DebugName);
@@ -108,7 +108,7 @@ private:
 
 namespace D3DResult
 {
-	const char8_t* const ToString(::HRESULT Result);
+	const char* const ToString(::HRESULT Result);
 };
 
 #define VERIFY_D3D(Func)                                                       \

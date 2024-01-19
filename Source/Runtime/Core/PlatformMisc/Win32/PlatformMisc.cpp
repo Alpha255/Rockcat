@@ -11,7 +11,7 @@
 
 std::string PlatformMisc::GetErrorMessage(uint32_t ErrorCode)
 {
-	static char8_t s_Buffer[FILE_PATH_LENGTH_MAX];
+	static char s_Buffer[FILE_PATH_LENGTH_MAX];
 	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
 
 	VERIFY(::FormatMessageA(
@@ -55,7 +55,7 @@ void PlatformMisc::Sleep(uint32_t Milliseconds)
 	::Sleep(static_cast<::DWORD>(Milliseconds));
 }
 
-void PlatformMisc::ExecuteProcess(const char8_t* Commandline, bool8_t WaitDone)
+void PlatformMisc::ExecuteProcess(const char* Commandline, bool8_t WaitDone)
 {
 	::SECURITY_ATTRIBUTES Security
 	{
@@ -77,7 +77,7 @@ void PlatformMisc::ExecuteProcess(const char8_t* Commandline, bool8_t WaitDone)
 	StartupInfo.hStdInput = Read;
 	StartupInfo.hStdOutput = Write;
 
-	static char8_t s_Buffer[FILE_PATH_LENGTH_MAX];
+	static char s_Buffer[FILE_PATH_LENGTH_MAX];
 	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
 
 	::PROCESS_INFORMATION ProcessInfo;
@@ -124,9 +124,9 @@ void PlatformMisc::ExecuteProcess(const char8_t* Commandline, bool8_t WaitDone)
 	VERIFY_WITH_PLATFORM_MESSAGE(0);
 }
 
-std::string PlatformMisc::GetEnvironmentVariables(const char8_t* Variable)
+std::string PlatformMisc::GetEnvironmentVariables(const char* Variable)
 {
-	static char8_t s_Buffer[FILE_PATH_LENGTH_MAX];
+	static char s_Buffer[FILE_PATH_LENGTH_MAX];
 	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
 
 	VERIFY_WITH_PLATFORM_MESSAGE(::GetEnvironmentVariableA(Variable, s_Buffer, FILE_PATH_LENGTH_MAX) != 0);

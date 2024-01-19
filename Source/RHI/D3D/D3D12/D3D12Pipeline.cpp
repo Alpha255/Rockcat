@@ -149,14 +149,14 @@ void D3D12RootSignature::Create(const D3D12Device& Device, const std::vector<D3D
 		CreateDesc.Desc_1_1.NumStaticSamplers = 0u;
 		CreateDesc.Desc_1_1.pStaticSamplers = nullptr;
 		CreateDesc.Desc_1_1.Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE;
-		if (RHICreateInfo.InputLayout)
-		{
-			CreateDesc.Desc_1_1.Flags |= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-		}
+		//if (RHICreateInfo.InputLayout)
+		//{
+		//	CreateDesc.Desc_1_1.Flags |= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+		//}
 
 		if (FAILED(D3D12SerializeVersionedRootSignature(&CreateDesc, Signature.Reference(), Error.Reference())))
 		{
-			LOG_ERROR("Failed to serialize versioned root signature: {}", reinterpret_cast<const char8_t*>(Error->GetBufferPointer()));
+			LOG_ERROR("Failed to serialize versioned root signature: {}", reinterpret_cast<const char*>(Error->GetBufferPointer()));
 			assert(false);
 		}
 	}
@@ -262,12 +262,12 @@ D3D12GraphicsPipelineState::D3D12GraphicsPipelineState(const D3D12Device& Device
 		}
 	};
 
-	const auto& InputElements = (Cast<D3D12InputLayout>(RHICreateInfo.InputLayout))->InputElementDescs();
-	CreateDesc.InputLayout = D3D12_INPUT_LAYOUT_DESC
-	{
-		InputElements.data(),
-		static_cast<uint32_t>(InputElements.size())
-	};
+	//const auto& InputElements = (Cast<D3D12InputLayout>(RHICreateInfo.InputLayout))->InputElementDescs();
+	//CreateDesc.InputLayout = D3D12_INPUT_LAYOUT_DESC
+	//{
+	//	InputElements.data(),
+	//	static_cast<uint32_t>(InputElements.size())
+	//};
 
 	CreateDesc.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
 

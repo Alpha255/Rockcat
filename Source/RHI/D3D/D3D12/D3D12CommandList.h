@@ -33,7 +33,7 @@ public:
 	void End() override final;
 	void Reset();
 
-	void BeginDebugMarker(const char8_t* Name, const Math::Color& Color) override final;
+	void BeginDebugMarker(const char* Name, const Math::Color& Color) override final;
 	void EndDebugMarker() override final;
 
 	void Draw(uint32_t VertexCount, uint32_t FirstVertex) override final;

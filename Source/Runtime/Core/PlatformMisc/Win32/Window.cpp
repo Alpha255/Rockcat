@@ -279,7 +279,7 @@ void Window::ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam)
 	}
 		break;
 	case WM_CHAR:
-		m_KeyboardEvent.InputChar = static_cast<char8_t>(WParam);
+		m_KeyboardEvent.InputChar = static_cast<char>(WParam);
 		OnKeyboardEvent();
 		break;
 	}

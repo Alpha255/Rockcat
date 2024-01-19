@@ -1,7 +1,7 @@
 #include "Runtime/Engine/Profile/Profiler.h"
 #include "Runtime/Engine/RHI/RHIDevice.h"
 
-Profiler::Event::Event(const char8_t* Name, EEventFlags Flags)
+Profiler::Event::Event(const char* Name, EEventFlags Flags)
 	: m_Name(Name)
 	, m_Flags(Flags)
 {
@@ -34,7 +34,7 @@ void Profiler::Tick(float32_t ElapsedSeconds)
 {
 }
 
-Profiler::ScopedEvent Profiler::ScopeEvent(const char8_t* Name, EEventFlags Flags)
+Profiler::ScopedEvent Profiler::ScopeEvent(const char* Name, EEventFlags Flags)
 {
 	auto It = m_Events.find(Name);
 	if (It == m_Events.end())

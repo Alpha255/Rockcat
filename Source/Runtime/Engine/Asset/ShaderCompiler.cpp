@@ -18,10 +18,10 @@ DxcShaderCompiler::DxcShaderCompiler(bool8_t GenerateSpirv)
 }
 
 ShaderBinary DxcShaderCompiler::Compile(
-	const char8_t* SourceName,
-	const char8_t* SourceCode,
+	const char* SourceName,
+	const char* SourceCode,
 	size_t SourceCodeSize,
-	const char8_t* EntryPoint,
+	const char* EntryPoint,
 	ERHIShaderStage ShaderStage,
 	const ShaderDefines& Definitions)
 {
@@ -115,7 +115,7 @@ ShaderBinary DxcShaderCompiler::Compile(
 	{
 		DxcBlobEncoding Error;
 		VERIFY(Result->GetErrorBuffer(Error.Reference()) == S_OK);
-		LOG_ERROR("ShaderCompiler:: {}", static_cast<const char8_t*>(Error->GetBufferPointer()));
+		LOG_ERROR("ShaderCompiler:: {}", static_cast<const char*>(Error->GetBufferPointer()));
 		assert(0);
 	}
 
@@ -126,10 +126,10 @@ ShaderBinary DxcShaderCompiler::Compile(
 }
 
 ShaderBinary D3DShaderCompiler::Compile(
-	const char8_t* SourceName,
-	const char8_t* SourceCode,
+	const char* SourceName,
+	const char* SourceCode,
 	size_t SourceCodeSize,
-	const char8_t* EntryPoint,
+	const char* EntryPoint,
 	ERHIShaderStage ShaderStage,
 	const ShaderDefines& Definitions)
 {
@@ -175,7 +175,7 @@ ShaderBinary D3DShaderCompiler::Compile(
 		Binary.Reference(),
 		Error.Reference())))
 	{
-		LOG_ERROR("D3DShaderCompiler:: Failed to compile shader: {}", reinterpret_cast<const char8_t* const>(Error->GetBufferPointer()));
+		LOG_ERROR("D3DShaderCompiler:: Failed to compile shader: {}", reinterpret_cast<const char* const>(Error->GetBufferPointer()));
 		assert(0);
 	}
 
@@ -370,10 +370,10 @@ void D3DShaderCompiler::GetReflectionInfo(RHI::ShaderDesc* const Desc)
 }
 
 std::shared_ptr<RHI::ShaderDesc> VkShaderCompiler::Compile(
-	const char8_t* SourceName,
+	const char* SourceName,
 	const void* Source,
 	size_t Size,
-	const char8_t* Entry,
+	const char* Entry,
 	RHI::EShaderStage Stage,
 	const std::vector<RHI::ShaderMacro>& Macros)
 {
@@ -400,7 +400,7 @@ std::shared_ptr<RHI::ShaderDesc> VkShaderCompiler::Compile(
 	}
 
 	EShMessages messages = static_cast<EShMessages>(EShMsgDefault | EShMsgVulkanRules | EShMsgSpvRules);
-	const char8_t* const sources[] = { Source };
+	const char* const sources[] = { Source };
 	glslang::TShader::ForbidIncluder noneIncluder;
 
 	glslang::InitializeProcess();
@@ -542,7 +542,7 @@ void VkShaderCompiler::GetReflectionInfo(RHI::ShaderDesc* const Desc)
 class ShaderCompileTask : public Task
 {
 public:
-	ShaderCompileTask(const char8_t* ShaderName)
+	ShaderCompileTask(const char* ShaderName)
 		: Task(std::move(StringUtils::Format("Compile shader: %s ...", ShaderName)), ETaskType::ShaderCompile, EPriority::High)
 	{
 	}
@@ -585,7 +585,7 @@ void ShaderCompileService::Compile(const ShaderAsset& Shader)
 {
 	const size_t Hash = Shader.ComputeHash();
 	const auto FileName = Shader.GetPath().filename().generic_string();
-	const auto SourceCode = static_cast<const char8_t*>(Shader.GetRawData().Data.get());
+	const auto SourceCode = static_cast<const char*>(Shader.GetRawData().Data.get());
 	const auto Size = Shader.GetRawData().SizeInBytes;
 
 	for (uint32_t Index = (uint32_t)ERenderHardwareInterface::Vulkan; Index < (uint32_t)ERenderHardwareInterface::Null; ++Index)

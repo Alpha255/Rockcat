@@ -230,7 +230,7 @@ private:
 
 namespace VulkanResult
 {
-	const char8_t* const ToString(VkResult Result);
+	const char* const ToString(VkResult Result);
 };
 
 #define VERIFY_VK(Func)                                                                      \
@@ -299,7 +299,7 @@ public:
 
 	const vk::Instance& GetNativeInstance() const;
 protected:
-	void SetObjectName(vk::ObjectType Type, uint64_t Object, const char8_t* Name);
+	void SetObjectName(vk::ObjectType Type, uint64_t Object, const char* Name);
 private:
 	const class VulkanDevice& m_Device;
 };
@@ -308,7 +308,9 @@ template<class VkObject>
 class VkHwResource : public VkDeviceResource, public RHIResource
 {
 public:
-	VkHwResource(const class VulkanDevice& Device, const char8_t* Name)
+	using NativeType = VkObject::NativeType;
+
+	VkHwResource(const class VulkanDevice& Device, const char* Name)
 		: VkDeviceResource(Device)
 		, RHIResource(Name)
 	{
@@ -322,10 +324,10 @@ public:
 	inline VkObject& GetNative() { return m_Native; }
 	inline const VkObject& GetNative() const { return m_Native; }
 
-	inline void SetDebugName(const char8_t* Name) override final
+	void SetDebugName(const char* Name) override final
 	{
 		assert(Name);
-		SetObjectName(VkObject::objectType, reinterpret_cast<uint64_t>((VkObject::NativeType)m_Native), Name);
+		SetObjectName(VkObject::objectType, reinterpret_cast<uint64_t>((NativeType)m_Native), Name);
 		RHIResource::SetDebugName(Name);
 	}
 

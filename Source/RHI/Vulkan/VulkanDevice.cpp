@@ -38,7 +38,7 @@ NAMESPACE_START(RHI)
 	uint32_t TransferQueueFamilyIndex = ~0u;
 	uint32_t NumQueuePriority = 0u;
 
-	auto GetGpuTypeName = [](VkPhysicalDeviceType Type)-> const char8_t* const
+	auto GetGpuTypeName = [](VkPhysicalDeviceType Type)-> const char* const
 	{
 		switch (Type)
 		{
@@ -137,13 +137,13 @@ NAMESPACE_START(RHI)
 		QueueCreateInfo.pQueuePriorities = QueuePriorities.data();  /// Each element of pQueuePriorities must be between 0.0 and 1.0 inclusive
 	}
 
-	std::vector<const char8_t*> EnabledLayers
+	std::vector<const char*> EnabledLayers
 	{
 #if defined(_DEBUG)
 #endif
 	};
 
-	std::vector<const char8_t*> EnabledExtensions
+	std::vector<const char*> EnabledExtensions
 	{
 #if VK_KHR_swapchain
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
@@ -477,12 +477,12 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 	auto WantedLayers = VulkanLayer::GetWantedDeviceLayers();
 	auto WantedExtensions = VulkanExtension::GetWantedDeviceExtensions();
 
-	std::vector<const char8_t*> EnabledLayers;
-	std::vector<const char8_t*> EnabledExtensions;
+	std::vector<const char*> EnabledLayers;
+	std::vector<const char*> EnabledExtensions;
 
 	LOG_DEBUG("VulkanRHI: Found valid device layers:");
 	auto LayerProperties = m_PhysicalDevice.enumerateDeviceLayerProperties();
-	for each (const auto& LayerProperty in LayerProperties)
+	for (const auto& LayerProperty : LayerProperties)
 	{
 		auto LayerIt = std::find_if(WantedLayers.begin(), WantedLayers.end(), [&LayerProperty](const std::unique_ptr<VulkanLayer>& Layer) {
 			return strcmp(Layer->GetName(), LayerProperty.layerName.data()) == 0;
@@ -500,7 +500,7 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 
 	LOG_DEBUG("VulkanRHI: Found valid device extensions:");
 	auto ExtensionProperties = m_PhysicalDevice.enumerateDeviceExtensionProperties();
-	for each (const auto& ExtensionProperty in ExtensionProperties)
+	for (const auto& ExtensionProperty : ExtensionProperties)
 	{
 		auto ExtensionIt = std::find_if(WantedExtensions.begin(), WantedExtensions.end(), [&ExtensionProperty](const std::unique_ptr<VulkanExtension>& Extension) {
 			return strcmp(Extension->GetName(), ExtensionProperty.extensionName.data()) == 0;

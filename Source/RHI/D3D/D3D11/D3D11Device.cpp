@@ -49,7 +49,7 @@ D3D11Device::D3D11Device(const DxgiFactory& Factory)
 		DXGI_ADAPTER_DESC AdapterDesc;
 		VERIFY_D3D(m_Adapter->GetNative()->GetDesc(&AdapterDesc));
 
-		auto GetFeatureLevelName = [](D3D_FEATURE_LEVEL Level)->const char8_t* const
+		auto GetFeatureLevelName = [](D3D_FEATURE_LEVEL Level)->const char* const
 		{
 			switch (Level)
 			{

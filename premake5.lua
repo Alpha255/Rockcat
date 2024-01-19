@@ -12,7 +12,7 @@ workspace "Rockcat"
 	symbolspath "$(IntDir)$(TargetName).pdb"
 	debugdir "$(SolutionDir)Out"
 	--flags { "MultiProcessorCompile", "NoIncrementalLink" }
-	cppdialect "C++17"
+	cppdialect "C++20"
 	flags { "MultiProcessorCompile", }
 	filter { "configurations:Debug" }
 		symbols "On"
@@ -25,7 +25,7 @@ workspace "Rockcat"
 		system "Windows"
 		architecture "x64"
 	filter {}
-	disablewarnings { "4996" }
+	disablewarnings { "4996", "5054" }
 
 	group "Gear"
 		project "Runtime"
@@ -139,8 +139,8 @@ workspace "Rockcat"
 			location "./Out/Intermediate/VCProjects"
 			targetdir "$(SolutionDir)Out"
 			targetname "$(ProjectName)_$(Configuration)"
-			buildoptions { "/bigobj" }
-			--disablewarnings { "4819", "4189", "4131", "4996", "4127", "4244" }
+			--buildoptions { "/bigobj" }
+			disablewarnings { "4131", "4127", "4244" }
 			--implibname "$(SolutionDir)Out/Intermediate/$(Configuration)/$(ProjectName)"
 			files {
 				"./Submodules/assimp/**.h",

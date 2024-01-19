@@ -6,7 +6,7 @@ template<class T>
 class Option
 {
 public:
-	Option(const T& Value, const char8_t* Description)
+	Option(const T& Value, const char* Description)
 		: m_Value(Value)
 		, m_Description(Description)
 	{
@@ -32,7 +32,7 @@ template<class T>
 class Optional : public std::optional<T>
 {
 public:
-	Optional(const T& Value, const char8_t* Description)
+	Optional(const T& Value, const char* Description)
 		: std::optional<T>(Value)
 		, m_Description(Description)
 	{

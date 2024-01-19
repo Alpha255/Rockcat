@@ -95,7 +95,7 @@ struct KeyboardEvent
 {
 	EKeyboardKey Key = EKeyboardKey::None;
 	EKeyState State = EKeyState::Up;
-	char8_t InputChar = 0;
+	char InputChar = 0;
 	InputModifiers Modifiers;
 };
 

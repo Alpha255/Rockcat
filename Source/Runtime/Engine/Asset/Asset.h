@@ -41,7 +41,7 @@ struct AssetType
 	std::string_view Extension;
 	EContentsType ContentsType;
 
-	AssetType(const char8_t* InName, const char8_t* InExtension, EContentsType InContentsType = EContentsType::Binary)
+	AssetType(const char* InName, const char* InExtension, EContentsType InContentsType = EContentsType::Binary)
 		: Name(InName)
 		, Extension(InExtension)
 		, ContentsType(InContentsType)
@@ -118,7 +118,7 @@ public:
 		return m_Dirty;
 	}
 
-	static const char8_t* GetPrefabricateAssetExtension(EPrefabAssetType Type)
+	static const char* GetPrefabricateAssetExtension(EPrefabAssetType Type)
 	{
 		switch (Type)
 		{
