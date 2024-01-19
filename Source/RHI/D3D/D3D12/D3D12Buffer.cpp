@@ -4,24 +4,28 @@
 
 D3D12Buffer::D3D12Buffer(const D3D12Device& Device, const RHIBufferCreateInfo& RHICreateInfo)
 {
+	assert(RHICreateInfo.AccessFlags != ERHIDeviceAccessFlags::None);
+
 	static const size_t ConstantsBufferAlignment = 256ull;
 	
+	DXGI_SAMPLE_DESC SampleDesc
+	{
+		.Count = 1u,
+		.Quality = 0u
+	};
+
 	D3D12_RESOURCE_DESC CreateDesc
 	{
-		D3D12_RESOURCE_DIMENSION_BUFFER,
-		0u,
-		RHICreateInfo.Size,
-		1u,
-		1u,
-		1u,
-		DXGI_FORMAT_UNKNOWN,
-		DXGI_SAMPLE_DESC
-		{
-			1u,
-			0u
-		},
-		D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
-		D3D12_RESOURCE_FLAG_NONE
+		.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
+		.Alignment = 0u,
+		.Width = RHICreateInfo.Size,
+		.Height = 1u,
+		.DepthOrArraySize = 1u,
+		.MipLevels = 1u,
+		.Format = DXGI_FORMAT_UNKNOWN,
+		.SampleDesc = SampleDesc,
+		.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
+		.Flags = D3D12_RESOURCE_FLAG_NONE
 	};
 
 	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UniformBuffer))
@@ -35,18 +39,15 @@ D3D12Buffer::D3D12Buffer(const D3D12Device& Device, const RHIBufferCreateInfo& R
 
 	D3D12_HEAP_PROPERTIES HeapProperties
 	{
-		D3D12_HEAP_TYPE_DEFAULT,
-		D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
-		D3D12_MEMORY_POOL_UNKNOWN,
-		0u,
-		0u
+		.Type = D3D12_HEAP_TYPE_DEFAULT,
+		.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
+		.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN,
+		.CreationNodeMask = 0u,
+		.VisibleNodeMask = 0u
 	};
 
 	D3D12_RESOURCE_STATES States = D3D12_RESOURCE_STATE_COMMON;
-	if (RHICreateInfo.AccessFlags == ERHIDeviceAccessFlags::None)
-	{
-		assert(0);
-	}
+
 	if (EnumHasAnyFlags(RHICreateInfo.AccessFlags, ERHIDeviceAccessFlags::CpuRead))
 	{
 		HeapProperties.Type = D3D12_HEAP_TYPE_READBACK;
@@ -80,8 +81,8 @@ void* D3D12Buffer::Map(size_t Size, size_t Offset)
 
 	D3D12_RANGE Range
 	{
-		Offset,
-		Offset + Size
+		.Begin = Offset,
+		.End = Offset + Size
 	};
 
 	VERIFY_D3D(GetNative()->Map(0u, &Range, &m_MappedMemory));

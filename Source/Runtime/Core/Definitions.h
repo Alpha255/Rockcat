@@ -44,12 +44,6 @@
 	#define PLATFORM_ANDROID 1
 #endif
 
-#if _HAS_CXX20
-	#define MEM(MemberName) MemberName
-#else
-	#define MEM(MemberName)
-#endif
-
 #define NOMINMAX 1
 
 using uchar8_t = unsigned char;

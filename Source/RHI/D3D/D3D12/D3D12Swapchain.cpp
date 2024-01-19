@@ -60,38 +60,42 @@ D3D12Swapchain::D3D12Swapchain(
 	******************************************************************************/
 	const uint32_t DefaultBackBufferCount = 3u;
 
+	DXGI_SAMPLE_DESC SampleDesc
+	{
+		.Count = 1u,
+		.Quality = 0u
+	};
+
+	DXGI_RATIONAL DXGIRational
+	{
+		.Numerator = 0u,
+		.Denominator = 1u
+	};
+
 	DxgiFactory2 Factory2;
 	if (SUCCEEDED(Factory->QueryInterface(Factory2.Reference())))
 	{
 		DXGI_SWAP_CHAIN_DESC1 Desc1
 		{
-			Width,
-			Height,
-			m_ColorFormat,
-			false,
-			DXGI_SAMPLE_DESC
-			{
-				1u,
-				0u
-			},
-			DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT,
-			DefaultBackBufferCount,
-			DXGI_SCALING_STRETCH,
-			DXGI_SWAP_EFFECT_FLIP_DISCARD,
-			DXGI_ALPHA_MODE_UNSPECIFIED,
-			Flags
+			.Width = Width,
+			.Height = Height,
+			.Format = m_ColorFormat,
+			.Stereo = false,
+			.SampleDesc = SampleDesc,
+			.BufferUsage = DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT,
+			.BufferCount = DefaultBackBufferCount,
+			.Scaling = DXGI_SCALING_STRETCH,
+			.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD,
+			.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED,
+			.Flags = Flags
 		};
 
 		DXGI_SWAP_CHAIN_FULLSCREEN_DESC FullscreenDesc
 		{
-			DXGI_RATIONAL
-			{
-				0u,
-				1u
-			},
-			DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE,
-			DXGI_MODE_SCALING_UNSPECIFIED,
-			!Fullscreen
+			.RefreshRate = DXGIRational,
+			.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE,
+			.Scaling = DXGI_MODE_SCALING_UNSPECIFIED,
+			.Windowed = !Fullscreen
 		};
 
 		VERIFY_D3D(Factory2->CreateSwapChainForHwnd(
@@ -113,32 +117,26 @@ D3D12Swapchain::D3D12Swapchain(
 	}
 	else
 	{
+		DXGI_MODE_DESC DXGIModeDesc
+		{
+			.Width = Width,
+			.Height = Height,
+			.RefreshRate = DXGIRational,
+			.Format = m_ColorFormat,
+			.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE,
+			.Scaling = DXGI_MODE_SCALING_UNSPECIFIED
+		};
+
 		DXGI_SWAP_CHAIN_DESC Desc
 		{
-			DXGI_MODE_DESC
-			{
-				Width,
-				Height,
-				DXGI_RATIONAL
-				{
-					0u,
-					1u
-				},
-				m_ColorFormat,
-				DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE,
-				DXGI_MODE_SCALING_UNSPECIFIED
-			},
-			DXGI_SAMPLE_DESC
-			{
-				1u,
-				0u
-			},
-			DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT,
-			DefaultBackBufferCount,
-			reinterpret_cast<HWND>(WindowHandle),
-			!Fullscreen,
-			DXGI_SWAP_EFFECT_FLIP_DISCARD,
-			Flags
+			.BufferDesc = DXGIModeDesc,
+			.SampleDesc = SampleDesc,
+			.BufferUsage = DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT,
+			.BufferCount = DefaultBackBufferCount,
+			.OutputWindow = reinterpret_cast<HWND>(WindowHandle),
+			.Windowed = !Fullscreen,
+			.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD,
+			.Flags = Flags
 		};
 
 		VERIFY_D3D(Factory->CreateSwapChain(

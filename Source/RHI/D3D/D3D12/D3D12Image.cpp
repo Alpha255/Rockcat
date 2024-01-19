@@ -6,27 +6,29 @@
 D3D12Image::D3D12Image(const D3D12Device& Device, const RHIImageCreateInfo& RHICreateInfo)
 	: RHIImage(RHICreateInfo)
 {
+	DXGI_SAMPLE_DESC SampleDesc
+	{
+		.Count = static_cast<uint32_t>(RHICreateInfo.SampleCount),
+		.Quality = 0u
+	};
+
 	D3D12_RESOURCE_DESC CreateDesc
 	{
-		GetImageDimension(RHICreateInfo.ImageType),
-		0u,
-		RHICreateInfo.Width,
-		RHICreateInfo.Height,
-		static_cast<uint16_t>(RHICreateInfo.ImageType == ERHIImageType::T_3D ? RHICreateInfo.Depth : RHICreateInfo.ArrayLayers),
-		static_cast<uint16_t>(RHICreateInfo.MipLevels),
-		::GetFormat(RHICreateInfo.Format),
-		DXGI_SAMPLE_DESC
-		{
-			static_cast<uint32_t>(RHICreateInfo.SampleCount),
-			0u
-		},
-		D3D12_TEXTURE_LAYOUT_UNKNOWN,
-		D3D12_RESOURCE_FLAG_NONE
+		.Dimension = GetImageDimension(RHICreateInfo.ImageType),
+		.Alignment = 0u,
+		.Width = RHICreateInfo.Width,
+		.Height = RHICreateInfo.Height,
+		.DepthOrArraySize = static_cast<uint16_t>(RHICreateInfo.ImageType == ERHIImageType::T_3D ? RHICreateInfo.Depth : RHICreateInfo.ArrayLayers),
+		.MipLevels = static_cast<uint16_t>(RHICreateInfo.MipLevels),
+		.Format = ::GetFormat(RHICreateInfo.Format),
+		.SampleDesc = SampleDesc,
+		.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
+		.Flags = D3D12_RESOURCE_FLAG_NONE
 	};
 
 	D3D12_CLEAR_VALUE ClearValue
 	{
-		CreateDesc.Format
+		.Format = CreateDesc.Format
 	};
 
 	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::RenderTarget))
@@ -50,11 +52,11 @@ D3D12Image::D3D12Image(const D3D12Device& Device, const RHIImageCreateInfo& RHIC
 
 	D3D12_HEAP_PROPERTIES HeapProperties
 	{
-		D3D12_HEAP_TYPE_DEFAULT,
-		D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
-		D3D12_MEMORY_POOL_UNKNOWN,
-		0u,
-		0u
+		.Type = D3D12_HEAP_TYPE_DEFAULT,
+		.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
+		.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN,
+		.CreationNodeMask = 0u,
+		.VisibleNodeMask = 0u
 	};
 
 	assert(false); /// #TODO ResourceStates
@@ -77,16 +79,16 @@ D3D12Sampler::D3D12Sampler(const D3D12Device& Device, const RHISamplerCreateInfo
 
 	D3D12_SAMPLER_DESC CreateDesc
 	{
-		GetFilter(RHICreateInfo.MinMagFilter, RHICreateInfo.MipmapMode, RHICreateInfo.MaxAnisotropy),
-		GetSamplerAddressMode(RHICreateInfo.AddressModeU),
-		GetSamplerAddressMode(RHICreateInfo.AddressModeV),
-		GetSamplerAddressMode(RHICreateInfo.AddressModeW),
-		RHICreateInfo.MipLODBias,
-		RHICreateInfo.MaxAnisotropy,
-		GetCompareFunc(RHICreateInfo.CompareOp),
-		{BorderColor.x, BorderColor.y, BorderColor.z, BorderColor.w},
-		RHICreateInfo.MinLOD,
-		RHICreateInfo.MaxLOD
+		.Filter = GetFilter(RHICreateInfo.MinMagFilter, RHICreateInfo.MipmapMode, static_cast<uint32_t>(RHICreateInfo.MaxAnisotropy)),
+		.AddressU = GetSamplerAddressMode(RHICreateInfo.AddressModeU),
+		.AddressV = GetSamplerAddressMode(RHICreateInfo.AddressModeV),
+		.AddressW = GetSamplerAddressMode(RHICreateInfo.AddressModeW),
+		.MipLODBias = RHICreateInfo.MipLODBias,
+		.MaxAnisotropy = static_cast<uint32_t>(RHICreateInfo.MaxAnisotropy),
+		.ComparisonFunc = GetCompareFunc(RHICreateInfo.CompareOp),
+		.BorderColor = {BorderColor.x, BorderColor.y, BorderColor.z, BorderColor.w},
+		.MinLOD = RHICreateInfo.MinLOD,
+		.MaxLOD = RHICreateInfo.MaxLOD
 	};
 
 	Device->CreateSampler(&CreateDesc, m_Descriptor);
