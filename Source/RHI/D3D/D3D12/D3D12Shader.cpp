@@ -7,7 +7,7 @@ D3D12InputLayout::D3D12InputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo
 	{
 		for (auto& Attr : Binding.Attributes)
 		{
-			m_ElementDescs.emplace_back(
+			m_Elements.emplace_back(
 				D3D12_INPUT_ELEMENT_DESC 
 				{
 					.SemanticName = Attr.Usage.c_str(),

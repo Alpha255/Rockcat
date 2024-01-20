@@ -52,7 +52,7 @@ private:
 	std::map<std::string, std::string> m_Defines;
 };
 
-class ShaderBinary : public MemoryBlock
+class ShaderBinary
 {
 public:
 	enum class EStatus
@@ -62,20 +62,43 @@ public:
 		Compiled
 	};
 
-	using MemoryBlock::MemoryBlock;
+	ShaderBinary() = default;
 
-	size_t GetSize() const { return SizeInBytes; }
-	const byte8_t* GetBinary() const { return RawData.get(); }
-	bool8_t IsValid() const { return SizeInBytes > 0u; }
+	ShaderBinary(size_t Size, const void* Compiled)
+		: m_Size(Size)
+		, m_Binary(new byte8_t[Size]())
+	{
+		VERIFY(memcpy_s(m_Binary.get(), Size, Compiled, Size) == 0);
+	}
+
+	size_t GetSize() const { return m_Size; }
+	const byte8_t* GetBinary() const { return m_Binary.get(); }
+	bool8_t IsValid() const { return m_Size > 0u; }
 
 	template<class Archive>
-	void serialize(Archive& Ar)
+	void load(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(MemoryBlock)
+			CEREAL_NVP(m_Size)
 		);
+
+		m_Binary.reset(new byte8_t[m_Size]());
+
+		Ar.loadBinaryValue(m_Binary.get(), m_Size, "Compiled");
+	}
+
+	template<class Archive>
+	void save(Archive& Ar) const
+	{
+		Ar(
+			CEREAL_NVP(m_Size)
+		);
+
+		Ar.saveBinaryValue(m_Binary.get(), m_Size, "Compiled");
 	}
 private:
+	size_t m_Size = 0u;
+	std::unique_ptr<byte8_t> m_Binary;
 	//void SetStatus(EStatus Status) { m_Status.store(Status); }
 	//bool8_t IsCompiling() const { return m_Status.load() == EStatus::Compiling; }
 	//bool8_t IsCompiled() const { return m_Status.load() == EStatus::Compiled; }

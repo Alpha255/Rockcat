@@ -61,9 +61,9 @@ public:
 
 	//void CopyImage(RHIImage* SrcImage, const ImageSlice& SrcSlice, RHIImage* DstImage, const ImageSlice& DstSlice) override final;
 
-	void SetViewport(const RHIViewport& DstViewport) override final;
+	void SetViewport(const RHIViewport& Viewport) override final;
 
-	void SetScissorRect(const RHIScissorRect& DstScissorRect) override final;
+	void SetScissorRect(const RHIScissorRect& ScissorRect) override final;
 
 	void WaitCommand(RHICommandBuffer* CommandToWait) override final;
 protected:

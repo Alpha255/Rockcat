@@ -163,12 +163,30 @@ void D3D12CommandList::CopyBuffer(RHIBuffer* DstBuffer, const void* Data, size_t
 //{
 //}
 
-void D3D12CommandList::SetViewport(const RHIViewport& DstViewport)
+void D3D12CommandList::SetViewport(const RHIViewport& Viewport)
 {
+	D3D12_VIEWPORT D3DViewport
+	{
+		.TopLeftX = Viewport.LeftTop.x,
+		.TopLeftY = Viewport.LeftTop.y,
+		.Width = Viewport.GetWidth(),
+		.Height = Viewport.GetHeight(),
+		.MinDepth = Viewport.DepthRange.x,
+		.MaxDepth = Viewport.DepthRange.y
+	};
+	GetNative()->RSSetViewports(1u, &D3DViewport);
 }
 
-void D3D12CommandList::SetScissorRect(const RHIScissorRect& DstScissorRect)
+void D3D12CommandList::SetScissorRect(const RHIScissorRect& ScissorRect)
 {
+	D3D12_RECT D3DRect
+	{
+		.left = ScissorRect.LeftTop.x,
+		.top = ScissorRect.LeftTop.y,
+		.right = ScissorRect.Extent.x,
+		.bottom = ScissorRect.Extent.y
+	};
+	GetNative()->RSSetScissorRects(1u, &D3DRect);
 }
 
 void D3D12CommandList::WaitCommand(RHICommandBuffer* CommandToWait)
