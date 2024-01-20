@@ -5,36 +5,15 @@
 class ResourceManager
 {
 public:
-	struct SceneImages
-	{
-		struct GeometryBuffer
-		{
-			DAGNodeID Albedo;
-			DAGNodeID WorldNormal;
-			DAGNodeID MetallicRoughness;
-		};
-
-		DAGNodeID Depth;
-		DAGNodeID Color;
-		DAGNodeID ShadowMap;
-
-		GeometryBuffer GBuffer;
-	};
-
 	ResourceManager(class RHIDevice& Device, DirectedAcyclicGraph& Graph);
 
 	~ResourceManager();
 
-	Field& GetOrAllocateField(const char* Name, Field::EVisibility Visibility, Field::EResourceType Type);
-
-	const SceneImages& GetSceneImages() const { return m_SceneImages; }
+	RDGResource& GetOrAllocateResource(const char* Name, RDGResource::EVisibility Visibility);
 
 	void CreateResources();
 private:
-	void AllocateSceneImageFields();
-
-	std::unordered_map<std::string_view, std::shared_ptr<Field>> m_Fields;
+	std::unordered_map<std::string_view, std::shared_ptr<RDGResource>> m_Resources;
 	class RHIDevice& m_RHIDevice;
 	DirectedAcyclicGraph& m_Graph;
-	SceneImages m_SceneImages;
 };

@@ -268,7 +268,6 @@ void VulkanSwapchain::Create(bool8_t RecreateSurface)
 			.SetFormat(RHI::GetRHIFormat(m_ColorFormat))
 			.SetSampleCount(ERHISampleCount::Sample_1_Bit)
 			.SetUsages(ERHIBufferUsageFlags::None)
-			.SetRequiredState(ERHIResourceState::Present)
 			.SetName(StringUtils::Format("SwapchainImage-%d", ImageIndex));
 		auto Image = std::make_shared<VulkanImage>(GetDevice(), ImageCreateInfo, Images[ImageIndex]);
 

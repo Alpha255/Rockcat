@@ -5,7 +5,7 @@
 
 using DAGNodeID = DirectedAcyclicGraph::NodeID;
 
-class Field
+class RDGResource
 {
 public:
 	enum class EVisibility
@@ -22,69 +22,52 @@ public:
 		Buffer
 	};
 
-	Field(DAGNodeID ID, const char* Name, EVisibility Visibility, EResourceType Type)
+	RDGResource(DAGNodeID ID, const char* Name, EVisibility Visibility)
 		: m_Visibility(Visibility)
-		, m_ResourceType(Type)
 		, m_NodeID(ID)
 		, m_Name(Name)
 	{
-		assert(Name);
 	}
 
-	Field& SetName(const char* Name) 
-	{ 
-		if (Name && m_Name != Name)
-		{
-			m_Name = Name;
-		}
-		return *this; 
-	}
+	RDGResource& SetName(const char* Name) { m_Name = Name; return *this; }
 	const char* GetName() const { return m_Name.data(); }
 
 	EVisibility GetVisibility() const { return m_Visibility; }
-	Field& SetVisibility(EVisibility Visibility);
+	RDGResource& SetVisibility(EVisibility Visibility);
 
-	EResourceType GetResourceType() const { return m_ResourceType; }
+	EResourceType GetType() const { return m_Type; }
 
 	DAGNodeID GetNodeID() const { return m_NodeID; }
 
-	RHIBufferCreateInfo& GetBufferCreateInfo() 
-	{ 
-		assert(m_ResourceType == EResourceType::Buffer); 
-		return std::get<RHIBufferCreateInfo>(m_ResourceCreateInfo);
-	}
-
-	RHIImageCreateInfo& GetImageCreateInfo() 
-	{ 
-		assert(m_ResourceType == EResourceType::Image);
-		return std::get<RHIImageCreateInfo>(m_ResourceCreateInfo);
-	}
+	RHIImageCreateInfo& CreateAsImage();
+	RHIBufferCreateInfo& CreateAsBuffer();
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
 			CEREAL_NVP(m_Visibility),
-			CEREAL_NVP(m_ResourceType),
+			CEREAL_NVP(m_Type),
 			//CEREAL_NVP(m_Name),
 			CEREAL_NVP(m_NodeID),
 			CEREAL_NVP(m_ResourceCreateInfo)
 		);
 	}
 protected:
+	using ResourceCreateInfo = std::variant<RHIBufferCreateInfo, RHIImageCreateInfo>;
 private:
 	EVisibility m_Visibility = EVisibility::None;
-	EResourceType m_ResourceType = EResourceType::Image;
+	EResourceType m_Type = EResourceType::Image;
 	DAGNodeID m_NodeID;
 	std::string_view m_Name;
 
-	std::variant<RHIBufferCreateInfo, RHIImageCreateInfo> m_ResourceCreateInfo;
+	std::optional<ResourceCreateInfo> m_ResourceCreateInfo;
 };
 
-ENUM_FLAG_OPERATORS(Field::EVisibility)
+ENUM_FLAG_OPERATORS(RDGResource::EVisibility)
 
 struct RenderPassField
 {
-	DAGNodeID ID;
-	Field::EVisibility Visibility;
+	DAGNodeID ResourceID;
+	RDGResource::EVisibility Visibility;
 };

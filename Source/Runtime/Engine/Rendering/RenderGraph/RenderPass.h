@@ -47,10 +47,12 @@ public:
 
 	const char* GetName() const { return m_Name.data(); }
 
-	const std::vector<RenderPassField>& GetFields() const { return m_Fields; }
 	DAGNodeID GetNodeID() const { return m_NodeID; }
 
-	Field& RegisterField(const char* Name, Field::EVisibility Visibility, Field::EResourceType Type);
+	RDGResource& AddInput(const char* Name) { return RegisterResource(Name, RDGResource::EVisibility::Input); }
+	RDGResource& AddOutput(const char* Name) { return RegisterResource(Name, RDGResource::EVisibility::Output); }
+	RDGResource& AddInputOutput(const char* Name) { return RegisterResource(Name, RDGResource::EVisibility::Input | RDGResource::EVisibility::Output); }
+	RDGResource& AddInternal(const char* Name) { return RegisterResource(Name, RDGResource::EVisibility::Internal); }
 
 	virtual void Compile() = 0;
 
@@ -59,6 +61,7 @@ public:
 	virtual void OnGUI() {};
 protected:
 	class ResourceManager& GetResourceManager() { return m_ResourceMgr; }
+	RDGResource& RegisterResource(const char* Name, RDGResource::EVisibility Visibility);
 private:
 	DAGNodeID m_NodeID;
 	std::string_view m_Name;

@@ -81,8 +81,6 @@ struct RHIImageCreateInfo
 	ERHISampleCount SampleCount = ERHISampleCount::Sample_1_Bit;
 	ERHIBufferUsageFlags BufferUsageFlags = ERHIBufferUsageFlags::None;
 
-	ERHIResourceState RequiredState = ERHIResourceState::Common;
-
 	std::string Name;
 
 	inline RHIImageCreateInfo& SetWidth(uint32_t Value) { Width = Value; return *this; }
@@ -94,7 +92,6 @@ struct RHIImageCreateInfo
 	inline RHIImageCreateInfo& SetImageType(ERHIImageType Value) { ImageType = Value; return *this; }
 	inline RHIImageCreateInfo& SetSampleCount(ERHISampleCount Count) { SampleCount = Count; return *this; }
 	inline RHIImageCreateInfo& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; };
-	inline RHIImageCreateInfo& SetRequiredState(ERHIResourceState State) { RequiredState = State; return *this; }
 	inline RHIImageCreateInfo& SetName(const char* Value) { Name = Value; return *this; }
 	inline RHIImageCreateInfo& SetName(const std::string& Value) { Name = Value; return *this; }
 };

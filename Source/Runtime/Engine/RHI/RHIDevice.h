@@ -93,7 +93,6 @@ public:
 			.SetFormat(Format)
 			.SetSampleCount(SampleCount)
 			.SetUsages(UseForShaderResource ? ERHIBufferUsageFlags::RenderTarget | ERHIBufferUsageFlags::ShaderResource : ERHIBufferUsageFlags::RenderTarget)
-			.SetRequiredState(ERHIResourceState::RenderTarget)
 			.SetName(Name);
 		return CreateImage(RHICreateInfo);
 	}
@@ -117,7 +116,6 @@ public:
 			.SetFormat(Format)
 			.SetSampleCount(SampleCount)
 			.SetUsages(ERHIBufferUsageFlags::DepthStencil)
-			.SetRequiredState(ERHIResourceState::DepthWrite)
 			.SetName(Name);
 		return CreateImage(RHICreateInfo);
 	}
@@ -127,7 +125,6 @@ public:
 		RHIBufferCreateInfo RHICreateInfo;
 		RHICreateInfo.SetUsages(ERHIBufferUsageFlags::UniformBuffer)
 			.SetAccessFlags(ERHIDeviceAccessFlags::GpuReadCpuWrite)
-			.SetRequiredState(ERHIResourceState::UniformBuffer)
 			.SetSize(Size);
 		return CreateBuffer(RHICreateInfo);
 	}
@@ -137,7 +134,6 @@ public:
 		RHIBufferCreateInfo RHICreateInfo;
 		RHICreateInfo.SetUsages(ERHIBufferUsageFlags::VertexBuffer)
 			.SetAccessFlags(AccessFlags)
-			.SetRequiredState(ERHIResourceState::VertexBuffer)
 			.SetSize(Size)
 			.SetInitialData(InitialData);
 		return CreateBuffer(RHICreateInfo);
@@ -148,7 +144,6 @@ public:
 		RHIBufferCreateInfo RHICreateInfo;
 		RHICreateInfo.SetUsages(ERHIBufferUsageFlags::IndexBuffer)
 			.SetAccessFlags(AccessFlags)
-			.SetRequiredState(ERHIResourceState::IndexBuffer)
 			.SetSize(Size)
 			.SetInitialData(InitialData);
 		return CreateBuffer(RHICreateInfo);

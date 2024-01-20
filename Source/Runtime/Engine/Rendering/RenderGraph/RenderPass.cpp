@@ -10,9 +10,9 @@ RenderPass::RenderPass(DAGNodeID ID, const char* Name, ResourceManager& Resource
 	assert(Name);
 }
 
-Field& RenderPass::RegisterField(const char* Name, Field::EVisibility Visibility, Field::EResourceType Type)
+RDGResource& RenderPass::RegisterResource(const char* Name, RDGResource::EVisibility Visibility)
 {
-    auto& Ret = m_ResourceMgr.GetOrAllocateField(Name, Visibility, Type);
+    auto& Ret = m_ResourceMgr.GetOrAllocateResource(Name, Visibility);
     m_Fields.emplace_back(RenderPassField{Ret.GetNodeID(), Visibility});
     return Ret;
 }

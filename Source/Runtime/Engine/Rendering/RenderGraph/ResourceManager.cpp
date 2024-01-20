@@ -6,51 +6,49 @@ ResourceManager::ResourceManager(RHIDevice& Device, DirectedAcyclicGraph& Graph)
 	: m_RHIDevice(Device)
 	, m_Graph(Graph)
 {
-	AllocateSceneImageFields();
 }
 
 ResourceManager::~ResourceManager()
 {
 }
 
-Field& ResourceManager::GetOrAllocateField(const char* Name, Field::EVisibility Visibility, Field::EResourceType Type)
+RDGResource& ResourceManager::GetOrAllocateResource(const char* Name, RDGResource::EVisibility Visibility)
 {
-	auto It = m_Fields.find(Name);
-	if (It != m_Fields.end())
+	auto It = m_Resources.find(Name);
+	if (It != m_Resources.end())
 	{
-		It->second->SetName(Name)
-			.SetVisibility(Visibility);
+		It->second->SetVisibility(Visibility);
 		return *It->second;
 	}
 
-	auto NewField = std::make_shared<Field>(m_Graph.AddNode(), Name, Visibility, Type);
-	m_Fields.insert(std::make_pair(std::string_view(Name), NewField));
-	return *NewField;
+	auto NewResource = std::make_shared<RDGResource>(m_Graph.AddNode(), Name, Visibility);
+	m_Resources.insert(std::make_pair(std::string_view(Name), NewResource));
+	return *NewResource;
 }
 
 void ResourceManager::CreateResources()
 {
 }
 
-void ResourceManager::AllocateSceneImageFields()
-{
-	m_SceneImages.Depth = GetOrAllocateField(
-		"SceneDepth", Field::EVisibility::None, Field::EResourceType::Image).GetNodeID();
-
-	m_SceneImages.Color = GetOrAllocateField(
-		"SceneColor", Field::EVisibility::None, Field::EResourceType::Image).GetNodeID();
-
-	m_SceneImages.ShadowMap = GetOrAllocateField(
-		"SceneShadowMap", Field::EVisibility::None, Field::EResourceType::Image).GetNodeID();
-
-	auto RenderingPath = RHIInterface::GetGraphicsSettings().RenderingPath;
-	if (RenderingPath == ERenderingPath::DeferredShading || RenderingPath == ERenderingPath::DeferredLighting)
-	{
-		m_SceneImages.GBuffer.Albedo = GetOrAllocateField(
-			"GBuffer.Albedo", Field::EVisibility::None, Field::EResourceType::Image).GetNodeID();
-		m_SceneImages.GBuffer.WorldNormal = GetOrAllocateField(
-			"GBuffer.WorldNormal", Field::EVisibility::None, Field::EResourceType::Image).GetNodeID();
-		m_SceneImages.GBuffer.MetallicRoughness = GetOrAllocateField(
-			"GBuffer.MetallicRoughness", Field::EVisibility::None, Field::EResourceType::Image).GetNodeID();
-	}
-}
+//void ResourceManager::AllocateSceneImageFields()
+//{
+//	m_SceneImages.Depth = GetOrAllocateField(
+//		"SceneDepth", Field::EVisibility::None, Field::EResourceType::Image).GetNodeID();
+//
+//	m_SceneImages.Color = GetOrAllocateField(
+//		"SceneColor", Field::EVisibility::None, Field::EResourceType::Image).GetNodeID();
+//
+//	m_SceneImages.ShadowMap = GetOrAllocateField(
+//		"SceneShadowMap", Field::EVisibility::None, Field::EResourceType::Image).GetNodeID();
+//
+//	auto RenderingPath = RHIInterface::GetGraphicsSettings().RenderingPath;
+//	if (RenderingPath == ERenderingPath::DeferredShading || RenderingPath == ERenderingPath::DeferredLighting)
+//	{
+//		m_SceneImages.GBuffer.Albedo = GetOrAllocateField(
+//			"GBuffer.Albedo", Field::EVisibility::None, Field::EResourceType::Image).GetNodeID();
+//		m_SceneImages.GBuffer.WorldNormal = GetOrAllocateField(
+//			"GBuffer.WorldNormal", Field::EVisibility::None, Field::EResourceType::Image).GetNodeID();
+//		m_SceneImages.GBuffer.MetallicRoughness = GetOrAllocateField(
+//			"GBuffer.MetallicRoughness", Field::EVisibility::None, Field::EResourceType::Image).GetNodeID();
+//	}
+//}
