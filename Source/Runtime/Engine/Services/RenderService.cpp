@@ -4,7 +4,7 @@
 
 void RenderService::InitializeRHI(const GraphicsSettings& GfxSettings)
 {
-	assert(GfxSettings.RenderHardwareInterface < ERenderHardwareInterface::Null);
+	assert(GfxSettings.RenderHardwareInterface < ERenderHardwareInterface::Num);
 
 	if (!m_RHIs[(size_t)GfxSettings.RenderHardwareInterface])
 	{

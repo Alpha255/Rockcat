@@ -1,6 +1,15 @@
 #pragma once
 
 #include "Runtime/Engine/RHI/RHIBuffer.h"
+#include "Runtime/Engine/RHI/RHIShader.h"
+
+struct RHIShaderVariableBinding
+{
+	ERHIShaderStage Stage;
+	uint32_t Binding = 0u;
+	ERHIResourceType Type = ERHIResourceType::UniformBuffer;
+};
+using RHIPipelineLayoutDesc = std::vector<RHIShaderVariableBinding>;
 
 struct RHIGraphicsPipelineCreateInfo
 {
@@ -10,7 +19,16 @@ struct RHIGraphicsPipelineCreateInfo
 	RHIDepthStencilStateCreateInfo DepthStencilState;
 	RHIMultisampleStateCreateInfo MultisampleState;
 
+	std::array<RHIShaderCreateInfo, (size_t)ERHIShaderStage::Num> Shaders;
+
 	inline RHIGraphicsPipelineCreateInfo& SetPrimitiveTopology(ERHIPrimitiveTopology Topology) { PrimitiveTopology = Topology; return *this; }
+	
+	inline RHIGraphicsPipelineCreateInfo& SetShader(RHIShaderCreateInfo&& CreateInfo) 
+	{ 
+		assert(CreateInfo.Stage < ERHIShaderStage::Num);
+		Shaders[static_cast<size_t>(CreateInfo.Stage)] = std::move(CreateInfo);
+		return *this;
+	}
 };
 
 struct RHIComputePipelineCreateInfo
@@ -168,6 +186,12 @@ private:
 	std::bitset<static_cast<size_t>(EDirtyFlags::Max)> Dirty;
 	PipelineShaderVariableTable ShaderVariableTable;
 #endif
+};
+
+class RHIDescriptorSet
+{
+public:
+	virtual void Commit(const RHIPipelineLayoutDesc& Desc) = 0;
 };
 
 class RHIPipeline

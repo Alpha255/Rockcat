@@ -6,8 +6,6 @@ class VulkanShader final : public VkHwResource<vk::ShaderModule>, public RHIShad
 {
 public:
 	VulkanShader(const class VulkanDevice& Device, const RHIShaderCreateInfo& CreateInfo);
-
-	~VulkanShader() = default;
 };
 
 class VulkanInputLayout final : public RHIInputLayout

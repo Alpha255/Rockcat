@@ -167,19 +167,19 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 	std::vector<vk::PipelineColorBlendAttachmentState> ColorBlendAttachmentStates;
 	for (uint32_t AttachmentIndex = 0u; AttachmentIndex < ERHILimitations::MaxRenderTargets; ++AttachmentIndex)
 	{
-		if (CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].Index == AttachmentIndex)
-		{
-			ColorBlendAttachmentStates.emplace_back(
-				vk::PipelineColorBlendAttachmentState()
-				.setBlendEnable(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].Enable)
-				.setSrcColorBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].SrcColor))
-				.setDstColorBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].DstColor))
-				.setColorBlendOp(GetBlendOp(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].ColorOp))
-				.setSrcAlphaBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].SrcAlpha))
-				.setDstAlphaBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].DstAlpha))
-				.setAlphaBlendOp(GetBlendOp(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].AlphaOp))
-				.setColorWriteMask(GetColorComponentFlags(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].ColorMask)));
-		}
+		//if (CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].Index == AttachmentIndex)
+		//{
+		//	ColorBlendAttachmentStates.emplace_back(
+		//		vk::PipelineColorBlendAttachmentState()
+		//		.setBlendEnable(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].Enable)
+		//		.setSrcColorBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].SrcColor))
+		//		.setDstColorBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].DstColor))
+		//		.setColorBlendOp(GetBlendOp(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].ColorOp))
+		//		.setSrcAlphaBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].SrcAlpha))
+		//		.setDstAlphaBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].DstAlpha))
+		//		.setAlphaBlendOp(GetBlendOp(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].AlphaOp))
+		//		.setColorWriteMask(GetColorComponentFlags(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].ColorMask)));
+		//}
 	}
 	auto BlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo()
 		.setLogicOpEnable(CreateInfo.BlendState.EnableLogicOp)

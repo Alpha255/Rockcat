@@ -137,8 +137,6 @@ enum class ERHIPrimitiveTopology : uint8_t
 
 struct RHIRenderTargetBlendDesc
 {
-	uint8_t Index = ERHILimitations::MaxRenderTargets;
-
 	bool8_t Enable = false;
 	ERHIColorWriteMask ColorMask = ERHIColorWriteMask::All;
 
@@ -150,7 +148,6 @@ struct RHIRenderTargetBlendDesc
 	ERHIBlendFactor DstAlpha = ERHIBlendFactor::Zero;
 	ERHIBlendOp AlphaOp = ERHIBlendOp::Add;
 
-	inline RHIRenderTargetBlendDesc& SetIndex(uint8_t Value) { Index = Value; return *this; }
 	inline RHIRenderTargetBlendDesc& SetEnable(bool8_t IsEnable) { Enable = IsEnable; return *this; }
 	inline RHIRenderTargetBlendDesc& SetColorMask(ERHIColorWriteMask ColorWriteMask) { ColorMask = ColorWriteMask; return *this; }
 	inline RHIRenderTargetBlendDesc& SetSrcColorBlendFactor(ERHIBlendFactor SrcColorBlendFactor) { SrcColor = SrcColorBlendFactor; return *this; }
@@ -159,8 +156,6 @@ struct RHIRenderTargetBlendDesc
 	inline RHIRenderTargetBlendDesc& SetSrcAlphaBlendFactor(ERHIBlendFactor SrcAlphaBlendFactor) { SrcAlpha = SrcAlphaBlendFactor; return *this; }
 	inline RHIRenderTargetBlendDesc& SetDstAlphaBlendFactor(ERHIBlendFactor DstAlphaBlendFactor) { DstAlpha = DstAlphaBlendFactor; return *this; }
 	inline RHIRenderTargetBlendDesc& SetAlphaBlendOp(ERHIBlendOp AlphaBlendOp) { AlphaOp = AlphaBlendOp; return *this; }
-
-	inline bool8_t IsValid() const { return Index != ERHILimitations::MaxRenderTargets; }
 };
 
 /// Move AlphaToCoverage/IndependentBlend to MultisampleState
@@ -209,12 +204,12 @@ struct RHIStencilStateDesc
 
 struct RHIDepthStencilStateCreateInfo
 {
-	bool8_t EnableDepth = true;
+	bool8_t EnableDepth = false;
 	bool8_t EnableDepthWrite = false;
 	bool8_t EnableDepthBoundsTest = false;
 	bool8_t EnableStencil = false;
 
-	ERHICompareFunc DepthCompareFunc = ERHICompareFunc::Less;
+	ERHICompareFunc DepthCompareFunc = ERHICompareFunc::Always;
 	uint8_t StencilReadMask = 0xFF;
 	uint8_t StencilWriteMask = 0xFF;
 
@@ -324,15 +319,17 @@ struct RHIScissorRect
 	bool8_t operator!=(const RHIScissorRect& Other) const { return LeftTop != Other.LeftTop || Extent != Other.Extent; }
 };
 
-enum class ERHIAttachmentLoadOp
+enum class ERHIAttachmentLoadOp : uint8_t
 {
+	None,
 	Load,
 	Clear,
 	DontCare
 };
 
-enum class ERHIAttachmentStoreOp
+enum class ERHIAttachmentStoreOp : uint8_t
 {
+	None,
 	Store,
 	DontCare
 };

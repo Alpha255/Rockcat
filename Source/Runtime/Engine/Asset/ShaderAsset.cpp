@@ -47,3 +47,10 @@ void ShaderAsset::Compile(bool8_t Force)
 		FreeRawData();
 	}
 }
+
+RHIShaderCreateInfo ShaderAsset::GetRHICreateInfo(ERenderHardwareInterface RHI) const
+{
+	return RHIShaderCreateInfo().SetStage(m_Stage)
+		.SetName(GetPath().string())
+		.SetShaderBinary(GetBinary(RHI));
+}

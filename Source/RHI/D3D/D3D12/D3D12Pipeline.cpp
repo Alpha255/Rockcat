@@ -203,7 +203,7 @@ D3D12GraphicsPipelineState::D3D12GraphicsPipelineState(const D3D12Device& Device
 	CreateDesc.BlendState.IndependentBlendEnable = true;
 	for (uint32_t Index = 0u; Index < ERHILimitations::MaxRenderTargets; ++Index)
 	{
-		if (RHICreateInfo.BlendState.RenderTargetBlends[Index].Index == Index)
+		if (RHICreateInfo.BlendState.RenderTargetBlends[Index].Enable)
 		{
 			CreateDesc.BlendState.RenderTarget[Index] = D3D12_RENDER_TARGET_BLEND_DESC
 			{

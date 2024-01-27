@@ -3,6 +3,7 @@
 #include "Runtime/Core/StringUtils.h"
 #include "Runtime/Engine/Asset/SerializableAsset.h"
 #include "Runtime/Engine/Application/GraphicsSettings.h"
+#include "Runtime/Engine/RHI/RHIShader.h"
 
 class ShaderDefines
 {
@@ -98,7 +99,7 @@ public:
 	}
 private:
 	size_t m_Size = 0u;
-	std::unique_ptr<byte8_t> m_Binary;
+	std::shared_ptr<byte8_t> m_Binary;
 	//void SetStatus(EStatus Status) { m_Status.store(Status); }
 	//bool8_t IsCompiling() const { return m_Status.load() == EStatus::Compiling; }
 	//bool8_t IsCompiled() const { return m_Status.load() == EStatus::Compiled; }
@@ -117,6 +118,15 @@ struct ShaderCache : public SerializableAsset<ShaderCache>
 	virtual const char* GetExtension() const { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::ShaderCache); }
 
 	bool8_t Contains(size_t Hash) const { return CompiledBinaries.find(Hash) != CompiledBinaries.cend(); }
+	const ShaderBinary* const GetBinary(size_t Hash, ERenderHardwareInterface RHI) const
+	{
+		auto It = CompiledBinaries.find(Hash);
+		if (It != CompiledBinaries.end())
+		{
+			return &It->second.at((size_t)RHI);
+		}
+		return nullptr;
+	}
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -126,7 +136,7 @@ struct ShaderCache : public SerializableAsset<ShaderCache>
 		);
 	}
 
-	std::unordered_map<size_t, std::array<ShaderBinary, (size_t)ERenderHardwareInterface::Null>> CompiledBinaries;
+	std::unordered_map<size_t, std::array<ShaderBinary, (size_t)ERenderHardwareInterface::Num>> CompiledBinaries;
 };
 
 class ShaderAsset : public Asset, public ShaderDefines
@@ -135,11 +145,18 @@ public:
 	template<class StringType>
 	ShaderAsset(StringType&& ShaderName)
 		: Asset(std::move(std::filesystem::path(ASSET_PATH_SHADERS) / std::filesystem::path(std::forward<StringType>(ShaderName))))
+		, m_Stage(GetStage(GetPath()))
 	{
 		GetDefaultDefines();
 	}
 
+	ERHIShaderStage GetStage() const { return m_Stage; }
+
 	void Compile(bool8_t Force = false);
+
+	const ShaderBinary* const GetBinary(ERenderHardwareInterface RHI) const { return GetCache().GetBinary(ComputeHash(), RHI); }
+
+	RHIShaderCreateInfo GetRHICreateInfo(ERenderHardwareInterface RHI) const;
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -149,7 +166,7 @@ public:
 		);
 	}
 protected:
-	ShaderCache& GetCache()
+	ShaderCache& GetCache() const
 	{
 		if (!m_Cache)
 		{
@@ -161,6 +178,36 @@ protected:
 		}
 		return *m_Cache;
 	}
+
+	static ERHIShaderStage GetStage(const std::filesystem::path& ShaderPath)
+	{
+		auto Extension = StringUtils::Lowercase(ShaderPath.extension().generic_string());
+		if (Extension == ".vert")
+		{
+			return ERHIShaderStage::Vertex;
+		}
+		else if (Extension == ".hull")
+		{
+			return ERHIShaderStage::Hull;
+		}
+		else if (Extension == ".domain")
+		{
+			return ERHIShaderStage::Domain;
+		}
+		else if (Extension == ".geom")
+		{
+			return ERHIShaderStage::Geometry;
+		}
+		else if (Extension == ".frag")
+		{
+			return ERHIShaderStage::Fragment;
+		}
+		else if (Extension == ".comp")
+		{
+			return ERHIShaderStage::Compute;
+		}
+		return ERHIShaderStage::Num;
+	}
 private:
 	void GetDefaultDefines();
 
@@ -171,7 +218,9 @@ private:
 		return Path;
 	}
 
-	std::shared_ptr<ShaderCache> m_Cache;
+	mutable std::shared_ptr<ShaderCache> m_Cache;
+
+	ERHIShaderStage m_Stage;
 };
 
 namespace cereal

@@ -13,6 +13,8 @@ public:
 	}
 
 	void Execute(class RHIDevice& Device, const RenderScene& Scene);
+
+	virtual RHIGraphicsPipeline* GetOverrideGraphicsPipeline() { return nullptr; }
 protected:
 private:
 	EMeshPass m_Filter;

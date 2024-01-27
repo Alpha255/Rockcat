@@ -12,5 +12,5 @@ public:
 
 	RHIInterface& GetRHIInterface(ERenderHardwareInterface RHIType) { return *m_RHIs[static_cast<size_t>(RHIType)]; }
 private:
-	std::array<std::unique_ptr<RHIInterface>, (size_t)ERenderHardwareInterface::Null> m_RHIs;
+	std::array<std::unique_ptr<RHIInterface>, (size_t)ERenderHardwareInterface::Num> m_RHIs;
 };

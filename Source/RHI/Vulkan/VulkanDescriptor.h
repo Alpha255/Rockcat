@@ -4,6 +4,22 @@
 
 /// VulkanDescriptor Manager???
 
+class VulkanDescriptorSetLayout final : public VkHwResource<vk::DescriptorSetLayout>
+{
+public:
+	VulkanDescriptorSetLayout(const class VulkanDevice& Device, const RHIPipelineLayoutDesc& Desc);
+};
+
+class VulkanPipelineLayout final : public VkHwResource<vk::PipelineLayout>
+{
+public:
+	VulkanPipelineLayout(const class VulkanDevice& Device, const RHIPipelineLayoutDesc& Desc);
+
+	vk::DescriptorSetLayout GetDescriptorSetLayout() const { return m_DescriptorSetLayout.GetNative(); }
+private:
+	VulkanDescriptorSetLayout m_DescriptorSetLayout;
+};
+
 class VulkanDescriptorPool final : public VkHwResource<vk::DescriptorPool>
 {
 public:
@@ -21,34 +37,13 @@ private:
 	uint32_t m_AllocatedCount = 0u;
 };
 
-#if 0
-struct VulkanDescriptor
+class VulkanDescriptorSet : public VkDeviceResource, public vk::DescriptorSet, public RHIDescriptorSet
 {
-	VkDescriptorSetLayout DescriptorSetLayout = VK_NULL_HANDLE;
-	VkPipelineLayout PipelineLayout = VK_NULL_HANDLE;
-	VkDescriptorSet DescriptorSet = VK_NULL_HANDLE;
+public:
+	VulkanDescriptorSet(const class VulkanDevice& Device, vk::PipelineLayout PipelineLayout, vk::DescriptorSetLayout DescriptorSetLayout, vk::DescriptorSet Set, const RHIPipelineLayoutDesc& Desc);
 
-	struct KeyBindings : public std::tuple<size_t, std::vector<VkDescriptorSetLayoutBinding>, std::vector<VkPushConstantRange>>
-	{
-		using Super = std::tuple<size_t, std::vector<VkDescriptorSetLayoutBinding>, std::vector<VkPushConstantRange>>;
-		using Super::Super;
-
-		const size_t Hash() const
-		{
-			return std::get<0>(*this);
-		}
-
-		const std::vector<VkDescriptorSetLayoutBinding>& DescriptorSetLayoutBindings() const
-		{
-			return std::get<1>(*this);
-		}
-
-		const std::vector<VkPushConstantRange>& PushConstantRanges() const
-		{
-			return std::get<2>(*this);
-		}
-	};
-
-	static KeyBindings MakeKeyBindings(class VulkanDevice* Device, const RHIGraphicsPipelineCreateInfo& Desc);
+	void Commit(const RHIPipelineLayoutDesc& Desc) override final;
+private:
+	vk::PipelineLayout m_PipelineLayout;
+	vk::DescriptorSetLayout m_DescriptorSetLayout;
 };
-#endif

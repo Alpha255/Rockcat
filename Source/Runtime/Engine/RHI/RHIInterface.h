@@ -24,7 +24,7 @@ public:
 
 	virtual ~RHIInterface() = default;
 
-	virtual ERenderHardwareInterface GetRHIType() const { return ERenderHardwareInterface::Null; }
+	virtual ERenderHardwareInterface GetRHIType() const { return ERenderHardwareInterface::Num; }
 
 	static const char* GetRHIName(ERenderHardwareInterface RHI)
 	{ 

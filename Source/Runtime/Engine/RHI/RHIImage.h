@@ -6,7 +6,7 @@
 //#define STBI_NO_PIC
 //#define STBI_NO_PNM
 
-enum class ERHIImageType : uint32_t
+enum class ERHIImageType : uint8_t
 {
 	Unknown,
 	T_1D,
@@ -71,14 +71,15 @@ struct RHIImageCreateInfo
 	uint32_t Width = 1u;
 	uint32_t Height = 1u;
 	uint32_t Depth = 1u;
-
 	uint16_t ArrayLayers = 1u;
 	uint16_t MipLevels = 1u;
 
+	ERHIAttachmentLoadOp AttachmentLoadOp = ERHIAttachmentLoadOp::DontCare;
+	ERHIAttachmentStoreOp AttachmentStoreOp = ERHIAttachmentStoreOp::DontCare;
 	ERHIImageType ImageType = ERHIImageType::Unknown;
-	ERHIFormat Format = ERHIFormat::Unknown;
-
 	ERHISampleCount SampleCount = ERHISampleCount::Sample_1_Bit;
+
+	ERHIFormat Format = ERHIFormat::Unknown;
 	ERHIBufferUsageFlags BufferUsageFlags = ERHIBufferUsageFlags::None;
 
 	std::string Name;
@@ -94,6 +95,8 @@ struct RHIImageCreateInfo
 	inline RHIImageCreateInfo& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; };
 	inline RHIImageCreateInfo& SetName(const char* Value) { Name = Value; return *this; }
 	inline RHIImageCreateInfo& SetName(const std::string& Value) { Name = Value; return *this; }
+	inline RHIImageCreateInfo& SetAttachmentLoadOp(ERHIAttachmentLoadOp Op) { AttachmentLoadOp = Op; return *this; }
+	inline RHIImageCreateInfo& SetAttachmentStoreOp(ERHIAttachmentStoreOp Op) { AttachmentStoreOp = Op; return *this; }
 };
 
 class RHIImage

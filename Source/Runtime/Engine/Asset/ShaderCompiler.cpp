@@ -588,7 +588,7 @@ void ShaderCompileService::Compile(const ShaderAsset& Shader)
 	const auto SourceCode = static_cast<const char*>(Shader.GetRawData().Data.get());
 	const auto Size = Shader.GetRawData().SizeInBytes;
 
-	for (uint32_t Index = (uint32_t)ERenderHardwareInterface::Vulkan; Index < (uint32_t)ERenderHardwareInterface::Null; ++Index)
+	for (uint32_t Index = (uint32_t)ERenderHardwareInterface::Vulkan; Index < (uint32_t)ERenderHardwareInterface::Num; ++Index)
 	{
 		auto RHI = static_cast<ERenderHardwareInterface>(Index);
 
@@ -599,7 +599,7 @@ void ShaderCompileService::Compile(const ShaderAsset& Shader)
 				SourceCode,
 				Size,
 				"main",
-				GetStage(Shader.GetPath()),
+				Shader.GetStage(),
 				Shader);
 
 			DeregisterCompileTask(RHI, Hash);
@@ -609,7 +609,7 @@ void ShaderCompileService::Compile(const ShaderAsset& Shader)
 
 bool8_t ShaderCompileService::RegisterCompileTask(ERenderHardwareInterface RHI, size_t Hash)
 {
-	assert(RHI < ERenderHardwareInterface::Null);
+	assert(RHI < ERenderHardwareInterface::Num);
 
 	if (m_CompilingTasks[size_t(RHI)].find(Hash) != m_CompilingTasks[size_t(RHI)].cend())
 	{
@@ -622,6 +622,6 @@ bool8_t ShaderCompileService::RegisterCompileTask(ERenderHardwareInterface RHI, 
 
 void ShaderCompileService::DeregisterCompileTask(ERenderHardwareInterface RHI, size_t Hash)
 {
-	assert(RHI < ERenderHardwareInterface::Null);
+	assert(RHI < ERenderHardwareInterface::Num);
 	m_CompilingTasks[size_t(RHI)].erase(Hash);
 }

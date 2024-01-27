@@ -19,6 +19,34 @@ static constexpr uint32_t DescriptorPoolLimits[] =
 
 static constexpr uint32_t DescriptorSetsLimit = 2048u;
 
+VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(const VulkanDevice& Device, const RHIPipelineLayoutDesc& Desc)
+	: VkHwResource(Device)
+{
+	std::vector<vk::DescriptorSetLayoutBinding> Bindings(Desc.size());
+	for (uint32_t Index = 0u; Index < Desc.size(); ++Index)
+	{
+		Bindings[Index].setBinding(Desc[Index].Binding)
+			.setDescriptorType(GetDescriptorType(Desc[Index].Type))
+			.setDescriptorCount(1u)
+			.setStageFlags(GetShaderStageFlags(Desc[Index].Stage))
+			.setPImmutableSamplers(nullptr);
+	}
+
+	auto vkCreateInfo = vk::DescriptorSetLayoutCreateInfo()
+		.setBindings(Bindings);
+	VERIFY_VK(GetNativeDevice().createDescriptorSetLayout(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+}
+
+VulkanPipelineLayout::VulkanPipelineLayout(const VulkanDevice& Device, const RHIPipelineLayoutDesc& Desc)
+	: VkHwResource(Device)
+	, m_DescriptorSetLayout(Device, Desc)
+{
+	auto vkCreateInfo = vk::PipelineLayoutCreateInfo()
+		.setSetLayoutCount(1u)
+		.setPSetLayouts(&m_DescriptorSetLayout.GetNative()); // TODO: PushConstants
+	VERIFY_VK(GetNativeDevice().createPipelineLayout(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+}
+
 VulkanDescriptorPool::VulkanDescriptorPool(const VulkanDevice& Device)
 	: VkHwResource(Device)
 {
@@ -93,53 +121,72 @@ bool8_t VulkanDescriptorPool::IsFull() const
 	return m_AllocatedCount == DescriptorSetsLimit;
 }
 
-#if 0
-VulkanDescriptor::KeyBindings VulkanDescriptor::MakeKeyBindings(VulkanDevice* Device, const GraphicsPipelineDesc& Desc)
+VulkanDescriptorSet::VulkanDescriptorSet(const class VulkanDevice& Device, vk::PipelineLayout PipelineLayout, vk::DescriptorSetLayout DescriptorSetLayout, vk::DescriptorSet Set, const RHIPipelineLayoutDesc& Desc)
+	: VkDeviceResource(Device)
+	, vk::DescriptorSet(Set)
+	, m_PipelineLayout(PipelineLayout)
+	, m_DescriptorSetLayout(DescriptorSetLayout)
 {
-	size_t Hash = 0u;
-	std::vector<VkDescriptorSetLayoutBinding> Bindings;
-	std::vector<VkPushConstantRange> PushConstantRanges;
-
-	Desc.Shaders.ForEach([Device, &Hash, &Bindings, &PushConstantRanges](const IShader* Shader) {
-			/// Desc.Shaders[i]->Desc()->Binary.clear();  #TODO Clear shader binary here ???
-			assert(Shader->Desc());
-
-			for (auto& Variable : Shader->Desc()->Variables)
-			{
-				if (Variable.Type == EResourceType::PushConstants)
-				{
-					assert(Variable.ConstantsSize <= Device->PhysicalLimits().maxPushConstantsSize);
-
-					PushConstantRanges.emplace_back(
-						VkPushConstantRange
-						{
-							VkType::ShaderStage(Shader->Stage()) | 0u,
-							0u,
-							Variable.ConstantsSize
-						}
-					);
-
-					HashCombine(Hash, Shader->Stage(), EResourceType::PushConstants, Variable.ConstantsSize);
-				}
-				else
-				{
-					VkDescriptorSetLayoutBinding Binding
-					{
-						Variable.Binding,
-						VkType::DescriptorType(Variable.Type),
-						Variable.Type == EResourceType::PushConstants ? 0u : 1u, /// #TODO Handle resource array
-						VkType::ShaderStage(Shader->Stage()) | 0u,               /// #TODO Support multi shader stages
-						nullptr
-					};
-
-					HashCombine(Hash, Binding.stageFlags, Binding.descriptorType, Binding.binding);
-
-					Bindings.emplace_back(Binding);
-				}
-			}
-		});
-
-	return std::make_tuple(Hash, Bindings, PushConstantRanges);
+	Commit(Desc);
 }
 
-#endif
+void VulkanDescriptorSet::Commit(const RHIPipelineLayoutDesc& Desc)
+{
+	std::vector<vk::DescriptorBufferInfo> Buffers;
+	std::vector<vk::DescriptorImageInfo> Images;
+	std::vector<vk::WriteDescriptorSet> Writes;
+
+	for (auto& Variable : Desc)
+	{
+		auto vkWrite = vk::WriteDescriptorSet()
+			.setDstSet(*this)
+			.setDescriptorCount(1u)
+			.setDescriptorType(GetDescriptorType(Variable.Type))
+			.setDstBinding(Variable.Binding);
+
+		switch (Variable.Type)
+		{
+		case ERHIResourceType::UniformTexelBuffer:
+		case ERHIResourceType::StorageTexelBuffer:
+		case ERHIResourceType::UniformBuffer:
+		case ERHIResourceType::StorageBuffer:
+		case ERHIResourceType::UniformBufferDynamic:
+		case ERHIResourceType::StorageBufferDynamic:
+			Buffers.emplace_back(
+				vk::DescriptorBufferInfo()
+				.setBuffer(nullptr)
+				.setOffset(0u)
+				.setRange(0u));
+			vkWrite.setPBufferInfo(&Buffers.back());
+			break;
+		case ERHIResourceType::SampledImage:
+		case ERHIResourceType::StorageImage:
+			Images.emplace_back(
+				vk::DescriptorImageInfo()
+				.setImageView(nullptr)
+				.setImageLayout(vk::ImageLayout::eUndefined)
+				.setSampler(nullptr));
+			vkWrite.setPImageInfo(&Images.back());
+			break;
+		case ERHIResourceType::CombinedImageSampler:
+			Images.emplace_back(
+				vk::DescriptorImageInfo()
+				.setImageView(nullptr)
+				.setImageLayout(vk::ImageLayout::eUndefined)
+				.setSampler(nullptr));
+			vkWrite.setPImageInfo(&Images.back());
+			break;
+		case ERHIResourceType::Sampler:
+			Images.emplace_back(
+				vk::DescriptorImageInfo()
+				.setImageView(nullptr)
+				.setImageLayout(vk::ImageLayout::eUndefined)
+				.setSampler(nullptr));
+			vkWrite.setPImageInfo(&Images.back());
+			break;
+		}
+		Writes.emplace_back(std::move(vkWrite));
+	}
+
+	GetNativeDevice().updateDescriptorSets(static_cast<uint32_t>(Writes.size()), Writes.data(), 0u, nullptr);
+}

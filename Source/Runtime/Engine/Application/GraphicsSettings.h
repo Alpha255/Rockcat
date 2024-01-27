@@ -49,7 +49,7 @@ enum class ERenderHardwareInterface : uint8_t
 	Vulkan,
 	D3D11,
 	D3D12,
-	Null
+	Num
 };
 
 struct GraphicsSettings
@@ -108,11 +108,12 @@ struct GraphicsSettings
 	bool8_t BatchResourceDataTransfer = false;
 	bool8_t BatchResourceBarrier = false;
 	bool8_t AsyncCommandlistSubmission = false;
+	bool8_t InverseDepth = false;
 	ERenderingPath RenderingPath = ERenderingPath::ForwardRendering;
 	ELightingPolicy LightingPolicy = ELightingPolicy::None;
 	EShadowTechnique ShadowTechnique = EShadowTechnique::None;
 	EAntiAliasingTechnique AntiAliasingTechnique = EAntiAliasingTechnique::None;
-	ERenderHardwareInterface RenderHardwareInterface = ERenderHardwareInterface::Null;
+	ERenderHardwareInterface RenderHardwareInterface = ERenderHardwareInterface::Num;
 	PostProcessingSettings PostProcessing;
 
 	template<class Archive>
@@ -133,6 +134,7 @@ struct GraphicsSettings
 			CEREAL_NVP(BatchResourceDataTransfer),
 			CEREAL_NVP(BatchResourceBarrier),
 			CEREAL_NVP(AsyncCommandlistSubmission),
+			CEREAL_NVP(InverseDepth),
 			CEREAL_NVP(RenderingPath),
 			CEREAL_NVP(LightingPolicy),
 			CEREAL_NVP(ShadowTechnique),

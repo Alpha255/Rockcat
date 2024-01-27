@@ -11,4 +11,8 @@ public:
 	}
 
 	void Compile() override final;
+
+	RHIGraphicsPipeline* GetOverrideGraphicsPipeline() override final { return m_Pipeline.get(); }
+private:
+	RHIGraphicsPipelinePtr m_Pipeline;
 };

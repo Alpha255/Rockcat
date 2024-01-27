@@ -23,15 +23,10 @@ class RHIBuffer
 {
 public:
 	virtual void* Map(size_t Size = WHOLE_SIZE, size_t Offset = 0u) = 0;
-
 	virtual void Unmap() = 0;
-
 	virtual void FlushMappedRange(size_t Size = WHOLE_SIZE, size_t Offset = 0u) = 0;
-
 	virtual void InvalidateMappedRange(size_t Size = WHOLE_SIZE, size_t Offset = 0u) = 0;
-
 	virtual bool8_t Update(const void* Data, size_t Size, size_t SrcOffset = 0u, size_t DstOffset = 0u) = 0;
-
 	void* GetMappedMemory() const { return m_MappedMemory; }
 protected:
 	void* m_MappedMemory = nullptr;
@@ -39,52 +34,49 @@ protected:
 
 struct RHIFrameBufferCreateInfo
 {
-	std::vector<RHIImage*> ColorAttachments;
-	RHIImage* DepthStencilAttachment = nullptr;
-
-	RHIFrameBufferCreateInfo& AddColorAttachment(RHIImage* Attachment)
+	struct RHIAttachment
 	{
-		assert(Attachment);
-		assert(std::find(ColorAttachments.begin(), ColorAttachments.end(), Attachment) == ColorAttachments.end());
-		assert(ColorAttachments.size() < ERHILimitations::MaxRenderTargets);
-
-		if (!Width || !Height || !Depth)
-		{
-			Width = Attachment->GetWidth();
-			Height = Attachment->GetHeight();
-			Depth = Attachment->GetDepth();
-		}
-		else
-		{
-			assert(Width == Attachment->GetWidth() && Height == Attachment->GetHeight() && Depth == Attachment->GetDepth());
-		}
-
-		ColorAttachments.emplace_back(Attachment);
-		return *this;
-	}
-
-	RHIFrameBufferCreateInfo& SetDepthStencilAttachment(RHIImage* Attachment)
-	{
-		assert(Attachment);
-
-		if (!Width || !Height || !Depth)
-		{
-			Width = Attachment->GetWidth();
-			Height = Attachment->GetHeight();
-			Depth = Attachment->GetDepth();
-		}
-		else
-		{
-			assert(Width == Attachment->GetWidth() && Height == Attachment->GetHeight() && Depth == Attachment->GetDepth());
-		}
-
-		DepthStencilAttachment = Attachment;
-		return *this;
-	}
+		ERHIFormat Format = ERHIFormat::Unknown;
+		RHIImagePtr Image;
+	};
 
 	uint32_t Width = 0u;
 	uint32_t Height = 0u;
-	uint32_t Depth = 0u;
+	uint32_t ArrayLayers = 0u;
+
+	RHIAttachment DepthStencilAttachment;
+	std::vector<RHIAttachment> ColorAttachments;
+
+	RHIFrameBufferCreateInfo& SetWidth(uint32_t InWidth) { Width = InWidth; }
+	RHIFrameBufferCreateInfo& SetHeight(uint32_t InHeight) { Height = InHeight; }
+	RHIFrameBufferCreateInfo& SetArrayLayers(uint32_t InLayers) { ArrayLayers = InLayers; }
+
+	RHIFrameBufferCreateInfo& AddColorFormat(ERHIFormat Format)
+	{
+		assert(ColorAttachments.size() < ERHILimitations::MaxRenderTargets);
+		ColorAttachments.emplace_back(RHIAttachment{Format, nullptr});
+		return *this;
+	}
+
+	RHIFrameBufferCreateInfo& SetColorAttachment(uint32_t Index, RHIImagePtr Color)
+	{
+		assert(Index < ERHILimitations::MaxRenderTargets && ColorAttachments[Index].Format == Color->GetFormat());
+		ColorAttachments[Index].Image = Color;
+		return *this;
+	}
+
+	RHIFrameBufferCreateInfo& SetDepthStencilFormat(ERHIFormat Format)
+	{
+		DepthStencilAttachment.Format = Format;
+		return *this;
+	}
+
+	RHIFrameBufferCreateInfo& SetDepthStencilAttachment(RHIImagePtr DepthStencil)
+	{
+		assert(DepthStencilAttachment.Format == DepthStencil->GetFormat());
+		DepthStencilAttachment.Image = DepthStencil;
+		return *this;
+	}
 };
 
 class RHIFrameBuffer
@@ -92,9 +84,9 @@ class RHIFrameBuffer
 public:
 	inline uint32_t GetWidth() const { return m_Width; }
 	inline uint32_t GetHeight() const { return m_Height; }
-	inline uint32_t GetDepth() const { return m_Depth; }
+	inline uint32_t GetArrayLayers() const { return m_ArrayLayers; }
 private:
 	uint32_t m_Width = 0u;
 	uint32_t m_Height = 0u;
-	uint32_t m_Depth = 0u;
+	uint32_t m_ArrayLayers = 0u;
 };

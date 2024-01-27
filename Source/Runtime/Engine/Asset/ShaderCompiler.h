@@ -91,47 +91,17 @@ public:
 
 	void Compile(const ShaderAsset& Shader);
 protected:
-	static ERHIShaderStage GetStage(const std::filesystem::path& ShaderPath)
-	{
-		auto Extension = StringUtils::Lowercase(ShaderPath.extension().generic_string());
-		if (Extension == ".vert")
-		{
-			return ERHIShaderStage::Vertex;
-		}
-		else if (Extension == ".hull")
-		{
-			return ERHIShaderStage::Hull;
-		}
-		else if (Extension == ".domain")
-		{
-			return ERHIShaderStage::Domain;
-		}
-		else if (Extension == ".geom")
-		{
-			return ERHIShaderStage::Geometry;
-		}
-		else if (Extension == ".frag")
-		{
-			return ERHIShaderStage::Fragment;
-		}
-		else if (Extension == ".comp")
-		{
-			return ERHIShaderStage::Compute;
-		}
-		return ERHIShaderStage::Num;
-	}
-
 	IShaderCompiler& GetCompiler(ERenderHardwareInterface RHI)
 	{
-		assert(RHI < ERenderHardwareInterface::Null && RHI > ERenderHardwareInterface::Software);
+		assert(RHI < ERenderHardwareInterface::Num && RHI > ERenderHardwareInterface::Software);
 		return *m_Compilers[(size_t)RHI];
 	}
 
 	bool8_t RegisterCompileTask(ERenderHardwareInterface RHI, size_t Hash);
 	void DeregisterCompileTask(ERenderHardwareInterface RHI, size_t Hash);
 private:
-	std::array<std::unique_ptr<IShaderCompiler>, (size_t)ERenderHardwareInterface::Null> m_Compilers;
-	std::array<std::set<size_t>, (size_t)ERenderHardwareInterface::Null> m_CompilingTasks;
+	std::array<std::unique_ptr<IShaderCompiler>, (size_t)ERenderHardwareInterface::Num> m_Compilers;
+	std::array<std::set<size_t>, (size_t)ERenderHardwareInterface::Num> m_CompilingTasks;
 };
 
 #if 0

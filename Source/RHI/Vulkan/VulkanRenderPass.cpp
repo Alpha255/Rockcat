@@ -155,20 +155,20 @@ VulkanFramebuffer::VulkanFramebuffer(const VulkanDevice& Device, const RHIFrameB
 	std::vector<vk::ImageView> Attachments;
 	for (auto& ColorAttachment : CreateInfo.ColorAttachments)
 	{
-		if (ColorAttachment)
+		if (ColorAttachment.Image)
 		{
-			auto Image = Cast<VulkanImage>(ColorAttachment);
+			auto Image = Cast<VulkanImage>(ColorAttachment.Image);
 			assert(Image &&
 				Image->GetWidth() == CreateInfo.Width &&
 				Image->GetHeight() == CreateInfo.Height &&
-				Image->GetDepth() == CreateInfo.Depth);
+				Image->GetArrayLayers() == CreateInfo.ArrayLayers);
 
 			//Attachments.push_back(Image->GetOrCrateImageView(AllSubresource));
 		}
 	}
-	if (CreateInfo.DepthStencilAttachment)
+	if (CreateInfo.DepthStencilAttachment.Image)
 	{
-		auto Image = Cast<VulkanImage>(CreateInfo.DepthStencilAttachment);
+		auto Image = Cast<VulkanImage>(CreateInfo.DepthStencilAttachment.Image);
 		assert(Image);
 
 		//Attachments.push_back(Image->GetOrCrateImageView(AllSubresource));
@@ -179,7 +179,7 @@ VulkanFramebuffer::VulkanFramebuffer(const VulkanDevice& Device, const RHIFrameB
 		.setAttachments(Attachments)
 		.setWidth(CreateInfo.Width)
 		.setHeight(CreateInfo.Height)
-		.setLayers(CreateInfo.Depth);
+		.setLayers(CreateInfo.ArrayLayers);
 
 	VERIFY_VK(GetNativeDevice().createFramebuffer(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
@@ -222,7 +222,7 @@ void VulkanFramebuffer::CreateRenderPass(const RHIFrameBufferCreateInfo& CreateI
 	for (uint32_t ColorAttachmentIndex = 0u; ColorAttachmentIndex < CreateInfo.ColorAttachments.size(); ++ColorAttachmentIndex)
 	{
 		AttachmentDescriptions[ColorAttachmentIndex]
-			.setFormat(GetFormat(CreateInfo.ColorAttachments[ColorAttachmentIndex]->GetFormat()))
+			.setFormat(GetFormat(CreateInfo.ColorAttachments[ColorAttachmentIndex].Format))
 			.setSamples(vk::SampleCountFlagBits::e1)
 			.setLoadOp(vk::AttachmentLoadOp::eLoad)
 			.setStoreOp(vk::AttachmentStoreOp::eStore)
@@ -236,11 +236,11 @@ void VulkanFramebuffer::CreateRenderPass(const RHIFrameBufferCreateInfo& CreateI
 			.setLayout(vk::ImageLayout::eAttachmentOptimal);
 	}
 
-	if (CreateInfo.DepthStencilAttachment)
+	if (CreateInfo.DepthStencilAttachment.Image)
 	{
 		AttachmentDescriptions.emplace_back(
 			vk::AttachmentDescription()
-			.setFormat(GetFormat(CreateInfo.DepthStencilAttachment->GetFormat()))
+			.setFormat(GetFormat(CreateInfo.DepthStencilAttachment.Format))
 			.setSamples(vk::SampleCountFlagBits::e1)
 			.setLoadOp(vk::AttachmentLoadOp::eLoad)
 			.setStoreOp(vk::AttachmentStoreOp::eStore)

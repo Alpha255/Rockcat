@@ -10,13 +10,13 @@ enum class ERHIShaderLanguage : uint8_t
 
 enum class ERHIShaderStage : uint8_t
 {
-	Vertex = 0,
-	Hull = 1 << 0,
-	Domain = 1 << 1,
-	Geometry = 1 << 2,
-	Fragment = 1 << 3,
-	Compute = 1 << 4,
-	Num = 6
+	Vertex,
+	Hull,
+	Domain,
+	Geometry,
+	Fragment,
+	Num,
+	Compute,
 };
 ENUM_FLAG_OPERATORS(ERHIShaderStage)
 
@@ -62,11 +62,17 @@ class RHIInputLayout : public RHIResource
 
 struct RHIShaderCreateInfo
 {
-	ERHIShaderStage ShaderStage = ERHIShaderStage::Num;
+	ERHIShaderStage Stage = ERHIShaderStage::Num;
 	ERHIShaderLanguage Language = ERHIShaderLanguage::HLSL;
 
-	class ShaderBinary* const Binary = nullptr;
+	const class ShaderBinary* Binary = nullptr;
 	std::string Name;
+
+	inline RHIShaderCreateInfo& SetStage(ERHIShaderStage InStage) { Stage = InStage; return *this; }
+	inline RHIShaderCreateInfo& SetLanguage(ERHIShaderLanguage InLanguage) { Language = InLanguage; return *this; }
+	inline RHIShaderCreateInfo& SetShaderBinary(const class ShaderBinary* const InBinary) { Binary = InBinary; return *this; }
+	inline RHIShaderCreateInfo& SetName(const char* InName) { Name = InName; return *this; }
+	inline RHIShaderCreateInfo& SetName(const std::string& InName) { Name = InName; return *this; }
 };
 
 class RHIShader : public RHIResource

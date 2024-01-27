@@ -9,13 +9,13 @@ RDGResource& RDGResource::SetVisibility(EVisibility Visibility)
 RHIImageCreateInfo& RDGResource::CreateAsImage()
 {
 	assert(!m_ResourceCreateInfo);
-	m_ResourceCreateInfo = std::make_optional(ResourceCreateInfo());
-	return std::get<1u>(m_ResourceCreateInfo.value()).SetName(m_Name.data());
+	m_ResourceCreateInfo = std::make_optional(RHIImageCreateInfo());
+	return std::get<RHIImageCreateInfo>(m_ResourceCreateInfo.value()).SetName(m_Name.data());
 }
 
 RHIBufferCreateInfo& RDGResource::CreateAsBuffer()
 {
 	assert(!m_ResourceCreateInfo);
-	m_ResourceCreateInfo = std::make_optional(ResourceCreateInfo());
-	return std::get<0u>(m_ResourceCreateInfo.value()).SetName(m_Name.data());
+	m_ResourceCreateInfo = std::make_optional(RHIBufferCreateInfo());
+	return std::get<RHIBufferCreateInfo>(m_ResourceCreateInfo.value()).SetName(m_Name.data());
 }

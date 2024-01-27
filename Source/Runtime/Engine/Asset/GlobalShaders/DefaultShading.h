@@ -76,6 +76,23 @@ public:
 	}
 };
 
+class DepthOnlyFS : public ShaderAsset
+{
+public:
+	DepthOnlyFS()
+		: ShaderAsset("DepthOnly.frag")
+	{
+	}
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(ShaderAsset)
+		);
+	}
+};
+
 template<class FS, class VS = GenericVS>
 class BaseMaterial : public MaterialAsset, public VS, public FS
 {
@@ -83,12 +100,12 @@ public:
 	using BaseMaterialType = BaseMaterial<FS, VS>;
 	using MaterialAsset::MaterialAsset;
 
-	BaseMaterial(MaterialID ID, EShadingMode ShadingMode, const char* MaterialAssetName)
-		: MaterialAsset(MaterialAssetName)
+	BaseMaterial(MaterialID ID, EShadingMode ShadingMode, const char* AssetName)
+		: MaterialAsset(AssetName)
 		, m_ID(ID)
-		, m_Name(MaterialAssetName)
+		, m_Name(AssetName)
 	{
-		assert(MaterialAssetName);
+		assert(AssetName);
 
 		SetShadingMode(ShadingMode);
 
@@ -109,8 +126,8 @@ public:
 	ERHICullMode GetCullMode() const { return m_CullMode; }
 	void SetCullMode(ERHICullMode CullMode) { m_CullMode = CullMode; }
 
-	bool8_t IsDoubleSided() const { return m_DoubleSided; }
-	void SetDoubleSided(bool8_t DoubleSided) { m_DoubleSided = DoubleSided; }
+	bool8_t IsTwoSided() const { return m_TwoSided; }
+	void SetTwoSided(bool8_t TwoSided) { m_TwoSided = TwoSided; }
 
 	bool8_t IsReady() const override final { return Asset::IsReady() && VS::IsReady() && FS::IsReady(); }
 
@@ -124,7 +141,7 @@ public:
 			CEREAL_BASE(VS),
 			CEREAL_BASE(FS),
 			CEREAL_NVP(m_CullMode),
-			CEREAL_NVP(m_DoubleSided),
+			CEREAL_NVP(m_TwoSided),
 			CEREAL_NVP(m_ShadingMode),
 			CEREAL_NVP(m_Name)
 		);
@@ -148,7 +165,7 @@ protected:
 private:
 	MaterialID m_ID;
 	ERHICullMode m_CullMode = ERHICullMode::BackFace;
-	bool8_t m_DoubleSided = false;
+	bool8_t m_TwoSided = false;
 	std::string m_Name;
 };
 

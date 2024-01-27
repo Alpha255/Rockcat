@@ -35,7 +35,7 @@ protected: \
 		struct NextVariableID_##VariableName{}; \
 		static FuncPtr AddShaderVariable(NextVariableID_##VariableName, MaterialAsset& Owner, ThisShader& Shader) \
 		{ \
-			MaterialProperty Property{ EShaderVariableType::VariableType, Binding, offsetof(ThisShaderVariablesStruct, VariableName), sizeof(BaseType) }; \
+			MaterialProperty Property{ ERHIResourceType::VariableType, Binding, offsetof(ThisShaderVariablesStruct, VariableName), sizeof(BaseType) }; \
 			Property.Setter = [&Shader](const ShaderVariant& Variant) { Shader.m_ShaderVariables.##VariableName=std::get<BaseType>(Variant);}; \
 			Property.Getter = [&Shader](){ return ShaderVariant(Shader.m_ShaderVariables.##VariableName); }; \
 			Owner.RegisterProperty(#VariableName, std::move(Property)); \
@@ -74,18 +74,18 @@ public: \
 	template<class StringType> \
 	void Set##VariableName(StringType&& Path) { VariableName = std::make_shared<ImageAsset>(std::forward<StringType>(Path)); }
 
-#define DECLARE_SHADER_VARIABLE_UNIFORM(BaseType, VariableName, Binding) DECLARE_SHADER_VARIABLE(BaseType, VariableName, Uniform, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_DEFAULT(BaseType, VariableName))
+#define DECLARE_SHADER_VARIABLE_UNIFORM(BaseType, VariableName, Binding) DECLARE_SHADER_VARIABLE(BaseType, VariableName, UniformBuffer, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_DEFAULT(BaseType, VariableName))
 
-#define DECLARE_SHADER_VARIABLE_TEXTURE_1D(VariableName, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, VariableName, ImageSampler, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_BY_PATH(std::shared_ptr<ImageAsset>, VariableName))
-#define DECLARE_SHADER_VARIABLE_TEXTURE_ARRAY_1D(VariableName, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, VariableName, ImageSampler, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_BY_PATH(std::shared_ptr<ImageAsset>, VariableName))
+#define DECLARE_SHADER_VARIABLE_TEXTURE_1D(VariableName, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, VariableName, SampledImage, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_BY_PATH(std::shared_ptr<ImageAsset>, VariableName))
+#define DECLARE_SHADER_VARIABLE_TEXTURE_ARRAY_1D(VariableName, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, VariableName, SampledImage, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_BY_PATH(std::shared_ptr<ImageAsset>, VariableName))
 
-#define DECLARE_SHADER_VARIABLE_TEXTURE_2D(VariableName, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, VariableName, ImageSampler, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_BY_PATH(std::shared_ptr<ImageAsset>, VariableName))
-#define DECLARE_SHADER_VARIABLE_TEXTURE_ARRAY_2D(VariableName, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, VariableName, ImageSampler, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_BY_PATH(std::shared_ptr<ImageAsset>, VariableName))
+#define DECLARE_SHADER_VARIABLE_TEXTURE_2D(VariableName, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, VariableName, SampledImage, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_BY_PATH(std::shared_ptr<ImageAsset>, VariableName))
+#define DECLARE_SHADER_VARIABLE_TEXTURE_ARRAY_2D(VariableName, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, VariableName, SampledImage, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_BY_PATH(std::shared_ptr<ImageAsset>, VariableName))
 
-#define DECLARE_SHADER_VARIABLE_TEXTURE_CUBE(VariableName, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, VariableName, ImageSampler, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_BY_PATH(std::shared_ptr<ImageAsset>, VariableName))
-#define DECLARE_SHADER_VARIABLE_TEXTURE_ARRAY_CUBE(VariableName, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, VariableName, ImageSampler, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_BY_PATH(std::shared_ptr<ImageAsset>, VariableName))
+#define DECLARE_SHADER_VARIABLE_TEXTURE_CUBE(VariableName, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, VariableName, SampledImage, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_BY_PATH(std::shared_ptr<ImageAsset>, VariableName))
+#define DECLARE_SHADER_VARIABLE_TEXTURE_ARRAY_CUBE(VariableName, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, VariableName, SampledImage, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_BY_PATH(std::shared_ptr<ImageAsset>, VariableName))
 
-#define DECLARE_SHADER_VARIABLE_TEXTURE_3D(VariableName, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, VariableName, ImageSampler, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_BY_PATH(std::shared_ptr<ImageAsset>, VariableName))
+#define DECLARE_SHADER_VARIABLE_TEXTURE_3D(VariableName, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, VariableName, SampledImage, Binding, DECLARE_SHADER_VARIABLE_SETER_GETTER_BY_PATH(std::shared_ptr<ImageAsset>, VariableName))
 
 #else  // __cplusplus
 

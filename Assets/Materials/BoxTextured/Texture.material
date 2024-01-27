@@ -4,7 +4,7 @@
             "class MaterialAsset": {
                 "class SerializableAsset<class MaterialAsset>": {
                     "class Asset": {
-                        "m_LastWriteTime": 133497215761323660
+                        "m_LastWriteTime": 133503125340600610
                     }
                 },
                 "m_Properties": [
@@ -209,7 +209,7 @@
                 }
             },
             "m_CullMode": 2,
-            "m_DoubleSided": false,
+            "m_TwoSided": false,
             "m_ShadingMode": 2,
             "m_Name": "BoxTextured\\Texture"
         }

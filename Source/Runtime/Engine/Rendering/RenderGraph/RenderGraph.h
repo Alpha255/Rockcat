@@ -22,7 +22,6 @@ private:
 
 	bool8_t m_NeedRecompile = true;
 	DirectedAcyclicGraph m_Graph;
-	class RHIDevice& m_RHIDevice;
 	std::shared_ptr<class ResourceManager> m_ResourceMgr;
 	std::shared_ptr<RenderScene> m_RenderScene;
 	std::vector<std::shared_ptr<RenderPass>> m_RenderPasses;

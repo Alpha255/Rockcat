@@ -2,8 +2,8 @@
 #include "Runtime/Engine/RHI/RHIDevice.h"
 #include "Runtime/Engine/RHI/RHIInterface.h"
 
-ResourceManager::ResourceManager(RHIDevice& Device, DirectedAcyclicGraph& Graph)
-	: m_RHIDevice(Device)
+ResourceManager::ResourceManager(RHIInterface& RHI, DirectedAcyclicGraph& Graph)
+	: m_RHI(RHI)
 	, m_Graph(Graph)
 {
 }
@@ -26,7 +26,12 @@ RDGResource& ResourceManager::GetOrAllocateResource(const char* Name, RDGResourc
 	return *NewResource;
 }
 
-void ResourceManager::CreateResources()
+RHIGraphicsPipelinePtr ResourceManager::GetOrCreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo)
+{
+	return RHIGraphicsPipelinePtr();
+}
+
+void ResourceManager::CreateAllResources()
 {
 }
 

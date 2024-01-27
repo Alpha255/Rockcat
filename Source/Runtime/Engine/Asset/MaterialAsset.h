@@ -3,7 +3,7 @@
 #include "Runtime/Core/Math/Matrix.h"
 #include "Runtime/Engine/Asset/SerializableAsset.h"
 #include "Runtime/Engine/Asset/ImageAsset.h"
-#include "Runtime/Engine/RHI/RHIDeclarations.h"
+#include "Runtime/Engine/RHI/RHIResource.h"
 
 enum class EShadingMode
 {
@@ -11,13 +11,6 @@ enum class EShadingMode
 	BlinnPhong,
 	StandardPBR,
 	Toon
-};
-
-enum class EShaderVariableType : uint32_t
-{
-	Uniform,
-	ImageSampler,
-	RWBuffer
 };
 
 using ShaderVariant = std::variant<
@@ -35,7 +28,7 @@ struct MaterialProperty
 	using SetFunc = std::function<void(const ShaderVariant&)>;
 	using GetFunc = std::function<ShaderVariant(void)>;
 
-	EShaderVariableType Type;
+	ERHIResourceType Type;
 	uint32_t Binding;
 	size_t Offset;
 	size_t Stride;
