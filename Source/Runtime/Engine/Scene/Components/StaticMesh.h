@@ -159,6 +159,9 @@ public:
 	ERHIPrimitiveTopology GetPrimitiveTopology() const { return PrimitiveTopology; }
 	ERHIIndexFormat GetIndexFormat() const { return IndexFormat; }
 
+	const RHIBuffer* GetVertexBuffer() const { return m_VertexBuffer.get(); }
+	const RHIBuffer* GetIndexBuffer() const { return m_IndexBuffer.get(); }
+
 	MaterialID GetMaterialID() const { return m_Material; }
 private:
 protected:

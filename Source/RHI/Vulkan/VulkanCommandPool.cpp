@@ -1,12 +1,9 @@
-#if 0
-#include "Colorful/Vulkan/VulkanCommandPool.h"
-#include "Colorful/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanCommandPool.h"
+#include "RHI/Vulkan/VulkanDevice.h"
+#include "Runtime/Engine/Services/SpdLogService.h"
 
-NAMESPACE_START(RHI)
-
-VulkanCommandBufferPool::VulkanCommandBufferPool(VulkanDevice* Device, uint32_t QueueFamilyIndex, EQueueType QueueType, VkCommandPoolCreateFlags CreateFlags)
-	: VkHWObject(Device)
-	, m_QueueType(QueueType)
+VulkanCommandPool::VulkanCommandPool(const VulkanDevice& Device, uint32_t QueueFamilyIndex, ERHIDeviceQueue Queue)
+	: VkHwResource(Device)
 {
 	/*************************
 		VK_COMMAND_POOL_CREATE_TRANSIENT_BIT:
@@ -23,89 +20,76 @@ VulkanCommandBufferPool::VulkanCommandBufferPool(VulkanDevice* Device, uint32_t 
 			specifies that command buffers allocated from the pool are protected command buffers.
 			If the protected memory feature is not enabled, the VK_COMMAND_POOL_CREATE_PROTECTED_BIT bit of flags must not be set.
 	**************************/
-	VkCommandPoolCreateInfo CreateInfo
-	{
-		VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-		nullptr,
-		CreateFlags,
-		QueueFamilyIndex  /// All command buffers allocated from this command pool must be submitted on queues from the same queue family.
-	};
-	VERIFY_VK(vkCreateCommandPool(m_Device->Get(), &CreateInfo, VK_ALLOCATION_CALLBACKS, Reference()));
+
+	auto vkCreateInfo = vk::CommandPoolCreateInfo()
+		.setQueueFamilyIndex(QueueFamilyIndex)
+		.setFlags(vk::CommandPoolCreateFlags());
+	VERIFY_VK(GetNativeDevice().createCommandPool(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
-std::shared_ptr<VulkanCommandBuffer> VulkanCommandBufferPool::GetOrAllocate(ECommandBufferLevel Level, bool8_t AutoBegin, bool8_t UseForTransfer)
+std::shared_ptr<VulkanCommandBuffer> VulkanCommandPool::GetOrAllocateCommandBuffer(ERHICommandBufferLevel Level)
 {
-	std::shared_ptr<VulkanCommandBuffer> Command = nullptr;
-	auto& CommandList = Level == ECommandBufferLevel::Primary ? m_PrimaryCommandBuffers : m_SecondaryCommandBuffers;
-	if (!CommandList.empty())
-	{
-		Command = CommandList.front();
-		CommandList.pop_front();
-	}
-	else
-	{
-		VkCommandBufferAllocateInfo AllocateInfo
-		{
-			VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-			nullptr,
-			m_Handle,
-			Level == ECommandBufferLevel::Primary ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY,
-			1u
-		};
+	//std::shared_ptr<VulkanCommandBuffer> Command = nullptr;
+	//auto& CommandList = Level == ECommandBufferLevel::Primary ? m_PrimaryCommandBuffers : m_SecondaryCommandBuffers;
+	//if (!CommandList.empty())
+	//{
+	//	Command = CommandList.front();
+	//	CommandList.pop_front();
+	//}
+	//else
+	//{
+		auto vkAllocateInfo = vk::CommandBufferAllocateInfo()
+			.setCommandBufferCount(1u)
+			.setCommandPool(GetNative())
+			.setLevel(GetCommandBufferLevel(Level));
 
-		Command = std::make_shared<VulkanCommandBuffer>(m_Device, this, Level, UseForTransfer);
-		VERIFY_VK(vkAllocateCommandBuffers(m_Device->Get(), &AllocateInfo, Command->Reference()));
-	}
-
-	assert(Command && (Command->State() == VulkanCommandBuffer::EState::Initial || Command->State() == VulkanCommandBuffer::EState::Invalid));
-	if (AutoBegin)
-	{
-		Command->Begin();
-	}
+		auto Command = std::make_shared<VulkanCommandBuffer>(GetDevice(), *this, Level);
+		VERIFY_VK(GetNativeDevice().allocateCommandBuffers(&vkAllocateInfo, &Command->GetNative()));
+	//}
 
 	return Command;
 }
 
-void VulkanCommandBufferPool::Reset()
-{
-	/// Resetting a command pool recycles all of the resources from all of the command buffers allocated from the command pool back to the command pool. 
-	/// All command buffers that have been allocated from the command pool are put in the initial state.
-	/// Any primary command buffer allocated from another VkCommandPool that is in the recording or executable state and has a secondary command buffer allocated from commandPool recorded into it, becomes invalid.
-	/// VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT specifies that resetting a command pool recycles all of the resources from the command pool back to the system.
-	/// All VkCommandBuffer objects allocated from commandPool must not be in the pending state
+//void VulkanCommandBufferPool::Reset()
+//{
+//	/// Resetting a command pool recycles all of the resources from all of the command buffers allocated from the command pool back to the command pool. 
+//	/// All command buffers that have been allocated from the command pool are put in the initial state.
+//	/// Any primary command buffer allocated from another VkCommandPool that is in the recording or executable state and has a secondary command buffer allocated from commandPool recorded into it, becomes invalid.
+//	/// VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT specifies that resetting a command pool recycles all of the resources from the command pool back to the system.
+//	/// All VkCommandBuffer objects allocated from commandPool must not be in the pending state
+//
+//	VERIFY_VK(vkResetCommandPool(m_Device->Get(), Get(), VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT));
+//}
+//
+//void VulkanCommandBufferPool::Recycle(std::shared_ptr<VulkanCommandBuffer>& Command)
+//{
+//	if (Command)
+//	{
+//		Command->SetState(VulkanCommandBuffer::EState::Executable);
+//		Command->Reset();
+//
+//		if (Command->Level() == ECommandBufferLevel::Primary)
+//		{
+//			m_PrimaryCommandBuffers.emplace_back(Command);
+//		}
+//		else
+//		{
+//			m_SecondaryCommandBuffers.emplace_back(Command);
+//		}
+//	}
+//}
+//
+//void VulkanCommandBufferPool::Free(std::shared_ptr<VulkanCommandBuffer>& Command)
+//{
+//	assert(Command->State() != VulkanCommandBuffer::EState::Pending);
+//
+//	const VkCommandBuffer Commands[]{ Command->Get() };
+//	vkFreeCommandBuffers(m_Device->Get(), m_Handle, 1u, Commands);
+//
+//	Command->Reset();
+//}
 
-	VERIFY_VK(vkResetCommandPool(m_Device->Get(), Get(), VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT));
-}
-
-void VulkanCommandBufferPool::Recycle(std::shared_ptr<VulkanCommandBuffer>& Command)
-{
-	if (Command)
-	{
-		Command->SetState(VulkanCommandBuffer::EState::Executable);
-		Command->Reset();
-
-		if (Command->Level() == ECommandBufferLevel::Primary)
-		{
-			m_PrimaryCommandBuffers.emplace_back(Command);
-		}
-		else
-		{
-			m_SecondaryCommandBuffers.emplace_back(Command);
-		}
-	}
-}
-
-void VulkanCommandBufferPool::Free(std::shared_ptr<VulkanCommandBuffer>& Command)
-{
-	assert(Command->State() != VulkanCommandBuffer::EState::Pending);
-
-	const VkCommandBuffer Commands[]{ Command->Get() };
-	vkFreeCommandBuffers(m_Device->Get(), m_Handle, 1u, Commands);
-
-	Command->Reset();
-}
-
-VulkanCommandBufferPool::~VulkanCommandBufferPool()
+VulkanCommandPool::~VulkanCommandPool()
 {
 	/// When a pool is destroyed, all command buffers allocated from the pool are freed.
 
@@ -114,23 +98,20 @@ VulkanCommandBufferPool::~VulkanCommandBufferPool()
 
 	/// All VkCommandBuffer objects allocated from commandPool must not be in the pending state.
 
-	Reset();
-
-#if _DEBUG
-	for (auto& Command : m_PrimaryCommandBuffers)
-	{
-		assert(Command->State() != VulkanCommandBuffer::EState::Pending);
-	}
-	for (auto& Command : m_SecondaryCommandBuffers)
-	{
-		assert(Command->State() != VulkanCommandBuffer::EState::Pending);
-	}
-#endif
-	m_PrimaryCommandBuffers.clear();
-	m_SecondaryCommandBuffers.clear();
-
-	vkDestroyCommandPool(m_Device->Get(), Get(), VK_ALLOCATION_CALLBACKS);
+//	Reset();
+//
+//#if _DEBUG
+//	for (auto& Command : m_PrimaryCommandBuffers)
+//	{
+//		assert(Command->State() != VulkanCommandBuffer::EState::Pending);
+//	}
+//	for (auto& Command : m_SecondaryCommandBuffers)
+//	{
+//		assert(Command->State() != VulkanCommandBuffer::EState::Pending);
+//	}
+//#endif
+//	m_PrimaryCommandBuffers.clear();
+//	m_SecondaryCommandBuffers.clear();
+//
+//	vkDestroyCommandPool(m_Device->Get(), Get(), VK_ALLOCATION_CALLBACKS);
 }
-
-NAMESPACE_END(RHI)
-#endif

@@ -139,22 +139,22 @@ namespace VulkanResult
 
 #endif
 
-const vk::Device& VkDeviceResource::GetNativeDevice() const
+const vk::Device& VkBaseDeviceResource::GetNativeDevice() const
 {
 	return m_Device.GetNative();
 }
 
-const vk::PhysicalDevice& VkDeviceResource::GetNativePhysicalDevice() const
+const vk::PhysicalDevice& VkBaseDeviceResource::GetNativePhysicalDevice() const
 {
 	return m_Device.GetPhysicalDevice();
 }
 
-const vk::Instance& VkDeviceResource::GetNativeInstance() const
+const vk::Instance& VkBaseDeviceResource::GetNativeInstance() const
 {
 	return m_Device.GetInstance();
 }
 
-void VkDeviceResource::SetObjectName(vk::ObjectType Type, uint64_t Object, const char* Name)
+void VkBaseDeviceResource::SetObjectName(vk::ObjectType Type, uint64_t Object, const char* Name)
 {
 	assert(Object && Name && Type != vk::ObjectType::eUnknown);
 

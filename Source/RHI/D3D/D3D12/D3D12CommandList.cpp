@@ -38,7 +38,7 @@ D3D12CommandList::D3D12CommandList(const D3D12Device& Device, ERHIDeviceQueue Qu
 
 void D3D12CommandList::Begin()
 {
-	assert(m_State == EState::Initial || m_State == EState::Closed);
+	assert(m_State == EState::Initial || m_State == EState::Executable);
 
 	Reset(); /// #TODO
 
@@ -51,12 +51,12 @@ void D3D12CommandList::End()
 
 	VERIFY_D3D(GetNative()->Close());
 
-	SetState(EState::Closed);
+	SetState(EState::Executable);
 }
 
 void D3D12CommandList::Reset()
 {
-	assert(m_State == EState::Initial || m_State == EState::Closed);
+	assert(m_State == EState::Initial || m_State == EState::Executable);
 
 	/// Resets a command list back to its initial state as if a new command list was just created.
 	VERIFY_D3D(GetNative()->Reset(m_Allocator.GetNative(), nullptr));
@@ -75,6 +75,42 @@ void D3D12CommandList::EndDebugMarker()
 	PIXEndEvent(GetNative());
 }
 
+void D3D12CommandList::SetVertexBuffer(const RHIBuffer* Buffer, uint32_t StartSlot, size_t Offset)
+{
+	assert(m_State == EState::Recording);
+
+	auto D3DBuffer = Cast<D3D12Buffer>(Buffer);
+	D3D12_VERTEX_BUFFER_VIEW BufferView
+	{
+		.BufferLocation = D3D12_GPU_VIRTUAL_ADDRESS{},
+		.SizeInBytes = 0u,
+		.StrideInBytes = 0u
+	};
+
+	GetNative()->IASetVertexBuffers(StartSlot, 1u, &BufferView);
+}
+
+void D3D12CommandList::SetIndexBuffer(const RHIBuffer* Buffer, size_t Offset, ERHIIndexFormat Format)
+{
+	assert(m_State == EState::Recording);
+
+	auto D3DBuffer = Cast<D3D12Buffer>(Buffer);
+	D3D12_INDEX_BUFFER_VIEW BufferView
+	{
+		.BufferLocation = D3D12_GPU_VIRTUAL_ADDRESS{},
+		.SizeInBytes = 0u,
+		.Format = Format == ERHIIndexFormat::UInt32 ? DXGI_FORMAT_R32_UINT : DXGI_FORMAT_R16_UINT
+	};
+
+	GetNative()->IASetIndexBuffer(&BufferView);
+}
+
+void D3D12CommandList::SetPrimitiveTopology(ERHIPrimitiveTopology Topology)
+{
+	assert(m_State == EState::Recording);
+	GetNative()->IASetPrimitiveTopology(GetPrimitiveTopology(Topology));
+}
+
 void D3D12CommandList::Draw(uint32_t VertexCount, uint32_t FirstVertex)
 {
 	assert(m_State == EState::Recording);
@@ -87,7 +123,7 @@ void D3D12CommandList::DrawInstanced(uint32_t VertexCount, uint32_t InstanceCoun
 	GetNative()->DrawInstanced(VertexCount, InstanceCount, FirstVertex, FirstInstance);
 }
 
-void D3D12CommandList::DrawIndirect(RHIBuffer* IndirectBuffer, size_t Offset, uint32_t DrawCount, uint32_t Stride)
+void D3D12CommandList::DrawIndirect(const RHIBuffer* IndirectBuffer, size_t Offset, uint32_t DrawCount, uint32_t Stride)
 {
 	assert(m_State == EState::Recording);
 	assert(false); /// #TODO
@@ -108,7 +144,7 @@ void D3D12CommandList::DrawIndexedInstanced(uint32_t IndexCount, uint32_t Instan
 	GetNative()->DrawIndexedInstanced(IndexCount, InstanceCount, FirstIndex, VertexOffset, FirstInstance);
 }
 
-void D3D12CommandList::DrawIndexedIndirect(RHIBuffer* IndirectBuffer, size_t Offset, uint32_t DrawCount, uint32_t Stride)
+void D3D12CommandList::DrawIndexedIndirect(const RHIBuffer* IndirectBuffer, size_t Offset, uint32_t DrawCount, uint32_t Stride)
 {
 	assert(m_State == EState::Recording);
 	assert(false); /// #TODO
@@ -123,7 +159,7 @@ void D3D12CommandList::Dispatch(uint32_t GroupX, uint32_t GroupY, uint32_t Group
 	GetNative()->Dispatch(GroupX, GroupY, GroupZ);
 }
 
-void D3D12CommandList::DispatchIndirect(RHIBuffer* IndirectBuffer, size_t Offset)
+void D3D12CommandList::DispatchIndirect(const RHIBuffer* IndirectBuffer, size_t Offset)
 {
 	assert(m_State == EState::Recording);
 	assert(false); /// #TODO
@@ -131,31 +167,31 @@ void D3D12CommandList::DispatchIndirect(RHIBuffer* IndirectBuffer, size_t Offset
 	GetNative()->ExecuteIndirect(nullptr, 1u, Cast<D3D12Buffer>(IndirectBuffer)->GetNative(), Offset, nullptr, 0u);
 }
 
-void D3D12CommandList::PushConstants(ERHIShaderStage Stage, RHIBuffer* ConstantsBuffer, const void* Data, size_t Size, size_t Offset)
+void D3D12CommandList::PushConstants(ERHIShaderStage Stage, const RHIBuffer* ConstantsBuffer, const void* Data, size_t Size, size_t Offset)
 {
 }
 
-//void D3D12CommandList::SetGraphicsPipeline(IPipeline* DstPipeline)
-//{
+void D3D12CommandList::SetGraphicsPipeline(const RHIGraphicsPipeline* GraphicsPipeline)
+{
 //	assert(m_State == EState::Recording && DstPipeline);
 //
 //	auto D3D12Pipeline = static_cast<D3D12GraphicsPipeline*>(DstPipeline);
 //	assert(D3D12Pipeline);
-//}
+}
 
-void D3D12CommandList::ClearColorImage(RHIImage* DstImage, const Math::Color& ClearColor)
+void D3D12CommandList::ClearColorImage(const RHIImage* DstImage, const Math::Color& ClearColor)
 {
 }
 
-void D3D12CommandList::ClearDepthStencilImage(RHIImage* DstImage, bool8_t ClearDepth, bool8_t ClearStencil, float32_t Depth, uint8_t Stencil)
+void D3D12CommandList::ClearDepthStencilImage(const RHIImage* DstImage, bool8_t ClearDepth, bool8_t ClearStencil, float32_t Depth, uint8_t Stencil)
 {
 }
 
-void D3D12CommandList::CopyBufferToImage(RHIImage* DstImage, const void* SrcBuffer, uint32_t BufferSize, const RHIImageSubresourceRange& SubresourceRange)
+void D3D12CommandList::CopyBufferToImage(const RHIImage* DstImage, const void* SrcBuffer, uint32_t BufferSize, const RHIImageSubresourceRange& SubresourceRange)
 {
 }
 
-void D3D12CommandList::CopyBuffer(RHIBuffer* DstBuffer, const void* Data, size_t DataSize, size_t SrcOffset, size_t DstOffset)
+void D3D12CommandList::CopyBuffer(const RHIBuffer* DstBuffer, const void* Data, size_t DataSize, size_t SrcOffset, size_t DstOffset)
 {
 }
 
@@ -165,6 +201,8 @@ void D3D12CommandList::CopyBuffer(RHIBuffer* DstBuffer, const void* Data, size_t
 
 void D3D12CommandList::SetViewport(const RHIViewport& Viewport)
 {
+	assert(m_State == EState::Recording);
+
 	D3D12_VIEWPORT D3DViewport
 	{
 		.TopLeftX = Viewport.LeftTop.x,
@@ -179,6 +217,8 @@ void D3D12CommandList::SetViewport(const RHIViewport& Viewport)
 
 void D3D12CommandList::SetScissorRect(const RHIScissorRect& ScissorRect)
 {
+	assert(m_State == EState::Recording);
+
 	D3D12_RECT D3DRect
 	{
 		.left = ScissorRect.LeftTop.x,
@@ -189,7 +229,7 @@ void D3D12CommandList::SetScissorRect(const RHIScissorRect& ScissorRect)
 	GetNative()->RSSetScissorRects(1u, &D3DRect);
 }
 
-void D3D12CommandList::WaitCommand(RHICommandBuffer* CommandToWait)
+void D3D12CommandList::WaitCommand(const RHICommandBuffer* CommandToWait)
 {
 }
 

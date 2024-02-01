@@ -26,7 +26,7 @@ public:
 
 	std::shared_ptr<Asset> GetAsset() const { return m_Asset; }
 
-	void DoTask() override final
+	void Execute() override final
 	{
 		m_Asset->OnPreLoad();
 
@@ -92,7 +92,7 @@ std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(
 				}
 				else
 				{
-					NewTask.DoTask();
+					NewTask.Execute();
 				}
 
 				return NewAsset;

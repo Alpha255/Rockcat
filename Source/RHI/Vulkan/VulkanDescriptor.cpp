@@ -121,13 +121,12 @@ bool8_t VulkanDescriptorPool::IsFull() const
 	return m_AllocatedCount == DescriptorSetsLimit;
 }
 
-VulkanDescriptorSet::VulkanDescriptorSet(const class VulkanDevice& Device, vk::PipelineLayout PipelineLayout, vk::DescriptorSetLayout DescriptorSetLayout, vk::DescriptorSet Set, const RHIPipelineLayoutDesc& Desc)
+VulkanDescriptorSet::VulkanDescriptorSet(const class VulkanDevice& Device, vk::PipelineLayout PipelineLayout, vk::DescriptorSetLayout DescriptorSetLayout, vk::DescriptorSet Set)
 	: VkDeviceResource(Device)
-	, vk::DescriptorSet(Set)
 	, m_PipelineLayout(PipelineLayout)
 	, m_DescriptorSetLayout(DescriptorSetLayout)
 {
-	Commit(Desc);
+	m_Native = Set;
 }
 
 void VulkanDescriptorSet::Commit(const RHIPipelineLayoutDesc& Desc)
@@ -139,7 +138,7 @@ void VulkanDescriptorSet::Commit(const RHIPipelineLayoutDesc& Desc)
 	for (auto& Variable : Desc)
 	{
 		auto vkWrite = vk::WriteDescriptorSet()
-			.setDstSet(*this)
+			.setDstSet(GetNative())
 			.setDescriptorCount(1u)
 			.setDescriptorType(GetDescriptorType(Variable.Type))
 			.setDstBinding(Variable.Binding);

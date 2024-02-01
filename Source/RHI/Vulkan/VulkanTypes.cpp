@@ -367,6 +367,16 @@ vk::DebugReportObjectTypeEXT GetDebugReportObjectType(vk::ObjectType Type)
 	}
 }
 
+vk::CommandBufferLevel GetCommandBufferLevel(ERHICommandBufferLevel Level)
+{
+	switch (Level)
+	{
+	case ERHICommandBufferLevel::Primary: return vk::CommandBufferLevel::ePrimary;
+	case ERHICommandBufferLevel::Secondary: return vk::CommandBufferLevel::eSecondary;
+	default: return vk::CommandBufferLevel::ePrimary;
+	}
+}
+
 vk::SampleCountFlagBits GetSampleCount(ERHISampleCount SampleCount)
 {
 	switch (SampleCount)

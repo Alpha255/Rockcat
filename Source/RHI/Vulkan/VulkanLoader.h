@@ -283,20 +283,19 @@ protected:
 }
 #endif
 
-class VkDeviceResource
+class VkBaseDeviceResource
 {
 public:
-	VkDeviceResource(const class VulkanDevice& Device)
+	VkBaseDeviceResource(const class VulkanDevice& Device)
 		: m_Device(Device)
 	{
 	}
 
+	virtual ~VkBaseDeviceResource() {}
+
 	inline const class VulkanDevice& GetDevice() const { return m_Device; }
-
 	const vk::Device& GetNativeDevice() const;
-
 	const vk::PhysicalDevice& GetNativePhysicalDevice() const;
-
 	const vk::Instance& GetNativeInstance() const;
 protected:
 	void SetObjectName(vk::ObjectType Type, uint64_t Object, const char* Name);
@@ -305,33 +304,43 @@ private:
 };
 
 template<class VkObject>
-class VkHwResource : public VkDeviceResource, public RHIResource
+class VkDeviceResource : public VkBaseDeviceResource
 {
 public:
+	using VkBaseDeviceResource::VkBaseDeviceResource;
+	virtual ~VkDeviceResource() {}
+
+	inline VkObject& GetNative() { return m_Native; }
+	inline const VkObject& GetNative() const { return m_Native; }
+protected:
+	VkObject m_Native;
+};
+
+template<class VkObject>
+class VkHwResource : public VkDeviceResource<VkObject>, public RHIResource
+{
+protected:
+	using BaseType = VkDeviceResource<VkObject>;
+public:
 	using NativeType = VkObject::NativeType;
+	using BaseType::BaseType;
 
 	VkHwResource(const class VulkanDevice& Device, const char* Name)
-		: VkDeviceResource(Device)
+		: VkDeviceResource<VkObject>(Device)
 		, RHIResource(Name)
 	{
 	}
 
-	VkHwResource(const class VulkanDevice& Device)
-		: VkDeviceResource(Device)
-	{
-	}
-
-	inline VkObject& GetNative() { return m_Native; }
-	inline const VkObject& GetNative() const { return m_Native; }
-
 	void SetDebugName(const char* Name) override final
 	{
 		assert(Name);
-		SetObjectName(VkObject::objectType, reinterpret_cast<uint64_t>((NativeType)m_Native), Name);
+		VkBaseDeviceResource::SetObjectName(VkObject::objectType, reinterpret_cast<uint64_t>((NativeType)BaseType::GetNative()), Name);
 		RHIResource::SetDebugName(Name);
 	}
 
-	virtual ~VkHwResource() { GetNativeDevice().destroy(m_Native, VK_ALLOCATION_CALLBACKS, vk::defaultDispatchLoaderDynamic); m_Native = nullptr; };
-protected:
-	VkObject m_Native;
+	virtual ~VkHwResource()
+	{ 
+		BaseType::GetNativeDevice().destroy(BaseType::GetNative(), VK_ALLOCATION_CALLBACKS, vk::defaultDispatchLoaderDynamic);
+		BaseType::GetNative() = nullptr;
+	}
 };

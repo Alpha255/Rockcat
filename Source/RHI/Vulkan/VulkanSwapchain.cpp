@@ -14,7 +14,7 @@ VulkanSurface::VulkanSurface(const VulkanDevice& Device, const void* WindowHandl
 	auto vkCreateInfo = vk::Win32SurfaceCreateInfoKHR()
 		.setHinstance(reinterpret_cast<::HINSTANCE>(PlatformMisc::GetCurrentModuleHandle()))
 		.setHwnd(reinterpret_cast<::HWND>(const_cast<void*>(WindowHandle)));
-	VERIFY_VK(GetNativeInstance().createWin32SurfaceKHR(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Surface));
+	VERIFY_VK(GetNativeInstance().createWin32SurfaceKHR(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 #else
 	assert(0);
 #endif
@@ -22,8 +22,8 @@ VulkanSurface::VulkanSurface(const VulkanDevice& Device, const void* WindowHandl
 
 VulkanSurface::~VulkanSurface()
 {
-	GetNativeInstance().destroy(m_Surface);
-	m_Surface = nullptr;
+	GetNativeInstance().destroy(m_Native);
+	m_Native = nullptr;
 }
 
 VulkanSwapchain::VulkanSwapchain(const VulkanDevice& Device, const void* WindowHandle, uint32_t Width, uint32_t Height)

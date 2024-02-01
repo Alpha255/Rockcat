@@ -35,7 +35,7 @@ public:
 	ETaskType GetType() const { return m_Type; }
 	EPriority GetPriority() const { return m_Priority; }
 
-	virtual void DoTask() {}
+	virtual void Execute() {}
 private:
 	std::string m_Name;
 	ETaskType m_Type;

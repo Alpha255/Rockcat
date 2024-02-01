@@ -199,7 +199,7 @@ struct RHIStencilStateDesc
 	ERHIStencilOp DepthFailOp = ERHIStencilOp::Keep;
 	ERHICompareFunc CompareFunc = ERHICompareFunc::Always;
 
-	uint32_t Ref = 0u;
+	uint32_t Ref = 0;
 };
 
 struct RHIDepthStencilStateCreateInfo

@@ -195,22 +195,44 @@ D3D12_STENCIL_OP GetStencilOp(ERHIStencilOp Op)
 	}
 }
 
-D3D12_PRIMITIVE_TOPOLOGY_TYPE PrimitiveTopology(ERHIPrimitiveTopology Topology)
+D3D12_PRIMITIVE_TOPOLOGY_TYPE GetPrimitiveTopologyType(ERHIPrimitiveTopology Topology)
 {
 	switch (Topology)
 	{
-	case ERHIPrimitiveTopology::PointList:              return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-	case ERHIPrimitiveTopology::LineList:               return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-	case ERHIPrimitiveTopology::LineStrip:              return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-	case ERHIPrimitiveTopology::TriangleList:           return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	case ERHIPrimitiveTopology::TriangleStrip:          return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	case ERHIPrimitiveTopology::LineListAdjacency:      return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-	case ERHIPrimitiveTopology::LineStripAdjacency:     return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-	case ERHIPrimitiveTopology::TriangleListAdjacency:  return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	case ERHIPrimitiveTopology::TriangleStripAdjacency: return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	case ERHIPrimitiveTopology::PatchList:              return D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
+	case ERHIPrimitiveTopology::PointList:
+		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+	case ERHIPrimitiveTopology::LineList:
+	case ERHIPrimitiveTopology::LineStrip:
+	case ERHIPrimitiveTopology::LineListAdjacency:
+	case ERHIPrimitiveTopology::LineStripAdjacency:
+		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	case ERHIPrimitiveTopology::TriangleList:
+	case ERHIPrimitiveTopology::TriangleStrip:
+	case ERHIPrimitiveTopology::TriangleListAdjacency:
+	case ERHIPrimitiveTopology::TriangleStripAdjacency:
+		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	case ERHIPrimitiveTopology::PatchList:
+		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
 	default:
 		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	}
+}
+
+D3D12_PRIMITIVE_TOPOLOGY GetPrimitiveTopology(ERHIPrimitiveTopology PrimitiveTopology)
+{
+	switch (PrimitiveTopology)
+	{
+	case ERHIPrimitiveTopology::PointList: return D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+	case ERHIPrimitiveTopology::LineList: return D3D_PRIMITIVE_TOPOLOGY_LINELIST;
+	case ERHIPrimitiveTopology::LineStrip: return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
+	case ERHIPrimitiveTopology::LineListAdjacency: return D3D_PRIMITIVE_TOPOLOGY_LINELIST_ADJ;
+	case ERHIPrimitiveTopology::LineStripAdjacency: return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ;
+	case ERHIPrimitiveTopology::TriangleList: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	case ERHIPrimitiveTopology::TriangleStrip: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+	case ERHIPrimitiveTopology::TriangleListAdjacency: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
+	case ERHIPrimitiveTopology::TriangleStripAdjacency: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ;
+	case ERHIPrimitiveTopology::PatchList: return D3D_PRIMITIVE_TOPOLOGY_1_CONTROL_POINT_PATCHLIST;
+	default: return D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
 	}
 }
 

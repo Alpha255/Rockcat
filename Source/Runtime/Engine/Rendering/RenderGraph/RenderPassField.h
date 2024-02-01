@@ -18,8 +18,8 @@ public:
 
 	enum class EResourceType
 	{
+		Buffer,
 		Image,
-		Buffer
 	};
 
 	RDGResource(DAGNodeID ID, const char* Name, EVisibility Visibility)
@@ -41,6 +41,18 @@ public:
 
 	RHIImageCreateInfo& CreateAsImage();
 	RHIBufferCreateInfo& CreateAsBuffer();
+
+	const RHIImageCreateInfo& GetImageCreateInfo() const
+	{
+		assert(m_Type == EResourceType::Image && m_ResourceCreateInfo.has_value());
+		return std::get<RHIImageCreateInfo>(m_ResourceCreateInfo.value());
+	}
+
+	const RHIBufferCreateInfo& GetBufferCreateInfo() const
+	{
+		assert(m_Type == EResourceType::Buffer && m_ResourceCreateInfo.has_value());
+		return std::get<RHIBufferCreateInfo>(m_ResourceCreateInfo.value());
+	}
 
 	template<class Archive>
 	void serialize(Archive& Ar)

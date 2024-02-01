@@ -1,33 +1,16 @@
 #pragma once
 
-#include "Colorful/Vulkan/VulkanCommand.h"
+#include "RHI/Vulkan/VulkanCommandBuffer.h"
+#include "Runtime/Engine/RHI/RHIDevice.h"
 
-NAMESPACE_START(RHI)
-
-class VulkanCommandBufferPool final : public VkHWObject<ICommandBufferPool, VkCommandPool_T>
+class VulkanCommandPool final : public VkHwResource<vk::CommandPool>
 {
 public:
-	VulkanCommandBufferPool(class VulkanDevice* Device, uint32_t QueueFamilyIndex, EQueueType QueueType, VkCommandPoolCreateFlags CreateFlags);
+	VulkanCommandPool(const class VulkanDevice& Device, uint32_t QueueFamilyIndex, ERHIDeviceQueue Queue);
 
-	~VulkanCommandBufferPool();
+	~VulkanCommandPool();
 
-	std::shared_ptr<VulkanCommandBuffer> GetOrAllocate(ECommandBufferLevel Level, bool8_t AutoBegin, bool8_t UseForTransfer);
-
-	void Recycle(std::shared_ptr<VulkanCommandBuffer>& Command);
-
-	void Free(std::shared_ptr<VulkanCommandBuffer>& Command);
-
-	void Reset();
-
-	EQueueType QueueType() const
-	{
-		return m_QueueType;
-	}
+	std::shared_ptr<VulkanCommandBuffer> GetOrAllocateCommandBuffer(ERHICommandBufferLevel Level);
 protected:
 private:
-	std::list<std::shared_ptr<VulkanCommandBuffer>> m_PrimaryCommandBuffers;
-	std::list<std::shared_ptr<VulkanCommandBuffer>> m_SecondaryCommandBuffers;
-	EQueueType m_QueueType = EQueueType::Graphics;
 };
-
-NAMESPACE_END(RHI)

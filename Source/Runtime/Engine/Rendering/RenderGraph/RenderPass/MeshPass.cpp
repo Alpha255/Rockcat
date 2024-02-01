@@ -13,7 +13,7 @@ public:
 		assert(m_Command);
 	}
 
-	void DoTask() override final
+	void Execute() override final
 	{
 	}
 private:
@@ -22,8 +22,12 @@ private:
 
 void MeshPass::Execute(RHIDevice& Device, const RenderScene& Scene)
 {
+	auto CommandBuffer = Device.GetActiveCommandBuffer(ERHIDeviceQueue::Graphics);
+	//assert(CommandBuffer);
+
+	//CommandBuffer->Begin();
 	for (auto DrawCommand : Scene.GetDrawCommands(m_Filter))
 	{
-
 	}
+	//CommandBuffer->End();
 }

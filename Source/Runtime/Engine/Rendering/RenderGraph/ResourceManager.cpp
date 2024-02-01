@@ -33,6 +33,22 @@ RHIGraphicsPipelinePtr ResourceManager::GetOrCreateGraphicsPipeline(const RHIGra
 
 void ResourceManager::CreateAllResources()
 {
+	for (auto& [Name, Resource] : m_Resources)
+	{
+		switch (Resource->GetType())
+		{
+		case RDGResource::EResourceType::Buffer:
+		{
+			auto& CreateInfo = Resource->GetBufferCreateInfo();
+		}
+			break;
+		case RDGResource::EResourceType::Image:
+		{
+			auto& CreateInfo = Resource->GetImageCreateInfo();
+		}
+			break;
+		}
+	}
 }
 
 //void ResourceManager::AllocateSceneImageFields()

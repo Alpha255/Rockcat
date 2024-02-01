@@ -3,17 +3,12 @@
 #include "RHI/Vulkan/VulkanAsync.h"
 #include "RHI/Vulkan/VulkanImage.h"
 
-class VulkanSurface final : public VkDeviceResource
+class VulkanSurface final : public VkDeviceResource<vk::SurfaceKHR>
 {
 public:
 	VulkanSurface(const class VulkanDevice& Device, const void* WindowHandle);
 
 	~VulkanSurface();
-
-	inline vk::SurfaceKHR& GetNative() { return m_Surface; }
-	inline const vk::SurfaceKHR& GetNative() const { return m_Surface; }
-private:
-	vk::SurfaceKHR m_Surface;
 };
 
 class VulkanSwapchain final : public VkHwResource<vk::SwapchainKHR>

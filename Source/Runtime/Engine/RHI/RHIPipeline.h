@@ -18,11 +18,13 @@ struct RHIGraphicsPipelineCreateInfo
 	RHIBlendStateCreateInfo BlendState;
 	RHIDepthStencilStateCreateInfo DepthStencilState;
 	RHIMultisampleStateCreateInfo MultisampleState;
-
 	std::array<RHIShaderCreateInfo, (size_t)ERHIShaderStage::Num> Shaders;
 
-	inline RHIGraphicsPipelineCreateInfo& SetPrimitiveTopology(ERHIPrimitiveTopology Topology) { PrimitiveTopology = Topology; return *this; }
-	
+	inline RHIGraphicsPipelineCreateInfo& SetPrimitiveTopology(ERHIPrimitiveTopology InTopology) { PrimitiveTopology = InTopology; return *this; }
+	inline RHIGraphicsPipelineCreateInfo& SetRasterizationState(const RHIRasterizationStateCreateInfo& InRasterizationState) { RasterizationState = InRasterizationState; return *this; }
+	inline RHIGraphicsPipelineCreateInfo& SetBlendState(const RHIBlendStateCreateInfo& InBlendState) { BlendState = InBlendState; return *this; }
+	inline RHIGraphicsPipelineCreateInfo& SetDepthStencilState(const RHIDepthStencilStateCreateInfo& InDepthStencilState) { DepthStencilState = InDepthStencilState; return *this; }
+	inline RHIGraphicsPipelineCreateInfo& SetMultisampleState(const RHIMultisampleStateCreateInfo& InMultisampleState) { MultisampleState = InMultisampleState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetShader(RHIShaderCreateInfo&& CreateInfo) 
 	{ 
 		assert(CreateInfo.Stage < ERHIShaderStage::Num);
@@ -205,3 +207,97 @@ class RHIGraphicsPipeline : public RHIPipeline
 class RHIComputePipeline : public RHIPipeline
 {
 };
+
+template<class RHIDescription>
+inline size_t ComputeHash(const RHIDescription&) { return 0ull; }
+
+template<>
+inline size_t ComputeHash(const RHIRasterizationStateCreateInfo& Desc)
+{
+	return ComputeHash(
+		Desc.PolygonMode,
+		Desc.CullMode,
+		Desc.FrontFace,
+		Desc.EnableDepthClamp,
+		Desc.DepthBias,
+		Desc.DepthBiasClamp,
+		Desc.DepthBiasSlope,
+		Desc.LineWidth);
+}
+
+template<>
+inline size_t ComputeHash(const RHIBlendStateCreateInfo& Desc)
+{
+	auto Hash = ComputeHash(
+		Desc.EnableLogicOp,
+		Desc.LogicOp);
+	for (uint32_t Index = 0u; Index < ERHILimitations::MaxRenderTargets; ++Index)
+	{
+		auto& BlendState = Desc.RenderTargetBlends[Index];
+		HashCombine(Hash, 
+			BlendState.Enable,
+			BlendState.ColorMask,
+			BlendState.SrcColor,
+			BlendState.DstColor,
+			BlendState.ColorOp,
+			BlendState.SrcAlpha,
+			BlendState.DstAlpha,
+			BlendState.AlphaOp);
+	}
+	return Hash;
+}
+
+template<>
+inline size_t ComputeHash(const RHIStencilStateDesc& Desc)
+{
+	return ComputeHash(
+		Desc.FailOp,
+		Desc.PassOp,
+		Desc.DepthFailOp,
+		Desc.CompareFunc,
+		Desc.Ref);
+}
+
+template<>
+inline size_t ComputeHash(const RHIDepthStencilStateCreateInfo& Desc)
+{
+	return ComputeHash(
+		Desc.EnableDepth,
+		Desc.EnableDepthWrite,
+		Desc.EnableDepthBoundsTest,
+		Desc.EnableStencil,
+		Desc.DepthCompareFunc,
+		Desc.StencilReadMask,
+		Desc.StencilWriteMask,
+		Desc.DepthBounds.x,
+		Desc.DepthBounds.y,
+		ComputeHash(Desc.FrontFaceStencil),
+		ComputeHash(Desc.BackFaceStencil));
+}
+
+template<>
+inline size_t ComputeHash(const RHIMultisampleStateCreateInfo& Desc)
+{
+	return ComputeHash(
+		Desc.SampleCount,
+		Desc.EnableSampleShading,
+		Desc.EnableAlphaToCoverage,
+		Desc.EnableAlphaToOne,
+		Desc.MinSampleShading);
+}
+
+template<>
+inline size_t ComputeHash(const RHIGraphicsPipelineCreateInfo& Desc)
+{
+	auto Hash = ComputeHash(
+		ComputeHash(Desc.PrimitiveTopology),
+		ComputeHash(Desc.RasterizationState),
+		ComputeHash(Desc.BlendState),
+		ComputeHash(Desc.DepthStencilState),
+		ComputeHash(Desc.MultisampleState));
+	for (uint32_t Index = 0u; Index < Desc.Shaders.size(); ++Index)
+	{
+		HashCombine(Hash, Desc.Shaders[Index].Stage, Desc.Shaders[Index].Name, Desc.Shaders[Index].Binary);
+	}
+	return Hash;
+}

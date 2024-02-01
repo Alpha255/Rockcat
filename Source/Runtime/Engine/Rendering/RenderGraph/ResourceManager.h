@@ -19,6 +19,8 @@ public:
 	void CreateAllResources();
 private:
 	std::unordered_map<std::string_view, std::shared_ptr<RDGResource>> m_Resources;
+	std::unordered_map<size_t, RHIBufferPtr> m_FreeBuffers;
+	std::unordered_map<size_t, RHIImagePtr> m_FreeImages;
 	class RHIInterface& m_RHI;
 	DirectedAcyclicGraph& m_Graph;
 };

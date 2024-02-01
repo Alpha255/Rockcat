@@ -37,10 +37,10 @@ private:
 	uint32_t m_AllocatedCount = 0u;
 };
 
-class VulkanDescriptorSet : public VkDeviceResource, public vk::DescriptorSet, public RHIDescriptorSet
+class VulkanDescriptorSet : public VkDeviceResource<vk::DescriptorSet>, public RHIDescriptorSet
 {
 public:
-	VulkanDescriptorSet(const class VulkanDevice& Device, vk::PipelineLayout PipelineLayout, vk::DescriptorSetLayout DescriptorSetLayout, vk::DescriptorSet Set, const RHIPipelineLayoutDesc& Desc);
+	VulkanDescriptorSet(const class VulkanDevice& Device, vk::PipelineLayout PipelineLayout, vk::DescriptorSetLayout DescriptorSetLayout, vk::DescriptorSet Set);
 
 	void Commit(const RHIPipelineLayoutDesc& Desc) override final;
 private:
