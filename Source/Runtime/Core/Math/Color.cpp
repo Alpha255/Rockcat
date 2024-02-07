@@ -1,5 +1,5 @@
-#include "Runtime/Core/Math/Color.h"
-#include "Runtime/Core/Math/Math.h"
+#include "Core/Math/Color.h"
+#include "Core/Math/Math.h"
 
 NAMESPACE_START(Math)
 
@@ -15,14 +15,14 @@ const Color Color::Silver(0.75f, 0.75f, 0.75f, 1.0f);
 const Color Color::LightSteelBlue(0.69f, 0.77f, 0.87f, 1.0f);
 const Color Color::DarkBlue(0.0f, 0.125f, 0.3f, 1.0f);
 
-const float32_t Color::Scaler = 1.0f / 255.0f;
+const float Color::Scaler = 1.0f / 255.0f;
 
 Color::Color(uint32_t RGBA)
 	: Vector4(
-			static_cast<float32_t>((RGBA >> 0) * 0xFF) * Scaler,
-			static_cast<float32_t>((RGBA >> 8) * 0xFF) * Scaler,
-			static_cast<float32_t>((RGBA >> 16) * 0xFF) * Scaler,
-			static_cast<float32_t>((RGBA >> 24) * 0xFF) * Scaler)
+			static_cast<float>((RGBA >> 0) * 0xFF) * Scaler,
+			static_cast<float>((RGBA >> 8) * 0xFF) * Scaler,
+			static_cast<float>((RGBA >> 16) * 0xFF) * Scaler,
+			static_cast<float>((RGBA >> 24) * 0xFF) * Scaler)
 {
 }
 
@@ -34,7 +34,7 @@ Color::Color(uint8_t R, uint8_t G, uint8_t B, uint8_t A)
 Color Color::Random()
 {
 	static std::default_random_engine RandomEngine((uint32_t)std::time(nullptr));
-	static std::uniform_real_distribution<float32_t> Distribution(0.0f, 1.0f);
+	static std::uniform_real_distribution<float> Distribution(0.0f, 1.0f);
 
 	return Color(Distribution(RandomEngine), Distribution(RandomEngine), Distribution(RandomEngine), 1.0f);
 	/*
@@ -113,7 +113,7 @@ uint32_t Color::RGBA8() const
 	return A << 24 | B << 16 | G << 8 | R;
 }
 
-uint32_t Color::RG11B10F(bool8_t RoundToEven) const
+uint32_t Color::RG11B10F(bool RoundToEven) const
 {
 #if !USE_SSE
 	static const float MaxVal = float(1 << 16);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/Rendering/RenderGraph/RenderPass/MeshPass.h"
+#include "Engine/Rendering/RenderGraph/RenderPass/MeshPass.h"
 
 class TranslucentPass : public MeshPass
 {

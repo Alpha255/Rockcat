@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Definitions.h"
+#include "Core/Definitions.h"
 
 /// From https://github.com/simco50/CppDelegates
 
@@ -12,7 +12,7 @@
 
 struct IDelegatesInternal
 {
-	template<bool8_t IsConst, class TObject, class TRet, class ...TArgs>
+	template<bool IsConst, class TObject, class TRet, class ...TArgs>
 	struct MemberFunction;
 
 	template<class TObject, class TRet, class ...TArgs>
@@ -74,10 +74,10 @@ private:
 	}
 };
 
-template<bool8_t IsConst, class T, class TRet, class ...TArgs>
+template<bool IsConst, class T, class TRet, class ...TArgs>
 class RawDelegate;
 
-template<bool8_t IsConst, class T, class TRet, class ...TArgs, class ...TArgs2>
+template<bool IsConst, class T, class TRet, class ...TArgs, class ...TArgs2>
 class RawDelegate<IsConst, T, TRet(TArgs...), TArgs2...> : public IDelegate<TRet, TArgs...>, private IDelegatesInternal
 {
 public:
@@ -152,10 +152,10 @@ private:
 	}
 };
 
-template<bool8_t IsConst, class T, class TRet, class ...TArgs>
+template<bool IsConst, class T, class TRet, class ...TArgs>
 class SPDelegate;
 
-template<bool8_t IsConst, class T, class TRet, class ...TArgs, class ...TArgs2>
+template<bool IsConst, class T, class TRet, class ...TArgs, class ...TArgs2>
 class SPDelegate<IsConst, T, TRet(TArgs...), TArgs2...> : public IDelegate<TRet, TArgs...>, private IDelegatesInternal
 {
 public:
@@ -309,7 +309,7 @@ public:
 		*this = CreateSP<T, TArgs2...>(Object, Executer, std::forward<TArgs2>(Args)...);
 	}
 
-	bool8_t HasBound() const
+	bool HasBound() const
 	{
 		return (m_Delegate);
 	}

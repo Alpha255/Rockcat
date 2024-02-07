@@ -1,18 +1,18 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIBuffer.h"
-#include "Runtime/Engine/RHI/RHIShader.h"
-#include "Runtime/Core/Math/AABB.h"
-#include "Runtime/Core/Math/Sphere.h"
-#include "Runtime/Core/Math/Color.h"
-#include "Runtime/Engine/Asset/MaterialAsset.h"
+#include "Engine/RHI/RHIBuffer.h"
+#include "Engine/RHI/RHIShader.h"
+#include "Core/Math/AABB.h"
+#include "Core/Math/Sphere.h"
+#include "Core/Math/Color.h"
+#include "Engine/Asset/MaterialAsset.h"
 
 struct MeshProperty
 {
 	MeshProperty() = default;
 
-	MeshProperty(uint32_t InNumVertex, uint32_t InNumIndex, uint32_t InNumPrimitive, bool8_t InHasTangent,
-		bool8_t InHasUV0, bool8_t InHasUV1, bool8_t InHasColor, ERHIIndexFormat InIndexFormat, ERHIPrimitiveTopology InPrimitiveTopology,
+	MeshProperty(uint32_t InNumVertex, uint32_t InNumIndex, uint32_t InNumPrimitive, bool InHasTangent,
+		bool InHasUV0, bool InHasUV1, bool InHasColor, ERHIIndexFormat InIndexFormat, ERHIPrimitiveTopology InPrimitiveTopology,
 		const Math::AABB& InBoundingBox)
 		: NumVertex(InNumVertex)
 		, NumIndex(InNumIndex)
@@ -26,7 +26,7 @@ struct MeshProperty
 		, BoundingBox(InBoundingBox)
 		, BoundingSphere(
 			InBoundingBox.GetCenter(), 
-			std::max<float32_t>(std::max<float32_t>(InBoundingBox.GetExtents().x, InBoundingBox.GetExtents().y), InBoundingBox.GetExtents().z))
+			std::max<float>(std::max<float>(InBoundingBox.GetExtents().x, InBoundingBox.GetExtents().y), InBoundingBox.GetExtents().z))
 	{
 	}
 
@@ -38,10 +38,10 @@ struct MeshProperty
 	uint32_t NumPrimitive = 0u;
 	uint32_t VertexStride = 0u;
 
-	bool8_t HasTangent = false;
-	bool8_t HasUV0 = false;
-	bool8_t HasUV1 = false;
-	bool8_t HasColor = false;
+	bool HasTangent = false;
+	bool HasUV0 = false;
+	bool HasUV1 = false;
+	bool HasColor = false;
 
 	ERHIIndexFormat IndexFormat = ERHIIndexFormat::UInt16;
 	ERHIPrimitiveTopology PrimitiveTopology = ERHIPrimitiveTopology::TriangleList;
@@ -71,8 +71,8 @@ struct MeshProperty
 
 struct MeshData : public MeshProperty
 {
-	MeshData(uint32_t InNumVertex, uint32_t InNumIndex, uint32_t InNumPrimitive, bool8_t InHasTangent,
-		bool8_t InHasUV0, bool8_t InHasUV1, bool8_t InHasColor, ERHIPrimitiveTopology InPrimitiveTopology,
+	MeshData(uint32_t InNumVertex, uint32_t InNumIndex, uint32_t InNumPrimitive, bool InHasTangent,
+		bool InHasUV0, bool InHasUV1, bool InHasColor, ERHIPrimitiveTopology InPrimitiveTopology,
 		const Math::AABB& InBoundingBox)
 		: MeshProperty(
 			InNumVertex, InNumIndex, InNumPrimitive, InHasTangent, 
@@ -92,8 +92,8 @@ struct MeshData : public MeshProperty
 		Stride += HasColor ? Align(sizeof(Math::Color), alignof(Math::Color)) : 0u; // Color
 		VertexStride = static_cast<uint32_t>(Stride);
 
-		Vertices.reset(new byte8_t[NumVertex * VertexStride]());
-		Indices.reset(new byte8_t[NumIndex * static_cast<size_t>(IndexFormat)]());
+		Vertices.reset(new uint8_t[NumVertex * VertexStride]());
+		Indices.reset(new uint8_t[NumIndex * static_cast<size_t>(IndexFormat)]());
 	}
 
 	void SetPosition(uint32_t Index, const Math::Vector3& Position) { SetData(Index, OffsetOfPosition(), Position); }
@@ -139,8 +139,8 @@ struct MeshData : public MeshProperty
 	constexpr size_t OffsetOfUV1() const { return HasUV0 ? (OffsetOfUV0() + Align(sizeof(Math::Vector3), alignof(Math::Vector4))) : OffsetOfUV0(); }
 	constexpr size_t OffsetOfColor() const { return OffsetOfUV1() + Align(sizeof(Math::Color), alignof(Math::Color)); }
 
-	std::unique_ptr<byte8_t> Vertices;
-	std::unique_ptr<byte8_t> Indices;
+	std::unique_ptr<uint8_t> Vertices;
+	std::unique_ptr<uint8_t> Indices;
 };
 
 class StaticMesh : private MeshProperty

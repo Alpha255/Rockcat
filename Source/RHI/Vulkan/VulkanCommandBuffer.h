@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RHI/Vulkan/VulkanAsync.h"
-#include "Runtime/Engine/RHI/RHICommandBuffer.h"
+#include "Engine/RHI/RHICommandBuffer.h"
 
 /// Command buffers are objects used to record commands which can be subsequently submitted to a device queue for execution. 
 /// There are two levels of command buffers - primary command buffers, which can execute secondary command buffers, and which are submitted to queues, 
@@ -49,7 +49,7 @@ public:
 
 	void ClearColorImage(const RHIImage* DstImage, const Math::Color& ClearColor) override final;
 
-	void ClearDepthStencilImage(const RHIImage* DstImage, bool8_t ClearDepth, bool8_t ClearStencil, float32_t Depth, uint8_t Stencil) override final;
+	void ClearDepthStencilImage(const RHIImage* DstImage, bool ClearDepth, bool ClearStencil, float Depth, uint8_t Stencil) override final;
 
 	void CopyBufferToImage(const RHIImage* DstImage, const void* SrcBuffer, uint32_t BufferSize, const RHIImageSubresourceRange& SubresourceRange) override final;
 

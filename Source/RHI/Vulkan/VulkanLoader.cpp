@@ -2,7 +2,7 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Engine/Services/SpdLogService.h"
 
 #if !defined(VULKAN_HPP_CPLUSPLUS)
 
@@ -65,7 +65,7 @@ VulkanLoader::~VulkanLoader()
 	VK_EXT_FUNC_TABLE_RESET
 }
 
-void VulkanLoader::LoadExtFuncs(VkInstance Instance, VkDevice Device, bool8_t SupportDebugMarker, bool8_t SupportDebugUtils)
+void VulkanLoader::LoadExtFuncs(VkInstance Instance, VkDevice Device, bool SupportDebugMarker, bool SupportDebugUtils)
 {
 	assert(Instance && Device);
 

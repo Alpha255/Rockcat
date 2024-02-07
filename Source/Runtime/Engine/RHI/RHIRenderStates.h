@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIResource.h"
-#include "Runtime/Core/Math/Vector4.h"
+#include "Engine/RHI/RHIResource.h"
+#include "Core/Math/Vector4.h"
 
 enum class ERHIPolygonMode : uint8_t
 {
@@ -137,7 +137,7 @@ enum class ERHIPrimitiveTopology : uint8_t
 
 struct RHIRenderTargetBlendDesc
 {
-	bool8_t Enable = false;
+	bool Enable = false;
 	ERHIColorWriteMask ColorMask = ERHIColorWriteMask::All;
 
 	ERHIBlendFactor SrcColor = ERHIBlendFactor::One;
@@ -148,7 +148,7 @@ struct RHIRenderTargetBlendDesc
 	ERHIBlendFactor DstAlpha = ERHIBlendFactor::Zero;
 	ERHIBlendOp AlphaOp = ERHIBlendOp::Add;
 
-	inline RHIRenderTargetBlendDesc& SetEnable(bool8_t IsEnable) { Enable = IsEnable; return *this; }
+	inline RHIRenderTargetBlendDesc& SetEnable(bool IsEnable) { Enable = IsEnable; return *this; }
 	inline RHIRenderTargetBlendDesc& SetColorMask(ERHIColorWriteMask ColorWriteMask) { ColorMask = ColorWriteMask; return *this; }
 	inline RHIRenderTargetBlendDesc& SetSrcColorBlendFactor(ERHIBlendFactor SrcColorBlendFactor) { SrcColor = SrcColorBlendFactor; return *this; }
 	inline RHIRenderTargetBlendDesc& SetDstColorBlendFactor(ERHIBlendFactor DstColorBlendFactor) { DstColor = DstColorBlendFactor; return *this; }
@@ -161,12 +161,12 @@ struct RHIRenderTargetBlendDesc
 /// Move AlphaToCoverage/IndependentBlend to MultisampleState
 struct RHIBlendStateCreateInfo
 {
-	bool8_t EnableLogicOp = false;
+	bool EnableLogicOp = false;
 	ERHILogicOp LogicOp = ERHILogicOp::No;
 
 	RHIRenderTargetBlendDesc RenderTargetBlends[ERHILimitations::MaxRenderTargets];
 
-	inline RHIBlendStateCreateInfo& SetEnableLogicOp(bool8_t Enable) { EnableLogicOp = Enable; return *this; }
+	inline RHIBlendStateCreateInfo& SetEnableLogicOp(bool Enable) { EnableLogicOp = Enable; return *this; }
 	inline RHIBlendStateCreateInfo& SetLogicOp(ERHILogicOp Op) { LogicOp = Op; return *this; }
 };
 
@@ -175,21 +175,21 @@ struct RHIRasterizationStateCreateInfo
 	ERHIPolygonMode PolygonMode = ERHIPolygonMode::Solid;
 	ERHICullMode CullMode = ERHICullMode::BackFace;
 	ERHIFrontFace FrontFace = ERHIFrontFace::Clockwise;
-	bool8_t EnableDepthClamp = false;
+	bool EnableDepthClamp = false;
 
-	float32_t DepthBias = 0.0f;       /// A scalar factor controlling the constant depth value added to each fragment.
-	float32_t DepthBiasClamp = 0.0f;  /// The maximum (or minimum) depth bias of a fragment.
-	float32_t DepthBiasSlope = 0.0f;  /// A scalar factor applied to a fragment¡¯s slope in depth bias calculations.
-	float32_t LineWidth = 1.0f;
+	float DepthBias = 0.0f;       /// A scalar factor controlling the constant depth value added to each fragment.
+	float DepthBiasClamp = 0.0f;  /// The maximum (or minimum) depth bias of a fragment.
+	float DepthBiasSlope = 0.0f;  /// A scalar factor applied to a fragment¡¯s slope in depth bias calculations.
+	float LineWidth = 1.0f;
 
 	inline RHIRasterizationStateCreateInfo& SetPolygonMode(ERHIPolygonMode Mode) { PolygonMode = Mode; return *this; }
 	inline RHIRasterizationStateCreateInfo& SetCullMode(ERHICullMode Mode) { CullMode = Mode; return *this; }
 	inline RHIRasterizationStateCreateInfo& SetFrontFace(ERHIFrontFace Face) { FrontFace = Face; return *this; }
-	inline RHIRasterizationStateCreateInfo& SetEnableDepthClamp(bool8_t Enable) { EnableDepthClamp = Enable; return *this; }
-	inline RHIRasterizationStateCreateInfo& SetDepthBias(float32_t Bias) { DepthBias = Bias; return *this; }
-	inline RHIRasterizationStateCreateInfo& SetDepthBiasClamp(float32_t BiasClamp) { DepthBiasClamp = BiasClamp; return *this; }
-	inline RHIRasterizationStateCreateInfo& SetDepthBiasSlope(float32_t BiasSlope) { DepthBiasSlope = BiasSlope; return *this; }
-	inline RHIRasterizationStateCreateInfo& SetLineWidth(float32_t Width) { LineWidth = Width; return *this; }
+	inline RHIRasterizationStateCreateInfo& SetEnableDepthClamp(bool Enable) { EnableDepthClamp = Enable; return *this; }
+	inline RHIRasterizationStateCreateInfo& SetDepthBias(float Bias) { DepthBias = Bias; return *this; }
+	inline RHIRasterizationStateCreateInfo& SetDepthBiasClamp(float BiasClamp) { DepthBiasClamp = BiasClamp; return *this; }
+	inline RHIRasterizationStateCreateInfo& SetDepthBiasSlope(float BiasSlope) { DepthBiasSlope = BiasSlope; return *this; }
+	inline RHIRasterizationStateCreateInfo& SetLineWidth(float Width) { LineWidth = Width; return *this; }
 };
 
 struct RHIStencilStateDesc
@@ -204,10 +204,10 @@ struct RHIStencilStateDesc
 
 struct RHIDepthStencilStateCreateInfo
 {
-	bool8_t EnableDepth = false;
-	bool8_t EnableDepthWrite = false;
-	bool8_t EnableDepthBoundsTest = false;
-	bool8_t EnableStencil = false;
+	bool EnableDepth = false;
+	bool EnableDepthWrite = false;
+	bool EnableDepthBoundsTest = false;
+	bool EnableStencil = false;
 
 	ERHICompareFunc DepthCompareFunc = ERHICompareFunc::Always;
 	uint8_t StencilReadMask = 0xFF;
@@ -218,10 +218,10 @@ struct RHIDepthStencilStateCreateInfo
 	RHIStencilStateDesc FrontFaceStencil;
 	RHIStencilStateDesc BackFaceStencil;
 
-	inline RHIDepthStencilStateCreateInfo& SetEnableDepth(bool8_t Enable) { EnableDepth = Enable; return *this; }
-	inline RHIDepthStencilStateCreateInfo& SetEnableDepthWrite(bool8_t Enable) { EnableDepthWrite = Enable; return *this; }
-	inline RHIDepthStencilStateCreateInfo& SetEnableDepthBoundsTest(bool8_t Enable) { EnableDepthBoundsTest = Enable; return *this; }
-	inline RHIDepthStencilStateCreateInfo& SetEnableStencil(bool8_t Enable) { EnableStencil = Enable; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetEnableDepth(bool Enable) { EnableDepth = Enable; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetEnableDepthWrite(bool Enable) { EnableDepthWrite = Enable; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetEnableDepthBoundsTest(bool Enable) { EnableDepthBoundsTest = Enable; return *this; }
+	inline RHIDepthStencilStateCreateInfo& SetEnableStencil(bool Enable) { EnableStencil = Enable; return *this; }
 	inline RHIDepthStencilStateCreateInfo& SetDepthCompareFunc(ERHICompareFunc CompareFunc) { DepthCompareFunc = CompareFunc; return *this; }
 	inline RHIDepthStencilStateCreateInfo& SetStencilReadMask(uint8_t Mask) { StencilReadMask = Mask; return *this; }
 	inline RHIDepthStencilStateCreateInfo& SetStencilWriteMask(uint8_t Mask) { StencilWriteMask = Mask; return *this; }
@@ -241,18 +241,18 @@ struct RHIDepthStencilStateCreateInfo
 struct RHIMultisampleStateCreateInfo
 {
 	ERHISampleCount SampleCount = ERHISampleCount::Sample_1_Bit;
-	bool8_t EnableSampleShading = false;
-	bool8_t EnableAlphaToCoverage = false;
-	bool8_t EnableAlphaToOne = false;
+	bool EnableSampleShading = false;
+	bool EnableAlphaToCoverage = false;
+	bool EnableAlphaToOne = false;
 
-	float32_t MinSampleShading = 0.0f;
+	float MinSampleShading = 0.0f;
 	uint32_t* SampleMask = nullptr; /// ??? 
 
 	inline RHIMultisampleStateCreateInfo& SetSampleCount(ERHISampleCount Count) { SampleCount = Count; return *this; }
-	inline RHIMultisampleStateCreateInfo& SetEnableSampleShading(bool8_t Enable) { EnableSampleShading = Enable; return *this; }
-	inline RHIMultisampleStateCreateInfo& SetEnableAlphaToCoverage(bool8_t Enable) { EnableAlphaToCoverage = Enable; return *this; }
-	inline RHIMultisampleStateCreateInfo& SetEnableAlphaToOne(bool8_t Enable) { EnableAlphaToOne = Enable; return *this; }
-	inline RHIMultisampleStateCreateInfo& SetMinSampleShading(float32_t SampleShading) { MinSampleShading = SampleShading; return *this; }
+	inline RHIMultisampleStateCreateInfo& SetEnableSampleShading(bool Enable) { EnableSampleShading = Enable; return *this; }
+	inline RHIMultisampleStateCreateInfo& SetEnableAlphaToCoverage(bool Enable) { EnableAlphaToCoverage = Enable; return *this; }
+	inline RHIMultisampleStateCreateInfo& SetEnableAlphaToOne(bool Enable) { EnableAlphaToOne = Enable; return *this; }
+	inline RHIMultisampleStateCreateInfo& SetMinSampleShading(float SampleShading) { MinSampleShading = SampleShading; return *this; }
 	inline RHIMultisampleStateCreateInfo& SetSampleMask(uint32_t* Mask) { SampleMask = Mask; return *this; }
 };
 
@@ -269,25 +269,25 @@ struct RHIViewport
 	{
 	}
 
-	RHIViewport(float32_t Width, float32_t Height)
+	RHIViewport(float Width, float Height)
 		: LeftTop(0.0f, 0.0f)
 		, Extent(Width, Height)
 		, DepthRange(0.0f, 1.0f)
 	{
 	}
 
-	RHIViewport(float32_t Left, float32_t Top, float32_t Width, float32_t Height, float32_t MinZ = 0.0f, float32_t MaxZ = 1.0f)
+	RHIViewport(float Left, float Top, float Width, float Height, float MinZ = 0.0f, float MaxZ = 1.0f)
 		: LeftTop(Left, Top)
 		, Extent(Width, Height)
 		, DepthRange(MinZ, MaxZ)
 	{
 	}
 
-	float32_t GetWidth() const { return Extent.x; }
-	float32_t GetHeight() const { return Extent.y; }
+	float GetWidth() const { return Extent.x; }
+	float GetHeight() const { return Extent.y; }
 
-	bool8_t operator==(const RHIViewport& Other) const { return LeftTop == Other.LeftTop && Extent == Other.Extent && DepthRange == Other.DepthRange; }
-	bool8_t operator!=(const RHIViewport& Other) const { return LeftTop != Other.LeftTop || Extent != Other.Extent || DepthRange != Other.DepthRange; }
+	bool operator==(const RHIViewport& Other) const { return LeftTop == Other.LeftTop && Extent == Other.Extent && DepthRange == Other.DepthRange; }
+	bool operator!=(const RHIViewport& Other) const { return LeftTop != Other.LeftTop || Extent != Other.Extent || DepthRange != Other.DepthRange; }
 };
 
 struct RHIScissorRect
@@ -301,22 +301,22 @@ struct RHIScissorRect
 	{
 	}
 
-	RHIScissorRect(float32_t Width, float32_t Height)
+	RHIScissorRect(float Width, float Height)
 		: LeftTop(0.0f, 0.0f)
 		, Extent(Width, Height)
 	{
 		assert(Width > 0.0f && Height > 0.0f);
 	}
 
-	RHIScissorRect(float32_t Left, float32_t Top, float32_t Width, float32_t Height)
+	RHIScissorRect(float Left, float Top, float Width, float Height)
 		: LeftTop(Left, Top)
 		, Extent(Width, Height)
 	{
 		assert(Width > 0.0f && Height > 0.0f);
 	}
 
-	bool8_t operator==(const RHIScissorRect& Other) const { return LeftTop == Other.LeftTop && Extent == Other.Extent; }
-	bool8_t operator!=(const RHIScissorRect& Other) const { return LeftTop != Other.LeftTop || Extent != Other.Extent; }
+	bool operator==(const RHIScissorRect& Other) const { return LeftTop == Other.LeftTop && Extent == Other.Extent; }
+	bool operator!=(const RHIScissorRect& Other) const { return LeftTop != Other.LeftTop || Extent != Other.Extent; }
 };
 
 enum class ERHIAttachmentLoadOp : uint8_t

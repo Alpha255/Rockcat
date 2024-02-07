@@ -48,12 +48,12 @@ public:
 
 	void Present();
 protected:
-	void Create(bool8_t RecreateSurface);
+	void Create(bool RecreateSurface);
 
 	void Recreate();
 private:
-	bool8_t m_VSync = false;
-	bool8_t m_Fullscreen = false;
+	bool m_VSync = false;
+	bool m_Fullscreen = false;
 	uint32_t m_Width = 0u;
 	uint32_t m_Height = 0u;
 	uint32_t m_CurImageIndex = 0u;

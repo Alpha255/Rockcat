@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Core/Definitions.h"
-#include "Runtime/Core/Cereal.h"
+#include "Core/Definitions.h"
+#include "Core/Cereal.h"
 
 enum class ERenderingPath : uint8_t
 {
@@ -71,12 +71,12 @@ struct GraphicsSettings
 
 	struct PostProcessingSettings
 	{
-		bool8_t Enable = true;
+		bool Enable = true;
 
-		bool8_t DepthOfField = false;
-		bool8_t Blur = false;
-		bool8_t Bloom = false;
-		bool8_t LensFlare = false;
+		bool DepthOfField = false;
+		bool Blur = false;
+		bool Bloom = false;
+		bool LensFlare = false;
 
 		EToneMappingTechnique ToneMappingTechnique = EToneMappingTechnique::None;
 
@@ -95,20 +95,20 @@ struct GraphicsSettings
 	};
 
 	DisplayResolution Resolution;
-	bool8_t VSync = false;
-	bool8_t FullScreen = false;
-	bool8_t SRGBSwapchain = false;
-	bool8_t MotionVectors = false;
-	bool8_t FrustumCulling = true;
-	bool8_t EnableTiledBasedLightCulling = false;
-	bool8_t EnableClusteredBasedLightCulling = false;
-	bool8_t EnableStencilBasedLightCulling = false;
-	bool8_t EnableComputeQueue = true;
-	bool8_t EnableTransferQueue = true;
-	bool8_t BatchResourceDataTransfer = false;
-	bool8_t BatchResourceBarrier = false;
-	bool8_t AsyncCommandlistSubmission = false;
-	bool8_t InverseDepth = false;
+	bool VSync = false;
+	bool FullScreen = false;
+	bool SRGBSwapchain = false;
+	bool MotionVectors = false;
+	bool FrustumCulling = true;
+	bool EnableTiledBasedLightCulling = false;
+	bool EnableClusteredBasedLightCulling = false;
+	bool EnableStencilBasedLightCulling = false;
+	bool EnableComputeQueue = true;
+	bool EnableTransferQueue = true;
+	bool BatchResourceDataTransfer = false;
+	bool BatchResourceBarrier = false;
+	bool AsyncCommandlistSubmission = false;
+	bool InverseDepth = false;
 	ERenderingPath RenderingPath = ERenderingPath::ForwardRendering;
 	ELightingPolicy LightingPolicy = ELightingPolicy::None;
 	EShadowTechnique ShadowTechnique = EShadowTechnique::None;

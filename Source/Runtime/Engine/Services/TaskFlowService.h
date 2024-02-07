@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Core/Module.h"
-#include "Runtime/Engine/Async/Task.h"
+#include "Core/Module.h"
+#include "Engine/Async/Task.h"
 
 #pragma warning(push)
 #pragma warning(disable:4244)
@@ -20,7 +20,7 @@ public:
 
 	void OnShutdown() override final;
 
-	template<bool8_t WaitDone = true, class Iterator, class Callable>
+	template<bool WaitDone = true, class Iterator, class Callable>
 	void ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function)
 	{
 		tf::Taskflow TFTaskflow;
@@ -35,7 +35,7 @@ public:
 		}
 	}
 
-	template<size_t Step, bool8_t WaitDone = true, class Callable>
+	template<size_t Step, bool WaitDone = true, class Callable>
 	void ParallelForIndex(size_t Begin, size_t End, Callable&& Function)
 	{
 		assert(Step < (End - Begin));
@@ -52,7 +52,7 @@ public:
 		}
 	}
 
-	template<bool8_t WaitDone = true, class Iterator, class CompareOp>
+	template<bool WaitDone = true, class Iterator, class CompareOp>
 	void ParallelSort(Iterator&& Begin, Iterator&& End, CompareOp&& Function)
 	{
 		tf::Taskflow TFTaskflow;
@@ -67,7 +67,7 @@ public:
 		}
 	}
 
-	template<bool8_t WaitDone = false, class Callable>
+	template<bool WaitDone = false, class Callable>
 	void Async(Callable&& Function)
 	{
 		if (WaitDone)
@@ -87,7 +87,7 @@ public:
 		});
 	}
 
-	template<bool8_t WaitDone = false>
+	template<bool WaitDone = false>
 	void DispatchTasks(std::vector<Task&>& InTasks)
 	{
 		tf::Taskflow TempTaskflow;
@@ -110,5 +110,5 @@ public:
 	}
 private:
 	std::unique_ptr<tf::Executor> m_Executor;
-	bool8_t m_UseHyperThreading;
+	bool m_UseHyperThreading;
 };

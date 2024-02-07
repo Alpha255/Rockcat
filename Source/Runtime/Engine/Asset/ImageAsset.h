@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Runtime/Engine/Asset/Asset.h"
-#include "Runtime/Engine/RHI/RHIDeclarations.h"
+#include "Engine/Asset/Asset.h"
+#include "Engine/RHI/RHIDeclarations.h"
 
 struct ImageAsset : public Asset
 {
 public:
 	using Asset::Asset;
 
-	bool8_t IsSRGB() const { return SRGB; }
+	bool IsSRGB() const { return SRGB; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -26,9 +26,9 @@ public:
 protected:
 	friend class AssimpSceneImporter;
 
-	void SetUseSRGB(bool8_t InSRGB) { SRGB = InSRGB; }
+	void SetUseSRGB(bool InSRGB) { SRGB = InSRGB; }
 
-	bool8_t SRGB = false;
+	bool SRGB = false;
 	RHIImagePtr Image;
 };
 

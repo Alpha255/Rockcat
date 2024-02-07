@@ -1,4 +1,4 @@
-#include "Runtime/Core/Math/Matrix.h"
+#include "Core/Math/Matrix.h"
 
 NAMESPACE_START(Math)
 
@@ -13,13 +13,13 @@ void Matrix::GaussJordanInverse()
 	for (i = 0; i < 3; ++i)
 	{
 		int32_t pivot = i;
-		float32_t pivotSize = copy.m[i][i];
+		float pivotSize = copy.m[i][i];
 
 		pivotSize = pivotSize < 0.0f ? -pivotSize : pivotSize;
 
 		for (j = i + 1; j < 4; ++j)
 		{
-			float32_t temp = copy.m[j][i];
+			float temp = copy.m[j][i];
 			temp = temp < 0.0f ? -temp : temp;
 
 			if (temp > pivotSize)
@@ -43,7 +43,7 @@ void Matrix::GaussJordanInverse()
 
 		for (j = i + 1; j < 4; ++j)
 		{
-			float32_t factor = copy.m[j][i] / copy.m[i][i];
+			float factor = copy.m[j][i] / copy.m[i][i];
 			for (k = 0; k < 4; ++k)
 			{
 				copy.m[j][k] -= factor * copy.m[i][k];
@@ -55,7 +55,7 @@ void Matrix::GaussJordanInverse()
 	/// Backward substitution
 	for (i = 3; i >= 0; --i)
 	{
-		float32_t factor = copy.m[i][i];
+		float factor = copy.m[i][i];
 
 		/// singular Matrix
 		assert(factor != 0.0f);

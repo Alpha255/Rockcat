@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Runtime/Core/Definitions.h"
-#include "Runtime/Core/Cereal.h"
+#include "Core/Definitions.h"
+#include "Core/Cereal.h"
 
 template<class TObject, class TIndex = uint32_t>
 class ObjectID
 {
 public:
-	static const constexpr TIndex NullIndex = std::numeric_limits<TIndex>().max();
+	static const constexpr TIndex NullIndex = std::numeric_limits<TIndex>::max();
 	static_assert(std::is_unsigned<TIndex>::value, "The index type must be unsigned integral");
 
 	using IndexType = TIndex;
@@ -44,17 +44,17 @@ public:
 
 	constexpr TIndex GetIndex() const { assert(IsValid()); return m_Index; }
 
-	constexpr operator bool8_t() const { return IsValid(); }
+	constexpr operator bool() const { return IsValid(); }
 
-	constexpr bool8_t IsValid() const { return m_Index != NullIndex; }
+	constexpr bool IsValid() const { return m_Index != NullIndex; }
 
-	constexpr bool8_t operator==(const ObjectID& Other) const { return m_Index == Other.m_Index; }
+	constexpr bool operator==(const ObjectID& Other) const { return m_Index == Other.m_Index; }
 
-	constexpr bool8_t operator!=(const ObjectID& Other) const { return m_Index != Other.m_Index; }
+	constexpr bool operator!=(const ObjectID& Other) const { return m_Index != Other.m_Index; }
 
-	constexpr bool8_t operator==(const TIndex Index) const { return m_Index == Index; }
+	constexpr bool operator==(const TIndex Index) const { return m_Index == Index; }
 
-	constexpr bool8_t operator!=(const TIndex Index) const { return m_Index != Index; }
+	constexpr bool operator!=(const TIndex Index) const { return m_Index != Index; }
 
 	struct Hasher
 	{

@@ -2,7 +2,7 @@
 #include "RHI/D3D/D3D12/D3D12Device.h"
 #include "RHI/D3D/D3D12/D3D12Pipeline.h"
 #include "RHI/D3D/D3D12/D3D12Buffer.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Engine/Services/SpdLogService.h"
 
 #include <pix.h>
 
@@ -183,7 +183,7 @@ void D3D12CommandList::ClearColorImage(const RHIImage* DstImage, const Math::Col
 {
 }
 
-void D3D12CommandList::ClearDepthStencilImage(const RHIImage* DstImage, bool8_t ClearDepth, bool8_t ClearStencil, float32_t Depth, uint8_t Stencil)
+void D3D12CommandList::ClearDepthStencilImage(const RHIImage* DstImage, bool ClearDepth, bool ClearStencil, float Depth, uint8_t Stencil)
 {
 }
 

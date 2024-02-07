@@ -2,9 +2,9 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Engine/Services/SpdLogService.h"
 
-VulkanFence::VulkanFence(const VulkanDevice& Device, bool8_t Signaled)
+VulkanFence::VulkanFence(const VulkanDevice& Device, bool Signaled)
 	: VkHwResource(Device)
 {
 	auto vkCreateInfo = vk::FenceCreateInfo()
@@ -12,7 +12,7 @@ VulkanFence::VulkanFence(const VulkanDevice& Device, bool8_t Signaled)
 	VERIFY_VK(GetNativeDevice().createFence(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
-bool8_t VulkanFence::IsSignaled() const
+bool VulkanFence::IsSignaled() const
 {
 	/// If a queue submission command is pending execution, then the value returned by this command may immediately be out of date.
 	/// If the device has been lost, vkGetFenceStatus may return any of the (VK_SUCCESS|VK_NOT_READY|VK_ERROR_DEVICE_LOST). 
@@ -79,7 +79,7 @@ VulkanSemaphore::VulkanSemaphore(const VulkanDevice& Device)
 
 uint64_t VulkanSemaphore::GetCounterValue() const
 {
-	uint64_t Value = std::numeric_limits<uint64_t>().max();
+	uint64_t Value = std::numeric_limits<uint64_t>::max();
 	if (VulkanRHI::GetLayerExtensionConfigs().HasTimelineSemaphore)
 	{
 		VERIFY_VK(GetNativeDevice().getSemaphoreCounterValue(m_Native, &Value));
@@ -124,7 +124,7 @@ VulkanEvent::VulkanEvent(const VulkanDevice& Device)
 	/// To set the state of an event to signaled from a device, call: vkCmdSetEvent
 }
 
-bool8_t VulkanEvent::IsSignaled() const
+bool VulkanEvent::IsSignaled() const
 {
 	switch (GetNativeDevice().getEventStatus(m_Native))
 	{
@@ -137,7 +137,7 @@ bool8_t VulkanEvent::IsSignaled() const
 		return false;
 	}
 }
-void VulkanEvent::Signal(bool8_t Signaled) const
+void VulkanEvent::Signal(bool Signaled) const
 {
 	if (Signaled)
 	{
@@ -615,7 +615,7 @@ void VulkanPipelineBarrier::Commit()
 {
 	assert(m_Command->Get() != VK_NULL_HANDLE);
 
-	const bool8_t HasMemoryBarrier = GlobalMemoryBarrier.srcAccessMask != VK_ACCESS_NONE_KHR || GlobalMemoryBarrier.dstAccessMask != VK_ACCESS_NONE_KHR;
+	const bool HasMemoryBarrier = GlobalMemoryBarrier.srcAccessMask != VK_ACCESS_NONE_KHR || GlobalMemoryBarrier.dstAccessMask != VK_ACCESS_NONE_KHR;
 
 	if (HasMemoryBarrier || ImageBarriers.size() > 0u || BufferBarriers.size() > 0u)
 	{

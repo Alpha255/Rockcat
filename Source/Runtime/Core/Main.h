@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/Engine.h"
+#include "Engine/Engine.h"
 
 #if defined(PLATFORM_WIN32)
 	#include <Windows.h>

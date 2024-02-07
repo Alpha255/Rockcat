@@ -1,7 +1,7 @@
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 
 #define BIND_WITH_CONFIG_GENERAL(ConfigName, ForceEnable) \
-	bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final \
+	bool IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const override final \
 	{ \
 		return Configs && (ForceEnable || Configs->ConfigName); \
 	} \

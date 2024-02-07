@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIDeclarations.h"
+#include "Engine/RHI/RHIDeclarations.h"
 #include <dxgiformat.h>
 
 #define USE_DYNAMIC_VK_LOADER 1
@@ -134,9 +134,9 @@ namespace RHI
 	ERHIFormat GetRHIFormat(vk::Format vkFormat);
 	ERHIFormat GetRHIFormat(DXGI_FORMAT DXGIFormat);
 
-	bool8_t IsColor(ERHIFormat Format);
-	bool8_t IsDepth(ERHIFormat Format);
-	bool8_t IsDepthStenci(ERHIFormat Format);
+	bool IsColor(ERHIFormat Format);
+	bool IsDepth(ERHIFormat Format);
+	bool IsDepthStenci(ERHIFormat Format);
 
 	void CalculateFormatBytes(uint32_t Width, uint32_t Height, ERHIFormat Format, __out size_t& SliceBytes, __out size_t& RowBytes);
 }

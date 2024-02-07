@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Math/Vector3.h"
+#include "Core/Math/Vector3.h"
 
 NAMESPACE_START(Math)
 
@@ -12,27 +12,27 @@ public:
 	{
 	}
 
-	inline Vector4(float32_t X, float32_t Y, float32_t Z, float32_t W)
+	inline Vector4(float X, float Y, float Z, float W)
 		: Float4(X, Y, Z, W)
 	{
 	}
 
-	inline Vector4(float32_t Value)
+	inline Vector4(float Value)
 		: Float4(Value, Value, Value, Value)
 	{
 	}
 
-	inline Vector4(const float32_t* Array)
+	inline Vector4(const float* Array)
 		: Float4(Array)
 	{
 	}
 
-	inline Vector4(const Vector2& XY, float32_t Z = 0.0f, float32_t W = 0.0f)
+	inline Vector4(const Vector2& XY, float Z = 0.0f, float W = 0.0f)
 		: Float4(XY.x, XY.y, Z, W)
 	{
 	}
 
-	inline Vector4(const Vector3& XYZ, float32_t W = 0.0f)
+	inline Vector4(const Vector3& XYZ, float W = 0.0f)
 		: Float4(XYZ.x, XYZ.y, XYZ.z, W)
 	{
 	}
@@ -56,20 +56,20 @@ public:
 
 	VECTOR_MEMBER_FUNCTIONS(4)
 #else
-	inline float32_t LengthSq()
+	inline float LengthSq()
 	{
 		return x * x + y * y + z * z + w * w;
 	}
 
-	inline float32_t Length()
+	inline float Length()
 	{
 		return ::sqrtf(lengthSq());
 	}
 
 	inline void Normalize()
 	{
-		float32_t Factor = 0.0f;
-		float32_t Length = length();
+		float Factor = 0.0f;
+		float Length = length();
 		if (Length > 0.0f)
 		{
 			Factor = 1.0f / Length;
@@ -92,7 +92,7 @@ public:
 		w = 0.0f;
 	}
 
-	inline float32_t Dot(const Vector4 &Right) const
+	inline float Dot(const Vector4 &Right) const
 	{
 		return x * Right.x + y * Right.y + z * Right.z + w * Right.w;
 	}
@@ -121,7 +121,7 @@ public:
 		w -= Right.w;
 	}
 
-	inline void operator*=(float32_t Right)
+	inline void operator*=(float Right)
 	{
 		x *= Right;
 		y *= Right;
@@ -176,7 +176,7 @@ inline Vector4 operator-(const Vector4 &Left, const Vector4 &Right)
 	return Vector4(Left.x - Right.x, Left.y - Right.y, Left.z - Right.z, Left.w - Right.w);
 }
 
-inline Vector4 operator*(const Vector4 &Left, float32_t Right)
+inline Vector4 operator*(const Vector4 &Left, float Right)
 {
 	return Vector4(Left.x * Right, Left.y * Right, Left.z * Right, Left.w * Right);
 }
@@ -234,7 +234,7 @@ inline Vector4 Normalize(const Vector4 &Vec)
 	return Ret;
 }
 
-inline float32_t Dot(const Vector4 &Left, const Vector4 &Right)
+inline float Dot(const Vector4 &Left, const Vector4 &Right)
 {
 	return Left.x * Right.x + Left.y * Right.y + Left.z * Right.z + Left.w * Right.w;
 }

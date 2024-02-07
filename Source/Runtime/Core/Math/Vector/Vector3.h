@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Math/Vector/Vector2.h"
+#include "Core/Math/Vector/Vector2.h"
 
 NAMESPACE_START(Math)
 
@@ -14,7 +14,7 @@ public:
     {
     }
 
-    inline Vector3(float32_t Value)
+    inline Vector3(float Value)
         : Float3(Value, Value, Value)
     {
     }
@@ -29,7 +29,7 @@ public:
         DirectX::XMStoreFloat3(this, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(this), DirectX::XMLoadFloat3(&Other)));
         return *this;
     }
-    inline Vector3& operator+=(float32_t Value)
+    inline Vector3& operator+=(float Value)
     {
         Vector3 V(Value);
         DirectX::XMStoreFloat3(this, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(this), DirectX::XMLoadFloat3(&V)));
@@ -41,7 +41,7 @@ public:
         DirectX::XMStoreFloat3(&Ret, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&Left), DirectX::XMLoadFloat3(&Right)));
         return Ret;
     }
-    friend inline Vector3 operator+(const Vector3& Left, float32_t Right)
+    friend inline Vector3 operator+(const Vector3& Left, float Right)
     {
         Vector3 V(Right);
         Vector3 Ret;
@@ -54,7 +54,7 @@ public:
         DirectX::XMStoreFloat3(this, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(this), DirectX::XMLoadFloat3(&Other)));
         return *this;
     }
-    inline Vector3& operator-=(float32_t Value)
+    inline Vector3& operator-=(float Value)
     {
         Vector3 V(Value);
         DirectX::XMStoreFloat3(this, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(this), DirectX::XMLoadFloat3(&V)));
@@ -66,7 +66,7 @@ public:
         DirectX::XMStoreFloat3(&Ret, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&Left), DirectX::XMLoadFloat3(&Right)));
         return Ret;
     }
-    inline friend Vector3 operator-(const Vector3& Left, float32_t Right)
+    inline friend Vector3 operator-(const Vector3& Left, float Right)
     {
         Vector3 V(Right);
         Vector3 Ret;
@@ -74,7 +74,7 @@ public:
         return Ret;
     }
 
-    inline Vector3& operator*=(const float32_t Value)
+    inline Vector3& operator*=(const float Value)
     {
         DirectX::XMStoreFloat3(this, DirectX::XMVectorScale(DirectX::XMLoadFloat3(this), Value));
         return *this;
@@ -84,7 +84,7 @@ public:
         DirectX::XMStoreFloat3(this, DirectX::XMVectorMultiply(DirectX::XMLoadFloat3(this), DirectX::XMLoadFloat3(&Other)));
         return *this;
     }
-    inline friend Vector3 operator*(const Vector3& Left, const float32_t Right)
+    inline friend Vector3 operator*(const Vector3& Left, const float Right)
     {
         Vector3 Ret;
         DirectX::XMStoreFloat3(&Ret, DirectX::XMVectorScale(DirectX::XMLoadFloat3(&Left), Right));
@@ -97,7 +97,7 @@ public:
         return Ret;
     }
 
-    inline Vector3& operator/=(const float32_t Value)
+    inline Vector3& operator/=(const float Value)
     {
         DirectX::XMStoreFloat3(this, DirectX::XMVectorScale(DirectX::XMLoadFloat3(this), 1.0f / Value));
         return *this;
@@ -107,7 +107,7 @@ public:
         DirectX::XMStoreFloat3(this, DirectX::XMVectorDivide(DirectX::XMLoadFloat3(this), DirectX::XMLoadFloat3(&Other)));
         return *this;
     }
-    inline friend Vector3 operator/(const Vector3& Left, const float32_t Right)
+    inline friend Vector3 operator/(const Vector3& Left, const float Right)
     {
         Vector3 Ret;
         DirectX::XMStoreFloat3(&Ret, DirectX::XMVectorScale(DirectX::XMLoadFloat3(&Left), 1.0f / Right));
@@ -120,11 +120,11 @@ public:
         return Ret;
     }
 
-    float32_t Dot(const Vector3& Other) const
+    float Dot(const Vector3& Other) const
     {
         return DirectX::XMVectorGetX(DirectX::XMVector3Dot(DirectX::XMLoadFloat3(this), DirectX::XMLoadFloat3(&Other)));
     }
-    friend float32_t Dot(const Vector3& Left, const Vector3& Right)
+    friend float Dot(const Vector3& Left, const Vector3& Right)
     {
         return DirectX::XMVectorGetX(DirectX::XMVector3Dot(DirectX::XMLoadFloat3(&Left), DirectX::XMLoadFloat3(&Right)));
     }
@@ -158,36 +158,36 @@ public:
         return Ret;
     }
 
-    float32_t LengthSq() const
+    float LengthSq() const
     {
         return DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(DirectX::XMLoadFloat3(this)));
     }
 
-    float32_t Length() const
+    float Length() const
     {
         return DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMLoadFloat3(this)));
     }
 
-    float32_t LengthEst() const
+    float LengthEst() const
     {
         return DirectX::XMVectorGetX(DirectX::XMVector3LengthEst(DirectX::XMLoadFloat3(this)));
     }
-    float32_t ReciprocalLength() const
+    float ReciprocalLength() const
     {
         return DirectX::XMVectorGetX(DirectX::XMVector3ReciprocalLength(DirectX::XMLoadFloat3(this)));
     }
 
-    float32_t ReciprocalLengthEst() const
+    float ReciprocalLengthEst() const
     {
         return DirectX::XMVectorGetX(DirectX::XMVector3ReciprocalLengthEst(DirectX::XMLoadFloat3(this)));
     }
 
-    bool8_t IsNaN() const
+    bool IsNaN() const
     {
         return DirectX::XMVector4IsNaN(DirectX::XMLoadFloat3(this));
     }
 
-    bool8_t IsInfinite() const
+    bool IsInfinite() const
     {
         return DirectX::XMVector4IsInfinite(DirectX::XMLoadFloat3(this));
     }
@@ -262,7 +262,7 @@ public:
         return Ret;
     }
 
-    Vector3 Refract(const Vector3& Normal, float32_t RefractionIndex) const
+    Vector3 Refract(const Vector3& Normal, float RefractionIndex) const
     {
         Vector3 Ret;
         DirectX::XMStoreFloat3(&Ret, DirectX::XMVector3Refract(DirectX::XMLoadFloat3(this), DirectX::XMLoadFloat3(&Normal), RefractionIndex));

@@ -1,6 +1,6 @@
-#include "Runtime/Engine/Rendering/RenderGraph/ResourceManager.h"
-#include "Runtime/Engine/RHI/RHIDevice.h"
-#include "Runtime/Engine/RHI/RHIInterface.h"
+#include "Engine/Rendering/RenderGraph/ResourceManager.h"
+#include "Engine/RHI/RHIDevice.h"
+#include "Engine/RHI/RHIInterface.h"
 
 ResourceManager::ResourceManager(RHIInterface& RHI, DirectedAcyclicGraph& Graph)
 	: m_RHI(RHI)

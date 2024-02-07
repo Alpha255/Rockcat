@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RHI/Vulkan/VulkanTypes.h"
-#include "Runtime/Engine/Asset/SerializableAsset.h"
+#include "Engine/Asset/SerializableAsset.h"
 
 #define VK_LAYER_EXT_CONFIG_NAME "VkLayerAndExtensionConfigs.json"
 #define VK_LAYER_KHRONOS_VALIDATION_NAME "VK_LAYER_KHRONOS_validation"
@@ -22,22 +22,22 @@ struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayer
 
 	ERHIDebugLayerLevel DebugLayerLevel = ERHIDebugLayerLevel::Error;
 
-	bool8_t HasKhronosValidationLayer = true;
+	bool HasKhronosValidationLayer = true;
 
-	bool8_t HasKHRSurfaceExt = true;
-	bool8_t HasDebugUtilsExt = true;
-	bool8_t HasDebugReportExt = true;
-	bool8_t HasValidationFeaturesExt = true;
-	bool8_t HasValidationFeaturesExt_GPUAssisted = false;
-	bool8_t HasValidationFeaturesExt_GPUAssistedReserveBindingSlot = false;
-	bool8_t HasValidationFeaturesExt_BestPractices = true;
-	bool8_t HasValidationFeaturesExt_DebugPrintf = false;
-	bool8_t HasValidationFeaturesExt_Synchronization = true;
-	bool8_t HasGetPhysicalDeviceProperties2 = false;
-	bool8_t HasDebugMarkerExt = true;
-	bool8_t HasTimelineSemaphore = false;
-	bool8_t HasFullscreenExclusive = false;
-	bool8_t HasDynamicState = false;
+	bool HasKHRSurfaceExt = true;
+	bool HasDebugUtilsExt = true;
+	bool HasDebugReportExt = true;
+	bool HasValidationFeaturesExt = true;
+	bool HasValidationFeaturesExt_GPUAssisted = false;
+	bool HasValidationFeaturesExt_GPUAssistedReserveBindingSlot = false;
+	bool HasValidationFeaturesExt_BestPractices = true;
+	bool HasValidationFeaturesExt_DebugPrintf = false;
+	bool HasValidationFeaturesExt_Synchronization = true;
+	bool HasGetPhysicalDeviceProperties2 = false;
+	bool HasDebugMarkerExt = true;
+	bool HasTimelineSemaphore = false;
+	bool HasFullscreenExclusive = false;
+	bool HasDynamicState = false;
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -65,14 +65,14 @@ struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayer
 class VulkanLayer
 {
 public:
-	VulkanLayer(const char* Name, bool8_t Needed)
+	VulkanLayer(const char* Name, bool Needed)
 		: m_Name(Name)
 		, m_Needed(Needed)
 	{
 	}
 
-	inline bool8_t IsEnabled() const { return m_Enabled; }
-	inline bool8_t IsNeeded() const { return m_Needed; }
+	inline bool IsEnabled() const { return m_Enabled; }
+	inline bool IsNeeded() const { return m_Needed; }
 	inline const char* GetName() const { return m_Name.data(); }
 
 	static VulkanLayerArray GetWantedInstanceLayers();
@@ -82,13 +82,13 @@ protected:
 	friend class VulkanInstance;
 	friend class VulkanDevice;
 
-	bool8_t SetEnabled(const VulkanLayerExtensionConfigurations* Configs, bool8_t Supported) { m_Enabled = IsEnabledInConfig(Configs) && Supported; return m_Enabled; }
-	virtual bool8_t IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const { return Configs && false; }
+	bool SetEnabled(const VulkanLayerExtensionConfigurations* Configs, bool Supported) { m_Enabled = IsEnabledInConfig(Configs) && Supported; return m_Enabled; }
+	virtual bool IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const { return Configs && false; }
 	virtual void SetEnabledToConfig(VulkanLayerExtensionConfigurations* /*Config*/) const {}
 private:
 	std::string_view m_Name;
-	bool8_t m_Enabled = false;
-	bool8_t m_Needed = false;
+	bool m_Enabled = false;
+	bool m_Needed = false;
 };
 
 class VulkanExtension : public VulkanLayer

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Runtime/Core/Math/Vector4.h"
+#include "Core/Math/Vector4.h"
 
 NAMESPACE_START(Math)
 
 class Euler : public Vector4
 {
 public:
-	void Set(float32_t Roll, float32_t Pitch, float32_t Yaw);
+	void Set(float Roll, float Pitch, float Yaw);
 protected:
 private:
 };

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Engine/Rendering/RenderGraph/RenderPassField.h"
-#include "Runtime/Engine/RHI/RHIPipeline.h"
+#include "Engine/Rendering/RenderGraph/RenderPassField.h"
+#include "Engine/RHI/RHIPipeline.h"
 
 class ResourceManager
 {

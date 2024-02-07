@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Engine/Rendering/RenderGraph/RenderPassField.h"
-#include "Runtime/Core/Math/Transform.h"
+#include "Engine/Rendering/RenderGraph/RenderPassField.h"
+#include "Core/Math/Transform.h"
 
 enum EMeshPass
 {
@@ -18,9 +18,9 @@ struct MeshDrawCommand
 	const Math::Transform* WorldTransform = nullptr;
 	uint32_t NumInstances = 1u;
 
-	bool8_t CastShadow = true;
-	bool8_t IsTranslucent = false;
-	bool8_t IsSelected = false;
+	bool CastShadow = true;
+	bool IsTranslucent = false;
+	bool IsSelected = false;
 };
 
 class RenderScene
@@ -61,6 +61,7 @@ public:
 	virtual void OnGUI() {};
 protected:
 	class ResourceManager& GetResourceManager() { return m_ResourceMgr; }
+	class RHIInterface& GetRHI();
 	RDGResource& RegisterResource(const char* Name, RDGResource::EVisibility Visibility);
 private:
 	DAGNodeID m_NodeID;

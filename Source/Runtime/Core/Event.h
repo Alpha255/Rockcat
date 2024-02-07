@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Definitions.h"
+#include "Core/Definitions.h"
 
 template<class... Args>
 class Event;
@@ -39,7 +39,7 @@ public:
 		UnbindAll();
 	}
 
-	bool8_t HasAnyBind() const
+	bool HasAnyBind() const
 	{
 		for (HandlerType* Handler : m_Handlers)
 		{
@@ -187,7 +187,7 @@ public:
 		}
 	}
 
-	bool8_t IsBind() const
+	bool IsBind() const
 	{
 		return m_Event != nullptr;
 	}

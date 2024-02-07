@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Core/GUID.h"
-#include "Runtime/Core/Math/Vector2.h"
+#include "Core/GUID.h"
+#include "Core/Math/Vector2.h"
 
 class PlatformMisc
 {
@@ -20,12 +20,12 @@ public:
 
 	static void* GetCurrentModuleHandle();
 
-	static void ExecuteProcess(const char* Commandline, bool8_t WaitDone = true);
+	static void ExecuteProcess(const char* Commandline, bool WaitDone = true);
 
 	static Guid CreateGUID();
 
 	static Math::Vector2 GetCurrentCursorPosition();
 
-	static size_t GetHardwareConcurrencyThreadsCount(bool8_t UseHyperThreading);
+	static size_t GetHardwareConcurrencyThreadsCount(bool UseHyperThreading);
 };
 

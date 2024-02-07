@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Runtime/Core/Definitions.h"
-#include "Runtime/Engine/Application/GraphicsSettings.h"
-#include "Runtime/Engine/RHI/RHIDevice.h"
+#include "Core/Definitions.h"
+#include "Engine/Application/GraphicsSettings.h"
+#include "Engine/RHI/RHIDevice.h"
 
 /// <summary>
 /// ****  Front face CCW

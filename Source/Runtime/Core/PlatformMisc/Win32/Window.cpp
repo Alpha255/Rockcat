@@ -1,7 +1,7 @@
-#include "Runtime/Core/Window.h"
-#include "Runtime/Core/PlatformMisc.h"
-#include "Runtime/Engine/Application/Resource.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Core/Window.h"
+#include "Core/PlatformMisc.h"
+#include "Engine/Application/Resource.h"
+#include "Engine/Services/SpdLogService.h"
 
 #if defined(PLATFORM_WIN32)
 	#include <Windows.h>
@@ -62,8 +62,8 @@ Window::Window(const WindowCreateInfo& CreateInfo, IInputHandler* InputHandler)
 	{ 
 		0l, 
 		0l, 
-		static_cast<long32_t>(m_Width), 
-		static_cast<long32_t>(m_Height) 
+		static_cast<long>(m_Width), 
+		static_cast<long>(m_Height) 
 	};
 	VERIFY_WITH_PLATFORM_MESSAGE(::AdjustWindowRect(&Rect, WS_OVERLAPPEDWINDOW, false) != 0);
 
@@ -88,7 +88,7 @@ Window::Window(const WindowCreateInfo& CreateInfo, IInputHandler* InputHandler)
 	m_Handle = reinterpret_cast<void*>(Handle);
 }
 
-void Window::UpdateSize(bool8_t Signal)
+void Window::UpdateSize(bool Signal)
 {
 	if (m_Handle)
 	{
@@ -155,8 +155,8 @@ void Window::ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam)
 		m_MouseEvent.OnMove = false;
 		m_MouseEvent.Button = EMouseButton::LButton;
 		m_MouseEvent.State = Message == WM_LBUTTONDOWN ? EKeyState::Down : Message == WM_LBUTTONDBLCLK ? EKeyState::DBClick : EKeyState::Up;
-		m_MouseEvent.Position.x = static_cast<float32_t>(GET_X_LPARAM(LParam));
-		m_MouseEvent.Position.y = static_cast<float32_t>(GET_Y_LPARAM(LParam));
+		m_MouseEvent.Position.x = static_cast<float>(GET_X_LPARAM(LParam));
+		m_MouseEvent.Position.y = static_cast<float>(GET_Y_LPARAM(LParam));
 		OnMouseEvent();
 		break;
 	case WM_RBUTTONDOWN:
@@ -166,8 +166,8 @@ void Window::ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam)
 		m_MouseEvent.OnMove = false;
 		m_MouseEvent.Button = EMouseButton::RButton;
 		m_MouseEvent.State = Message == WM_RBUTTONDOWN ? EKeyState::Down : Message == WM_RBUTTONDBLCLK ? EKeyState::DBClick : EKeyState::Up;
-		m_MouseEvent.Position.x = static_cast<float32_t>(GET_X_LPARAM(LParam));
-		m_MouseEvent.Position.y = static_cast<float32_t>(GET_Y_LPARAM(LParam));
+		m_MouseEvent.Position.x = static_cast<float>(GET_X_LPARAM(LParam));
+		m_MouseEvent.Position.y = static_cast<float>(GET_Y_LPARAM(LParam));
 		OnMouseEvent();
 		break;
 	case WM_MBUTTONDOWN:
@@ -177,8 +177,8 @@ void Window::ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam)
 		m_MouseEvent.OnMove = false;
 		m_MouseEvent.Button = EMouseButton::MButton;
 		m_MouseEvent.State = Message == WM_MBUTTONDOWN ? EKeyState::Down : Message == WM_MBUTTONDBLCLK ? EKeyState::DBClick : EKeyState::Up;
-		m_MouseEvent.Position.x = static_cast<float32_t>(GET_X_LPARAM(LParam));
-		m_MouseEvent.Position.y = static_cast<float32_t>(GET_Y_LPARAM(LParam));
+		m_MouseEvent.Position.x = static_cast<float>(GET_X_LPARAM(LParam));
+		m_MouseEvent.Position.y = static_cast<float>(GET_Y_LPARAM(LParam));
 		OnMouseEvent();
 		break;
 	case WM_MOUSEWHEEL:
@@ -192,8 +192,8 @@ void Window::ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam)
 		m_MouseEvent.WheelDelta = 0;
 		m_MouseEvent.Button = EMouseButton::None;
 		m_MouseEvent.State = EKeyState::Up;
-		m_MouseEvent.Position.x = static_cast<float32_t>(GET_X_LPARAM(LParam));
-		m_MouseEvent.Position.y = static_cast<float32_t>(GET_Y_LPARAM(LParam));
+		m_MouseEvent.Position.x = static_cast<float>(GET_X_LPARAM(LParam));
+		m_MouseEvent.Position.y = static_cast<float>(GET_Y_LPARAM(LParam));
 		OnMouseEvent();
 		break;
 	case WM_KEYDOWN:
@@ -273,8 +273,8 @@ void Window::ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam)
 		assert(MinMaxInfo);
 		MinMaxInfo->ptMinTrackSize = 
 		{ 
-			static_cast<long32_t>(m_MinWidth), 
-			static_cast<long32_t>(m_MinHeight) 
+			static_cast<long>(m_MinWidth), 
+			static_cast<long>(m_MinHeight) 
 		};
 	}
 		break;

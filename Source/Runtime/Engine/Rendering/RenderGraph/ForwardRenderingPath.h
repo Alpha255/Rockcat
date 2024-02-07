@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/Rendering/RenderGraph/RenderGraph.h"
+#include "Engine/Rendering/RenderGraph/RenderGraph.h"
 
 class ForwardRenderingPath : public RenderGraph
 {

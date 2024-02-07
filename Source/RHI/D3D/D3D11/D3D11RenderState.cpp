@@ -103,7 +103,7 @@ void D3D11PipelineState::submit(D3D11Context& context)
 	/// Output Merge
 	if (isDirty(eDirtyTag::eBlendState))
 	{
-		context->OMSetBlendState(BlendState, (float32_t*)&BlendFactor, BlendMask);
+		context->OMSetBlendState(BlendState, (float*)&BlendFactor, BlendMask);
 		setDirty(eDirtyTag::eBlendState, false);
 	}
 

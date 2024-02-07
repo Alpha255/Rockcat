@@ -1,5 +1,5 @@
-#include "Runtime/Engine/Asset/ShaderCompiler.h"
-#include "Runtime/Engine/Async/Task.h"
+#include "Engine/Asset/ShaderCompiler.h"
+#include "Engine/Async/Task.h"
 #pragma warning(disable:4068)
 #include <Submodules/filewatch/FileWatch.hpp>
 #pragma warning(default:4068)
@@ -10,7 +10,7 @@
 		(uint32_t)(uint8_t)(ch2) << 16  | (uint32_t)(uint8_t)(ch3) << 24)
 #endif
 
-DxcShaderCompiler::DxcShaderCompiler(bool8_t GenerateSpirv)
+DxcShaderCompiler::DxcShaderCompiler(bool GenerateSpirv)
 	: m_GenSpirv(GenerateSpirv)
 {
 	VERIFY(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(m_Utils.Reference())) == S_OK);
@@ -475,7 +475,7 @@ void VkShaderCompiler::GetReflectionInfo(RHI::ShaderDesc* const Desc)
 			RHI::ShaderVariable::Description
 			{
 				RHI::EResourceType::PushConstants,
-				std::numeric_limits<uint8_t>().max(),
+				std::numeric_limits<uint8_t>::max(),
 				Desc->Stage,
 				Size,
 				PushConstants.name
@@ -585,7 +585,7 @@ void ShaderCompileService::Compile(const ShaderAsset& Shader)
 {
 	const size_t Hash = Shader.ComputeHash();
 	const auto FileName = Shader.GetPath().filename().generic_string();
-	const auto SourceCode = static_cast<const char*>(Shader.GetRawData().Data.get());
+	const auto SourceCode = Shader.GetRawData().Data.get();
 	const auto Size = Shader.GetRawData().SizeInBytes;
 
 	for (uint32_t Index = (uint32_t)ERenderHardwareInterface::Vulkan; Index < (uint32_t)ERenderHardwareInterface::Num; ++Index)
@@ -607,7 +607,7 @@ void ShaderCompileService::Compile(const ShaderAsset& Shader)
 	}
 }
 
-bool8_t ShaderCompileService::RegisterCompileTask(ERenderHardwareInterface RHI, size_t Hash)
+bool ShaderCompileService::RegisterCompileTask(ERenderHardwareInterface RHI, size_t Hash)
 {
 	assert(RHI < ERenderHardwareInterface::Num);
 

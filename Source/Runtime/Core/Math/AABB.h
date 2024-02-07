@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Math/Vector4.h"
+#include "Core/Math/Vector4.h"
 
 NAMESPACE_START(Math)
 

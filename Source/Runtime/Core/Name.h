@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/StringUtils.h"
+#include "Core/StringUtils.h"
 
 template<bool CaseSensitive>
 class GeneralName : public std::string
@@ -8,7 +8,7 @@ class GeneralName : public std::string
 public:
 	using std::string::string;
 
-	constexpr bool8_t operator==(const GeneralName& Other) const
+	constexpr bool operator==(const GeneralName& Other) const
 	{
 		if (CaseSensitive)
 		{

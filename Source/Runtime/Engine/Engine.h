@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/Application/BaseApplication.h"
+#include "Engine/Application/BaseApplication.h"
 
 class Engine final : public NoneCopyable
 {
@@ -35,12 +35,12 @@ public:
 
 #define GetModule(ModuleType) GetModuleByName<ModuleType>(#ModuleType)
 private:
-	bool8_t Initialize();
+	bool Initialize();
 	void Finalize();
 
 	std::list<std::unique_ptr<BaseApplication>> m_Applications;
 
-	bool8_t m_Initialized = false;
+	bool m_Initialized = false;
 };
 
 #define REGISTER_APPLICATION(ApplicationType, ConfigurationName) \

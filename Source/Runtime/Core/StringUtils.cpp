@@ -1,4 +1,4 @@
-#include "Runtime/Core/StringUtils.h"
+#include "Core/StringUtils.h"
 #if defined(PLATFORM_WIN32)
 	#include <Windows.h>
 	#include <windowsx.h>
@@ -65,17 +65,17 @@ namespace StringUtils
 		return Ret;
 	}
 
-	bool8_t StartsWidth(const std::string& Str, const char* Src)
+	bool StartsWidth(const std::string& Str, const char* Src)
 	{
 		return strncmp(Str.data(), Src, strlen(Src)) == 0;
 	}
 
-	bool8_t EndsWidth(const std::string& Str, const char* Src)
+	bool EndsWidth(const std::string& Str, const char* Src)
 	{
 		return strcmp(Str.data() + (Str.length() - strlen(Src)), Src) == 0;
 	}
 
-	bool8_t Contains(const std::string& Str, const char* Src)
+	bool Contains(const std::string& Str, const char* Src)
 	{
 		return Str.find(Src, 0u) != std::string::npos;
 	}

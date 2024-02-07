@@ -11,11 +11,11 @@ public:
 		uint64_t WindowHandle,
 		uint32_t Width,
 		uint32_t Height,
-		bool8_t Fullscreen,
-		bool8_t VSync,
-		bool8_t sRGB);
+		bool Fullscreen,
+		bool VSync,
+		bool sRGB);
 protected:
 private:
-	bool8_t m_FullScreen = false;
-	bool8_t m_VSync = false;
+	bool m_FullScreen = false;
+	bool m_VSync = false;
 };

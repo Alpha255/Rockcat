@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Math/Matrix.h"
+#include "Core/Math/Matrix.h"
 
 template<class T>
 class Octree
@@ -17,7 +17,7 @@ public:
 
 		ElementID() = default;
 
-		bool8_t IsValid() const { return m_NodeIndex != NullIndex; }
+		bool IsValid() const { return m_NodeIndex != NullIndex; }
 		NodeIndex GetNodeIndex() const { return m_NodeIndex; }
 	private:
 		ElementID(NodeIndex InNodeIndex, uint32_t InElementIndex)
@@ -47,7 +47,7 @@ private:
 		NodeIndex ChildNodes = NullIndex;
 		uint32_t NumElements = 0u;
 
-		bool8_t IsLeaf() const { return ChildNodes == NullIndex; }
+		bool IsLeaf() const { return ChildNodes == NullIndex; }
 	};
 
 	std::vector<Node> m_Nodes;

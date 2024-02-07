@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Core/Math/Plane.h"
-#include "Runtime/Core/Math/Matrix.h"
+#include "Core/Math/Plane.h"
+#include "Core/Math/Matrix.h"
 
 NAMESPACE_START(Math)
 
@@ -21,7 +21,7 @@ public:
 
 	Frustum() = default;
 
-	Frustum(const Matrix& Viewport, bool8_t Reverse)
+	Frustum(const Matrix& Viewport, bool Reverse)
 	{
 		Vector4 Rows[4] = { Viewport.Row(0), Viewport.Row(1), Viewport.Row(2), Viewport.Row(3) };
 		
@@ -50,11 +50,11 @@ public:
 		}
 	}
 
-	bool8_t IntersectsWith(const Vector3& Point)
+	bool IntersectsWith(const Vector3& Point)
 	{
 		for (uint32_t Index = EPlane::Near; Index < EPlane::Counts; ++Index)
 		{
-			float32_t Distance = Dot(m_Planes[Index].Normal(), Point);
+			float Distance = Dot(m_Planes[Index].Normal(), Point);
 			if (Distance > m_Planes[Index].Distance())
 			{
 				return false;
@@ -64,7 +64,7 @@ public:
 		return true;
 	}
 
-	bool8_t IntersectsWith(const AABB& Box)
+	bool IntersectsWith(const AABB& Box)
 	{
 		for (uint32_t Index = EPlane::Near; Index < EPlane::Counts; ++Index)
 		{
@@ -72,11 +72,11 @@ public:
 			Vector3 Min = Box.GetMin();
 			Vector3 Max = Box.GetMax();
 
-			float32_t X = Normal.x > 0 ? Min.x : Max.x;
-			float32_t Y = Normal.y > 0 ? Min.y : Max.y;
-			float32_t Z = Normal.z > 0 ? Min.z : Max.z;
+			float X = Normal.x > 0 ? Min.x : Max.x;
+			float Y = Normal.y > 0 ? Min.y : Max.y;
+			float Z = Normal.z > 0 ? Min.z : Max.z;
 
-			float32_t Distance = 
+			float Distance = 
 				Normal.x * X + 
 				Normal.y + Y + 
 				Normal.z * Z - 

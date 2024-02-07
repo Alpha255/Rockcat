@@ -1,26 +1,26 @@
 #pragma once
 
-#include "Runtime/Core/Math/AABB.h"
-#include "Runtime/Core/Math/Color.h"
-#include "Runtime/Core/Math/Euler.h"
-#include "Runtime/Core/Math/Frustum.h"
-#include "Runtime/Core/Math/Matrix.h"
-#include "Runtime/Core/Math/OBB.h"
-#include "Runtime/Core/Math/Plane.h"
-#include "Runtime/Core/Math/Quaternion.h"
-#include "Runtime/Core/Math/Rect.h"
-#include "Runtime/Core/Math/Sphere.h"
-#include "Runtime/Core/Math/Transform.h"
+#include "Core/Math/AABB.h"
+#include "Core/Math/Color.h"
+#include "Core/Math/Euler.h"
+#include "Core/Math/Frustum.h"
+#include "Core/Math/Matrix.h"
+#include "Core/Math/OBB.h"
+#include "Core/Math/Plane.h"
+#include "Core/Math/Quaternion.h"
+#include "Core/Math/Rect.h"
+#include "Core/Math/Sphere.h"
+#include "Core/Math/Transform.h"
 
 NAMESPACE_START(Math)
 
-static constexpr float32_t PI = DirectX::XM_PI;
-static constexpr float32_t PI_2 = DirectX::XM_2PI;
-static constexpr float32_t PI_Inv = DirectX::XM_1DIVPI;
-static constexpr float32_t PI_2_Inv = DirectX::XM_1DIV2PI;
-static constexpr float32_t PI_Div2 = DirectX::XM_PIDIV2;
-static constexpr float32_t PI_Div4 = DirectX::XM_PIDIV4;
-static constexpr float32_t Epsilon = std::numeric_limits<float32_t>().epsilon();
+static constexpr float PI = DirectX::XM_PI;
+static constexpr float PI_2 = DirectX::XM_2PI;
+static constexpr float PI_Inv = DirectX::XM_1DIVPI;
+static constexpr float PI_2_Inv = DirectX::XM_1DIV2PI;
+static constexpr float PI_Div2 = DirectX::XM_PIDIV2;
+static constexpr float PI_Div4 = DirectX::XM_PIDIV4;
+static constexpr float Epsilon = std::numeric_limits<float>::epsilon();
 
 template<typename T> 
 inline T Clamp(const T& X, const T& Low, const T& High)
@@ -40,12 +40,12 @@ static constexpr inline T DivideAndRoundDown(T Dividend, T Divisor)
 	return Dividend / Divisor;
 }
 
-inline float32_t DegreeToRadians(float32_t Degree)
+inline float DegreeToRadians(float Degree)
 {
 	return DirectX::XMConvertToRadians(Degree);
 }
 
-inline float32_t RadiansToDegree(float32_t Radians)
+inline float RadiansToDegree(float Radians)
 {
 	return DirectX::XMConvertToDegrees(Radians);
 }

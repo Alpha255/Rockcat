@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Core/DirectedAcyclicGraph.h"
-#include "Runtime/Engine/RHI/RHIBuffer.h"
+#include "Core/DirectedAcyclicGraph.h"
+#include "Engine/RHI/RHIBuffer.h"
 
 using DAGNodeID = DirectedAcyclicGraph::NodeID;
 

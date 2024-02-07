@@ -1,5 +1,5 @@
-#include "Runtime/Engine/Asset/Asset.h"
-#include "Runtime/Core/IO/FileIOStream.h"
+#include "Engine/Asset/Asset.h"
+#include "Core/IO/FileIOStream.h"
 
 std::optional<Asset::Callbacks> Asset::s_DefaultNullCallbacks(std::nullopt);
 

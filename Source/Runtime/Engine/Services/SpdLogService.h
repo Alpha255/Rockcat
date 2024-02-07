@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Core/StringUtils.h"
-#include "Runtime/Core/Module.h"
+#include "Core/StringUtils.h"
+#include "Core/Module.h"
 #pragma warning(push)
 #pragma warning(disable:4702)
 #include <Submodules/spdlog/include/spdlog/spdlog.h>

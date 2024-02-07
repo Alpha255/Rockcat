@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Core/Definitions.h"
-#include "Runtime/Core/Cereal.h"
+#include "Core/Definitions.h"
+#include "Core/Cereal.h"
 
 #define USE_SSE 1
 //#define FORCE_ALIGN_16
@@ -88,7 +88,7 @@ inline void operator-=(const Vector##Dimension& Right)                          
 {                                                                                                                                                \
 	VECTOR_STORE(Dimension, this, DirectX::XMVectorSubtract(VECTOR_LOAD(Dimension, this), VECTOR_LOAD(Dimension, &Right)));                      \
 }                                                                                                                                                \
-inline void operator*=(const float32_t Right)                                                                                                    \
+inline void operator*=(const float Right)                                                                                                    \
 {                                                                                                                                                \
 	VECTOR_STORE(Dimension, this, DirectX::XMVectorScale(VECTOR_LOAD(Dimension, this), Right));                                                  \
 }                                                                                                                                                \
@@ -96,7 +96,7 @@ inline void operator*=(const Vector##Dimension& Right)                          
 {                                                                                                                                                \
 	VECTOR_STORE(Dimension, this, DirectX::XMVectorMultiply(VECTOR_LOAD(Dimension, this), VECTOR_LOAD(Dimension, &Right)));                      \
 }                                                                                                                                                \
-inline void operator/=(const float32_t Right)                                                                                                    \
+inline void operator/=(const float Right)                                                                                                    \
 {                                                                                                                                                \
 	assert(std::fpclassify(Right) != FP_ZERO);                                                                                                   \
 	VECTOR_STORE(Dimension, this, DirectX::XMVectorScale(VECTOR_LOAD(Dimension, this), 1.0f / Right));                                           \
@@ -105,7 +105,7 @@ inline void operator/=(const Vector##Dimension& Right)                          
 {                                                                                                                                                \
 	VECTOR_STORE(Dimension, this, DirectX::XMVectorDivide(VECTOR_LOAD(Dimension, this), VECTOR_LOAD(Dimension, &Right)));                        \
 }                                                                                                                                                \
-inline float32_t Dot(const Vector##Dimension& Right) const                                                                                       \
+inline float Dot(const Vector##Dimension& Right) const                                                                                       \
 {                                                                                                                                                \
 	return DirectX::XMVectorGetX(VECTOR_DOT(Dimension, VECTOR_LOAD(Dimension, this), VECTOR_LOAD(Dimension, &Right)));                           \
 }                                                                                                                                                \
@@ -117,35 +117,35 @@ inline void Negate()                                                            
 {                                                                                                                                                \
 	VECTOR_STORE(Dimension, this, DirectX::XMVectorNegate(VECTOR_LOAD(Dimension, this)));                                                        \
 }                                                                                                                                                \
-inline float32_t Length() const                                                                                                                  \
+inline float Length() const                                                                                                                  \
 {                                                                                                                                                \
 	return DirectX::XMVectorGetX(VECTOR_LENGTH(Dimension, VECTOR_LOAD(Dimension, this)));                                                        \
 }                                                                                                                                                \
-inline float32_t LengthSq() const                                                                                                                \
+inline float LengthSq() const                                                                                                                \
 {                                                                                                                                                \
 	return DirectX::XMVectorGetX(VECTOR_LENGTH_SQ(Dimension, VECTOR_LOAD(Dimension, this)));                                                     \
 }                                                                                                                                                \
-inline float32_t LengthEst() const                                                                                                               \
+inline float LengthEst() const                                                                                                               \
 {                                                                                                                                                \
 	return DirectX::XMVectorGetX(VECTOR_LENGTH_EST(Dimension, VECTOR_LOAD(Dimension, this)));                                                    \
 }                                                                                                                                                \
-inline float32_t ReciprocalLength() const                                                                                                        \
+inline float ReciprocalLength() const                                                                                                        \
 {                                                                                                                                                \
 	return DirectX::XMVectorGetX(VECTOR_RECIPROCAL_LENGTH(Dimension, VECTOR_LOAD(Dimension, this)));                                             \
 }                                                                                                                                                \
-inline float32_t ReciprocalLengthEst() const                                                                                                     \
+inline float ReciprocalLengthEst() const                                                                                                     \
 {                                                                                                                                                \
 	return DirectX::XMVectorGetX(VECTOR_RECIPROCAL_LENGTH_EST(Dimension, VECTOR_LOAD(Dimension, this)));                                         \
 }                                                                                                                                                \
-inline bool8_t IsNaN() const                                                                                                                     \
+inline bool IsNaN() const                                                                                                                     \
 {                                                                                                                                                \
 	return VECTOR_IS_NAN(Dimension, VECTOR_LOAD(Dimension, this));                                                                               \
 }                                                                                                                                                \
-inline bool8_t IsInfinite() const                                                                                                                \
+inline bool IsInfinite() const                                                                                                                \
 {                                                                                                                                                \
 	return VECTOR_IS_INFINITE(Dimension, VECTOR_LOAD(Dimension, this));                                                                          \
 }                                                                                                                                                \
-inline void ClampLength(float32_t Min, float32_t Max)                                                                                            \
+inline void ClampLength(float Min, float Max)                                                                                            \
 {                                                                                                                                                \
 	VECTOR_STORE(Dimension, this, VECTOR_CLAMP_LENGTH(Dimension, VECTOR_LOAD(Dimension, this), Min, Max));                                       \
 }                                                                                                                                                \
@@ -155,7 +155,7 @@ inline Vector##Dimension Reflect(const Vector##Dimension& Normal) const         
 	VECTOR_STORE(Dimension, &Result, VECTOR_REFLECT(Dimension, VECTOR_LOAD(Dimension, this), VECTOR_LOAD(Dimension, &Normal)));                  \
 	return Result;                                                                                                                               \
 }                                                                                                                                                \
-inline Vector##Dimension Refract(const Vector##Dimension& Normal, float32_t RefractionIndex) const                                               \
+inline Vector##Dimension Refract(const Vector##Dimension& Normal, float RefractionIndex) const                                               \
 {                                                                                                                                                \
 	Vector##Dimension Result;                                                                                                                    \
 	VECTOR_STORE(Dimension, &Result, VECTOR_REFRACT(Dimension, VECTOR_LOAD(Dimension, this), VECTOR_LOAD(Dimension, &Normal), RefractionIndex)); \
@@ -246,7 +246,7 @@ inline Vector##Dimension operator-(const Vector##Dimension &Left, const Vector##
 	VECTOR_STORE(Dimension, &Result, DirectX::XMVectorSubtract(VECTOR_LOAD(Dimension, &Left), VECTOR_LOAD(Dimension, &Right)));                               \
 	return Result;                                                                                                                                            \
 }                                                                                                                                                             \
-inline Vector##Dimension operator*(const Vector##Dimension& Left, const float32_t Right)                                                                      \
+inline Vector##Dimension operator*(const Vector##Dimension& Left, const float Right)                                                                      \
 {                                                                                                                                                             \
 	Vector##Dimension Result;                                                                                                                                 \
 	VECTOR_STORE(Dimension, &Result, DirectX::XMVectorScale(VECTOR_LOAD(Dimension, &Left), Right));                                                           \
@@ -258,7 +258,7 @@ inline Vector##Dimension operator*(const Vector##Dimension& Left, const Vector##
 	VECTOR_STORE(Dimension, &Result, DirectX::XMVectorMultiply(VECTOR_LOAD(Dimension, &Left), VECTOR_LOAD(Dimension, &Right)));                               \
 	return Result;                                                                                                                                            \
 }                                                                                                                                                             \
-inline Vector##Dimension operator/(const Vector##Dimension& Left, const float32_t Right)                                                                      \
+inline Vector##Dimension operator/(const Vector##Dimension& Left, const float Right)                                                                      \
 {                                                                                                                                                             \
 	assert(std::fpclassify(Right) != FP_ZERO);                                                                                                                \
 	Vector##Dimension Result;                                                                                                                                 \
@@ -271,31 +271,31 @@ inline Vector##Dimension operator/(const Vector##Dimension& Left, const Vector##
 	VECTOR_STORE(Dimension, &Result, DirectX::XMVectorDivide(VECTOR_LOAD(Dimension, &Left), VECTOR_LOAD(Dimension, &Right)));                                 \
 	return Result;                                                                                                                                            \
 }                                                                                                                                                             \
-inline bool8_t operator==(const Vector##Dimension& Left, const Vector##Dimension& Right)                                                                      \
+inline bool operator==(const Vector##Dimension& Left, const Vector##Dimension& Right)                                                                      \
 {                                                                                                                                                             \
 	return VECTOR_EQUAL(Dimension, VECTOR_LOAD(Dimension, &Left), VECTOR_LOAD(Dimension, &Right));                                                            \
 }                                                                                                                                                             \
-inline bool8_t operator!=(const Vector##Dimension& Left, const Vector##Dimension& Right)                                                                      \
+inline bool operator!=(const Vector##Dimension& Left, const Vector##Dimension& Right)                                                                      \
 {                                                                                                                                                             \
 	return VECTOR_NOT_EQUAL(Dimension, VECTOR_LOAD(Dimension, &Left), VECTOR_LOAD(Dimension, &Right));                                                        \
 }                                                                                                                                                             \
-inline bool8_t operator>(const Vector##Dimension& Left, const Vector##Dimension& Right)                                                                       \
+inline bool operator>(const Vector##Dimension& Left, const Vector##Dimension& Right)                                                                       \
 {                                                                                                                                                             \
 	return VECTOR_GREATER(Dimension, VECTOR_LOAD(Dimension, &Left), VECTOR_LOAD(Dimension, &Right));                                                          \
 }                                                                                                                                                             \
-inline bool8_t operator>=(const Vector##Dimension& Left, const Vector##Dimension& Right)                                                                      \
+inline bool operator>=(const Vector##Dimension& Left, const Vector##Dimension& Right)                                                                      \
 {                                                                                                                                                             \
 	return VECTOR_GREATER_OR_EQUAL(Dimension, VECTOR_LOAD(Dimension, &Left), VECTOR_LOAD(Dimension, &Right));                                                 \
 }                                                                                                                                                             \
-inline bool8_t operator<(const Vector##Dimension& Left, const Vector##Dimension& Right)                                                                       \
+inline bool operator<(const Vector##Dimension& Left, const Vector##Dimension& Right)                                                                       \
 {                                                                                                                                                             \
 	return VECTOR_LESS(Dimension, VECTOR_LOAD(Dimension, &Left), VECTOR_LOAD(Dimension, &Right));                                                             \
 }                                                                                                                                                             \
-inline bool8_t operator<=(const Vector##Dimension& Left, const Vector##Dimension& Right)                                                                      \
+inline bool operator<=(const Vector##Dimension& Left, const Vector##Dimension& Right)                                                                      \
 {                                                                                                                                                             \
 	return VECTOR_LESS_OR_EQUAL(Dimension, VECTOR_LOAD(Dimension, &Left), VECTOR_LOAD(Dimension, &Right));                                                    \
 }                                                                                                                                                             \
-inline float32_t Dot(const Vector##Dimension& Left, const Vector##Dimension& Right)                                                                           \
+inline float Dot(const Vector##Dimension& Left, const Vector##Dimension& Right)                                                                           \
 {                                                                                                                                                             \
 	return DirectX::XMVectorGetX(VECTOR_DOT(Dimension, VECTOR_LOAD(Dimension, &Left), VECTOR_LOAD(Dimension, &Right)));                                       \
 }                                                                                                                                                             \
@@ -311,35 +311,35 @@ inline Vector##Dimension Negate(Vector##Dimension& Vec)                         
 	VECTOR_STORE(Dimension, &Result, DirectX::XMVectorNegate(VECTOR_LOAD(Dimension, &Vec)));                                                                  \
 	return Result;                                                                                                                                            \
 }                                                                                                                                                             \
-inline float32_t Length(const Vector##Dimension& Vec)                                                                                                         \
+inline float Length(const Vector##Dimension& Vec)                                                                                                         \
 {                                                                                                                                                             \
 	return DirectX::XMVectorGetX(VECTOR_LENGTH(Dimension, VECTOR_LOAD(Dimension, &Vec)));                                                                     \
 }                                                                                                                                                             \
-inline float32_t LengthSq(const Vector##Dimension& Vec)                                                                                                       \
+inline float LengthSq(const Vector##Dimension& Vec)                                                                                                       \
 {                                                                                                                                                             \
 	return DirectX::XMVectorGetX(VECTOR_LENGTH_SQ(Dimension, VECTOR_LOAD(Dimension, &Vec)));                                                                  \
 }                                                                                                                                                             \
-inline float32_t LengthEst(const Vector##Dimension& Vec)                                                                                                      \
+inline float LengthEst(const Vector##Dimension& Vec)                                                                                                      \
 {                                                                                                                                                             \
 	return DirectX::XMVectorGetX(VECTOR_LENGTH_EST(Dimension, VECTOR_LOAD(Dimension, &Vec)));                                                                 \
 }                                                                                                                                                             \
-inline float32_t ReciprocalLength(const Vector##Dimension& Vec)                                                                                               \
+inline float ReciprocalLength(const Vector##Dimension& Vec)                                                                                               \
 {                                                                                                                                                             \
 	return DirectX::XMVectorGetX(VECTOR_RECIPROCAL_LENGTH(Dimension, VECTOR_LOAD(Dimension, &Vec)));                                                          \
 }                                                                                                                                                             \
-inline float32_t ReciprocalLengthEst(const Vector##Dimension& Vec)                                                                                            \
+inline float ReciprocalLengthEst(const Vector##Dimension& Vec)                                                                                            \
 {                                                                                                                                                             \
 	return DirectX::XMVectorGetX(VECTOR_RECIPROCAL_LENGTH_EST(Dimension, VECTOR_LOAD(Dimension, &Vec)));                                                      \
 }                                                                                                                                                             \
-inline bool8_t IsNaN(const Vector##Dimension& Vec)                                                                                                            \
+inline bool IsNaN(const Vector##Dimension& Vec)                                                                                                            \
 {                                                                                                                                                             \
 	return VECTOR_IS_NAN(Dimension, VECTOR_LOAD(Dimension, &Vec));                                                                                            \
 }                                                                                                                                                             \
-inline bool8_t IsInfinite(const Vector##Dimension& Vec)                                                                                                       \
+inline bool IsInfinite(const Vector##Dimension& Vec)                                                                                                       \
 {                                                                                                                                                             \
 	return VECTOR_IS_INFINITE(Dimension, VECTOR_LOAD(Dimension, &Vec));                                                                                       \
 }                                                                                                                                                             \
-inline Vector##Dimension ClampLength(const Vector##Dimension& Vec, float32_t Min, float32_t Max)                                                              \
+inline Vector##Dimension ClampLength(const Vector##Dimension& Vec, float Min, float Max)                                                              \
 {                                                                                                                                                             \
 	Vector##Dimension Result;                                                                                                                                 \
 	VECTOR_STORE(Dimension, &Result, VECTOR_CLAMP_LENGTH(Dimension, VECTOR_LOAD(Dimension, &Vec), Min, Max));                                                 \
@@ -351,7 +351,7 @@ inline Vector##Dimension Reflect(const Vector##Dimension& Vec, const Vector##Dim
 	VECTOR_STORE(Dimension, &Result, VECTOR_REFLECT(Dimension, VECTOR_LOAD(Dimension, &Vec), VECTOR_LOAD(Dimension, &Normal)));                               \
 	return Result;                                                                                                                                            \
 }                                                                                                                                                             \
-inline Vector##Dimension Refract(const Vector##Dimension& Vec, const Vector##Dimension& Normal, float32_t RefractionIndex)                                    \
+inline Vector##Dimension Refract(const Vector##Dimension& Vec, const Vector##Dimension& Normal, float RefractionIndex)                                    \
 {                                                                                                                                                             \
 	Vector##Dimension Result;                                                                                                                                 \
 	VECTOR_STORE(Dimension, &Result, VECTOR_REFRACT(Dimension, VECTOR_LOAD(Dimension, &Vec), VECTOR_LOAD(Dimension, &Normal), RefractionIndex));              \
@@ -375,7 +375,7 @@ inline Vector##Dimension Max(const Vector##Dimension& Left, const Vector##Dimens
 	VECTOR_STORE(Dimension, &Result, DirectX::XMVectorMax(VECTOR_LOAD(Dimension, &Left), VECTOR_LOAD(Dimension, &Right)));                                    \
 	return Result;                                                                                                                                            \
 }                                                                                                                                                             \
-inline Vector##Dimension Lerp(const Vector##Dimension &Left, const Vector##Dimension& Right, float32_t factor)                                                \
+inline Vector##Dimension Lerp(const Vector##Dimension &Left, const Vector##Dimension& Right, float factor)                                                \
 {                                                                                                                                                             \
 	Vector##Dimension Result;                                                                                                                                 \
 	VECTOR_STORE(Dimension, &Result, DirectX::XMVectorLerp(VECTOR_LOAD(Dimension, &Left), VECTOR_LOAD(Dimension, &Right), factor));                           \

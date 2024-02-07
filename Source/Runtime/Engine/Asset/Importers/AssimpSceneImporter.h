@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Runtime/Engine/Asset/SceneAsset.h"
-#include "Runtime/Engine/Asset/AssetDatabase.h"
-#include "Runtime/Engine/Asset/GlobalShaders/DefaultShading.h"
+#include "Engine/Asset/SceneAsset.h"
+#include "Engine/Asset/AssetDatabase.h"
+#include "Engine/Asset/GlobalShaders/DefaultShading.h"
 #include <Submodules/assimp/include/assimp/Importer.hpp>
 #include <Submodules/assimp/include/assimp/ProgressHandler.hpp>
 #include <Submodules/assimp/include/assimp/scene.h>
@@ -31,7 +31,7 @@ public:
 
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<AssimpScene>(AssetPath); }
 
-	bool8_t Reimport(Asset& InAsset) override final
+	bool Reimport(Asset& InAsset) override final
 	{
 		auto& Scene = Cast<AssimpScene>(InAsset);
 
@@ -86,7 +86,7 @@ private:
 		{
 		}
 
-		bool8_t Update(float32_t Percentage) override final
+		bool Update(float Percentage) override final
 		{
 			if (Percentage >= 1.0f)
 			{
@@ -112,11 +112,11 @@ private:
 		void OnInfo(const char* Message) override final { LOG_INFO("AssimpSceneImporter: {}", Message); }
 		void OnWarn(const char* Message) override final { LOG_WARNING("AssimpSceneImporter: {}", Message); }
 		void OnError(const char* Message) override final { LOG_ERROR("AssimpSceneImporter: {}", Message); }
-		bool8_t attachStream(Assimp::LogStream*, uint32_t) override final { return true; }
-		bool8_t detachStream(Assimp::LogStream*, uint32_t) override final { return true; }
+		bool attachStream(Assimp::LogStream*, uint32_t) override final { return true; }
+		bool detachStream(Assimp::LogStream*, uint32_t) override final { return true; }
 	};
 
-	bool8_t ProcessNode(const aiScene* AiScene, const aiNode* AiNode, SceneGraph::NodeID GraphNode, AssimpScene& AssimpScene)
+	bool ProcessNode(const aiScene* AiScene, const aiNode* AiNode, SceneGraph::NodeID GraphNode, AssimpScene& AssimpScene)
 	{
 		if (!AiNode)
 		{
@@ -212,7 +212,7 @@ private:
 				ai_real AlphaCutoff = 0.0f;
 				AiMaterial->Get(AI_MATKEY_GLTF_ALPHACUTOFF, AlphaCutoff);
 
-				bool8_t TwoSided = false;
+				bool TwoSided = false;
 				AiMaterial->Get(AI_MATKEY_TWOSIDED, TwoSided);
 
 				auto MaterialAssetName = (AssimpScene.GetPath().stem() / Name.C_Str()).string();

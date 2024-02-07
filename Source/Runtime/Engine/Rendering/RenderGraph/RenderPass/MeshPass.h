@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Core/Math/Transform.h"
-#include "Runtime/Engine/Rendering/RenderGraph/RenderPass.h"
+#include "Core/Math/Transform.h"
+#include "Engine/Rendering/RenderGraph/RenderPass.h"
 
 class MeshPass : public RenderPass
 {

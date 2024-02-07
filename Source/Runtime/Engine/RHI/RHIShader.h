@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIResource.h"
+#include "Engine/RHI/RHIResource.h"
 
 enum class ERHIShaderLanguage : uint8_t
 {

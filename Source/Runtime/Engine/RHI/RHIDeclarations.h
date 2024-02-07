@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Definitions.h"
+#include "Core/Definitions.h"
 
 DECLARE_SMART_PTR(RHIImage)
 DECLARE_SMART_PTR(RHIDevice)

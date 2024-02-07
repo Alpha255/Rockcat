@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIInterface.h"
-#include "Runtime/Engine/RHI/RHIFormat.h"
+#include "Engine/RHI/RHIInterface.h"
+#include "Engine/RHI/RHIFormat.h"
 
 class VulkanRHI final : public RHIInterface
 {

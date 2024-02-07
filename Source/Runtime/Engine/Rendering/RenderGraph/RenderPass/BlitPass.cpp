@@ -1,10 +1,10 @@
-#include "Runtime/Engine/Rendering/RenderGraph/RenderPass/BlitPass.h"
+#include "Engine/Rendering/RenderGraph/RenderPass/BlitPass.h"
 #if 0
 #include "Colorful/IRenderer/RenderGraph/RenderPass/BlitPass.h"
 #include "Colorful/IRenderer/RenderGraph/RenderPass/ForwardShadingPass.h"
 #include "Colorful/IRenderer/IRenderer.h"
-#include "Runtime/Asset/AssetDatabase.h"
-#include "Runtime/Scene/Scene.h"
+#include "Asset/AssetDatabase.h"
+#include "Scene/Scene.h"
 
 NAMESPACE_START(RHI)
 

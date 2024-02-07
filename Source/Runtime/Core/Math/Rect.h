@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Math/Vector4.h"
+#include "Core/Math/Vector4.h"
 
 NAMESPACE_START(Math)
 
@@ -12,7 +12,7 @@ public:
 	{
 	}
 
-	Rect(float32_t Left, float32_t Top, float32_t Right, float32_t Bottom)
+	Rect(float Left, float Top, float Right, float Bottom)
 		: Vector4(Left, Top, Right, Bottom)
 	{
 	}
@@ -22,17 +22,17 @@ public:
 	{
 	}
 
-	inline float32_t Width()
+	inline float Width()
 	{
 		return z - x;
 	}
 
-	inline float32_t Height()
+	inline float Height()
 	{
 		return w - y;
 	}
 
-	bool8_t IsIntersect(const Rect& Other);
+	bool IsIntersect(const Rect& Other);
 protected:
 private:
 };

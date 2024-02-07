@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Math/Vector4.h"
+#include "Core/Math/Vector4.h"
 
 NAMESPACE_START(Math)
 
@@ -13,10 +13,10 @@ public:
 	}
 
 	inline Matrix(
-		float32_t M00, float32_t M01, float32_t M02, float32_t M03,
-		float32_t M10, float32_t M11, float32_t M12, float32_t M13,
-		float32_t M20, float32_t M21, float32_t M22, float32_t M23,
-		float32_t M30, float32_t M31, float32_t M32, float32_t M33)
+		float M00, float M01, float M02, float M03,
+		float M10, float M11, float M12, float M13,
+		float M20, float M21, float M22, float M23,
+		float M30, float M31, float M32, float M33)
 		: Float4x4(
 			M00, M01, M02, M03,
 			M10, M11, M12, M13,
@@ -80,7 +80,7 @@ public:
 		_41 += Right._41; _42 += Right._42; _43 += Right._43; _44 += Right._44;
 	}
 
-	inline void Translate(float32_t X, float32_t Y, float32_t Z)
+	inline void Translate(float X, float Y, float Z)
 	{
 		MATRIX_STORE(this, DirectX::XMMatrixMultiply(MATRIX_LOAD(this), DirectX::XMMatrixTranslation(X, Y, Z)));
 	}
@@ -90,7 +90,7 @@ public:
 		MATRIX_STORE(this, DirectX::XMMatrixMultiply(MATRIX_LOAD(this), DirectX::XMMatrixTranslation(Value.x, Value.y, Value.z)));
 	}
 
-	inline void Scale(float32_t X, float32_t Y, float32_t Z)
+	inline void Scale(float X, float Y, float Z)
 	{
 		MATRIX_STORE(this, DirectX::XMMatrixMultiply(MATRIX_LOAD(this), DirectX::XMMatrixScaling(X, Y, Z)));
 	}
@@ -100,7 +100,7 @@ public:
 		MATRIX_STORE(this, DirectX::XMMatrixMultiply(MATRIX_LOAD(this), DirectX::XMMatrixScaling(Value.x, Value.y, Value.z)));
 	}
 
-	inline void Rotate(float32_t X, float32_t Y, float32_t Z, float32_t Angle)
+	inline void Rotate(float X, float Y, float Z, float Angle)
 	{
 		MATRIX_STORE(
 			this, 
@@ -111,7 +111,7 @@ public:
 					DirectX::XMConvertToRadians(Angle))));
 	}
 
-	inline void RotateAxis(const Vector3& Axis, float32_t Angle)
+	inline void RotateAxis(const Vector3& Axis, float Angle)
 	{
 		MATRIX_STORE(
 			this,
@@ -122,7 +122,7 @@ public:
 					DirectX::XMConvertToRadians(Angle))));
 	}
 
-	inline void RotateXAxis(float32_t Angle)
+	inline void RotateXAxis(float Angle)
 	{
 		MATRIX_STORE(
 			this,
@@ -131,7 +131,7 @@ public:
 				DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(Angle))));
 	}
 
-	inline void RotateYAxis(float32_t Angle)
+	inline void RotateYAxis(float Angle)
 	{
 		MATRIX_STORE(
 			this,
@@ -140,7 +140,7 @@ public:
 				DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(Angle))));
 	}
 
-	inline void RotateZAxis(float32_t Angle)
+	inline void RotateZAxis(float Angle)
 	{
 		MATRIX_STORE(
 			this,
@@ -149,7 +149,7 @@ public:
 				DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(Angle))));
 	}
 
-	inline void RotateRollPitchYaw(float32_t Pitch, float32_t Yaw, float32_t Roll)
+	inline void RotateRollPitchYaw(float Pitch, float Yaw, float Roll)
 	{
 		MATRIX_STORE(
 			this, 
@@ -170,7 +170,7 @@ public:
 		return Vector4(m[0u][ColumnIndex], m[1u][ColumnIndex], m[2u][ColumnIndex], m[3u][ColumnIndex]);
 	}
 
-	inline static Matrix Translation(float32_t X, float32_t Y, float32_t Z)
+	inline static Matrix Translation(float X, float Y, float Z)
 	{
 		Matrix Ret;
 		MATRIX_STORE(&Ret, DirectX::XMMatrixTranslation(X, Y, Z));
@@ -187,52 +187,52 @@ public:
 		return Scaling(Value.x, Value.y, Value.z);
 	}
 
-	inline static Matrix Scaling(float32_t X, float32_t Y, float32_t Z)
+	inline static Matrix Scaling(float X, float Y, float Z)
 	{
 		Matrix Ret;
 		MATRIX_STORE(&Ret, DirectX::XMMatrixScaling(X, Y, Z));
 		return Ret;
 	}
 
-	inline static Matrix Scaling(float32_t Factor)
+	inline static Matrix Scaling(float Factor)
 	{
 		return Scaling(Factor, Factor, Factor);
 	}
 
-	inline static Matrix Rotation(float32_t X, float32_t Y, float32_t Z, float32_t Angle)
+	inline static Matrix Rotation(float X, float Y, float Z, float Angle)
 	{
 		Matrix Ret;
 		MATRIX_STORE(&Ret, DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(X, Y, Z, 0.0f), DirectX::XMConvertToRadians(Angle)));
 		return Ret;
 	}
 
-	inline static Matrix Rotation(const Vector3& Axis, float32_t Angle)
+	inline static Matrix Rotation(const Vector3& Axis, float Angle)
 	{
 		return Rotation(Axis.x, Axis.y, Axis.z, Angle);
 	}
 
-	inline static Matrix RotationXAxis(float32_t Angle)
+	inline static Matrix RotationXAxis(float Angle)
 	{
 		Matrix Ret;
 		MATRIX_STORE(&Ret, DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(Angle)));
 		return Ret;
 	}
 
-	inline static Matrix RotationYAxis(float32_t Angle)
+	inline static Matrix RotationYAxis(float Angle)
 	{
 		Matrix Ret;
 		MATRIX_STORE(&Ret, DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(Angle)));
 		return Ret;
 	}
 
-	inline static Matrix RotationZAxis(float32_t Angle)
+	inline static Matrix RotationZAxis(float Angle)
 	{
 		Matrix Ret;
 		MATRIX_STORE(&Ret, DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(Angle)));
 		return Ret;
 	}
 
-	inline static Matrix RotationRollPitchYaw(float32_t Pitch, float32_t Yaw, float32_t Roll)
+	inline static Matrix RotationRollPitchYaw(float Pitch, float Yaw, float Roll)
 	{
 		Matrix Ret;
 		MATRIX_STORE(&Ret, DirectX::XMMatrixRotationRollPitchYaw(Pitch, Yaw, Roll));
@@ -267,35 +267,35 @@ public:
 		return Ret;
 	}
 
-	inline static Matrix PerspectiveFovLH(float32_t FOV, float32_t Aspect, float32_t NearPlane, float32_t FarPlane)
+	inline static Matrix PerspectiveFovLH(float FOV, float Aspect, float NearPlane, float FarPlane)
 	{
 		Matrix Ret;
 		MATRIX_STORE(&Ret, DirectX::XMMatrixPerspectiveFovLH(FOV, Aspect, NearPlane, FarPlane));
 		return Ret;
 	}
 
-	inline static Matrix PerspectiveFovRH(float32_t FOV, float32_t Aspect, float32_t NearPlane, float32_t FarPlane)
+	inline static Matrix PerspectiveFovRH(float FOV, float Aspect, float NearPlane, float FarPlane)
 	{
 		Matrix Ret;
 		MATRIX_STORE(&Ret, DirectX::XMMatrixPerspectiveFovRH(FOV, Aspect, NearPlane, FarPlane));
 		return Ret;
 	}
 
-	inline static Matrix PerspectiveOffCenterLH(float32_t Left, float32_t Right, float32_t Bottom, float32_t Top, float32_t NearPlane, float32_t FarPlane)
+	inline static Matrix PerspectiveOffCenterLH(float Left, float Right, float Bottom, float Top, float NearPlane, float FarPlane)
 	{
 		Matrix Ret;
 		MATRIX_STORE(&Ret, DirectX::XMMatrixPerspectiveOffCenterLH(Left, Right, Bottom, Top, NearPlane, FarPlane));
 		return Ret;
 	}
 
-	inline static Matrix OrthographicLH(float32_t Width, float32_t Height, float32_t NearPlane, float32_t FarPlane)
+	inline static Matrix OrthographicLH(float Width, float Height, float NearPlane, float FarPlane)
 	{
 		Matrix Ret;
 		MATRIX_STORE(&Ret, DirectX::XMMatrixOrthographicLH(Width, Height, NearPlane, FarPlane));
 		return Ret;
 	}
 
-	inline static Matrix OrthographicOffCenterLH(float32_t Left, float32_t Right, float32_t Bottom, float32_t Top, float32_t NearPlane, float32_t FarPlane)
+	inline static Matrix OrthographicOffCenterLH(float Left, float Right, float Bottom, float Top, float NearPlane, float FarPlane)
 	{
 		Matrix Ret;
 		MATRIX_STORE(&Ret, DirectX::XMMatrixOrthographicOffCenterLH(Left, Right, Bottom, Top, NearPlane, FarPlane));
@@ -382,7 +382,7 @@ public:
 			0.0f,
 			1.0f);
 
-		float32_t R = m[0][0] * S.m[0][0] + m[0][1] * S.m[1][0] + m[0][2] * S.m[2][0];
+		float R = m[0][0] * S.m[0][0] + m[0][1] * S.m[1][0] + m[0][2] * S.m[2][0];
 		if (std::abs(R) >= 1.0f)
 		{
 			for (uint32_t I = 0u; I < 3u; ++I)
@@ -395,7 +395,7 @@ public:
 		}
 		else
 		{
-			float32_t MR = std::abs(R) / FLT_MIN;
+			float MR = std::abs(R) / FLT_MIN;
 			for (uint32_t I = 0u; I < 3u; ++I)
 			{
 				for (uint32_t J = 0u; J < 3u; ++J)
@@ -432,7 +432,7 @@ public:
 		Transpose();
 	}
 
-	inline static Matrix Translate(float32_t X, float32_t Y, float32_t Z)
+	inline static Matrix Translate(float X, float Y, float Z)
 	{
 		Matrix Ret;
 		Ret._41 = X;
@@ -446,7 +446,7 @@ public:
 		return Translate(Translation.x, Translation.y, Translation.z);
 	}
 
-	inline static Matrix Scale(float32_t Value)
+	inline static Matrix Scale(float Value)
 	{
 		return Scale(Value, Value, Value);
 	}
@@ -456,7 +456,7 @@ public:
 		return Scale(Scalling.x, Scalling.y, Scalling.z);
 	}
 
-	inline static Matrix Scale(float32_t X, float32_t Y, float32_t Z)
+	inline static Matrix Scale(float X, float Y, float Z)
 	{
 		Matrix Ret;
 		Ret._11 = X;
@@ -465,15 +465,15 @@ public:
 		return Ret;
 	}
 
-	inline static Matrix Rotate(float32_t X, float32_t Y, float32_t Z, float32_t Angle)
+	inline static Matrix Rotate(float X, float Y, float Z, float Angle)
 	{
 		Matrix Ret;
 		Vector3 Axis(X, Y, Z);
 		Axis.Normalize();
 
-		float32_t Radian = Angle * Math::PI / 180.0f;
-		float32_t CosTheta = ::cosf(Radian);
-		float32_t SinTheta = ::sinf(Radian);
+		float Radian = Angle * Math::PI / 180.0f;
+		float CosTheta = ::cosf(Radian);
+		float SinTheta = ::sinf(Radian);
 
 		Ret._11 = Axis.x * Axis.x * (1.0f - CosTheta) + CosTheta;
 		Ret._12 = Axis.x * Axis.y * (1.0f - CosTheta) + Axis.z * SinTheta;
@@ -498,17 +498,17 @@ public:
 		return Ret;
 	}
 
-	inline static Matrix Rotate(const Vector3 &Axis, float32_t Angle)
+	inline static Matrix Rotate(const Vector3 &Axis, float Angle)
 	{
 		return SetRotate(Axis.x, Axis.y, Axis.z, Angle);
 	}
 
-	inline static Matrix RotateX(float32_t Angle)
+	inline static Matrix RotateX(float Angle)
 	{
 		Matrix Ret;
-		float32_t Radian = Angle * Math::PI / 180.0f;
-		float32_t CosTheta = ::cosf(Radian);
-		float32_t SinTheta = ::sinf(Radian);
+		float Radian = Angle * Math::PI / 180.0f;
+		float CosTheta = ::cosf(Radian);
+		float SinTheta = ::sinf(Radian);
 
 		Ret._11 = 1.0f; Ret._12 = 0.0f;      Ret._13 = 0.0f;     Ret._14 = 0.0f;
 		Ret._12 = 0.0f; Ret._22 = CosTheta;  Ret._23 = SinTheta; Ret._24 = 0.0f;
@@ -518,12 +518,12 @@ public:
 		return Ret;
 	}
 
-	inline static Matrix RotateY(float32_t Angle)
+	inline static Matrix RotateY(float Angle)
 	{
 		Matrix Ret;
-		float32_t Radian = Angle * Math::PI / 180.0f;
-		float32_t CosTheta = ::cosf(Radian);
-		float32_t SinTheta = ::sinf(Radian);
+		float Radian = Angle * Math::PI / 180.0f;
+		float CosTheta = ::cosf(Radian);
+		float SinTheta = ::sinf(Radian);
 
 		Ret._11 = CosTheta; Ret._12 = 0.0f; Ret._13 = -SinTheta; Ret._14 = 0.0f;
 		Ret._12 = 0.0f;     Ret._22 = 1.0f; Ret._23 = 0.0f;      Ret._24 = 0.0f;
@@ -533,12 +533,12 @@ public:
 		return Ret;
 	}
 
-	inline static Matrix RotateZ(float32_t Angle)
+	inline static Matrix RotateZ(float Angle)
 	{
 		Matrix result;
-		float32_t radian = angle * DirectX::XM_PI / 180.0f;
-		float32_t cosTheta = ::cosf(radian);
-		float32_t sinTheta = ::sinf(radian);
+		float radian = angle * DirectX::XM_PI / 180.0f;
+		float cosTheta = ::cosf(radian);
+		float sinTheta = ::sinf(radian);
 
 		result._11 = cosTheta;  result._12 = sinTheta; result._13 = 0.0f; result._14 = 0.0f;
 		result._12 = -sinTheta; result._22 = cosTheta; result._23 = 0.0f; result._24 = 0.0f;
@@ -548,7 +548,7 @@ public:
 		return result;
 	}
 
-	inline static Matrix rotateRollPitchYaw(float32_t roll, float32_t pitch, float32_t yaw)
+	inline static Matrix rotateRollPitchYaw(float roll, float pitch, float yaw)
 	{
 		Matrix result;
 		DirectX::XMMATRIX vResult = DirectX::XMMatrixRotationRollPitchYaw(roll, pitch, yaw);
@@ -584,7 +584,7 @@ public:
 		_44 = row.x * Right._14 + row.y * Right._24 + row.z * Right._34 + row.w * Right._44;
 	}
 
-	inline void operator*=(const float32_t factor)
+	inline void operator*=(const float factor)
 	{
 		_11 *= factor; _12 *= factor; _13 *= factor; _14 *= factor;
 		_21 *= factor; _22 *= factor; _23 *= factor; _24 *= factor;
@@ -632,14 +632,14 @@ public:
 		return result;
 	}
 
-	inline static Matrix perspectiveFovLH(float32_t fov, float32_t aspect, float32_t nearPlane, float32_t farPlane)
+	inline static Matrix perspectiveFovLH(float fov, float aspect, float nearPlane, float farPlane)
 	{
-		float32_t radian = fov * 0.5f;
-		float32_t cosTheta = ::cosf(radian);
-		float32_t sinTheta = ::sinf(radian);
-		float32_t height = cosTheta / sinTheta;
-		float32_t width = height / aspect;
-		float32_t range = farPlane / (farPlane - nearPlane);
+		float radian = fov * 0.5f;
+		float cosTheta = ::cosf(radian);
+		float sinTheta = ::sinf(radian);
+		float height = cosTheta / sinTheta;
+		float width = height / aspect;
+		float range = farPlane / (farPlane - nearPlane);
 
 		Matrix result(
 			Vector4(width, 0.0f,   0.0f,               0.0f),
@@ -650,11 +650,11 @@ public:
 		return result;
 	}
 
-	inline static Matrix perspectiveOffCenterLH(float32_t Left, float32_t Right, float32_t bottom, float32_t top, float32_t nearPlane, float32_t farPlane)
+	inline static Matrix perspectiveOffCenterLH(float Left, float Right, float bottom, float top, float nearPlane, float farPlane)
 	{
-		float32_t reciprocalWidth = 1.0f / (Right - Left);
-		float32_t reciprocalHeight = 1.0f / (top - bottom);
-		float32_t range = farPlane / (farPlane - nearPlane);
+		float reciprocalWidth = 1.0f / (Right - Left);
+		float reciprocalHeight = 1.0f / (top - bottom);
+		float range = farPlane / (farPlane - nearPlane);
 
 		Matrix result(
 			Vector4(2.0f * nearPlane * reciprocalWidth, 0.0f,                                0.0f,               0.0f),
@@ -665,9 +665,9 @@ public:
 		return result;
 	}
 
-	inline static Matrix orthographicLH(float32_t width, float32_t height, float32_t nearPlane, float32_t farPlane)
+	inline static Matrix orthographicLH(float width, float height, float nearPlane, float farPlane)
 	{
-		float32_t range = 1.0f / (farPlane - nearPlane);
+		float range = 1.0f / (farPlane - nearPlane);
 		Matrix result(
 			Vector4(2.0f / width, 0.0f,          0.0f,               0.0f),
 			Vector4(0.0f,         2.0f / height, 0.0f,               0.0f),
@@ -677,7 +677,7 @@ public:
 		return result;
 	}
 
-	inline static Matrix orthographicOffCenterLH(float32_t Left, float32_t Right, float32_t bottom, float32_t top, float32_t nearPlane, float32_t farPlane)
+	inline static Matrix orthographicOffCenterLH(float Left, float Right, float bottom, float top, float nearPlane, float farPlane)
 	{
 		/// Model Space -> World Space -> Camera Space -> Projection Space -> Clipping Space -> Homogeneous Screen Space
 		/*
@@ -713,9 +713,9 @@ public:
 		final = centerAboutOrigion * scaleViewingVolume * convertToRightHanded
 		/// https://docs.microsoft.com/en-us/windows/win32/dxtecharts/the-direct3d-transformation-pipeline
 		*/
-		float32_t reciprocalWidth = 1.0f / (Right - Left);
-		float32_t reciprocalHeight = 1.0f / (top - bottom);
-		float32_t range = 1.0f / (farPlane - nearPlane);
+		float reciprocalWidth = 1.0f / (Right - Left);
+		float reciprocalHeight = 1.0f / (top - bottom);
+		float range = 1.0f / (farPlane - nearPlane);
 		Matrix result(
 			Vector4(2.0f * reciprocalWidth,            0.0f,                               0.0f,               0.0f),
 			Vector4(0.0f,                              2.0f * reciprocalHeight,            0.0f,               0.0f),

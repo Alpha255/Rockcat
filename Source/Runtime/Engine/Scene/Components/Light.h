@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Math/Color.h"
+#include "Core/Math/Color.h"
 
 class Light
 {
@@ -48,8 +48,8 @@ public:
 
 	ELightType GetType() const override final { return ELightType::Directional; }
 
-	float32_t GetIrradiance() const { return m_Irradiance; }
-	void SetIrradiance(float32_t Irradiance) { m_Irradiance = Irradiance; }
+	float GetIrradiance() const { return m_Irradiance; }
+	void SetIrradiance(float Irradiance) { m_Irradiance = Irradiance; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -61,7 +61,7 @@ public:
 	}
 protected:
 private:
-	float32_t m_Irradiance = 1.0f;
+	float m_Irradiance = 1.0f;
 };
 
 class PointLight : public Light
@@ -71,14 +71,14 @@ public:
 
 	ELightType GetType() const override { return ELightType::Point; }
 
-	float32_t GetIntensity() const { return m_Intensity; }
-	void SetIntensity(float32_t Intensity) { m_Intensity = Intensity; }
+	float GetIntensity() const { return m_Intensity; }
+	void SetIntensity(float Intensity) { m_Intensity = Intensity; }
 
-	float32_t GetRadius() const { return m_Radius; }
-	void SetRadius(float32_t Radius) { m_Radius = Radius; }
+	float GetRadius() const { return m_Radius; }
+	void SetRadius(float Radius) { m_Radius = Radius; }
 
-	float32_t GetRange() const { return m_Range; }
-	void SetRange(float32_t Range) { m_Range = Range; }
+	float GetRange() const { return m_Range; }
+	void SetRange(float Range) { m_Range = Range; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -92,9 +92,9 @@ public:
 	}
 protected:
 private:
-	float32_t m_Intensity = 1.0f;
-	float32_t m_Radius = 0.0f;
-	float32_t m_Range = 0.0f;
+	float m_Intensity = 1.0f;
+	float m_Radius = 0.0f;
+	float m_Range = 0.0f;
 };
 
 class SpotLight final : public PointLight
@@ -104,11 +104,11 @@ public:
 
 	ELightType GetType() const override final { return ELightType::Spot; }
 
-	float32_t GetInnerAngle() const { return m_InnerAngle; }
-	void SetInnerAngle(float32_t InnerAngle) { m_InnerAngle = InnerAngle; }
+	float GetInnerAngle() const { return m_InnerAngle; }
+	void SetInnerAngle(float InnerAngle) { m_InnerAngle = InnerAngle; }
 
-	float32_t GetOuterAngle() const { return m_OuterAngle; }
-	void SetOuterAngle(float32_t OuterAngle) { m_OuterAngle = OuterAngle; }
+	float GetOuterAngle() const { return m_OuterAngle; }
+	void SetOuterAngle(float OuterAngle) { m_OuterAngle = OuterAngle; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -121,8 +121,8 @@ public:
 	}
 protected:
 private:
-	float32_t m_InnerAngle = 180.0f;
-	float32_t m_OuterAngle = 180.0f;
+	float m_InnerAngle = 180.0f;
+	float m_OuterAngle = 180.0f;
 };
 
 class AreaLight final : public Light

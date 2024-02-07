@@ -90,7 +90,7 @@ VulkanRenderPassPtr VkRenderStateCache::getOrCreateRenderPass(const RenderPassDe
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Engine/Services/SpdLogService.h"
 
 VulkanPipelineCache::VulkanPipelineCache(const VulkanDevice& Device)
 	: VkHwResource(Device)

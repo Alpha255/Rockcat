@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Math/Vector2.h"
+#include "Core/Math/Vector2.h"
 
 NAMESPACE_START(Math)
 
@@ -12,22 +12,22 @@ public:
 	{
 	}
 
-	inline Vector3(float32_t X, float32_t Y, float32_t Z)
+	inline Vector3(float X, float Y, float Z)
 		: Float3(X, Y, Z)
 	{
 	}
 
-	inline Vector3(float32_t Value)
+	inline Vector3(float Value)
 		: Float3(Value, Value, Value)
 	{
 	}
 
-	inline Vector3(const float32_t* Array)
+	inline Vector3(const float* Array)
 		: Float3(Array)
 	{
 	}
 
-	inline Vector3(const Vector2& Other, float32_t Z = 0.0f)
+	inline Vector3(const Vector2& Other, float Z = 0.0f)
 		: Float3(Other.x, Other.y, Z)
 	{
 	}
@@ -37,20 +37,20 @@ public:
 	VECTOR_MEMBER_FUNCTIONS(3)
 	VECTOR_MEMBER_FUNCTIONS_CROSS(3)
 #else
-	inline float32_t LengthSq()
+	inline float LengthSq()
 	{
 		return x * x + y * y + z * z;
 	}
 
-	inline float32_t Length()
+	inline float Length()
 	{
 		return std::sqrtf(LengthSq());
 	}
 
 	inline void Normalize()
 	{
-		float32_t Factor = 0.0f;
-		float32_t Length = Length();
+		float Factor = 0.0f;
+		float Length = Length();
 		if (Length > 0.0f)
 		{
 			Factor = 1.0f / Length;
@@ -62,16 +62,16 @@ public:
 
 	inline void Cross(const Vector3 &Right)
 	{
-		float32_t X = y * Right.z - z * Right.y;
-		float32_t Y = z * Right.x - x * Right.z;
-		float32_t Z = x * Right.y - y * Right.x;
+		float X = y * Right.z - z * Right.y;
+		float Y = z * Right.x - x * Right.z;
+		float Z = x * Right.y - y * Right.x;
 
 		x = X;
 		y = Y;
 		z = Z;
 	}
 
-	inline float32_t Dot(const Vector3 &Right) const
+	inline float Dot(const Vector3 &Right) const
 	{
 		return x * Right.x + y * Right.y + z * Right.z;
 	}
@@ -97,7 +97,7 @@ public:
 		z -= Right.z;
 	}
 
-	inline void operator*=(float32_t Right)
+	inline void operator*=(float Right)
 	{
 		x *= Right;
 		y *= Right;
@@ -136,7 +136,7 @@ inline Vector3 operator-(const Vector3 &Left, const Vector3 &Right)
 	return Vector3(Left.x - Right.x, Left.y - Right.y, Left.z - Right.z);
 }
 
-inline Vector3 operator*(const Vector3 &Left, float32_t Right)
+inline Vector3 operator*(const Vector3 &Left, float Right)
 {
 	return Vector3(Left.x * Right, Left.y * Right, Left.z * Right);
 }
@@ -191,16 +191,16 @@ inline Vector3 Normalize(const Vector3 &Vec)
 	return Ret;
 }
 
-inline float32_t Dot(const Vector3 &Left, const Vector3 &Right)
+inline float Dot(const Vector3 &Left, const Vector3 &Right)
 {
 	return Left.x * Right.x + Left.y * Right.y + Left.z * Right.z;
 }
 
 inline Vector3 Cross(const Vector3 &Left, const Vector3 &Right)
 {
-	float32_t X = Left.y * Right.z - Left.z * Right.y;
-	float32_t Y = Left.z * Right.x - Left.x * Right.z;
-	float32_t Z = Left.x * Right.y - Left.y * Right.x;
+	float X = Left.y * Right.z - Left.z * Right.y;
+	float Y = Left.z * Right.x - Left.x * Right.z;
+	float Z = Left.x * Right.y - Left.y * Right.x;
 
 	return Vector3(X, Y, Z);
 }

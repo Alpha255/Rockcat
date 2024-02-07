@@ -1,4 +1,4 @@
-#include "Runtime/Engine/Scene/Components/StaticMesh.h"
+#include "Engine/Scene/Components/StaticMesh.h"
 
 RHIInputLayoutCreateInfo MeshData::GetInputLayoutCreateInfo() const
 {

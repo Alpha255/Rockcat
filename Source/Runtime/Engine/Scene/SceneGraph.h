@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/ObjectID.h"
+#include "Core/ObjectID.h"
 
 struct SceneGraph
 {
@@ -34,26 +34,26 @@ struct SceneGraph
 		Node(Node&&) = default;
 		Node& operator=(const Node&) = default;
 
-		bool8_t HasParent() const { return m_Parent.IsValid(); }
+		bool HasParent() const { return m_Parent.IsValid(); }
 		NodeID GetParent() const { return m_Parent; }
 		Node& SetParent(NodeID ParentID) { m_Parent = ParentID; return *this; }
 
-		bool8_t HasChild() const { return m_Child.IsValid(); }
+		bool HasChild() const { return m_Child.IsValid(); }
 		NodeID GetChild() const { return m_Child; }
 		Node& SetChild(NodeID ChildID) { m_Child = ChildID; return *this; }
 
-		bool8_t HasSibling() const { return m_Sibling.IsValid(); }
+		bool HasSibling() const { return m_Sibling.IsValid(); }
 		NodeID GetSibling() const { return m_Sibling; }
 		Node& SetSibling(NodeID SiblingID) { m_Sibling = SiblingID; return *this; }
 
-		bool8_t IsAlive() const { return m_Alive; }
-		Node& SetAlive(bool8_t Alive) { m_Alive = Alive; return *this; }
+		bool IsAlive() const { return m_Alive; }
+		Node& SetAlive(bool Alive) { m_Alive = Alive; return *this; }
 
-		bool8_t IsVisible() const { return m_Visible; }
-		Node& SetVisible(bool8_t Visible) { m_Visible = Visible; return *this; }
+		bool IsVisible() const { return m_Visible; }
+		Node& SetVisible(bool Visible) { m_Visible = Visible; return *this; }
 
-		bool8_t IsSelected() const { return m_Selected; }
-		Node& SetSelected(bool8_t Selected) { m_Selected = Selected; return *this; }
+		bool IsSelected() const { return m_Selected; }
+		Node& SetSelected(bool Selected) { m_Selected = Selected; return *this; }
 
 		const char* GetName() const { return m_Name.c_str(); }
 		Node& SetName(const char* Name) { m_Name = Name; return *this; }
@@ -61,10 +61,10 @@ struct SceneGraph
 		ENodeMasks GetMasks() const { return m_Masks; }
 		Node& SetMasks(ENodeMasks Masks);
 
-		bool8_t IsStaticMesh() const;
-		bool8_t IsSkeletalMesh() const;
-		bool8_t IsLight() const;
-		bool8_t IsCamera() const;
+		bool IsStaticMesh() const;
+		bool IsSkeletalMesh() const;
+		bool IsLight() const;
+		bool IsCamera() const;
 
 		uint32_t GetDataIndex() const { return m_DataIndex; }
 
@@ -93,9 +93,9 @@ struct SceneGraph
 		ENodeMasks m_Masks = ENodeMasks::None;
 		uint32_t m_DataIndex = 0u;
 
-		bool8_t m_Alive = true;
-		bool8_t m_Visible = true;
-		bool8_t m_Selected = false;
+		bool m_Alive = true;
+		bool m_Visible = true;
+		bool m_Selected = false;
 
 		std::string m_Name;
 	};
@@ -106,7 +106,7 @@ struct SceneGraph
 	NodeIDAllocator IDAllocator;
 
 	size_t GetNodeCount() const { return Nodes.size(); }
-	bool8_t IsEmpty() const { return Nodes.empty(); }
+	bool IsEmpty() const { return Nodes.empty(); }
 
 	NodeID AddSibling(NodeID Sibling, const char* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
 	{

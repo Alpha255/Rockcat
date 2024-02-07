@@ -1,13 +1,13 @@
-#include "Runtime/Engine/Engine.h"
-#include "Runtime/Core/PlatformMisc.h"
-#include "Runtime/Engine/Application/BaseApplication.h"
-#include "Runtime/Engine/Application/ApplicationConfigurations.h"
-#include "Runtime/Engine/Profile/Profiler.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
-#include "Runtime/Engine/Services/RenderService.h"
-#include "Runtime/Engine/Services/TaskFlowService.h"
-#include "Runtime/Engine/Asset/AssetDatabase.h"
-#include "Runtime/Engine/Asset/ShaderCompiler.h"
+#include "Engine/Engine.h"
+#include "Core/PlatformMisc.h"
+#include "Engine/Application/BaseApplication.h"
+#include "Engine/Application/ApplicationConfigurations.h"
+#include "Engine/Profile/Profiler.h"
+#include "Engine/Services/SpdLogService.h"
+#include "Engine/Services/RenderService.h"
+#include "Engine/Services/TaskFlowService.h"
+#include "Engine/Asset/AssetDatabase.h"
+#include "Engine/Asset/ShaderCompiler.h"
 
 Engine& Engine::Get()
 {
@@ -57,7 +57,7 @@ void Engine::Run()
 	Finalize();
 }
 
-bool8_t Engine::Initialize()
+bool Engine::Initialize()
 {
 	auto AssetsDirectory = PlatformMisc::GetCurrentModuleDirectory().parent_path() / "Assets";
 	if (!std::filesystem::exists(AssetsDirectory))

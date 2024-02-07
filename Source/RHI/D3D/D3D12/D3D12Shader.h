@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIShader.h"
+#include "Engine/RHI/RHIShader.h"
 #include "RHI/D3D/D3D12/D3D12Types.h"
 
 class D3D12InputLayout : public RHIInputLayout

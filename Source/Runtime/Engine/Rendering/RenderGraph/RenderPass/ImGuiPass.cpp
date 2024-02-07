@@ -1,4 +1,4 @@
-#include "Runtime/Engine/Rendering/RenderGraph/RenderPass/ImGuiPass.h"
+#include "Engine/Rendering/RenderGraph/RenderPass/ImGuiPass.h"
 #include <Submodules/imgui/imgui.h>
 
 ImGUIPass::~ImGUIPass()
@@ -9,8 +9,8 @@ ImGUIPass::~ImGUIPass()
 #if 0
 #include "Colorful/IRenderer/RenderGraph/RenderPass/ImGUIPass.h"
 #include "Colorful/IRenderer/IRenderer.h"
-#include "Runtime/Asset/Material.h"
-#include "Runtime/Asset/Model.h"
+#include "Asset/Material.h"
+#include "Asset/Model.h"
 
 NAMESPACE_START(RHI)
 
@@ -76,7 +76,7 @@ ImGUIPass::ImGUIPass(const Scene* TargetScene, const Camera* ViewCamera)
 	);
 	m_GraphicsPipelineDesc.InputLayout = m_InputLayout.get();
 
-	byte8_t* Pixels = nullptr;
+	uint8_t* Pixels = nullptr;
 	int32_t Width = 0;
 	int32_t Height = 0;
 	m_Context->IO.Fonts->GetTexDataAsRGBA32(&Pixels, &Width, &Height);
@@ -120,7 +120,7 @@ ImGUIPass::ImGUIPass(const Scene* TargetScene, const Camera* ViewCamera)
 
 void ImGUIPass::ApplyRenderSettings(const RenderSettings* Settings)
 {
-	m_Context->IO.DisplaySize = ImVec2(static_cast<float32_t>(Settings->Resolution.Width), static_cast<float32_t>(Settings->Resolution.Height));
+	m_Context->IO.DisplaySize = ImVec2(static_cast<float>(Settings->Resolution.Width), static_cast<float>(Settings->Resolution.Height));
 
 	GraphicsPipelineDesc Desc = m_GraphicsPipelineDesc;
 	Desc.FrameBuffer = m_SwapchainFrameBuffer;
@@ -223,17 +223,17 @@ void ImGUIPass::OnKeyboardEvent(const KeyboardEvent& Keyboard)
 	}
 }
 
-bool8_t ImGUIPass::WantCaptureInput() const
+bool ImGUIPass::WantCaptureInput() const
 {
 	return ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard;
 }
 
 void ImGUIPass::OnWindowResized(uint32_t Width, uint32_t Height)
 {
-	m_Context->IO.DisplaySize = ImVec2(static_cast<float32_t>(Width), static_cast<float32_t>(Height));
+	m_Context->IO.DisplaySize = ImVec2(static_cast<float>(Width), static_cast<float>(Height));
 }
 
-void ImGUIPass::Tick(float32_t ElapsedSeconds)
+void ImGUIPass::Tick(float ElapsedSeconds)
 {
 	ImGui::GetIO().DeltaTime = ElapsedSeconds;
 }

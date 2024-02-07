@@ -1,5 +1,5 @@
-#include "Runtime/Engine/Rendering/RenderGraph/RenderPass/ShadowPass.h"
-#include "Runtime/Engine/RHI/RHIInterface.h"
+#include "Engine/Rendering/RenderGraph/RenderPass/ShadowPass.h"
+#include "Engine/RHI/RHIInterface.h"
 
 const char* GetShadowTechniqueName(EShadowTechnique Technique)
 {

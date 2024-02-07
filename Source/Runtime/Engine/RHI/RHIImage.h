@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIRenderStates.h"
+#include "Engine/RHI/RHIRenderStates.h"
 
 //#define STBI_NO_GIF
 //#define STBI_NO_PIC
@@ -44,7 +44,7 @@ struct RHIImageSubresourceRange
 		}
 	};
 
-	bool8_t operator==(const RHIImageSubresourceRange& Other) const
+	bool operator==(const RHIImageSubresourceRange& Other) const
 	{
 		return BaseMipLevel == Other.BaseMipLevel &&
 			LevelCount == Other.LevelCount &&
@@ -52,7 +52,7 @@ struct RHIImageSubresourceRange
 			LayerCount == Other.LayerCount;
 	}
 
-	bool8_t operator!=(const RHIImageSubresourceRange& Other) const
+	bool operator!=(const RHIImageSubresourceRange& Other) const
 	{
 		return BaseMipLevel != Other.BaseMipLevel ||
 			LevelCount != Other.LevelCount ||
@@ -176,10 +176,10 @@ struct RHISamplerCreateInfo
 	ERHICompareFunc CompareOp = ERHICompareFunc::Less;
 	ERHIBorderColor BorderColor = ERHIBorderColor::FloatTransparentBlack;
 
-	float32_t MaxAnisotropy = 0.0f;
-	float32_t MipLODBias = 0.0f;
-	float32_t MinLOD = 0.0f;
-	float32_t MaxLOD = 0.0f;
+	float MaxAnisotropy = 0.0f;
+	float MipLODBias = 0.0f;
+	float MinLOD = 0.0f;
+	float MaxLOD = 0.0f;
 	
 	inline RHISamplerCreateInfo& SetMinMagFilter(ERHIFilter Filter) { MinMagFilter = Filter; return *this; }
 	inline RHISamplerCreateInfo& SetMipmapMode(ERHIFilter Mode) { MipmapMode = Mode; return *this; }
@@ -189,10 +189,10 @@ struct RHISamplerCreateInfo
 	inline RHISamplerCreateInfo& SetAddressModeW(ERHISamplerAddressMode SamplerAddressMode) { AddressModeW = SamplerAddressMode; return *this; };
 	inline RHISamplerCreateInfo& SetCompareOp(ERHICompareFunc CompareFunc) { CompareOp = CompareFunc; return *this; }
 	inline RHISamplerCreateInfo& SetBorderColor(ERHIBorderColor BorderColorMode) { BorderColor = BorderColorMode; return *this; }
-	inline RHISamplerCreateInfo& SetMaxAnisotropy(float32_t Anisotropy) { MaxAnisotropy = Anisotropy; return *this; }
-	inline RHISamplerCreateInfo& SetMipLODBias(float32_t MipLODBiasValue) { MipLODBias = MipLODBiasValue; return *this; }
-	inline RHISamplerCreateInfo& SetMinLOD(float32_t MinLODValue) { MinLOD = MinLODValue; return *this; }
-	inline RHISamplerCreateInfo& SetMaxLOD(float32_t MaxLODValue) { MaxLOD = MaxLODValue; return *this; }
+	inline RHISamplerCreateInfo& SetMaxAnisotropy(float Anisotropy) { MaxAnisotropy = Anisotropy; return *this; }
+	inline RHISamplerCreateInfo& SetMipLODBias(float MipLODBiasValue) { MipLODBias = MipLODBiasValue; return *this; }
+	inline RHISamplerCreateInfo& SetMinLOD(float MinLODValue) { MinLOD = MinLODValue; return *this; }
+	inline RHISamplerCreateInfo& SetMaxLOD(float MaxLODValue) { MaxLOD = MaxLODValue; return *this; }
 };
 
 class RHISampler

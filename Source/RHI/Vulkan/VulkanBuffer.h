@@ -22,18 +22,18 @@ public:
 	/// are made visible to the host. If a range of non-coherent memory is written by the host and then invalidated without first being flushed, its contents are undefined.
 	void InvalidateMappedRange(size_t Size, size_t Offset) override final;
 
-	bool8_t Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset) override final;
+	bool Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset) override final;
 
 	inline size_t GetSize() const { return m_Size; }
-	inline bool8_t IsCoherent() const { return m_Coherent; }
-	inline bool8_t IsHostVisible() const { return m_HostVisible; }
-	bool8_t IsHostCached() const { return m_HostCached; }
+	inline bool IsCoherent() const { return m_Coherent; }
+	inline bool IsHostVisible() const { return m_HostVisible; }
+	bool IsHostCached() const { return m_HostCached; }
 private:
 	vk::DeviceMemory m_Memory;
 
-	bool8_t m_Coherent = false;
-	bool8_t m_HostVisible = false;
-	bool8_t m_HostCached = false;
+	bool m_Coherent = false;
+	bool m_HostVisible = false;
+	bool m_HostCached = false;
 
 	size_t m_Size = 0u;
 };

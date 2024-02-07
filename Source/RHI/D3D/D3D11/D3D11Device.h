@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIDevice.h"
+#include "Engine/RHI/RHIDevice.h"
 #include "RHI/D3D/D3D11/D3D11Types.h"
 
 class D3D11Device final : public D3DHwResource<ID3D11Device>, public RHIDevice

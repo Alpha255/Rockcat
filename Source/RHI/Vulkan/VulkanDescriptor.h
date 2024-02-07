@@ -31,7 +31,7 @@ public:
 
 	vk::DescriptorSet Alloc(vk::DescriptorSetLayout DescriptorSetLayout);
 
-	bool8_t IsFull() const;
+	bool IsFull() const;
 protected:
 private:
 	uint32_t m_AllocatedCount = 0u;

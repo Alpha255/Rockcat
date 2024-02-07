@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Math/Vector.h"
+#include "Core/Math/Vector.h"
 
 NAMESPACE_START(Math)
 
@@ -12,17 +12,17 @@ public:
 	{
 	}
 
-	inline Vector2(float32_t Value)
+	inline Vector2(float Value)
 		: Float2(Value, Value)
 	{
 	}
 
-	inline Vector2(float32_t X, float32_t Y)
+	inline Vector2(float X, float Y)
 		: Float2(X, Y)
 	{
 	}
 
-	inline Vector2(const float32_t* Array)
+	inline Vector2(const float* Array)
 		: Float2(Array)
 	{                               
 	}
@@ -32,20 +32,20 @@ public:
 	VECTOR_MEMBER_FUNCTIONS(2)
 	VECTOR_MEMBER_FUNCTIONS_CROSS(2)
 #else
-	inline float32_t LengthSq()
+	inline float LengthSq()
 	{
 		return x * x + y * y;
 	}
 
-	inline float32_t Length()
+	inline float Length()
 	{
 		return std::sqrtf(LengthSq());
 	}
 
 	inline void Normalize()
 	{
-		float32_t Factor = 0.0f;
-		float32_t Length = Length();
+		float Factor = 0.0f;
+		float Length = Length();
 		if (Length > 0.0f)
 		{
 			Factor = 1.0f / Length;
@@ -56,11 +56,11 @@ public:
 
 	inline Vector2 Cross(const Vector2& Right)
 	{
-		float32_t Value = x * Right.y - y * Right.x;
+		float Value = x * Right.y - y * Right.x;
 		x = y = Value;
 	}
 
-	inline float32_t Dot(const Vector2& Right) const
+	inline float Dot(const Vector2& Right) const
 	{
 		return x * Right.x + y * Right.y;
 	}
@@ -83,7 +83,7 @@ public:
 		y -= Right.y;
 	}
 
-	inline void operator*=(float32_t Right)
+	inline void operator*=(float Right)
 	{
 		x *= Right;
 		y *= Right;
@@ -120,7 +120,7 @@ inline Vector2 operator-(const Vector2 &Left, const Vector2 &Right)
 	return Vector2(Left.x - Right.x, Left.y - Right.y);
 }
 
-inline Vector2 operator*(const Vector2 &Left, float32_t Right)
+inline Vector2 operator*(const Vector2 &Left, float Right)
 {
 	return Vector2(Left.x * Right, Left.y * Right);
 }
@@ -172,14 +172,14 @@ inline Vector2 Normalize(const Vector2 &Vec)
 	return Ret;
 }
 
-inline float32_t Dot(const Vector2 &Left, const Vector2 &Right)
+inline float Dot(const Vector2 &Left, const Vector2 &Right)
 {
 	return Left.x * Right.x + Left.y * Right.y;
 }
 
 inline Vector2 Cross(const Vector2 &Left, const Vector2 &Right)
 {
-	float32_t Value = Left.x * Right.y - Left.y * Right.x;
+	float Value = Left.x * Right.y - Left.y * Right.x;
 	return Vector2(Value, Value);
 }
 

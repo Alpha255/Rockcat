@@ -17,9 +17,9 @@ public:
 
 	void InvalidateMappedRange(size_t Size, size_t Offset) override final;
 
-	bool8_t Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset) override final;
+	bool Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset) override final;
 protected:
 private:
 	size_t m_Size = 0ull;
-	bool8_t m_HostVisible = false;
+	bool m_HostVisible = false;
 };

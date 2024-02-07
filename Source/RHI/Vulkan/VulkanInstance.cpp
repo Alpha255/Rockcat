@@ -1,6 +1,6 @@
 #include "RHI/Vulkan/VulkanInstance.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Engine/Services/SpdLogService.h"
 
 #if !USE_DYNAMIC_VK_LOADER
 PFN_vkCreateDebugUtilsMessengerEXT PFN_CreateDebugUtilsMessengerEXT;
@@ -41,7 +41,7 @@ VKAPI_ATTR void VKAPI_CALL vkDestroyDebugReportCallbackEXT(VkInstance Instance, 
 }
 #endif
 
-static constexpr bool8_t UNIQUE_MESSAGE = true;
+static constexpr bool UNIQUE_MESSAGE = true;
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsMessengerCallback(
 	VkDebugUtilsMessageSeverityFlagBitsEXT MessageServerityFlagBits,
@@ -211,7 +211,7 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 	SetupRuntimeDebug(Configs, (*DebugUtilExt)->IsEnabled(), (*DebugReportExt)->IsEnabled());
 }
 
-void VulkanInstance::SetupRuntimeDebug(const VulkanLayerExtensionConfigurations* Configs, bool8_t EnableDebugUtils, bool8_t EnableDebugReports)
+void VulkanInstance::SetupRuntimeDebug(const VulkanLayerExtensionConfigurations* Configs, bool EnableDebugUtils, bool EnableDebugReports)
 {
 	if (Configs->DebugLayerLevel > ERHIDebugLayerLevel::None)
 	{

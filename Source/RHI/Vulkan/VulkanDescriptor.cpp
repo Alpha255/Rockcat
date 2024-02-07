@@ -1,6 +1,6 @@
 #include "RHI/Vulkan/VulkanDescriptor.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Engine/Services/SpdLogService.h"
 
 static constexpr uint32_t DescriptorPoolLimits[] =
 {
@@ -116,7 +116,7 @@ vk::DescriptorSet VulkanDescriptorPool::Alloc(vk::DescriptorSetLayout Descriptor
 	return DescriptorSet;
 }
 
-bool8_t VulkanDescriptorPool::IsFull() const
+bool VulkanDescriptorPool::IsFull() const
 {
 	return m_AllocatedCount == DescriptorSetsLimit;
 }

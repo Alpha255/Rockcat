@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/Asset/ImageAsset.h"
+#include "Engine/Asset/ImageAsset.h"
 #include <dxgiformat.h>
 #include <External/DDS.h>
 
@@ -14,7 +14,7 @@ public:
 
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<ImageAsset>(AssetPath); }
 
-	bool8_t Reimport(Asset& InAsset) override final
+	bool Reimport(Asset& InAsset) override final
 	{
 		auto& Image = Cast<ImageAsset>(InAsset);
 #if 0
@@ -22,7 +22,7 @@ public:
 		assert(Size >= (sizeof(uint32_t) + sizeof(DirectX::DDS_HEADER)));
 		assert(*reinterpret_cast<const uint32_t*>(Data) == DirectX::DDS_MAGIC);
 
-		bool8_t DXT10Header = false;
+		bool DXT10Header = false;
 		auto Header = reinterpret_cast<const DirectX::DDS_HEADER*>(Data + sizeof(uint32_t));
 		assert(Header->size == sizeof(DirectX::DDS_HEADER) && Header->ddspf.size == sizeof(DirectX::DDS_PIXELFORMAT));
 		if ((Header->ddspf.flags & DDS_FOURCC) && (Header->ddspf.fourCC == MAKEFOURCC('D', 'X', '1', '0')))
@@ -35,7 +35,7 @@ public:
 		auto BitSize = Size - Offset;
 		auto BitData = Data + Offset;
 
-		bool8_t Cubemap = false;
+		bool Cubemap = false;
 
 		RHI::ImageDesc Desc;
 		Desc.Width = Header->width;

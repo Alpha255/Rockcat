@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/InputState.h"
+#include "Core/InputState.h"
 
 #define MINIMAL_WINDOW_SIZE 32
 
@@ -10,7 +10,7 @@ struct WindowCreateInfo
 	uint32_t Height = 720u;
 	uint32_t MinWidth = MINIMAL_WINDOW_SIZE;
 	uint32_t MinHeight = MINIMAL_WINDOW_SIZE;
-	bool8_t FreezeWhenInactive = true;
+	bool FreezeWhenInactive = true;
 	std::string Title = "UnnamedApplication";
 
 	template<class Archive>
@@ -42,15 +42,15 @@ public:
 	const uint32_t GetWidth() const { return m_Width; }
 	const uint32_t GetHeight() const { return m_Height; }
 	const void* GetHandle() const { return m_Handle; }
-	const bool8_t IsActive() const { return m_State == EState::OnFocus; }
-	const bool8_t IsDestroyed() const { return m_State == EState::Destroyed; }
+	const bool IsActive() const { return m_State == EState::OnFocus; }
+	const bool IsDestroyed() const { return m_State == EState::Destroyed; }
 	const EState GetState() const { return m_State; }
 
 	void ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam);
 
 	void PollMessage();
 protected:
-	void UpdateSize(bool8_t Signal = false);
+	void UpdateSize(bool Signal = false);
 
 	void OnMouseEvent()
 	{

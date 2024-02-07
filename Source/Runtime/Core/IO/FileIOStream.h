@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Definitions.h"
+#include "Core/Definitions.h"
 
 struct IO
 {
@@ -36,15 +36,15 @@ public:
 
 	virtual ~IFileIOStream() = default;
 
-	virtual bool8_t Open(EOpenMode Mode) = 0;
+	virtual bool Open(EOpenMode Mode) = 0;
 	virtual void Close() = 0;
 	virtual void Seek(size_t Bytes, ESeekMode Mode) = 0;
-	virtual size_t Read(size_t Bytes, byte8_t* Buffer) = 0;
-	virtual void Write(size_t Bytes, const byte8_t* Buffer) = 0;
-	virtual bool8_t IsOpen() const = 0;
+	virtual size_t Read(size_t Bytes, char* Buffer) = 0;
+	virtual void Write(size_t Bytes, const char* Buffer) = 0;
+	virtual bool IsOpen() const = 0;
 
-	bool8_t CanRead() const { return IsOpen() && EnumHasAnyFlags(m_OpenMode, EOpenMode::Read); }
-	bool8_t CanWrite() const { return IsOpen() && EnumHasAnyFlags(m_OpenMode, EOpenMode::Write); }
+	bool CanRead() const { return IsOpen() && EnumHasAnyFlags(m_OpenMode, EOpenMode::Read); }
+	bool CanWrite() const { return IsOpen() && EnumHasAnyFlags(m_OpenMode, EOpenMode::Write); }
 
 	const std::filesystem::path& GetFilePath() const { return m_FilePath; }
 protected:
@@ -70,7 +70,7 @@ public:
 		}
 	}
 
-	bool8_t Open(EOpenMode Mode) override
+	bool Open(EOpenMode Mode) override
 	{
 		if (IsOpen() && Mode == m_OpenMode) 
 		{ 
@@ -114,7 +114,7 @@ public:
 		}
 	}
 
-	size_t Read(size_t Bytes, byte8_t* Buffer) override
+	size_t Read(size_t Bytes, char* Buffer) override
 	{
 		if (CanRead() && !m_Stream->eof())
 		{
@@ -124,7 +124,7 @@ public:
 		return 0u;
 	}
 
-	void Write(size_t Bytes, const byte8_t* Buffer) override
+	void Write(size_t Bytes, const char* Buffer) override
 	{
 		if (CanWrite())
 		{
@@ -132,7 +132,7 @@ public:
 		}
 	}
 
-	bool8_t IsOpen() const override
+	bool IsOpen() const override
 	{
 		return m_Stream && m_Stream->is_open();
 	}

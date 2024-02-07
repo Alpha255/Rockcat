@@ -27,7 +27,7 @@ private:
 	VkImageAttributes m_VkAttributes;
 	VulkanDeviceMemory m_DeviceMemory;
 	ImageViewMap m_Views;
-	bool8_t m_Own = true;
+	bool m_Own = true;
 #endif
 };
 

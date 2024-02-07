@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Math/Vector4.h"
+#include "Core/Math/Vector4.h"
 
 NAMESPACE_START(Math)
 
@@ -12,7 +12,7 @@ public:
 	{
 	}
 
-	Plane(const Vector3& Normal, float32_t Distance)
+	Plane(const Vector3& Normal, float Distance)
 		: Vector4(Normal, Distance)
 	{
 	}
@@ -58,7 +58,7 @@ public:
 		return Vector3(x, y, z);
 	}
 
-	inline float32_t Distance() const
+	inline float Distance() const
 	{
 		return w;
 	}

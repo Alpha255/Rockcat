@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIDevice.h"
+#include "Engine/RHI/RHIDevice.h"
 #include "RHI/D3D/D3D12/D3D12Types.h"
 
 class D3D12CommandQueue : public D3DHwResource<ID3D12CommandQueue>

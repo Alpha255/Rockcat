@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Definitions.h"
+#include "Core/Definitions.h"
 
 namespace StringUtils
 {
@@ -16,11 +16,11 @@ namespace StringUtils
 
 	std::string Replace(const std::string& Str, const std::string& Src, const std::string& Dst);
 
-	bool8_t StartsWidth(const std::string& Str, const char* Src);
+	bool StartsWidth(const std::string& Str, const char* Src);
 
-	bool8_t EndsWidth(const std::string& Str, const char* Src);
+	bool EndsWidth(const std::string& Str, const char* Src);
 
-	bool8_t Contains(const std::string& Str, const char* Src);
+	bool Contains(const std::string& Str, const char* Src);
 
 	std::vector<std::string> Split(const std::string& Str, const char* Token);
 
@@ -39,7 +39,7 @@ namespace StringUtils
 	uint32_t ToHex(const char* Str);
 
 	template<class StringTypeLeft, class StringTypeRight>
-	bool8_t Compare(const StringTypeLeft& Left, const StringTypeRight& Right, bool8_t CaseSensitive = true)
+	bool Compare(const StringTypeLeft& Left, const StringTypeRight& Right, bool CaseSensitive = true)
 	{
 		std::string_view LeftView(Left);
 		std::string_view RightView(Right);

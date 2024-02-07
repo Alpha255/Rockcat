@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Math/Matrix.h"
+#include "Core/Math/Matrix.h"
 
 NAMESPACE_START(Math)
 
@@ -9,7 +9,7 @@ class Quaternion : public Float4
 public:
 	/// The DirectXMath quaternion functions use an XMVECTOR 4-vector to represent quaternions, 
 	/// where the X, Y, and Z components are the vector part and the W component is the scalar part.
-	Quaternion(float32_t X, float32_t Y, float32_t Z, float32_t W)
+	Quaternion(float X, float Y, float Z, float W)
 		: Float4(X, Y, Z, W)
 	{
 	}
@@ -95,52 +95,52 @@ public:
 		return *this;
 	}
 
-	inline bool8_t IsNaN() const
+	inline bool IsNaN() const
 	{
 		return DirectX::XMQuaternionIsNaN(VECTOR_LOAD(4, this));
 	}
 
-	inline bool8_t IsInfinite() const
+	inline bool IsInfinite() const
 	{
 		return DirectX::XMQuaternionIsInfinite(VECTOR_LOAD(4, this));
 	}
 
-	inline bool8_t IsIdentity() const
+	inline bool IsIdentity() const
 	{
 		return DirectX::XMQuaternionIsIdentity(VECTOR_LOAD(4, this));
 	}
 
-	inline bool8_t operator==(const Quaternion& Other) const
+	inline bool operator==(const Quaternion& Other) const
 	{
 		return DirectX::XMQuaternionEqual(VECTOR_LOAD(4, this), VECTOR_LOAD(4, &Other));
 	}
 
-	inline bool8_t operator!=(const Quaternion& Other) const
+	inline bool operator!=(const Quaternion& Other) const
 	{
 		return DirectX::XMQuaternionNotEqual(VECTOR_LOAD(4, this), VECTOR_LOAD(4, &Other));
 	}
 
-	inline float32_t Dot(const Quaternion& Other) const
+	inline float Dot(const Quaternion& Other) const
 	{
 		return DirectX::XMVectorGetX(DirectX::XMQuaternionDot(VECTOR_LOAD(4, this), VECTOR_LOAD(4, &Other)));
 	}
 
-	inline float32_t Length() const
+	inline float Length() const
 	{
 		return DirectX::XMVectorGetX(DirectX::XMQuaternionLength(VECTOR_LOAD(4, this)));
 	}
 
-	inline float32_t LengthSq() const
+	inline float LengthSq() const
 	{
 		return DirectX::XMVectorGetX(DirectX::XMQuaternionLengthSq(VECTOR_LOAD(4, this)));
 	}
 
-	inline float32_t ReciprocalLength() const
+	inline float ReciprocalLength() const
 	{
 		return DirectX::XMVectorGetX(DirectX::XMQuaternionReciprocalLength(VECTOR_LOAD(4, this)));
 	}
 
-	inline void RotationRollPitchYaw(float32_t Pitch, float32_t Yaw, float32_t Roll)
+	inline void RotationRollPitchYaw(float Pitch, float Yaw, float Roll)
 	{
 		VECTOR_STORE(4, this, DirectX::XMQuaternionRotationRollPitchYaw(Pitch, Yaw, Roll));
 	}
@@ -150,24 +150,24 @@ public:
 		VECTOR_STORE(4, this, DirectX::XMQuaternionRotationRollPitchYaw(PitchYawRoll.x, PitchYawRoll.y, PitchYawRoll.z));
 	}
 
-	inline void RotationAxis(const Vector3& Axis, float32_t Angle)
+	inline void RotationAxis(const Vector3& Axis, float Angle)
 	{
 		VECTOR_STORE(4, this, DirectX::XMQuaternionRotationAxis(VECTOR_LOAD(3, &Axis), Angle));
 	}
 
-	inline void RotationXAxis(float32_t Angle)
+	inline void RotationXAxis(float Angle)
 	{
 		static Vector3 s_XAxis(1.0f, 0.0f, 0.0f);
 		RotationAxis(s_XAxis, Angle);
 	}
 
-	inline void RotationYAxis(float32_t Angle)
+	inline void RotationYAxis(float Angle)
 	{
 		static Vector3 s_YAxis(0.0f, 1.0f, 0.0f);
 		RotationAxis(s_YAxis, Angle);
 	}
 
-	inline void RotationZAxis(float32_t Angle)
+	inline void RotationZAxis(float Angle)
 	{
 		static Vector3 s_ZAxis(0.0f, 0.0f, 1.0f);
 		RotationAxis(s_ZAxis, Angle);
@@ -185,7 +185,7 @@ public:
 		return Ret;
 	}
 
-	inline void GetAxisAngle(Vector3& Axis, float32_t& Angle)
+	inline void GetAxisAngle(Vector3& Axis, float& Angle)
 	{
 		DirectX::XMVECTOR AxisV;
 		DirectX::XMQuaternionToAxisAngle(&AxisV, &Angle, VECTOR_LOAD(4, this));
@@ -206,7 +206,7 @@ protected:
 private:
 };
 
-inline Quaternion Slerp(const Quaternion& Q0, const Quaternion& Q1, float32_t Factor)
+inline Quaternion Slerp(const Quaternion& Q0, const Quaternion& Q1, float Factor)
 {
 	Quaternion Ret(0.0f, 0.0f, 0.0f, 0.0f);
 	VECTOR_STORE(4, &Ret, DirectX::XMQuaternionSlerp(VECTOR_LOAD(4, &Q0), VECTOR_LOAD(4, &Q1), Factor));

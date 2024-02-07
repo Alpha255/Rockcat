@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHICommandBuffer.h"
+#include "Engine/RHI/RHICommandBuffer.h"
 
 enum class ERHIDeviceQueue : uint8_t
 {
@@ -41,7 +41,7 @@ public:
 	}
 
 	template<class IDType>
-	static bool8_t IsDedicatedDevice(IDType VendorID)
+	static bool IsDedicatedDevice(IDType VendorID)
 	{
 		return 
 			static_cast<EVendorID>(VendorID) == EVendorID::AMD ||
@@ -81,7 +81,7 @@ private:
 class RHISwapchain
 {
 public:
-	RHISwapchain(const void* WindowHandle, uint32_t Width, uint32_t Height, bool8_t Fullscreen, bool8_t VSync)
+	RHISwapchain(const void* WindowHandle, uint32_t Width, uint32_t Height, bool Fullscreen, bool VSync)
 		: m_WindowHandle(WindowHandle)
 		, m_Width(Width)
 		, m_Height(Height)
@@ -93,11 +93,11 @@ public:
 
 	inline uint32_t GetWidth() const { return m_Width; }
 	inline uint32_t Height() const { return m_Height; }
-	inline bool8_t IsFullscreen() const { return m_Fullscreen; }
-	inline bool8_t IsEnableVSync() const { return m_VSync; }
+	inline bool IsFullscreen() const { return m_Fullscreen; }
+	inline bool IsEnableVSync() const { return m_VSync; }
 private:
-	bool8_t m_VSync = false;
-	bool8_t m_Fullscreen = false;
+	bool m_VSync = false;
+	bool m_Fullscreen = false;
 	uint32_t m_Width = 0u;
 	uint32_t m_Height = 0u;
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Runtime/Core/StringUtils.h"
-#include "Runtime/Engine/Asset/SerializableAsset.h"
-#include "Runtime/Engine/Application/GraphicsSettings.h"
-#include "Runtime/Engine/RHI/RHIShader.h"
+#include "Core/StringUtils.h"
+#include "Engine/Asset/SerializableAsset.h"
+#include "Engine/Application/GraphicsSettings.h"
+#include "Engine/RHI/RHIShader.h"
 
 class ShaderDefines
 {
@@ -67,14 +67,14 @@ public:
 
 	ShaderBinary(size_t Size, const void* Compiled)
 		: m_Size(Size)
-		, m_Binary(new byte8_t[Size]())
+		, m_Binary(new uint8_t[Size]())
 	{
 		VERIFY(memcpy_s(m_Binary.get(), Size, Compiled, Size) == 0);
 	}
 
 	size_t GetSize() const { return m_Size; }
-	const byte8_t* GetBinary() const { return m_Binary.get(); }
-	bool8_t IsValid() const { return m_Size > 0u; }
+	const uint8_t* GetBinary() const { return m_Binary.get(); }
+	bool IsValid() const { return m_Size > 0u; }
 
 	template<class Archive>
 	void load(Archive& Ar)
@@ -83,7 +83,7 @@ public:
 			CEREAL_NVP(m_Size)
 		);
 
-		m_Binary.reset(new byte8_t[m_Size]());
+		m_Binary.reset(new uint8_t[m_Size]());
 
 		Ar.loadBinaryValue(m_Binary.get(), m_Size, "Compiled");
 	}
@@ -99,10 +99,10 @@ public:
 	}
 private:
 	size_t m_Size = 0u;
-	std::shared_ptr<byte8_t> m_Binary;
+	std::shared_ptr<uint8_t> m_Binary;
 	//void SetStatus(EStatus Status) { m_Status.store(Status); }
-	//bool8_t IsCompiling() const { return m_Status.load() == EStatus::Compiling; }
-	//bool8_t IsCompiled() const { return m_Status.load() == EStatus::Compiled; }
+	//bool IsCompiling() const { return m_Status.load() == EStatus::Compiling; }
+	//bool IsCompiled() const { return m_Status.load() == EStatus::Compiled; }
 
 	//std::atomic<EStatus> m_Status;
 };
@@ -117,7 +117,7 @@ struct ShaderCache : public SerializableAsset<ShaderCache>
 
 	virtual const char* GetExtension() const { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::ShaderCache); }
 
-	bool8_t Contains(size_t Hash) const { return CompiledBinaries.find(Hash) != CompiledBinaries.cend(); }
+	bool Contains(size_t Hash) const { return CompiledBinaries.find(Hash) != CompiledBinaries.cend(); }
 	const ShaderBinary* const GetBinary(size_t Hash, ERenderHardwareInterface RHI) const
 	{
 		auto It = CompiledBinaries.find(Hash);
@@ -152,7 +152,7 @@ public:
 
 	ERHIShaderStage GetStage() const { return m_Stage; }
 
-	void Compile(bool8_t Force = false);
+	void Compile(bool Force = false);
 
 	const ShaderBinary* const GetBinary(ERenderHardwareInterface RHI) const { return GetCache().GetBinary(ComputeHash(), RHI); }
 

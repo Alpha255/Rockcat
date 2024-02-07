@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/Rendering/RenderGraph/RenderPass.h"
+#include "Engine/Rendering/RenderGraph/RenderPass.h"
 
 class RenderGraph
 {
@@ -20,7 +20,7 @@ public:
 private:
 	void Compile();
 
-	bool8_t m_NeedRecompile = true;
+	bool m_NeedRecompile = true;
 	DirectedAcyclicGraph m_Graph;
 	std::shared_ptr<class ResourceManager> m_ResourceMgr;
 	std::shared_ptr<RenderScene> m_RenderScene;

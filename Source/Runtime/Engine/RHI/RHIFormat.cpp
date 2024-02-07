@@ -1,4 +1,4 @@
-#include "Runtime/Engine/RHI/RHIFormat.h"
+#include "Engine/RHI/RHIFormat.h"
 #include <gl/GL.h>
 #include <vulkan/vulkan_format_traits.hpp>
 
@@ -195,24 +195,24 @@ namespace RHI
 		}
 	}
 
-	bool8_t IsColor(ERHIFormat Format)
+	bool IsColor(ERHIFormat Format)
 	{
 		return !(IsDepth(Format) || IsDepthStenci(Format));
 	}
 
-	bool8_t IsDepth(ERHIFormat Format)
+	bool IsDepth(ERHIFormat Format)
 	{
 		return Format == ERHIFormat::D16_UNorm || Format == ERHIFormat::D32_Float;
 	}
 
-	bool8_t IsDepthStenci(ERHIFormat Format)
+	bool IsDepthStenci(ERHIFormat Format)
 	{
 		return Format == ERHIFormat::D24_UNorm_S8_UInt || Format == ERHIFormat::D32_Float_S8_UInt;
 	}
 
 	void CalculateFormatBytes(uint32_t Width, uint32_t Height, ERHIFormat Format, __out size_t& SliceBytes, __out size_t& RowBytes)
 	{
-		bool8_t IsCompressed =
+		bool IsCompressed =
 			Format == ERHIFormat::BC1_Typeless ||
 			Format == ERHIFormat::BC1_UNorm ||
 			Format == ERHIFormat::BC1_UNorm_SRGB ||
@@ -235,13 +235,13 @@ namespace RHI
 			Format == ERHIFormat::BC7_UNorm ||
 			Format == ERHIFormat::BC7_UNorm_SRGB;
 
-		bool8_t IsPlanar =
+		bool IsPlanar =
 			Format == ERHIFormat::NV12 ||
 			Format == ERHIFormat::Opaque_420 ||
 			Format == ERHIFormat::P010 ||
 			Format == ERHIFormat::P016;
 
-		bool8_t IsPacked =
+		bool IsPacked =
 			Format == ERHIFormat::RG8_BG8_UNorm ||
 			Format == ERHIFormat::GR8_GB8_UNorm ||
 			Format == ERHIFormat::YUY2 ||

@@ -1,6 +1,6 @@
 #if 0
-#include "Runtime/Asset/ShaderImporter.h"
-#include "Runtime/Asset/ShaderCompiler.h"
+#include "Asset/ShaderImporter.h"
+#include "Asset/ShaderCompiler.h"
 #include "Colorful/IRenderer/IDevice.h"
 
 static std::shared_ptr<ShaderCompileConfigs> CompileConfigs;

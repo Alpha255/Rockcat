@@ -1,6 +1,6 @@
-#include "Runtime/Engine/Asset/SceneAsset.h"
-#include "Runtime/Engine/Scene/Scene.h"
-#include "Runtime/Engine/Asset/AssetDatabase.h"
+#include "Engine/Asset/SceneAsset.h"
+#include "Engine/Scene/Scene.h"
+#include "Engine/Asset/AssetDatabase.h"
 
 class SceneBuilder
 {

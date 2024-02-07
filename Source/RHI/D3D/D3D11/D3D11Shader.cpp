@@ -1,7 +1,7 @@
 #include "RHI/D3D/D3D11/D3D11Shader.h"
 #include "RHI/D3D/D3D11/D3D11Device.h"
-#include "Runtime/Engine/Asset/ShaderAsset.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Engine/Asset/ShaderAsset.h"
+#include "Engine/Services/SpdLogService.h"
 
 D3D11VertexShader::D3D11VertexShader(const D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo)
 {

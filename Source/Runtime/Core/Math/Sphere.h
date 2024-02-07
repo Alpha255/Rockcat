@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Math/Vector4.h"
+#include "Core/Math/Vector4.h"
 
 NAMESPACE_START(Math)
 
@@ -16,11 +16,11 @@ public:
 	}
 
 	const Vector3& GetCenter() const { return m_Center; }
-	float32_t GetRadius() const { return m_Radius; }
+	float GetRadius() const { return m_Radius; }
 protected:
 private:
 	Vector3 m_Center;
-	float32_t m_Radius;
+	float m_Radius;
 };
 
 NAMESPACE_END(Math)

@@ -1,4 +1,4 @@
-#include "Runtime/Core/Definitions.h"
+#include "Core/Definitions.h"
 
 std::string TrimEnumString(const std::string& Name)
 {

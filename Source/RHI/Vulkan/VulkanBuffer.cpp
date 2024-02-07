@@ -1,7 +1,7 @@
 #include "RHI/Vulkan/VulkanBuffer.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
-#include "Runtime/Engine/RHI/RHIInterface.h"
+#include "Engine/Services/SpdLogService.h"
+#include "Engine/RHI/RHIInterface.h"
 
 VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo& CreateInfo)
 	: VkHwResource(Device)
@@ -84,19 +84,8 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 
 	GetNativeDevice().bindBufferMemory(m_Native, m_Memory, 0u);
 
-	const bool8_t IsVolatile = CreateInfo.AccessFlags == ERHIDeviceAccessFlags::GpuReadCpuWrite;
-
-	if (IsVolatile)
-	{
-		Map(VK_WHOLE_SIZE, 0u);
-	}
-
 	if (CreateInfo.InitialData)
 	{
-		if (IsVolatile)
-		{
-			VERIFY(memcpy_s(m_MappedMemory, CreateInfo.Size, CreateInfo.InitialData, CreateInfo.Size) == 0);
-		}
 #if false
 		else
 		{
@@ -185,16 +174,16 @@ void VulkanBuffer::InvalidateMappedRange(size_t Size, size_t Offset)
 	VERIFY_VK(GetNativeDevice().invalidateMappedMemoryRanges(1u, &MappedRange));
 }
 
-bool8_t VulkanBuffer::Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset)
+bool VulkanBuffer::Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset)
 {
 	assert(Data && Size && Size <= m_Size);
 
 	if (m_MappedMemory)
 	{
 		VERIFY(memcpy_s(
-			reinterpret_cast<byte8_t*>(m_MappedMemory) + DstOffset, 
+			reinterpret_cast<uint8_t*>(m_MappedMemory) + DstOffset, 
 			Size, 
-			reinterpret_cast<const byte8_t*>(Data) + SrcOffset, 
+			reinterpret_cast<const uint8_t*>(Data) + SrcOffset, 
 			Size) == 0);
 
 		if (!m_Coherent)

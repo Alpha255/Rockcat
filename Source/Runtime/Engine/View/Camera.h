@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Core/InputState.h"
-#include "Runtime/Core/Math/Matrix.h"
+#include "Core/InputState.h"
+#include "Core/Math/Matrix.h"
 
 class Camera : public IInputHandler
 {
@@ -17,7 +17,7 @@ public:
 	{
 	}
 
-	Camera(EMode Mode, const Math::Vector3& Eye, const Math::Vector3& LookAt, float32_t FOV, float32_t Aspect, float32_t NearPlane, float32_t FarPlane)
+	Camera(EMode Mode, const Math::Vector3& Eye, const Math::Vector3& LookAt, float FOV, float Aspect, float NearPlane, float FarPlane)
 		: m_DefaultEye(Eye)
 		, m_DefaultLookAt(LookAt)
 		, m_Mode(Mode)
@@ -29,55 +29,28 @@ public:
 
 	virtual ~Camera() = default;
 
-	inline void SetMode(EMode Mode)
-	{
-		m_Mode = Mode;
-	}
+	inline void SetMode(EMode Mode) { m_Mode = Mode; }
+	inline const Math::Matrix& GetWorldMatrix() const { return m_World; }
+	inline const Math::Matrix& GetViewMatrix() const { return m_View; }
+	inline const Math::Matrix& GetProjectionMatrix() const { return m_Projection; }
+	inline const Math::Vector3& GetEyePosition() const { return m_Eye; }
+	inline const Math::Vector3& GetLookAt() const { return m_LookAt; }
+	inline Math::Matrix GetViewProjectionMatrix() const { return m_View * m_Projection; }
 
-	inline const Math::Matrix& WorldMatrix() const
-	{
-		return m_World;
-	}
-
-	inline const Math::Matrix& ViewMatrix() const
-	{
-		return m_View;
-	}
-
-	inline const Math::Matrix& ProjectionMatrix() const
-	{
-		return m_Projection;
-	}
-
-	inline const Math::Vector3& Eye() const
-	{
-		return m_Eye;
-	}
-
-	inline const Math::Vector3& LookAt() const
-	{
-		return m_LookAt;
-	}
-
-	inline Math::Matrix ViewProjectionMatrix() const
-	{
-		return m_View * m_Projection;
-	}
-
-	inline void SetClipToBoundary(bool8_t Clip, const Math::Vector3& Min, const Math::Vector3& Max)
+	inline void SetClipToBoundary(bool Clip, const Math::Vector3& Min, const Math::Vector3& Max)
 	{
 		m_ClipToBoundary = Clip;
 		m_MinBoundary = Min;
 		m_MaxBoundary = Max;
 	}
 
-	inline void SetSpeed(float32_t RotationSpeed = 0.01f, float32_t MoveSpeed = 5.0f)
+	inline void SetSpeed(float RotationSpeed = 0.01f, float MoveSpeed = 5.0f)
 	{
 		m_RotationSpeed = RotationSpeed;
 		m_MoveSpeed = MoveSpeed;
 	}
 
-	inline void SetPerspective(float32_t FOV, float32_t Aspect, float32_t NearPlane, float32_t FarPlane)
+	inline void SetPerspective(float FOV, float Aspect, float NearPlane, float FarPlane)
 	{
 		m_Fov = FOV;
 		m_Aspect = Aspect;
@@ -98,11 +71,7 @@ public:
 		}
 	}
 
-	void SetRadius(float32_t Radius)
-	{
-		assert(m_Mode == EMode::ModelViewer);
-		m_Radius = Radius;
-	}
+	void SetRadius(float Radius) { assert(m_Mode == EMode::ModelViewer); m_Radius = Radius; }
 
 	void SetLookAt(const Math::Vector3& Eye, const Math::Vector3& LookAt);
 
@@ -112,7 +81,7 @@ public:
 
 	void OnWindowResized(uint32_t Width, uint32_t Height) override;
 
-	///void Tick(float32_t ElapsedSeconds) override final;
+	///void Tick(float ElapsedSeconds) override final;
 
 	void FocusToBounds(const Math::AABB& Bounds);
 
@@ -165,34 +134,19 @@ protected:
 		int32_t WheelDelta = 0;
 		Math::Vector2 PosDelta;
 		Math::Vector2 LastPos;
-		bool8_t WheelMove = false;
+		bool WheelMove = false;
 
-		std::array<std::pair<bool8_t, bool8_t>, 3ull> Buttons;
+		std::array<std::pair<bool, bool>, 3ull> Buttons;
 
-		inline void SetButton(EMouseButton Button, bool8_t ButtonDown)
-		{
-			Buttons[static_cast<uint32_t>(Button)].first = ButtonDown;
-		}
-
-		inline const bool8_t IsButtonDown(EMouseButton Button) const
-		{
-			return Buttons[static_cast<uint32_t>(Button)].first;
-		}
-
-		inline void SetButtonDBClicked(EMouseButton Button, bool8_t Clicked)
-		{
-			Buttons[static_cast<uint32_t>(Button)].second = Clicked;
-		}
-
-		inline const bool8_t IsButtonDBClicked(EMouseButton Button) const
-		{
-			return Buttons[static_cast<uint32_t>(Button)].second;
-		}
+		inline void SetButton(EMouseButton Button, bool ButtonDown) { Buttons[static_cast<uint32_t>(Button)].first = ButtonDown; }
+		inline const bool IsButtonDown(EMouseButton Button) const { return Buttons[static_cast<uint32_t>(Button)].first; }
+		inline void SetButtonDoubleClicked(EMouseButton Button, bool Clicked) { Buttons[static_cast<uint32_t>(Button)].second = Clicked; }
+		inline const bool IsButtonDoubleClicked(EMouseButton Button) const { return Buttons[static_cast<uint32_t>(Button)].second; }
 	};
 
 	void UpdateMouseDelta();
 
-	Math::Vector3 ScaleToScreenPosition(float32_t X, float32_t Y);
+	Math::Vector3 ScaleToScreenPosition(float X, float Y);
 
 	Math::Matrix m_World;
 	Math::Matrix m_View;
@@ -211,28 +165,28 @@ protected:
 	Math::Vector2 m_Center;
 	Math::Vector3 m_LastPos;
 
-	float32_t m_Fov = 0.0f;
-	float32_t m_Aspect = 1.0f;
-	float32_t m_NearPlane = 0.0f;
-	float32_t m_FarPlane = 0.0f;
-	float32_t m_RotationSpeed = 0.01f;
-	float32_t m_MoveSpeed = 5.0f;
-	float32_t m_Yaw = 0.0f;
-	float32_t m_Pitch = 0.0f;
+	float m_Fov = 0.0f;
+	float m_Aspect = 1.0f;
+	float m_NearPlane = 0.0f;
+	float m_FarPlane = 0.0f;
+	float m_RotationSpeed = 0.01f;
+	float m_MoveSpeed = 5.0f;
+	float m_Yaw = 0.0f;
+	float m_Pitch = 0.0f;
 	uint32_t m_FrameCountToSmooth = 2u;
-	float32_t m_DragTimerToZero = 0.25f;
-	float32_t m_DragTimer = 0.0f;
+	float m_DragTimerToZero = 0.25f;
+	float m_DragTimer = 0.0f;
 
-	float32_t m_Radius = 5.0f;
-	float32_t m_DefaultRadius = 5.0f;
-	float32_t m_MinRadius = 1.0f;
-	float32_t m_MaxRadius = std::numeric_limits<float32_t>().max();
+	float m_Radius = 5.0f;
+	float m_DefaultRadius = 5.0f;
+	float m_MinRadius = 1.0f;
+	float m_MaxRadius = std::numeric_limits<float>::max();
 
 	Math::Quaternion m_QuatLast;
 	Math::Quaternion m_QuatCurrent;
 
 	EMode m_Mode = EMode::FirstPerson;
-	bool8_t m_ClipToBoundary = false;
+	bool m_ClipToBoundary = false;
 	
 	KeyboardMovements m_KeyboardMovements;
 	MouseMovements m_MouseMovements;

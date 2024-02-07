@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Math/Vector4.h"
+#include "Core/Math/Vector4.h"
 
 NAMESPACE_START(Math)
 
@@ -13,10 +13,10 @@ public:
 
 	Color(uint8_t R, uint8_t G, uint8_t B, uint8_t A = 1);
 
-	float32_t R() const { return x; }
-	float32_t G() const { return y; }
-	float32_t B() const { return z; }
-	float32_t A() const { return w; }
+	float R() const { return x; }
+	float G() const { return y; }
+	float B() const { return z; }
+	float A() const { return w; }
 
 	static const Color White;
 	static const Color Black;
@@ -40,11 +40,11 @@ public:
 	uint32_t RGB10A2() const;
 	uint32_t RGBA8() const;
 
-	uint32_t RG11B10F(bool8_t RoundToEven = false) const;
+	uint32_t RG11B10F(bool RoundToEven = false) const;
 	uint32_t RGB9E5() const;
 protected:
 private:
-	static const float32_t Scaler;
+	static const float Scaler;
 };
 
 NAMESPACE_END(Math)

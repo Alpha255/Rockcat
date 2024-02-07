@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIPipeline.h"
+#include "Engine/RHI/RHIPipeline.h"
 #include "RHI/D3D/D3D12/D3D12Types.h"
 
 class D3D12FrameBuffer : public RHIFrameBuffer

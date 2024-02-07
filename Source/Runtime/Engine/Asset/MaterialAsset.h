@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Runtime/Core/Math/Matrix.h"
-#include "Runtime/Engine/Asset/SerializableAsset.h"
-#include "Runtime/Engine/Asset/ImageAsset.h"
-#include "Runtime/Engine/RHI/RHIResource.h"
+#include "Core/Math/Matrix.h"
+#include "Engine/Asset/SerializableAsset.h"
+#include "Engine/Asset/ImageAsset.h"
+#include "Engine/RHI/RHIResource.h"
 
 enum class EShadingMode
 {
@@ -15,7 +15,7 @@ enum class EShadingMode
 
 using ShaderVariant = std::variant<
 	std::monostate,
-	float32_t, int32_t, uint32_t,
+	float, int32_t, uint32_t,
 	Math::Vector2,
 	Math::Vector3,
 	Math::Vector4,
@@ -38,7 +38,7 @@ struct MaterialProperty
 
 	ShaderVariant Value;
 
-	bool8_t IsValueValid() const { return Value.index() != 0u; }
+	bool IsValueValid() const { return Value.index() != 0u; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)

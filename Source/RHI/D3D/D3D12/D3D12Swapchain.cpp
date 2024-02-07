@@ -1,6 +1,6 @@
 #include "RHI/D3D/D3D12/D3D12Swapchain.h"
 #include "RHI/D3D/D3D12/D3D12Device.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Engine/Services/SpdLogService.h"
 
 #if 0
 void D3D12Swapchain::Resize(uint32_t Width, uint32_t Height)
@@ -22,9 +22,9 @@ D3D12Swapchain::D3D12Swapchain(
 	uint64_t WindowHandle, 
 	uint32_t Width, 
 	uint32_t Height, 
-	bool8_t Fullscreen, 
-	bool8_t VSync, 
-	bool8_t sRGB)
+	bool Fullscreen, 
+	bool VSync, 
+	bool sRGB)
 	: m_ColorFormat(sRGB ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM)
 {
 	/// Microsoft DirectX Graphics Infrastructure (DXGI)
@@ -35,13 +35,13 @@ D3D12Swapchain::D3D12Swapchain(
 
 	/// IDXGISwapChain3: Extends IDXGISwapChain2 with methods to support getting the index of the swap chain's current back buffer and support for color space.
 
-	bool8_t AllowTearing = false;
+	bool AllowTearing = false;
 	uint32_t Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 	DxgiFactory5 Factory5;
 	if (SUCCEEDED(Factory->QueryInterface(Factory5.Reference())))
 	{
-		Factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &AllowTearing, sizeof(bool8_t));
+		Factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &AllowTearing, sizeof(bool));
 		if (AllowTearing)
 		{
 			Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;

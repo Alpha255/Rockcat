@@ -43,7 +43,8 @@ workspace "Rockcat"
 			includedirs {
 				"$(SolutionDir)",
 				"$(SolutionDir)Source",
-				"$(SolutionDir)Assets/",
+				"$(SolutionDir)Source/Runtime",
+				"$(SolutionDir)Assets",
 				"$(SolutionDir)Submodules/cereal/include",
 				"$(SolutionDir)Submodules/spdlog/include",
 				"$(SolutionDir)Submodules/assimp/build/include",
@@ -71,6 +72,7 @@ workspace "Rockcat"
 				includedirs {
 					"$(SolutionDir)",
 					"$(SolutionDir)Source",
+					"$(SolutionDir)Source/Runtime",
 					"$(SolutionDir)Submodules/cereal/include",
 					"$(SolutionDir)Submodules/spdlog/include",
 					"$(VK_SDK_PATH)/Include",
@@ -87,6 +89,7 @@ workspace "Rockcat"
 				includedirs { 
 					"$(SolutionDir)",
 					"$(SolutionDir)Source",
+					"$(SolutionDir)Source/Runtime",
 					"$(SolutionDir)Submodules/cereal/include",
 					"$(SolutionDir)Submodules/spdlog/include",
 					"$(VK_SDK_PATH)/Include",
@@ -107,6 +110,7 @@ workspace "Rockcat"
 				includedirs { 
 					"$(SolutionDir)",
 					"$(SolutionDir)Source",
+					"$(SolutionDir)Source/Runtime",
 					"$(SolutionDir)Submodules/cereal/include",
 					"$(SolutionDir)Submodules/spdlog/include",
 					"$(VK_SDK_PATH)/Include",
@@ -231,7 +235,8 @@ workspace "Rockcat"
 		}
 		includedirs { 
 			"$(SolutionDir)",
-			"$(SolutionDir)/Source",
+			"$(SolutionDir)Source",
+			"$(SolutionDir)Source/Runtime",
 			"$(SolutionDir)Submodules/cereal/include",
 			"$(SolutionDir)Submodules/spdlog/include",
 			"$(VK_SDK_PATH)/Include",

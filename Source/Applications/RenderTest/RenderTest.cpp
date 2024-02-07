@@ -1,10 +1,10 @@
 #include "Applications/RenderTest/RenderTest.h"
-#include "Runtime/Core/Main.h"
-#include "Runtime/Engine/Scene/Scene.h"
-#include "Runtime/Engine/Asset/GlobalShaders/DefaultShading.h"
-#include "Runtime/Engine/Application/ApplicationConfigurations.h"
-#include "Runtime/Engine/Rendering/RenderGraph/ForwardRenderingPath.h"
-#include "Runtime/Engine/Services/RenderService.h"
+#include "Core/Main.h"
+#include "Engine/Scene/Scene.h"
+#include "Engine/Asset/GlobalShaders/DefaultShading.h"
+#include "Engine/Application/ApplicationConfigurations.h"
+#include "Engine/Rendering/RenderGraph/ForwardRenderingPath.h"
+#include "Engine/Services/RenderService.h"
 
 void RenderTest::OnInitialize()
 {

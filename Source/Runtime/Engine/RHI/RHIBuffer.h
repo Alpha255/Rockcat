@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIImage.h"
+#include "Engine/RHI/RHIImage.h"
 
 #define WHOLE_SIZE ~0u
 
@@ -26,7 +26,7 @@ public:
 	virtual void Unmap() = 0;
 	virtual void FlushMappedRange(size_t Size = WHOLE_SIZE, size_t Offset = 0u) = 0;
 	virtual void InvalidateMappedRange(size_t Size = WHOLE_SIZE, size_t Offset = 0u) = 0;
-	virtual bool8_t Update(const void* Data, size_t Size, size_t SrcOffset = 0u, size_t DstOffset = 0u) = 0;
+	virtual bool Update(const void* Data, size_t Size, size_t SrcOffset = 0u, size_t DstOffset = 0u) = 0;
 	void* GetMappedMemory() const { return m_MappedMemory; }
 protected:
 	void* m_MappedMemory = nullptr;

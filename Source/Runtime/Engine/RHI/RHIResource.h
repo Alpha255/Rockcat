@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIFormat.h"
+#include "Engine/RHI/RHIFormat.h"
 #include <d3d11.h>
 
 enum ERHILimitations : uint8_t
@@ -45,7 +45,7 @@ enum class ERHIDeviceAccessFlags : uint8_t
 	GpuReadWrite = 1 << 1,
 	CpuRead = 1 << 2,
 	CpuWrite = 1 << 3,
-	GpuReadCpuWrite = GpuRead | CpuWrite
+	GpuReadCpuWrite = 1 << 4
 };
 ENUM_FLAG_OPERATORS(ERHIDeviceAccessFlags)
 
@@ -143,7 +143,7 @@ public:
 		return *this;
 	}
 
-	bool8_t operator()() const { return IsValid(); }
+	bool operator()() const { return IsValid(); }
 
 	virtual ~RHIObject() { std::exchange(m_Handle, {}); }
 
@@ -156,7 +156,7 @@ public:
 	inline T* operator->() { assert(m_Handle); return m_Handle; }
 	inline T* operator->() const { assert(m_Handle); return m_Handle; }
 
-	inline const bool8_t IsValid() const { return m_Handle != nullptr; }
+	inline const bool IsValid() const { return m_Handle != nullptr; }
 
 	inline intptr_t ToIntPtr() const { return reinterpret_cast<intptr_t>(m_Handle); }
 protected:

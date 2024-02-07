@@ -1,8 +1,8 @@
-#include "Runtime/Engine/Rendering/RenderGraph/RenderPass/OpaquePass.h"
+#include "Engine/Rendering/RenderGraph/RenderPass/OpaquePass.h"
 #if 0
 #include "Colorful/IRenderer/RenderGraph/RenderPass/ForwardShadingPass.h"
 #include "Colorful/IRenderer/IRenderer.h"
-#include "Runtime/Scene/Scene.h"
+#include "Scene/Scene.h"
 
 NAMESPACE_START(RHI)
 
@@ -29,8 +29,8 @@ struct ModelPos
 
 struct MaterialParams
 {
-	float32_t Roughness;
-	float32_t Metallic;
+	float Roughness;
+	float Metallic;
 };
 
 static ModelPos PushConstants_0;
@@ -131,7 +131,7 @@ void ForwardShadingPass::ApplyRenderSettings(const RenderSettings* Settings)
 	IFrameGraphPass::ApplyRenderSettings(Settings);
 }
 
-bool8_t ForwardShadingPass::BatchDrawable(const SceneNode* Object)
+bool ForwardShadingPass::BatchDrawable(const SceneNode* Object)
 {
 	if (Object)
 	{

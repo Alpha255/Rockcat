@@ -1,6 +1,6 @@
 #include "Assets/Shaders/Definitions.h"
-#include "Runtime/Engine/Asset/MaterialAsset.h"
-#include "Runtime/Engine/Asset/ShaderAsset.h"
+#include "Engine/Asset/MaterialAsset.h"
+#include "Engine/Asset/ShaderAsset.h"
 
 #pragma warning(push)
 #pragma warning(disable:4324)
@@ -126,10 +126,10 @@ public:
 	ERHICullMode GetCullMode() const { return m_CullMode; }
 	void SetCullMode(ERHICullMode CullMode) { m_CullMode = CullMode; }
 
-	bool8_t IsTwoSided() const { return m_TwoSided; }
-	void SetTwoSided(bool8_t TwoSided) { m_TwoSided = TwoSided; }
+	bool IsTwoSided() const { return m_TwoSided; }
+	void SetTwoSided(bool TwoSided) { m_TwoSided = TwoSided; }
 
-	bool8_t IsReady() const override final { return Asset::IsReady() && VS::IsReady() && FS::IsReady(); }
+	bool IsReady() const override final { return Asset::IsReady() && VS::IsReady() && FS::IsReady(); }
 
 	void Compile() override final { VS::Compile(); FS::Compile(); }
 
@@ -155,7 +155,7 @@ protected:
 		}
 	}
 
-	static constexpr bool8_t IsValidName(const char* Name) { return Name ? strlen(Name) > 0u : false; }
+	static constexpr bool IsValidName(const char* Name) { return Name ? strlen(Name) > 0u : false; }
 
 	void PostLoad() override final
 	{
@@ -165,7 +165,7 @@ protected:
 private:
 	MaterialID m_ID;
 	ERHICullMode m_CullMode = ERHICullMode::BackFace;
-	bool8_t m_TwoSided = false;
+	bool m_TwoSided = false;
 	std::string m_Name;
 };
 

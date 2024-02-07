@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIBuffer.h"
-#include "Runtime/Engine/RHI/RHIShader.h"
+#include "Engine/RHI/RHIBuffer.h"
+#include "Engine/RHI/RHIShader.h"
 
 struct RHIShaderVariableBinding
 {
@@ -158,13 +158,13 @@ public:
 	}
 
 	template<EDirtyFlags Flags>
-	const bool8_t IsDirty() const
+	const bool IsDirty() const
 	{
 		return Dirty[static_cast<size_t>(Flags)];
 	}
 
 	template<EDirtyFlags Flags>
-	void SetDirty(bool8_t IsDirty)
+	void SetDirty(bool IsDirty)
 	{
 		Dirty.set(static_cast<size_t>(Flags), IsDirty);
 	}

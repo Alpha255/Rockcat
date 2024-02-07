@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/Math/Math.h"
+#include "Core/Math/Math.h"
 
 enum class EMouseButton : uint8_t
 {
@@ -76,15 +76,15 @@ enum class EKeyState : uint8_t
 
 struct InputModifiers
 {
-	bool8_t Ctrl = false;
-	bool8_t Shift = false;
-	bool8_t Alt = false;
+	bool Ctrl = false;
+	bool Shift = false;
+	bool Alt = false;
 };
 
 struct MouseEvent
 {
 	EMouseButton Button;
-	bool8_t OnMove = false;
+	bool OnMove = false;
 	int8_t WheelDelta = 0;
 	EKeyState State = EKeyState::Up;
 	Math::Vector2 Position;

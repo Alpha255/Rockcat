@@ -1,16 +1,16 @@
 #pragma once
 
-#include "Runtime/Core/Window.h"
-#include "Runtime/Engine/Application/GraphicsSettings.h"
-#include "Runtime/Engine/Asset/SerializableAsset.h"
+#include "Core/Window.h"
+#include "Engine/Application/GraphicsSettings.h"
+#include "Engine/Asset/SerializableAsset.h"
 
 class ApplicationConfigurations : public SerializableAsset<ApplicationConfigurations>
 {
 public:
 	using BaseClass::BaseClass;
 
-	bool8_t IsEnableWindow() const { return m_EnableWindow; }
-	bool8_t IsEnableRendering() const { return m_EnableRendering; }
+	bool IsEnableWindow() const { return m_EnableWindow; }
+	bool IsEnableRendering() const { return m_EnableRendering; }
 	const WindowCreateInfo& GetWindowCreateInfo() const { return m_WindowCreateInfo; }
 	const GraphicsSettings& GetGraphicsSettings() const { return m_GraphicsSettings; }
 
@@ -25,8 +25,8 @@ public:
 		);
 	}
 private:
-	bool8_t m_EnableWindow = true;
-	bool8_t m_EnableRendering = true;
+	bool m_EnableWindow = true;
+	bool m_EnableRendering = true;
 
 	WindowCreateInfo m_WindowCreateInfo;
 	GraphicsSettings m_GraphicsSettings;

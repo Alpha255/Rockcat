@@ -1,5 +1,5 @@
 #if 0
-#include "Runtime/Scene/Scene.h"
+#include "Scene/Scene.h"
 
 Scene::Scene(const char* Path)
 	: Serializeable(IAsset::CatPath(ASSET_PATH_SCENES, Path))
@@ -138,7 +138,7 @@ void Scene::AddCamera(const std::shared_ptr<Camera>& Cam, const std::shared_ptr<
 	}
 }
 
-bool8_t Scene::AddObject(const std::shared_ptr<SceneNode>& Object, const std::shared_ptr<SceneNode>& Parent)
+bool Scene::AddObject(const std::shared_ptr<SceneNode>& Object, const std::shared_ptr<SceneNode>& Parent)
 {
 	if (Object)
 	{
@@ -244,7 +244,7 @@ void SceneNode::Traverse(const VisitFunc& Visit) const
 	}
 }
 
-void Scene::Tick(float32_t ElapsedSeconds)
+void Scene::Tick(float ElapsedSeconds)
 {
 	for (auto Object : m_TickableObjects)
 	{
@@ -271,4 +271,4 @@ void Scene::Traverse(const SceneNode::VisitFunc& Visit) const
 }
 #endif
 
-#include "Runtime/Engine/Scene/Scene.h"
+#include "Engine/Scene/Scene.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/StringUtils.h"
+#include "Core/StringUtils.h"
 
 struct Guid
 {
@@ -17,17 +17,17 @@ struct Guid
 	uint32_t C = 0u;
 	uint32_t D = 0u;
 
-	friend bool8_t operator==(const Guid& Left, const Guid& Right)
+	friend bool operator==(const Guid& Left, const Guid& Right)
 	{
 		return ((Left.A ^ Right.A) | (Left.B ^ Right.B) | (Left.C ^ Right.B) | (Left.D ^ Right.D)) == 0;
 	}
 
-	friend bool8_t operator!=(const Guid& Left, const Guid& Right)
+	friend bool operator!=(const Guid& Left, const Guid& Right)
 	{
 		return ((Left.A ^ Right.A) | (Left.B ^ Right.B) | (Left.C ^ Right.B) | (Left.D ^ Right.D)) != 0;
 	}
 
-	bool8_t IsValid() const
+	bool IsValid() const
 	{
 		return (A | B | C | D) != 0;
 	}
@@ -70,7 +70,7 @@ struct Guid
 
 		for (uint32_t i = 0u; i < Normalized.length(); ++i)
 		{
-			if (std::isxdigit(static_cast<uchar8_t>(Normalized[i])) == 0)
+			if (std::isxdigit(static_cast<char>(Normalized[i])) == 0)
 			{
 				return ret;
 			}

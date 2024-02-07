@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/Scene/Scene.h"
+#include "Engine/Scene/Scene.h"
 
 struct DepthFirst {};
 struct BreadthFirst {};

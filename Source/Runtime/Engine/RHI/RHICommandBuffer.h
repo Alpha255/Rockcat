@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Runtime/Core/Math/Color.h"
-#include "Runtime/Engine/RHI/RHIShader.h"
-#include "Runtime/Engine/RHI/RHIPipeline.h"
+#include "Core/Math/Color.h"
+#include "Engine/RHI/RHIShader.h"
+#include "Engine/RHI/RHIPipeline.h"
 
 enum class ERHICommandBufferLevel
 {
@@ -55,7 +55,7 @@ public:
 
 	virtual void ClearColorImage(const RHIImage* DstImage, const Math::Color& ClearColor) = 0;
 
-	virtual void ClearDepthStencilImage(const RHIImage* DstImage, bool8_t ClearDepth = true, bool8_t ClearStencil = true, float32_t Depth = 1.0f, uint8_t Stencil = 0xF) = 0;
+	virtual void ClearDepthStencilImage(const RHIImage* DstImage, bool ClearDepth = true, bool ClearStencil = true, float Depth = 1.0f, uint8_t Stencil = 0xF) = 0;
 
 	virtual void CopyBufferToImage(const RHIImage* DstImage, const void* SrcBuffer, uint32_t BufferSize, const RHIImageSubresourceRange& SubresourceRange) = 0;
 

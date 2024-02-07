@@ -35,11 +35,11 @@
 class VulkanFence final : public VkHwResource<vk::Fence>
 {
 public:
-	VulkanFence(const class VulkanDevice& Device, bool8_t Signaled = false);
+	VulkanFence(const class VulkanDevice& Device, bool Signaled = false);
 
 	~VulkanFence() = default;
 
-	bool8_t IsSignaled() const;
+	bool IsSignaled() const;
 
 	void Reset() const;
 
@@ -69,9 +69,9 @@ public:
 
 	~VulkanEvent() = default;
 
-	bool8_t IsSignaled() const;
+	bool IsSignaled() const;
 
-	void Signal(bool8_t Signaled) const;
+	void Signal(bool Signaled) const;
 };
 
 #if 0

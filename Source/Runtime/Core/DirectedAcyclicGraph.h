@@ -101,8 +101,8 @@ public:
 		EdgeID m_ID;
 	};
 
-	bool8_t IsNodeExists(const NodeID& ID) const { return m_Nodes.find(ID.GetIndex()) != m_Nodes.end(); }
-	bool8_t IsEdgeExists(const EdgeID& ID) const { return m_Edges.find(ID.GetIndex()) != m_Edges.end(); }
+	bool IsNodeExists(const NodeID& ID) const { return m_Nodes.find(ID.GetIndex()) != m_Nodes.end(); }
+	bool IsEdgeExists(const EdgeID& ID) const { return m_Edges.find(ID.GetIndex()) != m_Edges.end(); }
 
 	const Node* FindNode(const NodeID& ID) const
 	{

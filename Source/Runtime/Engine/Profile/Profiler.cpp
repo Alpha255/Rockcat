@@ -1,5 +1,5 @@
-#include "Runtime/Engine/Profile/Profiler.h"
-#include "Runtime/Engine/RHI/RHIDevice.h"
+#include "Engine/Profile/Profiler.h"
+#include "Engine/RHI/RHIDevice.h"
 
 Profiler::Event::Event(const char* Name, EEventFlags Flags)
 	: m_Name(Name)
@@ -15,7 +15,7 @@ void Profiler::Event::Stop(RHIDevice& Device)
 {
 }
 
-Profiler::Profiler(RHIDevice& Device, bool8_t Enabled)
+Profiler::Profiler(RHIDevice& Device, bool Enabled)
 	: m_Enabled(Enabled)
 	, m_Device(Device)
 {
@@ -30,7 +30,7 @@ void Profiler::Event::SetFlags(EEventFlags Flags)
 	m_Flags = m_Flags | Flags;
 }
 
-void Profiler::Tick(float32_t ElapsedSeconds)
+void Profiler::Tick(float ElapsedSeconds)
 {
 }
 
@@ -58,13 +58,13 @@ NAMESPACE_START(RHI)
 
 namespace Profiler
 {
-	void Stats::Tick(float32_t ElapsedSeconds)
+	void Stats::Tick(float ElapsedSeconds)
 	{
 		m_TotalTime += ElapsedSeconds;
 		UpdateAverageFrameTime(ElapsedSeconds);
 	}
 
-	void Stats::UpdateAverageFrameTime(float32_t ElapsedSeconds)
+	void Stats::UpdateAverageFrameTime(float ElapsedSeconds)
 	{
 		m_FrameTime += ElapsedSeconds;
 		++m_FrameCount;

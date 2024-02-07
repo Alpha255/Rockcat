@@ -21,7 +21,7 @@ VulkanQueue::VulkanQueue(VulkanDevice* Device, EQueueType QueueType, uint32_t Qu
 	vkGetDeviceQueue(m_Device->Get(), m_QueueFamilyIndex, 0u, Reference());
 }
 
-std::shared_ptr<VulkanCommandBuffer> VulkanQueue::GetOrAllocateCommandBuffer(ECommandBufferLevel Level, bool8_t AutoBegin, bool8_t UseForTransfer)
+std::shared_ptr<VulkanCommandBuffer> VulkanQueue::GetOrAllocateCommandBuffer(ECommandBufferLevel Level, bool AutoBegin, bool UseForTransfer)
 {
 	auto ThreadID = std::this_thread::get_id();
 	auto CommandPool = m_CmdPools.second.end();

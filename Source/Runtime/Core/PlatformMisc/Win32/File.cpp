@@ -1,7 +1,7 @@
 #if 0
-#include "Runtime/Core/File.h"
-#include "Runtime/Core/Logger.h"
-#include "Runtime/Core/Platform.h"
+#include "Core/File.h"
+#include "Core/Logger.h"
+#include "Core/Platform.h"
 
 #if PLATFORM_WIN32
 
@@ -15,7 +15,7 @@ size_t File::Size(const char* Path)
 	return 0u;
 }
 
-bool8_t File::Exists(const char* Path)
+bool File::Exists(const char* Path)
 {
 	return std::filesystem::exists(Path);
 }
@@ -42,7 +42,7 @@ FileTime File::LastWriteTime(const char* Path)
 	return FileTime();
 }
 
-void GetFileList(std::vector<std::string>& Ret, const std::string& Path, const std::vector<std::string>& Filters, bool8_t ToLower)
+void GetFileList(std::vector<std::string>& Ret, const std::string& Path, const std::vector<std::string>& Filters, bool ToLower)
 {
 	std::string RootPath(Path + "\\*.*");
 
@@ -125,7 +125,7 @@ void TryToFindFile(const std::string& Path, const std::string& Name, _Inout_ std
 	}
 }
 
-std::vector<std::string> File::GetFileList(const char* Path, const std::vector<std::string>& Filters, bool8_t ToLower)
+std::vector<std::string> File::GetFileList(const char* Path, const std::vector<std::string>& Filters, bool ToLower)
 {
 	std::vector<std::string> Ret;
 

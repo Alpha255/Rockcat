@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Core/DynamicLinkLibrary.h"
-#include "Runtime/Engine/RHI/RHIResource.h"
+#include "Core/DynamicLinkLibrary.h"
+#include "Engine/RHI/RHIResource.h"
 
 #define VK_ALLOCATION_CALLBACKS nullptr
 
@@ -219,7 +219,7 @@ public:
 	void LoadInstanceFuncs(VkInstance Instance);
 	void LoadDeviceFuncs(VkDevice Device);
 
-	void LoadExtFuncs(VkInstance Instance, VkDevice Device, bool8_t SupportDebugMarker, bool8_t SupportDebugUtils);
+	void LoadExtFuncs(VkInstance Instance, VkDevice Device, bool SupportDebugMarker, bool SupportDebugUtils);
 protected:
 	VulkanLoader()
 		: DynamicLinkLibrary((std::string("vulkan-1") + DLL_EXTENSION).c_str())

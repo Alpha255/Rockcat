@@ -1,6 +1,6 @@
-#include "Runtime/Engine/Asset/ShaderAsset.h"
-#include "Runtime/Engine/Asset/ShaderCompiler.h"
-#include "Runtime/Engine/RHI/RHIInterface.h"
+#include "Engine/Asset/ShaderAsset.h"
+#include "Engine/Asset/ShaderCompiler.h"
+#include "Engine/RHI/RHIInterface.h"
 
 class GlobalShaderCompileConfigurations : public SerializableAsset<GlobalShaderCompileConfigurations>
 {
@@ -38,7 +38,7 @@ void ShaderAsset::GetDefaultDefines()
 	Merge(GlobalShaderCompileConfigurations::Get()->GetDefines(GetPath()));
 }
 
-void ShaderAsset::Compile(bool8_t Force)
+void ShaderAsset::Compile(bool Force)
 {
 	if (Force || IsDirty() || !GetCache().Contains(ComputeHash()))
 	{

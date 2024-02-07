@@ -14,7 +14,7 @@ public:
 
 	void Free(const D3D12_CPU_DESCRIPTOR_HANDLE& CpuDescriptorHandle);
 
-	bool8_t IsFull() const
+	bool IsFull() const
 	{
 		return m_FreeRanges.size() > 0u;
 	}

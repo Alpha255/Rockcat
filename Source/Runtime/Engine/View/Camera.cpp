@@ -1,5 +1,5 @@
-#include "Runtime/Engine/Camera/Camera.h"
-#include "Runtime/Core/PlatformMisc.h"
+#include "Engine/View/Camera.h"
+#include "Core/PlatformMisc.h"
 
 void Camera::SetLookAt(const Math::Vector3& Eye, const Math::Vector3& LookAt)
 {
@@ -76,8 +76,8 @@ void Camera::UpdateMouseDelta()
 
 		/// Smooth the relative mouse data over a few frames so it isn't 
 		/// jerky when moving slowly at low frame rates.
-		float32_t PercentNew = 1.0f / m_FrameCountToSmooth;
-		float32_t PercentOld = 1.0f - PercentNew;
+		float PercentNew = 1.0f / m_FrameCountToSmooth;
+		float PercentOld = 1.0f - PercentNew;
 
 		m_MouseMovements.PosDelta = m_MouseMovements.PosDelta * PercentOld + Delta * PercentNew;
 
@@ -85,20 +85,20 @@ void Camera::UpdateMouseDelta()
 	}
 }
 
-Math::Vector3 Camera::ScaleToScreenPosition(float32_t X, float32_t Y)
+Math::Vector3 Camera::ScaleToScreenPosition(float X, float Y)
 {
-	float32_t Sx = -(X - m_Center.x) / (m_Radius * m_Center.x);
-	float32_t Sy = (Y - m_Center.y) / (m_Radius * m_Center.y);
+	float Sx = -(X - m_Center.x) / (m_Radius * m_Center.x);
+	float Sy = (Y - m_Center.y) / (m_Radius * m_Center.y);
 
-	float32_t magnitude = Sx * Sx + Sy * Sy;
+	float Magnitude = Sx * Sx + Sy * Sy;
 
-	if (magnitude > 1.0f)
+	if (Magnitude > 1.0f)
 	{
-		float32_t scale = 1.0f / std::sqrtf(magnitude);
-		return Math::Vector3(Sx * scale, Sy * scale);
+		float Scale = 1.0f / std::sqrtf(Magnitude);
+		return Math::Vector3(Sx * Scale, Sy * Scale);
 	}
 
-	return Math::Vector3(Sx, Sy, std::sqrtf(1.0f - magnitude));
+	return Math::Vector3(Sx, Sy, std::sqrtf(1.0f - Magnitude));
 }
 
 void Camera::OnMouseEvent(const MouseEvent& Mouse)
@@ -108,7 +108,7 @@ void Camera::OnMouseEvent(const MouseEvent& Mouse)
 	if (Mouse.Button != EMouseButton::None)
 	{
 		m_MouseMovements.SetButton(Mouse.Button, Mouse.State == EKeyState::Down);
-		m_MouseMovements.SetButtonDBClicked(Mouse.Button, Mouse.State == EKeyState::DBClick);
+		m_MouseMovements.SetButtonDoubleClicked(Mouse.Button, Mouse.State == EKeyState::DBClick);
 	}
 
 	switch (Mouse.Button)
@@ -148,14 +148,14 @@ void Camera::OnMouseEvent(const MouseEvent& Mouse)
 
 void Camera::OnWindowResized(uint32_t Width, uint32_t Height)
 {
-	SetPerspective(m_Fov, static_cast<float32_t>(Width) / Height, m_NearPlane, m_FarPlane);
+	SetPerspective(m_Fov, static_cast<float>(Width) / Height, m_NearPlane, m_FarPlane);
 
 	m_Center.x = Width / 2.0f;
 	m_Center.y = Height / 2.0f;
 }
 
 #if 0
-void Camera::Tick(float32_t ElapsedSeconds)
+void Camera::Tick(float ElapsedSeconds)
 {
 	/// Normalize vector so if moving 2 dirs (left & forward), 
 	/// the camera doesn't move faster than if moving in 1 dir

@@ -4,7 +4,7 @@
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanBuffer.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Engine/Services/SpdLogService.h"
 
 VulkanCommandBuffer::VulkanCommandBuffer(const VulkanDevice& Device, VulkanCommandPool& Pool, ERHICommandBufferLevel Level)
 	: VkDeviceResource(Device)
@@ -295,7 +295,7 @@ void VulkanCommandBuffer::CopyBufferToImage(const RHIImage* DstImage, const void
 //	assert(StagingHeap->Size >= BufferSize);
 //
 //	size_t Offset = StagingHeap->CurOffset;
-//	byte8_t* MappedAddress = reinterpret_cast<byte8_t*>(StagingHeap->Buffer->MappedMemory());
+//	uint8_t* MappedAddress = reinterpret_cast<uint8_t*>(StagingHeap->Buffer->MappedMemory());
 //	if (SubresourceRange == AllSubresource)
 //	{
 //		VERIFY(memcpy_s(MappedAddress + Offset, BufferSize, SrcBuffer, BufferSize) == 0);
@@ -345,7 +345,7 @@ void VulkanCommandBuffer::CopyBufferToImage(const RHIImage* DstImage, const void
 //			uint32_t RowPitch = SliceBytes * MipDepth;
 //			if (SubresourceRange != AllSubresource)
 //			{
-//				VERIFY(memcpy_s(MappedAddress + Offset, RowPitch, reinterpret_cast<const byte8_t*>(SrcBuffer) + RowPitch, RowPitch) == 0);
+//				VERIFY(memcpy_s(MappedAddress + Offset, RowPitch, reinterpret_cast<const uint8_t*>(SrcBuffer) + RowPitch, RowPitch) == 0);
 //			}
 //
 //			Offset += RowPitch;
@@ -399,7 +399,7 @@ void VulkanCommandBuffer::CopyBuffer(const RHIBuffer* DstBuffer, const void* Dat
 //	assert(!m_InsideRenderPass);
 //
 //	auto Heap = StagingBufferAllocator::Get().Alloc(DataSize);
-//	byte8_t* MappedAddress = reinterpret_cast<byte8_t*>(Heap->Buffer->MappedMemory());
+//	uint8_t* MappedAddress = reinterpret_cast<uint8_t*>(Heap->Buffer->MappedMemory());
 //	VERIFY(memcpy_s(MappedAddress + Heap->CurOffset, DataSize, Data, DataSize) == 0);
 //
 //	VkBufferCopy CopyRegion
@@ -669,7 +669,7 @@ void VulkanCommandBuffer::ClearColorImage(const RHIImage* DstImage, const Math::
 //	m_Barrier->TransitionResourceState(VkImage, EResourceState::TransferDst, VkImage->RequiredState, SubresourceRange);
 }
 
-void VulkanCommandBuffer::ClearDepthStencilImage(const RHIImage* DstImage, bool8_t ClearDepth, bool8_t ClearStencil, float32_t Depth, uint8_t Stencil)
+void VulkanCommandBuffer::ClearDepthStencilImage(const RHIImage* DstImage, bool ClearDepth, bool ClearStencil, float Depth, uint8_t Stencil)
 {
 //#if true
 //	if (m_InsideRenderPass)

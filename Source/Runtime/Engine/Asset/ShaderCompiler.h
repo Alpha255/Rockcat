@@ -1,9 +1,9 @@
 #pragma once
 
 #include "RHI/D3D/DXGIInterface.h"
-#include "Runtime/Engine/RHI/RHIShader.h"
-#include "Runtime/Engine/Application/GraphicsSettings.h"
-#include "Runtime/Engine/Asset/ShaderAsset.h"
+#include "Engine/RHI/RHIShader.h"
+#include "Engine/Application/GraphicsSettings.h"
+#include "Engine/Asset/ShaderAsset.h"
 #include <dxc/dxcapi.h>
 
 class IShaderCompiler
@@ -19,7 +19,7 @@ public:
 protected:
 	virtual void GetShaderReflection(const ShaderBinary& Binary) = 0;
 
-	static const char* const GetProfile(ERHIShaderStage ShaderState, bool8_t DXC)
+	static const char* const GetProfile(ERHIShaderStage ShaderState, bool DXC)
 	{
 		switch (ShaderState)
 		{
@@ -38,7 +38,7 @@ protected:
 class DxcShaderCompiler : public IShaderCompiler
 {
 public:
-	DxcShaderCompiler(bool8_t GenerateSpirv);
+	DxcShaderCompiler(bool GenerateSpirv);
 
 	ShaderBinary Compile(
 		const char* SourceName,
@@ -63,7 +63,7 @@ protected:
 private:
 	DxcUtils m_Utils;
 	DxcCompiler m_Compiler;
-	bool8_t m_GenSpirv;
+	bool m_GenSpirv;
 };
 
 class D3DShaderCompiler : public IShaderCompiler
@@ -97,7 +97,7 @@ protected:
 		return *m_Compilers[(size_t)RHI];
 	}
 
-	bool8_t RegisterCompileTask(ERenderHardwareInterface RHI, size_t Hash);
+	bool RegisterCompileTask(ERenderHardwareInterface RHI, size_t Hash);
 	void DeregisterCompileTask(ERenderHardwareInterface RHI, size_t Hash);
 private:
 	std::array<std::unique_ptr<IShaderCompiler>, (size_t)ERenderHardwareInterface::Num> m_Compilers;

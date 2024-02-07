@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Core/ObjectID.h"
+#include "Core/ObjectID.h"
 
 DECLARE_OBJECT_ID(Asset, uint32_t)
 
@@ -15,7 +15,7 @@ DECLARE_OBJECT_ID(Asset, uint32_t)
 struct AssetRawData
 {
 	size_t SizeInBytes = 0u;
-	std::shared_ptr<byte8_t> Data;
+	std::shared_ptr<char> Data;
 private:
 	friend class Asset;
 
@@ -23,7 +23,7 @@ private:
 	{
 		assert(DataSize > 0u);
 		SizeInBytes = DataSize;
-		Data.reset(new byte8_t[DataSize]());
+		Data.reset(new char[DataSize]());
 	}
 
 	void Deallocate() { Data.reset(); SizeInBytes = 0u; }
@@ -96,8 +96,8 @@ public:
 	}
 
 	EAssetStatus GetStatus() const { return m_Status.load(); }
-	virtual bool8_t IsReady() const { return GetStatus() == EAssetStatus::Ready; }
-	bool8_t IsLoading() const { return GetStatus() == EAssetStatus::Loading; }
+	virtual bool IsReady() const { return GetStatus() == EAssetStatus::Ready; }
+	bool IsLoading() const { return GetStatus() == EAssetStatus::Loading; }
 
 	const std::filesystem::path& GetPath() const { return m_Path; }
 
@@ -107,7 +107,7 @@ public:
 	void FreeRawData() { m_RawData.Deallocate(); }
 	const AssetRawData& GetRawData() const { return m_RawData; }
 
-	bool8_t IsDirty() const
+	bool IsDirty() const
 	{
 		if (!m_Dirty)
 		{
@@ -216,7 +216,7 @@ protected:
 
 	std::filesystem::path m_Path; /// Notice the order of the members
 	mutable std::time_t m_LastWriteTime = 0u;
-	mutable bool8_t m_Dirty = false;
+	mutable bool m_Dirty = false;
 };
 
 class IAssetImporter
@@ -241,7 +241,7 @@ public:
 	}
 
 	virtual std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) = 0;
-	virtual bool8_t Reimport(Asset& InAsset) = 0;
+	virtual bool Reimport(Asset& InAsset) = 0;
 protected:
 private:
 	std::vector<AssetType> m_ValidAssetTypes;

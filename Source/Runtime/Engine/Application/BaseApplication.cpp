@@ -112,7 +112,7 @@ void Application::OnWindowResized(uint32_t Width, uint32_t Height)
 	}
 }
 
-void Application::Tick(float32_t ElapsedSeconds)
+void Application::Tick(float ElapsedSeconds)
 {
 	if (m_Scene)
 	{
@@ -141,10 +141,10 @@ Application::~Application()
 }
 #endif
 
-#include "Runtime/Engine/Application/BaseApplication.h"
-#include "Runtime/Engine/Application/ApplicationConfigurations.h"
-#include "Runtime/Core/Window.h"
-#include "Runtime/Engine/Services/RenderService.h"
+#include "Engine/Application/BaseApplication.h"
+#include "Engine/Application/ApplicationConfigurations.h"
+#include "Core/Window.h"
+#include "Engine/Services/RenderService.h"
 
 BaseApplication::BaseApplication(const char* ConfigurationName)
 { 
@@ -165,7 +165,7 @@ void BaseApplication::OnWindowCreation()
 	}
 }
 
-void BaseApplication::Tick(float32_t /*ElapsedSeconds*/)
+void BaseApplication::Tick(float /*ElapsedSeconds*/)
 {
 	if (m_Window)
 	{
@@ -183,7 +183,7 @@ const GraphicsSettings& BaseApplication::GetGraphicsSettings() const
 	return m_Configs->GetGraphicsSettings();
 }
 
-bool8_t BaseApplication::IsRequestingQuit() const
+bool BaseApplication::IsRequestingQuit() const
 {
 	return m_Window ? m_Window->IsDestroyed() : false;
 }

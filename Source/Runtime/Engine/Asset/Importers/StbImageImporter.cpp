@@ -1,6 +1,6 @@
 #if 0
 
-RHI::ImageDesc KTXImporter::Reimport(const byte8_t* Data, size_t Size)
+RHI::ImageDesc KTXImporter::Reimport(const uint8_t* Data, size_t Size)
 {
 	assert(Data && Size);
 

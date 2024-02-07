@@ -1,6 +1,6 @@
-#include "Runtime/Engine/Rendering/RenderGraph/RenderPass.h"
-#include "Runtime/Engine/Rendering/RenderGraph/ResourceManager.h"
-#include "Runtime/Engine/Scene/SceneView.h"
+#include "Engine/Rendering/RenderGraph/RenderPass.h"
+#include "Engine/Rendering/RenderGraph/ResourceManager.h"
+#include "Engine/Scene/SceneView.h"
 
 RenderPass::RenderPass(DAGNodeID ID, const char* Name, ResourceManager& ResourceMgr)
 	: m_NodeID(ID)
@@ -15,6 +15,11 @@ RDGResource& RenderPass::RegisterResource(const char* Name, RDGResource::EVisibi
     auto& Ret = m_ResourceMgr.GetOrAllocateResource(Name, Visibility);
     m_Fields.emplace_back(RenderPassField{Ret.GetNodeID(), Visibility});
     return Ret;
+}
+
+RHIInterface& RenderPass::GetRHI()
+{
+	return m_ResourceMgr.GetRHI();
 }
 
 void RenderScene::GenerateDrawCommands()

@@ -1,6 +1,6 @@
-#include "Runtime/Core/DynamicLinkLibrary.h"
-#include "Runtime/Core/PlatformMisc.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Core/DynamicLinkLibrary.h"
+#include "Core/PlatformMisc.h"
+#include "Engine/Services/SpdLogService.h"
 
 #if PLATFORM_WIN32
 

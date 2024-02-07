@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Engine/Asset/ImageAsset.h"
-#include "Runtime/Engine/RHI/RHIImage.h"
+#include "Engine/Asset/ImageAsset.h"
+#include "Engine/RHI/RHIImage.h"
 #pragma warning(disable:4244)
 #include <Submodules/stb/stb_image.h>
 #pragma warning(default:4244)
@@ -23,7 +23,7 @@ public:
 
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<ImageAsset>(AssetPath); }
 
-	bool8_t Reimport(Asset& InAsset) override final
+	bool Reimport(Asset& InAsset) override final
 	{
 		auto& Image = Cast<ImageAsset>(InAsset);
 
@@ -39,7 +39,7 @@ public:
 		}
 
 		stbi_uc* Bitmap = nullptr;
-		bool8_t IsHDR = stbi_is_hdr_from_memory(Data, DataSize);
+		bool IsHDR = stbi_is_hdr_from_memory(Data, DataSize);
 		Channels = OriginalChannels == STBI_rgb ? STBI_rgb_alpha : OriginalChannels;
 
 		if (IsHDR)

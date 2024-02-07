@@ -7,9 +7,9 @@ D3D11SwapChain::D3D11SwapChain(
 	uint64_t WindowHandle,
 	uint32_t Width,
 	uint32_t Height,
-	bool8_t Fullscreen,
-	bool8_t VSync,
-	bool8_t sRGB)
+	bool Fullscreen,
+	bool VSync,
+	bool sRGB)
 	: m_FullScreen(Fullscreen)
 	, m_VSync(VSync)
 {

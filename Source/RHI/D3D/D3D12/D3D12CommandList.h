@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHICommandBuffer.h"
-#include "Runtime/Engine/RHI/RHIDevice.h"
+#include "Engine/RHI/RHICommandBuffer.h"
+#include "Engine/RHI/RHIDevice.h"
 #include "RHI/D3D/D3D12/D3D12Types.h"
 
 DECLARE_D3D_HWOBJECT(D3D12CommandList1, ID3D12GraphicsCommandList1)
@@ -50,7 +50,7 @@ public:
 
 	void ClearColorImage(const RHIImage* DstImage, const Math::Color& ClearColor) override final;
 
-	void ClearDepthStencilImage(const RHIImage* DstImage, bool8_t ClearDepth, bool8_t ClearStencil, float32_t Depth, uint8_t Stencil) override final;
+	void ClearDepthStencilImage(const RHIImage* DstImage, bool ClearDepth, bool ClearStencil, float Depth, uint8_t Stencil) override final;
 
 	void CopyBufferToImage(const RHIImage* DstImage, const void* SrcBuffer, uint32_t BufferSize, const RHIImageSubresourceRange& SubresourceRange) override final;
 

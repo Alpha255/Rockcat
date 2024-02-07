@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Engine/Tickable.h"
-#include "Runtime/Core/Module.h"
+#include "Engine/Tickable.h"
+#include "Core/Module.h"
 
 class Profiler : public ITickable, public IService<Profiler>
 {
@@ -21,11 +21,11 @@ public:
 
 		const char* GetName() { return m_Name.c_str(); }
 
-		float32_t GetCpuTime() const { return m_CpuTime.MomentaryTime; }
-		float32_t GetCpuTimeAverage() const { return m_CpuTime.AverageTime; }
+		float GetCpuTime() const { return m_CpuTime.MomentaryTime; }
+		float GetCpuTimeAverage() const { return m_CpuTime.AverageTime; }
 
-		float32_t GetGpuTime() const { return m_GpuTime.MomentaryTime; }
-		float32_t GetGpuTimeAverage() const { return m_GpuTime.AverageTime; }
+		float GetGpuTime() const { return m_GpuTime.MomentaryTime; }
+		float GetGpuTimeAverage() const { return m_GpuTime.AverageTime; }
 
 		void SetFlags(EEventFlags Flags);
 
@@ -34,9 +34,9 @@ public:
 	protected:
 		struct EventTime
 		{
-			float32_t MomentaryTime = 0.0f;
-			float32_t AverageTime = 0.0f;
-			float32_t TotalTime = 0.0f;
+			float MomentaryTime = 0.0f;
+			float AverageTime = 0.0f;
+			float TotalTime = 0.0f;
 		};
 	private:
 		std::string m_Name;
@@ -63,19 +63,19 @@ public:
 		class RHIDevice& m_Device;
 	};
 
-	Profiler(class RHIDevice& Device, bool8_t Enabled = true);
+	Profiler(class RHIDevice& Device, bool Enabled = true);
 
 	void OnStartup() override final;
 
 	ScopedEvent ScopeEvent(const char* Name, EEventFlags Flags);
 
-	bool8_t IsEnabled() const { return m_Enabled; }
-	void SetEnabled(bool8_t Enable) { m_Enabled = Enable; }
+	bool IsEnabled() const { return m_Enabled; }
+	void SetEnabled(bool Enable) { m_Enabled = Enable; }
 
-	void Tick(float32_t ElapsedSeconds) override final;
+	void Tick(float ElapsedSeconds) override final;
 private:
 	std::unordered_map<std::string_view, std::shared_ptr<Event>> m_Events;
-	bool8_t m_Enabled = true;
+	bool m_Enabled = true;
 	class RHIDevice& m_Device;
 };
 

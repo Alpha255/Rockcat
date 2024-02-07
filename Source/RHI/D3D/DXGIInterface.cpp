@@ -1,6 +1,6 @@
 #include "RHI/D3D/DXGIInterface.h"
-#include "Runtime/Engine/RHI/RHIDevice.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Engine/RHI/RHIDevice.h"
+#include "Engine/Services/SpdLogService.h"
 
 namespace D3DResult
 {
@@ -45,7 +45,7 @@ namespace D3DResult
 	}
 }
 
-DxgiFactory::DxgiFactory(bool8_t EnableDebug)
+DxgiFactory::DxgiFactory(bool EnableDebug)
 {
 	uint32_t Flags = 0u;
 
@@ -74,7 +74,7 @@ DxgiAdapter::DxgiAdapter(const DxgiFactory& Factory)
 
 	uint32_t AdapterIndex = 0u;
 
-	auto IsDedicateAdapter1 = [](DxgiAdapter1& Adapter1) -> bool8_t {
+	auto IsDedicateAdapter1 = [](DxgiAdapter1& Adapter1) -> bool {
 		DXGI_ADAPTER_DESC1 Desc1;
 		VERIFY_D3D(Adapter1->GetDesc1(&Desc1));
 

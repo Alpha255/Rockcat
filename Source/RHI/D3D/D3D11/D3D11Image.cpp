@@ -1,6 +1,6 @@
 #include "RHI/D3D/D3D11/D3D11Image.h"
 #include "RHI/D3D/D3D11/D3D11Device.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Engine/Services/SpdLogService.h"
 
 D3D11Image1D::D3D11Image1D(const D3D11Device& Device, const RHIImageCreateInfo& RHICreateInfo)
 	: RHIImage(RHICreateInfo)

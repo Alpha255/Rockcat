@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/Asset/ShaderAsset.h"
+#include "Engine/Asset/ShaderAsset.h"
 
 class ShaderAssetImporter : public IAssetImporter
 {
@@ -17,7 +17,7 @@ public:
 
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<ShaderAsset>(AssetPath); }
 
-	bool8_t Reimport(Asset& InAsset) override final
+	bool Reimport(Asset& InAsset) override final
 	{
 		return false;
 	}

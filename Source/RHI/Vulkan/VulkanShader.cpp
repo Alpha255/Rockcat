@@ -1,6 +1,6 @@
 #include "RHI/Vulkan/VulkanShader.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "Runtime/Engine/Asset/ShaderAsset.h"
+#include "Engine/Asset/ShaderAsset.h"
 
 VulkanShader::VulkanShader(const class VulkanDevice& Device, const RHIShaderCreateInfo& CreateInfo)
 	: VkHwResource(Device)

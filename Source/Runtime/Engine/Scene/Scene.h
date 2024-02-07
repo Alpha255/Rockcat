@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/Asset/SceneAsset.h"
+#include "Engine/Asset/SceneAsset.h"
 
 class Scene : public SceneAsset
 {
@@ -17,9 +17,9 @@ public:
 		);
 	}
 
-	bool8_t IsDirty() const { return m_Dirty; }
+	bool IsDirty() const { return m_Dirty; }
 protected:
 private:
-	bool8_t m_Dirty = false;
+	bool m_Dirty = false;
 };
 

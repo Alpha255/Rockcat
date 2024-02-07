@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIResource.h"
+#include "Engine/RHI/RHIResource.h"
 #include <d3d11.h>
 #include <d3d11_1.h>
 #include <d3d11_2.h>
@@ -91,7 +91,7 @@ public:
 	inline HwObjectType* GetNative() { assert(m_Native); return m_Native; }
 	inline HwObjectType* GetNative() const { assert(m_Native); return m_Native; }
 
-	inline bool8_t IsValid() const { return m_Native != nullptr; }
+	inline bool IsValid() const { return m_Native != nullptr; }
 
 	virtual ~D3DHwResource()
 	{
@@ -163,7 +163,7 @@ DECLARE_D3D_HWOBJECT(D3DBlob, ID3DBlob)
 class DxgiFactory : public DxgiFactory0
 {
 public:
-	DxgiFactory(bool8_t EnableDebug);
+	DxgiFactory(bool EnableDebug);
 };
 
 class DxgiAdapter : public DxgiAdapter0

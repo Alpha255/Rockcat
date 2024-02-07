@@ -1,7 +1,7 @@
 #include "RHI/Vulkan/VulkanImage.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
-#include "Runtime/Engine/RHI/RHIInterface.h"
+#include "Engine/Services/SpdLogService.h"
+#include "Engine/RHI/RHIInterface.h"
 
 VulkanImage::VulkanImage(const VulkanDevice& Device, const RHIImageCreateInfo& CreateInfo, vk::Image Image)
 	: VkHwResource(Device)

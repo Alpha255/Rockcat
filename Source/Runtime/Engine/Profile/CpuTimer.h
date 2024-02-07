@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Runtime/Core/Definitions.h"
+#include "Core/Definitions.h"
 
 class CpuTimer
 {
 public:
-	CpuTimer(float32_t Speed = 1.0f, bool8_t Start = true)
+	CpuTimer(float Speed = 1.0f, bool Start = true)
 		: m_Speed(Speed)
 		, m_State(Start ? EState::Tick : EState::Paused)
 	{
@@ -13,7 +13,7 @@ public:
 		m_LastTime = std::chrono::high_resolution_clock::now();
 	}
 
-	inline float32_t GetElapsedMilliseconds()
+	inline float GetElapsedMilliseconds()
 	{
 		if (m_State == EState::Tick)
 		{
@@ -26,7 +26,7 @@ public:
 		return 0.0;
 	}
 
-	inline float32_t GetElapsedSeconds()
+	inline float GetElapsedSeconds()
 	{
 		if (m_State == EState::Tick)
 		{
@@ -56,8 +56,8 @@ public:
 		}
 	}
 
-	using Seconds = std::chrono::duration<float32_t, std::ratio<1, 1>>;
-	using Milliseconds = std::chrono::duration<float32_t, std::milli>;
+	using Seconds = std::chrono::duration<float, std::ratio<1, 1>>;
+	using Milliseconds = std::chrono::duration<float, std::milli>;
 protected:
 	enum class EState
 	{
@@ -66,8 +66,8 @@ protected:
 	};
 private:
 	std::chrono::high_resolution_clock::time_point m_LastTime;
-	float32_t m_Speed = 1.0f;
-	float32_t m_ElapsedTime = 0.0f;
+	float m_Speed = 1.0f;
+	float m_ElapsedTime = 0.0f;
 	EState m_State = EState::Tick;
 };
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIRenderStates.h"
-#include "Runtime/Engine/RHI/RHIImage.h"
+#include "Engine/RHI/RHIRenderStates.h"
+#include "Engine/RHI/RHIImage.h"
 
 template<class RHIResource>
 class RHIStaticResource : public RHIResource
@@ -39,7 +39,7 @@ public:
 				.SetAddressModeW(AddressModeW)
 				.SetCompareOp(CompareOp)
 				.SetBorderColor(BorderColor)
-				.SetMaxAnisotropy(static_cast<float32_t>(MaxAnisotropy))
+				.SetMaxAnisotropy(static_cast<float>(MaxAnisotropy))
 				.SetMipLODBias(0.0f)
 				.SetMinLOD(0.0f)
 				.SetMaxLOD(0.0f);
@@ -65,7 +65,7 @@ template<
 	ERHIPolygonMode PolygonMode = ERHIPolygonMode::Solid,
 	ERHICullMode CullMode = ERHICullMode::BackFace,
 	ERHIFrontFace FrontFace = ERHIFrontFace::Clockwise,
-	bool8_t EnableDepthClamp = false>
+	bool EnableDepthClamp = false>
 class RHIRasterizationStateStatic : public RHIStaticResource<RHIRasterizationState>
 {
 public:
@@ -80,10 +80,10 @@ public:
 };
 
 template<
-	bool8_t EnableDepth = true,
-	bool8_t EnableDepthWrite = false,
-	bool8_t EnableDepthBoundsTest = false,
-	bool8_t EnableStencil = false,
+	bool EnableDepth = true,
+	bool EnableDepthWrite = false,
+	bool EnableDepthBoundsTest = false,
+	bool EnableStencil = false,
 	ERHICompareFunc DepthCompareFunc = ERHICompareFunc::Less,
 	uint8_t StencilReadMask = 0xFF,
 	uint8_t StencilWriteMask = 0xFF,

@@ -1,21 +1,21 @@
 #pragma once
 
 #include "RHI/Vulkan/VulkanTypes.h"
-#include "Runtime/Engine/RHI/RHIDevice.h"
+#include "Engine/RHI/RHIDevice.h"
 
 #if 0
 struct VulkanExtensions
 {
-	bool8_t Synchronization2 = false;
-	bool8_t ExtendedDynamicState = false;
-	bool8_t ExtendedDynamicState2 = false;
-	bool8_t TimelineSemaphore = false;
-	bool8_t RenderPass2 = false;
-	bool8_t FullscreenExclusive = false;
-	bool8_t DebugUtils = false;
-	bool8_t DebugReport = false;
-	bool8_t DebugMarker = false;
-	bool8_t Maintenance1 = false;
+	bool Synchronization2 = false;
+	bool ExtendedDynamicState = false;
+	bool ExtendedDynamicState2 = false;
+	bool TimelineSemaphore = false;
+	bool RenderPass2 = false;
+	bool FullscreenExclusive = false;
+	bool DebugUtils = false;
+	bool DebugReport = false;
+	bool DebugMarker = false;
+	bool Maintenance1 = false;
 };
 
 enum class ESyncType
@@ -65,7 +65,7 @@ public:
 
 	const vk::PhysicalDeviceLimits& GetPhysicalDeviceLimits() const { return m_Limits; }
 private:
-	bool8_t GetQueueFamilyIndex(const vk::PhysicalDevice& PhysicalDevice, uint32_t& GraphicsQueueIndex, uint32_t& ComputeQueueIndex, uint32_t& TransferQueueIndex, uint32_t& PresentQueueIndex) const;
+	bool GetQueueFamilyIndex(const vk::PhysicalDevice& PhysicalDevice, uint32_t& GraphicsQueueIndex, uint32_t& ComputeQueueIndex, uint32_t& TransferQueueIndex, uint32_t& PresentQueueIndex) const;
 
 	std::unique_ptr<class VulkanInstance> m_Instance;
 
@@ -120,8 +120,8 @@ private:
 
 	struct VkDeviceOptions
 	{
-		bool8_t SubmitBarriersIM = true;
-		bool8_t BatchResourceSubmit = false;
+		bool SubmitBarriersIM = true;
+		bool BatchResourceSubmit = false;
 		ESyncType SyncType = ESyncType::SyncByFence;
 	};
 

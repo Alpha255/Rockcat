@@ -1,6 +1,6 @@
 #include "RHI/D3D/D3D12/D3D12Buffer.h"
 #include "RHI/D3D/D3D12/D3D12Device.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Engine/Services/SpdLogService.h"
 
 D3D12Buffer::D3D12Buffer(const D3D12Device& Device, const RHIBufferCreateInfo& RHICreateInfo)
 {
@@ -113,16 +113,16 @@ void D3D12Buffer::InvalidateMappedRange(size_t Size, size_t Offset)
 	assert(false);
 }
 
-bool8_t D3D12Buffer::Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset)
+bool D3D12Buffer::Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset)
 {
 	assert(Data && Size && Size <= m_Size);
 
 	if (m_MappedMemory)
 	{
 		VERIFY(memcpy_s(
-			reinterpret_cast<byte8_t*>(m_MappedMemory) + DstOffset,
+			reinterpret_cast<uint8_t*>(m_MappedMemory) + DstOffset,
 			Size,
-			reinterpret_cast<const byte8_t*>(Data) + SrcOffset,
+			reinterpret_cast<const uint8_t*>(Data) + SrcOffset,
 			Size) == 0);
 
 		if (!m_HostVisible)

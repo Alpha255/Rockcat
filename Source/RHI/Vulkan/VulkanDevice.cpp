@@ -130,7 +130,7 @@ NAMESPACE_START(RHI)
 	
 	m_PhysicalDevice = PhysicalDevices[GpuIndex];
 
-	std::vector<float32_t> QueuePriorities(NumQueuePriority, 1.0f);
+	std::vector<float> QueuePriorities(NumQueuePriority, 1.0f);
 
 	for (auto& QueueCreateInfo : QueueCreateInfos)
 	{
@@ -350,7 +350,7 @@ VulkanDescriptor VulkanDevice::GetOrAllocateDescriptor(const GraphicsPipelineDes
 	return Descriptor;
 }
 
-std::shared_ptr<VulkanFence> VulkanDevice::GetOrCreateFence(bool8_t Signaled)
+std::shared_ptr<VulkanFence> VulkanDevice::GetOrCreateFence(bool Signaled)
 {
 	std::lock_guard ScopedLocker(m_FenceCache.first);
 	if (!m_FenceCache.second.empty())
@@ -528,7 +528,7 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 		QueueFamilyIndices.insert(TransferQueueIndex);
 	}
 
-	const float32_t Priority = 1.0f;
+	const float Priority = 1.0f;
 	std::vector<vk::DeviceQueueCreateInfo> QueueCreateInfos;
 	for (auto QueueFamilyIndex : QueueFamilyIndices)
 	{
@@ -573,18 +573,18 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 #endif
 }
 
-bool8_t VulkanDevice::GetQueueFamilyIndex(
+bool VulkanDevice::GetQueueFamilyIndex(
 	const vk::PhysicalDevice& PhysicalDevice,
 	uint32_t& GraphicsQueueIndex, 
 	uint32_t& ComputeQueueIndex, 
 	uint32_t& TransferQueueIndex, 
 	uint32_t& PresentQueueIndex) const
 {
-#define IS_VALID_PROPERTY_INDEX(Index) Property.queueCount > 0u && Index == std::numeric_limits<uint32_t>().max()
-#define IS_VALID_QUEUE_INDEX(Index) Index != std::numeric_limits<uint32_t>().max()
+#define IS_VALID_PROPERTY_INDEX(Index) Property.queueCount > 0u && Index == std::numeric_limits<uint32_t>::max()
+#define IS_VALID_QUEUE_INDEX(Index) Index != std::numeric_limits<uint32_t>::max()
 #define IS_VALID_QUEUE_FLAGS(Flag) (Property.queueFlags & vk::QueueFlagBits::Flag) == vk::QueueFlagBits::Flag
 	
-	GraphicsQueueIndex = ComputeQueueIndex = TransferQueueIndex = std::numeric_limits<uint32_t>().max();
+	GraphicsQueueIndex = ComputeQueueIndex = TransferQueueIndex = std::numeric_limits<uint32_t>::max();
 
 	auto Properties = PhysicalDevice.getQueueFamilyProperties();
 	for (uint32_t Index = 0u; Index < Properties.size(); ++Index)

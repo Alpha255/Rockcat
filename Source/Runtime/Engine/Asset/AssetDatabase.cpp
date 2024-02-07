@@ -1,11 +1,11 @@
-#include "Runtime/Engine/Asset/AssetDatabase.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
-#include "Runtime/Engine/Services/TaskFlowService.h"
-#include "Runtime/Engine/Asset/Importers/DDSImageImporter.h"
-#include "Runtime/Engine/Asset/Importers/StbImageImporter.h"
-#include "Runtime/Engine/Asset/Importers/ShaderAssetImporter.h"
-#include "Runtime/Engine/Asset/Importers/AssimpSceneImporter.h"
-#include "Runtime/Engine/Async/Task.h"
+#include "Engine/Asset/AssetDatabase.h"
+#include "Engine/Services/SpdLogService.h"
+#include "Engine/Services/TaskFlowService.h"
+#include "Engine/Asset/Importers/DDSImageImporter.h"
+#include "Engine/Asset/Importers/StbImageImporter.h"
+#include "Engine/Asset/Importers/ShaderAssetImporter.h"
+#include "Engine/Asset/Importers/AssimpSceneImporter.h"
+#include "Engine/Async/Task.h"
 
 class AssetImportTask : public Task
 {
@@ -71,7 +71,7 @@ std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(
 	std::shared_ptr<Asset>& TargetAsset,
 	const std::filesystem::path& AssetPath, 
 	std::optional<Asset::Callbacks>& AssetLoadCallbacks, 
-	bool8_t Async)
+	bool Async)
 {
 	if (std::filesystem::exists(AssetPath))
 	{

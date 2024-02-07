@@ -1,7 +1,7 @@
-#include "Runtime/Engine/Rendering/RenderGraph/RenderGraph.h"
-#include "Runtime/Engine/Rendering/RenderGraph/ResourceManager.h"
-#include "Runtime/Engine/RHI/RHIInterface.h"
-#include "Runtime/Engine/Scene/Scene.h"
+#include "Engine/Rendering/RenderGraph/RenderGraph.h"
+#include "Engine/Rendering/RenderGraph/ResourceManager.h"
+#include "Engine/RHI/RHIInterface.h"
+#include "Engine/Scene/Scene.h"
 
 RenderGraph::RenderGraph(RHIInterface& RHI, const Scene& InScene)
 	: m_RenderScene(std::make_shared<RenderScene>(InScene))

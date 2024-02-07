@@ -1,7 +1,7 @@
-#include "Runtime/Engine/Rendering/RenderGraph/RenderPass/PreDepthPass.h"
-#include "Runtime/Engine/Rendering/RenderGraph/ResourceManager.h"
-#include "Runtime/Engine/RHI/RHIInterface.h"
-#include "Runtime/Engine/Asset/GlobalShaders/DefaultShading.h"
+#include "Engine/Rendering/RenderGraph/RenderPass/PreDepthPass.h"
+#include "Engine/Rendering/RenderGraph/ResourceManager.h"
+#include "Engine/RHI/RHIInterface.h"
+#include "Engine/Asset/GlobalShaders/DefaultShading.h"
 
 void PreDepthPass::Compile()
 {

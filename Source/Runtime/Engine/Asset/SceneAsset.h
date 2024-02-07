@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Runtime/Core/Math/Transform.h"
-#include "Runtime/Engine/Asset/MaterialAsset.h"
-#include "Runtime/Engine/Scene/SceneGraph.h"
-#include "Runtime/Engine/Scene/Components/StaticMesh.h"
+#include "Core/Math/Transform.h"
+#include "Engine/Asset/MaterialAsset.h"
+#include "Engine/Scene/SceneGraph.h"
+#include "Engine/Scene/Components/StaticMesh.h"
 
 struct SceneData
 {

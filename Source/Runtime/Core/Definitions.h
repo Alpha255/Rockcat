@@ -46,26 +46,6 @@
 
 #define NOMINMAX 1
 
-using uchar8_t = unsigned char;
-using float32_t = float;
-using double64_t = double;
-using bool8_t = bool;
-using long32_t = long;
-using ulong32_t = unsigned long;
-using long64_t = long long;
-using ulong64_t = unsigned long long;
-using byte8_t = char;
-
-static_assert(sizeof(uchar8_t) == 1ull, "Size of unsigned char miss match.");
-static_assert(sizeof(float32_t) == 4ull, "Size of float miss match.");
-static_assert(sizeof(double64_t) == 8ull, "Size of double miss match.");
-static_assert(sizeof(bool8_t) == 1ull, "Size of bool miss match.");
-static_assert(sizeof(long32_t) == 4ull, "Size of long miss match.");
-static_assert(sizeof(long64_t) == 8ull, "Size of long long miss match.");
-static_assert(sizeof(ulong32_t) == 4ull, "Size of long miss match.");
-static_assert(sizeof(ulong64_t) == 8ull, "Size of long long miss match.");
-static_assert(sizeof(byte8_t) == 1ull, "Size of byte miss match.");
-
 #define NAMESPACE_START(Name) namespace Name {
 #define NAMESPACE_END(Name) }
 
@@ -127,33 +107,33 @@ static_assert(sizeof(byte8_t) == 1ull, "Size of byte miss match.");
 	inline constexpr Enum    operator&(Enum Left, Enum Right) { return static_cast<Enum>(static_cast<std::underlying_type_t<Enum>>(Left) & static_cast<std::underlying_type_t<Enum>>(Right)); } \
 	inline constexpr Enum    operator^(Enum Left, Enum Right) { return static_cast<Enum>(static_cast<std::underlying_type_t<Enum>>(Left) ^ static_cast<std::underlying_type_t<Enum>>(Right)); } \
 	inline constexpr Enum    operator~(Enum Value) { return static_cast<Enum>(~(static_cast<std::underlying_type_t<Enum>>(Value))); } \
-	inline constexpr bool8_t operator!(Enum Value) { return !(static_cast<std::underlying_type_t<Enum>>(Value)); } \
-	inline constexpr bool8_t operator!=(Enum Left, Enum Right) { return static_cast<int64_t>(Left) != static_cast<int64_t>(Right); } \
-	inline constexpr bool8_t operator==(Enum Left, Enum Right) { return static_cast<int64_t>(Left) == static_cast<int64_t>(Right); }
+	inline constexpr bool operator!(Enum Value) { return !(static_cast<std::underlying_type_t<Enum>>(Value)); } \
+	inline constexpr bool operator!=(Enum Left, Enum Right) { return static_cast<int64_t>(Left) != static_cast<int64_t>(Right); } \
+	inline constexpr bool operator==(Enum Left, Enum Right) { return static_cast<int64_t>(Left) == static_cast<int64_t>(Right); }
 
 template<class Enum>
-constexpr bool8_t EnumHasAnyFlags(Enum Flags, Enum Contains)
+constexpr bool EnumHasAnyFlags(Enum Flags, Enum Contains)
 {
 	static_assert(std::is_enum_v<Enum>, "Must be enum!");
 	return (static_cast<std::underlying_type_t<Enum>>(Flags) & static_cast<std::underlying_type_t<Enum>>(Contains)) != static_cast<std::underlying_type_t<Enum>>(0);
 }
 
 template<class Enum1, class Enum2>
-constexpr bool8_t EnumHasAnyFlags(Enum1 Flags, Enum2 Contains)
+constexpr bool EnumHasAnyFlags(Enum1 Flags, Enum2 Contains)
 {
 	static_assert(std::is_enum_v<Enum1> || std::is_enum_v<Enum2>, "Either Enum1 or Enum2 be enum!");
 	return (static_cast<int32_t>(Flags) & static_cast<int32_t>(Contains)) != 0;
 }
 
 template<class Enum>
-constexpr bool8_t EnumHasAllFlags(Enum Flags, Enum Contains)
+constexpr bool EnumHasAllFlags(Enum Flags, Enum Contains)
 {
 	static_assert(std::is_enum_v<Enum>, "Must be enum!");
 	return (static_cast<std::underlying_type_t<Enum>>(Flags) & static_cast<std::underlying_type_t<Enum>>(Contains)) == static_cast<std::underlying_type_t<Enum>>(Contains);
 }
 
 template<class Enum1, class Enum2>
-constexpr bool8_t EnumHasAllFlags(Enum1 Flags, Enum2 Contains)
+constexpr bool EnumHasAllFlags(Enum1 Flags, Enum2 Contains)
 {
 	static_assert(std::is_enum_v<Enum1> || std::is_enum_v<Enum2>, "Either Enum1 or Enum2 be enum!");
 	return (static_cast<int32_t>(Flags) & static_cast<int32_t>(Contains)) == static_cast<int32_t>(Contains);
@@ -189,7 +169,7 @@ inline void SafeRelease(T& Object)
 }
 
 template <class Left, class Right>
-inline bool8_t IsEqual(const Left& A, const Right& B)
+inline bool IsEqual(const Left& A, const Right& B)
 {
 	assert(sizeof(Left) == sizeof(Right));
 	return std::memcmp(&A, &B, sizeof(Right)) == 0;
@@ -218,7 +198,7 @@ inline size_t ComputeHash(const Args&... ArgList)
 }
 
 template <class T>
-inline constexpr bool8_t IsPowerOfTwo(T Value)
+inline constexpr bool IsPowerOfTwo(T Value)
 {
 	return Value > 0 && (Value & (Value - 1)) == 0;
 }

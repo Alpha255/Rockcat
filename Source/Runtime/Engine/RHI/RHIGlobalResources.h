@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Engine/RHI/RHIImage.h"
+#include "Engine/RHI/RHIImage.h"
 
 class RHIGlobalResources
 {

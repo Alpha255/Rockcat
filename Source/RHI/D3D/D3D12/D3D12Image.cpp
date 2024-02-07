@@ -1,7 +1,7 @@
 #include "RHI/D3D/D3D12/D3D12Image.h"
 #include "RHI/D3D/D3D12/D3D12Device.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
-#include "Runtime/Core/Math/Color.h"
+#include "Engine/Services/SpdLogService.h"
+#include "Core/Math/Color.h"
 
 D3D12Image::D3D12Image(const D3D12Device& Device, const RHIImageCreateInfo& RHICreateInfo)
 	: RHIImage(RHICreateInfo)

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Runtime/Core/Module.h"
-#include "Runtime/Engine/RHI/RHIInterface.h"
+#include "Core/Module.h"
+#include "Engine/RHI/RHIInterface.h"
 
 class RenderService : public IService<RenderService>
 {

@@ -29,7 +29,7 @@ public:
 			);
 	}
 
-	std::shared_ptr<VulkanCommandBuffer> GetOrAllocateCommandBuffer(ECommandBufferLevel Level, bool8_t AutoBegin, bool8_t UserForTransfer);
+	std::shared_ptr<VulkanCommandBuffer> GetOrAllocateCommandBuffer(ECommandBufferLevel Level, bool AutoBegin, bool UserForTransfer);
 
 	void AddWaitSemaphore(VkSemaphore Semaphore, VkPipelineStageFlags WaitDstStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT)
 	{

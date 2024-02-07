@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Runtime/Core/Math/Matrix.h"
-#include "Runtime/Core/Math/Euler.h"
-#include "Runtime/Core/Math/Quaternion.h"
+#include "Core/Math/Matrix.h"
+#include "Core/Math/Euler.h"
+#include "Core/Math/Quaternion.h"
 
 NAMESPACE_START(Math)
 
@@ -34,7 +34,7 @@ public:
 		return *this;
 	}
 
-	inline Transform& SetTranslation(const float32_t X, const float32_t Y, const float32_t Z)
+	inline Transform& SetTranslation(const float X, const float Y, const float Z)
 	{
 		m_Translation = Vector3(X, Y, Z);
 		return *this;
@@ -48,13 +48,13 @@ public:
 		return *this;
 	}
 
-	inline Transform& SetScale(const float32_t X, const float32_t Y, const float32_t Z)
+	inline Transform& SetScale(const float X, const float Y, const float Z)
 	{
 		m_Scalling = Vector3(X, Y, Z);
 		return *this;
 	}
 
-	inline Transform& SetScale(const float32_t Scalling)
+	inline Transform& SetScale(const float Scalling)
 	{
 		m_Scalling = Vector3(Scalling);
 		return *this;
@@ -62,25 +62,25 @@ public:
 
 	inline Vector3 GetScalling() const { return m_Scalling; }
 
-	inline Transform& SetRotationXAxis(const float32_t Angle)
+	inline Transform& SetRotationXAxis(const float Angle)
 	{
 		m_Rotation.RotationXAxis(Angle);
 		return *this;
 	}
 
-	inline Transform& SetRotationYAxis(const float32_t Angle)
+	inline Transform& SetRotationYAxis(const float Angle)
 	{
 		m_Rotation.RotationYAxis(Angle);
 		return *this;
 	}
 
-	inline Transform& SetRotationZAxis(const float32_t Angle)
+	inline Transform& SetRotationZAxis(const float Angle)
 	{
 		m_Rotation.RotationZAxis(Angle);
 		return *this;
 	}
 
-	inline Transform& SetRotationAxis(const Vector3& Axis, const float32_t Angle)
+	inline Transform& SetRotationAxis(const Vector3& Axis, const float Angle)
 	{
 		m_Rotation.RotationAxis(Axis, Angle);
 		return *this;

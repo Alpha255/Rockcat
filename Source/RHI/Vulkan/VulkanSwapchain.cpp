@@ -2,8 +2,8 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
-#include "Runtime/Core/PlatformMisc.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
+#include "Core/PlatformMisc.h"
+#include "Engine/Services/SpdLogService.h"
 
 VulkanSurface::VulkanSurface(const VulkanDevice& Device, const void* WindowHandle)
 	: VkDeviceResource(Device)
@@ -41,7 +41,7 @@ VulkanSwapchain::VulkanSwapchain(const VulkanDevice& Device, const void* WindowH
 	Create(true);
 }
 
-void VulkanSwapchain::Create(bool8_t RecreateSurface)
+void VulkanSwapchain::Create(bool RecreateSurface)
 {	
 	if (RecreateSurface)
 	{

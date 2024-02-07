@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Runtime/Engine/Asset/Asset.h"
-#include "Runtime/Engine/Services/SpdLogService.h"
-#include "Runtime/Core/PlatformMisc.h"
-#include "Runtime/Core/Cereal.h"
+#include "Engine/Asset/Asset.h"
+#include "Engine/Services/SpdLogService.h"
+#include "Core/PlatformMisc.h"
+#include "Core/Cereal.h"
 
 ///#define SERIALIZABLE_MEMORY_BLOCK_SIZE 128u
 
@@ -49,7 +49,7 @@ public:
 	}
 
 	template<class Type = T>
-	void Save(bool8_t Force = false, const std::filesystem::path& CustomPath = std::filesystem::path())
+	void Save(bool Force = false, const std::filesystem::path& CustomPath = std::filesystem::path())
 	{
 		if (IsDirty() || Force)
 		{
