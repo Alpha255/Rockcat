@@ -82,16 +82,16 @@ public:
 		RHIResource::SetDebugName(DebugName);
 	}
 
-	inline HwObjectType** Reference() { return &m_Native; }
-	inline const HwObjectType** Reference() const { return &m_Native; }
+	FORCEINLINE HwObjectType** Reference() { return &m_Native; }
+	FORCEINLINE const HwObjectType** Reference() const { return &m_Native; }
 
-	inline HwObjectType* operator->() { assert(m_Native); return m_Native; }
-	inline HwObjectType* operator->() const { assert(m_Native); return m_Native; }
+	FORCEINLINE HwObjectType* operator->() { assert(m_Native); return m_Native; }
+	FORCEINLINE HwObjectType* operator->() const { assert(m_Native); return m_Native; }
 
-	inline HwObjectType* GetNative() { assert(m_Native); return m_Native; }
-	inline HwObjectType* GetNative() const { assert(m_Native); return m_Native; }
+	FORCEINLINE HwObjectType* GetNative() { assert(m_Native); return m_Native; }
+	FORCEINLINE HwObjectType* GetNative() const { assert(m_Native); return m_Native; }
 
-	inline bool IsValid() const { return m_Native != nullptr; }
+	FORCEINLINE bool IsValid() const { return m_Native != nullptr; }
 
 	virtual ~D3DHwResource()
 	{

@@ -52,3 +52,13 @@ void RenderScene::GenerateDrawCommands()
 		Node = SceneViewer.Next();
 	}
 }
+
+const std::vector<std::shared_ptr<IView>>& RenderScene::GetViews() const
+{
+	if (m_Scene.IsDirty())
+	{
+		m_Views.clear();
+	}
+
+	return m_Views;
+}

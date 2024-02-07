@@ -293,7 +293,7 @@ public:
 
 	virtual ~VkBaseDeviceResource() {}
 
-	inline const class VulkanDevice& GetDevice() const { return m_Device; }
+	FORCEINLINE const class VulkanDevice& GetDevice() const { return m_Device; }
 	const vk::Device& GetNativeDevice() const;
 	const vk::PhysicalDevice& GetNativePhysicalDevice() const;
 	const vk::Instance& GetNativeInstance() const;
@@ -310,8 +310,8 @@ public:
 	using VkBaseDeviceResource::VkBaseDeviceResource;
 	virtual ~VkDeviceResource() {}
 
-	inline VkObject& GetNative() { return m_Native; }
-	inline const VkObject& GetNative() const { return m_Native; }
+	FORCEINLINE VkObject& GetNative() { return m_Native; }
+	FORCEINLINE const VkObject& GetNative() const { return m_Native; }
 protected:
 	VkObject m_Native;
 };

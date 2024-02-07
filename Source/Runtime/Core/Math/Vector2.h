@@ -193,3 +193,9 @@ inline Vector2 Negate(const Vector2 &targetVec)
 #endif
 
 NAMESPACE_END(Math)
+
+inline bool operator==(const Math::UInt2& Left, const Math::UInt2& Right) { return Left.x == Right.x && Left.y == Right.y; }
+inline bool operator!=(const Math::UInt2& Left, const Math::UInt2& Right) { return Left.x != Right.x || Left.y != Right.y; }
+
+inline bool operator==(const Math::Int2& Left, const Math::Int2& Right) { return Left.x == Right.x && Left.y == Right.y; }
+inline bool operator!=(const Math::Int2& Left, const Math::Int2& Right) { return Left.x != Right.x || Left.y != Right.y; }

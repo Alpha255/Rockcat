@@ -2,6 +2,7 @@
 
 #include "Engine/Rendering/RenderGraph/RenderPassField.h"
 #include "Core/Math/Transform.h"
+#include "Engine/View/View.h"
 
 enum EMeshPass
 {
@@ -33,11 +34,13 @@ public:
 
 	const std::vector<const MeshDrawCommand*>& GetDrawCommands(EMeshPass MeshPass) const { return m_MeshPassDrawCommands[MeshPass]; }
 	void GenerateDrawCommands();
+	const std::vector<std::shared_ptr<IView>>& GetViews() const;
 protected:
 private:
 	const class Scene& m_Scene;
 	std::array<std::vector<const MeshDrawCommand*>, EMeshPass::Num> m_MeshPassDrawCommands;
 	std::vector<MeshDrawCommand> m_DrawCommands;
+	mutable std::vector<std::shared_ptr<IView>> m_Views;
 };
 
 class RenderPass

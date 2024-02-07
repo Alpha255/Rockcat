@@ -292,31 +292,31 @@ struct RHIViewport
 
 struct RHIScissorRect
 {
-	Math::Vector2 LeftTop;
-	Math::Vector2 Extent;
+	Math::Int2 LeftTop;
+	Math::UInt2 Extent;
 
 	RHIScissorRect()
-		: LeftTop(0.0f, 0.0f)
-		, Extent(0.0f, 0.0f)
+		: LeftTop(0, 0)
+		, Extent(0u, 0u)
 	{
 	}
 
-	RHIScissorRect(float Width, float Height)
-		: LeftTop(0.0f, 0.0f)
+	RHIScissorRect(uint32_t Width, uint32_t Height)
+		: LeftTop(0, 0)
 		, Extent(Width, Height)
 	{
-		assert(Width > 0.0f && Height > 0.0f);
+		assert(Width > 0u && Height > 0u);
 	}
 
-	RHIScissorRect(float Left, float Top, float Width, float Height)
+	RHIScissorRect(int32_t Left, int32_t Top, uint32_t Width, uint32_t Height)
 		: LeftTop(Left, Top)
 		, Extent(Width, Height)
 	{
 		assert(Width > 0.0f && Height > 0.0f);
 	}
 
-	bool operator==(const RHIScissorRect& Other) const { return LeftTop == Other.LeftTop && Extent == Other.Extent; }
-	bool operator!=(const RHIScissorRect& Other) const { return LeftTop != Other.LeftTop || Extent != Other.Extent; }
+	inline bool operator==(const RHIScissorRect& Other) const { return LeftTop == Other.LeftTop && Extent == Other.Extent; }
+	inline bool operator!=(const RHIScissorRect& Other) const { return LeftTop != Other.LeftTop || Extent != Other.Extent; }
 };
 
 enum class ERHIAttachmentLoadOp : uint8_t

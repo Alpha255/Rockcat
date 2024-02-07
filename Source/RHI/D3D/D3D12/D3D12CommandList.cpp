@@ -215,6 +215,27 @@ void D3D12CommandList::SetViewport(const RHIViewport& Viewport)
 	GetNative()->RSSetViewports(1u, &D3DViewport);
 }
 
+void D3D12CommandList::SetViewports(const RHIViewport* Viewports, uint32_t NumViewports)
+{
+	assert(m_State == EState::Recording && Viewports);
+
+	std::vector<D3D12_VIEWPORT> D3DViewports(NumViewports);
+	for (uint32_t Index = 0u; Index < NumViewports; ++Index)
+	{
+		auto& Viewport = Viewports[Index];
+		D3DViewports[Index] = D3D12_VIEWPORT
+		{
+			.TopLeftX = Viewport.LeftTop.x,
+			.TopLeftY = Viewport.LeftTop.y,
+			.Width = Viewport.GetWidth(),
+			.Height = Viewport.GetHeight(),
+			.MinDepth = Viewport.DepthRange.x,
+			.MaxDepth = Viewport.DepthRange.y
+		};
+	}
+	GetNative()->RSSetViewports(NumViewports, D3DViewports.data());
+}
+
 void D3D12CommandList::SetScissorRect(const RHIScissorRect& ScissorRect)
 {
 	assert(m_State == EState::Recording);
@@ -223,10 +244,29 @@ void D3D12CommandList::SetScissorRect(const RHIScissorRect& ScissorRect)
 	{
 		.left = ScissorRect.LeftTop.x,
 		.top = ScissorRect.LeftTop.y,
-		.right = ScissorRect.Extent.x,
-		.bottom = ScissorRect.Extent.y
+		.right = static_cast<long>(ScissorRect.Extent.x),
+		.bottom = static_cast<long>(ScissorRect.Extent.y)
 	};
 	GetNative()->RSSetScissorRects(1u, &D3DRect);
+}
+
+void D3D12CommandList::SetScissorRects(const RHIScissorRect* ScissorRects, uint32_t NumScissorRects)
+{
+	assert(m_State == EState::Recording && ScissorRects);
+	
+	std::vector<D3D12_RECT> D3DRects(NumScissorRects);
+	for (uint32_t Index = 0u; Index < NumScissorRects; ++Index)
+	{
+		auto& ScissorRect = ScissorRects[Index];
+		D3DRects[Index] = D3D12_RECT
+		{
+			.left = ScissorRect.LeftTop.x,
+			.top = ScissorRect.LeftTop.y,
+			.right = static_cast<long>(ScissorRect.Extent.x),
+			.bottom = static_cast<long>(ScissorRect.Extent.y)
+		};
+	}
+	GetNative()->RSSetScissorRects(NumScissorRects, D3DRects.data());
 }
 
 void D3D12CommandList::WaitCommand(const RHICommandBuffer* CommandToWait)

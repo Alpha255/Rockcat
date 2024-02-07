@@ -63,9 +63,11 @@ public:
 
 	//virtual void CopyImage(RHIImage* SrcImage, const ImageSlice& SrcSlice, IImage* DstImage, const ImageSlice& DstSlice) = 0;
 
-	virtual void SetViewport(const RHIViewport& DstViewport) = 0;
+	virtual void SetViewport(const RHIViewport& Viewport) = 0;
+	virtual void SetViewports(const RHIViewport* Viewports, uint32_t NumViewports) = 0u;
 
-	virtual void SetScissorRect(const RHIScissorRect& DstScissorRect) = 0;
+	virtual void SetScissorRect(const RHIScissorRect& ScissorRect) = 0;
+	virtual void SetScissorRects(const RHIScissorRect* ScissorRects, uint32_t NumScissorRects) = 0;
 
 	virtual void WaitCommand(const RHICommandBuffer* CommandToWait) = 0;
 protected:

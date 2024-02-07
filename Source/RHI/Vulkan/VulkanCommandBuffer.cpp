@@ -495,6 +495,26 @@ void VulkanCommandBuffer::SetViewport(const RHIViewport& Viewport)
 	GetNative().setViewport(0u, 1u, &vkViewport);
 }
 
+void VulkanCommandBuffer::SetViewports(const RHIViewport* Viewports, uint32_t NumViewports)
+{
+	assert(m_State == EState::Recording && Viewports);
+
+	std::vector<vk::Viewport> vkViewports(NumViewports);
+	for (uint32_t Index = 0u; Index < NumViewports; ++Index)
+	{
+		auto& Viewport = Viewports[Index];
+		vkViewports[Index] = vk::Viewport()
+			.setX(Viewport.LeftTop.x)
+			.setY(Viewport.LeftTop.y)
+			.setWidth(Viewport.Extent.x)
+			.setHeight(Viewport.Extent.y)
+			.setMinDepth(Viewport.DepthRange.x)
+			.setMaxDepth(Viewport.DepthRange.y);
+	}
+
+	GetNative().setViewport(0u, vkViewports);
+}
+
 void VulkanCommandBuffer::SetScissorRect(const RHIScissorRect& ScissorRect)
 {
 	assert(m_State == EState::Recording);
@@ -503,6 +523,21 @@ void VulkanCommandBuffer::SetScissorRect(const RHIScissorRect& ScissorRect)
 		.setExtent(vk::Extent2D(ScissorRect.Extent.x, ScissorRect.Extent.y))
 		.setOffset(vk::Offset2D(ScissorRect.LeftTop.x, ScissorRect.LeftTop.y));
 	GetNative().setScissor(0u, 1u, &vkRect);
+}
+
+void VulkanCommandBuffer::SetScissorRects(const RHIScissorRect* ScissorRects, uint32_t NumScissorRects)
+{
+	assert(m_State == EState::Recording && ScissorRects);
+
+	std::vector<vk::Rect2D> vkRects(NumScissorRects);
+	for (uint32_t Index = 0u; Index < NumScissorRects; ++Index)
+	{
+		auto& ScissorRect = ScissorRects[Index];
+		vkRects[Index] = vk::Rect2D()
+			.setExtent(vk::Extent2D(ScissorRect.Extent.x, ScissorRect.Extent.y))
+			.setOffset(vk::Offset2D(ScissorRect.LeftTop.x, ScissorRect.LeftTop.y));
+	}
+	GetNative().setScissor(0u, vkRects);
 }
 
 void VulkanCommandBuffer::PushConstants(ERHIShaderStage Stage, const RHIBuffer* ConstantsBuffer, const void* Data, size_t Size, size_t Offset)
