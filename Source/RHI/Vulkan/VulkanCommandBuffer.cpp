@@ -203,14 +203,30 @@ void VulkanCommandBuffer::EndDebugMarker()
 
 void VulkanCommandBuffer::SetVertexBuffer(const RHIBuffer* Buffer, uint32_t StartSlot, size_t Offset)
 {
+	assert(m_State == EState::Recording);
+
+	GetNative().bindVertexBuffers(StartSlot, 1u, &Cast<VulkanBuffer>(Buffer)->GetNative(), &Offset);
 }
 
 void VulkanCommandBuffer::SetIndexBuffer(const RHIBuffer* Buffer, size_t Offset, ERHIIndexFormat Format)
 {
+	assert(m_State == EState::Recording);
+
+	GetNative().bindIndexBuffer(Cast<VulkanBuffer>(Buffer)->GetNative(), Offset, Format == ERHIIndexFormat::UInt32 ? vk::IndexType::eUint32 : vk::IndexType::eUint16);
 }
 
 void VulkanCommandBuffer::SetPrimitiveTopology(ERHIPrimitiveTopology Topology)
 {
+	assert(m_State == EState::Recording);
+
+#if VK_VERSION_1_3
+	GetNative().setPrimitiveTopology(GetPrimitiveTopology(Topology));
+#else
+	if (VulkanRHI::GetLayerExtensionConfigs().HasDynamicState)
+	{
+		GetNative().setPrimitiveTopologyEXT(GetPrimitiveTopology(Topology));
+	}
+#endif
 }
 
 void VulkanCommandBuffer::Draw(uint32_t VertexCount, uint32_t FirstVertex)
@@ -261,8 +277,8 @@ void VulkanCommandBuffer::DispatchIndirect(const RHIBuffer* IndirectBuffer, size
 	GetNative().dispatchIndirect(Cast<VulkanBuffer>(IndirectBuffer)->GetNative(), Offset);
 }
 
-void VulkanCommandBuffer::CopyBufferToImage(const RHIImage* DstImage, const void* SrcBuffer, uint32_t BufferSize, const RHIImageSubresourceRange& SubresourceRange)
-{
+//void VulkanCommandBuffer::CopyBufferToImage(const RHIImage* DstImage, const void* SrcBuffer, uint32_t BufferSize, const RHIImageSubresourceRange& SubresourceRange)
+//{
 //#if true
 //	if (m_InsideRenderPass)
 //	{
@@ -372,15 +388,15 @@ void VulkanCommandBuffer::CopyBufferToImage(const RHIImage* DstImage, const void
 //		ImageCopys.data());
 //
 //	m_Barrier->TransitionResourceState(VkImage, EResourceState::TransferDst, VkImage->RequiredState, VkSubresourceRange);
-}
+//}
 
-void VulkanCommandBuffer::CopyBuffer(const RHIBuffer* DstBuffer, const void* Data, size_t DataSize, size_t SrcOffset, size_t DstOffset)
-{
-	/// https://github.com/KhronosGroup/Vulkan-Docs/wiki/Synchronization-Examples-(Legacy-synchronization-APIs)
-	/// Global memory barrier covers all resources. Generally considered more efficient to do a global memory barrier than per-resource barriers, 
-	/// per-resource barriers should usually be used for queue ownership transfers and image layout transitions - otherwise use global barriers.
-
-	assert(m_State == EState::Recording && DstBuffer && DataSize && Data);
+//void VulkanCommandBuffer::CopyBuffer(const RHIBuffer* DstBuffer, const void* Data, size_t DataSize, size_t SrcOffset, size_t DstOffset)
+//{
+//	/// https://github.com/KhronosGroup/Vulkan-Docs/wiki/Synchronization-Examples-(Legacy-synchronization-APIs)
+//	/// Global memory barrier covers all resources. Generally considered more efficient to do a global memory barrier than per-resource barriers, 
+//	/// per-resource barriers should usually be used for queue ownership transfers and image layout transitions - otherwise use global barriers.
+//
+//	assert(m_State == EState::Recording && DstBuffer && DataSize && Data);
 
 //	if (DstBuffer->Update(Data, DataSize, SrcOffset, DstOffset))
 //	{
@@ -421,7 +437,7 @@ void VulkanCommandBuffer::CopyBuffer(const RHIBuffer* DstBuffer, const void* Dat
 //		&CopyRegion);
 //
 //	m_Barrier->TransitionResourceState(VkBuffer, EResourceState::TransferDst, VkBuffer->RequiredState);
-}
+//}
 
 //void VulkanCommandBuffer::CopyImage(IImage* SrcImage, const ImageSlice& SrcSlice, IImage* DstImage, const ImageSlice& DstSlice)
 //{
@@ -750,6 +766,14 @@ void VulkanCommandBuffer::ClearDepthStencilImage(const RHIImage* DstImage, bool 
 //
 //		m_Barrier->TransitionResourceState(VkImage, EResourceState::TransferDst, VkImage->RequiredState, SubresourceRange);
 //	}
+}
+
+void VulkanCommandBuffer::UpdateBuffer(const RHIBuffer* Buffer, const void* Data, const RHICopyRange& Range)
+{
+}
+
+void VulkanCommandBuffer::UpdateImage(const RHIImage* Image, const void* Data, const RHICopyRange& Range)
+{
 }
 
 //void VulkanCommandBuffer::SetPolygonMode(EPolygonMode Mode)

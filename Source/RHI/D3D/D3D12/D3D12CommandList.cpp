@@ -187,13 +187,13 @@ void D3D12CommandList::ClearDepthStencilImage(const RHIImage* DstImage, bool Cle
 {
 }
 
-void D3D12CommandList::CopyBufferToImage(const RHIImage* DstImage, const void* SrcBuffer, uint32_t BufferSize, const RHIImageSubresourceRange& SubresourceRange)
-{
-}
-
-void D3D12CommandList::CopyBuffer(const RHIBuffer* DstBuffer, const void* Data, size_t DataSize, size_t SrcOffset, size_t DstOffset)
-{
-}
+//void D3D12CommandList::CopyBufferToImage(const RHIImage* DstImage, const void* SrcBuffer, uint32_t BufferSize, const RHIImageSubresourceRange& SubresourceRange)
+//{
+//}
+//
+//void D3D12CommandList::CopyBuffer(const RHIBuffer* DstBuffer, const void* Data, size_t DataSize, size_t SrcOffset, size_t DstOffset)
+//{
+//}
 
 //void D3D12CommandList::CopyImage(IImage* SrcImage, const ImageSlice& SrcSlice, IImage* DstImage, const ImageSlice& DstSlice)
 //{

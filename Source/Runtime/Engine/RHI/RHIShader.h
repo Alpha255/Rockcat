@@ -71,8 +71,9 @@ struct RHIShaderCreateInfo
 	inline RHIShaderCreateInfo& SetStage(ERHIShaderStage InStage) { Stage = InStage; return *this; }
 	inline RHIShaderCreateInfo& SetLanguage(ERHIShaderLanguage InLanguage) { Language = InLanguage; return *this; }
 	inline RHIShaderCreateInfo& SetShaderBinary(const class ShaderBinary* const InBinary) { Binary = InBinary; return *this; }
-	inline RHIShaderCreateInfo& SetName(const char* InName) { Name = InName; return *this; }
-	inline RHIShaderCreateInfo& SetName(const std::string& InName) { Name = InName; return *this; }
+
+	template<class T>
+	inline RHIShaderCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 };
 
 class RHIShader : public RHIResource

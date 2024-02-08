@@ -16,7 +16,9 @@ struct RHIBufferCreateInfo
 	inline RHIBufferCreateInfo& SetAccessFlags(ERHIDeviceAccessFlags Flags) { AccessFlags = Flags | AccessFlags; return *this; }
 	inline RHIBufferCreateInfo& SetSize(size_t DataSize) { Size = DataSize; return *this; }
 	inline RHIBufferCreateInfo& SetInitialData(const void* Data) { InitialData = Data; return *this; }
-	inline RHIBufferCreateInfo& SetName(const char* InName) { Name = InName; return *this; }
+	
+	template<class T>
+	inline RHIBufferCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 };
 
 class RHIBuffer

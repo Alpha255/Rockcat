@@ -19,6 +19,13 @@ enum class ERHIImageType : uint8_t
 	Buffer
 };
 
+struct RHICopyRange
+{
+	size_t Size = 0ull;
+	size_t SrcOffset = 0ull;
+	size_t DstOffset = 0ull;
+};
+
 struct RHIImageSubresourceRange
 {
 	static constexpr uint32_t AllMipLevels = ~0u;
@@ -74,13 +81,14 @@ struct RHIImageCreateInfo
 	uint16_t ArrayLayers = 1u;
 	uint16_t MipLevels = 1u;
 
-	ERHIAttachmentLoadOp AttachmentLoadOp = ERHIAttachmentLoadOp::DontCare;
-	ERHIAttachmentStoreOp AttachmentStoreOp = ERHIAttachmentStoreOp::DontCare;
 	ERHIImageType ImageType = ERHIImageType::Unknown;
 	ERHISampleCount SampleCount = ERHISampleCount::Sample_1_Bit;
 
 	ERHIFormat Format = ERHIFormat::Unknown;
 	ERHIBufferUsageFlags BufferUsageFlags = ERHIBufferUsageFlags::None;
+
+	size_t InitialDataSize = 0ull;
+	std::shared_ptr<char> InitialData;
 
 	std::string Name;
 
@@ -93,10 +101,11 @@ struct RHIImageCreateInfo
 	inline RHIImageCreateInfo& SetImageType(ERHIImageType Value) { ImageType = Value; return *this; }
 	inline RHIImageCreateInfo& SetSampleCount(ERHISampleCount Count) { SampleCount = Count; return *this; }
 	inline RHIImageCreateInfo& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; };
-	inline RHIImageCreateInfo& SetName(const char* Value) { Name = Value; return *this; }
-	inline RHIImageCreateInfo& SetName(const std::string& Value) { Name = Value; return *this; }
-	inline RHIImageCreateInfo& SetAttachmentLoadOp(ERHIAttachmentLoadOp Op) { AttachmentLoadOp = Op; return *this; }
-	inline RHIImageCreateInfo& SetAttachmentStoreOp(ERHIAttachmentStoreOp Op) { AttachmentStoreOp = Op; return *this; }
+	inline RHIImageCreateInfo& SetInitialDataSize(size_t Size) { InitialDataSize = Size; return *this; }
+	inline RHIImageCreateInfo& SetInitialData(const std::shared_ptr<char>& Data) { InitialData = Data; return *this; }
+	
+	template<class T>
+	inline RHIImageCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 };
 
 class RHIImage

@@ -528,7 +528,7 @@ private:
 				{
 					auto AssetLoadCallbacks = std::make_optional(Asset::Callbacks{});
 					AssetLoadCallbacks.value().PreLoadCallback = [this, &TextureType](Asset& InAsset) {
-						Cast<ImageAsset>(InAsset).SRGB = TextureType == aiTextureType_DIFFUSE || TextureType == aiTextureType_BASE_COLOR;
+						Cast<ImageAsset>(InAsset).SetUseSRGB(TextureType == aiTextureType_DIFFUSE || TextureType == aiTextureType_BASE_COLOR);
 					};
 
 					auto Image = SetMaterialUnlitTexture(Material, TextureType, TexturePath);

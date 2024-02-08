@@ -59,12 +59,14 @@ public:
 			LOG_ERROR("StbImageImporter: Failed to load image \"{}\": {}", Image.GetPath().generic_string(), stbi_failure_reason());
 		}
 
-		RHIImageCreateInfo CreateInfo = RHIImageCreateInfo()
+		auto CreateInfo = RHIImageCreateInfo()
 			.SetWidth(Width)
 			.SetHeight(Height)
 			.SetImageType(ERHIImageType::T_2D)
 			.SetFormat(Image.IsSRGB() ? ERHIFormat::RGBA8_UNorm_SRGB : ERHIFormat::RGBA8_UNorm)
-			.SetName(InAsset.GetPath().filename().generic_string());
+			.SetName(InAsset.GetPath().filename().string())
+			.SetInitialDataSize(DataSize)
+			.SetInitialData(Image.GetRawData().Data);
 
 		return false;
 #if 0

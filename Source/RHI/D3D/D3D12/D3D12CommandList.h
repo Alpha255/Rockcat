@@ -52,11 +52,8 @@ public:
 
 	void ClearDepthStencilImage(const RHIImage* DstImage, bool ClearDepth, bool ClearStencil, float Depth, uint8_t Stencil) override final;
 
-	void CopyBufferToImage(const RHIImage* DstImage, const void* SrcBuffer, uint32_t BufferSize, const RHIImageSubresourceRange& SubresourceRange) override final;
-
-	void CopyBuffer(const RHIBuffer* DstBuffer, const void* Data, size_t DataSize, size_t SrcOffset, size_t DstOffset) override final;
-
-	//void CopyImage(RHIImage* SrcImage, const ImageSlice& SrcSlice, RHIImage* DstImage, const ImageSlice& DstSlice) override final;
+	void UpdateBuffer(const RHIBuffer* Buffer, const void* Data, const RHICopyRange& Range) override final;
+	void UpdateImage(const RHIImage* Image, const void* Data, const RHICopyRange& Range) override final;
 
 	void SetViewport(const RHIViewport& Viewport) override final;
 	void SetViewports(const RHIViewport* Viewports, uint32_t NumViewports) override final;

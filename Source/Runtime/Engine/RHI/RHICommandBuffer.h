@@ -49,19 +49,16 @@ public:
 	virtual void Dispatch(uint32_t GroupX, uint32_t GroupY, uint32_t GroupZ) = 0;
 	virtual void DispatchIndirect(const RHIBuffer* IndirectBuffer, size_t Offset) = 0;
 	
-	virtual void PushConstants(ERHIShaderStage DstStage, const RHIBuffer* ConstantsBuffer, const void* SrcData, size_t Size, size_t Offset = 0u) = 0;
+	virtual void PushConstants(ERHIShaderStage Stage, const RHIBuffer* Buffer, const void* SrcData, size_t Size, size_t Offset = 0u) = 0;
 
-	virtual void SetGraphicsPipeline(const RHIGraphicsPipeline* DstPipeline) = 0;
+	virtual void SetGraphicsPipeline(const RHIGraphicsPipeline* Pipeline) = 0;
 
-	virtual void ClearColorImage(const RHIImage* DstImage, const Math::Color& ClearColor) = 0;
+	virtual void ClearColorImage(const RHIImage* Image, const Math::Color& ClearColor) = 0;
 
-	virtual void ClearDepthStencilImage(const RHIImage* DstImage, bool ClearDepth = true, bool ClearStencil = true, float Depth = 1.0f, uint8_t Stencil = 0xF) = 0;
+	virtual void ClearDepthStencilImage(const RHIImage* Image, bool ClearDepth = true, bool ClearStencil = true, float Depth = 1.0f, uint8_t Stencil = 0xF) = 0;
 
-	virtual void CopyBufferToImage(const RHIImage* DstImage, const void* SrcBuffer, uint32_t BufferSize, const RHIImageSubresourceRange& SubresourceRange) = 0;
-
-	virtual void CopyBuffer(const RHIBuffer* DstBuffer, const void* SrcData, size_t DataSize, size_t SrcOffset = 0u, size_t DstOffset = 0u) = 0;
-
-	//virtual void CopyImage(RHIImage* SrcImage, const ImageSlice& SrcSlice, IImage* DstImage, const ImageSlice& DstSlice) = 0;
+	virtual void UpdateBuffer(const RHIBuffer* Buffer, const void* Data, const RHICopyRange& Range) = 0;
+	virtual void UpdateImage(const RHIImage* Image, const void* Data, const RHICopyRange& Range) = 0;
 
 	virtual void SetViewport(const RHIViewport& Viewport) = 0;
 	virtual void SetViewports(const RHIViewport* Viewports, uint32_t NumViewports) = 0u;
