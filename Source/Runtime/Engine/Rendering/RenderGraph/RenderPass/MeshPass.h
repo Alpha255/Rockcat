@@ -14,8 +14,9 @@ public:
 
 	void Execute(class RHIDevice& Device, const RenderScene& Scene);
 
-	virtual RHIGraphicsPipeline* GetOverrideGraphicsPipeline() { return nullptr; }
+	const RHIGraphicsPipeline* GetGraphicsPipeline() const { assert(m_GraphicsPipeline); return m_GraphicsPipeline.get(); }
 protected:
+	RHIGraphicsPipelinePtr m_GraphicsPipeline;
 private:
 	EMeshPass m_Filter;
 };

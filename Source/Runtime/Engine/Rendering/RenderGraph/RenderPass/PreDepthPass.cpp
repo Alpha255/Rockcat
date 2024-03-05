@@ -18,8 +18,8 @@ void PreDepthPass::Compile()
 	CreateInfo.DepthStencilState.SetEnableDepth(true)
 		.SetEnableDepthWrite(true)
 		.SetDepthCompareFunc(GraphicsSettings.InverseDepth ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
-	CreateInfo.SetShader(GenericVS().GetRHICreateInfo(GraphicsSettings.RenderHardwareInterface))
-		.SetShader(DepthOnlyFS().GetRHICreateInfo(GraphicsSettings.RenderHardwareInterface));
+	CreateInfo.SetShader(GenericVS().GetRHICreateInfo())
+		.SetShader(DepthOnlyFS().GetRHICreateInfo());
 
-	m_Pipeline = GetResourceManager().GetOrCreateGraphicsPipeline(CreateInfo);
+	m_GraphicsPipeline = GetResourceManager().GetOrCreateGraphicsPipeline(CreateInfo);
 }

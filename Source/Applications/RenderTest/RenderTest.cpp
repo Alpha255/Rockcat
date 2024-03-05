@@ -30,6 +30,8 @@ void RenderTest::OnInitialize()
 			.SetViewMatrix(Math::Matrix());
 		Material.DefaultLitFS::GetShaderVariables()
 			.SetBaseColorMap("ToyCar\\glTF\\Fabric_baseColor.png");
+
+		auto& ShaderVariables = Material.GenericVS::GetShaderVariables();
 	}
 	
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");

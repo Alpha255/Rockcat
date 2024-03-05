@@ -18,8 +18,11 @@ public:
 	void InvalidateMappedRange(size_t Size, size_t Offset) override final;
 
 	bool Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset) override final;
+
+	D3D12_GPU_VIRTUAL_ADDRESS GetGpuVirtualAddress() const { return m_GpuVirtualAddress; }
 protected:
 private:
 	size_t m_Size = 0ull;
 	bool m_HostVisible = false;
+	D3D12_GPU_VIRTUAL_ADDRESS m_GpuVirtualAddress{};
 };

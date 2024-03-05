@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/StringUtils.h"
 #include "Engine/RHI/RHIResource.h"
 #include <d3d11.h>
 #include <d3d11_1.h>
@@ -78,7 +79,11 @@ public:
 	void SetDebugName(const char* DebugName) override final
 	{
 		assert(DebugName && m_Native);
-		//m_Native->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<uint32_t>(std::strlen(DebugName)), DebugName);
+#if 0
+		m_Native->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<uint32_t>(std::strlen(DebugName)), DebugName);
+		auto LDebugName = StringUtils::ToWide(DebugName);
+		m_Native->SetName(LDebugName.c_str());
+#endif
 		RHIResource::SetDebugName(DebugName);
 	}
 

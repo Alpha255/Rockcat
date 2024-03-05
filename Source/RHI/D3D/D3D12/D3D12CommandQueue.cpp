@@ -12,24 +12,26 @@ D3D12CommandQueue::D3D12CommandQueue(const D3D12Device& Device, ERHIDeviceQueue 
 		.NodeMask = 0u
 	};
 
-	std::wstring_view Name;
+	std::string_view Name;
 	switch (Type)
 	{
 	case ERHIDeviceQueue::Graphics:
 		Desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-		Name = L"D3D12 Graphics Queue";
+		Name = "D3D12 Graphics Queue";
 		break;
 	case ERHIDeviceQueue::Transfer:
 		Desc.Type = D3D12_COMMAND_LIST_TYPE_COPY;
-		Name = L"D3D12 Transfer Queue";
+		Name = "D3D12 Transfer Queue";
 		break;
 	case ERHIDeviceQueue::Compute:
 		Desc.Type = D3D12_COMMAND_LIST_TYPE_COMPUTE;
-		Name = L"D3D12 Compute Queue";
+		Name = "D3D12 Compute Queue";
 		break;
 	}
 
 	VERIFY_D3D(Device->CreateCommandQueue(&Desc, IID_PPV_ARGS(Reference())));
+
+	SetDebugName(Name.data());
 }
 
 D3D12CommandQueue::~D3D12CommandQueue()

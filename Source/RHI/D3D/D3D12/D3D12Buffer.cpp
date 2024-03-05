@@ -73,6 +73,8 @@ D3D12Buffer::D3D12Buffer(const D3D12Device& Device, const RHIBufferCreateInfo& R
 		States, 
 		nullptr, 
 		IID_PPV_ARGS(Reference())));
+
+	m_GpuVirtualAddress = GetNative()->GetGPUVirtualAddress();
 }
 
 void* D3D12Buffer::Map(size_t Size, size_t Offset)
