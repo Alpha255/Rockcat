@@ -23,9 +23,9 @@ public:
 		Low = tf::TaskPriority::LOW,
 	};
 
-	template<class StringType>
-	Task(StringType&& Name, ETaskType Type, EPriority Priority = EPriority::Normal)
-		: m_Name(std::forward<StringType>(Name))
+	template<class T>
+	Task(T&& Name, ETaskType Type, EPriority Priority = EPriority::Normal)
+		: m_Name(std::forward<T>(Name))
 		, m_Type(Type)
 		, m_Priority(Priority)
 	{

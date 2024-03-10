@@ -27,9 +27,9 @@ ENUM_FLAG_OPERATORS(IO::EOpenMode)
 class IFileIOStream : public IO
 {
 public:
-	template<class StringType>
-	IFileIOStream(StringType&& FilePath, EOpenMode Mode)
-		: m_FilePath(std::forward<StringType>(FilePath))
+	template<class T>
+	IFileIOStream(T&& FilePath, EOpenMode Mode)
+		: m_FilePath(std::forward<T>(FilePath))
 		, m_OpenMode(Mode)
 	{
 	}
@@ -55,9 +55,9 @@ protected:
 class StdFileIOStream : public IFileIOStream
 {
 public:
-	template<class StringType>
-	StdFileIOStream(StringType&& FilePath, EOpenMode Mode)
-		: IFileIOStream(std::forward<StringType>(FilePath), Mode)
+	template<class T>
+	StdFileIOStream(T&& FilePath, EOpenMode Mode)
+		: IFileIOStream(std::forward<T>(FilePath), Mode)
 	{
 		Open(Mode);
 	}

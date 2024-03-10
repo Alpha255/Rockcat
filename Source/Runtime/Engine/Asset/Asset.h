@@ -60,14 +60,6 @@ public:
 		Error
 	};
 
-	enum class EPrefabAssetType : uint8_t
-	{
-		Config,
-		Scene,
-		ShaderCache,
-		Material
-	};
-
 	using AssetPreLoadCallback = std::function<void(Asset&)>;
 	using AssetReadyCallback = std::function<void(Asset&)>;
 	using AssetReloadCallback = std::function<void(Asset&)>;
@@ -88,19 +80,19 @@ public:
 		AssetUnloadedCallback UnloadedCallback;
 	};
 
-	template<class StringType>
-	Asset(StringType&& Path)
-		: m_Path(std::forward<StringType>(Path))
+	template<class T>
+	Asset(T&& Path)
+		: m_Path(std::forward<T>(Path))
 		, m_LastWriteTime(GetFileLastWriteTime(m_Path))
 	{
 	}
 
 	EAssetStatus GetStatus() const { return m_Status.load(); }
 	virtual bool IsReady() const { return GetStatus() == EAssetStatus::Ready; }
-	bool IsLoading() const { return GetStatus() == EAssetStatus::Loading; }
 
 	const std::filesystem::path& GetPath() const { return m_Path; }
-
+	std::filesystem::path GetName() const { return m_Path.filename(); }
+	std::filesystem::path GetExtension() const { return m_Path.extension(); }
 	std::time_t GetLastWriteTime() const { return m_LastWriteTime; }
 
 	void ReadRawData(AssetType::EContentsType ContentsType);
@@ -116,46 +108,6 @@ public:
 			m_Dirty = m_LastWriteTime != LastWriteTime;
 		}
 		return m_Dirty;
-	}
-
-	static const char* GetPrefabricateAssetExtension(EPrefabAssetType Type)
-	{
-		switch (Type)
-		{
-		case EPrefabAssetType::Config: return ".json";
-		case EPrefabAssetType::Scene: return ".scene";
-		case EPrefabAssetType::ShaderCache: return ".shadercache";
-		case EPrefabAssetType::Material: return ".material";
-		default: return ".json";
-		}
-	}
-
-	template<class StringType>
-	static std::filesystem::path GetPrefabricateAssetPath(StringType&& AssetName, EPrefabAssetType Type)
-	{
-		auto Ret = std::filesystem::path();
-		switch (Type)
-		{
-		case EPrefabAssetType::Config:
-			break;
-		case EPrefabAssetType::Scene:
-			Ret += ASSET_PATH_SCENES;
-			break;
-		case EPrefabAssetType::ShaderCache:
-			Ret += ASSET_PATH_SHADERCACHE;
-			break;
-		case EPrefabAssetType::Material:
-			Ret += ASSET_PATH_MATERIALS;
-			break;
-		default:
-			break;
-		}
-		Ret += AssetName;
-		if (Ret.extension().empty())
-		{
-			Ret += GetPrefabricateAssetExtension(Type);
-		}
-		return Ret;
 	}
 
 	void SetCallbacks(std::optional<Callbacks>& InCallbacks)
@@ -187,8 +139,8 @@ protected:
 	virtual void OnSaved() { if (m_Callbacks.SavedCallback) { m_Callbacks.SavedCallback(*this); } }
 	virtual void OnUnloaded() { if (m_Callbacks.UnloadedCallback) { m_Callbacks.UnloadedCallback(*this); } }
 
-	template<class StringType>
-	void SetPath(StringType&& Path) { m_Path = std::filesystem::path(std::forward<StringType>(Path)); }
+	template<class T>
+	void SetPath(T&& Path) { m_Path = std::filesystem::path(std::forward<T>(Path)); }
 
 	static std::time_t GetFileLastWriteTime(const std::filesystem::path& Path)
 	{

@@ -52,14 +52,14 @@ struct MaterialProperty
 class MaterialAsset : public SerializableAsset<MaterialAsset>
 {
 public:
-	template<class StringType>
-	MaterialAsset(StringType&& MaterialAssetName)
-		: BaseClass(Asset::GetPrefabricateAssetPath(MaterialAssetName, Asset::EPrefabAssetType::Material))
+	template<class T>
+	MaterialAsset(T&& Name)
+		: BaseClass(GetFilePath(Name, GetExtension()))
 	{
 	}
 	virtual ~MaterialAsset() = default;
 
-	const char* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::Material); }
+	static const char* GetExtension() { return ".material"; }
 
 	EShadingMode GetShadingMode() const { return m_ShadingMode; }
 

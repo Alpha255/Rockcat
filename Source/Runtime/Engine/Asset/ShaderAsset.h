@@ -109,13 +109,13 @@ private:
 
 struct ShaderCache : public SerializableAsset<ShaderCache>
 {
-	template<class StringType>
-	ShaderCache(StringType&& Path)
-		: BaseClass(std::forward<StringType>(Path))
+	template<class T>
+	ShaderCache(T&& Path)
+		: BaseClass(std::forward<T>(Path))
 	{
 	}
 
-	virtual const char* GetExtension() const { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::ShaderCache); }
+	static const char* GetExtension() { return ".shadercache"; }
 
 	bool Contains(size_t Hash) const { return CompiledBinaries.find(Hash) != CompiledBinaries.cend(); }
 	const ShaderBinary* const GetBinary(size_t Hash, ERenderHardwareInterface RHI) const
@@ -142,9 +142,9 @@ struct ShaderCache : public SerializableAsset<ShaderCache>
 class ShaderAsset : public Asset, public ShaderDefines
 {
 public:
-	template<class StringType>
-	ShaderAsset(StringType&& ShaderName)
-		: Asset(std::move(std::filesystem::path(ASSET_PATH_SHADERS) / std::filesystem::path(std::forward<StringType>(ShaderName))))
+	template<class T>
+	ShaderAsset(T&& Name)
+		: Asset(GetFilePath(ASSET_PATH_SHADERS, Name))
 		, m_Stage(GetStage(GetPath()))
 	{
 		GetDefaultDefines();
@@ -167,11 +167,11 @@ public:
 		);
 	}
 protected:
-	ShaderCache& GetCache() const
+	const ShaderCache& GetCache() const
 	{
 		if (!m_Cache)
 		{
-			m_Cache = ShaderCache::Load(GetShaderCachePath());
+			m_Cache = ShaderCache::Load(GetFilePath(ASSET_PATH_SHADERCACHE, GetName(), ShaderCache::GetExtension()));
 		}
 		if (m_Cache->IsDirty())
 		{
@@ -180,47 +180,11 @@ protected:
 		return *m_Cache;
 	}
 
-	static ERHIShaderStage GetStage(const std::filesystem::path& ShaderPath)
-	{
-		auto Extension = StringUtils::Lowercase(ShaderPath.extension().generic_string());
-		if (Extension == ".vert")
-		{
-			return ERHIShaderStage::Vertex;
-		}
-		else if (Extension == ".hull")
-		{
-			return ERHIShaderStage::Hull;
-		}
-		else if (Extension == ".domain")
-		{
-			return ERHIShaderStage::Domain;
-		}
-		else if (Extension == ".geom")
-		{
-			return ERHIShaderStage::Geometry;
-		}
-		else if (Extension == ".frag")
-		{
-			return ERHIShaderStage::Fragment;
-		}
-		else if (Extension == ".comp")
-		{
-			return ERHIShaderStage::Compute;
-		}
-		return ERHIShaderStage::Num;
-	}
+	static ERHIShaderStage GetStage(const std::filesystem::path& Path);
 private:
 	void GetDefaultDefines();
 
-	std::filesystem::path GetShaderCachePath() const
-	{
-		auto Path = std::filesystem::path(ASSET_PATH_SHADERCACHE) / GetPath().filename();
-		Path += Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::ShaderCache);
-		return Path;
-	}
-
 	mutable std::shared_ptr<ShaderCache> m_Cache;
-
 	ERHIShaderStage m_Stage;
 };
 

@@ -221,6 +221,18 @@ inline auto Invoke(Function&& Func, Args&&... ArgList) -> decltype(std::forward<
 	return std::forward<Function>(Func)(std::forward<Args>(ArgList)...);
 }
 
+template<class TName, class TExtension>
+inline std::filesystem::path GetFilePath(TName&& Name, TExtension&& Extension)
+{
+	return std::filesystem::path(std::forward<TName>(Name)).replace_extension(std::filesystem::path(std::forward<TExtension>(Extension)));
+}
+
+template<class TParentPath, class TName, class TExtension>
+inline std::filesystem::path GetFilePath(TParentPath&& ParentPath, TName&& Name, TExtension&& Extension)
+{
+	return (std::filesystem::path(std::forward<TParentPath>(ParentPath)) / std::filesystem::path(std::forward<TName>(Name))).replace_extension(std::filesystem::path(std::forward<TExtension>(Extension)));
+}
+
 size_t PopulationCount(size_t Value);
 
 std::string TrimEnumString(const std::string& Name);

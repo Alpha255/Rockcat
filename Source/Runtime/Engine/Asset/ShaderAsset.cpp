@@ -9,10 +9,12 @@ public:
 
 	static std::shared_ptr<GlobalShaderCompileConfigurations> Get()
 	{
-		static std::filesystem::path s_Path = (std::filesystem::path(ASSET_PATH_SHADERS) /
-			"GlobalShaderCompileConfigs").replace_extension(Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::Config));
-
-		return GlobalShaderCompileConfigurations::Load(s_Path);
+		static std::shared_ptr<GlobalShaderCompileConfigurations> s_Configs;
+		if (!s_Configs)
+		{
+			s_Configs = GlobalShaderCompileConfigurations::Load(GetFilePath(ASSET_PATH_SHADERS, "GlobalShaderCompileConfigs", GetExtension()));
+		}
+		return s_Configs;
 	}
 
 	const ShaderDefines& GetDefines(const std::filesystem::path& ShaderPath) const
@@ -35,7 +37,37 @@ private:
 
 void ShaderAsset::GetDefaultDefines()
 {
-	Merge(GlobalShaderCompileConfigurations::Get()->GetDefines(GetPath()));
+	ShaderDefines::Merge(GlobalShaderCompileConfigurations::Get()->GetDefines(GetPath()));
+}
+
+ERHIShaderStage ShaderAsset::GetStage(const std::filesystem::path& Path)
+{
+	auto Extension = StringUtils::Lowercase(Path.extension().string());
+	if (Extension == ".vert")
+	{
+		return ERHIShaderStage::Vertex;
+	}
+	else if (Extension == ".hull")
+	{
+		return ERHIShaderStage::Hull;
+	}
+	else if (Extension == ".domain")
+	{
+		return ERHIShaderStage::Domain;
+	}
+	else if (Extension == ".geom")
+	{
+		return ERHIShaderStage::Geometry;
+	}
+	else if (Extension == ".frag")
+	{
+		return ERHIShaderStage::Fragment;
+	}
+	else if (Extension == ".comp")
+	{
+		return ERHIShaderStage::Compute;
+	}
+	return ERHIShaderStage::Num;
 }
 
 void ShaderAsset::Compile(bool Force)

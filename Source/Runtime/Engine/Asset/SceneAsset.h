@@ -23,22 +23,20 @@ struct SceneData
 class SceneAsset : public SerializableAsset<SceneAsset>
 {
 public:
-	template<class StringType>
-	SceneAsset(StringType&& SceneAssetName)
-		: BaseClass(Asset::GetPrefabricateAssetPath(SceneAssetName, Asset::EPrefabAssetType::Scene))
+	template<class T>
+	SceneAsset(T&& Name)
+		: BaseClass(GetFilePath(Name, GetExtension()))
 	{
 	}
 
-	const char* GetExtension() const override final { return Asset::GetPrefabricateAssetExtension(Asset::EPrefabAssetType::Scene); }
-
+	static const char* GetExtension() { return ".scene"; }
 	const SceneGraph& GetSceneGraph() const { return *m_Graph; }
-
 	const SceneData& GetSceneData() const { return *m_Data; }
 
-	const StaticMesh* GetStaticMesh(uint32_t Index) const
-	{
-		assert(Index < m_Data->StaticMeshes.size());
-		return m_Data->StaticMeshes[Index].get();
+	const StaticMesh* GetStaticMesh(uint32_t Index) const 
+	{ 
+		assert(Index < m_Data->StaticMeshes.size()); 
+		return m_Data->StaticMeshes[Index].get(); 
 	}
 
 	const Math::Transform* GetTransform(uint32_t Index) const

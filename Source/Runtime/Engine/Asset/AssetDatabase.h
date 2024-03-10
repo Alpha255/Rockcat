@@ -13,10 +13,10 @@ public:
 
 	void OnShutdown() override final;
 
-	template<class TAsset, class StringType>
-	std::shared_ptr<TAsset> FindOrImportAsset(StringType&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
+	template<class TAsset, class T>
+	std::shared_ptr<TAsset> FindOrImportAsset(T&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
 	{
-		auto UnifyPath = GetUnifyAssetPath(std::forward<StringType>(AssetPath));
+		auto UnifyPath = GetUnifyAssetPath(std::forward<T>(AssetPath));
 		auto AssetIt = m_Assets.find(UnifyPath);
 		if (AssetIt != m_Assets.end())
 		{
@@ -45,10 +45,10 @@ public:
 		}
 	}
 
-	template<class StringType>
-	void ReimportAsset(StringType&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
+	template<class T>
+	void ReimportAsset(T&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
 	{
-		ReimportAssetImpl(nullptr, GetUnifyAssetPath(std::forward<StringType>(AssetPath)), AssetLoadCallbacks, Async);
+		ReimportAssetImpl(nullptr, GetUnifyAssetPath(std::forward<T>(AssetPath)), AssetLoadCallbacks, Async);
 	}
 
 	void ReimportAsset(std::shared_ptr<Asset>& TargetAsset, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
@@ -58,10 +58,10 @@ public:
 		ReimportAssetImpl(TargetAsset, GetUnifyAssetPath(TargetAsset->GetPath()), AssetLoadCallbacks, Async);
 	}
 private:
-	template<class StringType>
-	static std::filesystem::path GetUnifyAssetPath(StringType&& AssetPath, bool Lowercase = false)
+	template<class T>
+	static std::filesystem::path GetUnifyAssetPath(T&& AssetPath, bool Lowercase = false)
 	{
-		auto UnifyPath = std::filesystem::path(std::forward<StringType>(AssetPath)).make_preferred();
+		auto UnifyPath = std::filesystem::path(std::forward<T>(AssetPath)).make_preferred();
 		return Lowercase ? std::filesystem::path(StringUtils::Lowercase(UnifyPath.generic_string())) : UnifyPath;
 	}
 
