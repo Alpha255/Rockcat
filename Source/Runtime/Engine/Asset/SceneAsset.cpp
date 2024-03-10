@@ -59,12 +59,12 @@ public:
 
 void SceneAsset::PostLoad()
 {
-	std::vector<const AssimpScene*> AssimpScenes;
+	std::vector<const AssimpSceneAsset*> AssimpScenes;
 
 	auto AssetLoadCallbacks = std::make_optional(Asset::Callbacks{});
 
 	AssetLoadCallbacks.value().PreLoadCallback = [this, &AssimpScenes](Asset& InAsset) {
-		AssimpScenes.push_back(Cast<AssimpScene>(&InAsset));
+		AssimpScenes.push_back(Cast<AssimpSceneAsset>(&InAsset));
 	};
 
 	AssetLoadCallbacks.value().ReadyCallback = [this, &AssimpScenes](Asset&) {
@@ -96,6 +96,6 @@ void SceneAsset::PostLoad()
 
 	for (const auto& Path : m_AssimpScenePaths)
 	{
-		AssetDatabase::Get().FindOrImportAsset<AssimpScene>(Path, AssetLoadCallbacks);
+		AssetDatabase::Get().FindOrImportAsset<AssimpSceneAsset>(Path, AssetLoadCallbacks);
 	}
 }

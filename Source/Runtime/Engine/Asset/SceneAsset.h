@@ -69,7 +69,7 @@ private:
 	std::shared_ptr<SceneData> m_Data;
 };
 
-struct AssimpScene : public Asset
+struct AssimpSceneAsset : public Asset
 {
 	using Asset::Asset;
 

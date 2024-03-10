@@ -29,11 +29,11 @@ public:
 
 	void LoadAssetData(std::shared_ptr<Asset>&, AssetType::EContentsType) override final {} /// Just load from file to avoid base path of texture broken
 
-	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<AssimpScene>(AssetPath); }
+	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<AssimpSceneAsset>(AssetPath); }
 
 	bool Reimport(Asset& InAsset) override final
 	{
-		auto& Scene = Cast<AssimpScene>(InAsset);
+		auto& AssimpScene = Cast<AssimpSceneAsset>(InAsset);
 
 		const uint32_t ProcessFlags = static_cast<uint32_t>(
 			aiProcessPreset_TargetRealtime_MaxQuality | 
@@ -45,22 +45,22 @@ public:
 
 #if _DEBUG
 		Assimp::DefaultLogger::set(new AssimpLogger());
-		AssimpImporter.SetProgressHandler(new AssimpProgressHandler(Scene.GetPath()));
+		AssimpImporter.SetProgressHandler(new AssimpProgressHandler(AssimpScene.GetPath()));
 #endif
-		if (auto AiScene = AssimpImporter.ReadFile(Scene.GetPath().string(), ProcessFlags))
+		if (auto AiScene = AssimpImporter.ReadFile(AssimpScene.GetPath().string(), ProcessFlags))
 		{
 			if (AiScene->HasMeshes())
 			{
-				ProcessMaterials(AiScene, Scene);
+				ProcessMaterials(AiScene, AssimpScene);
 
-				ProcessMeshes(AiScene, Scene);
+				ProcessMeshes(AiScene, AssimpScene);
 
 				if (AiScene->mRootNode)
 				{
-					Scene.Graph.Root = Scene.Graph.AddNode(SceneGraph::NodeID(), AiScene->mRootNode->mName.C_Str());
-					if (ProcessNode(AiScene, AiScene->mRootNode, Scene.Graph.Root, Scene))
+					AssimpScene.Graph.Root = AssimpScene.Graph.AddNode(SceneGraph::NodeID(), AiScene->mRootNode->mName.C_Str());
+					if (ProcessNode(AiScene, AiScene->mRootNode, AssimpScene.Graph.Root, AssimpScene))
 					{
-						CompileMaterials(Scene);
+						CompileMaterials(AssimpScene);
 						return true;
 					}
 				}
@@ -116,7 +116,7 @@ private:
 		bool detachStream(Assimp::LogStream*, uint32_t) override final { return true; }
 	};
 
-	bool ProcessNode(const aiScene* AiScene, const aiNode* AiNode, SceneGraph::NodeID GraphNode, AssimpScene& AssimpScene)
+	bool ProcessNode(const aiScene* AiScene, const aiNode* AiNode, SceneGraph::NodeID GraphNode, AssimpSceneAsset& AssimpScene)
 	{
 		if (!AiNode)
 		{
@@ -152,7 +152,7 @@ private:
 		return true;
 	}
 
-	void ProcessMaterials(const aiScene* AiScene, AssimpScene& AssimpScene)
+	void ProcessMaterials(const aiScene* AiScene, AssimpSceneAsset& AssimpScene)
 	{
 		if (!AiScene->HasMaterials())
 		{
@@ -249,7 +249,7 @@ private:
 		}
 	}
 
-	void ProcessMeshes(const aiScene* AiScene, AssimpScene& AssimpScene)
+	void ProcessMeshes(const aiScene* AiScene, AssimpSceneAsset& AssimpScene)
 	{
 		for (uint32_t Index = 0u; Index < AiScene->mNumMeshes; ++Index)
 		{
@@ -476,7 +476,7 @@ private:
 		return Image;
 	}
 
-	ShaderAsset& GetVertexShader(AssimpScene& AssimpScene, uint32_t MaterialIndex)
+	ShaderAsset& GetVertexShader(AssimpSceneAsset& AssimpScene, uint32_t MaterialIndex)
 	{
 		auto& Material = *AssimpScene.Data.Materials[MaterialIndex].get();
 		switch (Material.GetShadingMode())
@@ -493,7 +493,7 @@ private:
 		}
 	}
 
-	ShaderAsset& GetFragmentShader(AssimpScene& AssimpScene, uint32_t MaterialIndex)
+	ShaderAsset& GetFragmentShader(AssimpSceneAsset& AssimpScene, uint32_t MaterialIndex)
 	{
 		auto& Material = *AssimpScene.Data.Materials[MaterialIndex].get();
 		switch (Material.GetShadingMode())
@@ -550,9 +550,9 @@ private:
 		}
 	}
 
-	void CompileMaterials(AssimpScene& Scene)
+	void CompileMaterials(AssimpSceneAsset& AssimpScene)
 	{
-		for (auto& Material : Scene.Data.Materials)
+		for (auto& Material : AssimpScene.Data.Materials)
 		{
 			Material->Compile();
 		}
