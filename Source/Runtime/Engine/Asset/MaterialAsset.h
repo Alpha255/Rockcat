@@ -22,7 +22,6 @@ using ShaderVariant = std::variant<
 	Math::Matrix,
 	std::shared_ptr<ImageAsset>>;
 
-
 struct MaterialProperty
 {
 	using SetFunc = std::function<void(const ShaderVariant&)>;
@@ -63,10 +62,10 @@ public:
 
 	EShadingMode GetShadingMode() const { return m_ShadingMode; }
 
-	void RegisterProperty(const char* InName, MaterialProperty&& Property)
+	void RegisterProperty(const char* Name, MaterialProperty&& Property)
 	{
-		std::string Name(InName);
-		auto It = m_Properties.find(Name);
+		std::string PropertyName(Name);
+		auto It = m_Properties.find(PropertyName);
 		if (It != m_Properties.end())
 		{
 			auto Value = It->second.Value;
@@ -78,7 +77,7 @@ public:
 		}
 		else
 		{
-			m_Properties.insert(std::make_pair(Name, std::forward<MaterialProperty>(Property)));
+			m_Properties.insert(std::make_pair(PropertyName, std::forward<MaterialProperty>(Property)));
 		}
 	}
 

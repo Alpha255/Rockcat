@@ -23,7 +23,7 @@ template<
 	ERHICompareFunc CompareOp = ERHICompareFunc::Less,
 	ERHIBorderColor BorderColor = ERHIBorderColor::FloatTransparentBlack,
 	uint32_t MaxAnisotropy = 0u>
-class RHISamplerStatic : public RHIStaticState<RHISampler>
+class RHISamplerStatic : public RHIStaticResource<RHISampler>
 {
 public:
 	static RHISamplerPtr Get(const RHIDevice& Device)
@@ -123,7 +123,7 @@ public:
 	}
 };
 
-class RHIBlendStateStatic : public RHIStaticState<RHIBlendState>
+class RHIBlendStateStatic : public RHIStaticResource<RHIBlendState>
 {
 };
 

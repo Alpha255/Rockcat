@@ -84,10 +84,3 @@ const ShaderBinary* const ShaderAsset::GetBinary() const
 {
 	return GetBinary(RHIInterface::GetGraphicsSettings().RenderHardwareInterface);
 }
-
-RHIShaderCreateInfo ShaderAsset::GetRHICreateInfo() const
-{
-	return RHIShaderCreateInfo().SetStage(m_Stage)
-		.SetName(GetPath().string())
-		.SetShaderBinary(GetBinary(RHIInterface::GetGraphicsSettings().RenderHardwareInterface));
-}

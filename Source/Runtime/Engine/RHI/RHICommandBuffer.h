@@ -57,8 +57,8 @@ public:
 
 	virtual void ClearDepthStencilImage(const RHIImage* Image, bool ClearDepth = true, bool ClearStencil = true, float Depth = 1.0f, uint8_t Stencil = 0xF) = 0;
 
-	virtual void UpdateBuffer(const RHIBuffer* Buffer, const void* Data, const RHICopyRange& Range) = 0;
-	virtual void UpdateImage(const RHIImage* Image, const void* Data, const RHICopyRange& Range) = 0;
+	virtual void UpdateBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t Offset = 0u) = 0;
+	virtual void UpdateImage(const RHIImage* Image, const void* Data, size_t Size, size_t Offset = 0u) = 0;
 
 	virtual void SetViewport(const RHIViewport& Viewport) = 0;
 	virtual void SetViewports(const RHIViewport* Viewports, uint32_t NumViewports) = 0u;

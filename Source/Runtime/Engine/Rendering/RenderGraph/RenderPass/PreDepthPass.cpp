@@ -14,12 +14,15 @@ void PreDepthPass::Compile()
 		.SetFormat(ERHIFormat::D32_Float_S8_UInt)
 		.SetUsages(ERHIBufferUsageFlags::DepthStencil);
 
-	RHIGraphicsPipelineCreateInfo CreateInfo;
-	CreateInfo.DepthStencilState.SetEnableDepth(true)
+	auto DepthStencilState = RHIDepthStencilStateCreateInfo()
+		.SetEnableDepth(true)
 		.SetEnableDepthWrite(true)
 		.SetDepthCompareFunc(GraphicsSettings.InverseDepth ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
-	CreateInfo.SetShader(GenericVS().GetRHICreateInfo())
-		.SetShader(DepthOnlyFS().GetRHICreateInfo());
 
-	m_GraphicsPipeline = GetResourceManager().GetOrCreateGraphicsPipeline(CreateInfo);
+	auto GraphicsPipelineDesc = RHIGraphicsPipelineCreateInfo()
+		.SetDepthStencilState(DepthStencilState)
+		.SetShader(GenericVS())
+		.SetShader(DepthOnlyFS());
+
+	m_GraphicsPipeline = GetResourceManager().GetOrCreateGraphicsPipeline(GraphicsPipelineDesc);
 }

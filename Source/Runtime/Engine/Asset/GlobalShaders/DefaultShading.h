@@ -4,6 +4,7 @@
 
 #pragma warning(push)
 #pragma warning(disable:4324)
+
 class GenericVS : public ShaderAsset
 {
 public:

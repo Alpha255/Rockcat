@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Core/StringUtils.h"
+#include "Core/Math/Matrix.h"
 #include "Engine/Asset/SerializableAsset.h"
+#include "Engine/Asset/ImageAsset.h"
 #include "Engine/Application/GraphicsSettings.h"
 #include "Engine/RHI/RHIShader.h"
 
@@ -139,6 +141,43 @@ struct ShaderCache : public SerializableAsset<ShaderCache>
 	std::unordered_map<size_t, std::array<ShaderBinary, (size_t)ERenderHardwareInterface::Num>> CompiledBinaries;
 };
 
+struct ShaderVariable
+{
+	using Variant = std::variant<
+		std::monostate,
+		float,
+		int32_t,
+		uint32_t,
+		Math::Vector2,
+		Math::Vector3,
+		Math::Vector4,
+		Math::Matrix,
+		std::shared_ptr<ImageAsset>>;
+
+	using Setter = std::function<void(const Variant&)>;
+	using Getter = std::function<Variant(void)>;
+
+	ERHIResourceType Type = ERHIResourceType::Unknown;
+	uint32_t Binding = ~0u;
+	size_t Offset = 0u;
+	size_t Stride = 0u;
+
+	Setter Set;
+	Getter Get;
+
+	Variant Value;
+
+	bool IsValid() const { return Value.index() != 0u; }
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(Value)
+		);
+	}
+};
+
 class ShaderAsset : public Asset, public ShaderDefines
 {
 public:
@@ -157,7 +196,25 @@ public:
 	const ShaderBinary* const GetBinary(ERenderHardwareInterface RHI) const { return GetCache().GetBinary(ComputeHash(), RHI); }
 	const ShaderBinary* const GetBinary() const;
 
-	RHIShaderCreateInfo GetRHICreateInfo() const;
+	void RegisterVariable(const char* Name, ShaderVariable&& Variable)
+	{
+		std::string VariableName(Name);
+
+		auto It = m_Variables.find(VariableName);
+		if (It != m_Variables.end())
+		{
+			It->second = std::move(Variable);
+
+			if (It->second.IsValid())
+			{
+				It->second.Set(It->second.Value);
+			}
+		}
+		else
+		{
+			m_Variables.insert(std::make_pair(VariableName, std::forward<ShaderVariable>(Variable)));
+		}
+	}
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -186,6 +243,8 @@ private:
 
 	mutable std::shared_ptr<ShaderCache> m_Cache;
 	ERHIShaderStage m_Stage;
+
+	std::map<std::string, ShaderVariable> m_Variables;
 };
 
 namespace cereal

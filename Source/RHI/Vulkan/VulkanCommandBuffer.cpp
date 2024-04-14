@@ -768,11 +768,11 @@ void VulkanCommandBuffer::ClearDepthStencilImage(const RHIImage* DstImage, bool 
 //	}
 }
 
-void VulkanCommandBuffer::UpdateBuffer(const RHIBuffer* Buffer, const void* Data, const RHICopyRange& Range)
+void VulkanCommandBuffer::UpdateBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t Offset)
 {
 }
 
-void VulkanCommandBuffer::UpdateImage(const RHIImage* Image, const void* Data, const RHICopyRange& Range)
+void VulkanCommandBuffer::UpdateImage(const RHIImage* Image, const void* Data, size_t Size, size_t Offset)
 {
 }
 

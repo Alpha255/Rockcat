@@ -13,7 +13,7 @@ public:
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
-		std::string Path = m_Path.generic_string();
+		std::string Path = m_Path.string();
 		Ar(
 			cereal::make_nvp("m_Path", Path)
 		);
@@ -29,7 +29,7 @@ protected:
 	void SetUseSRGB(bool InSRGB) { SRGB = InSRGB; }
 
 	bool SRGB = false;
-	RHIImagePtr Image;
+	const RHIImage* Image;
 };
 
 namespace cereal

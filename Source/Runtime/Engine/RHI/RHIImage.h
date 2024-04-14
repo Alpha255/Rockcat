@@ -2,10 +2,6 @@
 
 #include "Engine/RHI/RHIRenderStates.h"
 
-//#define STBI_NO_GIF
-//#define STBI_NO_PIC
-//#define STBI_NO_PNM
-
 enum class ERHIImageType : uint8_t
 {
 	Unknown,
@@ -19,14 +15,7 @@ enum class ERHIImageType : uint8_t
 	Buffer
 };
 
-struct RHICopyRange
-{
-	size_t Size = 0ull;
-	size_t SrcOffset = 0ull;
-	size_t DstOffset = 0ull;
-};
-
-struct RHIImageSubresourceRange
+struct RHISubresource
 {
 	static constexpr uint32_t AllMipLevels = ~0u;
 	static constexpr uint32_t AllArrayLayers = ~0u;
@@ -39,19 +28,13 @@ struct RHIImageSubresourceRange
 
 	struct Hasher
 	{
-		size_t operator()(const RHIImageSubresourceRange& SubresourceRange) const noexcept
+		size_t operator()(const RHISubresource& Subresource) const noexcept
 		{
-			size_t Hash = 0u;
-			HashCombine(Hash, 
-				SubresourceRange.BaseMipLevel,
-				SubresourceRange.LevelCount,
-				SubresourceRange.BaseArrayLayer,
-				SubresourceRange.LayerCount);
-			return Hash;
+			return ComputeHash(Subresource.BaseMipLevel, Subresource.LevelCount, Subresource.BaseArrayLayer, Subresource.LayerCount);
 		}
 	};
 
-	bool operator==(const RHIImageSubresourceRange& Other) const
+	bool operator==(const RHISubresource& Other) const
 	{
 		return BaseMipLevel == Other.BaseMipLevel &&
 			LevelCount == Other.LevelCount &&
@@ -59,7 +42,7 @@ struct RHIImageSubresourceRange
 			LayerCount == Other.LayerCount;
 	}
 
-	bool operator!=(const RHIImageSubresourceRange& Other) const
+	bool operator!=(const RHISubresource& Other) const
 	{
 		return BaseMipLevel != Other.BaseMipLevel ||
 			LevelCount != Other.LevelCount ||
@@ -70,7 +53,7 @@ struct RHIImageSubresourceRange
 
 namespace RHI
 {
-	const static RHIImageSubresourceRange AllImageSubresource{0u, RHIImageSubresourceRange::AllMipLevels, 0u, RHIImageSubresourceRange::AllArrayLayers};
+	const static RHISubresource AllSubresource{0u, RHISubresource::AllMipLevels, 0u, RHISubresource::AllArrayLayers};
 }
 
 struct RHIImageCreateInfo
@@ -87,6 +70,8 @@ struct RHIImageCreateInfo
 	ERHIFormat Format = ERHIFormat::Unknown;
 	ERHIBufferUsageFlags BufferUsageFlags = ERHIBufferUsageFlags::None;
 
+	ERHIResourceState PermanentStates = ERHIResourceState::Unknown;
+
 	size_t InitialDataSize = 0ull;
 	std::shared_ptr<char> InitialData;
 
@@ -101,6 +86,7 @@ struct RHIImageCreateInfo
 	inline RHIImageCreateInfo& SetImageType(ERHIImageType Value) { ImageType = Value; return *this; }
 	inline RHIImageCreateInfo& SetSampleCount(ERHISampleCount Count) { SampleCount = Count; return *this; }
 	inline RHIImageCreateInfo& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; };
+	inline RHIImageCreateInfo& SetPermanentStates(ERHIResourceState States) { PermanentStates = States; return *this; }
 	inline RHIImageCreateInfo& SetInitialDataSize(size_t Size) { InitialDataSize = Size; return *this; }
 	inline RHIImageCreateInfo& SetInitialData(const std::shared_ptr<char>& Data) { InitialData = Data; return *this; }
 	
@@ -127,7 +113,7 @@ public:
 	inline uint32_t GetDepth() const { return m_Depth; }
 	inline uint32_t GetArrayLayers() const { return m_ArrayLayers; }
 	inline uint32_t GetMipLevels() const { return m_MipLevels; }
-	inline ERHIImageType GetImageType() const { return m_Type; }
+	inline ERHIImageType GetType() const { return m_Type; }
 	inline ERHIFormat GetFormat() const { return m_Format; }
 private:
 	uint32_t m_Width = 1u;

@@ -73,7 +73,7 @@ public:
 			}
 		}
 
-		LOG_ERROR("AssimpSceneImporter:: Failed to load assimp scene \"{}\" : {}", Scene.GetPath().generic_string(), AssimpImporter.GetErrorString());
+		LOG_ERROR("AssimpSceneImporter:: Failed to load assimp scene \"{}\" : {}", AssimpScene.GetPath().generic_string(), AssimpImporter.GetErrorString());
 		return false;
 	}
 

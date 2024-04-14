@@ -7,13 +7,16 @@
 struct RHIBufferCreateInfo
 {
 	ERHIBufferUsageFlags BufferUsageFlags = ERHIBufferUsageFlags::None;
-	ERHIDeviceAccessFlags AccessFlags = static_cast<ERHIDeviceAccessFlags>(0u);
+	ERHIDeviceAccessFlags AccessFlags = ERHIDeviceAccessFlags::None;
+	ERHIResourceState PermanentStates = ERHIResourceState::Unknown;
+
 	size_t Size = 0u;
 	const void* InitialData = nullptr;
 	std::string Name;
 
 	inline RHIBufferCreateInfo& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; }
 	inline RHIBufferCreateInfo& SetAccessFlags(ERHIDeviceAccessFlags Flags) { AccessFlags = Flags | AccessFlags; return *this; }
+	inline RHIBufferCreateInfo& SetPermanentStates(ERHIResourceState States) { PermanentStates = States; return *this; }
 	inline RHIBufferCreateInfo& SetSize(size_t DataSize) { Size = DataSize; return *this; }
 	inline RHIBufferCreateInfo& SetInitialData(const void* Data) { InitialData = Data; return *this; }
 	

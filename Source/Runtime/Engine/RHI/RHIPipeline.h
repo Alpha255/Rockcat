@@ -25,12 +25,7 @@ struct RHIGraphicsPipelineCreateInfo
 	inline RHIGraphicsPipelineCreateInfo& SetBlendState(const RHIBlendStateCreateInfo& InBlendState) { BlendState = InBlendState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetDepthStencilState(const RHIDepthStencilStateCreateInfo& InDepthStencilState) { DepthStencilState = InDepthStencilState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetMultisampleState(const RHIMultisampleStateCreateInfo& InMultisampleState) { MultisampleState = InMultisampleState; return *this; }
-	inline RHIGraphicsPipelineCreateInfo& SetShader(RHIShaderCreateInfo&& CreateInfo) 
-	{ 
-		assert(CreateInfo.Stage < ERHIShaderStage::Num);
-		Shaders[static_cast<size_t>(CreateInfo.Stage)] = std::move(CreateInfo);
-		return *this;
-	}
+	RHIGraphicsPipelineCreateInfo& SetShader(const class ShaderAsset& Shader);
 };
 
 struct RHIComputePipelineCreateInfo

@@ -1,21 +1,12 @@
-#if 0
-#include "Colorful/IRenderer/IPipeline.h"
+#include "Engine/Asset/ShaderAsset.h"
+#include "Engine/RHI/RHIPipeline.h"
 
-NAMESPACE_START(RHI)
-
-PipelineState::PipelineState(const GraphicsPipelineDesc& Desc)
-	: FrameBuffer(Desc.FrameBuffer)
+RHIGraphicsPipelineCreateInfo& RHIGraphicsPipelineCreateInfo::SetShader(const ShaderAsset& Shader)
 {
-	Desc.Shaders.ForEach([this](const IShader* Shader) {
-		assert(Shader->Desc());
-		for (auto& Variable : Shader->Desc()->Variables)
-		{
-			ShaderVariableTable.m_Variables.emplace_back(ShaderVariable(
-				static_cast<uint32_t>(ShaderVariableTable.m_Variables.size()),
-				Variable));
-		}
-	});
-}
+	auto Index = static_cast<uint32_t>(Shader.GetStage());
+	Shaders[Index].SetStage(Shader.GetStage())
+		.SetShaderBinary(Shader.GetBinary())
+		.SetName(Shader.GetName().string());
 
-NAMESPACE_END(RHI)
-#endif
+	return *this;
+}

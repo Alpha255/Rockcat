@@ -36,33 +36,19 @@ public:
 	virtual void WaitIdle() const override final { assert(m_LogicalDevice); m_LogicalDevice.waitIdle(); }
 
 	virtual RHIShaderPtr CreateShader(const RHIShaderCreateInfo& RHICreateInfo) override final;
-
 	virtual RHIImagePtr CreateImage(const RHIImageCreateInfo& RHICreateInfo) override final;
-
 	virtual RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo) override final;
-
 	virtual RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo) override final;
-
 	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) override final;
-
 	virtual RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo) override final;
-
 	virtual RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& RHICreateInfo) override final;
-
-	virtual RHICommandBufferPoolPtr CreateCommandBufferPool(ERHIDeviceQueue QueueType) override final;
-
 	virtual void SubmitCommandBuffer(ERHIDeviceQueue QueueType, RHICommandBuffer* Command) override final;
-
 	virtual void SubmitCommandBuffer(RHICommandBuffer* Command) override final;
-
 	virtual RHICommandBufferPtr GetActiveCommandBuffer(ERHIDeviceQueue QueueType, ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary) override final;
 
 	inline const vk::Device& GetNative() const { return m_LogicalDevice; }
-
 	inline const vk::PhysicalDevice& GetPhysicalDevice() const { return m_PhysicalDevice; }
-
 	const vk::Instance& GetInstance() const;
-
 	const vk::PhysicalDeviceLimits& GetPhysicalDeviceLimits() const { return m_Limits; }
 private:
 	bool GetQueueFamilyIndex(const vk::PhysicalDevice& PhysicalDevice, uint32_t& GraphicsQueueIndex, uint32_t& ComputeQueueIndex, uint32_t& TransferQueueIndex, uint32_t& PresentQueueIndex) const;

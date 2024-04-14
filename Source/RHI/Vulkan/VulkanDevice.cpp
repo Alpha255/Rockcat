@@ -654,11 +654,6 @@ RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& /*RHICreat
 	return RHISamplerPtr();
 }
 
-RHICommandBufferPoolPtr VulkanDevice::CreateCommandBufferPool(ERHIDeviceQueue /*QueueType*/)
-{
-	return RHICommandBufferPoolPtr();
-}
-
 void VulkanDevice::SubmitCommandBuffer(ERHIDeviceQueue /*QueueType*/, RHICommandBuffer* /*Command*/)
 {
 }

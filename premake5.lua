@@ -38,6 +38,7 @@ workspace "Rockcat"
 				"./Assets/Shaders/*.vert",
 				"./Assets/Shaders/*.frag",
 				"./Assets/Shaders/*.comp",
+				"./Assets/Shaders/*.h",
 			}
 			defines { "STB_IMAGE_IMPLEMENTATION" }
 			includedirs {

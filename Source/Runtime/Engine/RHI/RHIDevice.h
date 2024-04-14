@@ -52,27 +52,15 @@ public:
 	virtual void WaitIdle() const = 0;
 
 	virtual RHIShaderPtr CreateShader(const RHIShaderCreateInfo& RHICreateInfo) = 0;
-
 	virtual RHIImagePtr CreateImage(const RHIImageCreateInfo& RHICreateInfo) = 0;
-
 	virtual RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo) = 0;
-
 	virtual RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo) = 0;
-
 	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) = 0;
-
 	virtual RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo) = 0;
-
 	virtual RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& RHICreateInfo) = 0;
-
-	virtual RHICommandBufferPoolPtr CreateCommandBufferPool(ERHIDeviceQueue QueueType) = 0;
-
 	virtual void SubmitCommandBuffer(ERHIDeviceQueue QueueType, RHICommandBuffer* Command) = 0;
-
 	virtual void SubmitCommandBuffer(RHICommandBuffer* Command) = 0;
-
 	virtual RHICommandBufferPtr GetActiveCommandBuffer(ERHIDeviceQueue QueueType, ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary) = 0;
-
 	const char* const GetAdapterName() const { return m_AdapterName.c_str(); }
 private:
 	std::string m_AdapterName;
