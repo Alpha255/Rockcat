@@ -198,9 +198,7 @@ public:
 
 	void RegisterVariable(const char* Name, ShaderVariable&& Variable)
 	{
-		std::string VariableName(Name);
-
-		auto It = m_Variables.find(VariableName);
+		auto It = m_Variables.find(Name);
 		if (It != m_Variables.end())
 		{
 			It->second = std::move(Variable);
@@ -212,7 +210,7 @@ public:
 		}
 		else
 		{
-			m_Variables.insert(std::make_pair(VariableName, std::forward<ShaderVariable>(Variable)));
+			m_Variables.insert(std::make_pair(std::string(Name), std::forward<ShaderVariable>(Variable)));
 		}
 	}
 
@@ -220,7 +218,8 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(ShaderDefines)
+			CEREAL_BASE(ShaderDefines),
+			CEREAL_NVP(m_Variables)
 		);
 	}
 protected:
@@ -238,6 +237,8 @@ protected:
 	}
 
 	static ERHIShaderStage GetStage(const std::filesystem::path& Path);
+	const std::map<std::string, ShaderVariable>& GetVariables() const { return m_Variables; }
+	std::map<std::string, ShaderVariable>& GetVariables() { return m_Variables; }
 private:
 	void GetDefaultDefines();
 

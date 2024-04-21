@@ -24,14 +24,10 @@ void RenderTest::OnInitialize()
 #endif
 #endif
 	{
-		MaterialLit Material;
-		Material.GenericVS::GetShaderVariables()
-			.SetProjectionMatrix(Math::Matrix())
+		MaterialUnlit Material;
+		Material.SetProjectionMatrix(Math::Matrix())
 			.SetViewMatrix(Math::Matrix());
-		Material.DefaultLitFS::GetShaderVariables()
-			.SetBaseColorMap("ToyCar\\glTF\\Fabric_baseColor.png");
-
-		auto& ShaderVariables = Material.GenericVS::GetShaderVariables();
+		Material.SetBaseColorMap("ToyCar\\glTF\\Fabric_baseColor.png");
 	}
 	
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");

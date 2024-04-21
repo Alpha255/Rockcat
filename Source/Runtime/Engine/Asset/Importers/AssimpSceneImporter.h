@@ -381,8 +381,8 @@ private:
 			{
 			case aiTextureType_DIFFUSE:
 			case aiTextureType_BASE_COLOR:
-				Unlit->DefaultUnlitFS::GetShaderVariables().SetDiffuseMap(TexturePath);
-				Image = Unlit->DefaultUnlitFS::GetShaderVariables().GetDiffuseMap();
+				Unlit->SetBaseColorMap(TexturePath);
+				//Image = Unlit->GetBaseColorMap();
 				break;
 			}
 		}
@@ -402,12 +402,12 @@ private:
 			{
 			case aiTextureType_DIFFUSE:
 			case aiTextureType_BASE_COLOR:
-				Lit->DefaultLitFS::GetShaderVariables().SetBaseColorMap(TexturePath);
-				Image = Lit->DefaultLitFS::GetShaderVariables().GetBaseColorMap();
+				Lit->SetBaseColorMap(TexturePath);
+				//Image = Lit->DefaultLitFS::GetShaderVariables().GetBaseColorMap();
 				break;
 			case aiTextureType_NORMALS:
-				Lit->DefaultLitFS::GetShaderVariables().SetNormalMap(TexturePath);
-				Image = Lit->DefaultLitFS::GetShaderVariables().GetNormalMap();
+				Lit->SetNormalMap(TexturePath);
+				//Image = Lit->DefaultLitFS::GetShaderVariables().GetNormalMap();
 				break;
 			case aiTextureType_REFLECTION:
 				break;
@@ -435,14 +435,14 @@ private:
 				case aiTextureType_OPACITY:
 					break;
 				case aiTextureType_METALNESS:
-					Lit->DefaultLitFS::GetShaderVariables().SetMetallicRoughnessMap(TexturePath);
-					Image = Lit->DefaultLitFS::GetShaderVariables().GetMetallicRoughnessMap();
+					Lit->SetMetallicRoughnessMap(TexturePath);
+					//Image = Lit->DefaultLitFS::GetShaderVariables().GetMetallicRoughnessMap();
 					break;
 				case aiTextureType_DIFFUSE_ROUGHNESS:
 					break;
 				case aiTextureType_AMBIENT_OCCLUSION:
-					Lit->DefaultLitFS::GetShaderVariables().SetAOMap(TexturePath);
-					Image = Lit->DefaultLitFS::GetShaderVariables().GetAOMap();
+					Lit->SetAOMap(TexturePath);
+					//Image = Lit->DefaultLitFS::GetShaderVariables().GetAOMap();
 					break;
 				case aiTextureType_SHEEN:
 					break;
@@ -467,8 +467,8 @@ private:
 			{
 			case aiTextureType_DIFFUSE:
 			case aiTextureType_BASE_COLOR:
-				Toon->DefaultToonFS::GetShaderVariables().SetBaseColorMap(TexturePath);
-				Image = Toon->DefaultToonFS::GetShaderVariables().GetBaseColorMap();
+				Toon->SetBaseColorMap(TexturePath);
+				//Image = Toon->GetBaseColorMap();
 				break;
 			}
 		}
@@ -478,36 +478,12 @@ private:
 
 	ShaderAsset& GetVertexShader(AssimpSceneAsset& AssimpScene, uint32_t MaterialIndex)
 	{
-		auto& Material = *AssimpScene.Data.Materials[MaterialIndex].get();
-		switch (Material.GetShadingMode())
-		{
-		case EShadingMode::Unlit:
-		default:
-			return Cast<GenericVS>(Cast<MaterialUnlit>(Material));
-		case EShadingMode::BlinnPhong:
-			return Cast<GenericVS>(Cast<MaterialLit>(Material));
-		case EShadingMode::StandardPBR:
-			return Cast<GenericVS>(Cast<MaterialLit>(Material));
-		case EShadingMode::Toon:
-			return Cast<GenericVS>(Cast<MaterialToon>(Material));
-		}
+		return const_cast<ShaderAsset&>(AssimpScene.Data.Materials[MaterialIndex]->GetVertexShader());
 	}
 
 	ShaderAsset& GetFragmentShader(AssimpSceneAsset& AssimpScene, uint32_t MaterialIndex)
 	{
-		auto& Material = *AssimpScene.Data.Materials[MaterialIndex].get();
-		switch (Material.GetShadingMode())
-		{
-		case EShadingMode::Unlit:
-		default:
-			return Cast<DefaultUnlitFS>(Cast<MaterialUnlit>(Material));
-		case EShadingMode::BlinnPhong:
-			return Cast<DefaultLitFS>(Cast<MaterialLit>(Material));
-		case EShadingMode::StandardPBR:
-			return Cast<DefaultLitFS>(Cast<MaterialLit>(Material));
-		case EShadingMode::Toon:
-			return Cast<DefaultToonFS>(Cast<MaterialToon>(Material));
-		}
+		return const_cast<ShaderAsset&>(AssimpScene.Data.Materials[MaterialIndex]->GetFragmentShader());
 	}
 
 	void ProcessTextures(const aiMaterial* AiMaterial, MaterialAsset* Material, const std::filesystem::path& RootPath)
@@ -550,11 +526,11 @@ private:
 		}
 	}
 
-	void CompileMaterials(AssimpSceneAsset& AssimpScene)
+	void CompileMaterials(AssimpSceneAsset& /*AssimpScene*/)
 	{
-		for (auto& Material : AssimpScene.Data.Materials)
-		{
-			Material->Compile();
-		}
+		//for (auto& Material : AssimpScene.Data.Materials)
+		//{
+		//	Material->Compile();
+		//}
 	}
 };

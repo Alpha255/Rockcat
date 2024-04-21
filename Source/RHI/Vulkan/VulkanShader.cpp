@@ -2,11 +2,10 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "Engine/Asset/ShaderAsset.h"
 
-VulkanShader::VulkanShader(const class VulkanDevice& Device, const RHIShaderCreateInfo& CreateInfo)
+VulkanShader::VulkanShader(const VulkanDevice& Device, const RHIShaderCreateInfo& CreateInfo)
 	: VkHwResource(Device)
 {
-	assert(GetStage() < ERHIShaderStage::Num && CreateInfo.Binary);
-	assert(CreateInfo.Binary->GetSize() && CreateInfo.Binary->GetSize() % sizeof(uint32_t) == 0);
+	assert(CreateInfo.Binary && CreateInfo.Binary->GetSize() && CreateInfo.Binary->GetSize() % sizeof(uint32_t) == 0);
 
 	auto vkCreateInfo = vk::ShaderModuleCreateInfo()
 		.setCodeSize(CreateInfo.Binary->GetSize())

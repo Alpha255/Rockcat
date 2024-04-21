@@ -79,7 +79,7 @@ D3D12Buffer::D3D12Buffer(const D3D12Device& Device, const RHIBufferCreateInfo& R
 
 void* D3D12Buffer::Map(size_t Size, size_t Offset)
 {
-	assert(m_HostVisible && m_MappedMemory == nullptr && (Size == WHOLE_SIZE || Offset + Size <= m_Size));
+	assert(m_HostVisible && m_MappedMemory == nullptr && (Size == RHI_WHOLE_SIZE || Offset + Size <= m_Size));
 
 	D3D12_RANGE Range
 	{

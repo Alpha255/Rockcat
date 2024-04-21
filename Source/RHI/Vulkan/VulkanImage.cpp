@@ -194,6 +194,7 @@ VulkanImage::~VulkanImage()
 
 VulkanSampler::VulkanSampler(const VulkanDevice& Device, const RHISamplerCreateInfo& CreateInfo)
 	: VkHwResource(Device)
+	, RHISampler(CreateInfo)
 {
 	/*
 	  If the image view has a depth/stencil format, the depth component is selected by the aspectMask,

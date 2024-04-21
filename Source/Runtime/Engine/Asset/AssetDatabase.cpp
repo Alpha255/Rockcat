@@ -24,7 +24,7 @@ public:
 		m_Asset->SetCallbacks(AssetLoadCallbacks);
 	}
 
-	std::shared_ptr<Asset> GetAsset() const { return m_Asset; }
+	std::shared_ptr<Asset>& GetAsset() { return m_Asset; }
 
 	void Execute() override final
 	{

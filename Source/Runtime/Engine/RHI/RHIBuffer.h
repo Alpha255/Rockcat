@@ -2,7 +2,7 @@
 
 #include "Engine/RHI/RHIImage.h"
 
-#define WHOLE_SIZE ~0u
+#define RHI_WHOLE_SIZE ~0u
 
 struct RHIBufferCreateInfo
 {
@@ -19,18 +19,23 @@ struct RHIBufferCreateInfo
 	inline RHIBufferCreateInfo& SetPermanentStates(ERHIResourceState States) { PermanentStates = States; return *this; }
 	inline RHIBufferCreateInfo& SetSize(size_t DataSize) { Size = DataSize; return *this; }
 	inline RHIBufferCreateInfo& SetInitialData(const void* Data) { InitialData = Data; return *this; }
-	
+
 	template<class T>
 	inline RHIBufferCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 };
 
-class RHIBuffer
+class RHIBuffer : public RHIResource
 {
 public:
-	virtual void* Map(size_t Size = WHOLE_SIZE, size_t Offset = 0u) = 0;
+	RHIBuffer(const RHIBufferCreateInfo& CreateInfo)
+		: RHIResource(CreateInfo.Name.c_str())
+	{
+	}
+
+	virtual void* Map(size_t Size = RHI_WHOLE_SIZE, size_t Offset = 0u) = 0;
 	virtual void Unmap() = 0;
-	virtual void FlushMappedRange(size_t Size = WHOLE_SIZE, size_t Offset = 0u) = 0;
-	virtual void InvalidateMappedRange(size_t Size = WHOLE_SIZE, size_t Offset = 0u) = 0;
+	virtual void FlushMappedRange(size_t Size = RHI_WHOLE_SIZE, size_t Offset = 0u) = 0;
+	virtual void InvalidateMappedRange(size_t Size = RHI_WHOLE_SIZE, size_t Offset = 0u) = 0;
 	virtual bool Update(const void* Data, size_t Size, size_t SrcOffset = 0u, size_t DstOffset = 0u) = 0;
 	void* GetMappedMemory() const { return m_MappedMemory; }
 protected:
@@ -39,54 +44,51 @@ protected:
 
 struct RHIFrameBufferCreateInfo
 {
-	struct RHIAttachment
-	{
-		ERHIFormat Format = ERHIFormat::Unknown;
-		RHIImagePtr Image;
-	};
-
 	uint32_t Width = 0u;
 	uint32_t Height = 0u;
 	uint32_t ArrayLayers = 0u;
+	std::string Name;
 
-	RHIAttachment DepthStencilAttachment;
-	std::vector<RHIAttachment> ColorAttachments;
+	const RHIImage* DepthStencilAttachment = nullptr;
+	std::vector<const RHIImage*> ColorAttachments;
 
-	RHIFrameBufferCreateInfo& SetWidth(uint32_t InWidth) { Width = InWidth; }
-	RHIFrameBufferCreateInfo& SetHeight(uint32_t InHeight) { Height = InHeight; }
-	RHIFrameBufferCreateInfo& SetArrayLayers(uint32_t InLayers) { ArrayLayers = InLayers; }
+	inline RHIFrameBufferCreateInfo& SetWidth(uint32_t InWidth) { Width = InWidth; }
+	inline RHIFrameBufferCreateInfo& SetHeight(uint32_t InHeight) { Height = InHeight; }
+	inline RHIFrameBufferCreateInfo& SetArrayLayers(uint32_t InLayers) { ArrayLayers = InLayers; }
 
-	RHIFrameBufferCreateInfo& AddColorFormat(ERHIFormat Format)
+	inline RHIFrameBufferCreateInfo& AddColorAttachment(const RHIImage* Color)
 	{
-		assert(ColorAttachments.size() < ERHILimitations::MaxRenderTargets);
-		ColorAttachments.emplace_back(RHIAttachment{Format, nullptr});
+		assert(ColorAttachments.size() < ERHILimitations::MaxRenderTargets && Color && RHI::IsColor(Color->GetFormat()));
+		ColorAttachments.emplace_back(Color);
 		return *this;
 	}
 
-	RHIFrameBufferCreateInfo& SetColorAttachment(uint32_t Index, RHIImagePtr Color)
+	inline RHIFrameBufferCreateInfo& SetColorAttachment(uint32_t Index, const RHIImage* Color)
 	{
-		assert(Index < ERHILimitations::MaxRenderTargets && ColorAttachments[Index].Format == Color->GetFormat());
-		ColorAttachments[Index].Image = Color;
+		assert(Index < ERHILimitations::MaxRenderTargets && Color && RHI::IsColor(Color->GetFormat()));
+		ColorAttachments[Index] = Color;
 		return *this;
 	}
 
-	RHIFrameBufferCreateInfo& SetDepthStencilFormat(ERHIFormat Format)
+	inline RHIFrameBufferCreateInfo& SetDepthStencilAttachment(const RHIImage* DepthStencil)
 	{
-		DepthStencilAttachment.Format = Format;
+		assert(DepthStencil && RHI::IsDepthStenci(DepthStencil->GetFormat()));
+		DepthStencilAttachment = DepthStencil;
 		return *this;
 	}
 
-	RHIFrameBufferCreateInfo& SetDepthStencilAttachment(RHIImagePtr DepthStencil)
-	{
-		assert(DepthStencilAttachment.Format == DepthStencil->GetFormat());
-		DepthStencilAttachment.Image = DepthStencil;
-		return *this;
-	}
+	template<class T>
+	inline RHIFrameBufferCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 };
 
-class RHIFrameBuffer
+class RHIFrameBuffer : public RHIResource
 {
 public:
+	RHIFrameBuffer(const RHIFrameBufferCreateInfo& CreateInfo)
+		: RHIResource(CreateInfo.Name.c_str())
+	{
+	}
+
 	inline uint32_t GetWidth() const { return m_Width; }
 	inline uint32_t GetHeight() const { return m_Height; }
 	inline uint32_t GetArrayLayers() const { return m_ArrayLayers; }

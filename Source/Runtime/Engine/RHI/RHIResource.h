@@ -101,6 +101,29 @@ enum class ERHIDebugLayerLevel
 	Verbose
 };
 
+enum class ERHISampleCount : uint8_t
+{
+	Sample_1_Bit = 1 << 0,
+	Sample_2_Bit = 1 << 1,
+	Sample_4_Bit = 1 << 2,
+	Sample_8_Bit = 1 << 3,
+	Sample_16_Bit = 1 << 4,
+	Sample_32_Bit = 1 << 5,
+	Sample_64_Bit = 1 << 6
+};
+
+enum class ERHICompareFunc : uint8_t
+{
+	Always,
+	Never,
+	Less,
+	LessOrEqual,
+	Equal,
+	NotEqual,
+	Greater,
+	GreaterOrEqual
+};
+
 template<class T>
 class RHIObject
 {
@@ -170,7 +193,7 @@ public:
 	virtual ~RHIResource() = default;
 
 	RHIResource(const char* DebugName)
-		: m_DebugName(DebugName)
+		: m_DebugName(DebugName ? DebugName : "")
 	{
 	}
 

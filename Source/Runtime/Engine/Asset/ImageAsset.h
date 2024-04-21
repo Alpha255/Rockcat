@@ -9,6 +9,7 @@ public:
 	using Asset::Asset;
 
 	bool IsSRGB() const { return SRGB; }
+	const RHIImage* GetRHI() const { return Image; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -29,7 +30,7 @@ protected:
 	void SetUseSRGB(bool InSRGB) { SRGB = InSRGB; }
 
 	bool SRGB = false;
-	const RHIImage* Image;
+	const RHIImage* Image = nullptr;
 };
 
 namespace cereal

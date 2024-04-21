@@ -7,9 +7,5 @@
 
 void ForwardRenderingPath::Setup()
 {
-	this->AddPass<PreDepthPass>()
-		.AddPass<ShadowPass>()
-		.AddPass<OpaquePass>()
-		.AddPass<TranslucentPass>()
-		.AddPass<BlitPass>();
+	AddPass<PreDepthPass>();
 }

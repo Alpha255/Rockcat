@@ -2,12 +2,13 @@
 
 #include "Engine/RHI/RHIBuffer.h"
 #include "Engine/RHI/RHIShader.h"
+#include "Engine/RHI/RHIRenderStates.h"
 
 struct RHIShaderVariableBinding
 {
-	ERHIShaderStage Stage;
+	ERHIShaderStage Stage = ERHIShaderStage::Num;
 	uint32_t Binding = 0u;
-	ERHIResourceType Type = ERHIResourceType::UniformBuffer;
+	ERHIResourceType Type = ERHIResourceType::Unknown;
 };
 using RHIPipelineLayoutDesc = std::vector<RHIShaderVariableBinding>;
 
@@ -191,12 +192,22 @@ public:
 	virtual void Commit(const RHIPipelineLayoutDesc& Desc) = 0;
 };
 
+#define ENABLE_SHADER_HOT_RELOAD 1
+
 class RHIPipeline
 {
 };
 
 class RHIGraphicsPipeline : public RHIPipeline
 {
+#if ENABLE_SHADER_HOT_RELOAD
+	RHIGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo)
+		: m_CreateInfo(CreateInfo)
+	{
+	}
+private:
+	RHIGraphicsPipelineCreateInfo m_CreateInfo;
+#endif
 };
 
 class RHIComputePipeline : public RHIPipeline

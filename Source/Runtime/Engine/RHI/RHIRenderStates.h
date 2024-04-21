@@ -86,18 +86,6 @@ enum class ERHILogicOp : uint8_t
 	Set
 };
 
-enum class ERHICompareFunc : uint8_t
-{
-	Always,
-	Never,
-	Less,
-	LessOrEqual,
-	Equal,
-	NotEqual,
-	Greater,
-	GreaterOrEqual
-};
-
 enum class ERHIStencilOp : uint8_t
 {
 	Keep,
@@ -108,17 +96,6 @@ enum class ERHIStencilOp : uint8_t
 	Invert,
 	IncrementAndWrap,        /// Increment the stencil value by 1, and wrap the result if necessary
 	DecrementAndWrap         /// Increment the stencil value by 1, and wrap the result if necessary
-};
-
-enum class ERHISampleCount : uint8_t
-{
-	Sample_1_Bit = 1 << 0,
-	Sample_2_Bit = 1 << 1,
-	Sample_4_Bit = 1 << 2,
-	Sample_8_Bit = 1 << 3,
-	Sample_16_Bit = 1 << 4,
-	Sample_32_Bit = 1 << 5,
-	Sample_64_Bit = 1 << 6
 };
 
 enum class ERHIPrimitiveTopology : uint8_t

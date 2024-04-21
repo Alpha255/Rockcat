@@ -239,9 +239,9 @@ std::string TrimEnumString(const std::string& Name);
 
 void SplitEnumArgs(const char* Args, std::string Names[], uint32_t Max);
 
-static constexpr unsigned long long Kilobyte = 1 << 10ull;
-static constexpr unsigned long long Megabyte = 1 << 20ull;
-static constexpr unsigned long long Gigabyte = 1 << 30ull;
+static constexpr size_t Kilobyte = 1 << 10u;
+static constexpr size_t Megabyte = 1 << 20u;
+static constexpr size_t Gigabyte = 1 << 30u;
 
 #define DECLARE_ENUM_CLASS(ClassName, ...)                     \
 class ClassName                                                \

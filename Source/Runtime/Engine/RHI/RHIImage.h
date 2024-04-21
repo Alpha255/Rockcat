@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/RHI/RHIRenderStates.h"
+#include "Engine/RHI/RHIResource.h"
 
 enum class ERHIImageType : uint8_t
 {
@@ -94,7 +94,7 @@ struct RHIImageCreateInfo
 	inline RHIImageCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 };
 
-class RHIImage
+class RHIImage : public RHIResource
 {
 public:
 	RHIImage(const RHIImageCreateInfo& CreateInfo)
@@ -105,6 +105,7 @@ public:
 		, m_MipLevels(CreateInfo.MipLevels)
 		, m_Type(CreateInfo.ImageType)
 		, m_Format(CreateInfo.Format)
+		, RHIResource(CreateInfo.Name.c_str())
 	{
 	}
 
@@ -175,6 +176,8 @@ struct RHISamplerCreateInfo
 	float MipLODBias = 0.0f;
 	float MinLOD = 0.0f;
 	float MaxLOD = 0.0f;
+
+	std::string Name;
 	
 	inline RHISamplerCreateInfo& SetMinMagFilter(ERHIFilter Filter) { MinMagFilter = Filter; return *this; }
 	inline RHISamplerCreateInfo& SetMipmapMode(ERHIFilter Mode) { MipmapMode = Mode; return *this; }
@@ -188,8 +191,16 @@ struct RHISamplerCreateInfo
 	inline RHISamplerCreateInfo& SetMipLODBias(float MipLODBiasValue) { MipLODBias = MipLODBiasValue; return *this; }
 	inline RHISamplerCreateInfo& SetMinLOD(float MinLODValue) { MinLOD = MinLODValue; return *this; }
 	inline RHISamplerCreateInfo& SetMaxLOD(float MaxLODValue) { MaxLOD = MaxLODValue; return *this; }
+
+	template<class T>
+	inline RHISamplerCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 };
 
-class RHISampler
+class RHISampler : public RHIResource
 {
+public:
+	RHISampler(const RHISamplerCreateInfo& CreateInfo)
+		: RHIResource(CreateInfo.Name.c_str())
+	{
+	}
 };

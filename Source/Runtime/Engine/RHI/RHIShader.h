@@ -76,7 +76,7 @@ struct RHIShaderCreateInfo
 	inline RHIShaderCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 };
 
-class RHIShader : public RHIResource
+class RHIShader
 {
 public:
 	ERHIShaderStage GetStage() const { return m_Stage; }

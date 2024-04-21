@@ -79,7 +79,7 @@ D3D11Buffer::D3D11Buffer(const D3D11Device& Device, const RHIBufferCreateInfo& R
 void* D3D11Buffer::Map(size_t Size, size_t Offset)
 {
 #if 0
-	assert(m_HostVisible && m_MappedMemory == nullptr && (Size == WHOLE_SIZE || Offset + Size <= m_Size));
+	assert(m_HostVisible && m_MappedMemory == nullptr && (Size == RHI_WHOLE_SIZE || Offset + Size <= m_Size));
 
 	D3D11_RANGE Range
 	{

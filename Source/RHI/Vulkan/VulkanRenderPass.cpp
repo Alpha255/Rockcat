@@ -149,30 +149,31 @@ VulkanRenderPass::~VulkanRenderPass()
 
 VulkanFramebuffer::VulkanFramebuffer(const VulkanDevice& Device, const RHIFrameBufferCreateInfo& CreateInfo)
 	: VkHwResource(Device)
+	, RHIFrameBuffer(CreateInfo)
 {
 	CreateRenderPass(CreateInfo);
 
 	std::vector<vk::ImageView> Attachments;
-	for (auto& ColorAttachment : CreateInfo.ColorAttachments)
-	{
-		if (ColorAttachment.Image)
-		{
-			auto Image = Cast<VulkanImage>(ColorAttachment.Image);
-			assert(Image &&
-				Image->GetWidth() == CreateInfo.Width &&
-				Image->GetHeight() == CreateInfo.Height &&
-				Image->GetArrayLayers() == CreateInfo.ArrayLayers);
+	//for (auto& ColorAttachment : CreateInfo.ColorAttachments)
+	//{
+	//	if (ColorAttachment.Image)
+	//	{
+	//		auto Image = Cast<VulkanImage>(ColorAttachment.Image);
+	//		assert(Image &&
+	//			Image->GetWidth() == CreateInfo.Width &&
+	//			Image->GetHeight() == CreateInfo.Height &&
+	//			Image->GetArrayLayers() == CreateInfo.ArrayLayers);
 
-			//Attachments.push_back(Image->GetOrCrateImageView(AllSubresource));
-		}
-	}
-	if (CreateInfo.DepthStencilAttachment.Image)
-	{
-		auto Image = Cast<VulkanImage>(CreateInfo.DepthStencilAttachment.Image);
-		assert(Image);
+	//		//Attachments.push_back(Image->GetOrCrateImageView(AllSubresource));
+	//	}
+	//}
+	//if (CreateInfo.DepthStencilAttachment.Image)
+	//{
+	//	auto Image = Cast<VulkanImage>(CreateInfo.DepthStencilAttachment.Image);
+	//	assert(Image);
 
-		//Attachments.push_back(Image->GetOrCrateImageView(AllSubresource));
-	}
+	//	//Attachments.push_back(Image->GetOrCrateImageView(AllSubresource));
+	//}
 
 	auto vkCreateInfo = vk::FramebufferCreateInfo()
 		.setRenderPass(m_RenderPass)
@@ -222,7 +223,7 @@ void VulkanFramebuffer::CreateRenderPass(const RHIFrameBufferCreateInfo& CreateI
 	for (uint32_t ColorAttachmentIndex = 0u; ColorAttachmentIndex < CreateInfo.ColorAttachments.size(); ++ColorAttachmentIndex)
 	{
 		AttachmentDescriptions[ColorAttachmentIndex]
-			.setFormat(GetFormat(CreateInfo.ColorAttachments[ColorAttachmentIndex].Format))
+			.setFormat(GetFormat(CreateInfo.ColorAttachments[ColorAttachmentIndex]->GetFormat()))
 			.setSamples(vk::SampleCountFlagBits::e1)
 			.setLoadOp(vk::AttachmentLoadOp::eLoad)
 			.setStoreOp(vk::AttachmentStoreOp::eStore)
@@ -236,11 +237,11 @@ void VulkanFramebuffer::CreateRenderPass(const RHIFrameBufferCreateInfo& CreateI
 			.setLayout(vk::ImageLayout::eAttachmentOptimal);
 	}
 
-	if (CreateInfo.DepthStencilAttachment.Image)
+	if (CreateInfo.DepthStencilAttachment)
 	{
 		AttachmentDescriptions.emplace_back(
 			vk::AttachmentDescription()
-			.setFormat(GetFormat(CreateInfo.DepthStencilAttachment.Format))
+			.setFormat(GetFormat(CreateInfo.DepthStencilAttachment->GetFormat()))
 			.setSamples(vk::SampleCountFlagBits::e1)
 			.setLoadOp(vk::AttachmentLoadOp::eLoad)
 			.setStoreOp(vk::AttachmentStoreOp::eStore)
