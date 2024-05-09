@@ -144,7 +144,7 @@ workspace "Rockcat"
 			location "./Out/Intermediate/VCProjects"
 			targetdir "$(SolutionDir)Out"
 			targetname "$(ProjectName)_$(Configuration)"
-			--buildoptions { "/bigobj" }
+			buildoptions { "/bigobj" }
 			disablewarnings { "4131", "4127", "4244" }
 			--implibname "$(SolutionDir)Out/Intermediate/$(Configuration)/$(ProjectName)"
 			files {
@@ -262,6 +262,52 @@ workspace "Rockcat"
 			},
 			[""] = {
 				"./Source/Applications/RenderTest/**",
+			}
+		}
+
+		project "ImGuiEditor"
+		kind "WindowedApp"
+		language "C++"
+		location "./Out/Intermediate/VCProjects"
+		targetname "$(ProjectName)_$(Configuration)"
+		files {
+			"./Source/Applications/ImGuiEditor/**",
+			"./Source/Runtime/Engine/Application/Resource.rc",
+			"./Submodules/imgui/backends/imgui_impl_vulkan.h",
+			"./Submodules/imgui/backends/imgui_impl_vulkan.cpp"
+		}
+		includedirs {
+			"$(SolutionDir)",
+			"$(SolutionDir)Source",
+			"$(SolutionDir)Source/Runtime",
+			"$(SolutionDir)Submodules/cereal/include",
+			"$(SolutionDir)Submodules/spdlog/include",
+			"$(SolutionDir)Submodules/imgui",
+			"$(VK_SDK_PATH)/Include",
+		}
+		libdirs {
+			"$(VK_SDK_PATH)/Lib"
+		}
+		targetdir "$(SolutionDir)Out"
+		links {
+			"Runtime",
+			"assimp",
+			"imgui",
+			"vulkan-1",
+			"dxcompiler",
+			"d3dcompiler",
+			"VulkanRHI",
+		}
+		vpaths {
+			["Resource"] = {
+				"./Source/Runtime/Engine/Application/Resource.rc"
+			},
+			[""] = {
+				"./Source/Applications/ImGuiEditor/**",
+			},
+			["ImGuiImpl"] = {
+				"./Submodules/imgui/backends/imgui_impl_vulkan.h",
+				"./Submodules/imgui/backends/imgui_impl_vulkan.cpp"
 			}
 		}
 

@@ -62,7 +62,7 @@ bool Engine::Initialize()
 	auto AssetsDirectory = PlatformMisc::GetCurrentModuleDirectory().parent_path() / "Assets";
 	if (!std::filesystem::exists(AssetsDirectory))
 	{
-		LOG_ERROR("Invalid assets directory.");
+		LOG_ERROR("Invalid assets directory: {}.", AssetsDirectory.string());
 		return false;
 	}
 
