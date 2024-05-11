@@ -124,7 +124,7 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 		UsageFlags |= vk::ImageUsageFlagBits::eTransferDst;
 	}
 
-	auto CompositeAlphaFlagBits = vk::CompositeAlphaFlagBitsKHR(vk::FlagTraits<vk::CompositeAlphaFlagBitsKHR>::allFlags);
+	auto CompositeAlphaFlagBits = vk::CompositeAlphaFlagBitsKHR::eOpaque;
 	vk::CompositeAlphaFlagBitsKHR CompositeAlphaFlagBitsArray[]
 	{
 		vk::CompositeAlphaFlagBitsKHR::eOpaque,
@@ -140,7 +140,6 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 			break;
 		}
 	}
-	assert(CompositeAlphaFlagBits != vk::CompositeAlphaFlagBitsKHR(vk::FlagTraits<vk::CompositeAlphaFlagBitsKHR>::allFlags));
 
 	auto SurfaceTransformFlagBits = vk::SurfaceTransformFlagBitsKHR::eIdentity;
 	if (SurfaceCapabilities.supportedTransforms & vk::SurfaceTransformFlagBitsKHR::eIdentity)
