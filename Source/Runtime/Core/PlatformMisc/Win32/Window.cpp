@@ -184,7 +184,7 @@ void Window::ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam)
 	case WM_MOUSEWHEEL:
 		m_MouseEvent.State = EKeyState::Up;
 		m_MouseEvent.OnMove = false;
-		m_MouseEvent.WheelDelta = GET_WHEEL_DELTA_WPARAM(WParam) > 0 ? 1 : -1;
+		m_MouseEvent.WheelDelta = GET_WHEEL_DELTA_WPARAM(WParam);
 		OnMouseEvent();
 		break;
 	case WM_MOUSEMOVE:

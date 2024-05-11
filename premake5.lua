@@ -274,7 +274,11 @@ workspace "Rockcat"
 			"./Source/Applications/ImGuiEditor/**",
 			"./Source/Runtime/Engine/Application/Resource.rc",
 			"./Submodules/imgui/backends/imgui_impl_vulkan.h",
-			"./Submodules/imgui/backends/imgui_impl_vulkan.cpp"
+			"./Submodules/imgui/backends/imgui_impl_vulkan.cpp",
+			"./Submodules/imgui/backends/imgui_impl_Win32.h",
+			"./Submodules/imgui/backends/imgui_impl_win32.cpp",
+			"./Submodules/imgui/backends/imgui_impl_dx12.h",
+			"./Submodules/imgui/backends/imgui_impl_dx12.cpp"
 		}
 		includedirs {
 			"$(SolutionDir)",
@@ -297,6 +301,8 @@ workspace "Rockcat"
 			"dxcompiler",
 			"d3dcompiler",
 			"VulkanRHI",
+			"d3d12",
+			"dxgi"
 		}
 		vpaths {
 			["Resource"] = {
@@ -307,7 +313,11 @@ workspace "Rockcat"
 			},
 			["ImGuiImpl"] = {
 				"./Submodules/imgui/backends/imgui_impl_vulkan.h",
-				"./Submodules/imgui/backends/imgui_impl_vulkan.cpp"
+				"./Submodules/imgui/backends/imgui_impl_vulkan.cpp",
+				"./Submodules/imgui/backends/imgui_impl_Win32.h",
+				"./Submodules/imgui/backends/imgui_impl_win32.cpp",
+				"./Submodules/imgui/backends/imgui_impl_dx12.h",
+				"./Submodules/imgui/backends/imgui_impl_dx12.cpp"
 			}
 		}
 

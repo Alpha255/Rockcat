@@ -85,7 +85,7 @@ struct MouseEvent
 {
 	EMouseButton Button;
 	bool OnMove = false;
-	int8_t WheelDelta = 0;
+	int16_t WheelDelta = 0;
 	EKeyState State = EKeyState::Up;
 	Math::Vector2 Position;
 	InputModifiers Modifiers;

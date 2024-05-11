@@ -161,7 +161,7 @@ void BaseApplication::OnWindowCreation()
 {
 	if (m_Configs->IsEnableWindow())
 	{
-		m_Window = std::make_shared<Window>(m_Configs->GetWindowCreateInfo(), nullptr);
+		m_Window = std::make_shared<Window>(m_Configs->GetWindowCreateInfo(), this);
 	}
 }
 
