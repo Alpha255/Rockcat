@@ -184,7 +184,8 @@ workspace "Rockcat"
 				"$(SolutionDir)Submodules/assimp/contrib/pugixml/src",
 				"$(SolutionDir)Submodules/assimp/contrib/unzip",
 				"$(SolutionDir)Submodules/assimp/contrib/irrXML",
-				"$(SolutionDir)Submodules/assimp/contrib/openddlparser/include"
+				"$(SolutionDir)Submodules/assimp/contrib/openddlparser/include",
+				"$(SolutionDir)Submodules/assimp/contrib/utf8cpp/source"
 			}
 			filter { "configurations:Debug" }
 				defines { 
@@ -195,6 +196,8 @@ workspace "Rockcat"
 					"UNICODE",
 					"_UNICODE",
 					"ASSIMP_BUILD_NO_C4D_IMPORTER",
+					"ASSIMP_BUILD_NO_USD_IMPORTER",
+					"ASSIMP_BUILD_NO_IFC_IMPORTER",
 					"MINIZ_USE_UNALIGNED_LOADS_AND_STORES=0",
 					"ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1",
 					"RAPIDJSON_HAS_STDSTRING=1",
@@ -214,6 +217,8 @@ workspace "Rockcat"
 					"UNICODE",
 					"_UNICODE",
 					"ASSIMP_BUILD_NO_C4D_IMPORTER",
+					"ASSIMP_BUILD_NO_USD_IMPORTER",
+					"ASSIMP_BUILD_NO_IFC_IMPORTER",
 					"MINIZ_USE_UNALIGNED_LOADS_AND_STORES=0",
 					"ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1",
 					"RAPIDJSON_HAS_STDSTRING=1",
