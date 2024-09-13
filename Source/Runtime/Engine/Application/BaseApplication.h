@@ -30,7 +30,7 @@ public:
 protected:
 	virtual void OnWindowCreation();
 	virtual void OnInitialize() {}
-	virtual void OnGUI(class Canvas&) {}
+	virtual void OnRenderGUI(class Canvas&) {}
 private:
 	std::shared_ptr<class ApplicationConfigurations> m_Configs;
 	std::shared_ptr<class Window> m_Window;

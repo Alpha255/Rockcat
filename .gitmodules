@@ -22,3 +22,6 @@
 [submodule "Submodules/filewatch"]
 	path = Submodules/filewatch
 	url = https://github.com/ThomasMonkman/filewatch.git
+[submodule "Submodules/ImGuiAl"]
+	path = Submodules/ImGuiAl
+	url = https://github.com/leiradel/ImGuiAl.git

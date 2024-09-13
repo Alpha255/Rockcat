@@ -26,6 +26,7 @@ workspace "Rockcat"
 		architecture "x64"
 	filter {}
 	disablewarnings { "4996", "5054" }
+	buildoptions { "/Zc:char8_t-" }
 
 	group "Gear"
 		project "Runtime"
@@ -133,7 +134,8 @@ workspace "Rockcat"
 				"./Submodules/imgui/examples/**", 
 				"./Submodules/imgui/misc/fonts/**",
 				"./Submodules/imgui/misc/freetype/**",
-				"./Submodules/imgui/backends/**"
+				"./Submodules/imgui/backends/**",
+				"./Submodules/imgui/plugins/ImGuiAl/**.cpp"
 			}
 			includedirs { 
 				"$(SolutionDir)Submodules/imgui"

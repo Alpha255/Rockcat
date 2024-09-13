@@ -8,7 +8,7 @@ public:
 	using BaseApplication::BaseApplication;
 protected:
 	void OnInitialize() override final;
-	void OnGUI(class Canvas&) override final {}
+	void OnRenderGUI(class Canvas&) override final {}
 	void OnRenderFrame() override final;
 private:
 	std::shared_ptr<class Scene> m_Scene;
