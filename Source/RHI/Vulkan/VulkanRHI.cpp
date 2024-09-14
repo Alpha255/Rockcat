@@ -22,7 +22,7 @@ void VulkanRHI::InitializeGraphicsDevices()
 	assert(vkGetInstanceProcAddr);
 	VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);	
 #endif
-	s_LayerExtensionConfigs = VulkanLayerExtensionConfigurations::Load(VK_LAYER_EXT_CONFIG_NAME);
+	s_LayerExtensionConfigs = VulkanLayerExtensionConfigurations::Load(VK_LAYER_EXT_CONFIG_PATH);
 	m_Device = std::make_unique<VulkanDevice>(s_LayerExtensionConfigs.get());
 }
 

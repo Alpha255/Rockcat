@@ -3,7 +3,7 @@
 #include "RHI/Vulkan/VulkanTypes.h"
 #include "Engine/Asset/SerializableAsset.h"
 
-#define VK_LAYER_EXT_CONFIG_NAME "VkLayerAndExtensionConfigs.json"
+#define VK_LAYER_EXT_CONFIG_PATH "Configs\\VkLayerAndExtensionConfigs.json"
 #define VK_LAYER_KHRONOS_VALIDATION_NAME "VK_LAYER_KHRONOS_validation"
 
 using VulkanLayerArray = std::vector<std::unique_ptr<class VulkanLayer>>;
