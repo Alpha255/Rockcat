@@ -1,6 +1,8 @@
 #include "Editor/ImGuiConfigurations.h"
 #include "Engine/Services/SpdLogService.h"
 
+const std::map<std::string, ImGuiFont>* ImGuiScopedFont::AllFonts = nullptr;
+
 void ImGuiConfigurations::PostLoad()
 {
 	LoadDefaultFonts();
@@ -42,6 +44,10 @@ void ImGuiConfigurations::LoadDefaultFonts()
 	{
 		LOG_ERROR("Failed to build ImGui font atlas!");
 	}
+	else
+	{
+		ImGuiScopedFont::AllFonts = &m_Fonts;
+	}
 }
 
 void ImGuiConfigurations::LoadDefaultThemes()
@@ -59,27 +65,6 @@ void ImGuiConfigurations::LoadDefaultThemes()
 		else
 		{
 			LOG_ERROR("Duplicated ImGui editor theme in different directory!");
-		}
-	}
-}
-
-void ImGuiConfigurations::SetFont(const char* const FontName)
-{
-	std::string TempFontName(FontName ? FontName : "");
-	if (m_FontName != TempFontName)
-	{
-		auto FontIt = m_Fonts.find(TempFontName);
-		if (FontIt != m_Fonts.end())
-		{
-			if (m_Font)
-			{
-				ImGui::PopFont();
-			}
-
-			m_FontName.swap(TempFontName);
-			m_Font = FontIt->second.Font;
-
-			ImGui::PushFont(m_Font);
 		}
 	}
 }

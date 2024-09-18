@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Editor/ImGuiWidget.h"
+#include "Editor/ImGuiConfigurations.h"
 
 class ImGuiPanel : public ImGuiWidget
 {

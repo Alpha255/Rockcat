@@ -124,38 +124,3 @@ void serialize(Archive& Ar, ImVec4& Vec4)
         CEREAL_NVP(Vec4.w)
     );
 }
-
-struct ImGuiFontConfigs : public ImFontConfig
-{
-    template<class Archive>
-    void serialize(Archive& Ar)
-    {
-        Ar(
-            CEREAL_NVP(FontNo),
-            CEREAL_NVP(SizePixels),
-            CEREAL_NVP(OversampleH),
-            CEREAL_NVP(OversampleV),
-            CEREAL_NVP(PixelSnapH),
-            CEREAL_NVP(GlyphExtraSpacing),
-            CEREAL_NVP(GlyphOffset),
-            CEREAL_NVP(GlyphMinAdvanceX),
-            CEREAL_NVP(GlyphMaxAdvanceX),
-            CEREAL_NVP(MergeMode),
-            CEREAL_NVP(FontBuilderFlags),
-            CEREAL_NVP(RasterizerMultiply),
-            CEREAL_NVP(RasterizerDensity),
-            CEREAL_NVP(EllipsisChar),
-            CEREAL_NVP(Name),
-            CEREAL_NVP(FontSize),
-            CEREAL_NVP(GlyphRangesPayload)
-        );
-
-        if (Archive::is_loading::value)
-        {
-            GlyphRanges = GlyphRangesPayload.data();
-        }
-    }
-
-    float FontSize = 12.0f;
-    std::vector<ImWchar> GlyphRangesPayload;
-};

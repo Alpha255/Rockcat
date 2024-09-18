@@ -1,6 +1,5 @@
 #include "Editor/Panels/LogConsole.h"
 #include "Editor/Icons/IconsMaterialDesignIcons.h"
-#include "Submodules/imgui/imgui.h"
 
 LogConsole::LogConsole()
 	: ImGuiPanel("Log")
@@ -9,6 +8,8 @@ LogConsole::LogConsole()
 
 void LogConsole::OnDraw()
 {
+	IMGUI_SCOPED_FONT("Roboto-Black");
+
 	ImGui::AlignTextToFramePadding();
 	if (ImGui::Button(ICON_LOG))
 	{
