@@ -1,13 +1,8 @@
-#include "ImGuiEditor.h"
+#include "ImGuiEditorTest.h"
 #include "Core/Main.h"
 #include "Core/Window.h"
 #include "DX12Impl.h"
-#include "Submodules/ImGuiAl/fonts/CodingFontTobi.inl"
-#include "Submodules/ImGuiAl/fonts/RobotoRegular.inl"
-#include "Submodules/ImGuiAl/fonts/MaterialDesign.inl"
-#include "Runtime/Editor/Icons/IconsMaterialDesignIcons.h"
-#include "Editor/Panels/LogConsole.h"
-#include "Editor/ImGuiTheme.h"
+#include "Editor/ImGuiEditor.h"
 
 class Canvas
 {
@@ -140,20 +135,13 @@ static ImGuiKey ImGui_ImplWin32_VirtualKeyToImGuiKey(WPARAM wParam)
     }
 }
 
-void ImGuiEditor::OnInitialize()
+void ImGuiEditorTest::OnInitialize()
 {
+    auto Window = GetAssociatedWindow();
+    m_Editor = std::make_shared<ImGuiEditor>(Window->GetWidth(), Window->GetHeight());
+
 	auto WindowHandle = const_cast<void*>(GetAssociatedWindow()->GetHandle());
 	VERIFY(CreateDeviceD3D(reinterpret_cast<::HWND>(WindowHandle)));
-
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-    io.ConfigWindowsMoveFromTitleBarOnly = true;
-    //io.ConfigDockingTransparentPayload = true;
 
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_Init(WindowHandle);
@@ -161,162 +149,14 @@ void ImGuiEditor::OnInitialize()
         DXGI_FORMAT_R8G8B8A8_UNORM, g_pd3dSrvDescHeap,
         g_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
         g_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
-
-    ExtraInitialize();
-
-    m_Panels.emplace_back(std::make_shared<LogConsole>());
 }
 
-void ImGuiEditor::ExtraInitialize()
+void ImGuiEditorTest::OnRenderGUI(Canvas&)
 {
-    auto Window = GetAssociatedWindow();
-    ImGuiIO& io = ImGui::GetIO();
-    io.DisplaySize = ImVec2(static_cast<float>(Window->GetWidth()), static_cast<float>(Window->GetHeight()));
-    io.ConfigWindowsMoveFromTitleBarOnly = true;
-
-    for (auto& Entry : std::filesystem::directory_iterator("EditorThemes\\"))
-    {
-        auto Path = Entry.path().string();
-        m_Themes.insert(std::make_pair(Entry.path().stem().string(), ImGuiTheme::Load(Path)));
-    }
-    SetTheme("Cosy");
-
-    ImFontConfig icons_config;
-
-    static const ImWchar ranges[] = {
-        0x0020,
-        0x00FF,
-        0x0400,
-        0x044F,
-        0,
-    };
-
-    io.FontGlobalScale = 1.0f;
-    const float FontSize = 13.0f;
-
-    icons_config.MergeMode = false;
-    icons_config.PixelSnapH = true;
-    icons_config.OversampleH = icons_config.OversampleV = 1;
-    icons_config.GlyphMinAdvanceX = 4.0f;
-    icons_config.SizePixels = 12.0f;
-    //icons_config.FontDataOwnedByAtlas = false;
-    m_Fonts["RobotoRegular"] = io.Fonts->AddFontFromMemoryCompressedTTF(RobotoRegular_compressed_data, RobotoRegular_compressed_size, FontSize, &icons_config, ranges);
-
-    static const ImWchar icons_ranges[] = { ICON_MIN_MDI, ICON_MAX_MDI, 0 };
-    //ImFontConfig icons_config;
-    // merge in icons from Font Awesome
-    icons_config.MergeMode = true;
-    icons_config.PixelSnapH = true;
-    icons_config.GlyphOffset.y = 1.0f;
-    icons_config.OversampleH = icons_config.OversampleV = 1;
-    icons_config.GlyphMinAdvanceX = 4.0f;
-    icons_config.SizePixels = 12.0f;
-    m_Fonts["MaterialDesign"] = io.Fonts->AddFontFromMemoryCompressedTTF(MaterialDesign_compressed_data, MaterialDesign_compressed_size, FontSize, &icons_config, icons_ranges);
-
-    for (const auto& File : std::filesystem::recursive_directory_iterator("Fonts\\"))
-    {
-        auto FilePath = File.path();
-        auto Extension = FilePath.extension();
-        if (Extension == ".ttf" || Extension == ".otf")
-        {
-            auto FileName = FilePath.stem().string();
-            m_Fonts[FileName] = io.Fonts->AddFontFromFileTTF(FilePath.string().c_str(), FontSize, &icons_config, io.Fonts->GetGlyphRangesDefault());
-        }
-    }
-    //io.Fonts->AddFontDefault();
-
-    io.Fonts->TexGlyphPadding = 1;
-    for (int n = 0; n < io.Fonts->ConfigData.Size; n++)
-    {
-        ImFontConfig* font_config = (ImFontConfig*)&io.Fonts->ConfigData[n];
-        font_config->RasterizerMultiply = 1.0f;
-    }
-    auto Result = io.Fonts->Build();
+    m_Editor->Draw();
 }
 
-void ImGuiEditor::SetTheme(const std::string& ThemeName)
-{
-    auto Theme = m_Themes.find(ThemeName);
-    if (Theme != m_Themes.end())
-    {
-        m_Theme = ThemeName;
-
-        ImGuiStyle& Style = ImGui::GetStyle();
-        Style = static_cast<ImGuiStyle&>(*Theme->second);
-    }
-}
-
-void ImGuiEditor::DrawMenuBar()
-{
-    auto Font = SetFont("CodingFontTobi");
-
-    if (ImGui::BeginMainMenuBar())
-    {
-        if (ImGui::BeginMenu("File"))
-        {
-            if (ImGui::BeginMenu("Open"))
-            {
-                if (ImGui::MenuItem("Open Recent"))
-                {
-                }
-                if (ImGui::MenuItem("Open Last"))
-                {
-                }
-
-                ImGui::EndMenu();
-            }
-
-            if (ImGui::MenuItem("Save"))
-            {
-            }
-
-            if (ImGui::MenuItem("Exit"))
-            {
-            }
-
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::BeginMenu("Theme"))
-        {
-            for (auto& [Name, Theme] : m_Themes)
-            {
-                if (ImGui::MenuItem(Name.c_str(), nullptr, m_Theme == Name))
-                {
-                    SetTheme(Name);
-                }
-            }
-
-            ImGui::EndMenu();
-        }
-        
-        if (ImGui::BeginMenu("Demo"))
-        {
-            ImGui::ShowDemoWindow();
-            ImGui::EndMenu();
-        }
-        
-        if (ImGui::BeginMenu("About"))
-        {
-            ImGui::ShowAboutWindow();
-            ImGui::EndMenu();
-        }
-
-        ImGui::EndMainMenuBar();
-    }
-}
-
-void ImGuiEditor::OnRenderGUI(Canvas&)
-{
-    DrawMenuBar();
-
-    for (auto& Panel : m_Panels)
-    {
-        Panel->OnRender();
-    }
-}
-
-void ImGuiEditor::OnRenderFrame()
+void ImGuiEditorTest::OnRenderFrame()
 {
     ImGui_ImplDX12_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -372,7 +212,7 @@ void ImGuiEditor::OnRenderFrame()
     frameCtx->FenceValue = fenceValue;
 }
 
-void ImGuiEditor::OnMouseEvent(const MouseEvent& Mouse)
+void ImGuiEditorTest::OnMouseEvent(const MouseEvent& Mouse)
 {
     if (ImGui::GetCurrentContext() != nullptr)
     {
@@ -401,7 +241,7 @@ void ImGuiEditor::OnMouseEvent(const MouseEvent& Mouse)
     }
 }
 
-void ImGuiEditor::OnKeyboardEvent(const KeyboardEvent& Keyboard)
+void ImGuiEditorTest::OnKeyboardEvent(const KeyboardEvent& Keyboard)
 {
     if (ImGui::GetCurrentContext() != nullptr)
     {
@@ -411,7 +251,7 @@ void ImGuiEditor::OnKeyboardEvent(const KeyboardEvent& Keyboard)
     }
 }
 
-void ImGuiEditor::OnWindowResized(uint32_t Width, uint32_t Height)
+void ImGuiEditorTest::OnWindowResized(uint32_t Width, uint32_t Height)
 {
     if (g_pSwapChain)
     {
@@ -423,7 +263,7 @@ void ImGuiEditor::OnWindowResized(uint32_t Width, uint32_t Height)
     }
 }
 
-void ImGuiEditor::OnShutdown()
+void ImGuiEditorTest::OnShutdown()
 {
     WaitForLastSubmittedFrame();
 
@@ -434,4 +274,4 @@ void ImGuiEditor::OnShutdown()
 	CleanupDeviceD3D();
 }
 
-REGISTER_APPLICATION(ImGuiEditor, "ImGuiEditor.json")
+REGISTER_APPLICATION(ImGuiEditorTest, "ImGuiEditorTest.json")

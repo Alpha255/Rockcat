@@ -3,11 +3,11 @@
 #include "Submodules/imgui/imgui.h"
 
 LogConsole::LogConsole()
-	: ImGuiPanel("Log", "")
+	: ImGuiPanel("Log")
 {
 }
 
-void LogConsole::Draw()
+void LogConsole::OnDraw()
 {
 	ImGui::AlignTextToFramePadding();
 	if (ImGui::Button(ICON_LOG))

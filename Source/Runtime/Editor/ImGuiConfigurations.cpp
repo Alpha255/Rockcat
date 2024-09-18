@@ -1,6 +1,13 @@
 #include "Editor/ImGuiConfigurations.h"
 #include "Engine/Services/SpdLogService.h"
 
+void ImGuiConfigurations::PostLoad()
+{
+	LoadDefaultFonts();
+	LoadDefaultThemes();
+	SetTheme(m_ThemeName, true);
+}
+
 void ImGuiConfigurations::LoadDefaultFonts()
 {
 	auto& IO = ImGui::GetIO();
@@ -8,6 +15,11 @@ void ImGuiConfigurations::LoadDefaultFonts()
 
 	for (auto& Entry : std::filesystem::recursive_directory_iterator("Fonts\\"))
 	{
+		if (Entry.is_directory())
+		{
+			continue;
+		}
+
 		auto FontPath = Entry.path();
 		auto FontName = FontPath.stem().string();
 		auto FontIt = m_Fonts.find(FontName);
@@ -40,7 +52,9 @@ void ImGuiConfigurations::LoadDefaultThemes()
 		auto ThemeName = ThemePath.stem().string();
 		if (!m_Themes.contains(ThemeName))
 		{
-			m_Themes.insert(std::make_pair(ThemeName, ImGuiTheme::Load(ThemePath)));
+			auto Theme = ImGuiTheme::Load(ThemePath);
+			Theme->Name = ThemeName;
+			m_Themes.insert(std::make_pair(ThemeName, std::move(Theme)));
 		}
 		else
 		{
@@ -70,17 +84,27 @@ void ImGuiConfigurations::SetFont(const char* const FontName)
 	}
 }
 
-void ImGuiConfigurations::SetTheme(const char* const ThemeName)
+void ImGuiConfigurations::SetTheme(const char* const ThemeName, bool Force)
 {
 	std::string TempThemeName(ThemeName ? ThemeName : "");
-	if (m_ThemeName != TempThemeName)
+	SetTheme(TempThemeName, Force);
+}
+
+void ImGuiConfigurations::SetTheme(const std::string& ThemeName, bool Force)
+{
+	if (!ThemeName.empty() && (m_ThemeName != ThemeName || Force))
 	{
-		auto ThemeIt = m_Themes.find(TempThemeName);
+		auto ThemeIt = m_Themes.find(ThemeName);
 		if (ThemeIt != m_Themes.end())
 		{
-			m_ThemeName.swap(TempThemeName);
+			m_ThemeName = ThemeName;
 			m_Theme = ThemeIt->second.get();
 			ImGui::GetStyle() = static_cast<const ImGuiStyle&>(*m_Theme);
 		}
 	}
+}
+
+ImGuiConfigurations::~ImGuiConfigurations()
+{
+	Save<ImGuiConfigurations>(true);
 }

@@ -22,13 +22,15 @@ public:
 	ImGuiConfigurations()
 		: BaseClass::BaseClass("Configs\\ImGuiEditorConfigs.json")
 	{
-		LoadDefaultThemes();
-		LoadDefaultFonts();
 	}
+
+	~ImGuiConfigurations();
 
 	void SetFont(const char* const FontName);
 
-	void SetTheme(const char* const ThemeName);
+	void SetTheme(const std::string& ThemeName, bool Force = false);
+	void SetTheme(const char* const ThemeName, bool Force = false);
+	ImGuiTheme* GetTheme() const { return m_Theme; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -38,7 +40,13 @@ public:
 			CEREAL_NVP(m_Fonts)
 		);
 	}
+protected:
+	void PostLoad() override;
 private:
+	friend class ImGuiEditor;
+
+	std::unordered_map<std::string, std::shared_ptr<ImGuiTheme>>& GetThemes() { return m_Themes; }
+
 	ImGuiTheme* m_Theme = nullptr;
 	ImFont* m_Font = nullptr;
 

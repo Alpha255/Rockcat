@@ -1,21 +1,18 @@
 #include "Editor/ImGuiPanel.h"
 #include <Submodules/imgui/imgui.h>
 
-ImGuiPanel::ImGuiPanel(const char* Title, const char* Icon, const ImGuiWidget* Parent)
+ImGuiPanel::ImGuiPanel(const char* Title, const ImGuiWidget* Parent, int32_t WindowsFlags)
 	: ImGuiWidget(Title, Parent)
 	, m_Title(Title)
-	, m_WindowFlags(ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)
+	, m_WindowFlags(WindowsFlags)
 {
-	if (Icon)
-	{
-	}
 }
 
-void ImGuiPanel::OnRender()
+void ImGuiPanel::Draw()
 {
 	if (ImGui::Begin(m_Title.data(), &m_Show, m_WindowFlags))
 	{
-		Draw();
+		OnDraw();
 		ImGui::End();
 	}
 }

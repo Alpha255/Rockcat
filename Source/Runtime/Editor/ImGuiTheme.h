@@ -12,6 +12,11 @@ struct ImGuiTheme : public ImGuiStyle, public SerializableAsset<ImGuiTheme>
     {
     }
 
+    ~ImGuiTheme()
+    {
+        Save<ImGuiTheme>(true);
+    }
+
     std::string Name;
 
 	template<class Archive>

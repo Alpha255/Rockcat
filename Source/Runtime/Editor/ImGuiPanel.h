@@ -16,7 +16,7 @@ public:
 		Locked = 1 << 6
 	};
 
-	ImGuiPanel(const char* Title, const char* Icon = nullptr, const ImGuiWidget* Parent = nullptr);
+	ImGuiPanel(const char* Title, const ImGuiWidget* Parent = nullptr, int32_t WindowsFlags = 0);
 
 	bool IsOpened() const { return EnumHasAnyFlags(m_Status, EStatus::Opened); }
 	bool IsClosed() const { return EnumHasAnyFlags(m_Status, EStatus::Closed); }
@@ -26,17 +26,17 @@ public:
 	bool IsCollapsed() const { return EnumHasAnyFlags(m_Status, EStatus::Collapsed); }
 	bool IsLocked() const { return EnumHasAnyFlags(m_Status, EStatus::Locked); }
 
-	virtual void OnOpen() {};
-	virtual void OnClose() {};
+	virtual void OnOpen() {}
+	virtual void OnClose() {}
 	virtual void OnCollapse() {}
 	virtual void OnMinimize() {}
 	virtual void OnMaximize() {}
 
-	void OnRender() override;
+	void Draw() override;
 
 	const char* const GetTitle() const { return m_Title.data(); }
 protected:
-	virtual void Draw() = 0;
+	virtual void OnDraw() {}
 private:
 	EStatus m_Status = EStatus::Opened;
 	bool m_Show = true;

@@ -7,6 +7,6 @@ class LogConsole : public ImGuiPanel
 public:
 	LogConsole();
 protected:
-	void Draw() override final;
+	void OnDraw() override final;
 private:
 };

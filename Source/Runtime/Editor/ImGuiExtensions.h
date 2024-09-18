@@ -150,7 +150,7 @@ struct ImGuiFontConfigs : public ImFontConfig
             CEREAL_NVP(GlyphRangesPayload)
         );
 
-        if (Archive::is_loading)
+        if (Archive::is_loading::value)
         {
             GlyphRanges = GlyphRangesPayload.data();
         }

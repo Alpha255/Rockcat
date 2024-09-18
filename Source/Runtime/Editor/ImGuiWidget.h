@@ -16,7 +16,7 @@ public:
 	const char* const GetName() const { return m_Name.data(); }
 	void SetName(const char* const Name) { m_Name = Name; }
 
-	virtual void OnRender() = 0;
+	virtual void Draw() = 0;
 private:
 	const ImGuiWidget* m_Parent;
 	std::string_view m_Name;
