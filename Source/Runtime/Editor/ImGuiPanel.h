@@ -17,7 +17,7 @@ public:
 		Locked = 1 << 6
 	};
 
-	ImGuiPanel(const char* Title, const ImGuiWidget* Parent = nullptr, int32_t WindowsFlags = 0);
+	ImGuiPanel(const char* Title, const char* Icon = nullptr, const ImGuiWidget* Parent = nullptr, int32_t WindowsFlags = 0);
 
 	bool IsOpened() const { return EnumHasAnyFlags(m_Status, EStatus::Opened); }
 	bool IsClosed() const { return EnumHasAnyFlags(m_Status, EStatus::Closed); }
@@ -43,6 +43,7 @@ private:
 	bool m_Show = true;
 	int32_t m_WindowFlags = 0;
 	std::string_view m_Title;
+	std::string m_TitleWithIcon;
 };
 
 ENUM_FLAG_OPERATORS(ImGuiPanel::EStatus)

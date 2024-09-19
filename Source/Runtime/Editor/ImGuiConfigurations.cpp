@@ -1,6 +1,5 @@
 #include "Editor/ImGuiConfigurations.h"
 #include "Engine/Services/SpdLogService.h"
-#include <Submodules/ImGuiAl/fonts/MaterialDesign.inl>
 
 const std::map<std::string, ImGuiFont>* ImGuiScopedFont::AllFonts = nullptr;
 

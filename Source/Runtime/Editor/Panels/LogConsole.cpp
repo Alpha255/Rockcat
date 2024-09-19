@@ -3,30 +3,29 @@
 #include <Submodules/IconFontCppHeaders/IconsMaterialDesign.h>
 
 LogConsole::LogConsole()
-	: ImGuiPanel("Log")
+	: ImGuiPanel("Log", ICON_MD_CHAT)
 {
-	m_LogLevelIcons.resize(spdlog::level::level_enum::off);
-	m_LogLevelIcons[spdlog::level::level_enum::trace] = ICON_MD_MESSAGE;
+	m_LogLevelIcons.resize(spdlog::level::level_enum::critical);
+	m_LogLevelIcons[spdlog::level::level_enum::trace] = ICON_MD_FEEDBACK;
 	m_LogLevelIcons[spdlog::level::level_enum::debug] = ICON_MD_BUG_REPORT;
 	m_LogLevelIcons[spdlog::level::level_enum::info] = ICON_MD_INFO;
 	m_LogLevelIcons[spdlog::level::level_enum::warn] = ICON_MD_WARNING;
-	m_LogLevelIcons[spdlog::level::level_enum::err] = ICON_MD_ERROR;
-	m_LogLevelIcons[spdlog::level::level_enum::critical] = ICON_MD_HEART_BROKEN;
+	m_LogLevelIcons[spdlog::level::level_enum::err] = ICON_MD_DANGEROUS;
 }
 
 void LogConsole::DrawHeader()
 {
 	ImGui::AlignTextToFramePadding();
 
-	IMGUI_SCOPED_FONT("MaterialIcons-Regular");
+	//IMGUI_SCOPED_FONT("MaterialIcons-Regular");
 	
 	IMGUI_SCOPED_COLOR(ImGuiCol_Button, Math::Color::Black);
 	if (ImGui::Button(ICON_MD_MESSAGE))
 	{
 
 	}
-	ImGui::SameLine();
-	ImGui::TextUnformatted(ICON_MD_ADD_ALERT);
+	//ImGui::SameLine();
+	//ImGui::TextUnformatted(ICON_MD_ADD_ALERT);
 
 	IMGUI_SCOPED_COLOR(ImGuiCol_Text, Math::Color::White);
 	ImGui::SameLine();
@@ -38,11 +37,8 @@ void LogConsole::DrawHeader()
 
 	IMGUI_SCOPED_COLOR(ImGuiCol_Text, Math::Color::Red);
 	ImGui::SameLine();
-	ImGui::TextUnformatted(ICON_MD_ERROR_OUTLINE);
+	ImGui::TextUnformatted(ICON_MD_DANGEROUS);
 
-	IMGUI_SCOPED_COLOR(ImGuiCol_Text, Math::Color::Red);
-	ImGui::SameLine();
-	ImGui::TextUnformatted(ICON_MD_HEART_BROKEN);
 
 	auto& Style = ImGui::GetStyle();
 	
