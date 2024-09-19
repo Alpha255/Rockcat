@@ -11,7 +11,7 @@ ImGuiPanel::ImGuiPanel(const char* Title, const char* Icon, const ImGuiWidget* P
 
 void ImGuiPanel::Draw()
 {
-	IMGUI_SCOPED_FONT("MaterialIcons-Regular");
+	//IMGUI_SCOPED_FONT("MaterialIcons-Regular");
 
 	if (ImGui::Begin(m_TitleWithIcon.c_str(), &m_Show, m_WindowFlags))
 	{

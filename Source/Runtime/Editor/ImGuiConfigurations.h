@@ -24,6 +24,7 @@ struct ImGuiFontConfigs : public ImFontConfig
 			CEREAL_NVP(RasterizerDensity),
 			CEREAL_NVP(EllipsisChar),
 			CEREAL_NVP(Name),
+			CEREAL_NVP(MergeIconFont),
 			CEREAL_NVP(FontSize),
 			CEREAL_NVP(GlyphRangesPayload)
 		);
@@ -34,6 +35,7 @@ struct ImGuiFontConfigs : public ImFontConfig
 		}
 	}
 
+	bool MergeIconFont = false;
 	float FontSize = 12.0f;
 	std::vector<ImWchar> GlyphRangesPayload;
 };

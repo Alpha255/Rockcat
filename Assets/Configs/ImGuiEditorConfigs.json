@@ -1,10 +1,86 @@
 {
     "class ImGuiConfigurations": {
         "m_DefaultTheme": "Classic",
-        "m_DefaultFont": "Roboto-Regular",
+        "m_DefaultFont": "Noto Sans CJK Regular",
         "m_Fonts": [
             {
                 "key": "MaterialIcons-Regular",
+                "value": {
+                    "Configs": {
+                        "FontNo": 0,
+                        "SizePixels": 12.0,
+                        "OversampleH": 1,
+                        "OversampleV": 1,
+                        "PixelSnapH": true,
+                        "GlyphExtraSpacing": {
+                            "Vec2.x": 0.0,
+                            "Vec2.y": 0.0
+                        },
+                        "GlyphOffset": {
+                            "Vec2.x": 0.0,
+                            "Vec2.y": 0.0
+                        },
+                        "GlyphMinAdvanceX": 4.0,
+                        "GlyphMaxAdvanceX": 3.4028234663852887e38,
+                        "MergeMode": true,
+                        "FontBuilderFlags": 0,
+                        "RasterizerMultiply": 1.0,
+                        "RasterizerDensity": 1.0,
+                        "EllipsisChar": 65535,
+                        "Name": {
+                            "value0": 0,
+                            "value1": 0,
+                            "value2": 0,
+                            "value3": 0,
+                            "value4": 0,
+                            "value5": 0,
+                            "value6": 0,
+                            "value7": 0,
+                            "value8": 0,
+                            "value9": 0,
+                            "value10": 0,
+                            "value11": 0,
+                            "value12": 0,
+                            "value13": 0,
+                            "value14": 0,
+                            "value15": 0,
+                            "value16": 0,
+                            "value17": 0,
+                            "value18": 0,
+                            "value19": 0,
+                            "value20": 0,
+                            "value21": 0,
+                            "value22": 0,
+                            "value23": 0,
+                            "value24": 0,
+                            "value25": 0,
+                            "value26": 0,
+                            "value27": 0,
+                            "value28": 0,
+                            "value29": 0,
+                            "value30": 0,
+                            "value31": 0,
+                            "value32": 0,
+                            "value33": 0,
+                            "value34": 0,
+                            "value35": 0,
+                            "value36": 0,
+                            "value37": 0,
+                            "value38": 0,
+                            "value39": 0
+                        },
+                        "MergeIconFont": false,
+                        "FontSize": 16.0,
+                        "GlyphRangesPayload": [
+                            57344,
+                            65533,
+                            0
+                        ]
+                    }
+                }
+            },
+            {
+                "key": "Noto Sans CJK Regular",
                 "value": {
                     "Configs": {
                         "FontNo": 0,
@@ -69,12 +145,9 @@
                             "value38": 0,
                             "value39": 0
                         },
+                        "MergeIconFont": true,
                         "FontSize": 20.0,
-                        "GlyphRangesPayload": [
-                            57344,
-                            65533,
-                            0
-                        ]
+                        "GlyphRangesPayload": []
                     }
                 }
             },
@@ -144,6 +217,7 @@
                             "value38": 0,
                             "value39": 0
                         },
+                        "MergeIconFont": false,
                         "FontSize": 14.0,
                         "GlyphRangesPayload": []
                     }
@@ -215,6 +289,7 @@
                             "value38": 0,
                             "value39": 0
                         },
+                        "MergeIconFont": false,
                         "FontSize": 14.0,
                         "GlyphRangesPayload": []
                     }
@@ -286,6 +361,7 @@
                             "value38": 0,
                             "value39": 0
                         },
+                        "MergeIconFont": false,
                         "FontSize": 14.0,
                         "GlyphRangesPayload": []
                     }
@@ -357,87 +433,13 @@
                             "value38": 0,
                             "value39": 0
                         },
+                        "MergeIconFont": true,
                         "FontSize": 14.0,
                         "GlyphRangesPayload": [
                             32,
                             255,
                             1024,
                             1103,
-                            0
-                        ]
-                    }
-                }
-            },
-            {
-                "key": "materialdesignicons-webfont",
-                "value": {
-                    "Configs": {
-                        "FontNo": 0,
-                        "SizePixels": 12.0,
-                        "OversampleH": 1,
-                        "OversampleV": 1,
-                        "PixelSnapH": true,
-                        "GlyphExtraSpacing": {
-                            "Vec2.x": 0.0,
-                            "Vec2.y": 0.0
-                        },
-                        "GlyphOffset": {
-                            "Vec2.x": 0.0,
-                            "Vec2.y": 0.0
-                        },
-                        "GlyphMinAdvanceX": 4.0,
-                        "GlyphMaxAdvanceX": 3.4028234663852887e38,
-                        "MergeMode": false,
-                        "FontBuilderFlags": 0,
-                        "RasterizerMultiply": 1.0,
-                        "RasterizerDensity": 1.0,
-                        "EllipsisChar": 65535,
-                        "Name": {
-                            "value0": 0,
-                            "value1": 0,
-                            "value2": 0,
-                            "value3": 0,
-                            "value4": 0,
-                            "value5": 0,
-                            "value6": 0,
-                            "value7": 0,
-                            "value8": 0,
-                            "value9": 0,
-                            "value10": 0,
-                            "value11": 0,
-                            "value12": 0,
-                            "value13": 0,
-                            "value14": 0,
-                            "value15": 0,
-                            "value16": 0,
-                            "value17": 0,
-                            "value18": 0,
-                            "value19": 0,
-                            "value20": 0,
-                            "value21": 0,
-                            "value22": 0,
-                            "value23": 0,
-                            "value24": 0,
-                            "value25": 0,
-                            "value26": 0,
-                            "value27": 0,
-                            "value28": 0,
-                            "value29": 0,
-                            "value30": 0,
-                            "value31": 0,
-                            "value32": 0,
-                            "value33": 0,
-                            "value34": 0,
-                            "value35": 0,
-                            "value36": 0,
-                            "value37": 0,
-                            "value38": 0,
-                            "value39": 0
-                        },
-                        "FontSize": 14.0,
-                        "GlyphRangesPayload": [
-                            48,
-                            65149,
                             0
                         ]
                     }

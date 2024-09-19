@@ -3,7 +3,7 @@
 #include <Submodules/IconFontCppHeaders/IconsMaterialDesign.h>
 
 LogConsole::LogConsole()
-	: ImGuiPanel("Log", ICON_MD_CHAT)
+	: ImGuiPanel("Log", ICON_MD_DESCRIPTION)
 {
 	m_LogLevelIcons.resize(spdlog::level::level_enum::critical);
 	m_LogLevelIcons[spdlog::level::level_enum::trace] = ICON_MD_FEEDBACK;
@@ -42,8 +42,7 @@ void LogConsole::DrawHeader()
 
 	auto& Style = ImGui::GetStyle();
 	
-	float OldSpacing = Style.ItemSpacing.x;
-	Style.ItemSpacing.x = 2.0f;
+	IMGUI_SCOPED_STYLE(ImGuiStyleVar_ItemSpacing, Math::Vector2(2.0f, Style.ItemSpacing.y));
 	float LogLevelButtonWidth = ((ImGui::CalcTextSize(m_LogLevelIcons[spdlog::level::debug]) + 
 		Style.FramePadding * 2.0f).x + Style.ItemSpacing.x) * 6.0f;
 

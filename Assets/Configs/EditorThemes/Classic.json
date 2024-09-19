@@ -7,32 +7,32 @@
             "Vec2.y": 3.0
         },
         "WindowRounding": 5.0,
-        "WindowBorderSize": 0.0,
+        "WindowBorderSize": 1.0,
         "WindowMinSize": {
             "Vec2.x": 200.0,
             "Vec2.y": 200.0
         },
         "WindowTitleAlign": {
-            "Vec2.x": 0.5,
+            "Vec2.x": 0.0,
             "Vec2.y": 0.5
         },
         "WindowMenuButtonPosition": -1,
         "ChildRounding": 5.0,
         "ChildBorderSize": 1.0,
         "PopupRounding": 5.0,
-        "PopupBorderSize": 3.0,
+        "PopupBorderSize": 0.0,
         "FramePadding": {
             "Vec2.x": 5.0,
             "Vec2.y": 5.0
         },
         "FrameRounding": 5.0,
-        "FrameBorderSize": 0.0,
+        "FrameBorderSize": 1.0,
         "ItemSpacing": {
             "Vec2.x": 5.0,
-            "Vec2.y": 3.0
+            "Vec2.y": 5.0
         },
         "ItemInnerSpacing": {
-            "Vec2.x": 3.0,
+            "Vec2.x": 5.0,
             "Vec2.y": 3.0
         },
         "CellPadding": {
@@ -60,7 +60,7 @@
             "Vec2.x": 0.5,
             "Vec2.y": 0.0
         },
-        "ColorButtonPosition": 1,
+        "ColorButtonPosition": 0,
         "ButtonTextAlign": {
             "Vec2.x": 0.5,
             "Vec2.y": 0.5

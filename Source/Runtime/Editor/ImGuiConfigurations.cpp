@@ -15,22 +15,18 @@ void ImGuiConfigurations::LoadDefaultFonts()
 	IO.FontGlobalScale = 1.0f;
 	const float DefaultFontSize = 14.0f;
 
-	for (auto& Entry : std::filesystem::recursive_directory_iterator("Fonts\\"))
-	{
-		if (Entry.is_directory())
-		{
-			continue;
-		}
+	auto AddFont = [this, DefaultFontSize, &IO](const std::filesystem::path& FontPath) -> bool {
+		assert(std::filesystem::exists(FontPath));
 
-		auto FontPath = Entry.path();
+		bool MergeWithIconFont = false;
 		auto FontName = FontPath.stem().string();
 		auto FontIt = m_Fonts.find(FontName);
 		if (FontIt == m_Fonts.end())
 		{
-			m_Fonts.insert(std::make_pair(FontName, ImGuiFont{
+			MergeWithIconFont = m_Fonts.insert(std::make_pair(FontName, ImGuiFont{
 				ImGuiFontConfigs(),
 				IO.Fonts->AddFontFromFileTTF(FontPath.string().c_str(), DefaultFontSize)
-			}));
+				})).first->second.Configs.MergeIconFont;
 		}
 		else
 		{
@@ -38,6 +34,22 @@ void ImGuiConfigurations::LoadDefaultFonts()
 				FontIt->second.Configs.FontSize,
 				&FontIt->second.Configs,
 				FontIt->second.Configs.GlyphRanges);
+			MergeWithIconFont = FontIt->second.Configs.MergeIconFont;
+		}
+
+		return MergeWithIconFont;
+	};
+
+	for (auto& Entry : std::filesystem::directory_iterator("Fonts\\"))
+	{
+		if (Entry.is_directory())
+		{
+			continue;
+		}
+
+		if (AddFont(Entry.path()))
+		{
+			AddFont("Fonts\\Icons\\MaterialIcons-Regular.ttf");
 		}
 	}
 
