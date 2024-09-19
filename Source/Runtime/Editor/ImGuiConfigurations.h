@@ -133,7 +133,8 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_NVP(m_ThemeName),
+			CEREAL_NVP(m_DefaultTheme),
+			CEREAL_NVP(m_DefaultFont),
 			CEREAL_NVP(m_Fonts)
 		);
 	}
@@ -145,7 +146,8 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<ImGuiTheme>>& GetThemes() { return m_Themes; }
 
 	ImGuiTheme* m_Theme = nullptr;
-	std::string m_ThemeName;
+	std::string m_DefaultTheme;
+	std::string m_DefaultFont;
 
 	std::unordered_map<std::string, std::shared_ptr<ImGuiTheme>> m_Themes;
 	std::map<std::string, ImGuiFont> m_Fonts;

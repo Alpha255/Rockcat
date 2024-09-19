@@ -1,5 +1,6 @@
 #include "Editor/ImGuiConfigurations.h"
 #include "Engine/Services/SpdLogService.h"
+#include <Submodules/ImGuiAl/fonts/MaterialDesign.inl>
 
 const std::map<std::string, ImGuiFont>* ImGuiScopedFont::AllFonts = nullptr;
 
@@ -7,13 +8,13 @@ void ImGuiConfigurations::PostLoad()
 {
 	LoadDefaultFonts();
 	LoadDefaultThemes();
-	SetTheme(m_ThemeName, true);
 }
 
 void ImGuiConfigurations::LoadDefaultFonts()
 {
 	auto& IO = ImGui::GetIO();
-	const float DefaultFontSize = 12.0f;
+	IO.FontGlobalScale = 1.0f;
+	const float DefaultFontSize = 14.0f;
 
 	for (auto& Entry : std::filesystem::recursive_directory_iterator("Fonts\\"))
 	{
@@ -36,7 +37,8 @@ void ImGuiConfigurations::LoadDefaultFonts()
 		{
 			FontIt->second.Font = IO.Fonts->AddFontFromFileTTF(FontPath.string().c_str(),
 				FontIt->second.Configs.FontSize,
-				&FontIt->second.Configs);
+				&FontIt->second.Configs,
+				FontIt->second.Configs.GlyphRanges);
 		}
 	}
 
@@ -47,6 +49,14 @@ void ImGuiConfigurations::LoadDefaultFonts()
 	else
 	{
 		ImGuiScopedFont::AllFonts = &m_Fonts;
+		if (!m_DefaultFont.empty())
+		{
+			auto FontIt = m_Fonts.find(m_DefaultFont);
+			if (FontIt != m_Fonts.end())
+			{
+				IO.FontDefault = FontIt->second.Font;
+			}
+		}
 	}
 }
 
@@ -67,22 +77,23 @@ void ImGuiConfigurations::LoadDefaultThemes()
 			LOG_ERROR("Duplicated ImGui editor theme in different directory!");
 		}
 	}
+	
+	SetTheme(m_DefaultTheme, true);
 }
 
 void ImGuiConfigurations::SetTheme(const char* const ThemeName, bool Force)
 {
-	std::string TempThemeName(ThemeName ? ThemeName : "");
-	SetTheme(TempThemeName, Force);
+	SetTheme(std::string(ThemeName ? ThemeName : ""), Force);
 }
 
 void ImGuiConfigurations::SetTheme(const std::string& ThemeName, bool Force)
 {
-	if (!ThemeName.empty() && (m_ThemeName != ThemeName || Force))
+	if (!ThemeName.empty() && (m_DefaultTheme != ThemeName || Force))
 	{
 		auto ThemeIt = m_Themes.find(ThemeName);
 		if (ThemeIt != m_Themes.end())
 		{
-			m_ThemeName = ThemeName;
+			m_DefaultTheme = ThemeName;
 			m_Theme = ThemeIt->second.get();
 			ImGui::GetStyle() = static_cast<const ImGuiStyle&>(*m_Theme);
 		}

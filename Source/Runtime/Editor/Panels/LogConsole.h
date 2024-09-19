@@ -9,4 +9,8 @@ public:
 protected:
 	void OnDraw() override final;
 private:
+	void DrawHeader();
+
+	std::vector<const char*> m_LogLevelIcons;
+	ImGuiTextFilter m_TextFilter;
 };
