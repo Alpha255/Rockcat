@@ -49,7 +49,7 @@ void ImGuiConfigurations::LoadDefaultFonts()
 
 		if (AddFont(Entry.path()))
 		{
-			AddFont("Fonts\\Icons\\MaterialIcons-Regular.ttf");
+			AddFont("Fonts\\Icons\\materialdesignicons-webfont.ttf");
 		}
 	}
 

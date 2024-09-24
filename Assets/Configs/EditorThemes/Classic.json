@@ -28,7 +28,7 @@
         "FrameRounding": 5.0,
         "FrameBorderSize": 1.0,
         "ItemSpacing": {
-            "Vec2.x": 5.0,
+            "Vec2.x": 8.0,
             "Vec2.y": 5.0
         },
         "ItemInnerSpacing": {

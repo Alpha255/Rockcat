@@ -17,10 +17,10 @@ workspace "Rockcat"
 	filter { "configurations:Debug" }
 		symbols "On"
 		optimize "Debug"
-		defines { "_DEBUG", "_UNICODE", "UNICODE", "CONFIGURATION=\"_Debug\"" }
+		defines { "_DEBUG", "_UNICODE", "UNICODE", "CONFIGURATION=\"_Debug\"", "IMGUI_USE_WCHAR32" }
 	filter { "configurations:Release" }
 		optimize "Speed"
-		defines { "NDEBUG", "_UNICODE", "UNICODE", "CONFIGURATION=\"\"" }
+		defines { "NDEBUG", "_UNICODE", "UNICODE", "CONFIGURATION=\"\"", "IMGUI_USE_WCHAR32" }
 	filter { "platforms:Win64" }
 		system "Windows"
 		architecture "x64"
