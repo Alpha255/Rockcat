@@ -18,37 +18,34 @@ LogConsole::LogConsole()
 void LogConsole::DrawHeader()
 {
 	ImGui::AlignTextToFramePadding();
-
-	//IMGUI_SCOPED_FONT("MaterialIcons-Regular");
 	
 	IMGUI_SCOPED_COLOR(ImGuiCol_Button, Math::Color::Black);
-	if (ImGui::Button(ICON_MDI_INFORMATION))
+	if (ImGui::Button(ICON_MDI_COG_OUTLINE))
 	{
+		ImGui::OpenPopup("SettingsPopup");
 	}
-	//ImGui::SameLine();
-	//ImGui::TextUnformatted(ICON_MD_ADD_ALERT);
-
-	IMGUI_SCOPED_COLOR(ImGuiCol_Text, Math::Color::White);
-	ImGui::SameLine();
-	ImGui::TextUnformatted(ICON_MDI_INFORMATION);
+	if (ImGui::BeginPopup("SettingsPopup"))
+	{
+		if (ImGui::Button("Clear"))
+		{
+		}
+		ImGui::EndPopup();
+	}
 	
-	IMGUI_SCOPED_COLOR(ImGuiCol_Text, Math::Color::Yellow);
 	ImGui::SameLine();
-	ImGui::TextUnformatted(ICON_MDI_ALERT);
-
-	IMGUI_SCOPED_COLOR(ImGuiCol_Text, Math::Color::Red);
+	ImGui::TextUnformatted(ICON_MDI_MAGNIFY);
 	ImGui::SameLine();
-	ImGui::TextUnformatted(ICON_MDI_CLOSE_OCTAGON);
 
-	//auto& Style = ImGui::GetStyle();
+	auto& Style = ImGui::GetStyle();
 	
-	//IMGUI_SCOPED_STYLE(ImGuiStyleVar_ItemSpacing, Math::Vector2(2.0f, Style.ItemSpacing.y));
-	//float LogLevelButtonWidth = ((ImGui::CalcTextSize(m_LogLevelIcons[spdlog::level::debug]) + 
-	//	Style.FramePadding * 2.0f).x + Style.ItemSpacing.x) * 6.0f;
+	IMGUI_SCOPED_STYLE(ImGuiStyleVar_ItemSpacing, Math::Vector2(2.0f, Style.ItemSpacing.y));
+	float LogLevelButtonWidth = ((ImGui::CalcTextSize(m_LogLevelIcons[spdlog::level::debug]) + 
+		Style.FramePadding * 2.0f).x + Style.ItemSpacing.x) * 6.0f;
 
-	//IMGUI_SCOPED_STYLE(ImGuiStyleVar_FrameBorderSize, 0.0f);
-	//IMGUI_SCOPED_COLOR(ImGuiCol_FrameBg, Math::Color::White);
-	//m_TextFilter.Draw("###ConsoleFilter", ImGui::GetContentRegionAvail().x - LogLevelButtonWidth);
+	IMGUI_SCOPED_STYLE(ImGuiStyleVar_FrameBorderSize, 0.0f);
+	IMGUI_SCOPED_COLOR(ImGuiCol_FrameBg, Math::Color::Black);
+	m_TextFilter.Draw("###LogFilter", ImGui::GetContentRegionAvail().x - LogLevelButtonWidth);
+	ImGui::DrawItemActivityOutline(2.0f, false);
 }
 
 void LogConsole::OnDraw()

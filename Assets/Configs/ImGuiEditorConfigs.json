@@ -450,7 +450,7 @@
                 "value": {
                     "Configs": {
                         "FontNo": 0,
-                        "SizePixels": 24.0,
+                        "SizePixels": 20.0,
                         "OversampleH": 1,
                         "OversampleV": 1,
                         "PixelSnapH": true,
@@ -460,7 +460,7 @@
                         },
                         "GlyphOffset": {
                             "Vec2.x": 0.0,
-                            "Vec2.y": 1.0
+                            "Vec2.y": 3.0
                         },
                         "GlyphMinAdvanceX": 4.0,
                         "GlyphMaxAdvanceX": 3.4028234663852887e38,

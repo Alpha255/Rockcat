@@ -11,7 +11,7 @@ public:
 
 	Color(uint32_t RGBA);
 
-	Color(uint8_t R, uint8_t G, uint8_t B, uint8_t A = 1);
+	Color(uint8_t R, uint8_t G, uint8_t B, uint8_t A = 255u);
 
 	float R() const { return x; }
 	float G() const { return y; }
