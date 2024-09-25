@@ -14,6 +14,8 @@ const Color Color::Magenta(1.0f, 0.0f, 1.0f, 1.0f);
 const Color Color::Silver(0.75f, 0.75f, 0.75f, 1.0f);
 const Color Color::LightSteelBlue(0.69f, 0.77f, 0.87f, 1.0f);
 const Color Color::DarkBlue(0.0f, 0.125f, 0.3f, 1.0f);
+const Color Color::Gray(0.5f, 0.5f, 0.5f, 1.0f);
+const Color Color::Purple(0.6f, 0.2f, 0.8f, 1.0f);
 
 const float Color::Scaler = 1.0f / 255.0f;
 

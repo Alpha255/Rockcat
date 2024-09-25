@@ -29,6 +29,8 @@ public:
 	static const Color Silver;
 	static const Color LightSteelBlue;
 	static const Color DarkBlue;
+	static const Color Gray;
+	static const Color Purple;
 
 	static Color Random();
 
