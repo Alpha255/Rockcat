@@ -10,6 +10,7 @@ protected:
 	void OnDraw() override final;
 private:
 	void DrawHeader();
+	void DrawTexts();
 
 	struct LogLevelConfig
 	{

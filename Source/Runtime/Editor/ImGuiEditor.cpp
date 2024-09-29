@@ -1,5 +1,7 @@
 #include "Editor/ImGuiEditor.h"
 #include "Editor/Panels/LogConsole.h"
+#include "Editor/Panels/GameView.h"
+#include "Editor/Panels/AssetBrowser.h"
 
 ImGuiEditor::ImGuiEditor(uint32_t AppWindowWidth, uint32_t AppWindowHeight)
 {
@@ -18,6 +20,8 @@ ImGuiEditor::ImGuiEditor(uint32_t AppWindowWidth, uint32_t AppWindowHeight)
 	m_Configs = ImGuiConfigurations::Load();
     
     m_Panels.emplace_back(std::make_shared<LogConsole>());
+    m_Panels.emplace_back(std::make_shared<GameView>());
+    m_Panels.emplace_back(std::make_shared<AssetBrowser>());
 }
 
 void ImGuiEditor::Draw()

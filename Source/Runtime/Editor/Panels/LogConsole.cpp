@@ -105,8 +105,29 @@ void LogConsole::DrawHeader()
 	}
 }
 
+void LogConsole::DrawTexts()
+{
+	if (ImGui::BeginTable("Logs", 2,
+		ImGuiTableFlags_NoSavedSettings |
+		ImGuiTableFlags_Borders |
+		ImGuiTableFlags_SizingStretchProp |
+		ImGuiTableFlags_ScrollY |
+		ImGuiTableFlags_RowBg))
+	{
+		ImGui::TableSetupColumn("Level", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed);
+		ImGui::TableSetupColumn("Log", ImGuiTableColumnFlags_NoSort);
+		ImGui::TableSetupScrollFreeze(0, 1);
+
+		ImGui::TableHeadersRow();
+		ImGui::TableNextRow();
+
+		ImGui::EndTable();
+	}
+}
+
 void LogConsole::OnDraw()
 {
 	DrawHeader();
 	ImGui::Separator();
+	DrawTexts();
 }
