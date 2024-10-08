@@ -12,36 +12,38 @@
 class SpdLogService : public IService<SpdLogService>
 {
 public:
-	SpdLogService()
-	{
-		m_AsyncLogger = spdlog::create_async("SpdLogger", std::make_shared<spdlog::sinks::windebug_sink_mt>(), 1024u);
-		m_AsyncLogger->set_pattern("[%^%l%$] %v");
-
-#if _DEBUG
-		m_AsyncLogger->set_level(spdlog::level::trace);
-#else
-		m_AsyncLogger->set_level(spdlog::level::info);
-#endif
-	}
+	SpdLogService();
 
 	template<class... Args>
-	void Info(const char* Format, Args&&... ArgList) { m_AsyncLogger->info(Format, std::forward<Args>(ArgList)...); }
+	inline void Info(const char* Format, Args&&... ArgList) { m_AsyncLogger->info(Format, std::forward<Args>(ArgList)...); }
 
 	template<class... Args>
-	void Warning(const char* Format, Args&&... ArgList) { m_AsyncLogger->warn(Format, std::forward<Args>(ArgList)...); }
+	inline void Warning(const char* Format, Args&&... ArgList) { m_AsyncLogger->warn(Format, std::forward<Args>(ArgList)...); }
 
 	template<class... Args>
-	void Error(const char* Format, Args&&... ArgList) { m_AsyncLogger->error(Format, std::forward<Args>(ArgList)...); }
+	inline void Error(const char* Format, Args&&... ArgList) { m_AsyncLogger->error(Format, std::forward<Args>(ArgList)...); }
 
 	template<class... Args>
-	void Debug(const char* Format, Args&&... ArgList) { m_AsyncLogger->debug(Format, std::forward<Args>(ArgList)...); }
+	inline void Debug(const char* Format, Args&&... ArgList) { m_AsyncLogger->debug(Format, std::forward<Args>(ArgList)...); }
 
 	template<class... Args>
-	void Trace(const char* Format, Args&&... ArgList) { m_AsyncLogger->trace(Format, std::forward<Args>(ArgList)...); }
+	inline void Trace(const char* Format, Args&&... ArgList) { m_AsyncLogger->trace(Format, std::forward<Args>(ArgList)...); }
 
 	template<class... Args>
-	void Critical(const char* Format, Args&&... ArgList) { m_AsyncLogger->critical(Format, std::forward<Args>(ArgList)...); }
+	inline void Critical(const char* Format, Args&&... ArgList) { m_AsyncLogger->critical(Format, std::forward<Args>(ArgList)...); }
+
+	void RegisterRedirector(spdlog::sinks::sink* Sink);
 private:
+	class Logger : public spdlog::sinks::windebug_sink_mt
+	{
+	public:
+		void RegisterRedirector(spdlog::sinks::sink* Sink);
+	protected:
+		void _sink_it(const spdlog::details::log_msg& Message) override;
+	private:
+		std::unordered_set<spdlog::sinks::sink*> m_Redirectors;
+	};
+
 	std::shared_ptr<spdlog::logger> m_AsyncLogger;
 };
 

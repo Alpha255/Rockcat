@@ -2,6 +2,14 @@
 #include "Engine/Services/SpdLogService.h"
 #include <Submodules/IconFontCppHeaders/IconsMaterialDesignIcons.h>
 
+LogConsole::LogMessage::LogMessage(const spdlog::details::log_msg& Message, int32_t MessageID)
+	: Level(Message.level)
+	, Text(Message.formatted.c_str())
+	, Time(Message.time)
+	, ID(MessageID)
+{
+}
+
 LogConsole::LogConsole()
 	: ImGuiPanel("Log", ICON_MDI_COMMENT_TEXT_MULTIPLE)
 {
@@ -39,8 +47,13 @@ LogConsole::LogConsole()
 
 	for (uint32_t Index = spdlog::level::level_enum::trace; Index < spdlog::level::level_enum::off; ++Index)
 	{
-		m_LogLevelFilter += 1 << Index;
+		m_LogLevelFilter |= 1 << Index;
 	}
+}
+
+void LogConsole::log(const spdlog::details::log_msg& Message)
+{
+	m_LogMessages.emplace_back(LogMessage(Message, static_cast<int32_t>(m_LogMessages.size())));
 }
 
 void LogConsole::DrawHeader()
@@ -114,12 +127,46 @@ void LogConsole::DrawTexts()
 		ImGuiTableFlags_ScrollY |
 		ImGuiTableFlags_RowBg))
 	{
-		ImGui::TableSetupColumn("Level", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed);
-		ImGui::TableSetupColumn("Log", ImGuiTableColumnFlags_NoSort);
+		//ImGui::TableSetupColumn("Level", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed);
+		//ImGui::TableSetupColumn("Log", ImGuiTableColumnFlags_NoSort);
 		ImGui::TableSetupScrollFreeze(0, 1);
 
-		ImGui::TableHeadersRow();
-		ImGui::TableNextRow();
+		//ImGui::TableHeadersRow();
+		//ImGui::TableNextRow();
+
+		for (const auto& Message : m_LogMessages)
+		{
+			if (m_TextFilter.IsActive() && !m_TextFilter.PassFilter(Message.Text.c_str()))
+			{
+				continue;
+			}
+
+			if (!(m_LogLevelFilter & (1 << Message.Level)))
+			{
+				continue;
+			}
+
+			IMGUI_SCOPED_COLOR(ImGuiCol_Text, m_LogLevelConfigs[Message.Level].TextColor);
+			ImGui::TableNextColumn();
+			ImGui::TextUnformatted(m_LogLevelConfigs[Message.Level].Icon);
+
+			IMGUI_SCOPED_ID(Message.ID);
+			ImGui::TableNextColumn();
+			ImGui::TextUnformatted(Message.Text.c_str());
+
+			IMGUI_SCOPED_COLOR(ImGuiCol_Text, Math::Color::White);
+			if (ImGui::BeginPopupContextItem(Message.Text.c_str()))
+			{
+				if (ImGui::MenuItem("Copy"))
+				{
+					ImGui::SetClipboardText(Message.Text.c_str());
+				}
+
+				ImGui::EndPopup();
+			}
+
+			ImGui::TableNextRow();
+		}
 
 		ImGui::EndTable();
 	}

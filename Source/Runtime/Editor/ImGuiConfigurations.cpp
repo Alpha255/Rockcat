@@ -13,9 +13,8 @@ void ImGuiConfigurations::LoadDefaultFonts()
 {
 	auto& IO = ImGui::GetIO();
 	IO.FontGlobalScale = 1.0f;
-	const float DefaultFontSize = 14.0f;
 
-	auto AddFont = [this, DefaultFontSize, &IO](const std::filesystem::path& FontPath) -> bool {
+	auto AddFont = [this, &IO](const std::filesystem::path& FontPath) -> bool {
 		assert(std::filesystem::exists(FontPath));
 
 		bool MergeWithIconFont = false;
@@ -25,7 +24,7 @@ void ImGuiConfigurations::LoadDefaultFonts()
 		{
 			MergeWithIconFont = m_Fonts.insert(std::make_pair(FontName, ImGuiFont{
 				ImGuiFontConfigs(),
-				IO.Fonts->AddFontFromFileTTF(FontPath.string().c_str(), DefaultFontSize)
+				IO.Fonts->AddFontFromFileTTF(FontPath.string().c_str(), FontIt->second.Font->FontSize)
 				})).first->second.Configs.MergeIconFont;
 		}
 		else

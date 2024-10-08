@@ -2,10 +2,10 @@
 
 #include "Editor/ImGuiPanel.h"
 
-class GameView : public ImGuiPanel
+class SceneView : public ImGuiPanel
 {
 public:
-	GameView();
+	SceneView();
 protected:
 	void OnDraw() override final;
 private:

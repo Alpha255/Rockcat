@@ -117,6 +117,30 @@ private:
 };
 #define IMGUI_SCOPED_FONT(FontName) ImGuiScopedFont CAT(_ScopedFont_, __LINE__)(FontName)
 
+struct ImGuiScopedID
+{
+	explicit ImGuiScopedID(const char* ID) 
+	{
+		ImGui::PushID(ID);
+	}
+
+	explicit ImGuiScopedID(const void* ID)
+	{
+		ImGui::PushID(ID);
+	}
+
+	explicit ImGuiScopedID(int32_t ID)
+	{
+		ImGui::PushID(ID);
+	}
+
+	~ImGuiScopedID()
+	{
+		ImGui::PopID();
+	}
+};
+#define IMGUI_SCOPED_ID(ID) ImGuiScopedID CAT(_ScopedID_, __LINE__)(ID)
+
 class ImGuiConfigurations : public SerializableAsset<ImGuiConfigurations>
 {
 public:

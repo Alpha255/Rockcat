@@ -1,10 +1,10 @@
-#include "Editor/Panels/GameView.h"
+#include "Editor/Panels/SceneView.h"
 #include <Submodules/IconFontCppHeaders/IconsMaterialDesignIcons.h>
 
-GameView::GameView()
+SceneView::SceneView()
 	: ImGuiPanel(
-		"Game", 
-		ICON_MDI_CONTROLLER,
+		"Scene", 
+		ICON_MDI_CONTROLLER_OFF,
 		nullptr,
 		ImGuiWindowFlags_NoCollapse | 
 		ImGuiWindowFlags_NoScrollbar | 
@@ -12,6 +12,6 @@ GameView::GameView()
 {
 }
 
-void GameView::OnDraw()
+void SceneView::OnDraw()
 {
 }

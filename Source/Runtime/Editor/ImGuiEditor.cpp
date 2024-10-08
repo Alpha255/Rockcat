@@ -1,6 +1,6 @@
 #include "Editor/ImGuiEditor.h"
 #include "Editor/Panels/LogConsole.h"
-#include "Editor/Panels/GameView.h"
+#include "Editor/Panels/SceneView.h"
 #include "Editor/Panels/AssetBrowser.h"
 
 ImGuiEditor::ImGuiEditor(uint32_t AppWindowWidth, uint32_t AppWindowHeight)
@@ -19,9 +19,11 @@ ImGuiEditor::ImGuiEditor(uint32_t AppWindowWidth, uint32_t AppWindowHeight)
 	
 	m_Configs = ImGuiConfigurations::Load();
     
-    m_Panels.emplace_back(std::make_shared<LogConsole>());
-    m_Panels.emplace_back(std::make_shared<GameView>());
+    auto LogPanel = m_Panels.emplace_back(std::make_shared<LogConsole>()).get();
+    m_Panels.emplace_back(std::make_shared<SceneView>());
     m_Panels.emplace_back(std::make_shared<AssetBrowser>());
+
+    SpdLogService::Get().RegisterRedirector(Cast<LogConsole>(LogPanel));
 }
 
 void ImGuiEditor::Draw()

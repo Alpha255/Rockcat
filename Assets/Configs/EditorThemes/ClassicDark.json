@@ -6,7 +6,7 @@
             "Vec2.x": 5.0,
             "Vec2.y": 5.0
         },
-        "WindowRounding": 2.0,
+        "WindowRounding": 5.0,
         "WindowBorderSize": 0.0,
         "WindowMinSize": {
             "Vec2.x": 200.0,
@@ -17,18 +17,18 @@
             "Vec2.y": 0.5
         },
         "WindowMenuButtonPosition": -1,
-        "ChildRounding": 0.0,
+        "ChildRounding": 5.0,
         "ChildBorderSize": 1.0,
-        "PopupRounding": 2.0,
+        "PopupRounding": 5.0,
         "PopupBorderSize": 3.0,
         "FramePadding": {
             "Vec2.x": 4.0,
             "Vec2.y": 4.0
         },
-        "FrameRounding": 2.0,
-        "FrameBorderSize": 0.0,
+        "FrameRounding": 5.0,
+        "FrameBorderSize": 1.0,
         "ItemSpacing": {
-            "Vec2.x": 6.0,
+            "Vec2.x": 5.0,
             "Vec2.y": 2.0
         },
         "ItemInnerSpacing": {
@@ -40,22 +40,22 @@
             "Vec2.y": 2.0
         },
         "TouchExtraPadding": {
-            "Vec2.x": 4.0,
+            "Vec2.x": 6.0,
             "Vec2.y": 4.0
         },
         "IndentSpacing": 6.0,
         "ColumnsMinSpacing": 6.0,
         "ScrollbarSize": 10.0,
-        "ScrollbarRounding": 2.0,
+        "ScrollbarRounding": 5.0,
         "GrabMinSize": 12.0,
-        "GrabRounding": 2.0,
+        "GrabRounding": 5.0,
         "LogSliderDeadzone": 4.0,
-        "TabRounding": 2.0,
+        "TabRounding": 3.0,
         "TabBorderSize": 1.0,
         "TabMinWidthForCloseButton": 0.0,
         "TabBarBorderSize": 1.0,
         "TabBarOverlineSize": 2.0,
-        "TableAngledHeadersAngle": 0.6108652353286743,
+        "TableAngledHeadersAngle": 0.7504915595054627,
         "TableAngledHeadersTextAlign": {
             "Vec2.x": 0.5,
             "Vec2.y": 0.0

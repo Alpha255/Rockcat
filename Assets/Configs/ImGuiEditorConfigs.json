@@ -222,7 +222,7 @@
                             "value39": 0
                         },
                         "MergeIconFont": true,
-                        "FontSize": 20.0,
+                        "FontSize": 16.0,
                         "GlyphRangesPayload": []
                     }
                 }
@@ -294,7 +294,7 @@
                             "value39": 0
                         },
                         "MergeIconFont": false,
-                        "FontSize": 14.0,
+                        "FontSize": 12.0,
                         "GlyphRangesPayload": []
                     }
                 }
@@ -536,7 +536,7 @@
                         },
                         "GlyphOffset": {
                             "Vec2.x": 0.0,
-                            "Vec2.y": 3.0
+                            "Vec2.y": 1.0
                         },
                         "GlyphMinAdvanceX": 4.0,
                         "GlyphMaxAdvanceX": 3.4028234663852887e38,
@@ -588,7 +588,7 @@
                             "value39": 0
                         },
                         "MergeIconFont": false,
-                        "FontSize": 24.0,
+                        "FontSize": 18.0,
                         "GlyphRangesPayload": [
                             63116,
                             990487,
