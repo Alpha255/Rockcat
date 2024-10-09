@@ -29,10 +29,13 @@ ImGuiEditor::ImGuiEditor(uint32_t AppWindowWidth, uint32_t AppWindowHeight)
 void ImGuiEditor::Draw()
 {
     DrawMenuBar();
-
-    for (auto& Panel : m_Panels)
+    
     {
-        Panel->Draw();
+        ScopedDockSpace DockPanels("ImGuiEditorPanels");
+        for (auto& Panel : m_Panels)
+        {
+            Panel->Draw();
+        }
     }
 
     if (m_ShowThemeEditor)
@@ -103,4 +106,51 @@ void ImGuiEditor::DrawMenuBar()
 
         ImGui::EndMainMenuBar();
     }
+}
+
+ImGuiEditor::ScopedDockSpace::ScopedDockSpace(const char* const DockSpaceName)
+    : Open(true)
+    , DockNodeFlags(ImGuiDockNodeFlags_NoWindowMenuButton | ImGuiDockNodeFlags_NoCloseButton)
+    , WindowFlags(ImGuiWindowFlags_NoDocking |
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoBringToFrontOnFocus |
+        ImGuiWindowFlags_NoNavFocus)
+    , Name(DockSpaceName)
+{
+    if (DockNodeFlags & ImGuiDockNodeFlags_DockSpace)
+    {
+        WindowFlags |= ImGuiWindowFlags_NoBackground;
+    }
+
+    auto Viewport = ImGui::GetMainViewport();
+    auto Size = Viewport->Size;
+    auto Pos = Viewport->Pos;
+
+    const float FrameHeight = ImGui::GetFrameHeight();
+    Pos.y += FrameHeight;
+    Size.y -= FrameHeight;
+
+    ImGui::SetNextWindowPos(Pos);
+    ImGui::SetNextWindowSize(Size);
+    ImGui::SetNextWindowViewport(Viewport->ID);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+    ImGui::Begin(Name, &Open, WindowFlags);
+    ImGuiIO& IO = ImGui::GetIO();
+    if (IO.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+    {
+        ImGui::DockSpace(ImGui::GetID(Name), ImVec2(0.0f, 0.0f), DockNodeFlags);
+    }
+}
+
+ImGuiEditor::ScopedDockSpace::~ScopedDockSpace()
+{
+    ImGui::PopStyleVar(3);
+    ImGui::End();
 }

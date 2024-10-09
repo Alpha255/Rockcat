@@ -10,6 +10,19 @@ public:
 	void Draw();
 protected:
 private:
+	struct ScopedDockSpace
+	{
+		ScopedDockSpace(const char* const DockSpaceName);
+		~ScopedDockSpace();
+
+		void RebuildDefaultLayout() {}
+
+		bool Open;
+		ImGuiDockNodeFlags DockNodeFlags;
+		ImGuiWindowFlags WindowFlags;
+		const char* const Name;
+	};
+
 	void DrawMenuBar();
 
 	std::shared_ptr<ImGuiConfigurations> m_Configs;

@@ -4,7 +4,7 @@
 SceneView::SceneView()
 	: ImGuiPanel(
 		"Scene", 
-		ICON_MDI_CONTROLLER_OFF,
+		ICON_MDI_EYE,
 		nullptr,
 		ImGuiWindowFlags_NoCollapse | 
 		ImGuiWindowFlags_NoScrollbar | 
