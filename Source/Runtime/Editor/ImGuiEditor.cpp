@@ -2,6 +2,8 @@
 #include "Editor/Panels/LogConsole.h"
 #include "Editor/Panels/SceneView.h"
 #include "Editor/Panels/AssetBrowser.h"
+#include <Submodules/IconFontCppHeaders/IconsMaterialDesignIcons.h>
+//#include <Assets/Fonts/Icons/Blender/IconsBlenderIcons.h>
 
 ImGuiEditor::ImGuiEditor(uint32_t AppWindowWidth, uint32_t AppWindowHeight)
 {
@@ -55,44 +57,53 @@ void ImGuiEditor::DrawMenuBar()
     {
         if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::BeginMenu("Open"))
-            {
-                if (ImGui::MenuItem("Open Recent"))
-                {
-                }
-                if (ImGui::MenuItem("Open Last"))
-                {
-                }
-
-                ImGui::EndMenu();
-            }
-
-            if (ImGui::MenuItem("Save"))
+            if (ImGui::MenuItem(ICON_MDI_FOLDER_OPEN " Open"))
             {
             }
 
-            if (ImGui::MenuItem("Exit"))
+            if (ImGui::BeginMenu("Open Recent", !m_RecentScenes.empty()))
+            {
+            }
+
+            ImGui::Separator();
+            if (ImGui::MenuItem(ICON_MDI_FILE_EDIT_OUTLINE " New", "Ctrl+N"))
+            {
+            }
+            if (ImGui::MenuItem(ICON_MDI_CONTENT_SAVE " Save", "Ctrl+S"))
+            {
+            }
+            if (ImGui::MenuItem(ICON_MDI_RELOAD " Reload", "Ctrl+R"))
+            {
+            }
+
+            ImGui::Separator();
+            if (ImGui::MenuItem(ICON_MDI_CLOSE_CIRCLE " Exit"))
             {
             }
 
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Theme"))
+        if (ImGui::BeginMenu("Settings"))
         {
-            auto CurrentTheme = m_Configs->GetTheme();
-
-            for (auto& [Name, Theme] : m_Configs->GetThemes())
+            if (ImGui::BeginMenu("Theme"))
             {
-                if (ImGui::MenuItem(Name.c_str(), nullptr, CurrentTheme && CurrentTheme->Name == Name))
+                auto CurrentTheme = m_Configs->GetTheme();
+
+                for (auto& [Name, Theme] : m_Configs->GetThemes())
                 {
-                    m_Configs->SetTheme(Name);
+                    if (ImGui::MenuItem(Name.c_str(), nullptr, CurrentTheme && CurrentTheme->Name == Name))
+                    {
+                        m_Configs->SetTheme(Name);
+                    }
                 }
-            }
 
-            if (ImGui::MenuItem("ThemeEditor") && CurrentTheme)
-            {
-                m_ShowThemeEditor = true;
+                if (ImGui::MenuItem("ThemeEditor") && CurrentTheme)
+                {
+                    m_ShowThemeEditor = true;
+                }
+
+                ImGui::EndMenu();
             }
 
             ImGui::EndMenu();

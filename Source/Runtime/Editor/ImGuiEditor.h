@@ -27,5 +27,6 @@ private:
 
 	std::shared_ptr<ImGuiConfigurations> m_Configs;
 	std::vector<std::shared_ptr<class ImGuiPanel>> m_Panels;
+	std::vector<std::string> m_RecentScenes;
 	bool m_ShowThemeEditor = false;
 };
