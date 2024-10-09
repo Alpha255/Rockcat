@@ -1,5 +1,5 @@
 #include "Editor/ImGuiExtensions.h"
-#include <Submodules/imgui/imgui_internal.h>
+#include "Editor/ImGuiConfigurations.h"
 
 namespace ImGui
 {
@@ -20,6 +20,18 @@ namespace ImGui
 		else if (!ImGui::IsItemHovered() && DrawWhenInactive)
 		{
 			DrawList->AddRect(ExpandedRect.Min, ExpandedRect.Max, ImColor(50, 50, 50), Rounding, 0, 1.0f);
+		}
+	}
+
+	void DrawToolTip(const char* Tip)
+	{
+		IMGUI_SCOPED_STYLE(ImGuiStyleVar_WindowPadding, Math::Vector2(5.0f, 5.0f));
+
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted(Tip);
+			ImGui::EndTooltip();
 		}
 	}
 }

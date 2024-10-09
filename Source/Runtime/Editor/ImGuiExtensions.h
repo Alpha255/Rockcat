@@ -95,4 +95,6 @@ namespace ImGui
 {
     void DrawItemActivityOutline(float Rounding, bool DrawWhenInactive, 
         const Math::Color& ColorWhenActive = Math::Color(80u, 80u, 80u));
+
+    void DrawToolTip(const char* Tip);
 }

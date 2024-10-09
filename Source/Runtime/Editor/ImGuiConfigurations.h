@@ -75,17 +75,27 @@ struct ImGuiScopedStyle
 
 struct ImGuiScopedColor
 {
-	ImGuiScopedColor(ImGuiCol_ Var, const Math::Color& Col)
+	ImGuiScopedColor(ImGuiCol_ Var, const Math::Color& Col, bool Conditional = true)
+		: Condition(Conditional)
 	{
-		ImGui::PushStyleColor(Var, ImVec4(Col.x, Col.y, Col.z, Col.w));
+		if (Condition)
+		{
+			ImGui::PushStyleColor(Var, ImVec4(Col.x, Col.y, Col.z, Col.w));
+		}
 	}
 
 	~ImGuiScopedColor()
 	{
-		ImGui::PopStyleColor();
+		if (Condition)
+		{
+			ImGui::PopStyleColor();
+		}
 	}
+
+	bool Condition;
 };
 #define IMGUI_SCOPED_COLOR(Var, Color) ImGuiScopedColor CAT(_ScopedColor_, __LINE__)(Var, Color)
+#define IMGUI_SCOPED_COLOR_CONDITION(Var, Color, Condition) ImGuiScopedColor CAT(_ScopedColor_, __LINE__)(Var, Color, Condition)
 
 struct ImGuiScopedFont
 {
