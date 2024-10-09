@@ -48,8 +48,8 @@ void ImGuiConfigurations::LoadDefaultFonts()
 
 		if (AddFont(Entry.path()))
 		{
-			AddFont("Fonts\\Icons\\materialdesignicons-webfont.ttf");
-			//AddFont("Fonts\\Icons\\Blender\\icomoon.ttf");
+			//AddFont("Fonts\\Icons\\materialdesignicons-webfont.ttf");
+			AddFont("Fonts\\Icons\\Blender\\BlenderIconFont.ttf");
 		}
 	}
 

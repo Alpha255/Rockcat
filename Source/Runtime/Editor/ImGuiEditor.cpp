@@ -3,7 +3,7 @@
 #include "Editor/Panels/SceneView.h"
 #include "Editor/Panels/AssetBrowser.h"
 #include <Submodules/IconFontCppHeaders/IconsMaterialDesignIcons.h>
-//#include <Assets/Fonts/Icons/Blender/IconsBlenderIcons.h>
+#include <Assets/Fonts/Icons/Blender/IconsBlenderIcons.h>
 
 ImGuiEditor::ImGuiEditor(uint32_t AppWindowWidth, uint32_t AppWindowHeight)
 {
@@ -57,7 +57,7 @@ void ImGuiEditor::DrawMenuBar()
     {
         if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::MenuItem(ICON_MDI_FOLDER_OPEN " Open"))
+            if (ImGui::MenuItem(ICON_BLENDER_FILE_FOLDER " Open"))
             {
             }
 
@@ -66,18 +66,18 @@ void ImGuiEditor::DrawMenuBar()
             }
 
             ImGui::Separator();
-            if (ImGui::MenuItem(ICON_MDI_FILE_EDIT_OUTLINE " New", "Ctrl+N"))
+            if (ImGui::MenuItem(ICON_BLENDER_FILE_NEW " New", "Ctrl+N"))
             {
             }
-            if (ImGui::MenuItem(ICON_MDI_CONTENT_SAVE " Save", "Ctrl+S"))
+            if (ImGui::MenuItem(ICON_BLENDER_FILE_TICK " Save", "Ctrl+S"))
             {
             }
-            if (ImGui::MenuItem(ICON_MDI_RELOAD " Reload", "Ctrl+R"))
+            if (ImGui::MenuItem(ICON_BLENDER_FILE_REFRESH " Reload", "Ctrl+R"))
             {
             }
 
             ImGui::Separator();
-            if (ImGui::MenuItem(ICON_MDI_CLOSE_CIRCLE " Exit"))
+            if (ImGui::MenuItem(ICON_BLENDER_QUIT " Exit"))
             {
             }
 
