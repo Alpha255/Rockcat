@@ -1,6 +1,6 @@
 #include "Editor/Panels/LogConsole.h"
 #include "Engine/Services/SpdLogService.h"
-#include "Assets/Fonts/Icons/Blender/IconsBlenderIcons.h"
+#include <Submodules/IconFontCppHeaders/IconsMaterialDesignIcons.h>
 
 LogConsole::LogMessage::LogMessage(const spdlog::details::log_msg& Message, int32_t MessageID)
 	: Level(Message.level)
@@ -11,37 +11,37 @@ LogConsole::LogMessage::LogMessage(const spdlog::details::log_msg& Message, int3
 }
 
 LogConsole::LogConsole()
-	: ImGuiPanel("Log", ICON_BLENDER_CONSOLE)
+	: ImGuiPanel("Log", ICON_MDI_COMMENT_TEXT_MULTIPLE)
 {
 	m_LogLevelConfigs.resize(spdlog::level::level_enum::off);
 	m_LogLevelConfigs[spdlog::level::level_enum::trace] = 
 	{
-		ICON_BLENDER_TEXT,
+		ICON_MDI_MESSAGE_TEXT,
 		Math::Color::Silver
 	};
 	m_LogLevelConfigs[spdlog::level::level_enum::debug] =
 	{
-		ICON_BLENDER_GHOST_ENABLED,
+		ICON_MDI_BUG,
 		Math::Color::Cyan
 	};
 	m_LogLevelConfigs[spdlog::level::level_enum::info] = 
 	{
-		ICON_BLENDER_INFO,
+		ICON_MDI_INFORMATION,
 		Math::Color::White
 	};
 	m_LogLevelConfigs[spdlog::level::level_enum::warn] = 
 	{
-		ICON_BLENDER_WARNING_LARGE,
+		ICON_MDI_ALERT,
 		Math::Color::Yellow
 	};
 	m_LogLevelConfigs[spdlog::level::level_enum::err] = 
 	{
-		ICON_BLENDER_ERROR,
+		ICON_MDI_CLOSE_OCTAGON,
 		Math::Color::Red
 	};
 	m_LogLevelConfigs[spdlog::level::level_enum::critical] = 
 	{
-		ICON_BLENDER_CANCEL,
+		ICON_MDI_ALERT_OCTAGRAM,
 		Math::Color::Purple
 	};
 
@@ -61,7 +61,7 @@ void LogConsole::DrawHeader()
 	ImGui::AlignTextToFramePadding();
 	
 	IMGUI_SCOPED_COLOR(ImGuiCol_Button, Math::Color::Black);
-	if (ImGui::Button(ICON_BLENDER_TOOL_SETTINGS))
+	if (ImGui::Button(ICON_MDI_COG))
 	{
 		ImGui::OpenPopup("SettingsPopup");
 	}
@@ -74,7 +74,7 @@ void LogConsole::DrawHeader()
 	}
 	
 	ImGui::SameLine();
-	ImGui::TextUnformatted(ICON_BLENDER_VIEW_ZOOM);
+	ImGui::TextUnformatted(ICON_MDI_MAGNIFY);
 	ImGui::SameLine();
 
 	auto& Style = ImGui::GetStyle();

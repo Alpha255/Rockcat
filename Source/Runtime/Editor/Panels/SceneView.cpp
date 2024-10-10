@@ -1,10 +1,10 @@
 #include "Editor/Panels/SceneView.h"
-#include "Assets/Fonts/Icons/Blender/IconsBlenderIcons.h"
+#include <Submodules/IconFontCppHeaders/IconsMaterialDesignIcons.h>
 
 SceneView::SceneView()
 	: ImGuiPanel(
 		"Scene", 
-		ICON_BLENDER_SCENE,
+		ICON_MDI_EYE,
 		nullptr,
 		ImGuiWindowFlags_NoCollapse | 
 		ImGuiWindowFlags_NoScrollbar | 
@@ -22,10 +22,10 @@ void SceneView::DrawToolBar()
 	ImGui::Indent();
 	IMGUI_SCOPED_COLOR(ImGuiCol_Button, Math::Color::Black);
 
-	DrawToolBarButton(ImGuiGizmo::EMode::Selection, ICON_BLENDER_RESTRICT_SELECT_OFF, "Select", true);
-	DrawToolBarButton(ImGuiGizmo::EMode::Translation, ICON_BLENDER_EMPTY_ARROWS, "Translate", false);
-	DrawToolBarButton(ImGuiGizmo::EMode::Rotatation, ICON_BLENDER_ORIENTATION_GIMBAL, "Rotate", false);
-	DrawToolBarButton(ImGuiGizmo::EMode::Scaling, ICON_BLENDER_OBJECT_ORIGIN, "Scale", true);
+	DrawToolBarButton(ImGuiGizmo::EMode::Selection, ICON_MDI_CURSOR_DEFAULT, "Select", true);
+	DrawToolBarButton(ImGuiGizmo::EMode::Translation, ICON_MDI_ARROW_ALL, "Translate", false);
+	DrawToolBarButton(ImGuiGizmo::EMode::Rotatation, ICON_MDI_ROTATE_ORBIT, "Rotate", false);
+	DrawToolBarButton(ImGuiGizmo::EMode::Scaling, ICON_MDI_RESIZE, "Scale", true);
 }
 
 void SceneView::DrawToolBarButton(ImGuiGizmo::EMode GizmoMode, const char* const Icon, const char* const Tooltip, bool DrawSeperator)
@@ -37,6 +37,7 @@ void SceneView::DrawToolBarButton(ImGuiGizmo::EMode GizmoMode, const char* const
 	ImGui::SameLine();
 	if (ImGui::Button(Icon))
 	{
+		m_GizmoMode = GizmoMode;
 	}
 	ImGui::DrawToolTip(Tooltip);
 
