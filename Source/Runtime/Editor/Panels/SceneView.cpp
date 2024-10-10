@@ -22,23 +22,52 @@ void SceneView::DrawToolBar()
 	ImGui::Indent();
 	IMGUI_SCOPED_COLOR(ImGuiCol_Button, Math::Color::Black);
 
-	DrawToolBarButton(ImGuiGizmo::EMode::Selection, ICON_MDI_CURSOR_DEFAULT, "Select", true);
-	DrawToolBarButton(ImGuiGizmo::EMode::Translation, ICON_MDI_ARROW_ALL, "Translate", false);
-	DrawToolBarButton(ImGuiGizmo::EMode::Rotatation, ICON_MDI_ROTATE_ORBIT, "Rotate", false);
-	DrawToolBarButton(ImGuiGizmo::EMode::Scaling, ICON_MDI_RESIZE, "Scale", true);
+	DrawToolBarButton(ICON_MDI_CURSOR_DEFAULT, "Select", m_GizmoMode == ImGuiGizmo::EMode::Selection, true, [this]() 
+		{
+			m_GizmoMode = ImGuiGizmo::EMode::Selection;
+		}
+	);
+	DrawToolBarButton(ICON_MDI_ARROW_ALL, "Translate", m_GizmoMode == ImGuiGizmo::EMode::Translation, false, [this]()
+		{
+			m_GizmoMode = ImGuiGizmo::EMode::Translation;
+		}
+	);
+	DrawToolBarButton(ICON_MDI_ROTATE_ORBIT, "Rotate", m_GizmoMode == ImGuiGizmo::EMode::Rotatation, false, [this]()
+		{
+			m_GizmoMode = ImGuiGizmo::EMode::Rotatation;
+		}
+	);
+	DrawToolBarButton(ICON_MDI_RESIZE, "Scale", m_GizmoMode == ImGuiGizmo::EMode::Scaling, true, [this]()
+		{
+			m_GizmoMode = ImGuiGizmo::EMode::Scaling;
+		}
+	);
+
+	DrawToolBarButton(ICON_MDI_AXIS_ARROW " 3D", "3D", true, false, [this]() 
+		{
+		}
+	);
+	DrawToolBarButton(ICON_MDI_ANGLE_RIGHT " 2D", "2D", false, false, [this]()
+		{
+		}
+	);
+	ImGui::Unindent();
 }
 
-void SceneView::DrawToolBarButton(ImGuiGizmo::EMode GizmoMode, const char* const Icon, const char* const Tooltip, bool DrawSeperator)
+void SceneView::DrawToolBarButton(const char* const Label, const char* const Tooltip, bool Highlight, bool DrawSeperator, std::function<void()>&& BtnClickCallback)
 {
 	static const Math::Color HightlightColor(0.28f, 0.56f, 0.9f, 1.0f);
 
-	IMGUI_SCOPED_COLOR_CONDITION(ImGuiCol_Text, HightlightColor, m_GizmoMode == GizmoMode);
-	
-	ImGui::SameLine();
-	if (ImGui::Button(Icon))
 	{
-		m_GizmoMode = GizmoMode;
+		IMGUI_SCOPED_COLOR_CONDITION(ImGuiCol_Text, HightlightColor, Highlight);
+
+		ImGui::SameLine();
+		if (ImGui::Button(Label))
+		{
+			BtnClickCallback();
+		}
 	}
+
 	ImGui::DrawToolTip(Tooltip);
 
 	if (DrawSeperator)

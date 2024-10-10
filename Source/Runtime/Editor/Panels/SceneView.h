@@ -11,7 +11,7 @@ protected:
 	void OnDraw() override final;
 private:
 	void DrawToolBar();
-	void DrawToolBarButton(ImGuiGizmo::EMode GizmoMode, const char* const Icon, const char* const Tooltip, bool DrawSeperator);
+	void DrawToolBarButton(const char* const Label, const char* const Tooltip, bool Highlight, bool DrawSeperator, std::function<void()>&& BtnClickCallback);
 
 	ImGuiGizmo::EMode m_GizmoMode = ImGuiGizmo::EMode::None;
 };
