@@ -1,6 +1,6 @@
 workspace "Rockcat"
 	location "./"
-	configurations { "Debug", "Release" }
+	configurations { "Debug", "DebugEditor", "Release", "ReleaseEditor" }
 	objdir "$(SolutionDir)Out/Intermediate"
 	targetdir "$(SolutionDir)Out/Intermediate/$(Platform)/$(Configuration)/$(ProjectName)"
 	characterset "Unicode"
@@ -17,10 +17,17 @@ workspace "Rockcat"
 	filter { "configurations:Debug" }
 		symbols "On"
 		optimize "Debug"
-		defines { "_DEBUG", "_UNICODE", "UNICODE", "CONFIGURATION=\"_Debug\"", "IMGUI_USE_WCHAR32" }
+		defines { "_DEBUG", "_UNICODE", "UNICODE", "CONFIGURATION=\"_Debug\"", "IMGUI_USE_WCHAR32", "WITH_EDITOR=0" }
+	filter { "configurations:DebugEditor" }
+		symbols "On"
+		optimize "Debug"
+		defines { "_DEBUG", "_UNICODE", "UNICODE", "CONFIGURATION=\"_Debug\"", "IMGUI_USE_WCHAR32", "WITH_EDITOR=1" }
 	filter { "configurations:Release" }
 		optimize "Speed"
-		defines { "NDEBUG", "_UNICODE", "UNICODE", "CONFIGURATION=\"\"", "IMGUI_USE_WCHAR32" }
+		defines { "NDEBUG", "_UNICODE", "UNICODE", "CONFIGURATION=\"_Release\"", "IMGUI_USE_WCHAR32", "WITH_EDITOR=0" }
+	filter { "configurations:ReleaseEditor" }
+		optimize "Speed"
+		defines { "NDEBUG", "_UNICODE", "UNICODE", "CONFIGURATION=\"_Release\"", "IMGUI_USE_WCHAR32", "WITH_EDITOR=1" }
 	filter { "platforms:Win64" }
 		system "Windows"
 		architecture "x64"
@@ -56,11 +63,11 @@ workspace "Rockcat"
 			libdirs {
 				"$(VK_SDK_PATH)/Lib"
 			}
-			filter { "configurations:Debug" }
+			filter { "configurations:Debug or DebugEditor" }
 				links {
 					"spirv-cross-cored"
 				}
-			filter { "configurations:Release" }
+			filter { "configurations:Release or ReleaseEditor" }
 				links {
 					"spirv-cross-core"
 				}
@@ -189,7 +196,7 @@ workspace "Rockcat"
 				"$(SolutionDir)Submodules/assimp/contrib/openddlparser/include",
 				"$(SolutionDir)Submodules/assimp/contrib/utf8cpp/source"
 			}
-			filter { "configurations:Debug" }
+			filter { "configurations:Debug or DebugEditor" }
 				defines { 
 					"WIN32",
 					"_WINDOWS",
@@ -210,7 +217,7 @@ workspace "Rockcat"
 					"OPENDDLPARSER_BUILD",
 					"assimp_EXPORTS",
 				}
-			filter { "configurations:Release" }
+			filter { "configurations:Release or ReleaseEditor" }
 				defines { 
 					"WIN32",
 					"_WINDOWS",
