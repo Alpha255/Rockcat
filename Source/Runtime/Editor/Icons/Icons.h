@@ -1,0 +1,34 @@
+#pragma once
+
+#include <Submodules/IconFontCppHeaders/IconsMaterialDesignIcons.h>
+#include "Editor/Icons/IconsBlenderIcons.h"
+#include "Editor/Icons/IconsUnrealIcons.h"
+
+#define ICON_FONT "Fonts\\Icons\\materialdesignicons-webfont.ttf"
+
+#define ICON_FILE_OPEN       ICON_MDI_FOLDER_OPEN
+#define ICON_FILE_NEW        ICON_MDI_FILE_DOCUMENT_PLUS
+#define ICON_FILE_SAVE       ICON_MDI_CONTENT_SAVE
+#define ICON_FILE_RELOAD     ICON_MDI_RELOAD
+						     
+#define ICON_EXIT            ICON_MDI_CLOSE_CIRCLE
+						     
+#define ICON_LOG_CONSOLE     ICON_MDI_COMMENT_TEXT_MULTIPLE
+#define ICON_LOG_TRACE       ICON_MDI_MESSAGE_TEXT
+#define ICON_LOG_DEBUG       ICON_MDI_BUG
+#define ICON_LOG_INFO        ICON_MDI_INFORMATION
+#define ICON_LOG_WARNING     ICON_MDI_ALERT
+#define ICON_LOG_ERROR       ICON_MDI_CLOSE_OCTAGON
+#define ICON_LOG_FATAL       ICON_MDI_ALERT_OCTAGRAM
+#define ICON_LOG_SETTING     ICON_MDI_COG
+#define ICON_LOG_SEARCH      ICON_MDI_MAGNIFY
+
+#define ICON_SCENE_VIEW      ICON_MDI_EYE
+#define ICON_OBJ_MODE_SELECT ICON_MDI_CURSOR_DEFAULT
+#define ICON_OBJ_MODE_TRANS  ICON_MDI_ARROW_ALL
+#define ICON_OBJ_MODE_ROTATE ICON_MDI_ROTATE_ORBIT
+#define ICON_OBJ_MODE_SCALE  ICON_MDI_RESIZE
+#define ICON_VIEW_MODE_3D    ICON_MDI_AXIS_ARROW
+#define ICON_VIEW_MODE_2D    ICON_MDI_ANGLE_RIGHT
+
+#define ICON_ASSET_BROWSER   ICON_MDI_FOLDER_EYE

@@ -1,8 +1,8 @@
 #include "Editor/Panels/AssetBrowser.h"
-#include <Submodules/IconFontCppHeaders/IconsMaterialDesignIcons.h>
+#include "Editor/Icons/Icons.h"
 
 AssetBrowser::AssetBrowser()
-	: ImGuiPanel("Assets", ICON_MDI_FOLDER_EYE)
+	: ImGuiPanel("Assets", ICON_ASSET_BROWSER)
 {
 }
 

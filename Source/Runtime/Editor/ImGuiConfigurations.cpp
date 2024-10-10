@@ -1,5 +1,6 @@
 #include "Editor/ImGuiConfigurations.h"
 #include "Engine/Services/SpdLogService.h"
+#include "Editor/Icons/Icons.h"
 
 const std::map<std::string, ImGuiFont>* ImGuiScopedFont::AllFonts = nullptr;
 
@@ -48,8 +49,7 @@ void ImGuiConfigurations::LoadDefaultFonts()
 
 		if (AddFont(Entry.path()))
 		{
-			AddFont("Fonts\\Icons\\materialdesignicons-webfont.ttf");
-			//AddFont("Fonts\\Icons\\Blender\\icomoon.ttf");
+			AddFont(ICON_FONT);
 		}
 	}
 

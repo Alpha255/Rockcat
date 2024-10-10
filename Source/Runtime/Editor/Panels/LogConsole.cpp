@@ -1,6 +1,6 @@
 #include "Editor/Panels/LogConsole.h"
 #include "Engine/Services/SpdLogService.h"
-#include <Submodules/IconFontCppHeaders/IconsMaterialDesignIcons.h>
+#include "Editor/Icons/Icons.h"
 
 LogConsole::LogMessage::LogMessage(const spdlog::details::log_msg& Message, int32_t MessageID)
 	: Level(Message.level)
@@ -11,37 +11,37 @@ LogConsole::LogMessage::LogMessage(const spdlog::details::log_msg& Message, int3
 }
 
 LogConsole::LogConsole()
-	: ImGuiPanel("Log", ICON_MDI_COMMENT_TEXT_MULTIPLE)
+	: ImGuiPanel("Log", ICON_LOG_CONSOLE)
 {
 	m_LogLevelConfigs.resize(spdlog::level::level_enum::off);
 	m_LogLevelConfigs[spdlog::level::level_enum::trace] = 
 	{
-		ICON_MDI_MESSAGE_TEXT,
+		ICON_LOG_TRACE,
 		Math::Color::Silver
 	};
 	m_LogLevelConfigs[spdlog::level::level_enum::debug] =
 	{
-		ICON_MDI_BUG,
+		ICON_LOG_DEBUG,
 		Math::Color::Cyan
 	};
 	m_LogLevelConfigs[spdlog::level::level_enum::info] = 
 	{
-		ICON_MDI_INFORMATION,
+		ICON_LOG_INFO,
 		Math::Color::White
 	};
 	m_LogLevelConfigs[spdlog::level::level_enum::warn] = 
 	{
-		ICON_MDI_ALERT,
+		ICON_LOG_WARNING,
 		Math::Color::Yellow
 	};
 	m_LogLevelConfigs[spdlog::level::level_enum::err] = 
 	{
-		ICON_MDI_CLOSE_OCTAGON,
+		ICON_LOG_ERROR,
 		Math::Color::Red
 	};
 	m_LogLevelConfigs[spdlog::level::level_enum::critical] = 
 	{
-		ICON_MDI_ALERT_OCTAGRAM,
+		ICON_LOG_FATAL,
 		Math::Color::Purple
 	};
 
@@ -61,7 +61,7 @@ void LogConsole::DrawHeader()
 	ImGui::AlignTextToFramePadding();
 	
 	IMGUI_SCOPED_COLOR(ImGuiCol_Button, Math::Color::Black);
-	if (ImGui::Button(ICON_MDI_COG))
+	if (ImGui::Button(ICON_LOG_SETTING))
 	{
 		ImGui::OpenPopup("SettingsPopup");
 	}
@@ -74,7 +74,7 @@ void LogConsole::DrawHeader()
 	}
 	
 	ImGui::SameLine();
-	ImGui::TextUnformatted(ICON_MDI_MAGNIFY);
+	ImGui::TextUnformatted(ICON_LOG_SEARCH);
 	ImGui::SameLine();
 
 	auto& Style = ImGui::GetStyle();
