@@ -97,4 +97,8 @@ namespace ImGui
         const Math::Color& ColorWhenActive = Math::Color(80u, 80u, 80u));
 
     void DrawToolTip(const char* Tip);
+
+    bool BeginMenuWithStress(const char* Label, bool Enabled = true);
+
+    bool MenuItemWithStress(const char* Label, const char* Shortcut = nullptr, bool Selected = false, bool Enabled = true);
 }

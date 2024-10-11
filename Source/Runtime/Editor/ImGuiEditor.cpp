@@ -33,6 +33,7 @@ void ImGuiEditor::Draw()
     
     {
         ScopedDockSpace DockPanels("ImGuiEditorPanels");
+        IMGUI_SCOPED_STYLE(ImGuiStyleVar_WindowPadding, Math::Vector2(0.0f, 2.0f));
         for (auto& Panel : m_Panels)
         {
             Panel->Draw();
@@ -56,34 +57,34 @@ void ImGuiEditor::DrawMenuBar()
     {
         if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::MenuItem(ICON_FILE_OPEN " Open"))
+            if (ImGui::MenuItemWithStress(ICON_FILE_OPEN " O^pen", "Ctrl+O"))
             {
             }
 
-            if (ImGui::BeginMenu("Open Recent", !m_RecentScenes.empty()))
-            {
-            }
-
-            ImGui::Separator();
-            if (ImGui::MenuItem(ICON_FILE_NEW " New", "Ctrl+N"))
-            {
-            }
-            if (ImGui::MenuItem(ICON_FILE_SAVE " Save", "Ctrl+S"))
-            {
-            }
-            if (ImGui::MenuItem(ICON_FILE_RELOAD " Reload", "Ctrl+R"))
+            if (ImGui::BeginMenuWithStress("Open R^ecent", !m_RecentScenes.empty()))
             {
             }
 
             ImGui::Separator();
-            if (ImGui::MenuItem(ICON_EXIT " Exit"))
+            if (ImGui::MenuItemWithStress(ICON_FILE_NEW " N^ew", "Ctrl+N"))
+            {
+            }
+            if (ImGui::MenuItemWithStress(ICON_FILE_SAVE " S^ave", "Ctrl+S"))
+            {
+            }
+            if (ImGui::MenuItemWithStress(ICON_FILE_RELOAD " R^eload", "Ctrl+R"))
+            {
+            }
+
+            ImGui::Separator();
+            if (ImGui::MenuItemWithStress(ICON_EXIT " Q^uit", "Ctrl+Q"))
             {
             }
 
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Settings"))
+        if (ImGui::BeginMenu("Edit"))
         {
             if (ImGui::BeginMenu("Theme"))
             {

@@ -69,13 +69,13 @@ void LogConsole::DrawHeader()
 	{
 		if (ImGui::Button("Clear"))
 		{
+			m_LogMessages.clear();
 		}
 		ImGui::EndPopup();
 	}
 	
 	ImGui::SameLine();
 	ImGui::TextUnformatted(ICON_LOG_SEARCH);
-	ImGui::SameLine();
 
 	auto& Style = ImGui::GetStyle();
 	
@@ -85,15 +85,15 @@ void LogConsole::DrawHeader()
 
 	IMGUI_SCOPED_STYLE(ImGuiStyleVar_FrameBorderSize, 0.0f);
 	IMGUI_SCOPED_COLOR(ImGuiCol_FrameBg, Math::Color::Black);
-	m_TextFilter.Draw("###LogFilter", ImGui::GetContentRegionAvail().x - LogLevelButtonWidth);
-	ImGui::DrawItemActivityOutline(2.0f, false);
-
 	ImGui::SameLine();
+	const float FilterWidth = (ImGui::GetContentRegionAvail().x - LogLevelButtonWidth) / 2.0f;
+	m_TextFilter.Draw("###LogFilter", FilterWidth);
+	ImGui::DrawItemActivityOutline(2.0f, true);
 
+	ImGui::SameLine(0.0f, FilterWidth);
 	for (uint32_t Index = spdlog::level::level_enum::trace; Index < spdlog::level::level_enum::off; ++Index)
 	{
 		IMGUI_SCOPED_COLOR(ImGuiCol_Button, Math::Color::Black);
-		ImGui::SameLine();
 
 		uint32_t LogLevel = 1 << Index;
 		const auto& TextColor = (LogLevel & m_LogLevelFilter) ? m_LogLevelConfigs[Index].TextColor : Math::Color::Gray;
@@ -108,12 +108,16 @@ void LogConsole::DrawHeader()
 		{
 			ImGui::SetTooltip("%s", spdlog::level::level_names[Index]);
 		}
+
+		ImGui::SameLine();
 	}
 
 	if (!m_TextFilter.IsActive())
 	{
 		ImGui::SameLine();
 		IMGUI_SCOPED_STYLE(ImGuiStyleVar_FramePadding, Math::Vector2(0.0f, Style.FramePadding.y));
+		IMGUI_SCOPED_COLOR(ImGuiCol_Text, Math::Color::Gray);
+		ImGui::SetCursorPosX(ImGui::GetFontSize() * 4.0f);
 		ImGui::TextUnformatted("Search...");
 	}
 }
@@ -127,12 +131,7 @@ void LogConsole::DrawTexts()
 		ImGuiTableFlags_ScrollY |
 		ImGuiTableFlags_RowBg))
 	{
-		//ImGui::TableSetupColumn("Level", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed);
-		//ImGui::TableSetupColumn("Log", ImGuiTableColumnFlags_NoSort);
 		ImGui::TableSetupScrollFreeze(0, 1);
-
-		//ImGui::TableHeadersRow();
-		//ImGui::TableNextRow();
 
 		for (const auto& Message : m_LogMessages)
 		{

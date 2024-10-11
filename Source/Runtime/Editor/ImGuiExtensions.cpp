@@ -34,4 +34,56 @@ namespace ImGui
 			ImGui::EndTooltip();
 		}
 	}
+
+	std::string AddLabelStressline(const char* Label)
+	{
+		std::string NewLabel;
+		ImGuiWindow* Window = GetCurrentWindow();
+		if (Window->SkipItems)
+		{
+			return NewLabel;
+		}
+
+		ImGuiContext& Context = *ImGui::GetCurrentContext();
+		ImVec2 Pos = Window->DC.CursorPos;
+
+		std::string MenuLabel(Label);
+		NewLabel.reserve(MenuLabel.size());
+		size_t Index = 0u;
+		for (auto Char : MenuLabel)
+		{
+			if (Char == '^')
+			{
+				if (Index > 0u)
+				{
+					ImVec2 TextSize = ImGui::CalcTextSize(NewLabel.c_str(), NewLabel.c_str() + Index - 1u, true);
+					ImVec2 CharSize = ImGui::CalcTextSize(Label + Index - 1u, Label + Index, true);
+
+					const ImVec4& LineColor = ImGui::IsItemActivated() ? Context.Style.Colors[ImGuiCol_Text] : Context.Style.Colors[ImGuiCol_TextDisabled];
+					float LineY = TextSize.y + Pos.y;
+					Window->DrawList->AddLine(ImVec2(Pos.x + TextSize.x, LineY), ImVec2(Pos.x + TextSize.x + CharSize.x * 0.6f, LineY), ImGui::GetColorU32(LineColor), 1.0f);
+				}
+			}
+			else
+			{
+				NewLabel.append(1u, Char);
+				++Index;
+			}
+		}
+		NewLabel.append(1u, '\0');
+
+		return NewLabel;
+	}
+
+	bool BeginMenuWithStress(const char* Label, bool Enabled)
+	{
+		auto NewLabel = AddLabelStressline(Label);
+		return ImGui::BeginMenu(NewLabel.empty() ? Label : NewLabel.c_str(), Enabled);
+	}
+
+	bool MenuItemWithStress(const char* Label, const char* Shortcut, bool Selected, bool Enabled)
+	{
+		auto NewLabel = AddLabelStressline(Label);
+		return ImGui::MenuItem(NewLabel.empty() ? Label : NewLabel.c_str(), Shortcut, Selected, Enabled);
+	}
 }
