@@ -24,11 +24,13 @@ void ImGuiConfigurations::LoadDefaultFonts()
 		auto FontIt = m_Fonts.find(FontName);
 		if (FontIt == m_Fonts.end())
 		{
-			MergeWithIconFont = m_Fonts.insert(std::make_pair(FontName, ImGuiFont
+			auto& FontConfig = m_Fonts.insert(std::make_pair(FontName, ImGuiFont
 				{
 					ImGuiFontConfigs(),
 					IO.Fonts->AddFontFromFileTTF(FontPath.string().c_str(), DefaultFontSize)
-				})).first->second.Configs.MergeIconFont;
+				})).first->second.Configs;
+			strcpy_s(FontConfig.Name, FontName.c_str());
+			MergeWithIconFont = FontConfig.MergeIconFont;
 		}
 		else
 		{
