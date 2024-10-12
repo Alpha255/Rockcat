@@ -25,13 +25,13 @@ class SceneAsset : public SerializableAsset<SceneAsset>
 public:
 	template<class T>
 	SceneAsset(T&& Name)
-		: BaseClass(GetFilePath(Name, GetExtension()))
+		: BaseClass(GetFilePath(ASSET_PATH_SCENES, Name, GetExtension()))
 	{
 	}
 
 	static const char* GetExtension() { return ".scene"; }
-	const SceneGraph& GetSceneGraph() const { return *m_Graph; }
-	const SceneData& GetSceneData() const { return *m_Data; }
+	const SceneGraph* GetSceneGraph() const { return m_Graph.get(); }
+	const SceneData* GetSceneData() const { return m_Data.get(); }
 
 	const StaticMesh* GetStaticMesh(uint32_t Index) const 
 	{ 
@@ -55,7 +55,7 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_NVP(m_AssimpScenePaths),
+			CEREAL_NVP(m_AssimpScenes),
 			CEREAL_NVP(m_Graph),
 			CEREAL_NVP(m_Data)
 		);
@@ -64,7 +64,7 @@ protected:
 	friend class SceneBuilder;
 	void PostLoad() override final;
 private:
-	std::vector<std::string> m_AssimpScenePaths;
+	std::vector<std::string> m_AssimpScenes;
 	std::shared_ptr<SceneGraph> m_Graph;
 	std::shared_ptr<SceneData> m_Data;
 };

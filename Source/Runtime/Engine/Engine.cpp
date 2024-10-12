@@ -6,8 +6,9 @@
 #include "Engine/Services/SpdLogService.h"
 #include "Engine/Services/RenderService.h"
 #include "Engine/Services/TaskFlowService.h"
+#include "Engine/Services/FileWatchService.h"
+#include "Engine/Services/ShaderCompileService.h"
 #include "Engine/Asset/AssetDatabase.h"
-#include "Engine/Asset/ShaderCompiler.h"
 
 Engine& Engine::Get()
 {
@@ -81,6 +82,7 @@ bool Engine::Initialize()
 	AssetDatabase::Get().OnStartup();
 	RenderService::Get().OnStartup();
 	ShaderCompileService::Get().OnStartup();
+	FileWatchService::Get().OnShutdown();
 
 	return true;
 }
@@ -91,4 +93,5 @@ void Engine::Finalize()
 	AssetDatabase::Get().OnShutdown();
 	RenderService::Get().OnShutdown();
 	ShaderCompileService::Get().OnShutdown();
+	FileWatchService::Get().OnShutdown();
 }

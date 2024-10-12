@@ -30,7 +30,7 @@ private:
 void MeshPass::Execute(RHIDevice& Device, const RenderScene& Scene)
 {
 	auto CommandBuffer = Device.GetActiveCommandBuffer(ERHIDeviceQueue::Graphics);
-	//assert(CommandBuffer);
+	assert(CommandBuffer);
 
 	if (GetRHI().GetGraphicsSettings().AsyncCommandlistSubmission)
 	{

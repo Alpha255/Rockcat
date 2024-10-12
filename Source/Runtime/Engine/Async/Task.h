@@ -42,19 +42,19 @@ private:
 	EPriority m_Priority;
 };
 
-#define TF_ParallelFor(Begin, End, Callable) TaskFlowService::Get().ParallelFor<true>(Begin, End, Callable)
-#define TF_ParallelFor_NoWait(Begin, End, Callable) TaskFlowService::Get().ParallelFor<false>(Begin, End, Callable)
+#define TF_ParallelFor(Begin, End, Callable, Thread) TaskFlowService::Get().ParallelFor<true>(Begin, End, Callable, Thread)
+#define TF_ParallelFor_NoWait(Begin, End, Callable, Thread) TaskFlowService::Get().ParallelFor<false>(Begin, End, Callable, Thread)
 
-#define TF_ParallelForIndex(Begin, End, Step, Callable) TaskFlowService::Get().ParallelForIndex<Step, true>(Begin, End, Callable)
-#define TF_ParallelForIndex_NoWait(Begin, End, Step, Callable) TaskFlowService::Get().ParallelForIndex<Step, false>(Begin, End, Callable)
+#define TF_ParallelForIndex(Begin, End, Step, Callable, Thread) TaskFlowService::Get().ParallelForIndex<Step, true>(Begin, End, Callabl, Thread)
+#define TF_ParallelForIndex_NoWait(Begin, End, Step, Callable, Thread) TaskFlowService::Get().ParallelForIndex<Step, false>(Begin, End, Callable, Thread)
 
-#define TF_ParallelSort(Begin, End, CompareOp) TaskFlowService::Get().ParallelSort<true>(Begin, End, CompareOp)
-#define TF_ParallelSort_NoWait(Begin, End, CompareOp) TaskFlowService::Get().ParallelSort<false>(Begin, End, CompareOp)
+#define TF_ParallelSort(Begin, End, CompareOp, Thread) TaskFlowService::Get().ParallelSort<true>(Begin, End, CompareOp, Thread)
+#define TF_ParallelSort_NoWait(Begin, End, CompareOp, Thread) TaskFlowService::Get().ParallelSort<false>(Begin, End, CompareOp, Thread)
 
-#define TF_Async(Callable) TaskFlowService::Get().Async<true>(Callable)
-#define TF_Async_NoWait(Callable) TaskFlowService::Get().Async<false>(Callable)
+#define TF_Async(Callable, Thread) TaskFlowService::Get().Async<true>(Callable, Thread)
+#define TF_Async_NoWait(Callable, Thread) TaskFlowService::Get().Async<false>(Callable, Thread)
 
-#define TF_DispatchTask(InTask) TaskFlowService::Get().DispatchTask(InTask)
+#define TF_DispatchTask(InTask, Thread) TaskFlowService::Get().DispatchTask(InTask, Thread)
 
-#define TF_DispatchTasks(InTasks) TaskFlowService::Get().DispatchTasks<true>(InTasks)
-#define TF_DispatchTasks_NoWait(InTasks) TaskFlowService::Get().DispatchTasks<false>(InTasks)
+#define TF_DispatchTasks(InTasks, Thread) TaskFlowService::Get().DispatchTasks<true>(InTasks, Thread)
+#define TF_DispatchTasks_NoWait(InTasks, Thread) TaskFlowService::Get().DispatchTasks<false>(InTasks, Thread)

@@ -38,8 +38,10 @@ void RenderTest::OnInitialize()
 		m_RenderGraph = std::make_shared<ForwardRenderingPath>(GetRHI(), *m_Scene);
 		break;
 	case ERenderingPath::DeferredShading:
+		assert(false);
 		break;
 	case ERenderingPath::DeferredLighting:
+		assert(false);
 		break;
 	}
 	m_RenderGraph->Setup();

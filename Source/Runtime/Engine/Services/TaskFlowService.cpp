@@ -6,14 +6,26 @@
 #define RENDER_THREADS 1
 
 TaskFlowService::TaskFlowService()
-	: m_UseHyperThreading(true)
+	: m_UseHyperThreading(false)
 {
-	const size_t SeperateThreadCount = FILE_WATCHER_THREADS + RENDER_THREADS;
-	auto ThreadsCount = PlatformMisc::GetHardwareConcurrencyThreadsCount(m_UseHyperThreading) - SeperateThreadCount;
-	m_Executor = std::make_unique<tf::Executor>(ThreadsCount);
+	size_t NumSeperateThread = 0u;
+	auto NumTotalThreads = PlatformMisc::GetHardwareConcurrencyThreadsCount(m_UseHyperThreading);
 
-	LOG_INFO("TaskFlow: Create taskflow executor with {} threads, hyper threading is {}, taskflow version: {}",
-		ThreadsCount,
+	m_Executors[(size_t)EThread::GameThread] = std::move(std::make_unique<tf::Executor>(1u));
+	NumSeperateThread += 1u;
+
+	m_Executors[(size_t)EThread::RenderThread] = std::move(std::make_unique<tf::Executor>(1u));
+	NumSeperateThread += 1u;
+
+	m_Executors[(size_t)EThread::FileWatchThread] = std::move(std::make_unique<tf::Executor>(1u));
+	NumSeperateThread += 1u;
+
+	m_Executors[(size_t)EThread::WorkerThread] = std::move(std::make_unique<tf::Executor>(NumTotalThreads - NumSeperateThread));
+
+	LOG_INFO("TaskFlow: Create taskflow executors with {} threads, {} seperate threads, {} work threads, hyper threading is {}, taskflow version: {}",
+		NumTotalThreads,
+		NumSeperateThread,
+		NumTotalThreads - NumSeperateThread,
 		m_UseHyperThreading ? "enabled" : "disabled",
 		tf::version());
 }

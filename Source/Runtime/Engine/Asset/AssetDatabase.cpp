@@ -54,7 +54,7 @@ private:
 };
 
 AssetDatabase::AssetDatabase()
-	: m_SupportAsyncLoad(false)
+	: m_EnableAsyncImport(false)
 { 
 	CreateAssetImporters();
 }
@@ -86,9 +86,9 @@ std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(
 
 				m_Assets.insert(std::make_pair(AssetPath, NewAsset));
 
-				if (Async && m_SupportAsyncLoad)
+				if (Async && m_EnableAsyncImport)
 				{
-					TF_DispatchTask(NewTask);
+					TF_DispatchTask(NewTask, EThread::WorkerThread);
 				}
 				else
 				{

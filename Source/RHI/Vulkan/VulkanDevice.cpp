@@ -438,6 +438,7 @@ NAMESPACE_END(RHI)
 #include "RHI/Vulkan/VulkanInstance.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
+#include "RHI/Vulkan/VulkanShader.h"
 
 VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 {
@@ -619,37 +620,37 @@ bool VulkanDevice::GetQueueFamilyIndex(
 #undef IS_FLAGS_MATCH
 }
 
-RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& /*RHICreateInfo*/)
+RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& CreateInfo)
 {
-	return RHIShaderPtr();
+	return std::make_shared<VulkanShader>(*this, CreateInfo);
 }
 
-RHIImagePtr VulkanDevice::CreateImage(const RHIImageCreateInfo& /*RHICreateInfo*/)
+RHIImagePtr VulkanDevice::CreateImage(const RHIImageCreateInfo& /*CreateInfo*/)
 {
 	return RHIImagePtr();
 }
 
-RHIInputLayoutPtr VulkanDevice::CreateInputLayout(const RHIInputLayoutCreateInfo& /*RHICreateInfo*/)
+RHIInputLayoutPtr VulkanDevice::CreateInputLayout(const RHIInputLayoutCreateInfo& /*CreateInfo*/)
 {
 	return RHIInputLayoutPtr();
 }
 
-RHIFrameBufferPtr VulkanDevice::CreateFrameBuffer(const RHIFrameBufferCreateInfo& /*RHICreateInfo*/)
+RHIFrameBufferPtr VulkanDevice::CreateFrameBuffer(const RHIFrameBufferCreateInfo& /*CreateInfo*/)
 {
 	return RHIFrameBufferPtr();
 }
 
-RHIGraphicsPipelinePtr VulkanDevice::CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& /*RHICreateInfo*/)
+RHIGraphicsPipelinePtr VulkanDevice::CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& /*CreateInfo*/)
 {
 	return RHIGraphicsPipelinePtr();
 }
 
-RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& /*RHICreateInfo*/)
+RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& /*CreateInfo*/)
 {
 	return RHIBufferPtr();
 }
 
-RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& /*RHICreateInfo*/)
+RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& /*CreateInfo*/)
 {
 	return RHISamplerPtr();
 }

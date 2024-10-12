@@ -94,7 +94,7 @@ void SceneAsset::PostLoad()
 		m_Data.swap(NewData);
 	};
 
-	for (const auto& Path : m_AssimpScenePaths)
+	for (const auto& Path : m_AssimpScenes)
 	{
 		AssetDatabase::Get().FindOrImportAsset<AssimpSceneAsset>(Path, AssetLoadCallbacks);
 	}

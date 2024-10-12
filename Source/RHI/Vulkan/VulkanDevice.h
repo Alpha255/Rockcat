@@ -35,13 +35,13 @@ public:
 
 	virtual void WaitIdle() const override final { assert(m_LogicalDevice); m_LogicalDevice.waitIdle(); }
 
-	virtual RHIShaderPtr CreateShader(const RHIShaderCreateInfo& RHICreateInfo) override final;
-	virtual RHIImagePtr CreateImage(const RHIImageCreateInfo& RHICreateInfo) override final;
-	virtual RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo) override final;
-	virtual RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo) override final;
-	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) override final;
-	virtual RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo) override final;
-	virtual RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& RHICreateInfo) override final;
+	virtual RHIShaderPtr CreateShader(const RHIShaderCreateInfo& CreateInfo) override final;
+	virtual RHIImagePtr CreateImage(const RHIImageCreateInfo& CreateInfo) override final;
+	virtual RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& CreateInfo) override final;
+	virtual RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& CreateInfo) override final;
+	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo) override final;
+	virtual RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& CreateInfo) override final;
+	virtual RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& CreateInfo) override final;
 	virtual void SubmitCommandBuffer(ERHIDeviceQueue QueueType, RHICommandBuffer* Command) override final;
 	virtual void SubmitCommandBuffer(RHICommandBuffer* Command) override final;
 	virtual RHICommandBufferPtr GetActiveCommandBuffer(ERHIDeviceQueue QueueType, ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary) override final;

@@ -19,14 +19,20 @@ public:
 
 	SceneNodeIterator& Get() { return m_Iterator; }
 private:
-	SceneView(const SceneGraph& Graph)
+	SceneView(const SceneGraph* const Graph)
 		: m_Graph(Graph)
-		, m_Iterator(std::next(Graph.Nodes.cbegin(), Graph.Root.GetIndex()))
+		, m_Iterator(Graph ? std::next(Graph->Nodes.cbegin(), Graph->Root.GetIndex()) : SceneNodeIterator())
 	{
 	}
 
 	void MoveTo(const SceneGraph::NodeID& Diff) { MoveTo(Diff.GetIndex()); }
-	void MoveTo(const SceneGraph::NodeID::IndexType Diff) { m_Iterator = std::next(m_Graph.Nodes.cbegin(), Diff); }
+	void MoveTo(const SceneGraph::NodeID::IndexType Diff) 
+	{ 
+		if (m_Graph) 
+		{ 
+			m_Iterator = std::next(m_Graph->Nodes.cbegin(), Diff); 
+		} 
+	}
 
 	SceneNodeIterator Next(DepthFirst)
 	{
@@ -76,7 +82,7 @@ private:
 		return m_Iterator;
 	}
 
-	const SceneGraph& m_Graph;
+	const SceneGraph* const m_Graph;
 	SceneNodeIterator m_Iterator;
 	std::stack<SceneGraph::NodeID::IndexType> m_Pending;
 };

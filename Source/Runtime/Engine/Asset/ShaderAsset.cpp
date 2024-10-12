@@ -1,5 +1,6 @@
 #include "Engine/Asset/ShaderAsset.h"
 #include "Engine/Asset/ShaderCompiler.h"
+#include "Engine/Services/ShaderCompileService.h"
 #include "Engine/RHI/RHIInterface.h"
 
 class GlobalShaderCompileConfigurations : public SerializableAsset<GlobalShaderCompileConfigurations>

@@ -75,6 +75,6 @@ private:
 
 	std::unordered_map<std::filesystem::path, std::shared_ptr<Asset>> m_Assets;
 	std::vector<std::unique_ptr<IAssetImporter>> m_AssetImporters;
-	bool m_SupportAsyncLoad;
+	bool m_EnableAsyncImport;
 };
 
