@@ -156,20 +156,16 @@ RHISamplerPtr D3D11Device::CreateSampler(const RHISamplerCreateInfo& RHICreateIn
 	return RHISamplerPtr();
 }
 
-RHICommandBufferPoolPtr D3D11Device::CreateCommandBufferPool(ERHIDeviceQueue QueueType)
-{
-	return RHICommandBufferPoolPtr();
-}
-
-void D3D11Device::SubmitCommandBuffer(ERHIDeviceQueue QueueType, RHICommandBuffer* Commands)
-{
-}
+//RHICommandBufferPoolPtr D3D11Device::CreateCommandBufferPool(ERHIDeviceQueue QueueType)
+//{
+//	return RHICommandBufferPoolPtr();
+//}
 
 void D3D11Device::SubmitCommandBuffer(RHICommandBuffer* Command)
 {
 }
 
-RHICommandBufferPtr D3D11Device::GetActiveCommandBuffer(ERHIDeviceQueue QueueType, ERHICommandBufferLevel Level)
+RHICommandBuffer* D3D11Device::GetActiveCommandBuffer(ERHIDeviceQueue QueueType, ERHICommandBufferLevel Level)
 {
-	return RHICommandBufferPtr();
+	return nullptr;
 }

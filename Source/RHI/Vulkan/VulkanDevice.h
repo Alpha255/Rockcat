@@ -42,9 +42,8 @@ public:
 	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo) override final;
 	virtual RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& CreateInfo) override final;
 	virtual RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& CreateInfo) override final;
-	virtual void SubmitCommandBuffer(ERHIDeviceQueue QueueType, RHICommandBuffer* Command) override final;
 	virtual void SubmitCommandBuffer(RHICommandBuffer* Command) override final;
-	virtual RHICommandBufferPtr GetActiveCommandBuffer(ERHIDeviceQueue QueueType, ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary) override final;
+	virtual RHICommandBuffer* GetActiveCommandBuffer(ERHIDeviceQueue QueueType, ERHICommandBufferLevel Level) override final;
 
 	inline const vk::Device& GetNative() const { return m_LogicalDevice; }
 	inline const vk::PhysicalDevice& GetPhysicalDevice() const { return m_PhysicalDevice; }
@@ -54,6 +53,10 @@ private:
 	bool GetQueueFamilyIndex(const vk::PhysicalDevice& PhysicalDevice, uint32_t& GraphicsQueueIndex, uint32_t& ComputeQueueIndex, uint32_t& TransferQueueIndex, uint32_t& PresentQueueIndex) const;
 
 	std::unique_ptr<class VulkanInstance> m_Instance;
+	std::unique_ptr<class VulkanCommandBufferManager> m_TransferCmdMgr;
+	std::unique_ptr<class VulkanCommandBufferManager> m_ComputeCmdMgr;
+	std::queue<std::shared_ptr<class VulkanCommandBufferManager>> m_GraphicsCmdMgrs;
+	std::array<std::unique_ptr<class VulkanQueue>, (size_t)ERHIDeviceQueue::Num> m_Queues;
 
 	vk::PhysicalDeviceLimits m_Limits;
 

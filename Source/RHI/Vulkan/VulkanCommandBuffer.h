@@ -61,8 +61,14 @@ public:
 	void SetScissorRects(const RHIScissorRect* ScissorRects, uint32_t NumScissorRects) override final;
 
 	void WaitCommand(const RHICommandBuffer* CommandToWait) override final;
+
+	VulkanFence* GetFence() { return &m_Fence; }
+	const std::vector<VulkanSemaphore*> GetWaitSemaphores() const { return m_WaitSemaphores; }
+	const std::vector<vk::PipelineStageFlags>& GetWaitDstStageFlags() const { return m_WaitDstStageFlags; }
 protected:
 private:
 	class VulkanCommandPool& m_Pool;
-	VulkanSemaphore m_Semaphore;
+	VulkanFence m_Fence;
+	std::vector<VulkanSemaphore*> m_WaitSemaphores;
+	std::vector<vk::PipelineStageFlags> m_WaitDstStageFlags;
 };

@@ -1,7 +1,7 @@
 #include "RHI/Vulkan/VulkanBuffer.h"
 #include "RHI/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanRHI.h"
 #include "Engine/Services/SpdLogService.h"
-#include "Engine/RHI/RHIInterface.h"
 
 VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo& CreateInfo)
 	: VkHwResource(Device)
@@ -104,7 +104,7 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 		}
 		else
 		{
-			if (RHIInterface::GetGraphicsSettings().BatchResourceDataTransfer)
+			if (VulkanRHI::GetGraphicsSettings().BatchResourceDataTransfer)
 			{
 			}
 			else

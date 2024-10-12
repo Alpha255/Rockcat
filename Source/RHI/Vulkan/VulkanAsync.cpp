@@ -396,7 +396,7 @@ VulkanPipelineBarrier::VkResourceState VulkanPipelineBarrier::TranslateResourceS
 	/// VK_IMAGE_LAYOUT_UNDEFINED specifies that the layout is unknown. Image memory cannot be transitioned into this layout. 
 	/// This layout can be used as the initialLayout member of VkImageCreateInfo. 
 	/// This layout can be used in place of the current image layout in a layout transition, 
-	/// but doing so will cause the contents of the image¡¯s memory to be undefined.
+	/// but doing so will cause the contents of the imageï¿½ï¿½s memory to be undefined.
 
 	if (State == EResourceState::Common)
 	{

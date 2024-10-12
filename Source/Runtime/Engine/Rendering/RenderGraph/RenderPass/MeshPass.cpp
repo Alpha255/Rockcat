@@ -40,7 +40,7 @@ void MeshPass::Execute(RHIDevice& Device, const RenderScene& Scene)
 	{
 		for (auto DrawCommand : Scene.GetDrawCommands(m_Filter))
 		{
-			MeshDrawTask(DrawCommand, CommandBuffer.get()).Execute();
+			MeshDrawTask(DrawCommand, CommandBuffer).Execute();
 		}
 	}
 

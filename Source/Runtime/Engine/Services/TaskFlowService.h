@@ -5,6 +5,8 @@
 
 #pragma warning(push)
 #pragma warning(disable:4244)
+#pragma warning(disable:4127)
+#pragma warning(disable:4267)
 #pragma warning(disable:4456)
 #include <Submodules/taskflow/taskflow/taskflow.hpp>
 #include <Submodules/taskflow/taskflow/algorithm/for_each.hpp>
@@ -117,7 +119,10 @@ public:
 			m_Executors[(size_t)Thread]->run(TempTaskflow);
 		}
 	}
+
+	uint8_t GetNumWorkThreads() const { return m_NumWorkThreads; }
 private:
 	bool m_UseHyperThreading;
+	uint8_t m_NumWorkThreads;
 	std::array<std::unique_ptr<tf::Executor>, (size_t)EThread::ThreadTypes> m_Executors;
 };

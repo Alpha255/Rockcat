@@ -103,8 +103,8 @@ struct GraphicsSettings
 	bool EnableTiledBasedLightCulling = false;
 	bool EnableClusteredBasedLightCulling = false;
 	bool EnableStencilBasedLightCulling = false;
-	bool EnableComputeQueue = true;
-	bool EnableTransferQueue = true;
+	bool EnableAsyncCompute = true;
+	bool EnableAsyncTransfer = true;
 	bool BatchResourceDataTransfer = false;
 	bool BatchResourceBarrier = false;
 	bool AsyncCommandlistSubmission = false;
@@ -129,8 +129,8 @@ struct GraphicsSettings
 			CEREAL_NVP(EnableTiledBasedLightCulling),
 			CEREAL_NVP(EnableClusteredBasedLightCulling),
 			CEREAL_NVP(EnableStencilBasedLightCulling),
-			CEREAL_NVP(EnableComputeQueue),
-			CEREAL_NVP(EnableTransferQueue),
+			CEREAL_NVP(EnableAsyncCompute),
+			CEREAL_NVP(EnableAsyncTransfer),
 			CEREAL_NVP(BatchResourceDataTransfer),
 			CEREAL_NVP(BatchResourceBarrier),
 			CEREAL_NVP(AsyncCommandlistSubmission),

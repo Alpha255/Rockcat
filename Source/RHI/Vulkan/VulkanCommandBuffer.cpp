@@ -10,7 +10,7 @@ VulkanCommandBuffer::VulkanCommandBuffer(const VulkanDevice& Device, VulkanComma
 	: VkDeviceResource(Device)
 	, RHICommandBuffer(Level)
 	, m_Pool(Pool)
-	, m_Semaphore(Device)
+	, m_Fence(Device, true)
 {
 	/**************************************************************************************************************************************************
 	Each command buffer is always in one of the following states:

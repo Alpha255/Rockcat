@@ -177,26 +177,60 @@ void VulkanQueue::Sync()
 	}
 }
 
+NAMESPACE_END(RHI)
+#endif
+
+#include "RHI/Vulkan/VulkanQueue.h"
+#include "RHI/Vulkan/VulkanCommandBuffer.h"
+#include "RHI/Vulkan/VulkanDevice.h"
+#include "Engine/Services/SpdLogService.h"
+
+VulkanQueue::VulkanQueue(const VulkanDevice& Device, ERHIDeviceQueue QueueType, uint32_t FamilyIndex)
+	: VkDeviceResource(Device)
+	, m_Type(QueueType)
+	, m_FamilyIndex(FamilyIndex)
+{
+	GetNativeDevice().getQueue(FamilyIndex, 0u, &m_Native);
+}
+
+void VulkanQueue::Submit(VulkanCommandBuffer* CommandBuffer, uint32_t NumSignalSemaphores, VulkanSemaphore* Semaphores)
+{
+	assert(CommandBuffer);
+	assert((NumSignalSemaphores == 0u && !Semaphores) || (NumSignalSemaphores > 0u && Semaphores));
+
+	std::vector<vk::Semaphore> SignalSemaphores(NumSignalSemaphores);
+	for (uint32_t Index = 0u; Index < NumSignalSemaphores; ++Index)
+	{
+		SignalSemaphores[Index] = (Semaphores + Index)->GetNative();
+	}
+
+	std::vector<vk::Semaphore> WaitSemaphores;
+	WaitSemaphores.reserve(CommandBuffer->GetWaitSemaphores().size());
+	for (auto Semaphore : CommandBuffer->GetWaitSemaphores())
+	{
+		WaitSemaphores.push_back(Semaphore->GetNative());
+	}
+
+	auto vkSubmitInfo = vk::SubmitInfo()
+		.setCommandBufferCount(1u)
+		.setPCommandBuffers(&CommandBuffer->GetNative())
+		.setSignalSemaphores(SignalSemaphores)
+		.setWaitSemaphores(WaitSemaphores)
+		.setWaitDstStageMask(CommandBuffer->GetWaitDstStageFlags());
+
+	VERIFY_VK(GetNative().submit(1u, &vkSubmitInfo, CommandBuffer->GetFence()->GetNative()));
+}
+
 void VulkanQueue::WaitIdle()
 {
 	/**************************************************************************************************************************
-		vkQueueWaitIdle is equivalent to having submitted a valid fence to every previously executed queue submission command that accepts a fence, 
+		vkQueueWaitIdle is equivalent to having submitted a valid fence to every previously executed queue submission command that accepts a fence,
 		then waiting for all of those fences to signal using vkWaitForFences with an infinite timeout and waitAll set to VK_TRUE.
 	***************************************************************************************************************************/
-
-	VERIFY_VK(vkQueueWaitIdle(m_Handle));
+	GetNative().waitIdle();
 }
 
 VulkanQueue::~VulkanQueue()
 {
-	for (auto& Pool : m_CmdPools.second)
-	{
-		Pool.second->Reset();
-	}
-	m_CmdPools.second.clear();
-
 	WaitIdle();
 }
-
-NAMESPACE_END(RHI)
-#endif

@@ -28,16 +28,14 @@ VulkanSurface::~VulkanSurface()
 
 VulkanSwapchain::VulkanSwapchain(const VulkanDevice& Device, const void* WindowHandle, uint32_t Width, uint32_t Height)
 	: VkHwResource(Device)
+	, m_VSync(VulkanRHI::GetGraphicsSettings().VSync)
+	, m_Fullscreen(VulkanRHI::GetGraphicsSettings().FullScreen)
 	, m_WindowHandle(WindowHandle)
 	, m_Width(Width)
 	, m_Height(Height)
+	, m_ColorFormat(VulkanRHI::GetGraphicsSettings().SRGBSwapchain ? vk::Format::eR8G8B8A8Srgb : vk::Format::eR8G8B8A8Unorm)
 	//, m_PresentComplete(std::move(std::make_unique<VulkanSemaphore>(Device)))
 {
-	auto GfxSettings = RHIInterface::GetGraphicsSettings();
-	m_VSync = VulkanRHI::GetGraphicsSettings().VSync;
-	m_Fullscreen = VulkanRHI::GetGraphicsSettings().FullScreen;
-	m_ColorFormat = VulkanRHI::GetGraphicsSettings().SRGBSwapchain ? vk::Format::eR8G8B8A8Srgb : vk::Format::eR8G8B8A8Unorm;
-
 	Create(true);
 }
 
@@ -52,7 +50,7 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 
 	/// VK_PRESENT_MODE_FIFO_KHR: The swap chain is a queue where the display takes an image from the front of the queue when the display is 
 	/// refreshed and the program inserts rendered images at the back of the queue.If the queue is full then the program has to wait.
-	/// This is most similar to vertical sync as found in modern games.The moment that the display is refreshed is known as ¡°vertical blank¡±
+	/// This is most similar to vertical sync as found in modern games.The moment that the display is refreshed is known as ï¿½ï¿½vertical blankï¿½ï¿½
 
 	/// VK_PRESENT_MODE_FIFO_RELAXED_KHR: This mode only differs from the previous one if the application is late and the queue was empty at the last
 	/// vertical blank.Instead of waiting for the next vertical blank, the image is transferred right away when it finally arrives.This may result in visible tearing
@@ -351,7 +349,7 @@ void VulkanSwapchain::Present()
 	//vk::Queue PresentQueue = m_Device->Queue(EQueueType::Graphics)->Get();
 	vk::Queue PresentQueue;
 
-	/// Before an application can present an image, the image¡¯s layout must be transitioned to the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout, 
+	/// Before an application can present an image, the imageï¿½ï¿½s layout must be transitioned to the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout, 
 	/// or for a shared presentable image the VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR layout.
 	auto PresentInfo = vk::PresentInfoKHR()
 		.setWaitSemaphores(WaitSemaphores)

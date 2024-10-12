@@ -67,6 +67,8 @@ public:
 	virtual void SetScissorRects(const RHIScissorRect* ScissorRects, uint32_t NumScissorRects) = 0;
 
 	virtual void WaitCommand(const RHICommandBuffer* CommandToWait) = 0;
+
+	EState GetState() const { return m_State; }
 protected:
 	inline void SetState(EState State) { m_State = State; }
 	EState m_State = EState::Initial;
