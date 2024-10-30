@@ -371,8 +371,8 @@ vk::CommandBufferLevel GetCommandBufferLevel(ERHICommandBufferLevel Level)
 {
 	switch (Level)
 	{
-	case ERHICommandBufferLevel::Primary: return vk::CommandBufferLevel::ePrimary;
-	case ERHICommandBufferLevel::Secondary: return vk::CommandBufferLevel::eSecondary;
+	case ERHICommandBufferLevel::Immediate: return vk::CommandBufferLevel::ePrimary;
+	case ERHICommandBufferLevel::Deferred: return vk::CommandBufferLevel::eSecondary;
 	default: return vk::CommandBufferLevel::ePrimary;
 	}
 }

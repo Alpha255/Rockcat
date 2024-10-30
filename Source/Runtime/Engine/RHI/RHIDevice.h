@@ -58,8 +58,6 @@ public:
 	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) = 0;
 	virtual RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo) = 0;
 	virtual RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& RHICreateInfo) = 0;
-	virtual void SubmitCommandBuffer(RHICommandBuffer* Command) = 0;
-	virtual RHICommandBuffer* GetActiveCommandBuffer(ERHIDeviceQueue QueueType, ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary) = 0;
 	const char* const GetAdapterName() const { return m_AdapterName.c_str(); }
 private:
 	std::string m_AdapterName;

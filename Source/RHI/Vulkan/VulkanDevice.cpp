@@ -11,10 +11,54 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 {
 	m_Instance = std::make_unique<VulkanInstance>(Configs);
 
-	uint32_t GraphicsQueueIndex = ~0u, ComputeQueueIndex = ~0u, TransferQueueIndex = ~0u, PresentQueueIndex = ~0u;
+	auto GetQueueFamilyIndex = [](
+		const vk::PhysicalDevice& PhysicalDevice, 
+		uint32_t& GraphicsQueueIndex,
+		uint32_t& ComputeQueueIndex,
+		uint32_t& TransferQueueIndex,
+		uint32_t& PresentQueueIndex) {
+#define IS_VALID_PROPERTY_INDEX(Index) Property.queueCount > 0u && Index == std::numeric_limits<uint32_t>::max()
+#define IS_VALID_QUEUE_INDEX(Index) Index != std::numeric_limits<uint32_t>::max()
+#define IS_VALID_QUEUE_FLAGS(Flag) (Property.queueFlags & vk::QueueFlagBits::Flag) == vk::QueueFlagBits::Flag
+
+			GraphicsQueueIndex = ComputeQueueIndex = TransferQueueIndex = std::numeric_limits<uint32_t>::max();
+
+			auto Properties = PhysicalDevice.getQueueFamilyProperties();
+			for (uint32_t Index = 0u; Index < Properties.size(); ++Index)
+			{
+				const auto& Property = Properties[Index];
+				if (IS_VALID_PROPERTY_INDEX(GraphicsQueueIndex) && IS_VALID_QUEUE_FLAGS(eGraphics))
+				{
+					GraphicsQueueIndex = Index;
+				}
+				if (IS_VALID_PROPERTY_INDEX(ComputeQueueIndex) && IS_VALID_QUEUE_FLAGS(eCompute) && !(IS_VALID_QUEUE_FLAGS(eGraphics)))
+				{
+					ComputeQueueIndex = Index;
+				}
+				if (IS_VALID_PROPERTY_INDEX(TransferQueueIndex) && IS_VALID_QUEUE_FLAGS(eTransfer) && !(IS_VALID_QUEUE_FLAGS(eGraphics)) && !(IS_VALID_QUEUE_FLAGS(eCompute)))
+				{
+					TransferQueueIndex = Index;
+				}
+				if (IS_VALID_PROPERTY_INDEX(PresentQueueIndex))
+				{
+#if PLATFORM_WIN32
+					if (PhysicalDevice.getWin32PresentationSupportKHR(Index))
+					{
+						PresentQueueIndex = Index;
+					}
+#endif
+				}
+			}
+
+			return IS_VALID_QUEUE_INDEX(GraphicsQueueIndex) && IS_VALID_QUEUE_INDEX(ComputeQueueIndex) && IS_VALID_QUEUE_INDEX(TransferQueueIndex) && IS_VALID_QUEUE_INDEX(PresentQueueIndex);
+#undef IS_VALID
+#undef IS_INVALID
+#undef IS_FLAGS_MATCH
+	};
 
 	std::vector<const vk::PhysicalDevice*> DiscreteGpus;
 	std::vector<const vk::PhysicalDevice*> OtherGpus;
+	uint32_t GraphicsQueueIndex = ~0u, ComputeQueueIndex = ~0u, TransferQueueIndex = ~0u, PresentQueueIndex = ~0u;
 
 	auto PhysicalDevices = m_Instance->GetNative().enumeratePhysicalDevices();
 	for (const auto& PhysicalDevice : PhysicalDevices)
@@ -169,58 +213,12 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 		assert(false);
 	}
 
-	m_TransferCmdMgr = std::move(std::make_unique<VulkanCommandBufferManager>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Transfer]));
-	m_ComputeCmdMgr = std::move(std::make_unique<VulkanCommandBufferManager>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Compute]));
-	for (uint8_t Index = 0u; Index < TaskFlowService::Get().GetNumWorkThreads(); ++Index)
-	{
-		m_GraphicsCmdMgrs.emplace(std::make_shared<VulkanCommandBufferManager>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Graphics]));
-	}
-}
-
-bool VulkanDevice::GetQueueFamilyIndex(
-	const vk::PhysicalDevice& PhysicalDevice,
-	uint32_t& GraphicsQueueIndex, 
-	uint32_t& ComputeQueueIndex, 
-	uint32_t& TransferQueueIndex, 
-	uint32_t& PresentQueueIndex) const
-{
-#define IS_VALID_PROPERTY_INDEX(Index) Property.queueCount > 0u && Index == std::numeric_limits<uint32_t>::max()
-#define IS_VALID_QUEUE_INDEX(Index) Index != std::numeric_limits<uint32_t>::max()
-#define IS_VALID_QUEUE_FLAGS(Flag) (Property.queueFlags & vk::QueueFlagBits::Flag) == vk::QueueFlagBits::Flag
-	
-	GraphicsQueueIndex = ComputeQueueIndex = TransferQueueIndex = std::numeric_limits<uint32_t>::max();
-
-	auto Properties = PhysicalDevice.getQueueFamilyProperties();
-	for (uint32_t Index = 0u; Index < Properties.size(); ++Index)
-	{
-		const auto& Property = Properties[Index];
-		if (IS_VALID_PROPERTY_INDEX(GraphicsQueueIndex) && IS_VALID_QUEUE_FLAGS(eGraphics))
-		{
-			GraphicsQueueIndex = Index;
-		}
-		if (IS_VALID_PROPERTY_INDEX(ComputeQueueIndex) && IS_VALID_QUEUE_FLAGS(eCompute) && !(IS_VALID_QUEUE_FLAGS(eGraphics)))
-		{
-			ComputeQueueIndex = Index;
-		}
-		if (IS_VALID_PROPERTY_INDEX(TransferQueueIndex) && IS_VALID_QUEUE_FLAGS(eTransfer) && !(IS_VALID_QUEUE_FLAGS(eGraphics)) && !(IS_VALID_QUEUE_FLAGS(eCompute)))
-		{
-			TransferQueueIndex = Index;
-		}
-		if (IS_VALID_PROPERTY_INDEX(PresentQueueIndex))
-		{
-#if PLATFORM_WIN32
-			if (PhysicalDevice.getWin32PresentationSupportKHR(Index))
-			{
-				PresentQueueIndex = Index;
-			}
-#endif
-		}
-	}
-
-	return IS_VALID_QUEUE_INDEX(GraphicsQueueIndex) && IS_VALID_QUEUE_INDEX(ComputeQueueIndex) && IS_VALID_QUEUE_INDEX(TransferQueueIndex) && IS_VALID_QUEUE_INDEX(PresentQueueIndex);
-#undef IS_VALID
-#undef IS_INVALID
-#undef IS_FLAGS_MATCH
+	//m_TransferCmdMgr = std::move(std::make_unique<VulkanCommandBufferManager>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Transfer]));
+	//m_ComputeCmdMgr = std::move(std::make_unique<VulkanCommandBufferManager>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Compute]));
+	//for (uint8_t Index = 0u; Index < TaskFlowService::Get().GetNumWorkThreads(); ++Index)
+	//{
+	//	m_GraphicsCmdMgrs.emplace(std::make_shared<VulkanCommandBufferManager>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Graphics]));
+	//}
 }
 
 RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& CreateInfo)
@@ -256,15 +254,6 @@ RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& /*CreateInfo*
 RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& /*CreateInfo*/)
 {
 	return RHISamplerPtr();
-}
-
-void VulkanDevice::SubmitCommandBuffer(RHICommandBuffer* /*Command*/)
-{
-}
-
-RHICommandBuffer* VulkanDevice::GetActiveCommandBuffer(ERHIDeviceQueue /*QueueType*/, ERHICommandBufferLevel /*Level*/)
-{
-	return nullptr;
 }
 
 const vk::Instance& VulkanDevice::GetInstance() const

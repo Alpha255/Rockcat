@@ -76,30 +76,12 @@ void VulkanCommandBuffer::End()
 {
 	assert(m_State == EState::Recording);
 
-	//m_Tracker.EnsureCorrectStates(m_Barrier.get());
-
-	//for (auto Image : m_Tracker.PermanentImages)
-	//{
-	//	VkImageSubresourceRange SubresourceRange
-	//	{
-	//		VK_IMAGE_ASPECT_COLOR_BIT,
-	//		0u,
-	//		VK_REMAINING_MIP_LEVELS,
-	//		0u,
-	//		VK_REMAINING_ARRAY_LAYERS
-	//	};
-	//	m_Barrier->TransitionResourceState(Image, Image->CurrentState, Image->PermanentState, SubresourceRange);
-	//}
-	//m_Tracker.PermanentImages.clear();
-
-	//m_Barrier->Commit();
-
 	//if (m_InsideRenderPass)
 	//{
 	//	EndRenderPass();
 	//}
 
-	//VERIFY_VK(vkEndCommandBuffer(Get()));
+	GetNative().end();
 
 	SetState(EState::Executable);
 }
@@ -222,10 +204,8 @@ void VulkanCommandBuffer::SetPrimitiveTopology(ERHIPrimitiveTopology Topology)
 #if VK_VERSION_1_3
 	GetNative().setPrimitiveTopology(GetPrimitiveTopology(Topology));
 #else
-	if (VulkanRHI::GetLayerExtensionConfigs().HasDynamicState)
-	{
-		GetNative().setPrimitiveTopologyEXT(GetPrimitiveTopology(Topology));
-	}
+	assert(VulkanRHI::GetLayerExtensionConfigs().HasDynamicState);
+	GetNative().setPrimitiveTopologyEXT(GetPrimitiveTopology(Topology));
 #endif
 }
 
@@ -768,11 +748,11 @@ void VulkanCommandBuffer::ClearDepthStencilImage(const RHIImage* DstImage, bool 
 //	}
 }
 
-void VulkanCommandBuffer::UpdateBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t Offset)
+void VulkanCommandBuffer::WriteBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t Offset)
 {
 }
 
-void VulkanCommandBuffer::UpdateImage(const RHIImage* Image, const void* Data, size_t Size, size_t Offset)
+void VulkanCommandBuffer::WriteImage(const RHIImage* Image, const void* Data, size_t Size, size_t Offset)
 {
 }
 

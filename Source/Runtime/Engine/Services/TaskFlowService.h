@@ -3,16 +3,6 @@
 #include "Core/Module.h"
 #include "Engine/Async/Task.h"
 
-#pragma warning(push)
-#pragma warning(disable:4244)
-#pragma warning(disable:4127)
-#pragma warning(disable:4267)
-#pragma warning(disable:4456)
-#include <Submodules/taskflow/taskflow/taskflow.hpp>
-#include <Submodules/taskflow/taskflow/algorithm/for_each.hpp>
-#include <Submodules/taskflow/taskflow/algorithm/sort.hpp>
-#pragma warning(pop)
-
 enum class EThread
 {
 	GameThread,
@@ -107,8 +97,7 @@ public:
 			tf::Task TFTask = TempTaskflow.emplace([&Task]() {
 				Task.Execute();
 			});
-			TFTask.name(std::string(Task.GetName()))
-				.priority(static_cast<tf::TaskPriority>(Task.GetPriority()));
+			TFTask.name(std::string(Task.GetName()));
 		}
 		if (WaitDone)
 		{

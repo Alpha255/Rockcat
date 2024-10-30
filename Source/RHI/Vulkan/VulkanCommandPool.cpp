@@ -77,5 +77,5 @@ VulkanCommandPool::~VulkanCommandPool()
 VulkanCommandBufferManager::VulkanCommandBufferManager(const VulkanDevice& Device, const VulkanQueue& Queue)
 	: m_Pool(Device, Queue.GetFamilyIndex())
 {
-	m_CommandBuffer = m_Pool.AllocateCommandBuffer(ERHICommandBufferLevel::Primary);
+	m_CommandBuffer = m_Pool.AllocateCommandBuffer(ERHICommandBufferLevel::Immediate);
 }

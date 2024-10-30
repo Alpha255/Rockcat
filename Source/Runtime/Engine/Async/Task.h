@@ -2,9 +2,13 @@
 
 #include "Core/Definitions.h"
 
-#pragma warning(disable:4456)
+#pragma warning(push)
+#pragma warning(disable:4456 4244 4127 4267 4324)
+#include <Submodules/taskflow/taskflow/taskflow.hpp>
 #include <Submodules/taskflow/taskflow/core/task.hpp>
-#pragma warning(default:4456)
+#include <Submodules/taskflow/taskflow/algorithm/for_each.hpp>
+#include <Submodules/taskflow/taskflow/algorithm/sort.hpp>
+#pragma warning(pop)
 
 class Task
 {
@@ -18,9 +22,9 @@ public:
 
 	enum EPriority
 	{
-		High = tf::TaskPriority::HIGH,
-		Normal = tf::TaskPriority::NORMAL,
-		Low = tf::TaskPriority::LOW,
+		High,
+		Normal,
+		Low,
 	};
 
 	template<class T>

@@ -23,12 +23,6 @@ public:
 	RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo) override final;
 
 	RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& RHICreateInfo) override final;
-
-	//RHICommandBufferPoolPtr CreateCommandBufferPool(ERHIDeviceQueue QueueType) override final;
-
-	void SubmitCommandBuffer(RHICommandBuffer* Command) override final;
-
-	RHICommandBuffer* GetActiveCommandBuffer(ERHIDeviceQueue QueueType, ERHICommandBufferLevel Level) override final;
 #if 0
 	D3D12CommandQueue* CommandQueue(EQueueType QueueType)
 	{

@@ -29,20 +29,20 @@ private:
 
 void MeshPass::Execute(RHIDevice& Device, const RenderScene& Scene)
 {
-	auto CommandBuffer = Device.GetActiveCommandBuffer(ERHIDeviceQueue::Graphics);
-	assert(CommandBuffer);
+	//auto CommandBuffer = Device.GetActiveCommandBuffer(ERHIDeviceQueue::Graphics);
+	//assert(CommandBuffer);
 
-	if (GetRHI().GetGraphicsSettings().AsyncCommandlistSubmission)
-	{
+	//if (GetRHI().GetGraphicsSettings().AsyncCommandlistSubmission)
+	//{
 
-	}
-	else
-	{
-		for (auto DrawCommand : Scene.GetDrawCommands(m_Filter))
-		{
-			MeshDrawTask(DrawCommand, CommandBuffer).Execute();
-		}
-	}
+	//}
+	//else
+	//{
+	//	for (auto DrawCommand : Scene.GetDrawCommands(m_Filter))
+	//	{
+	//		MeshDrawTask(DrawCommand, CommandBuffer).Execute();
+	//	}
+	//}
 
 	//CommandBuffer->Begin();
 	//CommandBuffer->End();

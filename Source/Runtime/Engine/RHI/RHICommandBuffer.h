@@ -4,10 +4,10 @@
 #include "Engine/RHI/RHIShader.h"
 #include "Engine/RHI/RHIPipeline.h"
 
-enum class ERHICommandBufferLevel
+enum class ERHICommandBufferLevel : uint8_t
 {
-	Primary,
-	Secondary
+	Immediate,
+	Deferred
 };
 
 class RHICommandBuffer
@@ -15,9 +15,13 @@ class RHICommandBuffer
 public:
 	enum class EState
 	{
+		Invalid,
 		Initial,
 		Recording,
-		Executable
+		InsideRenderPass,
+		Executable,
+		Pending,
+		NeedReset
 	};
 
 	RHICommandBuffer(ERHICommandBufferLevel Level)
@@ -57,8 +61,8 @@ public:
 
 	virtual void ClearDepthStencilImage(const RHIImage* Image, bool ClearDepth = true, bool ClearStencil = true, float Depth = 1.0f, uint8_t Stencil = 0xF) = 0;
 
-	virtual void UpdateBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t Offset = 0u) = 0;
-	virtual void UpdateImage(const RHIImage* Image, const void* Data, size_t Size, size_t Offset = 0u) = 0;
+	virtual void WriteBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t Offset = 0u) = 0;
+	virtual void WriteImage(const RHIImage* Image, const void* Data, size_t Size, size_t Offset = 0u) = 0;
 
 	virtual void SetViewport(const RHIViewport& Viewport) = 0;
 	virtual void SetViewports(const RHIViewport* Viewports, uint32_t NumViewports) = 0u;
@@ -68,12 +72,20 @@ public:
 
 	virtual void WaitCommand(const RHICommandBuffer* CommandToWait) = 0;
 
-	EState GetState() const { return m_State; }
+	inline bool IsReady() const { return m_State == EState::Initial; }
+	inline bool IsRecording() const { return m_State == EState::Recording; }
+	inline bool IsInsideRenderPass() const { return m_State == EState::InsideRenderPass; }
+	inline bool IsEnded() const { return m_State == EState::Executable; }
+	inline bool IsSubmitted() const { return m_State == EState::Pending; }
+	inline bool IsNeedReset() const { return m_State == EState::NeedReset; }
+
+	inline EState GetState() const { return m_State; }
 protected:
 	inline void SetState(EState State) { m_State = State; }
 	EState m_State = EState::Initial;
 private:
-	ERHICommandBufferLevel m_Level = ERHICommandBufferLevel::Primary;
+	ERHICommandBufferLevel m_Level;
+	bool m_UseForUploadOnly;
 };
 
 class RHICommandBufferPool

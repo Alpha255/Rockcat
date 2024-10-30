@@ -43,7 +43,7 @@ public:
 	void Dispatch(uint32_t GroupX, uint32_t GroupY, uint32_t GroupZ) override final;
 	void DispatchIndirect(const RHIBuffer* IndirectBuffer, size_t Offset) override final;
 
-	void PushConstants(ERHIShaderStage Stage, const RHIBuffer* ConstantsBuffer, const void* Data, size_t Size, size_t Offset = 0u) override final;
+	void PushConstants(ERHIShaderStage Stage, const RHIBuffer* ConstantsBuffer, const void* Data, size_t Size, size_t Offset) override final;
 
 	void SetGraphicsPipeline(const RHIGraphicsPipeline* GraphicsPipeline) override final;
 
@@ -51,8 +51,8 @@ public:
 
 	void ClearDepthStencilImage(const RHIImage* DstImage, bool ClearDepth, bool ClearStencil, float Depth, uint8_t Stencil) override final;
 
-	void UpdateBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t Offset = 0u) override final;
-	void UpdateImage(const RHIImage* Image, const void* Data, size_t Size, size_t Offset = 0u) override final;
+	void WriteBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t Offset) override final;
+	void WriteImage(const RHIImage* Image, const void* Data, size_t Size, size_t Offset) override final;
 
 	void SetViewport(const RHIViewport& Viewport) override final;
 	void SetViewports(const RHIViewport* Viewports, uint32_t NumViewports) override final;
