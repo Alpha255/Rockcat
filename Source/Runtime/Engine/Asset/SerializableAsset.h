@@ -29,10 +29,10 @@ public:
 		SetStatus(Asset::EAssetStatus::Loading);
 		PreLoad();
 
-		std::ifstream InFileStream(GetPath());
-		if (InFileStream.is_open())
+		std::ifstream FileStream(GetPath());
+		if (FileStream.is_open())
 		{
-			cereal::JSONInputArchive Ar(InFileStream);
+			cereal::JSONInputArchive Ar(FileStream);
 			Ar(
 				cereal::make_nvp(typeid(Type).name(), *static_cast<Type*>(this))
 			);
@@ -42,7 +42,7 @@ public:
 			LOG_TRACE("Create serializable asset: \"{}\".", GetPath().generic_string());
 			Save<Type>(true);
 		}
-		InFileStream.close();
+		FileStream.close();
 
 		PostLoad();
 		SetStatus(Asset::EAssetStatus::Ready);
@@ -66,10 +66,10 @@ public:
 				VERIFY(std::filesystem::create_directories(ParentPath));
 			}
 
-			std::ofstream OutFileStream(SavePath);
-			if (OutFileStream.is_open())
+			std::ofstream FileStream(SavePath);
+			if (FileStream.is_open())
 			{
-				cereal::JSONOutputArchive Ar(OutFileStream);
+				cereal::JSONOutputArchive Ar(FileStream);
 				Ar(
 					cereal::make_nvp(typeid(Type).name(), *static_cast<Type*>(this))
 				);
@@ -78,7 +78,7 @@ public:
 			{
 				LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath.generic_string(), PlatformMisc::GetErrorMessage());
 			}
-			OutFileStream.close();
+			FileStream.close();
 		}
 	}
 

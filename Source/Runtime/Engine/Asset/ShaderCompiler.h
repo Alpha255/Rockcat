@@ -56,6 +56,8 @@ protected:
 	using DxcCompilerArgs = D3DHwResource<IDxcCompilerArgs>;
 	using DxcIncludeHandler = D3DHwResource<IDxcIncludeHandler>;
 	using DxcContainerReflection = D3DHwResource<IDxcContainerReflection>;
+	using DxcVersionInfo = D3DHwResource<IDxcVersionInfo>;
+
 	using D3D12LibraryReflection = D3DHwResource<ID3D12LibraryReflection>;
 	using D3D12ShaderReflection = D3DHwResource<ID3D12ShaderReflection>;
 

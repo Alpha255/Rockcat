@@ -252,7 +252,7 @@ public:                                                        \
 		__VA_ARGS__,                                           \
 		Max                                                    \
 	};                                                         \
-	static constexpr const char* ToString(Value& EnumName)  \
+	static constexpr const char* ToString(Value& EnumName)     \
 	{                                                          \
 		static std::string Names[Max];                         \
 		if (Names[0].empty())                                  \
