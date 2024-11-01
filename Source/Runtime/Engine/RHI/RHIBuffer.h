@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/RHI/RHIImage.h"
+#include "Engine/RHI/RHITexture.h"
 
 #define RHI_WHOLE_SIZE ~0u
 
@@ -49,28 +49,28 @@ struct RHIFrameBufferCreateInfo
 	uint32_t ArrayLayers = 0u;
 	std::string Name;
 
-	const RHIImage* DepthStencilAttachment = nullptr;
-	std::vector<const RHIImage*> ColorAttachments;
+	const RHITexture* DepthStencilAttachment = nullptr;
+	std::vector<const RHITexture*> ColorAttachments;
 
 	inline RHIFrameBufferCreateInfo& SetWidth(uint32_t InWidth) { Width = InWidth; }
 	inline RHIFrameBufferCreateInfo& SetHeight(uint32_t InHeight) { Height = InHeight; }
 	inline RHIFrameBufferCreateInfo& SetArrayLayers(uint32_t InLayers) { ArrayLayers = InLayers; }
 
-	inline RHIFrameBufferCreateInfo& AddColorAttachment(const RHIImage* Color)
+	inline RHIFrameBufferCreateInfo& AddColorAttachment(const RHITexture* Color)
 	{
 		assert(ColorAttachments.size() < ERHILimitations::MaxRenderTargets && Color && RHI::IsColor(Color->GetFormat()));
 		ColorAttachments.emplace_back(Color);
 		return *this;
 	}
 
-	inline RHIFrameBufferCreateInfo& SetColorAttachment(uint32_t Index, const RHIImage* Color)
+	inline RHIFrameBufferCreateInfo& SetColorAttachment(uint32_t Index, const RHITexture* Color)
 	{
 		assert(Index < ERHILimitations::MaxRenderTargets && Color && RHI::IsColor(Color->GetFormat()));
 		ColorAttachments[Index] = Color;
 		return *this;
 	}
 
-	inline RHIFrameBufferCreateInfo& SetDepthStencilAttachment(const RHIImage* DepthStencil)
+	inline RHIFrameBufferCreateInfo& SetDepthStencilAttachment(const RHITexture* DepthStencil)
 	{
 		assert(DepthStencil && RHI::IsDepthStenci(DepthStencil->GetFormat()));
 		DepthStencilAttachment = DepthStencil;

@@ -226,9 +226,9 @@ RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& CreateInfo)
 	return std::make_shared<VulkanShader>(*this, CreateInfo);
 }
 
-RHIImagePtr VulkanDevice::CreateImage(const RHIImageCreateInfo& /*CreateInfo*/)
+RHITexturePtr VulkanDevice::CreateTexture(const RHITextureCreateInfo& /*CreateInfo*/)
 {
-	return RHIImagePtr();
+	return RHITexturePtr();
 }
 
 RHIInputLayoutPtr VulkanDevice::CreateInputLayout(const RHIInputLayoutCreateInfo& /*CreateInfo*/)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RHI/Vulkan/VulkanImage.h"
+#include "RHI/Vulkan/VulkanTexture.h"
 
 /// VulkanDescriptor Manager???
 

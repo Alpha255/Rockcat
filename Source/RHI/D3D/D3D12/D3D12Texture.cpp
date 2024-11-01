@@ -1,10 +1,10 @@
-#include "RHI/D3D/D3D12/D3D12Image.h"
+#include "RHI/D3D/D3D12/D3D12Texture.h"
 #include "RHI/D3D/D3D12/D3D12Device.h"
 #include "Engine/Services/SpdLogService.h"
 #include "Core/Math/Color.h"
 
-D3D12Image::D3D12Image(const D3D12Device& Device, const RHIImageCreateInfo& RHICreateInfo)
-	: RHIImage(RHICreateInfo)
+D3D12Texture::D3D12Texture(const D3D12Device& Device, const RHITextureCreateInfo& RHICreateInfo)
+	: RHITexture(RHICreateInfo)
 {
 	DXGI_SAMPLE_DESC SampleDesc
 	{
@@ -14,11 +14,11 @@ D3D12Image::D3D12Image(const D3D12Device& Device, const RHIImageCreateInfo& RHIC
 
 	D3D12_RESOURCE_DESC CreateDesc
 	{
-		.Dimension = GetImageDimension(RHICreateInfo.ImageType),
+		.Dimension = ::GetDimension(RHICreateInfo.Dimension),
 		.Alignment = 0u,
 		.Width = RHICreateInfo.Width,
 		.Height = RHICreateInfo.Height,
-		.DepthOrArraySize = static_cast<uint16_t>(RHICreateInfo.ImageType == ERHIImageType::T_3D ? RHICreateInfo.Depth : RHICreateInfo.ArrayLayers),
+		.DepthOrArraySize = static_cast<uint16_t>(RHICreateInfo.Dimension == ERHITextureDimension::T_3D ? RHICreateInfo.Depth : RHICreateInfo.ArrayLayers),
 		.MipLevels = static_cast<uint16_t>(RHICreateInfo.MipLevels),
 		.Format = ::GetFormat(RHICreateInfo.Format),
 		.SampleDesc = SampleDesc,
@@ -68,10 +68,11 @@ D3D12Image::D3D12Image(const D3D12Device& Device, const RHIImageCreateInfo& RHIC
 		&ClearValue,
 		IID_PPV_ARGS(Reference())));
 
-	SetDebugName(RHICreateInfo.Name.c_str());
+	D3DHwResource::SetDebugName(RHICreateInfo.Name.c_str());
 }
 
 D3D12Sampler::D3D12Sampler(const D3D12Device& Device, const RHISamplerCreateInfo& RHICreateInfo)
+	: RHISampler(RHICreateInfo)
 {
 	assert(false);
 

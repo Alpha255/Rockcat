@@ -6,11 +6,11 @@ RDGResource& RDGResource::SetVisibility(EVisibility Visibility)
 	return *this;
 }
 
-RHIImageCreateInfo& RDGResource::CreateAsImage()
+RHITextureCreateInfo& RDGResource::CreateAsTexture()
 {
 	assert(!m_ResourceCreateInfo);
-	m_ResourceCreateInfo = std::make_optional(RHIImageCreateInfo());
-	return std::get<RHIImageCreateInfo>(m_ResourceCreateInfo.value()).SetName(m_Name.data());
+	m_ResourceCreateInfo = std::make_optional(RHITextureCreateInfo());
+	return std::get<RHITextureCreateInfo>(m_ResourceCreateInfo.value()).SetName(m_Name.data());
 }
 
 RHIBufferCreateInfo& RDGResource::CreateAsBuffer()

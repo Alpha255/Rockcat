@@ -3,13 +3,13 @@
 #include "Engine/Asset/Asset.h"
 #include "Engine/RHI/RHIDeclarations.h"
 
-struct ImageAsset : public Asset
+struct TextureAsset : public Asset
 {
 public:
 	using Asset::Asset;
 
 	bool IsSRGB() const { return SRGB; }
-	const RHIImage* GetRHI() const { return Image; }
+	const RHITexture* GetRHI() const { return Texture; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -30,15 +30,15 @@ protected:
 	void SetUseSRGB(bool InSRGB) { SRGB = InSRGB; }
 
 	bool SRGB = false;
-	const RHIImage* Image = nullptr;
+	const RHITexture* Texture = nullptr;
 };
 
 namespace cereal
 {
-	template<> struct LoadAndConstruct<ImageAsset>
+	template<> struct LoadAndConstruct<TextureAsset>
 	{
 		template<class Archive>
-		static void load_and_construct(Archive& Ar, cereal::construct<ImageAsset>& Construct)
+		static void load_and_construct(Archive& Ar, cereal::construct<TextureAsset>& Construct)
 		{
 			std::string Path;
 			Ar(

@@ -2,12 +2,12 @@
 
 #include "RHI/Vulkan/VulkanBuffer.h"
 
-class VulkanImage final : public VkHwResource<vk::Image>, public RHIImage
+class VulkanTexture final : public VkHwResource<vk::Image>, public RHITexture
 {
 public:
-	VulkanImage(const class VulkanDevice& Device, const RHIImageCreateInfo& CreateInfo, vk::Image Image = vk::Image());
+	VulkanTexture(const class VulkanDevice& Device, const RHITextureCreateInfo& CreateInfo, vk::Image Image = vk::Image());
 
-	~VulkanImage();
+	~VulkanTexture();
 
 #if 0
 	VkImageView GetOrCrateImageView(const ImageSubresourceRange& SubResource);

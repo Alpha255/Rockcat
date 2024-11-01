@@ -3,7 +3,7 @@
 #include "Core/StringUtils.h"
 #include "Core/Math/Matrix.h"
 #include "Engine/Asset/SerializableAsset.h"
-#include "Engine/Asset/ImageAsset.h"
+#include "Engine/Asset/TextureAsset.h"
 #include "Engine/Application/GraphicsSettings.h"
 #include "Engine/RHI/RHIShader.h"
 
@@ -152,7 +152,7 @@ struct ShaderVariable
 		Math::Vector3,
 		Math::Vector4,
 		Math::Matrix,
-		std::shared_ptr<ImageAsset>>;
+		std::shared_ptr<TextureAsset>>;
 
 	using Setter = std::function<void(const Variant&)>;
 	using Getter = std::function<Variant(void)>;

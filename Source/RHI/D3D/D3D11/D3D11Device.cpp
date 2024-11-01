@@ -126,9 +126,9 @@ RHIShaderPtr D3D11Device::CreateShader(const RHIShaderCreateInfo& RHICreateInfo)
 	return RHIShaderPtr();
 }
 
-RHIImagePtr D3D11Device::CreateImage(const RHIImageCreateInfo& RHICreateInfo)
+RHITexturePtr D3D11Device::CreateTexture(const RHITextureCreateInfo& RHICreateInfo)
 {
-	return RHIImagePtr();
+	return RHITexturePtr();
 }
 
 RHIInputLayoutPtr D3D11Device::CreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo)

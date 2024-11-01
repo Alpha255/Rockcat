@@ -42,9 +42,9 @@ void ResourceManager::CreateAllResources()
 			auto& CreateInfo = Resource->GetBufferCreateInfo();
 		}
 			break;
-		case RDGResource::EResourceType::Image:
+		case RDGResource::EResourceType::Texture:
 		{
-			auto& CreateInfo = Resource->GetImageCreateInfo();
+			auto& CreateInfo = Resource->GetTextureCreateInfo();
 		}
 			break;
 		}

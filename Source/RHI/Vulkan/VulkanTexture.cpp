@@ -1,23 +1,23 @@
-#include "RHI/Vulkan/VulkanImage.h"
+#include "RHI/Vulkan/VulkanTexture.h"
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "Engine/Services/SpdLogService.h"
 #include "Engine/RHI/RHIInterface.h"
 
-VulkanImage::VulkanImage(const VulkanDevice& Device, const RHIImageCreateInfo& CreateInfo, vk::Image Image)
+VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateInfo& CreateInfo, vk::Image Image)
 	: VkHwResource(Device)
-	, RHIImage(CreateInfo)
+	, RHITexture(CreateInfo)
 {
-	assert(CreateInfo.Format != ERHIFormat::Unknown && CreateInfo.ImageType != ERHIImageType::Unknown);
+	assert(CreateInfo.Format != ERHIFormat::Unknown && CreateInfo.Dimension != ERHITextureDimension::Unknown);
 	assert(CreateInfo.ArrayLayers <= GetDevice().GetPhysicalDeviceLimits().maxImageArrayLayers);
 	assert(
-		(CreateInfo.ImageType == ERHIImageType::T_1D && CreateInfo.Width <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension1D) ||
-		((CreateInfo.ImageType == ERHIImageType::T_2D || CreateInfo.ImageType == ERHIImageType::T_2D_Array) &&
+		(CreateInfo.Dimension == ERHITextureDimension::T_1D && CreateInfo.Width <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension1D) ||
+		((CreateInfo.Dimension == ERHITextureDimension::T_2D || CreateInfo.Dimension == ERHITextureDimension::T_2D_Array) &&
 			CreateInfo.Width <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension2D &&
 			CreateInfo.Height <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension2D) ||
-		((CreateInfo.ImageType == ERHIImageType::T_Cube || CreateInfo.ImageType == ERHIImageType::T_Cube_Array) &&
+		((CreateInfo.Dimension == ERHITextureDimension::T_Cube || CreateInfo.Dimension == ERHITextureDimension::T_Cube_Array) &&
 			CreateInfo.Width <= GetDevice().GetPhysicalDeviceLimits().maxImageDimensionCube &&
 			CreateInfo.Height <= GetDevice().GetPhysicalDeviceLimits().maxImageDimensionCube) ||
-		(CreateInfo.ImageType == ERHIImageType::T_3D && CreateInfo.Height <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension3D));
+		(CreateInfo.Dimension == ERHITextureDimension::T_3D && CreateInfo.Height <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension3D));
 
 	///VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME
 
@@ -83,14 +83,14 @@ VulkanImage::VulkanImage(const VulkanDevice& Device, const RHIImageCreateInfo& C
 	else
 	{
 		auto vkCreateInfo = vk::ImageCreateInfo()
-			.setFlags((CreateInfo.ImageType == ERHIImageType::T_Cube || CreateInfo.ImageType == ERHIImageType::T_Cube_Array) ?
+			.setFlags((CreateInfo.Dimension == ERHITextureDimension::T_Cube || CreateInfo.Dimension == ERHITextureDimension::T_Cube_Array) ?
 				vk::ImageCreateFlagBits::eCubeCompatible : vk::ImageCreateFlags())
-			.setImageType(::GetImageType(CreateInfo.ImageType))
+			.setImageType(::GetDimension(CreateInfo.Dimension))
 			.setFormat(::GetFormat(CreateInfo.Format))
 			.setExtent(vk::Extent3D(
 				CreateInfo.Width,
-				CreateInfo.ImageType == ERHIImageType::T_1D || CreateInfo.ImageType == ERHIImageType::T_1D_Array ? 1u : CreateInfo.Height,
-				CreateInfo.ImageType == ERHIImageType::T_3D ? CreateInfo.Depth : 1u))
+				CreateInfo.Dimension == ERHITextureDimension::T_1D || CreateInfo.Dimension == ERHITextureDimension::T_1D_Array ? 1u : CreateInfo.Height,
+				CreateInfo.Dimension == ERHITextureDimension::T_3D ? CreateInfo.Depth : 1u))
 			.setMipLevels(CreateInfo.MipLevels)
 			.setArrayLayers(CreateInfo.ArrayLayers)
 			.setSamples(GetSampleCount(CreateInfo.SampleCount))
@@ -171,7 +171,7 @@ VulkanImage::VulkanImage(const VulkanDevice& Device, const RHIImageCreateInfo& C
 //}
 //
 
-VulkanImage::~VulkanImage()
+VulkanTexture::~VulkanTexture()
 {
 #if 0
 	if (m_Own)

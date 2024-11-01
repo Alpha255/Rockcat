@@ -5,19 +5,19 @@ DXGI_FORMAT Format(ERHIFormat Format)
 	return RHI::GetDXGIFormat(Format);
 }
 
-D3D11_RESOURCE_DIMENSION GetImageDimension(ERHIImageType Type)
+D3D11_RESOURCE_DIMENSION GetImageDimension(ERHITextureDimension Dimension)
 {
-	switch (Type)
+	switch (Dimension)
 	{
-	case ERHIImageType::T_1D:
-	case ERHIImageType::T_1D_Array:
+	case ERHITextureDimension::T_1D:
+	case ERHITextureDimension::T_1D_Array:
 		return D3D11_RESOURCE_DIMENSION_TEXTURE1D;
-	case ERHIImageType::T_2D:
-	case ERHIImageType::T_2D_Array:
-	case ERHIImageType::T_Cube:
-	case ERHIImageType::T_Cube_Array:
+	case ERHITextureDimension::T_2D:
+	case ERHITextureDimension::T_2D_Array:
+	case ERHITextureDimension::T_Cube:
+	case ERHITextureDimension::T_Cube_Array:
 		return D3D11_RESOURCE_DIMENSION_TEXTURE2D;
-	case ERHIImageType::T_3D:
+	case ERHITextureDimension::T_3D:
 		return D3D11_RESOURCE_DIMENSION_TEXTURE3D;
 	default:
 		return D3D11_RESOURCE_DIMENSION_UNKNOWN;

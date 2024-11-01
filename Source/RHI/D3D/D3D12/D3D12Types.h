@@ -2,11 +2,12 @@
 
 #include "Engine/RHI/RHIBuffer.h"
 #include "Engine/RHI/RHIShader.h"
+#include "Engine/RHI/RHIRenderStates.h"
 #include "RHI/D3D/DXGIInterface.h"
 #include <d3d12.h>
 
 DXGI_FORMAT GetFormat(ERHIFormat Format);
-D3D12_RESOURCE_DIMENSION GetImageDimension(ERHIImageType Type);
+D3D12_RESOURCE_DIMENSION GetDimension(ERHITextureDimension Dimension);
 D3D12_SHADER_VISIBILITY GetShaderVisibility(ERHIShaderStage Stage);
 D3D12_LOGIC_OP GetLogicOp(ERHILogicOp Op);
 D3D12_BLEND_OP GetBlendOp(ERHIBlendOp Op);

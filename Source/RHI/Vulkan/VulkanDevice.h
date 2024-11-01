@@ -36,7 +36,7 @@ public:
 	virtual void WaitIdle() const override final { assert(m_LogicalDevice); m_LogicalDevice.waitIdle(); }
 
 	virtual RHIShaderPtr CreateShader(const RHIShaderCreateInfo& CreateInfo) override final;
-	virtual RHIImagePtr CreateImage(const RHIImageCreateInfo& CreateInfo) override final;
+	virtual RHITexturePtr CreateTexture(const RHITextureCreateInfo& CreateInfo) override final;
 	virtual RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& CreateInfo) override final;
 	virtual RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& CreateInfo) override final;
 	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo) override final;

@@ -1,12 +1,12 @@
 #pragma once
 
 #include "RHI/D3D/D3D12/D3D12Types.h"
-#include "Engine/RHI/RHIImage.h"
+#include "Engine/RHI/RHITexture.h"
 
-class D3D12Image : public D3DHwResource<ID3D12Resource>, public RHIImage
+class D3D12Texture : public D3DHwResource<ID3D12Resource>, public RHITexture
 {
 public:
-	D3D12Image(const class D3D12Device& Device, const RHIImageCreateInfo& RHICreateInfo);
+	D3D12Texture(const class D3D12Device& Device, const RHITextureCreateInfo& RHICreateInfo);
 protected:
 private:
 };

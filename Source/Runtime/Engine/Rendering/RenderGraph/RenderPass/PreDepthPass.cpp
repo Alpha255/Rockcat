@@ -7,10 +7,10 @@ void PreDepthPass::Compile()
 {
 	auto& GraphicsSettings = RHIInterface::GetGraphicsSettings();
 
-	AddOutput("SceneDepth").CreateAsImage()
+	AddOutput("SceneDepth").CreateAsTexture()
 		.SetWidth(GraphicsSettings.Resolution.Width)
 		.SetHeight(GraphicsSettings.Resolution.Height)
-		.SetImageType(ERHIImageType::T_2D)
+		.SetDimension(ERHITextureDimension::T_2D)
 		.SetFormat(ERHIFormat::D32_Float_S8_UInt)
 		.SetUsages(ERHIBufferUsageFlags::DepthStencil);
 

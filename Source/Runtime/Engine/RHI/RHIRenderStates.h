@@ -156,7 +156,7 @@ struct RHIRasterizationStateCreateInfo
 
 	float DepthBias = 0.0f;       /// A scalar factor controlling the constant depth value added to each fragment.
 	float DepthBiasClamp = 0.0f;  /// The maximum (or minimum) depth bias of a fragment.
-	float DepthBiasSlope = 0.0f;  /// A scalar factor applied to a fragment¡¯s slope in depth bias calculations.
+	float DepthBiasSlope = 0.0f;  /// A scalar factor applied to a fragmentï¿½ï¿½s slope in depth bias calculations.
 	float LineWidth = 1.0f;
 
 	inline RHIRasterizationStateCreateInfo& SetPolygonMode(ERHIPolygonMode Mode) { PolygonMode = Mode; return *this; }

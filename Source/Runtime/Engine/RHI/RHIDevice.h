@@ -52,7 +52,7 @@ public:
 	virtual void WaitIdle() const = 0;
 
 	virtual RHIShaderPtr CreateShader(const RHIShaderCreateInfo& RHICreateInfo) = 0;
-	virtual RHIImagePtr CreateImage(const RHIImageCreateInfo& RHICreateInfo) = 0;
+	virtual RHITexturePtr CreateTexture(const RHITextureCreateInfo& RHICreateInfo) = 0;
 	virtual RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo) = 0;
 	virtual RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo) = 0;
 	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) = 0;

@@ -1,11 +1,11 @@
-#include "RHI/D3D/D3D11/D3D11Image.h"
+#include "RHI/D3D/D3D11/D3D11Texture.h"
 #include "RHI/D3D/D3D11/D3D11Device.h"
 #include "Engine/Services/SpdLogService.h"
 
-D3D11Image1D::D3D11Image1D(const D3D11Device& Device, const RHIImageCreateInfo& RHICreateInfo)
-	: RHIImage(RHICreateInfo)
+D3D11Texture1D::D3D11Texture1D(const D3D11Device& Device, const RHITextureCreateInfo& RHICreateInfo)
+	: RHITexture(RHICreateInfo)
 {
-	assert(RHICreateInfo.ImageType == ERHIImageType::T_1D || RHICreateInfo.ImageType == ERHIImageType::T_1D_Array);
+	assert(RHICreateInfo.Dimension == ERHITextureDimension::T_1D || RHICreateInfo.Dimension == ERHITextureDimension::T_1D_Array);
 
 	std::vector<D3D11_SUBRESOURCE_DATA> SubresourceData;
 
@@ -23,13 +23,13 @@ D3D11Image1D::D3D11Image1D(const D3D11Device& Device, const RHIImageCreateInfo& 
 	VERIFY_D3D(Device->CreateTexture1D(&Desc, nullptr, Reference()));
 }
 
-D3D11Image2D::D3D11Image2D(const D3D11Device& Device, const RHIImageCreateInfo& RHICreateInfo)
-	: RHIImage(RHICreateInfo)
+D3D11Texture2D::D3D11Texture2D(const D3D11Device& Device, const RHITextureCreateInfo& RHICreateInfo)
+	: RHITexture(RHICreateInfo)
 {
-	assert(RHICreateInfo.ImageType == ERHIImageType::T_2D || 
-		RHICreateInfo.ImageType == ERHIImageType::T_2D_Array ||
-		RHICreateInfo.ImageType == ERHIImageType::T_Cube ||
-		RHICreateInfo.ImageType == ERHIImageType::T_Cube_Array);
+	assert(RHICreateInfo.Dimension == ERHITextureDimension::T_2D || 
+		RHICreateInfo.Dimension == ERHITextureDimension::T_2D_Array ||
+		RHICreateInfo.Dimension == ERHITextureDimension::T_Cube ||
+		RHICreateInfo.Dimension == ERHITextureDimension::T_Cube_Array);
 
 	std::vector<D3D11_SUBRESOURCE_DATA> SubresourceData;
 
@@ -48,15 +48,15 @@ D3D11Image2D::D3D11Image2D(const D3D11Device& Device, const RHIImageCreateInfo& 
 		D3D11_USAGE_DEFAULT,
 		0u,
 		0u,
-		(RHICreateInfo.ImageType == ERHIImageType::T_Cube || RHICreateInfo.ImageType == ERHIImageType::T_Cube_Array) ? D3D11_RESOURCE_MISC_TEXTURECUBE : 0u
+		(RHICreateInfo.Dimension == ERHITextureDimension::T_Cube || RHICreateInfo.Dimension == ERHITextureDimension::T_Cube_Array) ? D3D11_RESOURCE_MISC_TEXTURECUBE : 0u
 	};
 	VERIFY_D3D(Device->CreateTexture2D(&Desc, nullptr, Reference()));
 }
 
-D3D11Image3D::D3D11Image3D(const D3D11Device& Device, const RHIImageCreateInfo& RHICreateInfo)
-	: RHIImage(RHICreateInfo)
+D3D11Texture3D::D3D11Texture3D(const D3D11Device& Device, const RHITextureCreateInfo& RHICreateInfo)
+	: RHITexture(RHICreateInfo)
 {
-	assert(RHICreateInfo.ImageType == ERHIImageType::T_3D);
+	assert(RHICreateInfo.Dimension == ERHITextureDimension::T_3D);
 
 	std::vector<D3D11_SUBRESOURCE_DATA> SubresourceData;
 

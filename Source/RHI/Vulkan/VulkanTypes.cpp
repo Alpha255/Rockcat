@@ -285,36 +285,36 @@ vk::BorderColor GetBorderColor(ERHIBorderColor BorderColor)
 	}
 }
 
-vk::ImageType GetImageType(ERHIImageType Type)
+vk::ImageType GetDimension(ERHITextureDimension Dimension)
 {
-	switch (Type)
+	switch (Dimension)
 	{
-	case ERHIImageType::T_1D:
-	case ERHIImageType::T_1D_Array:
+	case ERHITextureDimension::T_1D:
+	case ERHITextureDimension::T_1D_Array:
 		return vk::ImageType::e1D;
-	case ERHIImageType::T_2D:
-	case ERHIImageType::T_2D_Array:
-	case ERHIImageType::T_Cube:
-	case ERHIImageType::T_Cube_Array:
+	case ERHITextureDimension::T_2D:
+	case ERHITextureDimension::T_2D_Array:
+	case ERHITextureDimension::T_Cube:
+	case ERHITextureDimension::T_Cube_Array:
 		return vk::ImageType::e2D;
-	case ERHIImageType::T_3D:
+	case ERHITextureDimension::T_3D:
 		return vk::ImageType::e3D;
 	default:
 		return vk::ImageType::e2D;
 	}
 }
 
-vk::ImageViewType GetImageViewType(ERHIImageType Type)
+vk::ImageViewType GetImageViewDimension(ERHITextureDimension Dimension)
 {
-	switch (Type)
+	switch (Dimension)
 	{
-	case ERHIImageType::T_1D:         return vk::ImageViewType::e1D;
-	case ERHIImageType::T_1D_Array:   return vk::ImageViewType::e1DArray;
-	case ERHIImageType::T_2D:         return vk::ImageViewType::e2D;
-	case ERHIImageType::T_2D_Array:   return vk::ImageViewType::e2DArray;
-	case ERHIImageType::T_Cube:       return vk::ImageViewType::eCube;
-	case ERHIImageType::T_Cube_Array: return vk::ImageViewType::eCubeArray;
-	case ERHIImageType::T_3D:         return vk::ImageViewType::e3D;
+	case ERHITextureDimension::T_1D:         return vk::ImageViewType::e1D;
+	case ERHITextureDimension::T_1D_Array:   return vk::ImageViewType::e1DArray;
+	case ERHITextureDimension::T_2D:         return vk::ImageViewType::e2D;
+	case ERHITextureDimension::T_2D_Array:   return vk::ImageViewType::e2DArray;
+	case ERHITextureDimension::T_Cube:       return vk::ImageViewType::eCube;
+	case ERHITextureDimension::T_Cube_Array: return vk::ImageViewType::eCubeArray;
+	case ERHITextureDimension::T_3D:         return vk::ImageViewType::e3D;
 	default:
 		return vk::ImageViewType::e2D;
 	}

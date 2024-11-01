@@ -19,7 +19,7 @@ public:
 	enum class EResourceType
 	{
 		Buffer,
-		Image,
+		Texture,
 	};
 
 	RDGResource(DAGNodeID ID, const char* Name, EVisibility Visibility)
@@ -39,13 +39,13 @@ public:
 
 	DAGNodeID GetNodeID() const { return m_NodeID; }
 
-	RHIImageCreateInfo& CreateAsImage();
+	RHITextureCreateInfo& CreateAsTexture();
 	RHIBufferCreateInfo& CreateAsBuffer();
 
-	const RHIImageCreateInfo& GetImageCreateInfo() const
+	const RHITextureCreateInfo& GetTextureCreateInfo() const
 	{
-		assert(m_Type == EResourceType::Image && m_ResourceCreateInfo.has_value());
-		return std::get<RHIImageCreateInfo>(m_ResourceCreateInfo.value());
+		assert(m_Type == EResourceType::Texture && m_ResourceCreateInfo.has_value());
+		return std::get<RHITextureCreateInfo>(m_ResourceCreateInfo.value());
 	}
 
 	const RHIBufferCreateInfo& GetBufferCreateInfo() const
@@ -66,10 +66,10 @@ public:
 		);
 	}
 protected:
-	using ResourceCreateInfo = std::variant<RHIBufferCreateInfo, RHIImageCreateInfo>;
+	using ResourceCreateInfo = std::variant<RHIBufferCreateInfo, RHITextureCreateInfo>;
 private:
 	EVisibility m_Visibility = EVisibility::None;
-	EResourceType m_Type = EResourceType::Image;
+	EResourceType m_Type = EResourceType::Texture;
 	DAGNodeID m_NodeID;
 	std::string_view m_Name;
 

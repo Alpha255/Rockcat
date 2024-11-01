@@ -666,7 +666,7 @@ void VulkanCommandBuffer::SetGraphicsPipeline(const RHIGraphicsPipeline* Graphic
 //	VkState->Reset();
 //}
 
-void VulkanCommandBuffer::ClearColorImage(const RHIImage* DstImage, const Math::Color& ClearColor)
+void VulkanCommandBuffer::ClearColorTexture(const RHITexture* Texture, const Math::Color& ClearColor)
 {
 //#if true
 //	if (m_InsideRenderPass)
@@ -700,7 +700,7 @@ void VulkanCommandBuffer::ClearColorImage(const RHIImage* DstImage, const Math::
 //	m_Barrier->TransitionResourceState(VkImage, EResourceState::TransferDst, VkImage->RequiredState, SubresourceRange);
 }
 
-void VulkanCommandBuffer::ClearDepthStencilImage(const RHIImage* DstImage, bool ClearDepth, bool ClearStencil, float Depth, uint8_t Stencil)
+void VulkanCommandBuffer::ClearDepthStencilTexture(const RHITexture* Texture, bool ClearDepth, bool ClearStencil, float Depth, uint8_t Stencil)
 {
 //#if true
 //	if (m_InsideRenderPass)
@@ -752,7 +752,7 @@ void VulkanCommandBuffer::WriteBuffer(const RHIBuffer* Buffer, const void* Data,
 {
 }
 
-void VulkanCommandBuffer::WriteImage(const RHIImage* Image, const void* Data, size_t Size, size_t Offset)
+void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, size_t Offset)
 {
 }
 

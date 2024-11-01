@@ -2,7 +2,7 @@
 
 #include "Core/Math/Matrix.h"
 #include "Engine/Asset/SerializableAsset.h"
-#include "Engine/Asset/ImageAsset.h"
+#include "Engine/Asset/TextureAsset.h"
 #include "Engine/Asset/ShaderAsset.h"
 #include "Runtime/Engine/RHI/RHIRenderStates.h"
 

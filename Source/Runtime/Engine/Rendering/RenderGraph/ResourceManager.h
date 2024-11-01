@@ -20,7 +20,7 @@ public:
 private:
 	std::unordered_map<std::string_view, std::shared_ptr<RDGResource>> m_Resources;
 	std::unordered_map<size_t, RHIBufferPtr> m_FreeBuffers;
-	std::unordered_map<size_t, RHIImagePtr> m_FreeImages;
+	std::unordered_map<size_t, RHITexturePtr> m_FreeTextures;
 	class RHIInterface& m_RHI;
 	DirectedAcyclicGraph& m_Graph;
 };

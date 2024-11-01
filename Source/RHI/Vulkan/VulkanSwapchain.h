@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RHI/Vulkan/VulkanAsync.h"
-#include "RHI/Vulkan/VulkanImage.h"
+#include "RHI/Vulkan/VulkanTexture.h"
 
 class VulkanSurface final : public VkDeviceResource<vk::SurfaceKHR>
 {

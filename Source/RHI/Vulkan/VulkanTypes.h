@@ -20,9 +20,9 @@ vk::DescriptorType GetDescriptorType(ERHIResourceType Type);
 vk::Filter GetFilter(ERHIFilter Filter);
 vk::SamplerAddressMode GetSamplerAddressMode(ERHISamplerAddressMode AddressMode);
 vk::BorderColor GetBorderColor(ERHIBorderColor BorderColor);
-vk::ImageType GetImageType(ERHIImageType Type);
+vk::ImageType GetDimension(ERHITextureDimension Dimension);
 vk::SampleCountFlagBits GetSampleCount(ERHISampleCount SampleCount);
-vk::ImageViewType GetImageViewType(ERHIImageType Type);
+vk::ImageViewType GetImageViewDimension(ERHITextureDimension Dimension);
 vk::DebugReportObjectTypeEXT GetDebugReportObjectType(vk::ObjectType Type);
 vk::CommandBufferLevel GetCommandBufferLevel(ERHICommandBufferLevel Level);
 #if 0

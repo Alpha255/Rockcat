@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Engine/Asset/ImageAsset.h"
-#include "Engine/RHI/RHIImage.h"
+#include "Engine/Asset/TextureAsset.h"
+#include "Engine/RHI/RHITexture.h"
+#include "Engine/Services/SpdLogService.h"
 #pragma warning(disable:4244)
 #include <Submodules/stb/stb_image.h>
 #pragma warning(default:4244)
@@ -21,11 +22,11 @@ public:
 	{
 	}
 
-	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<ImageAsset>(AssetPath); }
+	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<TextureAsset>(AssetPath); }
 
 	bool Reimport(Asset& InAsset) override final
 	{
-		auto& Image = Cast<ImageAsset>(InAsset);
+		auto& Image = Cast<TextureAsset>(InAsset);
 
 		auto DataSize = static_cast<int32_t>(Image.GetRawData().SizeInBytes);
 		auto Data = reinterpret_cast<const stbi_uc*>(Image.GetRawData().Data.get());
@@ -59,14 +60,13 @@ public:
 			LOG_ERROR("StbImageImporter: Failed to load image \"{}\": {}", Image.GetPath().generic_string(), stbi_failure_reason());
 		}
 
-		auto CreateInfo = RHIImageCreateInfo()
+		auto CreateInfo = RHITextureCreateInfo()
 			.SetWidth(Width)
 			.SetHeight(Height)
-			.SetImageType(ERHIImageType::T_2D)
+			.SetDimension(ERHITextureDimension::T_2D)
 			.SetFormat(Image.IsSRGB() ? ERHIFormat::RGBA8_UNorm_SRGB : ERHIFormat::RGBA8_UNorm)
 			.SetName(InAsset.GetPath().filename().string())
-			.SetInitialDataSize(DataSize)
-			.SetInitialData(Image.GetRawData().Data);
+			.SetInitialData(DataSize, Image.GetRawData().Data);
 
 		return false;
 #if 0

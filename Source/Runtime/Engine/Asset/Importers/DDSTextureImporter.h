@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Asset/ImageAsset.h"
+#include "Engine/Asset/TextureAsset.h"
 #include <dxgiformat.h>
 #include <External/DDS.h>
 
@@ -12,11 +12,11 @@ public:
 	{
 	}
 
-	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<ImageAsset>(AssetPath); }
+	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<TextureAsset>(AssetPath); }
 
 	bool Reimport(Asset& InAsset) override final
 	{
-		auto& Image = Cast<ImageAsset>(InAsset);
+		auto& Image = Cast<TextureAsset>(InAsset);
 #if 0
 		assert(Data && Size);
 		assert(Size >= (sizeof(uint32_t) + sizeof(DirectX::DDS_HEADER)));

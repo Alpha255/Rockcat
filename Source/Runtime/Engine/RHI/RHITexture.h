@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Engine/RHI/RHIResource.h"
+#include "Engine/Asset/Asset.h"
 
-enum class ERHIImageType : uint8_t
+enum class ERHITextureDimension : uint8_t
 {
 	Unknown,
 	T_1D,
@@ -56,7 +57,7 @@ namespace RHI
 	const static RHISubresource AllSubresource{0u, RHISubresource::AllMipLevels, 0u, RHISubresource::AllArrayLayers};
 }
 
-struct RHIImageCreateInfo
+struct RHITextureCreateInfo
 {
 	uint32_t Width = 1u;
 	uint32_t Height = 1u;
@@ -64,7 +65,7 @@ struct RHIImageCreateInfo
 	uint16_t ArrayLayers = 1u;
 	uint16_t MipLevels = 1u;
 
-	ERHIImageType ImageType = ERHIImageType::Unknown;
+	ERHITextureDimension Dimension = ERHITextureDimension::Unknown;
 	ERHISampleCount SampleCount = ERHISampleCount::Sample_1_Bit;
 
 	ERHIFormat Format = ERHIFormat::Unknown;
@@ -72,38 +73,37 @@ struct RHIImageCreateInfo
 
 	ERHIResourceState PermanentStates = ERHIResourceState::Unknown;
 
-	size_t InitialDataSize = 0ull;
-	std::shared_ptr<char> InitialData;
+	AssetRawData InitialData;
 
 	std::string Name;
 
-	inline RHIImageCreateInfo& SetWidth(uint32_t Value) { Width = Value; return *this; }
-	inline RHIImageCreateInfo& SetHeight(uint32_t Value) { Height = Value; return *this; }
-	inline RHIImageCreateInfo& SetDepth(uint32_t Value) { Depth = Value; return *this; }
-	inline RHIImageCreateInfo& SetMipLevels(uint32_t Value) { MipLevels = static_cast<uint16_t>(Value); return *this; }
-	inline RHIImageCreateInfo& SetArrayLayers(uint32_t Value) { ArrayLayers = static_cast<uint16_t>(Value); return *this; }
-	inline RHIImageCreateInfo& SetFormat(ERHIFormat Value) { Format = Value; return *this; }
-	inline RHIImageCreateInfo& SetImageType(ERHIImageType Value) { ImageType = Value; return *this; }
-	inline RHIImageCreateInfo& SetSampleCount(ERHISampleCount Count) { SampleCount = Count; return *this; }
-	inline RHIImageCreateInfo& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; };
-	inline RHIImageCreateInfo& SetPermanentStates(ERHIResourceState States) { PermanentStates = States; return *this; }
-	inline RHIImageCreateInfo& SetInitialDataSize(size_t Size) { InitialDataSize = Size; return *this; }
-	inline RHIImageCreateInfo& SetInitialData(const std::shared_ptr<char>& Data) { InitialData = Data; return *this; }
-	
+	inline RHITextureCreateInfo& SetWidth(uint32_t Value) { Width = Value; return *this; }
+	inline RHITextureCreateInfo& SetHeight(uint32_t Value) { Height = Value; return *this; }
+	inline RHITextureCreateInfo& SetDepth(uint32_t Value) { Depth = Value; return *this; }
+	inline RHITextureCreateInfo& SetMipLevels(uint32_t Value) { MipLevels = static_cast<uint16_t>(Value); return *this; }
+	inline RHITextureCreateInfo& SetArrayLayers(uint32_t Value) { ArrayLayers = static_cast<uint16_t>(Value); return *this; }
+	inline RHITextureCreateInfo& SetFormat(ERHIFormat Value) { Format = Value; return *this; }
+	inline RHITextureCreateInfo& SetDimension(ERHITextureDimension Value) { Dimension = Value; return *this; }
+	inline RHITextureCreateInfo& SetSampleCount(ERHISampleCount Count) { SampleCount = Count; return *this; }
+	inline RHITextureCreateInfo& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; };
+	inline RHITextureCreateInfo& SetPermanentStates(ERHIResourceState States) { PermanentStates = States; return *this; }
+	inline RHITextureCreateInfo& SetInitialData(const AssetRawData& Data) { InitialData = Data; return *this; }
+	inline RHITextureCreateInfo& SetInitialData(size_t Size, const std::shared_ptr<char>& Data) { InitialData.SizeInBytes = Size; InitialData.Data = Data; return *this; }
+
 	template<class T>
-	inline RHIImageCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
+	inline RHITextureCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 };
 
-class RHIImage : public RHIResource
+class RHITexture : public RHIResource
 {
 public:
-	RHIImage(const RHIImageCreateInfo& CreateInfo)
+	RHITexture(const RHITextureCreateInfo& CreateInfo)
 		: m_Width(CreateInfo.Width)
 		, m_Height(CreateInfo.Height)
 		, m_Depth(CreateInfo.Depth)
 		, m_ArrayLayers(CreateInfo.ArrayLayers)
 		, m_MipLevels(CreateInfo.MipLevels)
-		, m_Type(CreateInfo.ImageType)
+		, m_Dimension(CreateInfo.Dimension)
 		, m_Format(CreateInfo.Format)
 		, RHIResource(CreateInfo.Name.c_str())
 	{
@@ -114,7 +114,7 @@ public:
 	inline uint32_t GetDepth() const { return m_Depth; }
 	inline uint32_t GetArrayLayers() const { return m_ArrayLayers; }
 	inline uint32_t GetMipLevels() const { return m_MipLevels; }
-	inline ERHIImageType GetType() const { return m_Type; }
+	inline ERHITextureDimension GetDimension() const { return m_Dimension; }
 	inline ERHIFormat GetFormat() const { return m_Format; }
 private:
 	uint32_t m_Width = 1u;
@@ -124,7 +124,7 @@ private:
 	uint32_t m_ArrayLayers = 1u;
 	uint32_t m_MipLevels = 1u;
 
-	ERHIImageType m_Type = ERHIImageType::Unknown;
+	ERHITextureDimension m_Dimension = ERHITextureDimension::Unknown;
 	ERHIFormat m_Format = ERHIFormat::Unknown;
 };
 

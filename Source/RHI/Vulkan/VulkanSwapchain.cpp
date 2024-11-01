@@ -255,18 +255,18 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 	//m_BackBuffers.resize(Count);
 	for (uint32_t ImageIndex = 0u; ImageIndex < Images.size(); ++ImageIndex)
 	{
-		auto ImageCreateInfo = RHIImageCreateInfo()
+		auto CreateInfo = RHITextureCreateInfo()
 			.SetWidth(m_Width)
 			.SetHeight(m_Height)
 			.SetDepth(1u)
 			.SetArrayLayers(1u)
 			.SetMipLevels(1u)
-			.SetImageType(ERHIImageType::T_2D)
+			.SetDimension(ERHITextureDimension::T_2D)
 			.SetFormat(RHI::GetRHIFormat(m_ColorFormat))
 			.SetSampleCount(ERHISampleCount::Sample_1_Bit)
 			.SetUsages(ERHIBufferUsageFlags::None)
 			.SetName(StringUtils::Format("SwapchainImage-%d", ImageIndex));
-		auto Image = std::make_shared<VulkanImage>(GetDevice(), ImageCreateInfo, Images[ImageIndex]);
+		auto Image = std::make_shared<VulkanTexture>(GetDevice(), CreateInfo, Images[ImageIndex]);
 
 		//FrameBufferDesc Desc;
 		//Desc.AddColorAttachment(Image);

@@ -371,7 +371,7 @@ private:
 
 	std::shared_ptr<Asset> SetMaterialUnlitTexture(MaterialAsset* Material, aiTextureType TextureType, const std::filesystem::path& TexturePath)
 	{
-		std::shared_ptr<ImageAsset> Image(nullptr);
+		std::shared_ptr<TextureAsset> Image(nullptr);
 
 		if (Material->GetShadingMode() == EShadingMode::Unlit)
 		{
@@ -392,7 +392,7 @@ private:
 
 	std::shared_ptr<Asset> SetMaterialLitTexture(MaterialAsset* Material, aiTextureType TextureType, const std::filesystem::path& TexturePath)
 	{
-		std::shared_ptr<ImageAsset> Image(nullptr);
+		std::shared_ptr<TextureAsset> Image(nullptr);
 
 		if (Material->GetShadingMode() == EShadingMode::BlinnPhong || Material->GetShadingMode() == EShadingMode::StandardPBR)
 		{
@@ -457,7 +457,7 @@ private:
 
 	std::shared_ptr<Asset> SetMaterialToonTexture(MaterialAsset* Material, aiTextureType TextureType, const std::filesystem::path& TexturePath)
 	{
-		std::shared_ptr<ImageAsset> Image(nullptr);
+		std::shared_ptr<TextureAsset> Image(nullptr);
 
 		if (Material->GetShadingMode() == EShadingMode::Toon)
 		{
@@ -504,7 +504,7 @@ private:
 				{
 					auto AssetLoadCallbacks = std::make_optional(Asset::Callbacks{});
 					AssetLoadCallbacks.value().PreLoadCallback = [this, &TextureType](Asset& InAsset) {
-						Cast<ImageAsset>(InAsset).SetUseSRGB(TextureType == aiTextureType_DIFFUSE || TextureType == aiTextureType_BASE_COLOR);
+						Cast<TextureAsset>(InAsset).SetUseSRGB(TextureType == aiTextureType_DIFFUSE || TextureType == aiTextureType_BASE_COLOR);
 					};
 
 					auto Image = SetMaterialUnlitTexture(Material, TextureType, TexturePath);

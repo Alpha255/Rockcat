@@ -4,7 +4,7 @@
 #ifdef __cplusplus
 
 #include "Runtime/Core/Math/Matrix.h"
-#include "Runtime/Engine/Asset/ImageAsset.h"
+#include "Runtime/Engine/Asset/TextureAsset.h"
 
 using uint = uint32_t;
 using float2 = Math::Vector2;
@@ -69,22 +69,22 @@ private: \
 	inline OwnerClass& Set##Name(const Type&& Value) { Name = Value; return *this; } \
 
 #define DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name) \
-	inline const RHIImage* Get##Name() const { return Name->GetRHI(); } \
+	inline const RHITexture* Get##Name() const { return Name->GetRHI(); } \
 	template<class T> \
-	OwnerClass& Set##Name(T&& Path) { Name = std::make_shared<ImageAsset>(std::forward<T>(Path)); return *this; }
+	OwnerClass& Set##Name(T&& Path) { Name = std::make_shared<TextureAsset>(std::forward<T>(Path)); return *this; }
 
 #define DECLARE_SV_UNIFORM_BUFFER(Type, Name) DECLARE_SHADER_VARIABLE(Type, Name, UniformBuffer, ~0u, DECLARE_SV_SETER_GETTER_DEFAULT(Type, Name))
 
-#define DECLARE_SV_TEXTURE_1D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
-#define DECLARE_SV_TEXTURE_ARRAY_1D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
+#define DECLARE_SV_TEXTURE_1D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
+#define DECLARE_SV_TEXTURE_ARRAY_1D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
 
-#define DECLARE_SV_TEXTURE_2D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
-#define DECLARE_SV_TEXTURE_ARRAY_2D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
+#define DECLARE_SV_TEXTURE_2D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
+#define DECLARE_SV_TEXTURE_ARRAY_2D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
 
-#define DECLARE_SV_TEXTURE_CUBE(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
-#define DECLARE_SV_TEXTURE_ARRAY_CUBE(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
+#define DECLARE_SV_TEXTURE_CUBE(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
+#define DECLARE_SV_TEXTURE_ARRAY_CUBE(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
 
-#define DECLARE_SV_TEXTURE_3D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<ImageAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
+#define DECLARE_SV_TEXTURE_3D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
 
 #define DECLARE_SV_SAMPLER(Name, Binding)
 

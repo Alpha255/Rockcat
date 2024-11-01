@@ -179,15 +179,15 @@ void D3D12CommandList::SetGraphicsPipeline(const RHIGraphicsPipeline* GraphicsPi
 //	assert(D3D12Pipeline);
 }
 
-void D3D12CommandList::ClearColorImage(const RHIImage* DstImage, const Math::Color& ClearColor)
+void D3D12CommandList::ClearColorTexture(const RHITexture* Texture, const Math::Color& ClearColor)
 {
 }
 
-void D3D12CommandList::ClearDepthStencilImage(const RHIImage* DstImage, bool ClearDepth, bool ClearStencil, float Depth, uint8_t Stencil)
+void D3D12CommandList::ClearDepthStencilTexture(const RHITexture* Texture, bool ClearDepth, bool ClearStencil, float Depth, uint8_t Stencil)
 {
 }
 
-//void D3D12CommandList::CopyBufferToImage(const RHIImage* DstImage, const void* SrcBuffer, uint32_t BufferSize, const RHIImageSubresourceRange& SubresourceRange)
+//void D3D12CommandList::CopyBufferToImage(const RHIImage* Texture, const void* SrcBuffer, uint32_t BufferSize, const RHIImageSubresourceRange& SubresourceRange)
 //{
 //}
 //
