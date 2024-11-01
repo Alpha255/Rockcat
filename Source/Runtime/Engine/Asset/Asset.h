@@ -12,21 +12,21 @@ DECLARE_OBJECT_ID(Asset, uint32_t)
 #define ASSET_PATH_AUDIOS       "Audios\\"
 #define ASSET_PATH_SCENES       "Scenes\\"
 
-struct AssetRawData
+struct DataBlock
 {
-	size_t SizeInBytes = 0u;
-	std::shared_ptr<char> Data;
+	size_t Size = 0u;
+	std::shared_ptr<std::byte> Data;
 private:
 	friend class Asset;
 
 	void Allocate(size_t DataSize)
 	{
 		assert(DataSize > 0u);
-		SizeInBytes = DataSize;
-		Data.reset(new char[DataSize]());
+		Size = DataSize;
+		Data.reset(new std::byte[DataSize]());
 	}
 
-	void Deallocate() { Data.reset(); SizeInBytes = 0u; }
+	void Deallocate() { Data.reset(); Size = 0u; }
 };
 
 struct AssetType
@@ -97,7 +97,7 @@ public:
 
 	void ReadRawData(AssetType::EContentsType ContentsType);
 	void FreeRawData() { m_RawData.Deallocate(); }
-	const AssetRawData& GetRawData() const { return m_RawData; }
+	const DataBlock& GetRawData() const { return m_RawData; }
 
 	bool IsDirty() const
 	{
@@ -161,7 +161,7 @@ protected:
 		return 0u;
 	}
 
-	AssetRawData m_RawData;
+	DataBlock m_RawData;
 	std::atomic<EAssetStatus> m_Status = EAssetStatus::NotLoaded;
 
 	Callbacks m_Callbacks;

@@ -1,8 +1,8 @@
-#include "RHI/D3D/D3D11/D3D11ImageView.h"
+#include "RHI/D3D/D3D11/D3D11TextureView.h"
 #include "RHI/D3D/D3D11/D3D11Device.h"
 #include "Engine/Services/SpdLogService.h"
 
-D3D11ShaderResourceView::D3D11ShaderResourceView(const D3D11Device& Device, const RHIImageCreateInfo& RHICreateInfo)
+D3D11ShaderResourceView::D3D11ShaderResourceView(const D3D11Device& Device, const RHITextureCreateInfo& RHICreateInfo)
 {
 	assert(EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::ShaderResource));
 
@@ -11,15 +11,15 @@ D3D11ShaderResourceView::D3D11ShaderResourceView(const D3D11Device& Device, cons
 		::GetFormat(RHICreateInfo.Format)
 	};
 
-	switch (RHICreateInfo.ImageType)
+	switch (RHICreateInfo.Dimension)
 	{
-	case ERHIImageType::Unknown:
+	case ERHITextureDimension::Unknown:
 		Desc.ViewDimension = D3D11_SRV_DIMENSION_UNKNOWN;
 		break;
-	case ERHIImageType::Buffer:
+	case ERHITextureDimension::Buffer:
 		Desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER; /// D3D_SRV_DIMENSION_BUFFEREX Raw buffer???
 		break;
-	case ERHIImageType::T_1D:
+	case ERHITextureDimension::T_1D:
 		Desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1D;
 		Desc.Texture1D = D3D11_TEX1D_SRV
 		{
@@ -27,7 +27,7 @@ D3D11ShaderResourceView::D3D11ShaderResourceView(const D3D11Device& Device, cons
 			RHICreateInfo.MipLevels
 		};
 		break;
-	case ERHIImageType::T_1D_Array:
+	case ERHITextureDimension::T_1D_Array:
 		Desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1DARRAY;
 		Desc.Texture1DArray = D3D11_TEX1D_ARRAY_SRV
 		{
@@ -37,7 +37,7 @@ D3D11ShaderResourceView::D3D11ShaderResourceView(const D3D11Device& Device, cons
 			RHICreateInfo.ArrayLayers
 		};
 		break;
-	case ERHIImageType::T_2D:
+	case ERHITextureDimension::T_2D:
 		Desc.ViewDimension = RHICreateInfo.SampleCount > ERHISampleCount::Sample_1_Bit ?
 			D3D11_SRV_DIMENSION_TEXTURE2DMS : D3D11_SRV_DIMENSION_TEXTURE2D;
 		if (RHICreateInfo.SampleCount > ERHISampleCount::Sample_1_Bit)
@@ -56,7 +56,7 @@ D3D11ShaderResourceView::D3D11ShaderResourceView(const D3D11Device& Device, cons
 			};
 		}
 		break;
-	case ERHIImageType::T_2D_Array:
+	case ERHITextureDimension::T_2D_Array:
 		Desc.ViewDimension = RHICreateInfo.SampleCount > ERHISampleCount::Sample_1_Bit ?
 			D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY : D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
 		if (RHICreateInfo.SampleCount > ERHISampleCount::Sample_1_Bit)
@@ -78,7 +78,7 @@ D3D11ShaderResourceView::D3D11ShaderResourceView(const D3D11Device& Device, cons
 			};
 		}
 		break;
-	case ERHIImageType::T_3D:
+	case ERHITextureDimension::T_3D:
 		Desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
 		Desc.Texture3D = D3D11_TEX3D_SRV
 		{
@@ -86,7 +86,7 @@ D3D11ShaderResourceView::D3D11ShaderResourceView(const D3D11Device& Device, cons
 			RHICreateInfo.MipLevels
 		};
 		break;
-	case ERHIImageType::T_Cube:
+	case ERHITextureDimension::T_Cube:
 		Desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
 		Desc.TextureCube = D3D11_TEXCUBE_SRV
 		{
@@ -94,7 +94,7 @@ D3D11ShaderResourceView::D3D11ShaderResourceView(const D3D11Device& Device, cons
 			RHICreateInfo.MipLevels
 		};
 		break;
-	case ERHIImageType::T_Cube_Array:
+	case ERHITextureDimension::T_Cube_Array:
 		Desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBEARRAY;
 		Desc.TextureCubeArray = D3D11_TEXCUBE_ARRAY_SRV
 		{
@@ -109,7 +109,7 @@ D3D11ShaderResourceView::D3D11ShaderResourceView(const D3D11Device& Device, cons
 	VERIFY_D3D(Device->CreateShaderResourceView(nullptr, &Desc, Reference()));
 }
 
-D3D11RenderTargetView::D3D11RenderTargetView(const D3D11Device& Device, const RHIImageCreateInfo& RHICreateInfo)
+D3D11RenderTargetView::D3D11RenderTargetView(const D3D11Device& Device, const RHITextureCreateInfo& RHICreateInfo)
 {
 	assert(EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::RenderTarget));
 
@@ -118,19 +118,19 @@ D3D11RenderTargetView::D3D11RenderTargetView(const D3D11Device& Device, const RH
 		::GetFormat(RHICreateInfo.Format)
 	};
 
-	switch (RHICreateInfo.ImageType)
+	switch (RHICreateInfo.Dimension)
 	{
-	case ERHIImageType::Buffer:
+	case ERHITextureDimension::Buffer:
 		Desc.ViewDimension = D3D11_RTV_DIMENSION_BUFFER; /// D3D_SRV_DIMENSION_BUFFEREX Raw buffer???
 		break;
-	case ERHIImageType::T_1D:
+	case ERHITextureDimension::T_1D:
 		Desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE1D;
 		Desc.Texture1D = D3D11_TEX1D_RTV
 		{
 			0u
 		};
 		break;
-	case ERHIImageType::T_1D_Array:
+	case ERHITextureDimension::T_1D_Array:
 		Desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE1DARRAY;
 		Desc.Texture1DArray = D3D11_TEX1D_ARRAY_RTV
 		{
@@ -139,7 +139,7 @@ D3D11RenderTargetView::D3D11RenderTargetView(const D3D11Device& Device, const RH
 			RHICreateInfo.ArrayLayers
 		};
 		break;
-	case ERHIImageType::T_2D:
+	case ERHITextureDimension::T_2D:
 		Desc.ViewDimension = RHICreateInfo.SampleCount > ERHISampleCount::Sample_1_Bit ?
 			D3D11_RTV_DIMENSION_TEXTURE2DMS : D3D11_RTV_DIMENSION_TEXTURE2D;
 		if (RHICreateInfo.SampleCount > ERHISampleCount::Sample_1_Bit)
@@ -157,7 +157,7 @@ D3D11RenderTargetView::D3D11RenderTargetView(const D3D11Device& Device, const RH
 			};
 		}
 		break;
-	case ERHIImageType::T_2D_Array:
+	case ERHITextureDimension::T_2D_Array:
 		Desc.ViewDimension = RHICreateInfo.SampleCount > ERHISampleCount::Sample_1_Bit ?
 			D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY : D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
 		if (RHICreateInfo.SampleCount > ERHISampleCount::Sample_1_Bit)
@@ -178,7 +178,7 @@ D3D11RenderTargetView::D3D11RenderTargetView(const D3D11Device& Device, const RH
 			};
 		}
 		break;
-	case ERHIImageType::T_3D:
+	case ERHITextureDimension::T_3D:
 		Desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE3D;
 		Desc.Texture3D = D3D11_TEX3D_RTV
 		{
@@ -195,7 +195,7 @@ D3D11RenderTargetView::D3D11RenderTargetView(const D3D11Device& Device, const RH
 	VERIFY_D3D(Device->CreateRenderTargetView(nullptr, &Desc, Reference()));
 }
 
-D3D11DepthStencilView::D3D11DepthStencilView(const D3D11Device& Device, const RHIImageCreateInfo& RHICreateInfo)
+D3D11DepthStencilView::D3D11DepthStencilView(const D3D11Device& Device, const RHITextureCreateInfo& RHICreateInfo)
 {
 	assert(EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::DepthStencil));
 
@@ -206,16 +206,16 @@ D3D11DepthStencilView::D3D11DepthStencilView(const D3D11Device& Device, const RH
 		0u /// A value that describes whether the texture is read only. Pass 0 to specify that it is not read only; otherwise, pass one of the members of the D3D11_DSV_READ_ONLY_DEPTH/D3D11_DSV_READ_ONLY_STENCIL enumerated type.
 	};
 
-	switch (RHICreateInfo.ImageType)
+	switch (RHICreateInfo.Dimension)
 	{
-	case ERHIImageType::T_1D:
+	case ERHITextureDimension::T_1D:
 		Desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE1D;
 		Desc.Texture1D = D3D11_TEX1D_DSV
 		{
 			0u
 		};
 		break;
-	case ERHIImageType::T_1D_Array:
+	case ERHITextureDimension::T_1D_Array:
 		Desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE1DARRAY;
 		Desc.Texture1DArray = D3D11_TEX1D_ARRAY_DSV
 		{
@@ -224,7 +224,7 @@ D3D11DepthStencilView::D3D11DepthStencilView(const D3D11Device& Device, const RH
 			RHICreateInfo.ArrayLayers
 		};
 		break;
-	case ERHIImageType::T_2D:
+	case ERHITextureDimension::T_2D:
 		Desc.ViewDimension = RHICreateInfo.SampleCount > ERHISampleCount::Sample_1_Bit ?
 			D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
 		if (RHICreateInfo.SampleCount > ERHISampleCount::Sample_1_Bit)
@@ -242,7 +242,7 @@ D3D11DepthStencilView::D3D11DepthStencilView(const D3D11Device& Device, const RH
 			};
 		}
 		break;
-	case ERHIImageType::T_2D_Array:
+	case ERHITextureDimension::T_2D_Array:
 		Desc.ViewDimension = RHICreateInfo.SampleCount > ERHISampleCount::Sample_1_Bit ?
 			D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY : D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
 		if (RHICreateInfo.SampleCount > ERHISampleCount::Sample_1_Bit)

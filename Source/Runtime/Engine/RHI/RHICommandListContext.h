@@ -27,6 +27,8 @@ public:
 				return m_ActiveCmdBuffer;
 			}
 		}
+
+		return nullptr;
 	}
 
 	virtual void Submit() = 0;

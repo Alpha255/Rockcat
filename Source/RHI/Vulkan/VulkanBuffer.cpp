@@ -3,9 +3,9 @@
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "Engine/Services/SpdLogService.h"
 
-VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo& CreateInfo)
+VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo& RHICreateInfo)
 	: VkHwResource(Device)
-	, RHIBuffer(CreateInfo)
+	, RHIBuffer(RHICreateInfo)
 {
 	/// If a memory object does not have the VK_MEMORY_PROPERTY_HOST_COHERENT_BIT property, 
 	/// then vkFlushMappedMemoryRanges must be called in order to guarantee that writes to the memory object from the host are made available to the host domain, 
@@ -28,64 +28,64 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 
 	/// https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkBufferUsageFlagBits.html
 
-	size_t AlignedSize = CreateInfo.Size;
+	size_t AlignedSize = RHICreateInfo.Size;
 	vk::BufferUsageFlags UsageFlags = vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eTransferDst;
 
-	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UniformBuffer))
+	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UniformBuffer))
 	{
 		UsageFlags |= vk::BufferUsageFlagBits::eUniformBuffer;
-		AlignedSize = Align(CreateInfo.Size, GetDevice().GetPhysicalDeviceLimits().minUniformBufferOffsetAlignment);
+		AlignedSize = Align(RHICreateInfo.Size, GetDevice().GetPhysicalDeviceLimits().minUniformBufferOffsetAlignment);
 		//RequiredState = EResourceState::UniformBuffer;
 	}
-	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::IndexBuffer))
+	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::IndexBuffer))
 	{
 		UsageFlags |= vk::BufferUsageFlagBits::eIndexBuffer;
 		//RequiredState = EResourceState::IndexBuffer;
 	}
-	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::VertexBuffer))
+	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::VertexBuffer))
 	{
 		UsageFlags |= vk::BufferUsageFlagBits::eVertexBuffer;
 		//RequiredState = EResourceState::VertexBuffer;
 	}
-	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::IndirectBuffer))
+	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::IndirectBuffer))
 	{
 		UsageFlags |= vk::BufferUsageFlagBits::eIndirectBuffer;
 		//RequiredState = EResourceState::IndirectArgument;
 	}
-	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::StructuredBuffer))
+	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::StructuredBuffer))
 	{
 		UsageFlags |= vk::BufferUsageFlagBits::eStorageBuffer;
-		AlignedSize = Align(CreateInfo.Size, GetDevice().GetPhysicalDeviceLimits().minStorageBufferOffsetAlignment);
+		AlignedSize = Align(RHICreateInfo.Size, GetDevice().GetPhysicalDeviceLimits().minStorageBufferOffsetAlignment);
 	}
-	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UnorderedAccess))
+	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UnorderedAccess))
 	{
 		UsageFlags |= vk::BufferUsageFlagBits::eStorageTexelBuffer;
-		AlignedSize = Align(CreateInfo.Size, GetDevice().GetPhysicalDeviceLimits().minTexelBufferOffsetAlignment);
+		AlignedSize = Align(RHICreateInfo.Size, GetDevice().GetPhysicalDeviceLimits().minTexelBufferOffsetAlignment);
 		//RequiredState = EResourceState::UnorderedAccess;
 	}
-	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::ShaderResource))
+	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::ShaderResource))
 	{
 		UsageFlags |= vk::BufferUsageFlagBits::eUniformTexelBuffer;
 		//RequiredState = EResourceState::ShaderResource;
 	}
-	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::AccelerationStructure))
+	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::AccelerationStructure))
 	{
 		UsageFlags |= vk::BufferUsageFlagBits::eAccelerationStructureStorageKHR;
 		//RequiredState = EResourceState::AccelerationStructure;
 		/// #TODO Align
 	}
 
-	auto vkCreateInfo = vk::BufferCreateInfo()
+	auto CreateInfo = vk::BufferCreateInfo()
 		.setSize(AlignedSize)
 		.setUsage(UsageFlags)
 		.setSharingMode(vk::SharingMode::eExclusive);
-	VERIFY_VK(GetNativeDevice().createBuffer(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+	VERIFY_VK(GetNativeDevice().createBuffer(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
 	//m_DeviceMemory = VulkanMemoryAllocator::Get().Alloc(Get(), CreateInfo.AccessFlags);
 
 	GetNativeDevice().bindBufferMemory(m_Native, m_Memory, 0u);
 
-	if (CreateInfo.InitialData)
+	if (RHICreateInfo.InitialData)
 	{
 #if false
 		else

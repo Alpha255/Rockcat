@@ -274,7 +274,7 @@ D3D12GraphicsPipelineState::D3D12GraphicsPipelineState(const D3D12Device& Device
 
 	CreateDesc.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
 
-	CreateDesc.PrimitiveTopologyType = GetPrimitiveTopology(RHICreateInfo.PrimitiveTopology);
+	CreateDesc.PrimitiveTopologyType = GetPrimitiveTopologyType(RHICreateInfo.PrimitiveTopology);
 
 #if 0
 	const RHIFrameBufferCreateInfo& FrameBufferDesc = RHICreateInfo.FrameBuffer->Description();

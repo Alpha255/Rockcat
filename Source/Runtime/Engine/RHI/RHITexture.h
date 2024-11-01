@@ -73,7 +73,7 @@ struct RHITextureCreateInfo
 
 	ERHIResourceState PermanentStates = ERHIResourceState::Unknown;
 
-	AssetRawData InitialData;
+	DataBlock InitialData;
 
 	std::string Name;
 
@@ -87,8 +87,8 @@ struct RHITextureCreateInfo
 	inline RHITextureCreateInfo& SetSampleCount(ERHISampleCount Count) { SampleCount = Count; return *this; }
 	inline RHITextureCreateInfo& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; };
 	inline RHITextureCreateInfo& SetPermanentStates(ERHIResourceState States) { PermanentStates = States; return *this; }
-	inline RHITextureCreateInfo& SetInitialData(const AssetRawData& Data) { InitialData = Data; return *this; }
-	inline RHITextureCreateInfo& SetInitialData(size_t Size, const std::shared_ptr<char>& Data) { InitialData.SizeInBytes = Size; InitialData.Data = Data; return *this; }
+	inline RHITextureCreateInfo& SetInitialData(const DataBlock& Data) { InitialData = Data; return *this; }
+	inline RHITextureCreateInfo& SetInitialData(size_t Size, const std::shared_ptr<std::byte>& Data) { InitialData.Size = Size; InitialData.Data = Data; return *this; }
 
 	template<class T>
 	inline RHITextureCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
@@ -199,8 +199,8 @@ struct RHISamplerCreateInfo
 class RHISampler : public RHIResource
 {
 public:
-	RHISampler(const RHISamplerCreateInfo& CreateInfo)
-		: RHIResource(CreateInfo.Name.c_str())
+	RHISampler(const RHISamplerCreateInfo& RHICreateInfo)
+		: RHIResource(RHICreateInfo.Name.c_str())
 	{
 	}
 };

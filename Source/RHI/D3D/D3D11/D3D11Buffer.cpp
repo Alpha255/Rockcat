@@ -3,6 +3,7 @@
 #include "Engine/Services/SpdLogService.h"
 
 D3D11Buffer::D3D11Buffer(const D3D11Device& Device, const RHIBufferCreateInfo& RHICreateInfo)
+	: RHIBuffer(RHICreateInfo)
 {
 #if 0
 	static const size_t ConstantsBufferAlignment = 256ull;

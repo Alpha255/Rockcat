@@ -12,7 +12,7 @@ public:
 
 	RHIShaderPtr CreateShader(const RHIShaderCreateInfo& RHICreateInfo) override final;
 
-	RHIImagePtr CreateImage(const RHIImageCreateInfo& RHICreateInfo) override final;
+	RHITexturePtr CreateTexture(const RHITextureCreateInfo& RHICreateInfo) override final;
 
 	RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo) override final;
 

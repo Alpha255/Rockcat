@@ -7,9 +7,9 @@
 VulkanFence::VulkanFence(const VulkanDevice& Device, bool Signaled)
 	: VkHwResource(Device)
 {
-	auto vkCreateInfo = vk::FenceCreateInfo()
+	auto CreateInfo = vk::FenceCreateInfo()
 		.setFlags(Signaled ? vk::FenceCreateFlagBits::eSignaled : vk::FenceCreateFlags());
-	VERIFY_VK(GetNativeDevice().createFence(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+	VERIFY_VK(GetNativeDevice().createFence(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
 bool VulkanFence::IsSignaled() const
@@ -52,7 +52,7 @@ VulkanSemaphore::VulkanSemaphore(const VulkanDevice& Device)
 	/// Semaphores have two states - signaled and unsignaled. The state of a semaphore can be signaled after execution of a batch of commands is completed. 
 	/// A batch can wait for a semaphore to become signaled before it begins execution, and the semaphore is also unsignaled before the batch begins execution.
 
-	auto vkCreateInfo = vk::SemaphoreCreateInfo();
+	auto CreateInfo = vk::SemaphoreCreateInfo();
 	auto SemaphoreTypeCreateInfo = vk::SemaphoreTypeCreateInfo();
 
 	if (VulkanRHI::GetLayerExtensionConfigs().HasTimelineSemaphore)
@@ -60,13 +60,13 @@ VulkanSemaphore::VulkanSemaphore(const VulkanDevice& Device)
 		SemaphoreTypeCreateInfo.setInitialValue(0u)
 			.setSemaphoreType(vk::SemaphoreType::eTimeline);
 #if 0
-		vkCreateInfo.setPNext(&SemaphoreTypeCreateInfo);
+		CreateInfo.setPNext(&SemaphoreTypeCreateInfo);
 #else
-		SetPNext(vkCreateInfo, SemaphoreTypeCreateInfo);
+		SetPNext(CreateInfo, SemaphoreTypeCreateInfo);
 #endif
 	}
 
-	VERIFY_VK(GetNativeDevice().createSemaphore(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+	VERIFY_VK(GetNativeDevice().createSemaphore(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
 	/// When a batch is submitted to a queue via a queue submission, and it includes semaphores to be signaled, 
 	/// it defines a memory dependency on the batch, and defines semaphore signal operations which set the semaphores to the signaled state.
@@ -117,8 +117,8 @@ VulkanEvent::VulkanEvent(const VulkanDevice& Device)
 	/// A device can wait for an event to become signaled before executing further operations. 
 	/// No command exists to wait for an event to become signaled on the host.
 
-	auto vkCreateInfo = vk::EventCreateInfo();
-	VERIFY_VK(GetNativeDevice().createEvent(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+	auto CreateInfo = vk::EventCreateInfo();
+	VERIFY_VK(GetNativeDevice().createEvent(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
 	/// The state of an event can also be updated on the device by commands inserted in command buffers.
 	/// To set the state of an event to signaled from a device, call: vkCmdSetEvent

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/RHI/RHITexture.h"
+#include "Engine/Asset/Asset.h"
 
 #define RHI_WHOLE_SIZE ~0u
 
@@ -10,14 +11,15 @@ struct RHIBufferCreateInfo
 	ERHIDeviceAccessFlags AccessFlags = ERHIDeviceAccessFlags::None;
 	ERHIResourceState PermanentStates = ERHIResourceState::Unknown;
 
-	size_t Size = 0u;
+	size_t Size = 0ull;
 	const void* InitialData = nullptr;
+
 	std::string Name;
 
 	inline RHIBufferCreateInfo& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; }
 	inline RHIBufferCreateInfo& SetAccessFlags(ERHIDeviceAccessFlags Flags) { AccessFlags = Flags | AccessFlags; return *this; }
 	inline RHIBufferCreateInfo& SetPermanentStates(ERHIResourceState States) { PermanentStates = States; return *this; }
-	inline RHIBufferCreateInfo& SetSize(size_t DataSize) { Size = DataSize; return *this; }
+	inline RHIBufferCreateInfo& SetSize(size_t InSize) { Size = InSize; return *this; }
 	inline RHIBufferCreateInfo& SetInitialData(const void* Data) { InitialData = Data; return *this; }
 
 	template<class T>
@@ -27,8 +29,8 @@ struct RHIBufferCreateInfo
 class RHIBuffer : public RHIResource
 {
 public:
-	RHIBuffer(const RHIBufferCreateInfo& CreateInfo)
-		: RHIResource(CreateInfo.Name.c_str())
+	RHIBuffer(const RHIBufferCreateInfo& RHICreateInfo)
+		: RHIResource(RHICreateInfo.Name.c_str())
 	{
 	}
 

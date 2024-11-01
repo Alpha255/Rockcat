@@ -50,8 +50,8 @@ void ShaderCompileService::Compile(const ShaderAsset& Shader)
 {
 	const size_t Hash = Shader.ComputeHash();
 	const auto FileName = Shader.GetPath().filename().generic_string();
-	const auto SourceCode = Shader.GetRawData().Data.get();
-	const auto Size = Shader.GetRawData().SizeInBytes;
+	const auto SourceCode = reinterpret_cast<char*>(Shader.GetRawData().Data.get());
+	const auto Size = Shader.GetRawData().Size;
 
 	for (uint32_t Index = (uint32_t)ERenderHardwareInterface::Vulkan; Index < (uint32_t)ERenderHardwareInterface::Num; ++Index)
 	{

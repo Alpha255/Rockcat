@@ -28,7 +28,7 @@ public:
 	{
 		auto& Image = Cast<TextureAsset>(InAsset);
 
-		auto DataSize = static_cast<int32_t>(Image.GetRawData().SizeInBytes);
+		auto DataSize = static_cast<int32_t>(Image.GetRawData().Size);
 		auto Data = reinterpret_cast<const stbi_uc*>(Image.GetRawData().Data.get());
 
 		int32_t Width = 0, Height = 0, Channels = 0, OriginalChannels = STBI_default;

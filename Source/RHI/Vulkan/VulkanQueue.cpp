@@ -193,15 +193,15 @@ VulkanQueue::VulkanQueue(const VulkanDevice& Device, ERHIDeviceQueue QueueType, 
 	GetNativeDevice().getQueue(FamilyIndex, 0u, &m_Native);
 }
 
-void VulkanQueue::Submit(VulkanCommandBuffer* CommandBuffer, uint32_t NumSignalSemaphores, VulkanSemaphore* Semaphores)
+void VulkanQueue::Submit(VulkanCommandBuffer* CommandBuffer, uint32_t NumSignalSemaphores, VulkanSemaphore* SignalSemaphores)
 {
 	assert(CommandBuffer);
-	assert((NumSignalSemaphores == 0u && !Semaphores) || (NumSignalSemaphores > 0u && Semaphores));
+	assert((NumSignalSemaphores == 0u && !SignalSemaphores) || (NumSignalSemaphores > 0u && SignalSemaphores));
 
-	std::vector<vk::Semaphore> SignalSemaphores(NumSignalSemaphores);
+	std::vector<vk::Semaphore> Semaphores(NumSignalSemaphores);
 	for (uint32_t Index = 0u; Index < NumSignalSemaphores; ++Index)
 	{
-		SignalSemaphores[Index] = (Semaphores + Index)->GetNative();
+		Semaphores[Index] = (SignalSemaphores + Index)->GetNative();
 	}
 
 	std::vector<vk::Semaphore> WaitSemaphores;
@@ -214,7 +214,7 @@ void VulkanQueue::Submit(VulkanCommandBuffer* CommandBuffer, uint32_t NumSignalS
 	auto vkSubmitInfo = vk::SubmitInfo()
 		.setCommandBufferCount(1u)
 		.setPCommandBuffers(&CommandBuffer->GetNative())
-		.setSignalSemaphores(SignalSemaphores)
+		.setSignalSemaphores(Semaphores)
 		.setWaitSemaphores(WaitSemaphores)
 		.setWaitDstStageMask(CommandBuffer->GetWaitDstStageFlags());
 

@@ -76,17 +76,18 @@ D3D11Texture3D::D3D11Texture3D(const D3D11Device& Device, const RHITextureCreate
 }
 
 D3D11Sampler::D3D11Sampler(const D3D11Device& Device, const RHISamplerCreateInfo& RHICreateInfo)
+	: RHISampler(RHICreateInfo)
 {
 	Math::Vector4 BorderColor = GetBorderColor(RHICreateInfo.BorderColor);
 
 	D3D11_SAMPLER_DESC Desc
 	{
-		GetFilter(RHICreateInfo.MinMagFilter, RHICreateInfo.MipmapMode, RHICreateInfo.MaxAnisotropy),
+		GetFilter(RHICreateInfo.MinMagFilter, RHICreateInfo.MipmapMode, static_cast<uint32_t>(RHICreateInfo.MaxAnisotropy)),
 		GetSamplerAddressMode(RHICreateInfo.AddressModeU),
 		GetSamplerAddressMode(RHICreateInfo.AddressModeV),
 		GetSamplerAddressMode(RHICreateInfo.AddressModeW),
 		RHICreateInfo.MipLODBias,
-		RHICreateInfo.MaxAnisotropy,
+		static_cast<uint32_t>(RHICreateInfo.MaxAnisotropy),
 		GetCompareFunc(RHICreateInfo.CompareOp),
 		{
 			BorderColor.x,

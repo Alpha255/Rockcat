@@ -3,6 +3,7 @@
 #include "Engine/Services/SpdLogService.h"
 
 D3D12Buffer::D3D12Buffer(const D3D12Device& Device, const RHIBufferCreateInfo& RHICreateInfo)
+	: RHIBuffer(RHICreateInfo)
 {
 	assert(RHICreateInfo.AccessFlags != ERHIDeviceAccessFlags::None);
 

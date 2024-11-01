@@ -7,6 +7,7 @@ class D3D12FrameBuffer : public RHIFrameBuffer
 {
 public:
 	D3D12FrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo)
+		: RHIFrameBuffer(RHICreateInfo)
 	{
 	}
 };
