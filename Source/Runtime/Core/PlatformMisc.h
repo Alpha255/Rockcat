@@ -9,7 +9,6 @@ public:
 	static std::string GetErrorMessage(uint32_t ErrorCode = ~0u);
 
 	static std::filesystem::path GetCurrentWorkingDirectory();
-
 	static void SetCurrentWorkingDirectory(const std::filesystem::path& Directory);
 
 	static void Sleep(uint32_t Milliseconds);
@@ -17,7 +16,6 @@ public:
 	static std::string GetEnvironmentVariables(const char* Variable);
 
 	static std::filesystem::path GetCurrentModuleDirectory();
-
 	static void* GetCurrentModuleHandle();
 
 	static void ExecuteProcess(const char* Commandline, bool WaitDone = true);

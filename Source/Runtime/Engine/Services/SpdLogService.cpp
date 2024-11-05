@@ -1,36 +1,48 @@
 #include "Engine/Services/SpdLogService.h"
 
-void SpdLogService::Logger::RegisterRedirector(spdlog::sinks::sink* Sink)
+void SpdLogService::WinDebugSinkAsync::_sink_it(const spdlog::details::log_msg& Log)
 {
-	m_Redirectors.insert(Sink);
-}
+	BaseSink::_sink_it(Log);
 
-void SpdLogService::Logger::_sink_it(const spdlog::details::log_msg& Message)
-{
-	spdlog::sinks::windebug_sink_mt::_sink_it(Message);
-
-	for (auto Sink : m_Redirectors)
+	for (auto Sink : m_Service.GetRedirectors())
 	{
 		if (Sink)
 		{
-			Sink->log(Message);
+			Sink->Log(Log);
 		}
 	}
 }
 
 SpdLogService::SpdLogService()
 {
-	m_AsyncLogger = spdlog::create_async("SpdLogger", std::make_shared<Logger>(), 1024u);
-	m_AsyncLogger->set_pattern("[%^%l%$] %v");
-
+	m_DefaultLogger = CreateLogger("LogDefault", 
 #if _DEBUG
-	m_AsyncLogger->set_level(spdlog::level::trace);
+		ELogLevel::Trace
 #else
-	m_AsyncLogger->set_level(spdlog::level::info);
+		ELogLevel::Info
 #endif
+	);
 }
 
-void SpdLogService::RegisterRedirector(spdlog::sinks::sink* Sink)
+std::shared_ptr<spdlog::logger> SpdLogService::CreateLogger(const char* Name, ELogLevel Level)
 {
-	Cast<Logger>(m_AsyncLogger->sinks()[0].get())->RegisterRedirector(Sink);
+	auto Logger = spdlog::create_async(Name, std::make_shared<WinDebugSinkAsync>(*this), 1024u);
+	Logger->set_level(static_cast<spdlog::level::level_enum>(Level));
+	Logger->set_pattern("[%n]: [%^%l%$]: %v");
+	return Logger;
+}
+
+void SpdLogService::RegisterRedirector(LogRedirector* Redirector)
+{
+	// TODO: Thread safe ???
+	m_Redirectors.insert(Redirector);
+}
+
+void SpdLogService::RegisterLogCategory(const char* Category, ELogLevel Level)
+{
+	std::string LoggerName = StringUtils::Lowercase(std::string(Category));
+	if (!spdlog::get(LoggerName))
+	{
+		CreateLogger(Category, Level);
+	}
 }

@@ -272,14 +272,14 @@ protected:
 	class VulkanDevice* m_Device = nullptr;
 };
 #else
-#define VERIFY_VK(Func)                                                                                                                   \
-{                                                                                                                                         \
-	vk::Result TempResult = (Func);                                                                                                       \
-	if (TempResult != vk::Result::eSuccess)                                                                                               \
-	{                                                                                                                                     \
-		LOG_ERROR("Vulkan: Failed to invoke VulkanAPI: File: {}, Line: {}, vkResult: {}", __FILE__, __LINE__, vk::to_string(TempResult)); \
-		assert(0);                                                                                                                        \
-	}                                                                                                                                     \
+#define VERIFY_VK(Func)                                                                                                                                \
+{                                                                                                                                                      \
+	vk::Result TempResult = (Func);                                                                                                                    \
+	if (TempResult != vk::Result::eSuccess)                                                                                                            \
+	{                                                                                                                                                  \
+		LOG_CAT_CRITICAL(LogVulkanRHI, "Failed to invoke VulkanAPI: File: {}, Line: {}, vkResult: {}", __FILE__, __LINE__, vk::to_string(TempResult)); \
+		assert(0);                                                                                                                                     \
+	}                                                                                                                                                  \
 }
 #endif
 

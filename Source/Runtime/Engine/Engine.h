@@ -8,7 +8,6 @@ public:
 	static Engine& Get();
 
 	Engine() = default;
-
 	~Engine() = default;
 
 	void Run();

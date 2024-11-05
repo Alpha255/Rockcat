@@ -1,5 +1,4 @@
 #include "Editor/Panels/LogConsole.h"
-#include "Engine/Services/SpdLogService.h"
 #include "Editor/Icons/Icons.h"
 
 LogConsole::LogMessage::LogMessage(const spdlog::details::log_msg& Message, int32_t MessageID)
@@ -51,9 +50,10 @@ LogConsole::LogConsole()
 	}
 }
 
-void LogConsole::log(const spdlog::details::log_msg& Message)
+void LogConsole::Log(const SpdLogMessage& Log)
 {
-	m_LogMessages.emplace_back(LogMessage(Message, static_cast<int32_t>(m_LogMessages.size())));
+	/// TODO: Thread safe ???
+	m_LogMessages.emplace_back(LogMessage(Log, static_cast<int32_t>(m_LogMessages.size())));
 }
 
 void LogConsole::DrawHeader()

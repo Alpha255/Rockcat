@@ -52,7 +52,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsMessengerCallback(
 	(void)(UserData);
 	(void)(MessageTypeFlags);
 
-	std::string Message = StringUtils::Format("VulkanRHI: Validation: [%3d][%10s]: %s",
+	std::string Message = StringUtils::Format("[Validation]: [%3d][%10s]: %s",
 		MessengerCallbackData->messageIdNumber,
 		MessengerCallbackData->pMessageIdName,
 		MessengerCallbackData->pMessage);
@@ -62,20 +62,20 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsMessengerCallback(
 #if 0
 		LOG_INFO("VulkanRHI Validation: {:<3}{:<10}: {}", MessengerCallbackData->messageIdNumber, MessengerCallbackData->pMessageIdName, MessengerCallbackData->pMessage);
 #else
-		LOG_INFO("{}", Message);
+		LOG_CAT_INFO(LogVulkanRHI, Message.c_str());
 #endif
 	}
 	else if (EnumHasAnyFlags(MessageServerityFlagBits, VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT))
 	{
-		LOG_WARNING("{}", Message);
+		LOG_CAT_WARNING(LogVulkanRHI, Message.c_str());
 	}
 	else if (EnumHasAnyFlags(MessageServerityFlagBits, VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT))
 	{
-		LOG_ERROR("{}", Message);
+		LOG_CAT_ERROR(LogVulkanRHI, Message.c_str());
 	}
 	else if (EnumHasAnyFlags(MessageServerityFlagBits, VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT))
 	{
-		LOG_DEBUG("{}", Message);
+		LOG_CAT_DEBUG(LogVulkanRHI, Message.c_str());
 	}
 	else
 	{
@@ -103,15 +103,15 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugReportCallback(
 
 	if (EnumHasAnyFlags(Flags, VK_DEBUG_REPORT_ERROR_BIT_EXT))
 	{
-		LOG_ERROR("VulkanRHI: {}: {}", LayerPrefix, Message);
+		LOG_CAT_ERROR(LogVulkanRHI, "{}: {}", LayerPrefix, Message);
 	}
 	else if (EnumHasAnyFlags(Flags, VK_DEBUG_REPORT_WARNING_BIT_EXT) || EnumHasAnyFlags(Flags, VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT))
 	{
-		LOG_WARNING("VulkanRHI: {}: {}", LayerPrefix, Message);
+		LOG_CAT_WARNING(LogVulkanRHI, "{}: {}", LayerPrefix, Message);
 	}
 	else
 	{
-		LOG_INFO("VulkanRHI: {}: {}", LayerPrefix, Message);
+		LOG_CAT_INFO(LogVulkanRHI, "{}: {}", LayerPrefix, Message);
 	}
 
 	return VK_FALSE;
@@ -125,7 +125,7 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 	std::vector<const char*> EnabledLayers;
 	std::vector<const char*> EnabledExtensions;
 
-	LOG_DEBUG("VulkanRHI: Found valid instance layers:");
+	std::string LogValidInstanceLayers("VulkanRHI: Found valid instance layers:\n");
 	auto LayerProperties = vk::enumerateInstanceLayerProperties();
 	for (const auto& LayerProperty : LayerProperties)
 	{
@@ -140,13 +140,14 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 			}
 		}
 
-		LOG_DEBUG("\t\t\t\t\"{}\"", LayerProperty.layerName.data());
+		LogValidInstanceLayers += StringUtils::Format("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
 	}
+	LOG_CAT_DEBUG(LogVulkanRHI, LogValidInstanceLayers.c_str());
 
 	VulkanExtensionArray::iterator DebugUtilExt = WantedExtensions.end();
 	VulkanExtensionArray::iterator DebugReportExt = WantedExtensions.end();
 
-	LOG_DEBUG("VulkanRHI: Found valid instance extensions:");
+	std::string LogValidInstanceExtensions("Found valid instance extensions:\n");
 	auto ExtensionProperties = vk::enumerateInstanceExtensionProperties();
 	for (const auto& ExtensionProperty : ExtensionProperties)
 	{
@@ -170,8 +171,9 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 			}
 		}
 
-		LOG_DEBUG("\t\t\t\t\"{}\"", ExtensionProperty.extensionName.data());
+		LogValidInstanceExtensions += StringUtils::Format("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
 	}
+	LOG_CAT_DEBUG(LogVulkanRHI, LogValidInstanceExtensions.c_str());
 
 	if (DebugUtilExt != WantedExtensions.end() && (*DebugUtilExt)->IsEnabled())
 	{

@@ -1,15 +1,14 @@
 #pragma once
 
 #include "Editor/ImGuiPanel.h"
+#include "Engine/Services/SpdLogService.h"
 
-class LogConsole : public ImGuiPanel, public spdlog::sinks::sink
+class LogConsole : public ImGuiPanel, public SpdLogService::LogRedirector
 {
 public:
 	LogConsole();
 
-	void log(const spdlog::details::log_msg& Message) override;
-
-	void flush() override {}
+	void Log(const SpdLogMessage& Log) override;
 protected:
 	void OnDraw() override final;
 private:

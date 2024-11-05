@@ -12,6 +12,7 @@ std::shared_ptr<VulkanLayerExtensionConfigurations> VulkanRHI::s_LayerExtensionC
 VulkanRHI::VulkanRHI(const GraphicsSettings* GfxSettings)
 	: RHIInterface(GfxSettings)
 {
+	REGISTER_LOG_CATEGORY(LogVulkanRHI);
 	InitializeGraphicsDevices();
 }
 
@@ -30,7 +31,7 @@ VulkanRHI::~VulkanRHI()
 {
 	m_Device.reset();
 
-	LOG_INFO("VulkanRHI: Finalized");
+	LOG_CAT_INFO(LogVulkanRHI, "Finalized");
 }
 
 RHIDevice& VulkanRHI::GetDevice()

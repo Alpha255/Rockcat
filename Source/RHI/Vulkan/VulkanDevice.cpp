@@ -78,7 +78,7 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 
 	if (DiscreteGpus.size() == 0u && OtherGpus.size() > 0u)
 	{
-		LOG_WARNING("VulkanRHI: Can't find discrete GPU");
+		LOG_CAT_WARNING(LogVulkanRHI, "Can't find discrete GPU");
 	}
 
 	m_PhysicalDevice = DiscreteGpus.size() > 0u ? *DiscreteGpus[0] : (OtherGpus.size() > 0u ? *OtherGpus[0] : vk::PhysicalDevice{});
@@ -92,7 +92,7 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 	std::vector<const char*> EnabledLayers;
 	std::vector<const char*> EnabledExtensions;
 
-	LOG_DEBUG("VulkanRHI: Found valid device layers:");
+	std::string LogValidDeviceLayers("Found valid device layers:\n");
 	auto LayerProperties = m_PhysicalDevice.enumerateDeviceLayerProperties();
 	for (const auto& LayerProperty : LayerProperties)
 	{
@@ -107,10 +107,11 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 			}
 		}
 
-		LOG_DEBUG("\t\t\t\t\"{}\"", LayerProperty.layerName.data());
+		LogValidDeviceLayers += StringUtils::Format("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
 	}
+	LOG_CAT_DEBUG(LogVulkanRHI, LogValidDeviceLayers.c_str());
 
-	LOG_DEBUG("VulkanRHI: Found valid device extensions:");
+	std::string LogValidDeviceExtensions("Found valid device extensions:\n");
 	auto ExtensionProperties = m_PhysicalDevice.enumerateDeviceExtensionProperties();
 	for (const auto& ExtensionProperty : ExtensionProperties)
 	{
@@ -125,8 +126,9 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 			}
 		}
 
-		LOG_DEBUG("\t\t\t\t\"{}\"", ExtensionProperty.extensionName.data());
+		LogValidDeviceExtensions += StringUtils::Format("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
 	}
+	LOG_CAT_DEBUG(LogVulkanRHI, LogValidDeviceExtensions.c_str());
 
 	LogEnabledLayerAndExtensions(WantedLayers, WantedExtensions, "device");
 
@@ -184,7 +186,7 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 	VERIFY_VK(m_PhysicalDevice.createDevice(&CreateInfo, nullptr, &m_LogicalDevice));
 
 	auto PhysicalDeviceProperties = m_PhysicalDevice.getProperties();
-	LOG_INFO("VulkanRHI: Created vulkan device on adapter: \"{}\", DeviceID = {}. DeviceType = {}. VulkanAPI Version: {}.{}.{}",
+	LOG_CAT_INFO(LogVulkanRHI, "Created vulkan device on adapter: \"{}\", DeviceID = {}. DeviceType = {}. VulkanAPI Version: {}.{}.{}",
 		PhysicalDeviceProperties.deviceName.data(),
 		PhysicalDeviceProperties.deviceID,
 		vk::to_string(PhysicalDeviceProperties.deviceType).c_str(),
