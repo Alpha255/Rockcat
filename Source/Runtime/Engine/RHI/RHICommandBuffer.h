@@ -26,6 +26,7 @@ public:
 
 	RHICommandBuffer(ERHICommandBufferLevel Level)
 		: m_Level(Level)
+		, m_UseForUploadOnly(false)
 	{
 	}
 

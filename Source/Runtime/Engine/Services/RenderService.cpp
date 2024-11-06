@@ -1,5 +1,7 @@
 #include "Engine/Services/RenderService.h"
 #include "Engine/Services/SpdLogService.h"
+#include "Engine/Engine.h"
+#include "Engine/Application/ApplicationConfigurations.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 
 void RenderService::InitializeRHI(const GraphicsSettings& GfxSettings)
@@ -22,6 +24,17 @@ void RenderService::InitializeRHI(const GraphicsSettings& GfxSettings)
 		case ERenderHardwareInterface::D3D12:
 			LOG_ERROR("{} is not support yet!", RHIInterface::GetRHIName(ERenderHardwareInterface::D3D12));
 			break;
+		}
+	}
+}
+
+void RenderService::OnStartup()
+{
+	for (auto& Application : Engine::Get().GetApplications())
+	{
+		if (Application->GetConfigurations().IsEnableRendering())
+		{
+			InitializeRHI(Application->GetConfigurations().GetGraphicsSettings());
 		}
 	}
 }

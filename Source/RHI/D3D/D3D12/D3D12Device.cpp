@@ -163,3 +163,17 @@ RHISamplerPtr D3D12Device::CreateSampler(const RHISamplerCreateInfo& RHICreateIn
 {
 	return RHISamplerPtr();
 }
+
+RHICommandListContext* D3D12Device::GetImmediateCommandListContext(ERHIDeviceQueue Queue)
+{
+	return nullptr;
+}
+
+RHICommandListContextPtr D3D12Device::AcquireDeferredCommandListContext()
+{
+	return RHICommandListContextPtr();
+}
+
+void D3D12Device::ReleaseDeferredCommandListContext(RHICommandListContextPtr& CmdListContext)
+{
+}

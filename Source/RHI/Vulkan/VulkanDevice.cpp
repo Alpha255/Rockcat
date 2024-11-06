@@ -5,6 +5,7 @@
 #include "RHI/Vulkan/VulkanCommandPool.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 #include "RHI/Vulkan/VulkanShader.h"
+#include "RHI/Vulkan/VulkanCommandListContext.h"
 #include "Engine/Services/TaskFlowService.h"
 
 VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
@@ -200,27 +201,31 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 	VULKAN_HPP_DEFAULT_DISPATCHER.init(m_LogicalDevice);
 #endif
 
-	m_Queues[(size_t)ERHIDeviceQueue::Graphics] = std::move(std::make_unique<VulkanQueue>(*this, ERHIDeviceQueue::Graphics, GraphicsQueueIndex));
-	if (VulkanRHI::GetGraphicsSettings().EnableAsyncTransfer)
-	{
-		m_Queues[(size_t)ERHIDeviceQueue::Transfer] = std::move(std::make_unique<VulkanQueue>(*this, ERHIDeviceQueue::Transfer, TransferQueueIndex));
-	}
-	if (VulkanRHI::GetGraphicsSettings().EnableAsyncCompute)
-	{
-		m_Queues[(size_t)ERHIDeviceQueue::Compute] = std::move(std::make_unique<VulkanQueue>(*this, ERHIDeviceQueue::Compute, ComputeQueueIndex));
-	}
+	auto CreateQueueAndImmdiateCmdListContext = [this](ERHIDeviceQueue Queue, uint32_t QueueFamilyIndex, bool Enabled) {
+		size_t QueueIndex = static_cast<size_t>(Queue);
+		size_t GraphicsQueueIndex = static_cast<size_t>(ERHIDeviceQueue::Graphics);
 
-	if (PresentQueueIndex != GraphicsQueueIndex)
-	{
-		assert(false);
-	}
+		if (Enabled)
+		{
+			m_Queues[QueueIndex].reset(new VulkanQueue(*this, Queue, QueueFamilyIndex));
+			m_ImmediateCmdListContexts[QueueIndex] = std::make_shared<VulkanCommandListContext>(*this, *m_Queues[QueueIndex]);
+		}
+		else
+		{
+			m_ImmediateCmdListContexts[QueueIndex] = m_ImmediateCmdListContexts[GraphicsQueueIndex];
+		}
+	};
 
-	//m_TransferCmdMgr = std::move(std::make_unique<VulkanCommandBufferManager>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Transfer]));
-	//m_ComputeCmdMgr = std::move(std::make_unique<VulkanCommandBufferManager>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Compute]));
-	//for (uint8_t Index = 0u; Index < TaskFlowService::Get().GetNumWorkThreads(); ++Index)
-	//{
-	//	m_GraphicsCmdMgrs.emplace(std::make_shared<VulkanCommandBufferManager>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Graphics]));
-	//}
+	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Graphics, GraphicsQueueIndex, true);
+	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Transfer, TransferQueueIndex, VulkanRHI::GetGraphicsSettings().EnableAsyncTransfer);
+	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Compute, ComputeQueueIndex, VulkanRHI::GetGraphicsSettings().EnableAsyncCompute);
+	
+	assert(PresentQueueIndex == GraphicsQueueIndex);
+
+	for (uint8_t Index = 0u; Index < TaskFlowService::Get().GetNumWorkThreads(); ++Index)
+	{
+		m_ThreadedCmdListContexts.emplace(std::make_shared<VulkanCommandListContext>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Graphics]));
+	}
 }
 
 RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& CreateInfo)
@@ -256,6 +261,32 @@ RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& /*CreateInfo*
 RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& /*CreateInfo*/)
 {
 	return RHISamplerPtr();
+}
+
+RHICommandListContext* VulkanDevice::GetImmediateCommandListContext(ERHIDeviceQueue Queue)
+{
+	return m_ImmediateCmdListContexts[(size_t)Queue].get();
+}
+
+RHICommandListContextPtr VulkanDevice::AcquireDeferredCommandListContext()
+{
+	std::lock_guard Locker(m_CmdListContextLock);
+	
+	if (m_ThreadedCmdListContexts.empty())
+	{
+		return std::make_shared<VulkanCommandListContext>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Graphics]);
+	}
+
+	auto CommandListContext = m_ThreadedCmdListContexts.front();
+	m_ThreadedCmdListContexts.pop();
+	return CommandListContext;
+}
+
+void VulkanDevice::ReleaseDeferredCommandListContext(RHICommandListContextPtr& CmdListContext)
+{
+	std::lock_guard Locker(m_CmdListContextLock);
+
+	m_ThreadedCmdListContexts.emplace(Cast<VulkanCommandListContext>(std::move(CmdListContext)));
 }
 
 const vk::Instance& VulkanDevice::GetInstance() const

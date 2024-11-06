@@ -11,18 +11,16 @@ public:
 	void WaitIdle() const override final {}
 
 	RHIShaderPtr CreateShader(const RHIShaderCreateInfo& RHICreateInfo) override final;
-
 	RHITexturePtr CreateTexture(const RHITextureCreateInfo& RHICreateInfo) override final;
-
 	RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo) override final;
-
 	RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo) override final;
-
 	RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) override final;
-
 	RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo) override final;
-
 	RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& RHICreateInfo) override final;
+
+	RHICommandListContext* GetImmediateCommandListContext(ERHIDeviceQueue Queue) override final;
+	RHICommandListContextPtr AcquireDeferredCommandListContext() override final;
+	void ReleaseDeferredCommandListContext(RHICommandListContextPtr& CmdListContext) override final;
 #if 0
 	D3D12CommandQueue* CommandQueue(EQueueType QueueType)
 	{

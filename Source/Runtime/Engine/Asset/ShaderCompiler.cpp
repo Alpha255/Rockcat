@@ -14,12 +14,12 @@ DxcShaderCompiler::DxcShaderCompiler(bool GenerateSpirv)
 	VERIFY(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(m_Compiler.Reference())) == S_OK);
 
 	DxcVersionInfo VersionInfo;
-	VERIFY(m_Utils->QueryInterface(IID_PPV_ARGS(VersionInfo.Reference())) == S_OK);
+	VERIFY(m_Compiler->QueryInterface(IID_PPV_ARGS(VersionInfo.Reference())) == S_OK);
 
 	uint32_t Major = 0u, Minor = 0u;
 	VERIFY(VersionInfo->GetVersion(&Major, &Minor) == S_OK);
 
-	LOG_INFO("DxcShaderCompiler:: Create dxc shader compiler @{}.{}, generate spir-v is {}", Major, Minor, GenerateSpirv ? "enabled" : "disabled");
+	LOG_INFO("DxcShaderCompiler:: Create dxc shader compiler v{}.{}, spir-v is {}", Major, Minor, GenerateSpirv ? "enabled" : "disabled");
 }
 
 ShaderBinary DxcShaderCompiler::Compile(

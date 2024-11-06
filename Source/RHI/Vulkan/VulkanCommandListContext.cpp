@@ -8,3 +8,7 @@ VulkanCommandListContext::VulkanCommandListContext(const VulkanDevice& Device, V
 	, m_Queue(Queue)
 {
 }
+
+void VulkanCommandListContext::Submit()
+{
+}

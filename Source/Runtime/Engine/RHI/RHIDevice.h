@@ -58,7 +58,14 @@ public:
 	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) = 0;
 	virtual RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo) = 0;
 	virtual RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& RHICreateInfo) = 0;
+
+	virtual RHICommandListContext* GetImmediateCommandListContext(ERHIDeviceQueue Queue) = 0;
+	virtual RHICommandListContextPtr AcquireDeferredCommandListContext() = 0;
+	virtual void ReleaseDeferredCommandListContext(RHICommandListContextPtr& CmdListContext) = 0;
+
 	const char* const GetAdapterName() const { return m_AdapterName.c_str(); }
+protected:
+	std::mutex m_CmdListContextLock;
 private:
 	std::string m_AdapterName;
 };

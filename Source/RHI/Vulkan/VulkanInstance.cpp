@@ -41,8 +41,6 @@ VKAPI_ATTR void VKAPI_CALL vkDestroyDebugReportCallbackEXT(VkInstance Instance, 
 }
 #endif
 
-static constexpr bool UNIQUE_MESSAGE = true;
-
 static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsMessengerCallback(
 	VkDebugUtilsMessageSeverityFlagBitsEXT MessageServerityFlagBits,
 	VkDebugUtilsMessageTypeFlagsEXT MessageTypeFlags,

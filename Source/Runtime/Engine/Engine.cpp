@@ -70,14 +70,6 @@ bool Engine::Initialize()
 	PlatformMisc::SetCurrentWorkingDirectory(AssetsDirectory);
 	LOG_INFO("Mount working directory to \"{}\".", PlatformMisc::GetCurrentWorkingDirectory().generic_string());
 
-	for (auto& Application : m_Applications)
-	{
-		if (Application->GetConfigurations().IsEnableRendering())
-		{
-			RenderService::Get().InitializeRHI(Application->GetConfigurations().GetGraphicsSettings());
-		}
-	}
-
 	TaskFlowService::Get().OnStartup();
 	AssetDatabase::Get().OnStartup();
 	RenderService::Get().OnStartup();
