@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Engine/Rendering/RenderGraph/RenderPass/MeshPass.h"
+#include "Engine/Rendering/RenderGraph/RenderPass/GeometryPass.h"
 
-class ShadowPass : public MeshPass
+class ShadowPass : public GeometryPass
 {
 public:
 	ShadowPass(DAGNodeID ID, class ResourceManager& ResourceMgr);

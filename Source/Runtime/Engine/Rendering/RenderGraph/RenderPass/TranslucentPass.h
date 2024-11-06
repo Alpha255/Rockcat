@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Engine/Rendering/RenderGraph/RenderPass/MeshPass.h"
+#include "Engine/Rendering/RenderGraph/RenderPass/GeometryPass.h"
 
-class TranslucentPass : public MeshPass
+class TranslucentPass : public GeometryPass
 {
 public:
 	TranslucentPass(DAGNodeID ID, class ResourceManager& ResourceMgr)
-		: MeshPass(ID, "TranslucentPass", ResourceMgr, EMeshPass::Translucent)
+		: GeometryPass(ID, "TranslucentPass", ResourceMgr, EGeometryPass::Translucent)
 	{
 	}
 

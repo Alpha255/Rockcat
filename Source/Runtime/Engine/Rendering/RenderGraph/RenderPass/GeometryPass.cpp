@@ -1,4 +1,4 @@
-#include "Engine/Rendering/RenderGraph/RenderPass/MeshPass.h"
+#include "Engine/Rendering/RenderGraph/RenderPass/GeometryPass.h"
 #include "Engine/RHI/RHIInterface.h"
 #include "Engine/RHI/RHIDevice.h"
 #include "Engine/Scene/Components/StaticMesh.h"
@@ -27,7 +27,7 @@ private:
 	RHICommandBuffer* m_CommandBuffer;
 };
 
-void MeshPass::Execute(RHIDevice& Device, const RenderScene& Scene)
+void GeometryPass::Execute(RHIDevice& Device, const RenderScene& Scene)
 {
 	//auto CommandBuffer = Device.GetActiveCommandBuffer(ERHIDeviceQueue::Graphics);
 	//assert(CommandBuffer);

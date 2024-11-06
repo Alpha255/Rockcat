@@ -15,10 +15,10 @@ const char* GetShadowTechniqueName(EShadowTechnique Technique)
 }
 
 ShadowPass::ShadowPass(DAGNodeID ID, ResourceManager& ResourceMgr)
-	: MeshPass(
+	: GeometryPass(
 		ID, 
 		GetShadowTechniqueName(RHIInterface::GetGraphicsSettings().ShadowTechnique),
 		ResourceMgr,
-		EMeshPass::ShadowCaster)
+		EGeometryPass::ShadowCaster)
 {
 }

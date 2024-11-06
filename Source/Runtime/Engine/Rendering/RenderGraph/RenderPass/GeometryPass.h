@@ -3,10 +3,10 @@
 #include "Core/Math/Transform.h"
 #include "Engine/Rendering/RenderGraph/RenderPass.h"
 
-class MeshPass : public RenderPass
+class GeometryPass : public RenderPass
 {
 public:
-	MeshPass(DAGNodeID ID, const char* Name, class ResourceManager& ResourceMgr, EMeshPass Filter)
+	GeometryPass(DAGNodeID ID, const char* Name, class ResourceManager& ResourceMgr, EGeometryPass Filter)
 		: RenderPass(ID, Name, ResourceMgr)
 		, m_Filter(Filter)
 	{
@@ -18,5 +18,5 @@ public:
 protected:
 	RHIGraphicsPipelinePtr m_GraphicsPipeline;
 private:
-	EMeshPass m_Filter;
+	EGeometryPass m_Filter;
 };

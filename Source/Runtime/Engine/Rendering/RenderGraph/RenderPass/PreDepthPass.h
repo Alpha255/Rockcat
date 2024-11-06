@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Engine/Rendering/RenderGraph/RenderPass/MeshPass.h"
+#include "Engine/Rendering/RenderGraph/RenderPass/GeometryPass.h"
 
-class PreDepthPass : public MeshPass
+class PreDepthPass : public GeometryPass
 {
 public:
 	PreDepthPass(DAGNodeID ID, class ResourceManager& ResourceMgr)
-		: MeshPass(ID, "PreDepthPass", ResourceMgr, EMeshPass::PreDepth)
+		: GeometryPass(ID, "PreDepthPass", ResourceMgr, EGeometryPass::PreDepth)
 	{
 	}
 

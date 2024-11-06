@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Engine/Rendering/RenderGraph/RenderPass/MeshPass.h"
+#include "Engine/Rendering/RenderGraph/RenderPass/GeometryPass.h"
 
-class GeometryBufferPass : public MeshPass
+class GBufferPass : public GeometryPass
 {
 public:
-	GeometryBufferPass(DAGNodeID ID, class ResourceManager& ResourceMgr)
-		: MeshPass(ID, "GBufferPass", ResourceMgr, EMeshPass::Opaque)
+	GBufferPass(DAGNodeID ID, class ResourceManager& ResourceMgr)
+		: GeometryPass(ID, "GBufferPass", ResourceMgr, EGeometryPass::Opaque)
 	{
 	}
 

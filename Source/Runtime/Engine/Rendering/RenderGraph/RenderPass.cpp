@@ -40,8 +40,8 @@ void RenderScene::GenerateDrawCommands()
 				NewCommand.IsSelected = Node->IsSelected();
 
 				m_DrawCommands.emplace_back(std::move(NewCommand));
-				m_MeshPassDrawCommands[EMeshPass::PreDepth].push_back(&m_DrawCommands.back());
-				m_MeshPassDrawCommands[EMeshPass::Opaque].push_back(&m_DrawCommands.back());
+				m_MeshPassDrawCommands[EGeometryPass::PreDepth].push_back(&m_DrawCommands.back());
+				m_MeshPassDrawCommands[EGeometryPass::Opaque].push_back(&m_DrawCommands.back());
 			}
 			else if (Node->IsSkeletalMesh())
 			{
