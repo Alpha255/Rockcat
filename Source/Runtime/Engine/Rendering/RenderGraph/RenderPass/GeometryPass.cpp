@@ -1,18 +1,19 @@
 #include "Engine/Rendering/RenderGraph/RenderPass/GeometryPass.h"
 #include "Engine/RHI/RHIInterface.h"
 #include "Engine/RHI/RHIDevice.h"
+#include "Engine/RHI/RHICommandListContext.h"
 #include "Engine/Scene/Components/StaticMesh.h"
 #include "Engine/Async/Task.h"
 
 class MeshDrawTask : public Task
 {
 public:
-	MeshDrawTask(const MeshDrawCommand* Command, RHICommandBuffer* CommandBuffer)
+	MeshDrawTask(const MeshDrawCommand* Command, RHICommandListContext* CommandListContext)
 		: Task("MeshDrawTask", Task::ETaskType::Graphics, Task::EPriority::High)
 		, m_DrawCommand(Command)
-		, m_CommandBuffer(CommandBuffer)
+		, m_CommandBuffer(CommandListContext->GetCommandBuffer())
 	{
-		assert(m_DrawCommand);
+		assert(m_DrawCommand && m_CommandBuffer);
 	}
 
 	void Execute() override final
@@ -29,21 +30,16 @@ private:
 
 void GeometryPass::Execute(RHIDevice& Device, const RenderScene& Scene)
 {
-	//auto CommandBuffer = Device.GetActiveCommandBuffer(ERHIDeviceQueue::Graphics);
-	//assert(CommandBuffer);
-
-	//if (GetRHI().GetGraphicsSettings().AsyncCommandlistSubmission)
-	//{
-
-	//}
-	//else
-	//{
-	//	for (auto DrawCommand : Scene.GetDrawCommands(m_Filter))
-	//	{
-	//		MeshDrawTask(DrawCommand, CommandBuffer).Execute();
-	//	}
-	//}
-
-	//CommandBuffer->Begin();
-	//CommandBuffer->End();
+	if (GetRHI().GetGraphicsSettings().AsyncCommandlistSubmission)
+	{
+		assert(false);
+	}
+	else
+	{
+		auto RHICmdListContext = Device.GetImmediateCommandListContext(ERHIDeviceQueue::Graphics);
+		for (auto DrawCommand : Scene.GetDrawCommands(m_Filter))
+		{
+			MeshDrawTask(DrawCommand, RHICmdListContext).Execute();
+		}
+	}
 }

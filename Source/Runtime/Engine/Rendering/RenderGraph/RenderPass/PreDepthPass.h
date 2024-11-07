@@ -6,7 +6,7 @@ class PreDepthPass : public GeometryPass
 {
 public:
 	PreDepthPass(DAGNodeID ID, class ResourceManager& ResourceMgr)
-		: GeometryPass(ID, "PreDepthPass", ResourceMgr, EGeometryPass::PreDepth)
+		: GeometryPass(ID, "PreDepthPass", ResourceMgr, EGeometryPassFilter::PreDepth)
 	{
 	}
 

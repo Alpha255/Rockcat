@@ -4,7 +4,7 @@
 #include "Core/Math/Transform.h"
 #include "Engine/View/View.h"
 
-enum EGeometryPass
+enum class EGeometryPassFilter
 {
 	PreDepth,
 	Opaque,
@@ -13,11 +13,43 @@ enum EGeometryPass
 	Num
 };
 
+struct VertexStream
+{
+	uint16_t Index = 0;
+	uint16_t Offset = 0u;
+	RHIBuffer* VertexBuffer = nullptr;
+};
+
 struct MeshDrawCommand
 {
 	const class StaticMesh* Mesh = nullptr;
 	const Math::Transform* WorldTransform = nullptr;
+
+	std::vector<VertexStream> VertexStreams;
+	RHIBuffer* IndexBuffer = nullptr;
+
+	RHIGraphicsPipeline* GraphicsPipeline = nullptr;
+
+	uint32_t FirstIndex = 0u;
+	uint32_t NumPrimitives = 0u;
 	uint32_t NumInstances = 1u;
+
+	ERHIPrimitiveTopology PrimitiveTopology = ERHIPrimitiveTopology::TriangleList;
+
+	union
+	{
+		struct
+		{
+			uint32_t BaseVertexIndex;
+			uint32_t NumVertices;
+		} VertexArgs;
+
+		struct
+		{
+			RHIBuffer* Buffer;
+			uint32_t Offset;
+		} IndirectArgs;
+	};
 
 	bool CastShadow = true;
 	bool IsTranslucent = false;
@@ -32,13 +64,13 @@ public:
 	{
 	}
 
-	const std::vector<const MeshDrawCommand*>& GetDrawCommands(EGeometryPass MeshPass) const { return m_MeshPassDrawCommands[MeshPass]; }
+	const std::vector<const MeshDrawCommand*>& GetDrawCommands(EGeometryPassFilter MeshPass) const { return m_MeshDrawCommands[(size_t)MeshPass]; }
 	void GenerateDrawCommands();
 	const std::vector<std::shared_ptr<IView>>& GetViews() const;
 protected:
 private:
 	const class Scene& m_Scene;
-	std::array<std::vector<const MeshDrawCommand*>, EGeometryPass::Num> m_MeshPassDrawCommands;
+	std::array<std::vector<const MeshDrawCommand*>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommands;
 	std::vector<MeshDrawCommand> m_DrawCommands;
 	mutable std::vector<std::shared_ptr<IView>> m_Views;
 };

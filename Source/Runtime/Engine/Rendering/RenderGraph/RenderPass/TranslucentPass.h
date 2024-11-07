@@ -6,7 +6,7 @@ class TranslucentPass : public GeometryPass
 {
 public:
 	TranslucentPass(DAGNodeID ID, class ResourceManager& ResourceMgr)
-		: GeometryPass(ID, "TranslucentPass", ResourceMgr, EGeometryPass::Translucent)
+		: GeometryPass(ID, "TranslucentPass", ResourceMgr, EGeometryPassFilter::Translucent)
 	{
 	}
 

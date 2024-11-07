@@ -6,7 +6,7 @@
 class GeometryPass : public RenderPass
 {
 public:
-	GeometryPass(DAGNodeID ID, const char* Name, class ResourceManager& ResourceMgr, EGeometryPass Filter)
+	GeometryPass(DAGNodeID ID, const char* Name, class ResourceManager& ResourceMgr, EGeometryPassFilter Filter)
 		: RenderPass(ID, Name, ResourceMgr)
 		, m_Filter(Filter)
 	{
@@ -18,5 +18,5 @@ public:
 protected:
 	RHIGraphicsPipelinePtr m_GraphicsPipeline;
 private:
-	EGeometryPass m_Filter;
+	EGeometryPassFilter m_Filter;
 };
