@@ -61,6 +61,9 @@ AssetDatabase::AssetDatabase()
 
 void AssetDatabase::CreateAssetImporters()
 {
+	REGISTER_LOG_CATEGORY(LogImageImporter);
+	REGISTER_LOG_CATEGORY(LogAssimpImporter);
+
 	m_AssetImporters.emplace_back(std::make_unique<DDSImageImporter>());
 	m_AssetImporters.emplace_back(std::make_unique<StbImageImporter>());
 	m_AssetImporters.emplace_back(std::make_unique<ShaderAssetImporter>());

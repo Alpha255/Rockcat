@@ -68,12 +68,12 @@ public:
 			}
 			else
 			{
-				LOG_WARNING("AssimpSceneImporter:: Assimp scene \"{}\" has no meshes");
+				LOG_CAT_WARNING(LogAssimpImporter, "Assimp scene: \"{}\" has no meshes");
 				return true;
 			}
 		}
 
-		LOG_ERROR("AssimpSceneImporter:: Failed to load assimp scene \"{}\" : {}", AssimpScene.GetPath().generic_string(), AssimpImporter.GetErrorString());
+		LOG_CAT_ERROR(LogAssimpImporter, "Failed to load assimp scene: {}, error message: {}", AssimpScene.GetPath().generic_string(), AssimpImporter.GetErrorString());
 		return false;
 	}
 
@@ -90,13 +90,13 @@ private:
 		{
 			if (Percentage >= 1.0f)
 			{
-				LOG_DEBUG("AssimpSceneImporter: Loading model \"{}\" succeeded", m_AssetPath.generic_string());
+				LOG_CAT_DEBUG(LogAssimpImporter, "Loading model \"{}\" succeeded", m_AssetPath.generic_string());
 				return true;
 			}
 
 			if (static_cast<int32_t>(Percentage * 100) % 10 == 0)
 			{
-				LOG_DEBUG("AssimpSceneImporter: Loading model: \"{}\" in progress {:.2f}%", m_AssetPath.generic_string(), Percentage * 100);
+				LOG_CAT_DEBUG(LogAssimpImporter, "Loading model: \"{}\" in progress {:.2f}%", m_AssetPath.generic_string(), Percentage * 100);
 			}
 			return false;
 		}
@@ -107,11 +107,11 @@ private:
 	class AssimpLogger : public Assimp::Logger
 	{
 	public:
-		void OnDebug(const char* Message) override final { LOG_DEBUG("AssimpSceneImporter: {}", Message); }
-		void OnVerboseDebug(const char* Message) override final { LOG_DEBUG("AssimpSceneImporter: {}", Message); }
-		void OnInfo(const char* Message) override final { LOG_INFO("AssimpSceneImporter: {}", Message); }
-		void OnWarn(const char* Message) override final { LOG_WARNING("AssimpSceneImporter: {}", Message); }
-		void OnError(const char* Message) override final { LOG_ERROR("AssimpSceneImporter: {}", Message); }
+		void OnDebug(const char* Message) override final { LOG_CAT_DEBUG(LogAssimpImporter, Message); }
+		void OnVerboseDebug(const char* Message) override final { LOG_CAT_DEBUG(LogAssimpImporter, Message); }
+		void OnInfo(const char* Message) override final { LOG_CAT_INFO(LogAssimpImporter, Message); }
+		void OnWarn(const char* Message) override final { LOG_CAT_WARNING(LogAssimpImporter, Message); }
+		void OnError(const char* Message) override final { LOG_CAT_ERROR(LogAssimpImporter, Message); }
 		bool attachStream(Assimp::LogStream*, uint32_t) override final { return true; }
 		bool detachStream(Assimp::LogStream*, uint32_t) override final { return true; }
 	};
@@ -257,27 +257,27 @@ private:
 
 			if (!Mesh)
 			{
-				LOG_ERROR("AssimpSceneImporter: Detected invalid mesh!");
+				LOG_CAT_ERROR(LogAssimpImporter, "Detected invalid mesh!");
 				continue;
 			}
 			if (!Mesh->HasPositions())
 			{
-				LOG_ERROR("AssimpSceneImporter: The mesh has no vertices data!");
+				LOG_CAT_ERROR(LogAssimpImporter, "The mesh has no vertices data!");
 				continue;
 			}
 			if (!Mesh->HasNormals())
 			{
-				LOG_ERROR("AssimpSceneImporter: The mesh has no normals!");
+				LOG_CAT_ERROR(LogAssimpImporter, "The mesh has no normals!");
 				continue;
 			}
 			if (!Mesh->HasFaces())
 			{
-				LOG_ERROR("AssimpSceneImporter: The mesh has no indices data!");
+				LOG_CAT_ERROR(LogAssimpImporter, "The mesh has no indices data!");
 				continue;
 			}
 			if (Mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
 			{
-				LOG_ERROR("AssimpSceneImporter: Detected others primitive type, should never be happen!");
+				LOG_CAT_ERROR(LogAssimpImporter, "Detected others primitive type, should never be happen!");
 				continue;
 			}
 

@@ -35,7 +35,7 @@ public:
 
 		if (!stbi_info_from_memory(Data, DataSize, &Width, &Height, &OriginalChannels))
 		{
-			LOG_ERROR("StbImageImporter: Couldn't parse image header \"{}\": {}", Image.GetPath().generic_string(), stbi_failure_reason());
+			LOG_CAT_ERROR(LogImageImporter, "Couldn't parse image header, image path: {}, fail reason: {}", Image.GetPath().generic_string(), stbi_failure_reason());
 			return false;
 		}
 
@@ -57,7 +57,7 @@ public:
 
 		if (!Bitmap)
 		{
-			LOG_ERROR("StbImageImporter: Failed to load image \"{}\": {}", Image.GetPath().generic_string(), stbi_failure_reason());
+			LOG_CAT_ERROR(LogImageImporter, "Failed to load image: {}, fail reason: {}", Image.GetPath().generic_string(), stbi_failure_reason());
 		}
 
 		auto CreateInfo = RHITextureCreateInfo()

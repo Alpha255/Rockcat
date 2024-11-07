@@ -10,7 +10,7 @@ D3D12CommandList::D3D12CommandList(const D3D12Device& Device, ERHIDeviceQueue Qu
 	: RHICommandBuffer(Level)
 {
 	D3D12_COMMAND_LIST_TYPE Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-	if (Level == ERHICommandBufferLevel::Deferred)
+	if (Level == ERHICommandBufferLevel::Secondary)
 	{
 		Type = D3D12_COMMAND_LIST_TYPE_BUNDLE;
 	}

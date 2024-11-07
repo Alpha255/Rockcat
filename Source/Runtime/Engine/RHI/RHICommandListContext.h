@@ -5,36 +5,46 @@
 class RHICommandListContext
 {
 public:
-	RHICommandBuffer* GetCommandBuffer(ERHICommandBufferLevel Level = ERHICommandBufferLevel::Immediate, bool UseForUploadOnly = false)
+	RHICommandBuffer* GetCommandBuffer(ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary)
 	{
-		if (m_ActiveCmdBuffer && m_ActiveCmdBuffer->GetLevel() == Level)
+		auto& CmdBufferGroup = Level == ERHICommandBufferLevel::Primary ? m_PrimaryCmdBufferGroup : m_SecondaryCmdBufferGroup;
+		if (auto ActiveCmdBuffer = CmdBufferGroup.ActiveCmdBuffer)
 		{
-			if (m_ActiveCmdBuffer->IsReady())
+			if (ActiveCmdBuffer->IsRecording())
 			{
-				return m_ActiveCmdBuffer;
+				return ActiveCmdBuffer;
 			}
-			if (m_ActiveCmdBuffer->IsNeedReset())
+			else if (ActiveCmdBuffer->IsReady())
 			{
-				m_ActiveCmdBuffer->Reset();
-				m_ActiveCmdBuffer->Begin();
-				return m_ActiveCmdBuffer;
+				ActiveCmdBuffer->Begin();
+				return ActiveCmdBuffer;
+			}
+			else if (ActiveCmdBuffer->IsNeedReset())
+			{
+				ActiveCmdBuffer->Reset();
+				ActiveCmdBuffer->Begin();
+				return ActiveCmdBuffer;
 			}
 		}
 
-		m_ActiveCmdBuffer = m_CmdBuffersInFly.emplace_back(AllocateCommandBuffer(Level)).get();
-		assert(m_ActiveCmdBuffer);
+		CmdBufferGroup.ActiveCmdBuffer = CmdBufferGroup.OnFlyCmdBuffers.emplace_back(AllocateCommandBuffer(Level)).get();
+		assert(CmdBufferGroup.ActiveCmdBuffer);
 
-		m_ActiveCmdBuffer->Begin();
-
-		return m_ActiveCmdBuffer;
+		CmdBufferGroup.ActiveCmdBuffer->Begin();
+		return CmdBufferGroup.ActiveCmdBuffer;
 	}
 
-	virtual RHICommandBufferPtr AllocateCommandBuffer(ERHICommandBufferLevel Level) = 0;
 	virtual void Submit() = 0;
 protected:
-	std::vector<RHICommandBufferPtr> m_CmdBuffersInFly;
-	std::queue<RHICommandBufferPtr> m_CmdBuffersFreed;
+	virtual RHICommandBufferPtr AllocateCommandBuffer(ERHICommandBufferLevel Level) = 0;
 
-	RHICommandBuffer* m_ActiveCmdBuffer = nullptr;
-	RHICommandBuffer* m_UploadCmdBuffer = nullptr;
+	struct CommandBufferGroup
+	{
+		std::vector<RHICommandBufferPtr> OnFlyCmdBuffers;
+		std::queue<RHICommandBufferPtr> FreedCmdBuffers;
+		RHICommandBuffer* ActiveCmdBuffer = nullptr;
+	};
+
+	CommandBufferGroup m_PrimaryCmdBufferGroup;
+	CommandBufferGroup m_SecondaryCmdBufferGroup;
 };

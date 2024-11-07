@@ -1,5 +1,6 @@
 #include "Engine/Services/ShaderCompileService.h"
 #include "Engine/Async/Task.h"
+#include "Engine/Services/SpdLogService.h"
 #pragma warning(disable:4068)
 #include <Submodules/filewatch/FileWatch.hpp>
 #pragma warning(default:4068)
@@ -8,7 +9,7 @@ class ShaderCompileTask : public Task
 {
 public:
 	ShaderCompileTask(const char* ShaderName)
-		: Task(std::move(StringUtils::Format("Compile shader: %s ...", ShaderName)), ETaskType::ShaderCompile, EPriority::High)
+		: Task(std::move(StringUtils::Format("ShaderCompileTask|%s", ShaderName)), ETaskType::ShaderCompile, EPriority::High)
 	{
 	}
 
@@ -21,6 +22,8 @@ using FileWatcher = filewatch::FileWatch<std::string>;
 static std::unique_ptr<FileWatcher> s_ShaderWatcher;
 void ShaderCompileService::OnStartup()
 {
+	REGISTER_LOG_CATEGORY(LogShaderCompile);
+
 	m_Compilers[(size_t)ERenderHardwareInterface::Vulkan] = std::make_unique<DxcShaderCompiler>(true);
 	m_Compilers[(size_t)ERenderHardwareInterface::D3D11] = std::make_unique<D3DShaderCompiler>();
 	m_Compilers[(size_t)ERenderHardwareInterface::D3D12] = std::make_unique<DxcShaderCompiler>(false);

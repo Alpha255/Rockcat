@@ -7,6 +7,7 @@ VulkanCommandListContext::VulkanCommandListContext(const VulkanDevice& Device, V
 	: m_Pool(Device, Queue.GetFamilyIndex())
 	, m_Queue(Queue)
 {
+	GetCommandBuffer();
 }
 
 void VulkanCommandListContext::Submit()

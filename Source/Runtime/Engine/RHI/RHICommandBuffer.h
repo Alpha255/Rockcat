@@ -6,8 +6,8 @@
 
 enum class ERHICommandBufferLevel : uint8_t
 {
-	Immediate,
-	Deferred
+	Primary,
+	Secondary
 };
 
 class RHICommandBuffer
