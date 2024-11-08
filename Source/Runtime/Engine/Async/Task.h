@@ -13,13 +13,6 @@
 class Task
 {
 public:
-	enum class ETaskType
-	{
-		General,
-		Graphics,
-		ShaderCompile
-	};
-
 	enum EPriority
 	{
 		High,
@@ -28,21 +21,20 @@ public:
 	};
 
 	template<class T>
-	Task(T&& Name, ETaskType Type, EPriority Priority = EPriority::Normal)
+	Task(T&& Name, EPriority Priority = EPriority::Normal)
 		: m_Name(std::forward<T>(Name))
-		, m_Type(Type)
 		, m_Priority(Priority)
 	{
 	}
 
 	const char* GetName() const { return m_Name.c_str(); }
-	ETaskType GetType() const { return m_Type; }
 	EPriority GetPriority() const { return m_Priority; }
 
-	virtual void Execute() {}
+	virtual void Execute() = 0;
+
+	bool IsCompleted() const { return false; }
 private:
 	std::string m_Name;
-	ETaskType m_Type;
 	EPriority m_Priority;
 };
 

@@ -9,7 +9,7 @@ class ShaderCompileTask : public Task
 {
 public:
 	ShaderCompileTask(const char* ShaderName)
-		: Task(std::move(StringUtils::Format("ShaderCompileTask|%s", ShaderName)), ETaskType::ShaderCompile, EPriority::High)
+		: Task(std::move(StringUtils::Format("ShaderCompileTask|%s", ShaderName)), EPriority::High)
 	{
 	}
 

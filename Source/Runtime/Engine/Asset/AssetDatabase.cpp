@@ -16,7 +16,7 @@ public:
 		IAssetImporter& AssetImporter, 
 		const AssetType* Type,
 		std::optional<Asset::Callbacks>& AssetLoadCallbacks)
-		: Task(std::move(StringUtils::Format("ImportAsset: %s", AssetPath.generic_string().c_str())), ETaskType::General)
+		: Task(std::move(StringUtils::Format("ImportAsset: %s", AssetPath.generic_string().c_str())))
 		, m_AssetImporter(AssetImporter)
 		, m_Asset(TargetAsset ? TargetAsset : AssetImporter.CreateAsset(AssetPath))
 		, m_AssetType(Type)

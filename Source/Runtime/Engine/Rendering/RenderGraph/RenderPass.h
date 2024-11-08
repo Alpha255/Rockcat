@@ -1,79 +1,6 @@
 #pragma once
 
-#include "Engine/Rendering/RenderGraph/RenderPassField.h"
-#include "Core/Math/Transform.h"
-#include "Engine/View/View.h"
-
-enum class EGeometryPassFilter
-{
-	PreDepth,
-	Opaque,
-	Translucent,
-	ShadowCaster,
-	Num
-};
-
-struct VertexStream
-{
-	uint16_t Index = 0;
-	uint16_t Offset = 0u;
-	RHIBuffer* VertexBuffer = nullptr;
-};
-
-struct MeshDrawCommand
-{
-	const class StaticMesh* Mesh = nullptr;
-	const Math::Transform* WorldTransform = nullptr;
-
-	std::vector<VertexStream> VertexStreams;
-	RHIBuffer* IndexBuffer = nullptr;
-
-	RHIGraphicsPipeline* GraphicsPipeline = nullptr;
-
-	uint32_t FirstIndex = 0u;
-	uint32_t NumPrimitives = 0u;
-	uint32_t NumInstances = 1u;
-
-	ERHIPrimitiveTopology PrimitiveTopology = ERHIPrimitiveTopology::TriangleList;
-
-	union
-	{
-		struct
-		{
-			uint32_t BaseVertexIndex;
-			uint32_t NumVertices;
-		} VertexArgs;
-
-		struct
-		{
-			RHIBuffer* Buffer;
-			uint32_t Offset;
-		} IndirectArgs;
-	};
-
-	bool CastShadow = true;
-	bool IsTranslucent = false;
-	bool IsSelected = false;
-};
-
-class RenderScene
-{
-public:
-	RenderScene(const class Scene& InScene)
-		: m_Scene(InScene)
-	{
-	}
-
-	const std::vector<const MeshDrawCommand*>& GetDrawCommands(EGeometryPassFilter MeshPass) const { return m_MeshDrawCommands[(size_t)MeshPass]; }
-	void GenerateDrawCommands();
-	const std::vector<std::shared_ptr<IView>>& GetViews() const;
-protected:
-private:
-	const class Scene& m_Scene;
-	std::array<std::vector<const MeshDrawCommand*>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommands;
-	std::vector<MeshDrawCommand> m_DrawCommands;
-	mutable std::vector<std::shared_ptr<IView>> m_Views;
-};
+#include "Engine/Rendering/RenderGraph/RenderScene.h"
 
 class RenderPass
 {
@@ -96,7 +23,6 @@ public:
 	virtual void OnGUI() {};
 protected:
 	class ResourceManager& GetResourceManager() { return m_ResourceMgr; }
-	class RHIInterface& GetRHI();
 	RDGResource& RegisterResource(const char* Name, RDGResource::EVisibility Visibility);
 private:
 	DAGNodeID m_NodeID;
