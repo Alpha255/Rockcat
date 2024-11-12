@@ -194,7 +194,6 @@ public:
 	void Compile(bool Force = false);
 
 	const ShaderBinary* const GetBinary(ERenderHardwareInterface RHI) const { return GetCache().GetBinary(ComputeHash(), RHI); }
-	const ShaderBinary* const GetBinary() const;
 
 	void RegisterVariable(const char* Name, ShaderVariable&& Variable)
 	{

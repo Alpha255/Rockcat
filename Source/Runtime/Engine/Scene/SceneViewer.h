@@ -10,8 +10,8 @@ template<class Policy = DepthFirst>
 class SceneViewer
 {
 public:
-	SceneViewer(const Scene& TargetScene)
-		: SceneViewer(TargetScene.GetSceneGraph())
+	SceneViewer(const Scene& InScene)
+		: SceneViewer(InScene.GetGraph())
 	{
 	}
 

@@ -80,8 +80,3 @@ void ShaderAsset::Compile(bool Force)
 		FreeRawData();
 	}
 }
-
-const ShaderBinary* const ShaderAsset::GetBinary() const
-{
-	return GetBinary(RHIInterface::GetGraphicsSettings().RenderHardwareInterface);
-}

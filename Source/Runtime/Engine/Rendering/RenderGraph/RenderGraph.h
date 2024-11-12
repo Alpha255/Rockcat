@@ -5,7 +5,7 @@
 class RenderGraph
 {
 public:
-	RenderGraph(class RHIInterface& RHI, const class Scene& RenderScene);
+	RenderGraph(const GraphicsSettings& GfxSettings);
 
 	template<class TPass>
 	RenderGraph& AddPass()
@@ -14,15 +14,19 @@ public:
 		return *this;
 	}
 
-	void Execute();
+	void Execute(const class Scene& InScene);
 
-	virtual void Setup() = 0;
+	static std::shared_ptr<RenderGraph> Create(const GraphicsSettings& GfxSettings);
+protected:
+	virtual void SetupRenderPasses() = 0;
 private:
+	inline void SetDirty(bool Dirty) { m_Dirty = Dirty; }
 	void Compile();
 
-	bool m_NeedRecompile = true;
+	bool m_Dirty = true;
 	DirectedAcyclicGraph m_Graph;
 	std::shared_ptr<class ResourceManager> m_ResourceMgr;
 	std::shared_ptr<RenderScene> m_RenderScene;
 	std::vector<std::shared_ptr<RenderPass>> m_RenderPasses;
+	const GraphicsSettings& m_GfxSettings;
 };

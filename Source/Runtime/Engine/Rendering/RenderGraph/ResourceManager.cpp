@@ -1,9 +1,9 @@
 #include "Engine/Rendering/RenderGraph/ResourceManager.h"
 #include "Engine/RHI/RHIDevice.h"
-#include "Engine/RHI/RHIInterface.h"
+#include "Engine/Services/RenderService.h"
 
-ResourceManager::ResourceManager(RHIInterface& RHI, DirectedAcyclicGraph& Graph)
-	: m_RHI(RHI)
+ResourceManager::ResourceManager(const GraphicsSettings& GfxSettings, DirectedAcyclicGraph& Graph)
+	: m_RHIDevice(RenderService::Get().GetRHIInterface(GfxSettings.RenderHardwareInterface).GetDevice())
 	, m_Graph(Graph)
 {
 }
@@ -31,7 +31,7 @@ RHIGraphicsPipelinePtr ResourceManager::GetOrCreateGraphicsPipeline(const RHIGra
 	return RHIGraphicsPipelinePtr();
 }
 
-void ResourceManager::CreateAllResources()
+void ResourceManager::ResolveResources()
 {
 	for (auto& [Name, Resource] : m_Resources)
 	{

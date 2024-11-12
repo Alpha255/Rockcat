@@ -16,25 +16,14 @@ void RenderTest::OnInitialize()
 	}
 	
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");
-
-	switch (GetGraphicsSettings().RenderingPath)
-	{
-	case ERenderingPath::ForwardRendering:
-		m_RenderGraph = std::make_shared<ForwardRenderingPath>(GetRHI(), *m_Scene);
-		break;
-	case ERenderingPath::DeferredShading:
-		assert(false);
-		break;
-	case ERenderingPath::DeferredLighting:
-		assert(false);
-		break;
-	}
-	m_RenderGraph->Setup();
+	m_RenderGraph = RenderGraph::Create(GetGraphicsSettings());
 }
 
 void RenderTest::OnRenderFrame()
 {
-	m_RenderGraph->Execute();
+	m_Scene->Update();
+
+	m_RenderGraph->Execute(*m_Scene);
 }
 
 #if 0

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/RHI/RHIDeclarations.h"
+#include "Engine/Application/GraphicsSettings.h"
 #include <dxgiformat.h>
 
 #define USE_DYNAMIC_VK_LOADER 1

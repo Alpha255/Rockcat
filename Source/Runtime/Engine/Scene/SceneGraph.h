@@ -144,7 +144,7 @@ struct SceneGraph
 		return NextID;
 	}
 
-	const Node* FindNode(const char* NodeName) const
+	const Node* FindNodeByName(const char* NodeName) const
 	{
 		for (auto& Node : Nodes)
 		{

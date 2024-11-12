@@ -272,3 +272,35 @@ void Scene::Traverse(const SceneNode::VisitFunc& Visit) const
 #endif
 
 #include "Engine/Scene/Scene.h"
+#include "Engine/Scene/SceneViewer.h"
+
+void Scene::Update()
+{
+	SetDirty(!m_AddNodes.empty() || !m_RemoveOrHiddenNodes.empty());
+
+	if (m_VisibleNodes.empty())
+	{
+		SceneViewer<BreadthFirst> SceneViewer(*this);
+		auto Node = SceneViewer.Get();
+
+		while (Node != SceneNodeIterator())
+		{
+			if (Node->IsAlive() && Node->IsVisible())
+			{
+				m_VisibleNodes.insert(&(*Node));
+			}
+
+			Node = SceneViewer.Next();
+		}
+	}
+
+	for (auto Node : m_AddNodes)
+	{
+		m_VisibleNodes.insert(Node);
+	}
+
+	for (auto Node : m_RemoveOrHiddenNodes)
+	{
+		m_VisibleNodes.erase(Node);
+	}
+}

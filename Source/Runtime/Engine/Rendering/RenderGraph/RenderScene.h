@@ -20,12 +20,19 @@ struct VertexStream
 	RHIBuffer* VertexBuffer = nullptr;
 };
 
+struct GraphicsPipelineKey
+{
+	size_t Hash = 0u;
+	RHIGraphicsPipeline* RHI = nullptr;
+	// Shader Resource Binding
+};
+
 struct MeshDrawCommand
 {
 	std::vector<VertexStream> VertexStreams;
 	RHIBuffer* IndexBuffer = nullptr;
 
-	RHIGraphicsPipeline* GraphicsPipeline = nullptr;
+	GraphicsPipelineKey GfxPipelineKey;
 
 	uint32_t FirstIndex = 0u;
 	uint32_t NumPrimitives = 0u;
@@ -53,16 +60,16 @@ class RenderScene
 {
 public:
 	RenderScene(const class Scene& InScene)
-		: m_Scene(InScene)
 	{
+		GenerateDrawCommands(InScene);
 	}
 
 	const std::vector<const MeshDrawCommand*>& GetDrawCommands(EGeometryPassFilter MeshPass) const { return m_MeshDrawCommands[(size_t)MeshPass]; }
-	void GenerateDrawCommands();
 	const std::vector<std::shared_ptr<IView>>& GetViews() const;
 protected:
 private:
-	const class Scene& m_Scene;
+	void GenerateDrawCommands(const class Scene& InScene);
+
 	std::array<std::vector<const MeshDrawCommand*>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommands;
 	std::vector<MeshDrawCommand> m_DrawCommands;
 	mutable std::vector<std::shared_ptr<IView>> m_Views;

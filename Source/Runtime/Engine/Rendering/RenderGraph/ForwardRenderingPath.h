@@ -7,5 +7,6 @@ class ForwardRenderingPath : public RenderGraph
 public:
 	using RenderGraph::RenderGraph;
 
-	void Setup() override final;
+protected:
+	void SetupRenderPasses() override final;
 };

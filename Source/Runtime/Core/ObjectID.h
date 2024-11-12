@@ -56,14 +56,6 @@ public:
 
 	constexpr bool operator!=(const TIndex Index) const { return m_Index != Index; }
 
-	struct Hasher
-	{
-		size_t operator()(const ObjectID& Value) const
-		{
-			return static_cast<size_t>(Value.Index());
-		}
-	};
-
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
@@ -110,4 +102,16 @@ private:
 };
 
 #define DECLARE_OBJECT_ID(ObjectType, IDType) using ObjectType##ID = ObjectID<class ObjectType, IDType>; using ObjectType##IDAllocator = ObjectIDAllocator<class ObjectType, IDType>;
+
+namespace std
+{
+	template<class TObject, class TIndex>
+	struct hash<ObjectID<TObject, TIndex>>
+	{
+		size_t operator()(const ObjectID<TObject>& ID) const
+		{
+			return std::hash<TIndex>(ID.GetIndex());
+		}
+	};
+}
 

@@ -21,8 +21,8 @@ void PreDepthPass::Compile()
 
 	auto GraphicsPipelineDesc = RHIGraphicsPipelineCreateInfo()
 		.SetDepthStencilState(DepthStencilState)
-		.SetShader(GenericVS())
-		.SetShader(DepthOnly());
+		.SetShader(GenericVS(), GraphicsSettings.RenderHardwareInterface)
+		.SetShader(DepthOnly(), GraphicsSettings.RenderHardwareInterface);
 
 	m_GraphicsPipeline = GetResourceManager().GetOrCreateGraphicsPipeline(GraphicsPipelineDesc);
 }

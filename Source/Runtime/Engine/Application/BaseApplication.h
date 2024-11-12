@@ -24,7 +24,6 @@ public:
 	class Window* GetAssociatedWindow() const { return m_Window.get(); }
 	const class ApplicationConfigurations& GetConfigurations() const;
 	const struct GraphicsSettings& GetGraphicsSettings() const;
-	class RHIInterface& GetRHI();
 
 	bool IsRequestingQuit() const;
 protected:

@@ -26,7 +26,7 @@ struct RHIGraphicsPipelineCreateInfo
 	inline RHIGraphicsPipelineCreateInfo& SetBlendState(const RHIBlendStateCreateInfo& InBlendState) { BlendState = InBlendState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetDepthStencilState(const RHIDepthStencilStateCreateInfo& InDepthStencilState) { DepthStencilState = InDepthStencilState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetMultisampleState(const RHIMultisampleStateCreateInfo& InMultisampleState) { MultisampleState = InMultisampleState; return *this; }
-	RHIGraphicsPipelineCreateInfo& SetShader(const class ShaderAsset& Shader);
+	RHIGraphicsPipelineCreateInfo& SetShader(const class ShaderAsset& Shader, ERenderHardwareInterface Interface);
 };
 
 struct RHIComputePipelineCreateInfo

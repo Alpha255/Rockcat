@@ -5,7 +5,7 @@
 #include "Engine/Rendering/RenderGraph/RenderPass/TranslucentPass.h"
 #include "Engine/Rendering/RenderGraph/RenderPass/BlitPass.h"
 
-void ForwardRenderingPath::Setup()
+void ForwardRenderingPath::SetupRenderPasses()
 {
 	AddPass<PreDepthPass>();
 }

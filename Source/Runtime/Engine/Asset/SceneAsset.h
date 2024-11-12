@@ -9,6 +9,7 @@ struct SceneData
 {
 	std::vector<std::shared_ptr<StaticMesh>> StaticMeshes;
 	std::vector<std::shared_ptr<MaterialAsset>> Materials;
+	std::vector<std::shared_ptr<class Camera>> m_Cameras;
 	std::vector<Math::Transform> Transforms;
 
 	template<class Archive>
@@ -30,13 +31,23 @@ public:
 	}
 
 	static const char* GetExtension() { return ".scene"; }
-	const SceneGraph* GetSceneGraph() const { return m_Graph.get(); }
-	const SceneData* GetSceneData() const { return m_Data.get(); }
+	const SceneGraph* GetGraph() const { return m_Graph.get(); }
+	const SceneData* GetData() const { return m_Data.get(); }
 
 	const StaticMesh* GetStaticMesh(uint32_t Index) const 
 	{ 
 		assert(Index < m_Data->StaticMeshes.size()); 
 		return m_Data->StaticMeshes[Index].get(); 
+	}
+
+	const StaticMesh* GetStaticMesh(const SceneGraph::NodeID& ID) const
+	{
+		auto& Node = m_Graph->GetNode(ID);
+		if (Node.IsStaticMesh())
+		{
+			return GetStaticMesh(Node.GetDataIndex());
+		}
+		return nullptr;
 	}
 
 	const Math::Transform* GetTransform(uint32_t Index) const

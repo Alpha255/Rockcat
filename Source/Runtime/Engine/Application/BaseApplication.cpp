@@ -187,8 +187,3 @@ bool BaseApplication::IsRequestingQuit() const
 {
 	return m_Window ? m_Window->IsDestroyed() : false;
 }
-
-RHIInterface& BaseApplication::GetRHI()
-{
-	return RenderService::Get().GetRHIInterface(m_Configs->GetGraphicsSettings().RenderHardwareInterface);
-}
