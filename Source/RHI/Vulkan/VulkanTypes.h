@@ -25,6 +25,7 @@ vk::SampleCountFlagBits GetSampleCount(ERHISampleCount SampleCount);
 vk::ImageViewType GetImageViewDimension(ERHITextureDimension Dimension);
 vk::DebugReportObjectTypeEXT GetDebugReportObjectType(vk::ObjectType Type);
 vk::CommandBufferLevel GetCommandBufferLevel(ERHICommandBufferLevel Level);
+vk::VertexInputRate GetInputRate(ERHIVertexInputRate InputRate);
 #if 0
 VkAttachmentLoadOp attachmentLoadOp(RenderPassDesc::EAttachmentLoadOp op);
 VkAttachmentStoreOp attachmentStoreOp(RenderPassDesc::EAttachmentStoreOp op);

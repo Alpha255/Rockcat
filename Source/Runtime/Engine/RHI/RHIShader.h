@@ -79,6 +79,11 @@ struct RHIShaderCreateInfo
 class RHIShader
 {
 public:
+	RHIShader(const RHIShaderCreateInfo& CreateInfo)
+		: m_Stage(CreateInfo.Stage)
+	{
+	}
+
 	ERHIShaderStage GetStage() const { return m_Stage; }
 private:
 	ERHIShaderStage m_Stage = ERHIShaderStage::Num;

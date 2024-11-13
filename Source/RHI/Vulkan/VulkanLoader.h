@@ -317,7 +317,7 @@ protected:
 };
 
 template<class VkObject>
-class VkHwResource : public VkDeviceResource<VkObject>, public RHIResource
+class VkHwResource : public VkDeviceResource<VkObject>
 {
 protected:
 	using BaseType = VkDeviceResource<VkObject>;
@@ -327,15 +327,13 @@ public:
 
 	VkHwResource(const class VulkanDevice& Device, const char* Name)
 		: VkDeviceResource<VkObject>(Device)
-		, RHIResource(Name)
 	{
 	}
 
-	void SetDebugName(const char* Name) override final
+	void SetObjectName(const char* Name)
 	{
 		assert(Name);
 		VkBaseDeviceResource::SetObjectName(VkObject::objectType, reinterpret_cast<uint64_t>((NativeType)BaseType::GetNative()), Name);
-		RHIResource::SetDebugName(Name);
 	}
 
 	virtual ~VkHwResource()

@@ -19,6 +19,6 @@ ShadowPass::ShadowPass(DAGNodeID ID, ResourceManager& ResourceMgr)
 		ID, 
 		GetShadowTechniqueName(RHIInterface::GetGraphicsSettings().ShadowTechnique),
 		ResourceMgr,
-		EGeometryPassFilter::ShadowCaster)
+		EGeometryPassFilter::ShadowCast)
 {
 }

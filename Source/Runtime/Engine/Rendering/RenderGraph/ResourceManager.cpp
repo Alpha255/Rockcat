@@ -3,7 +3,7 @@
 #include "Engine/Services/RenderService.h"
 
 ResourceManager::ResourceManager(const GraphicsSettings& GfxSettings, DirectedAcyclicGraph& Graph)
-	: m_RHIDevice(RenderService::Get().GetRHIInterface(GfxSettings.RenderHardwareInterface).GetDevice())
+	: m_RHIDevice(RenderService::Get().GetBackend(GfxSettings.RenderHardwareInterface).GetDevice())
 	, m_Graph(Graph)
 {
 }

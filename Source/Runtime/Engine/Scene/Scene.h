@@ -28,7 +28,7 @@ public:
 protected:
 	inline void SetDirty(bool Dirty) { m_Dirty = Dirty; }
 private:
-	bool m_Dirty = false;
+	bool m_Dirty = true;
 	std::set<const SceneGraph::Node*> m_VisibleNodes;
 	std::vector<SceneGraph::Node*> m_AddNodes;
 	std::vector<SceneGraph::Node*> m_RemoveOrHiddenNodes;

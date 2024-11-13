@@ -5,11 +5,11 @@
 
 void PreDepthPass::Compile()
 {
-	auto& GraphicsSettings = RHIInterface::GetGraphicsSettings();
+	auto& GfxSettings = RHIInterface::GetGraphicsSettings();
 
 	AddOutput("SceneDepth").CreateAsTexture()
-		.SetWidth(GraphicsSettings.Resolution.Width)
-		.SetHeight(GraphicsSettings.Resolution.Height)
+		.SetWidth(GfxSettings.Resolution.Width)
+		.SetHeight(GfxSettings.Resolution.Height)
 		.SetDimension(ERHITextureDimension::T_2D)
 		.SetFormat(ERHIFormat::D32_Float_S8_UInt)
 		.SetUsages(ERHIBufferUsageFlags::DepthStencil);
@@ -17,12 +17,10 @@ void PreDepthPass::Compile()
 	auto DepthStencilState = RHIDepthStencilStateCreateInfo()
 		.SetEnableDepth(true)
 		.SetEnableDepthWrite(true)
-		.SetDepthCompareFunc(GraphicsSettings.InverseDepth ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
+		.SetDepthCompareFunc(GfxSettings.InverseDepth ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
 
 	auto GraphicsPipelineDesc = RHIGraphicsPipelineCreateInfo()
 		.SetDepthStencilState(DepthStencilState)
-		.SetShader(GenericVS(), GraphicsSettings.RenderHardwareInterface)
-		.SetShader(DepthOnly(), GraphicsSettings.RenderHardwareInterface);
-
-	m_GraphicsPipeline = GetResourceManager().GetOrCreateGraphicsPipeline(GraphicsPipelineDesc);
+		.SetShader(GenericVS(), GfxSettings.RenderHardwareInterface)
+		.SetShader(DepthOnly(), GfxSettings.RenderHardwareInterface);
 }

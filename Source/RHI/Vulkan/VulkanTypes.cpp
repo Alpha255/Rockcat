@@ -393,6 +393,19 @@ vk::SampleCountFlagBits GetSampleCount(ERHISampleCount SampleCount)
 	}
 }
 
+vk::VertexInputRate GetInputRate(ERHIVertexInputRate InputRate)
+{
+	switch (InputRate)
+	{
+	case ERHIVertexInputRate::Vertex:
+		return vk::VertexInputRate::eVertex;
+	case ERHIVertexInputRate::Instance:
+		return vk::VertexInputRate::eInstance;
+	default:
+		return vk::VertexInputRate::eVertex;
+	}
+}
+
 #if 0
 VkAttachmentLoadOp attachmentLoadOp(RenderPassDesc::EAttachmentLoadOp op)
 {

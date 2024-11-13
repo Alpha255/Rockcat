@@ -13,10 +13,7 @@ public:
 	}
 
 	void Execute(class RHIDevice& Device, const RenderScene& Scene);
-
-	const RHIGraphicsPipeline* GetGraphicsPipeline() const { assert(m_GraphicsPipeline); return m_GraphicsPipeline.get(); }
 protected:
-	RHIGraphicsPipelinePtr m_GraphicsPipeline;
 private:
 	EGeometryPassFilter m_Filter;
 };

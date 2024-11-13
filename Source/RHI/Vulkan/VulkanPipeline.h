@@ -20,22 +20,15 @@ class VulkanPipeline : public VkHwResource<vk::Pipeline>
 public:
 	VulkanPipeline(const class VulkanDevice& Device);
 
-	virtual ~VulkanPipeline();
-
-//	VulkanDescriptor& Descriptor()
-//	{
-//		return m_Descriptor;
-//	}
-//protected:
-//	VulkanDescriptor m_Descriptor;
+	virtual ~VulkanPipeline() = default;
+protected:
+	std::shared_ptr<VulkanPipelineLayout> m_PipelineLayout;
 };
 
 class VulkanGraphicsPipeline final : public VulkanPipeline
 {
 public:
 	VulkanGraphicsPipeline(const class VulkanDevice& Device, vk::PipelineCache PipelineCache, const RHIGraphicsPipelineCreateInfo& CreateInfo);
-protected:
-private:
 };
 
 class VulkanComputePipeline final : public VulkanPipeline

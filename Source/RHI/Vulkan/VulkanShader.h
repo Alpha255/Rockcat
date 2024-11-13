@@ -8,29 +8,12 @@ public:
 	VulkanShader(const class VulkanDevice& Device, const RHIShaderCreateInfo& CreateInfo);
 };
 
-class VulkanInputLayout final : public RHIInputLayout
+class VulkanInputLayout final : public RHIInputLayout, public vk::PipelineVertexInputStateCreateInfo
 {
 public:
 	VulkanInputLayout(const RHIInputLayoutCreateInfo& CreateInfo);
 
-#if 0
-	VkPipelineVertexInputStateCreateInfo InputStateCreateInfo() const
-	{
-		assert(m_Bindings.size() && m_Attrs.size());
-
-		return VkPipelineVertexInputStateCreateInfo
-		{
-			VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-			nullptr,
-			0u,
-			static_cast<uint32_t>(m_Bindings.size()),
-			m_Bindings.data(),
-			static_cast<uint32_t>(m_Attrs.size()),
-			m_Attrs.data()
-		};
-	}
 private:
-	std::vector<VkVertexInputBindingDescription> m_Bindings;
-	std::vector<VkVertexInputAttributeDescription> m_Attrs;
-#endif
+	std::vector<vk::VertexInputBindingDescription> m_InputBindings;
+	std::vector<vk::VertexInputAttributeDescription> m_InputAttributes;
 };

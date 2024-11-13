@@ -10,7 +10,7 @@ public:
 
 	void OnShutdown() override final;
 
-	RHIInterface& GetRHIInterface(ERenderHardwareInterface RHIType) { return *m_RHIs[static_cast<size_t>(RHIType)]; }
+	RHIInterface& GetBackend(ERenderHardwareInterface RHIType) { return *m_RHIs[static_cast<size_t>(RHIType)]; }
 private:
 	void InitializeRHI(const GraphicsSettings& GfxSettings);
 

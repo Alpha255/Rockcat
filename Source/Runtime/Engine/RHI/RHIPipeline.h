@@ -4,13 +4,19 @@
 #include "Engine/RHI/RHIShader.h"
 #include "Engine/RHI/RHIRenderStates.h"
 
-struct RHIShaderVariableBinding
+struct RHIShaderResourceBinding
 {
 	ERHIShaderStage Stage = ERHIShaderStage::Num;
 	uint32_t Binding = 0u;
 	ERHIResourceType Type = ERHIResourceType::Unknown;
+
+	RHIResource* Resource = nullptr;
 };
-using RHIPipelineLayoutDesc = std::vector<RHIShaderVariableBinding>;
+using RHIShaderResourceBindings = std::vector<RHIShaderResourceBinding>;
+
+struct RHIShaderResourceContainer
+{
+};
 
 struct RHIGraphicsPipelineCreateInfo
 {
@@ -19,6 +25,7 @@ struct RHIGraphicsPipelineCreateInfo
 	RHIBlendStateCreateInfo BlendState;
 	RHIDepthStencilStateCreateInfo DepthStencilState;
 	RHIMultisampleStateCreateInfo MultisampleState;
+	RHIInputLayoutCreateInfo InputLayout;
 	std::array<RHIShaderCreateInfo, (size_t)ERHIShaderStage::Num> Shaders;
 
 	inline RHIGraphicsPipelineCreateInfo& SetPrimitiveTopology(ERHIPrimitiveTopology InTopology) { PrimitiveTopology = InTopology; return *this; }
@@ -189,7 +196,7 @@ private:
 class RHIDescriptorSet
 {
 public:
-	virtual void Commit(const RHIPipelineLayoutDesc& Desc) = 0;
+	virtual void Commit(const RHIShaderResourceBindings& CreateInfo) = 0;
 };
 
 #define ENABLE_SHADER_HOT_RELOAD 1

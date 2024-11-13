@@ -221,6 +221,8 @@ public:
 			CEREAL_NVP(m_Variables)
 		);
 	}
+
+	const std::map<std::string, ShaderVariable>& GetVariables() const { return m_Variables; }
 protected:
 	const ShaderCache& GetCache() const
 	{
@@ -236,7 +238,6 @@ protected:
 	}
 
 	static ERHIShaderStage GetStage(const std::filesystem::path& Path);
-	const std::map<std::string, ShaderVariable>& GetVariables() const { return m_Variables; }
 	std::map<std::string, ShaderVariable>& GetVariables() { return m_Variables; }
 private:
 	void GetDefaultDefines();

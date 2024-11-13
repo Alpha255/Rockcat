@@ -26,6 +26,7 @@ std::shared_ptr<RenderGraph> RenderGraph::Create(const GraphicsSettings& GfxSett
 RenderGraph::RenderGraph(const GraphicsSettings& GfxSettings)
 	: m_GfxSettings(GfxSettings)
 	, m_ResourceMgr(std::move(std::make_shared<ResourceManager>(GfxSettings, m_Graph)))
+	, m_RenderScene(std::move(std::make_shared<RenderScene>()))
 {
 }
 
@@ -44,9 +45,9 @@ void RenderGraph::Compile()
 
 void RenderGraph::Execute(const Scene& InScene)
 {
-	if (!m_RenderScene || InScene.IsDirty())
+	if (InScene.IsDirty())
 	{
-		m_RenderScene = std::make_shared<RenderScene>(InScene);
+		m_RenderScene->BuildMeshDrawCommands(InScene, m_GfxSettings.AsyncMeshDrawCommandsBuilding);
 	}
 
 	Compile();

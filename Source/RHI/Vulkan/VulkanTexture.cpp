@@ -126,7 +126,7 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 		//}
 	}
 
-	VkHwResource::SetDebugName(CreateInfo.Name.data());
+	VkHwResource::SetObjectName(CreateInfo.Name.c_str());
 }
 
 //

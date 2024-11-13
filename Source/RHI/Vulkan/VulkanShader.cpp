@@ -4,8 +4,9 @@
 
 VulkanShader::VulkanShader(const VulkanDevice& Device, const RHIShaderCreateInfo& CreateInfo)
 	: VkHwResource(Device)
+	, RHIShader(CreateInfo)
 {
-	assert(CreateInfo.Binary && CreateInfo.Binary->GetSize() && CreateInfo.Binary->GetSize() % sizeof(uint32_t) == 0);
+	assert(CreateInfo.Binary && CreateInfo.Binary->IsValid() && CreateInfo.Binary->GetSize() % sizeof(uint32_t) == 0);
 
 	auto vkCreateInfo = vk::ShaderModuleCreateInfo()
 		.setCodeSize(CreateInfo.Binary->GetSize())
@@ -13,39 +14,36 @@ VulkanShader::VulkanShader(const VulkanDevice& Device, const RHIShaderCreateInfo
 
 	VERIFY_VK(GetNativeDevice().createShaderModule(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
-	VkHwResource::SetDebugName(CreateInfo.Name.c_str());
+	VkHwResource::SetObjectName(CreateInfo.Name.c_str());
 }
 
-#if 0
-VulkanInputLayout::VulkanInputLayout(const InputLayoutDesc& Desc, const ShaderDesc& VertexShaderDesc)
+VulkanInputLayout::VulkanInputLayout(const RHIInputLayoutCreateInfo& CreateInfo)
 {
-	(void)VertexShaderDesc;
-
-	for (uint32_t BindingIndex = 0u; BindingIndex < Desc.Bindings.size(); ++BindingIndex)
+	for (uint32_t Index = 0u; Index < CreateInfo.Bindings.size(); ++Index)
 	{
-		VkVertexInputBindingDescription BindingDescription
-		{
-			Desc.Bindings[BindingIndex].Binding,
-			Desc.Bindings[BindingIndex].Stride,
-			Desc.Bindings[BindingIndex].InputRate == EVertexInputRate::Instance ?
-				VK_VERTEX_INPUT_RATE_INSTANCE : VK_VERTEX_INPUT_RATE_VERTEX
-		};
+		auto& BindingInfo = CreateInfo.Bindings[Index];
+		auto InputBinding = vk::VertexInputBindingDescription()
+			.setBinding(BindingInfo.Binding)
+			.setStride(BindingInfo.Stride)
+			.setInputRate(GetInputRate(BindingInfo.InputRate));
 
 		uint32_t Offset = 0u;
-		for (auto& Attribute : Desc.Bindings[BindingIndex].Attributes)
+		for (auto& AttributeInfo : BindingInfo.Attributes)
 		{
-			VkVertexInputAttributeDescription AttributeDesc
-			{
-				Attribute.Location,
-				BindingIndex,
-				VkType::Format(Attribute.Format),
-				Offset
-			};
-			m_Attrs.emplace_back(AttributeDesc);
+			auto InputAttribute = vk::VertexInputAttributeDescription()
+				.setLocation(AttributeInfo.Location)
+				.setFormat(GetFormat(AttributeInfo.Format))
+				.setOffset(Offset)
+				.setBinding(Index);
 
-			Offset += Attribute.Stride;
+			Offset += AttributeInfo.Stride;
+
+			m_InputAttributes.emplace_back(std::move(InputAttribute));
 		}
-		m_Bindings.emplace_back(BindingDescription);
+
+		m_InputBindings.emplace_back(std::move(InputBinding));
 	}
+
+	vk::PipelineVertexInputStateCreateInfo::setVertexBindingDescriptions(m_InputBindings)
+		.setVertexAttributeDescriptions(m_InputAttributes);
 }
-#endif

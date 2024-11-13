@@ -12,7 +12,7 @@ enum class ERenderingPath : uint8_t
 
 enum class ELightingPolicy : uint8_t
 {
-	None,
+	Default,
 	TiledBased,
 	ClusterBased,
 	StencilBased
@@ -108,9 +108,10 @@ struct GraphicsSettings
 	bool BatchResourceDataTransfer = false;
 	bool BatchResourceBarrier = false;
 	bool AsyncCommandlistSubmission = false;
+	bool AsyncMeshDrawCommandsBuilding = false;
 	bool InverseDepth = false;
 	ERenderingPath RenderingPath = ERenderingPath::ForwardRendering;
-	ELightingPolicy LightingPolicy = ELightingPolicy::None;
+	ELightingPolicy LightingPolicy = ELightingPolicy::Default;
 	EShadowTechnique ShadowTechnique = EShadowTechnique::None;
 	EAntiAliasingTechnique AntiAliasingTechnique = EAntiAliasingTechnique::None;
 	ERenderHardwareInterface RenderHardwareInterface = ERenderHardwareInterface::Num;
@@ -134,6 +135,7 @@ struct GraphicsSettings
 			CEREAL_NVP(BatchResourceDataTransfer),
 			CEREAL_NVP(BatchResourceBarrier),
 			CEREAL_NVP(AsyncCommandlistSubmission),
+			CEREAL_NVP(AsyncMeshDrawCommandsBuilding),
 			CEREAL_NVP(InverseDepth),
 			CEREAL_NVP(RenderingPath),
 			CEREAL_NVP(LightingPolicy),

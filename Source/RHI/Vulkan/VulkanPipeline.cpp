@@ -90,6 +90,7 @@ VulkanRenderPassPtr VkRenderStateCache::getOrCreateRenderPass(const RenderPassDe
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
+#include "RHI/Vulkan/VulkanShader.h"
 #include "Engine/Services/SpdLogService.h"
 
 VulkanPipelineCache::VulkanPipelineCache(const VulkanDevice& Device)
@@ -107,22 +108,21 @@ VulkanPipeline::VulkanPipeline(const VulkanDevice& Device)
 VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::PipelineCache PipelineCache, const RHIGraphicsPipelineCreateInfo& CreateInfo)
 	: VulkanPipeline(Device)
 {
+	std::vector<VulkanShader> Shaders;
 	std::vector<vk::PipelineShaderStageCreateInfo> ShaderStageCreateInfos;
-	//CreateInfo.Shaders.ForEach([&ShaderStageCreateInfos](RHIShader* Shader) {
-	//	ShaderStageCreateInfos.emplace_back(
-	//		vk::PipelineShaderStageCreateInfo().
-	//		{
-	//			VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-	//			nullptr,
-	//			0u,
-	//			VkType::ShaderStage(Shader->Stage()),
-	//			static_cast<VulkanShader*>(Shader)->Get(),
-	//			"main", /// #TODO
-	//			nullptr /// pSpecializationInfo
-	//		}
-	//	);
-	//});
-	//assert(ShaderStageCreateInfos.size() > 0u);
+	for (auto& ShaderCreateInfo : CreateInfo.Shaders)
+	{
+		if (ShaderCreateInfo.Binary)
+		{
+			auto& ShaderModule = Shaders.emplace_back(VulkanShader(Device, ShaderCreateInfo));
+			auto ShaderStageCreateInfo = vk::PipelineShaderStageCreateInfo()
+				.setStage(GetShaderStage(ShaderCreateInfo.Stage))
+				.setModule(ShaderModule.GetNative())
+				.setPName("main");
+			ShaderStageCreateInfos.emplace_back(std::move(ShaderStageCreateInfo));
+		}
+	}
+	assert(ShaderStageCreateInfos.size() > 0u);
 
 	auto RasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo()
 		.setDepthClampEnable(CreateInfo.RasterizationState.EnableDepthClamp)
@@ -167,19 +167,17 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 	std::vector<vk::PipelineColorBlendAttachmentState> ColorBlendAttachmentStates;
 	for (uint32_t AttachmentIndex = 0u; AttachmentIndex < ERHILimitations::MaxRenderTargets; ++AttachmentIndex)
 	{
-		//if (CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].Index == AttachmentIndex)
-		//{
-		//	ColorBlendAttachmentStates.emplace_back(
-		//		vk::PipelineColorBlendAttachmentState()
-		//		.setBlendEnable(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].Enable)
-		//		.setSrcColorBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].SrcColor))
-		//		.setDstColorBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].DstColor))
-		//		.setColorBlendOp(GetBlendOp(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].ColorOp))
-		//		.setSrcAlphaBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].SrcAlpha))
-		//		.setDstAlphaBlendFactor(GetBlendFactor(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].DstAlpha))
-		//		.setAlphaBlendOp(GetBlendOp(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].AlphaOp))
-		//		.setColorWriteMask(GetColorComponentFlags(CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex].ColorMask)));
-		//}
+		auto& BlendState = CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex];
+
+		ColorBlendAttachmentStates.emplace_back(vk::PipelineColorBlendAttachmentState()
+			.setBlendEnable(BlendState.Enable)
+			.setSrcColorBlendFactor(GetBlendFactor(BlendState.SrcColor))
+			.setDstColorBlendFactor(GetBlendFactor(BlendState.DstColor))
+			.setColorBlendOp(GetBlendOp(BlendState.ColorOp))
+			.setSrcAlphaBlendFactor(GetBlendFactor(BlendState.SrcAlpha))
+			.setDstAlphaBlendFactor(GetBlendFactor(BlendState.DstAlpha))
+			.setAlphaBlendOp(GetBlendOp(BlendState.AlphaOp))
+			.setColorWriteMask(GetColorComponentFlags(BlendState.ColorMask)));
 	}
 	auto BlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo()
 		.setLogicOpEnable(CreateInfo.BlendState.EnableLogicOp)
@@ -220,22 +218,15 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 	auto DynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
 		.setDynamicStates(DynamicStates);
 
-	vk::PipelineVertexInputStateCreateInfo InputStateCreateInfo;
-
-	//if (auto InputLayout = static_cast<const VulkanInputLayout*>(CreateInfo.InputLayout))
-	//{
-	//	InputStateCreateInfo = InputLayout->InputStateCreateInfo();
-	//}
+	auto InputState = VulkanInputLayout(CreateInfo.InputLayout);
 	
 	auto InputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo()
 		.setTopology(GetPrimitiveTopology(CreateInfo.PrimitiveTopology))
 		.setPrimitiveRestartEnable(false);
 
-	//m_Descriptor = m_Device->GetOrAllocateDescriptor(Desc);
-
 	auto vkCreateInfo = vk::GraphicsPipelineCreateInfo()
 		.setStages(ShaderStageCreateInfos)
-		.setPVertexInputState(&InputStateCreateInfo)
+		.setPVertexInputState(&InputState)
 		.setPInputAssemblyState(&InputAssemblyStateCreateInfo)
 		.setPTessellationState(&TessellationStateCreateInfo)
 		.setPViewportState(&ViewportStateCreateInfo)
@@ -249,15 +240,6 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 
 	/// #TODO Batch creations ???
 	VERIFY_VK(GetNativeDevice().createGraphicsPipelines(PipelineCache, 1u, &vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
-
-	//m_State = std::make_shared<VulkanGraphicsPipelineState>(Desc, m_Descriptor.DescriptorSet);
-}
-
-VulkanPipeline::~VulkanPipeline()
-{
-	//vkDestroyDescriptorSetLayout(m_Device->Get(), m_Descriptor.DescriptorSetLayout, VK_ALLOCATION_CALLBACKS);
-
-	//vkDestroyPipelineLayout(m_Device->Get(), m_Descriptor.PipelineLayout, VK_ALLOCATION_CALLBACKS);
 }
 
 #if 0
