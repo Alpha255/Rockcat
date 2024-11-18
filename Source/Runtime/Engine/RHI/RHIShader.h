@@ -47,11 +47,45 @@ struct RHIInputLayoutCreateInfo
 
 		inline RHIVertexInputBinding& AddAttribute(const RHIVertexAttribute& Attribute)
 		{
+			assert(Attribute.Stride);
 			Stride += Attribute.Stride;
 			Attributes.emplace_back(Attribute);
 			return *this;
 		}
+
+		template<class T>
+		inline RHIVertexInputBinding& AddAttribute(uint32_t InLocation, T InStride, ERHIFormat InFormat, const char* InUsage)
+		{
+			Stride += static_cast<uint32_t>(InStride);
+			Attributes.emplace_back(RHIVertexAttribute
+				{
+					InLocation,
+					static_cast<uint32_t>(InStride),
+					InFormat,
+					std::string(InUsage)
+				});
+			return *this;
+		}
 	};
+
+	inline RHIInputLayoutCreateInfo& AddBinding(const RHIVertexInputBinding& InputBinding)
+	{
+		assert(InputBinding.Binding < ERHILimitations::MaxVertexStreams);
+		Bindings.emplace_back(InputBinding);
+		return *this;
+	}
+
+	template<class T>
+	inline RHIVertexInputBinding& AddBinding(uint32_t InBinding, T InStride, ERHIVertexInputRate InInputRate)
+	{
+		assert(InBinding < ERHILimitations::MaxVertexStreams);
+		return Bindings.emplace_back(RHIVertexInputBinding
+			{
+				InBinding,
+				static_cast<uint32_t>(InStride),
+				InInputRate
+			});
+	}
 
 	std::vector<RHIVertexInputBinding> Bindings;
 };

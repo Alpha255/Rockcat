@@ -174,6 +174,8 @@ struct MeshData : public MeshProperty
 	}
 
 	RHIInputLayoutCreateInfo GetInputLayoutCreateInfo() const;
+	static RHIInputLayoutCreateInfo GetInputLayoutCreateInfo(EVertexAttributes Attributes);
+	static RHIInputLayoutCreateInfo GetPackedInputLayoutCreateInfo(EVertexAttributes Attributes);
 
 	template<class Vector>
 	inline void SetPackedData(uint32_t Index, size_t Offset, const Vector& Value)
