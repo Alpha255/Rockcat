@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/RHI/RHIRenderStates.h"
-#include "Engine/RHI/RHIImage.h"
+#include "Engine/RHI/RHITexture.h"
 
 template<class RHIResource>
 class RHIStaticResource : public RHIResource

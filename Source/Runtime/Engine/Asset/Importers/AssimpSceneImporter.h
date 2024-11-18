@@ -307,6 +307,7 @@ private:
 				Mesh->mNumVertices,
 				Mesh->mNumFaces * 3u,
 				Mesh->mNumFaces,
+				Mesh->HasNormals(),
 				Mesh->HasTangentsAndBitangents(),
 				Mesh->HasTextureCoords(0u),
 				Mesh->HasTextureCoords(1u),
@@ -321,40 +322,40 @@ private:
 				MeshDataBlock.SetFace(FaceIndex, Face.mIndices[0], Face.mIndices[1], Face.mIndices[2]);
 			}
 
-			for (uint32_t VIndex = 0u; VIndex < Mesh->mNumVertices; ++VIndex)
+			for (uint32_t VertexIndex = 0u; VertexIndex < Mesh->mNumVertices; ++VertexIndex)
 			{
-				const auto& Position = Mesh->mVertices[VIndex];
-				MeshDataBlock.SetPosition(VIndex, Math::Vector3(Position.x, Position.y, Position.z));
+				const auto& Position = Mesh->mVertices[VertexIndex];
+				MeshDataBlock.SetPosition(VertexIndex, Math::Vector3(Position.x, Position.y, Position.z));
 
 				if (Mesh->HasNormals())
 				{
-					const auto& Normal = Mesh->mNormals[VIndex];
-					MeshDataBlock.SetNormal(VIndex, Math::Vector3(Normal.x, Normal.y, Normal.z));
+					const auto& Normal = Mesh->mNormals[VertexIndex];
+					MeshDataBlock.SetNormal(VertexIndex, Math::Vector3(Normal.x, Normal.y, Normal.z));
 				}
 				if (Mesh->HasTangentsAndBitangents())
 				{
-					const auto& Tangent = Mesh->mTangents[VIndex];
-					MeshDataBlock.SetTangent(VIndex, Math::Vector3(Tangent.x, Tangent.y, Tangent.z));
+					const auto& Tangent = Mesh->mTangents[VertexIndex];
+					MeshDataBlock.SetTangent(VertexIndex, Math::Vector3(Tangent.x, Tangent.y, Tangent.z));
 
-					const auto& Bitangent = Mesh->mBitangents[VIndex];
-					MeshDataBlock.SetBitangent(VIndex, Math::Vector3(Bitangent.x, Bitangent.y, Bitangent.z));
+					const auto& Bitangent = Mesh->mBitangents[VertexIndex];
+					MeshDataBlock.SetBitangent(VertexIndex, Math::Vector3(Bitangent.x, Bitangent.y, Bitangent.z));
 				}
 
 				if (Mesh->HasTextureCoords(0u))
 				{
-					const auto& UV = Mesh->mTextureCoords[0u][VIndex];
-					MeshDataBlock.SetUV0(VIndex, Math::Vector3(UV.x, UV.y, UV.z));
+					const auto& UV = Mesh->mTextureCoords[0u][VertexIndex];
+					MeshDataBlock.SetUV0(VertexIndex, Math::Vector3(UV.x, UV.y, UV.z));
 				}
 				if (Mesh->HasTextureCoords(1))
 				{
-					const auto& UV = Mesh->mTextureCoords[1u][VIndex];
-					MeshDataBlock.SetUV0(VIndex, Math::Vector3(UV.x, UV.y, UV.z));
+					const auto& UV = Mesh->mTextureCoords[1u][VertexIndex];
+					MeshDataBlock.SetUV0(VertexIndex, Math::Vector3(UV.x, UV.y, UV.z));
 				}
 
 				if (Mesh->HasVertexColors(0u))
 				{
-					const auto& Color = Mesh->mColors[0u][VIndex];
-					MeshDataBlock.SetColor(VIndex, Math::Color(Color.r, Color.g, Color.b, Color.a));
+					const auto& Color = Mesh->mColors[0u][VertexIndex];
+					MeshDataBlock.SetColor(VertexIndex, Math::Color(Color.r, Color.g, Color.b, Color.a));
 				}
 			}
 

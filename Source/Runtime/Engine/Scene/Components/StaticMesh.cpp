@@ -9,4 +9,9 @@ StaticMesh::StaticMesh(const MeshData& Data, MaterialID Material)
 	: MeshProperty(Data)
 	, m_Material(Material)
 {
+	CrateRHIBuffers(Data);
+}
+
+void StaticMesh::CrateRHIBuffers(const MeshData& Data)
+{
 }
