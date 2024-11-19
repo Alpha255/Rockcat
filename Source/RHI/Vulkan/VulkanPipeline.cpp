@@ -110,10 +110,15 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 {
 	std::vector<VulkanShader> Shaders;
 	std::vector<vk::PipelineShaderStageCreateInfo> ShaderStageCreateInfos;
-	for (auto& ShaderCreateInfo : CreateInfo.Shaders)
+	for (auto Shader : CreateInfo.Shaders)
 	{
-		if (ShaderCreateInfo.Binary)
+		if (Shader)
 		{
+			auto ShaderCreateInfo = RHIShaderCreateInfo()
+				.SetStage(Shader->GetStage())
+				.SetShaderBinary(Shader->GetBinary(ERenderHardwareInterface::Vulkan))
+				.SetName(Shader->GetName().string());
+
 			auto& ShaderModule = Shaders.emplace_back(VulkanShader(Device, ShaderCreateInfo));
 			auto ShaderStageCreateInfo = vk::PipelineShaderStageCreateInfo()
 				.setStage(GetShaderStage(ShaderCreateInfo.Stage))

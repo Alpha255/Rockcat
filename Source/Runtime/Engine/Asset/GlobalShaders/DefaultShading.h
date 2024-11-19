@@ -84,6 +84,20 @@ public:
 	}
 };
 
+class GenericShadow : public ShaderAsset
+{
+public:
+	GenericShadow() : ShaderAsset("GenericShadow.frag") {}
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(ShaderAsset)
+		);
+	}
+};
+
 class MaterialUnlit : public Material<GenericVS, DefaultUnlit, MaterialUnlit>
 {
 public:

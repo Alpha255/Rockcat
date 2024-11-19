@@ -3,6 +3,7 @@
 #include "Engine/RHI/RHIBuffer.h"
 #include "Engine/RHI/RHIShader.h"
 #include "Engine/RHI/RHIRenderStates.h"
+#include "Engine/Asset/ShaderAsset.h"
 
 struct RHIShaderResourceBinding
 {
@@ -26,14 +27,14 @@ struct RHIGraphicsPipelineCreateInfo
 	RHIDepthStencilStateCreateInfo DepthStencilState;
 	RHIMultisampleStateCreateInfo MultisampleState;
 	RHIInputLayoutCreateInfo InputLayout;
-	std::array<RHIShaderCreateInfo, (size_t)ERHIShaderStage::Num> Shaders;
+	std::array<const ShaderAsset*, (size_t)ERHIShaderStage::Num> Shaders;
 
 	inline RHIGraphicsPipelineCreateInfo& SetPrimitiveTopology(ERHIPrimitiveTopology InTopology) { PrimitiveTopology = InTopology; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetRasterizationState(const RHIRasterizationStateCreateInfo& InRasterizationState) { RasterizationState = InRasterizationState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetBlendState(const RHIBlendStateCreateInfo& InBlendState) { BlendState = InBlendState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetDepthStencilState(const RHIDepthStencilStateCreateInfo& InDepthStencilState) { DepthStencilState = InDepthStencilState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetMultisampleState(const RHIMultisampleStateCreateInfo& InMultisampleState) { MultisampleState = InMultisampleState; return *this; }
-	RHIGraphicsPipelineCreateInfo& SetShader(const class ShaderAsset& Shader, ERenderHardwareInterface Interface);
+	inline RHIGraphicsPipelineCreateInfo& SetShader(const ShaderAsset* Shader) { Shaders[static_cast<size_t>(Shader->GetStage())] = Shader; return *this; }
 };
 
 struct RHIComputePipelineCreateInfo
@@ -308,9 +309,12 @@ inline size_t ComputeHash(const RHIGraphicsPipelineCreateInfo& Desc)
 		ComputeHash(Desc.BlendState),
 		ComputeHash(Desc.DepthStencilState),
 		ComputeHash(Desc.MultisampleState));
-	for (uint32_t Index = 0u; Index < Desc.Shaders.size(); ++Index)
+	for (auto Shader : Desc.Shaders)
 	{
-		HashCombine(Hash, Desc.Shaders[Index].Stage, Desc.Shaders[Index].Name, Desc.Shaders[Index].Binary);
+		if (Shader)
+		{
+			HashCombine(Hash, Shader);
+		}
 	}
 	return Hash;
 }
