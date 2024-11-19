@@ -14,6 +14,8 @@ public:
 
 	RHIDevice& GetDevice() override final;
 
+	static const GraphicsSettings& GetGraphicsSettings() { return RHIInterface::GetGraphicsSettings(ERenderHardwareInterface::Vulkan); }
+
 	static const struct VulkanLayerExtensionConfigurations& GetLayerExtensionConfigs() { return *s_LayerExtensionConfigs; }
 protected:
 	void InitializeGraphicsDevices() override final;

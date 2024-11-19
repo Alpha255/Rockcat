@@ -17,7 +17,7 @@ const char* GetShadowTechniqueName(EShadowTechnique Technique)
 ShadowPass::ShadowPass(DAGNodeID ID, ResourceManager& ResourceMgr)
 	: GeometryPass(
 		ID, 
-		GetShadowTechniqueName(RHIInterface::GetGraphicsSettings().ShadowTechnique),
+		"ShadowPass",
 		ResourceMgr,
 		EGeometryPassFilter::ShadowCast)
 {

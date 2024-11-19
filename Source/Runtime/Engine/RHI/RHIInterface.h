@@ -16,18 +16,18 @@
 class RHIInterface
 {
 public:
-	RHIInterface(const GraphicsSettings* GfxSettings)
-	{
-		assert(GfxSettings);
-		s_GraphicsSettings = GfxSettings;
-	}
+	RHIInterface(const GraphicsSettings* GfxSettings);
 
 	virtual ~RHIInterface() = default;
 
 	virtual ERenderHardwareInterface GetRHIType() const { return ERenderHardwareInterface::Num; }
 
+	const char* GetName() const { return GetRHIName(GetRHIType()); }
+
+	virtual RHIDevice& GetDevice() = 0;
+
 	static const char* GetRHIName(ERenderHardwareInterface RHI)
-	{ 
+	{
 		switch (RHI)
 		{
 		case ERenderHardwareInterface::Software: return "Software";
@@ -35,16 +35,12 @@ public:
 		case ERenderHardwareInterface::D3D11: return "D3D11";
 		case ERenderHardwareInterface::D3D12: return "D3D12";
 		default: return "None";
-		} 
+		}
 	}
-
-	static const GraphicsSettings& GetGraphicsSettings() { assert(s_GraphicsSettings); return *s_GraphicsSettings; }
-
-	const char* GetName() const { return GetRHIName(GetRHIType()); }
-
-	virtual RHIDevice& GetDevice() = 0;
 protected:
 	virtual void InitializeGraphicsDevices() = 0;
+
+	static const GraphicsSettings& GetGraphicsSettings(ERenderHardwareInterface Interface);
 private:
-	static const GraphicsSettings* s_GraphicsSettings;
+	static std::array<const GraphicsSettings*, (size_t)ERenderHardwareInterface::Num> s_GraphicsSettings;
 };

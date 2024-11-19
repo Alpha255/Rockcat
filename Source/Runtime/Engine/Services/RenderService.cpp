@@ -10,19 +10,20 @@ void RenderService::InitializeRHI(const GraphicsSettings& GfxSettings)
 
 	if (!m_RHIs[(size_t)GfxSettings.RenderHardwareInterface])
 	{
+		const char* RHIName = RHIInterface::GetRHIName(GfxSettings.RenderHardwareInterface);
 		switch (GfxSettings.RenderHardwareInterface)
 		{
 		case ERenderHardwareInterface::Software:
-			LOG_ERROR("{} is not support yet!", RHIInterface::GetRHIName(ERenderHardwareInterface::Software));
+			LOG_ERROR("{} is not support yet!", RHIName);
 			break;
 		case ERenderHardwareInterface::Vulkan:
 			m_RHIs[(size_t)ERenderHardwareInterface::Vulkan] = std::make_unique<VulkanRHI>(&GfxSettings);
 			break;
 		case ERenderHardwareInterface::D3D11:
-			LOG_ERROR("{} is not support yet!", RHIInterface::GetRHIName(ERenderHardwareInterface::D3D11));
+			LOG_ERROR("{} is not support yet!", RHIName);
 			break;
 		case ERenderHardwareInterface::D3D12:
-			LOG_ERROR("{} is not support yet!", RHIInterface::GetRHIName(ERenderHardwareInterface::D3D12));
+			LOG_ERROR("{} is not support yet!", RHIName);
 			break;
 		}
 	}

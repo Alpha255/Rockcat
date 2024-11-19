@@ -1,7 +1,7 @@
 #include "RHI/Vulkan/VulkanTexture.h"
 #include "RHI/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanRHI.h"
 #include "Engine/Services/SpdLogService.h"
-#include "Engine/RHI/RHIInterface.h"
 
 VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateInfo& CreateInfo, vk::Image Image)
 	: VkHwResource(Device)
@@ -100,7 +100,7 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 			.setInitialLayout(vk::ImageLayout::eUndefined);
 		VERIFY_VK(GetNativeDevice().createImage(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
-		if (RHIInterface::GetGraphicsSettings().BatchResourceDataTransfer)
+		if (VulkanRHI::GetGraphicsSettings().BatchResourceDataTransfer)
 		{
 		}
 		else
