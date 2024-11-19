@@ -83,7 +83,7 @@ struct MeshProperty
 	}
 
 private:
-	virtual void CrateRHIBuffers(const struct MeshData& Data) {}
+	virtual void CrateRHIBuffers(const struct MeshData&) {}
 };
 
 struct MeshData : public MeshProperty
@@ -102,8 +102,7 @@ struct MeshData : public MeshProperty
 		size_t Stride = 0u;
 		Stride += Align(sizeof(Math::Vector3), alignof(Math::Vector4)); // Position
 		Stride += HasNormal() ? Align(sizeof(Math::Vector3), alignof(Math::Vector4)) : 0u; // Normal
-		Stride += HasTangent() ? Align(sizeof(Math::Vector3), alignof(Math::Vector4)) : 0u; // Tangent
-		Stride += HasTangent() ? Align(sizeof(Math::Vector3), alignof(Math::Vector4)) : 0u; // BiTangent
+		Stride += HasTangent() ? Align(sizeof(Math::Vector3) + sizeof(Math::Vector3), alignof(Math::Vector4)) : 0u; // Tangent and BiTangent
 		Stride += HasUV0() ? Align(sizeof(Math::Vector3), alignof(Math::Vector4)) : 0u; // UV0
 		Stride += HasUV1() ? Align(sizeof(Math::Vector3), alignof(Math::Vector4)) : 0u; // UV1
 		Stride += HasColor() ? Align(sizeof(Math::Color), alignof(Math::Color)) : 0u; // Color
@@ -133,7 +132,7 @@ struct MeshData : public MeshProperty
 	inline void SetBitangent(uint32_t Index, const Math::Vector3& Bitangent) 
 	{ 
 		assert(HasTangent());
-		SetPackedData(Index, GetBitangentOffset(), Bitangent);
+		SetPackedData(Index, GetBiTangentOffset(), Bitangent);
 		SetData<Math::Vector3, sizeof(Math::Vector3) * 2u>(Index, TangentData, Bitangent, sizeof(Math::Vector3));
 	}
 	inline void SetUV0(uint32_t Index, const Math::Vector3& UV) 
@@ -192,8 +191,8 @@ struct MeshData : public MeshProperty
 	constexpr size_t GetPositionOffset() const { return 0u; }
 	constexpr size_t GetNormalOffset() const { return GetPositionOffset() + Align(sizeof(Math::Vector3), alignof(Math::Vector4)); }
 	constexpr size_t GetTangentOffset() const { return GetNormalOffset() + Align(sizeof(Math::Vector3), alignof(Math::Vector4)); }
-	constexpr size_t GetBitangentOffset() const { return GetTangentOffset() + Align(sizeof(Math::Vector3), alignof(Math::Vector4)); }
-	constexpr size_t GetUV0Offset() const { return HasTangent() ? (GetBitangentOffset() + Align(sizeof(Math::Vector3), alignof(Math::Vector4))) : GetTangentOffset(); }
+	constexpr size_t GetBiTangentOffset() const { return GetTangentOffset() + Align(sizeof(Math::Vector3), alignof(Math::Vector4)); }
+	constexpr size_t GetUV0Offset() const { return HasTangent() ? (GetBiTangentOffset() + Align(sizeof(Math::Vector3), alignof(Math::Vector4))) : GetTangentOffset(); }
 	constexpr size_t GetUV1Offset() const { return HasUV0() ? (GetUV0Offset() + Align(sizeof(Math::Vector3), alignof(Math::Vector4))) : GetUV0Offset(); }
 	constexpr size_t GetColorOffset() const { return GetUV1Offset() + Align(sizeof(Math::Color), alignof(Math::Color)); }
 
