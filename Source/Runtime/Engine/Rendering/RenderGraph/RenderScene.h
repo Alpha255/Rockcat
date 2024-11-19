@@ -4,6 +4,7 @@
 #include "Engine/RHI/RHIRenderStates.h"
 #include "Engine/RHI/RHIPipeline.h"
 #include "Engine/View/View.h"
+#include "Engine/Asset/MaterialAsset.h"
 
 enum class EGeometryPassFilter
 {
@@ -16,9 +17,9 @@ enum class EGeometryPassFilter
 
 struct VertexStream
 {
-	uint16_t Index = 0;
+	uint16_t Location = 0;
 	uint16_t Offset = 0u;
-	const RHIBuffer* VertexBuffer = nullptr;
+	const RHIBuffer* Buffer = nullptr;
 };
 
 struct GraphicsPipelineKey
@@ -33,14 +34,14 @@ struct MeshDrawCommand
 	std::vector<VertexStream> VertexStreams;
 	const RHIBuffer* IndexBuffer = nullptr;
 
-	const class MaterialAsset* Material = nullptr;
-
 	GraphicsPipelineKey GfxPipelineKey;
 
 	uint32_t FirstIndex = 0u;
 	uint32_t NumPrimitives = 0u;
 	uint32_t NumIndex = 0u;
 	uint32_t NumInstances = 1u;
+	
+	MaterialID Material;
 
 	ERHIIndexFormat IndexFormat = ERHIIndexFormat::UInt16;
 	ERHIPrimitiveTopology PrimitiveTopology = ERHIPrimitiveTopology::TriangleList;
@@ -60,27 +61,34 @@ struct MeshDrawCommand
 		} IndirectArgs;
 	};
 
-	MeshDrawCommand(const class StaticMesh& Mesh, const class MaterialAsset* InMaterial, class GeometryPassGraphicsPipelineBuilder* PipelineBuilder);
+	MeshDrawCommand(const class StaticMesh& Mesh);
+
+	inline void AddVertexStream(uint16_t Location, uint16_t Offset, const RHIBuffer* Buffer)
+	{
+		assert(Buffer);
+		VertexStreams.emplace_back(VertexStream{ Location, Offset, Buffer });
+	}
 };
 
-class GeometryPassGraphicsPipelineBuilder
+class GeometryPassMeshDrawCommandBuilder
 {
 public:
-	virtual void Build(MeshDrawCommand& Command) = 0;
+	virtual MeshDrawCommand Build(const class StaticMesh& Mesh, const class Scene& InScene) = 0;
 };
 
 class RenderScene
 {
 public:
-	RenderScene();
+	RenderScene(const GraphicsSettings& GfxSettings);
 
-	void BuildMeshDrawCommands(const class Scene& InScene, bool AsyncBuilding);
+	void BuildMeshDrawCommands(const class Scene& InScene);
 
 	const std::vector<MeshDrawCommand>& GetMeshDrawCommands(EGeometryPassFilter MeshPass) const { return m_MeshDrawCommands[(size_t)MeshPass]; }
-	const std::vector<std::shared_ptr<IView>>& GetViews() const;
+	const std::vector<std::shared_ptr<IView>>& GetViews() const { return m_Views; }
 protected:
 private:
 	std::array<std::vector<MeshDrawCommand>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommands;
-	std::array<std::unique_ptr<GeometryPassGraphicsPipelineBuilder>, (size_t)EGeometryPassFilter::Num> m_PipelineBuilders;
+	std::array<std::unique_ptr<GeometryPassMeshDrawCommandBuilder>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommandBuilders;
+	const GraphicsSettings& m_GfxSettings;
 	mutable std::vector<std::shared_ptr<IView>> m_Views;
 };

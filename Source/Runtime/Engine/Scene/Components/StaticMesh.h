@@ -14,7 +14,8 @@ enum class EVertexAttributes : uint8_t
 	Tangent = 1 << 2,
 	UV0 = 1 << 3,
 	UV1 = 1 << 4,
-	Color = 1 << 5
+	Color = 1 << 5,
+	Num = 6
 };
 ENUM_FLAG_OPERATORS(EVertexAttributes);
 
@@ -81,36 +82,16 @@ struct MeshProperty
 			CEREAL_NVP(BoundingSphere)
 		);
 	}
-
-private:
-	virtual void CrateRHIBuffers(const struct MeshData&) {}
 };
 
 struct MeshData : public MeshProperty
 {
 	MeshData(uint32_t InNumVertex, uint32_t InNumIndex, uint32_t InNumPrimitive, bool InHasNormal, bool InHasTangent,
 		bool InHasUV0, bool InHasUV1, bool InHasColor, ERHIPrimitiveTopology InPrimitiveTopology,
-		const Math::AABB& InBoundingBox)
-		: MeshProperty(
-			InNumVertex, InNumIndex, InNumPrimitive, InHasNormal, InHasTangent, 
-			InHasUV0, InHasUV1, InHasColor,
-			InNumVertex >= std::numeric_limits<uint16_t>::max() ? ERHIIndexFormat::UInt32 : ERHIIndexFormat::UInt16,
-			InPrimitiveTopology, InBoundingBox)
-	{
-		assert(NumVertex && NumIndex && NumPrimitive);
+		const Math::AABB& InBoundingBox);
 
-		size_t Stride = 0u;
-		Stride += Align(sizeof(Math::Vector3), alignof(Math::Vector4)); // Position
-		Stride += HasNormal() ? Align(sizeof(Math::Vector3), alignof(Math::Vector4)) : 0u; // Normal
-		Stride += HasTangent() ? Align(sizeof(Math::Vector3) + sizeof(Math::Vector3), alignof(Math::Vector4)) : 0u; // Tangent and BiTangent
-		Stride += HasUV0() ? Align(sizeof(Math::Vector3), alignof(Math::Vector4)) : 0u; // UV0
-		Stride += HasUV1() ? Align(sizeof(Math::Vector3), alignof(Math::Vector4)) : 0u; // UV1
-		Stride += HasColor() ? Align(sizeof(Math::Color), alignof(Math::Color)) : 0u; // Color
-		PackedVertexStride = static_cast<uint32_t>(Stride);
-
-		PackedVerticesData.reset(new uint8_t[NumVertex * PackedVertexStride]());
-		IndicesData.reset(new uint8_t[NumIndex * static_cast<size_t>(IndexFormat)]());
-	}
+	MeshData(const MeshData&) = default;
+	MeshData& operator=(const MeshData&) = default;
 
 	inline void SetPosition(uint32_t Index, const Math::Vector3& Position)
 	{
@@ -127,13 +108,13 @@ struct MeshData : public MeshProperty
 	{
 		assert(HasTangent());
 		SetPackedData(Index, GetTangentOffset(), Tangent);
-		SetData<Math::Vector3, sizeof(Math::Vector3) * 2u>(Index, TangentData, Tangent);
+		SetData<Math::Vector3, TangentAndBiTangentStride>(Index, TangentData, Tangent);
 	}
 	inline void SetBitangent(uint32_t Index, const Math::Vector3& Bitangent) 
 	{ 
 		assert(HasTangent());
 		SetPackedData(Index, GetBiTangentOffset(), Bitangent);
-		SetData<Math::Vector3, sizeof(Math::Vector3) * 2u>(Index, TangentData, Bitangent, sizeof(Math::Vector3));
+		SetData<Math::Vector3, TangentAndBiTangentStride>(Index, TangentData, Bitangent, TangentStride);
 	}
 	inline void SetUV0(uint32_t Index, const Math::Vector3& UV) 
 	{
@@ -173,8 +154,8 @@ struct MeshData : public MeshProperty
 	}
 
 	RHIInputLayoutCreateInfo GetInputLayoutCreateInfo() const;
-	static RHIInputLayoutCreateInfo GetInputLayoutCreateInfo(EVertexAttributes Attributes);
-	static RHIInputLayoutCreateInfo GetPackedInputLayoutCreateInfo(EVertexAttributes Attributes);
+	static RHIInputLayoutCreateInfo GetInputLayoutCreateInfo(EVertexAttributes Attributes, ERHIVertexInputRate InputRate = ERHIVertexInputRate::Vertex);
+	static RHIInputLayoutCreateInfo GetPackedInputLayoutCreateInfo(EVertexAttributes Attributes, ERHIVertexInputRate InputRate = ERHIVertexInputRate::Vertex);
 
 	template<class Vector>
 	inline void SetPackedData(uint32_t Index, size_t Offset, const Vector& Value)
@@ -183,58 +164,75 @@ struct MeshData : public MeshProperty
 	}
 
 	template<class Vector, size_t Stride = sizeof(Vector)>
-	inline void SetData(uint32_t Index, std::unique_ptr<uint8_t>& Data, const Vector& Value, size_t Offset = 0u)
+	inline void SetData(uint32_t Index, std::shared_ptr<uint8_t>& Data, const Vector& Value, size_t Offset = 0u)
 	{
 		*(reinterpret_cast<Vector*>(Data.get() + Index * Stride + Offset)) = Value;
 	}
 
+	static const size_t PositionStride = sizeof(Math::Vector3);
+	static const size_t NormalStride = sizeof(Math::Vector3);
+	static const size_t TangentStride = sizeof(Math::Vector3);
+	static const size_t TangentAndBiTangentStride = sizeof(Math::Vector3) * 2u;
+	static const size_t UVStride = sizeof(Math::Vector3);
+	static const size_t ColorStride = sizeof(Math::Color);
+	static const size_t AlignOf = alignof(Math::Vector4);
+
+	static_assert(AlignOf == sizeof(float));
+
 	constexpr size_t GetPositionOffset() const { return 0u; }
-	constexpr size_t GetNormalOffset() const { return GetPositionOffset() + Align(sizeof(Math::Vector3), alignof(Math::Vector4)); }
-	constexpr size_t GetTangentOffset() const { return GetNormalOffset() + Align(sizeof(Math::Vector3), alignof(Math::Vector4)); }
-	constexpr size_t GetBiTangentOffset() const { return GetTangentOffset() + Align(sizeof(Math::Vector3), alignof(Math::Vector4)); }
-	constexpr size_t GetUV0Offset() const { return HasTangent() ? (GetBiTangentOffset() + Align(sizeof(Math::Vector3), alignof(Math::Vector4))) : GetTangentOffset(); }
-	constexpr size_t GetUV1Offset() const { return HasUV0() ? (GetUV0Offset() + Align(sizeof(Math::Vector3), alignof(Math::Vector4))) : GetUV0Offset(); }
-	constexpr size_t GetColorOffset() const { return GetUV1Offset() + Align(sizeof(Math::Color), alignof(Math::Color)); }
+	constexpr size_t GetNormalOffset() const { return GetPositionOffset() + PositionStride; }
+	constexpr size_t GetTangentOffset() const { return HasNormal() ? (GetNormalOffset() + NormalStride) : GetNormalOffset(); }
+	constexpr size_t GetBiTangentOffset() const { return GetTangentOffset() + TangentStride; }
+	constexpr size_t GetUV0Offset() const { return HasTangent() ? (GetBiTangentOffset() + TangentStride) : GetTangentOffset(); }
+	constexpr size_t GetUV1Offset() const { return HasUV0() ? (GetUV0Offset() + UVStride) : GetUV0Offset(); }
+	constexpr size_t GetColorOffset() const { return GetUV1Offset() + UVStride; }
 
-	std::unique_ptr<uint8_t> PackedVerticesData;
-	std::unique_ptr<uint8_t> PositionData;
-	std::unique_ptr<uint8_t> NormalData;
-	std::unique_ptr<uint8_t> TangentData;
-	std::unique_ptr<uint8_t> UV0Data;
-	std::unique_ptr<uint8_t> UV1Data;
-	std::unique_ptr<uint8_t> ColorData;
+	void ClearData();
 
-	std::unique_ptr<uint8_t> IndicesData;
+	virtual void CreateRHIBuffers(class RHIDevice&) {}
+
+	std::shared_ptr<uint8_t> PackedVerticesData;
+	std::shared_ptr<uint8_t> PositionData;
+	std::shared_ptr<uint8_t> NormalData;
+	std::shared_ptr<uint8_t> TangentData;
+	std::shared_ptr<uint8_t> UV0Data;
+	std::shared_ptr<uint8_t> UV1Data;
+	std::shared_ptr<uint8_t> ColorData;
+
+	std::shared_ptr<uint8_t> IndicesData;
+
+	RHIBufferPtr RHIPackedVertexBuffer;
+	RHIBufferPtr RHIIndexBuffer;
+	std::array<RHIBufferPtr, (size_t)EVertexAttributes::Num> RHIVertexBuffers;
 };
 
-class StaticMesh : private MeshProperty
+class StaticMesh : private MeshData
 {
 public:
-	StaticMesh() = default;
-
 	StaticMesh(const MeshData& Data, MaterialID Material);
 
-	uint32_t GetNumVertex() const { return NumVertex; }
-	uint32_t GetNumIndex() const { return NumIndex; }
-	uint32_t GetNumPrimitive() const { return NumPrimitive; }
-	uint32_t GetPackedVertexStride() const { return PackedVertexStride; }
-	const Math::AABB& GetBoundingBox() const { return BoundingBox; }
-	const Math::Sphere& GetBoundingSphere() const { return BoundingSphere; }
-	ERHIPrimitiveTopology GetPrimitiveTopology() const { return PrimitiveTopology; }
-	ERHIIndexFormat GetIndexFormat() const { return IndexFormat; }
+	inline uint32_t GetNumVertex() const { return NumVertex; }
+	inline uint32_t GetNumIndex() const { return NumIndex; }
+	inline uint32_t GetNumPrimitive() const { return NumPrimitive; }
+	inline uint32_t GetPackedVertexStride() const { return PackedVertexStride; }
+	inline const Math::AABB& GetBoundingBox() const { return BoundingBox; }
+	inline const Math::Sphere& GetBoundingSphere() const { return BoundingSphere; }
+	inline ERHIPrimitiveTopology GetPrimitiveTopology() const { return PrimitiveTopology; }
+	inline ERHIIndexFormat GetIndexFormat() const { return IndexFormat; }
 
-	//const RHIBuffer* GetVertexBuffer() const { return m_VertexBuffer.get(); }
-	const RHIBuffer* GetIndexBuffer() const { return m_IndexBuffer.get(); }
+	inline MaterialID GetMaterialID() const { return m_Material; }
 
-	MaterialID GetMaterialID() const { return m_Material; }
+	inline const RHIBuffer* GetPackedVertexBuffer() const { assert(RHIPackedVertexBuffer);  return RHIPackedVertexBuffer.get(); }
+	inline const RHIBuffer* GetIndexBuffer() const { assert(RHIIndexBuffer);  return RHIIndexBuffer.get(); }
+	std::vector<const RHIBuffer*> GetVertexBuffers(EVertexAttributes Attributes) const;
+	const RHIBuffer* GetVertexBuffer(EVertexAttributes Attributes) const;
+
+	virtual void CreateRHIBuffers(class RHIDevice& Device);
 protected:
 	friend class SceneBuilder;
 	void SetMaterialID(MaterialID ID) { m_Material = ID; }
 
 	MaterialID m_Material;
-
-	RHIBufferPtr m_VertexBuffer;
-	RHIBufferPtr m_IndexBuffer;
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -244,8 +242,6 @@ protected:
 			CEREAL_NVP(m_Material)
 		);
 	}
-private:
-	virtual void CrateRHIBuffers(const MeshData& Data) override final;
 };
 
 class SkeletalMesh : public StaticMesh
