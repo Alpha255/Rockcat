@@ -11,7 +11,12 @@ struct RHIShaderResourceBinding
 	uint32_t Binding = 0u;
 	ERHIResourceType Type = ERHIResourceType::Unknown;
 
-	RHIResource* Resource = nullptr;
+	union
+	{
+		RHISampler* Sampler;
+		RHITexture* Texture;
+		RHIBuffer* Buffer;
+	};
 };
 using RHIShaderResourceBindings = std::vector<RHIShaderResourceBinding>;
 
