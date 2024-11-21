@@ -135,46 +135,80 @@ private: \
 struct VSInput
 {
 	VK_LOCATION(0) float3 Position : POSITION;
-	VK_LOCATION(1) float3 Normal : NORMAL;
 
-#if _HAS_TANGENT_
-	VK_LOCATION(2) float3 Tangent : TANGENT;
-	VK_LOCATION(3) float3 BiTangent : BITANGENT;
-#if _HAS_UV0_
-	VK_LOCATION(4) float2 UV0 : TEXCOORD0;
-#if _HAS_UV1_
-	VK_LOCATION(5) float2 UV1 : TEXCOORD1;
-#if _HAS_COLOR_
-	VK_LOCATION(6) float4 Color : COLOR;
-#endif
+#if _HAS_NORMAL_
+	VK_LOCATION(1) float3 Normal : NORMAL;
+	#if _HAS_TANGENT_
+		VK_LOCATION(2) float3 Tangent : TANGENT;
+		VK_LOCATION(3) float3 BiTangent : BITANGENT;
+		#if _HAS_UV0_
+			VK_LOCATION(4) float3 UV0 : TEXCOORD0;
+			#if _HAS_UV1_
+				VK_LOCATION(5) float3 UV1 : TEXCOORD1;
+				#if _HAS_COLOR_
+					VK_LOCATION(6) float4 Color : COLOR;
+				#endif
+			#else
+				#if _HAS_COLOR_
+					VK_LOCATION(5) float4 Color : COLOR;
+				#endif
+			#endif
+		#elif _HAS_UV1_
+			VK_LOCATION(4) float3 UV1 : TEXCOORD1;
+			#if _HAS_COLOR_
+				VK_LOCATION(5) float4 Color : COLOR;
+			#endif
+		#else
+			#if _HAS_COLOR_
+				VK_LOCATION(4) float4 Color : COLOR;
+			#endif
+		#endif
+	#else
+		#if _HAS_UV0_
+			VK_LOCATION(2) float3 UV0 : TEXCOORD0;
+			#if _HAS_UV1_
+				VK_LOCATION(3) float3 UV1 : TEXCOORD1;
+				#if _HAS_COLOR_	
+					VK_LOCATION(4) float4 Color : COLOR;
+				#endif
+			#else
+				#if _HAS_COLOR_
+					VK_LOCATION(3) float4 Color : COLOR;
+				#endif
+			#endif
+		#elif _HAS_UV1_
+			VK_LOCATION(2) float3 UV1 : TEXCOORD1;
+			#if _HAS_COLOR_
+				VK_LOCATION(3) float4 Color : COLOR;
+			#endif
+		#else
+			#if _HAS_COLOR_
+				VK_LOCATION(2) float4 Color : COLOR;
+			#endif
+		#endif
+	#endif
 #else
-#if _HAS_COLOR_
-	VK_LOCATION(5) float4 Color : COLOR;
-#endif
-#endif
-#else
-#if _HAS_COLOR_
-	VK_LOCATION(4) float4 Color : COLOR;
-#endif
-#endif
-#else
-#if _HAS_UV0_
-	VK_LOCATION(2) float2 UV0 : TEXCOORD0;
-#if _HAS_UV1_
-	VK_LOCATION(3) float2 UV1 : TEXCOORD1;
-#if _HAS_COLOR_	
-	VK_LOCATION(4) float4 Color : COLOR;
-#endif
-#else
-#if _HAS_COLOR_
-	VK_LOCATION(3) float4 Color : COLOR;
-#endif
-#endif
-#else
-#if _HAS_COLOR_
-	VK_LOCATION(2) float4 Color : COLOR;
-#endif
-#endif
+	#if _HAS_UV0_
+		VK_LOCATION(1) float3 UV0 : TEXCOORD0;
+		#if _HAS_UV1_
+			VK_LOCATION(2) float3 UV1 : TEXCOORD1;
+			#if _HAS_COLOR_
+				VK_LOCATION(3) float4 Color : COLOR;
+			#endif
+		#else
+			#if _HAS_COLOR_
+				VK_LOCATION(2) float4 Color : COLOR;
+			#endif
+		#endif
+	#elif _HAS_UV1_
+		VK_LOCATION(1) float3 UV1 : TEXCOORD1;
+		#if _HAS_COLOR_
+			VK_LOCATION(2) float4 Color : COLOR;
+		#endif
+	#else
+		#if _HAS_COLOR_
+			VK_LOCATION(1) float4 Color : COLOR;
+		#endif
 #endif
 };
 
@@ -182,46 +216,81 @@ struct VSOutput
 {
 	float4 Position : SV_POSITION;
 	VK_LOCATION(0) float3 WorldPosition : POSITIONT;
-	VK_LOCATION(1) float3 WorldNormal : NORMAL;
 
-#if _HAS_TANGENT_
-	VK_LOCATION(2) float3 WorldTangent : TANGENT;
-	VK_LOCATION(3) float3 WorldBiTangent : BITANGENT;
-#if _HAS_UV0_
-	VK_LOCATION(4) float2 UV0 : TEXCOORD0;
-#if _HAS_UV1_
-	VK_LOCATION(5) float2 UV1 : TEXCOORD1;
-#if _HAS_COLOR_
-	VK_LOCATION(6) float4 Color : COLOR;
-#endif
+#if _HAS_NORMAL_
+	VK_LOCATION(1) float3 WorldNormal : NORMAL;
+	#if _HAS_TANGENT_
+		VK_LOCATION(2) float3 WorldTangent : TANGENT;
+		VK_LOCATION(3) float3 WorldBiTangent : BITANGENT;
+		#if _HAS_UV0_
+			VK_LOCATION(4) float3 UV0 : TEXCOORD0;
+			#if _HAS_UV1_
+				VK_LOCATION(5) float3 UV1 : TEXCOORD1;
+				#if _HAS_COLOR_
+					VK_LOCATION(6) float4 Color : COLOR;
+				#endif
+			#else
+				#if _HAS_COLOR_
+					VK_LOCATION(5) float4 Color : COLOR;
+				#endif
+			#endif
+		#elif _HAS_UV1_
+			VK_LOCATION(4) float3 UV1 : TEXCOORD1;
+			#if _HAS_COLOR_
+				VK_LOCATION(5) float4 Color : COLOR;
+			#endif
+		#else
+			#if _HAS_COLOR_
+				VK_LOCATION(4) float4 Color : COLOR;
+			#endif
+		#endif
+	#else
+		#if _HAS_UV0_
+			VK_LOCATION(2) float3 UV0 : TEXCOORD0;
+			#if _HAS_UV1_
+				VK_LOCATION(3) float3 UV1 : TEXCOORD1;
+				#if _HAS_COLOR_
+					VK_LOCATION(4) float4 Color : COLOR;
+				#endif
+			#else
+				#if _HAS_COLOR_
+					VK_LOCATION(3) float4 Color : COLOR;
+				#endif
+			#endif
+		#elif _HAS_UV1_
+			VK_LOCATION(2) float3 UV1 : TEXCOORD1;
+			#if _HAS_COLOR_
+				VK_LOCATION(3) float4 Color : COLOR;
+			#endif
+		#else
+			#if _HAS_COLOR_
+				VK_LOCATION(2) float4 Color : COLOR;
+			#endif
+		#endif
+	#endif
 #else
-#if _HAS_COLOR_
-	VK_LOCATION(5) float4 Color : COLOR;
-#endif
-#endif
-#else
-#if _HAS_COLOR_
-	VK_LOCATION(4) float4 Color : COLOR;
-#endif
-#endif
-#else
-#if _HAS_UV0_
-	VK_LOCATION(2) float2 UV0 : TEXCOORD0;
-#if _HAS_UV1_
-	VK_LOCATION(3) float2 UV1 : TEXCOORD1;
-#if _HAS_COLOR_
-	VK_LOCATION(4) float4 Color : COLOR;
-#endif
-#else
-#if _HAS_COLOR_
-	VK_LOCATION(3) float4 Color : COLOR;
-#endif
-#endif
-#else
-#if _HAS_COLOR_
-	VK_LOCATION(3) float4 Color : COLOR;
-#endif
-#endif
+	#if _HAS_UV0_
+		VK_LOCATION(1) float3 UV0 : TEXCOORD0;
+		#if _HAS_UV1_
+			VK_LOCATION(2) float3 UV1 : TEXCOORD1;
+			#if _HAS_COLOR_
+				VK_LOCATION(3) float4 Color : COLOR;
+			#endif
+		#else
+			#if _HAS_COLOR_
+				VK_LOCATION(2) float4 Color : COLOR;
+			#endif
+		#endif
+	#elif _HAS_UV1_
+		VK_LOCATION(1) float3 UV1 : TEXCOORD1;
+		#if _HAS_COLOR_
+			VK_LOCATION(2) float4 Color : COLOR;
+		#endif
+	#else
+		#if _HAS_COLOR_
+			VK_LOCATION(1) float4 Color : COLOR;
+		#endif
+	#endif
 #endif
 };
 

@@ -146,6 +146,11 @@ RHIGraphicsPipelinePtr D3D11Device::CreateGraphicsPipeline(const RHIGraphicsPipe
 	return RHIGraphicsPipelinePtr();
 }
 
+RHIPipelineStatePtr D3D11Device::CreatePipelineState(const RHIGraphicsPipelineCreateInfo& RHICreateInfo)
+{
+	return RHIPipelineStatePtr();
+}
+
 RHIBufferPtr D3D11Device::CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo)
 {
 	return RHIBufferPtr();

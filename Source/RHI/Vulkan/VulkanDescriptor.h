@@ -48,17 +48,13 @@ struct VulkanDescriptorLimitations : public SerializableAsset<VulkanDescriptorLi
 class VulkanDescriptorSetLayout final : public VkHwResource<vk::DescriptorSetLayout>
 {
 public:
-	VulkanDescriptorSetLayout(const class VulkanDevice& Device, const RHIShaderResourceBindings& CreateInfo);
+	VulkanDescriptorSetLayout(const class VulkanDevice& Device, const RHIShaderResourceLayout& LayoutDesc);
 };
 
 class VulkanPipelineLayout final : public VkHwResource<vk::PipelineLayout>
 {
 public:
-	VulkanPipelineLayout(const class VulkanDevice& Device, const RHIShaderResourceBindings& Desc);
-
-	vk::DescriptorSetLayout GetDescriptorSetLayout() const { return m_DescriptorSetLayout.GetNative(); }
-private:
-	VulkanDescriptorSetLayout m_DescriptorSetLayout;
+	VulkanPipelineLayout(const class VulkanDevice& Device, const vk::DescriptorSetLayout& DescriptorSetLayout);
 };
 
 class VulkanDescriptorPool final : public VkHwResource<vk::DescriptorPool>
@@ -78,15 +74,4 @@ private:
 	uint32_t m_AllocatedCount = 0u;
 
 	static std::shared_ptr<VulkanDescriptorLimitations> s_DescriptorLimitations;
-};
-
-class VulkanDescriptorSet : public VkDeviceResource<vk::DescriptorSet>, public RHIDescriptorSet
-{
-public:
-	VulkanDescriptorSet(const class VulkanDevice& Device, vk::PipelineLayout PipelineLayout, vk::DescriptorSetLayout DescriptorSetLayout, vk::DescriptorSet Set);
-
-	void Commit(const RHIShaderResourceBindings& Bindings) override final;
-private:
-	vk::PipelineLayout m_PipelineLayout;
-	vk::DescriptorSetLayout m_DescriptorSetLayout;
 };

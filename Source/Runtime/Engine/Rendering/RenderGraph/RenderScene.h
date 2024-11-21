@@ -26,7 +26,6 @@ struct GraphicsPipelineKey
 {
 	size_t Hash = 0u;
 	RHIGraphicsPipeline* Pipeline = nullptr;
-	RHIShaderResourceBindings ShaderResourceLayout;
 };
 
 struct MeshDrawCommand

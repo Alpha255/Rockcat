@@ -21,11 +21,9 @@ public:
 	VulkanPipeline(const class VulkanDevice& Device);
 
 	virtual ~VulkanPipeline() = default;
-protected:
-	std::shared_ptr<VulkanPipelineLayout> m_PipelineLayout;
 };
 
-class VulkanGraphicsPipeline final : public VulkanPipeline
+class VulkanGraphicsPipeline final : public VulkanPipeline, public RHIGraphicsPipeline
 {
 public:
 	VulkanGraphicsPipeline(const class VulkanDevice& Device, vk::PipelineCache PipelineCache, const RHIGraphicsPipelineCreateInfo& CreateInfo);
@@ -39,34 +37,21 @@ class VulkanRayTracingPipeline final : public VulkanPipeline
 {
 };
 
-#if 0
-class VulkanGraphicsPipelineState : public PipelineState
+class VulkanPipelineState : public RHIPipelineState, public VkBaseDeviceResource
 {
 public:
-	VulkanGraphicsPipelineState(const GraphicsPipelineDesc& Desc, VkDescriptorSet DescriptorSet);
+	VulkanPipelineState(const class VulkanDevice& Device, const RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo);
 
-	const std::vector<VkWriteDescriptorSet>& WriteDescriptorSets() const
-	{
-		return m_Writes;
-	}
-
-	struct ResourceNeedTransitionState
-	{
-		class VulkanImage* Image = nullptr;
-		class VulkanBuffer* Buffer = nullptr;
-	};
-
-	std::vector<ResourceNeedTransitionState> ResourcesNeedTransitionState;
-protected:
-	void WriteImage(EShaderStage Stage, uint32_t Binding, IImage* Image) override final;
-	void WriteSampler(EShaderStage Stage, uint32_t Binding, ISampler* Sampler) override final;
-	void WriteUniformBuffer(EShaderStage Stage, uint32_t Binding, IBuffer* Buffer) override final;
+	virtual void CommitShaderResources();
 private:
-	std::vector<VkWriteDescriptorSet> m_Writes;
-	std::list<VkDescriptorImageInfo> m_ImageInfos;
-	std::list<VkDescriptorBufferInfo> m_BufferInfos;
-	std::list<VkBufferView> m_BufferViews;
-	VkDescriptorSet m_DescriptorSet = VK_NULL_HANDLE;
-};
+	void InitWrites();
 
-#endif
+	std::unique_ptr<VulkanDescriptorSetLayout> m_DescriptorSetLayout;
+	std::unique_ptr<VulkanPipelineLayout> m_PipelineLayout;
+
+	std::vector<vk::DescriptorImageInfo> m_ImageInfos;
+	std::vector<vk::DescriptorBufferInfo> m_BufferInfos;
+	std::vector<vk::WriteDescriptorSet> m_Writes;
+
+	vk::DescriptorSet m_Set;
+};

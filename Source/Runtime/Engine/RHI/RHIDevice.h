@@ -56,6 +56,7 @@ public:
 	virtual RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo) = 0;
 	virtual RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo) = 0;
 	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) = 0;
+	virtual RHIPipelineStatePtr CreatePipelineState(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) = 0;
 	virtual RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo) = 0;
 	virtual RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& RHICreateInfo) = 0;
 

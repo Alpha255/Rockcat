@@ -5,6 +5,7 @@
 #include "RHI/Vulkan/VulkanCommandPool.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 #include "RHI/Vulkan/VulkanShader.h"
+#include "RHI/Vulkan/VulkanPipeline.h"
 #include "RHI/Vulkan/VulkanCommandListContext.h"
 #include "Engine/Services/TaskFlowService.h"
 
@@ -226,6 +227,8 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 	{
 		m_ThreadedCmdListContexts.emplace(std::make_shared<VulkanCommandListContext>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Graphics]));
 	}
+
+	m_PipelineCache = std::make_shared<VulkanPipelineCache>(*this);
 }
 
 RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& CreateInfo)
@@ -233,14 +236,14 @@ RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& CreateInfo)
 	return std::make_shared<VulkanShader>(*this, CreateInfo);
 }
 
-RHITexturePtr VulkanDevice::CreateTexture(const RHITextureCreateInfo& /*CreateInfo*/)
+RHITexturePtr VulkanDevice::CreateTexture(const RHITextureCreateInfo& CreateInfo)
 {
-	return RHITexturePtr();
+	return std::make_shared<VulkanTexture>(*this, CreateInfo);
 }
 
-RHIInputLayoutPtr VulkanDevice::CreateInputLayout(const RHIInputLayoutCreateInfo& /*CreateInfo*/)
+RHIInputLayoutPtr VulkanDevice::CreateInputLayout(const RHIInputLayoutCreateInfo& CreateInfo)
 {
-	return RHIInputLayoutPtr();
+	return std::make_shared<VulkanInputLayout>(CreateInfo);
 }
 
 RHIFrameBufferPtr VulkanDevice::CreateFrameBuffer(const RHIFrameBufferCreateInfo& /*CreateInfo*/)
@@ -248,9 +251,9 @@ RHIFrameBufferPtr VulkanDevice::CreateFrameBuffer(const RHIFrameBufferCreateInfo
 	return RHIFrameBufferPtr();
 }
 
-RHIGraphicsPipelinePtr VulkanDevice::CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& /*CreateInfo*/)
+RHIGraphicsPipelinePtr VulkanDevice::CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo)
 {
-	return RHIGraphicsPipelinePtr();
+	return std::make_shared<VulkanGraphicsPipeline>(*this, m_PipelineCache->GetNative(), CreateInfo);
 }
 
 RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& /*CreateInfo*/)

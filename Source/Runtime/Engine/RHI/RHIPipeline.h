@@ -7,8 +7,8 @@
 
 struct RHIShaderResourceBinding
 {
-	ERHIShaderStage Stage = ERHIShaderStage::Num;
 	uint32_t Binding = 0u;
+	uint32_t DescriptorIndex = 0u;
 	ERHIResourceType Type = ERHIResourceType::Unknown;
 
 	union
@@ -18,11 +18,8 @@ struct RHIShaderResourceBinding
 		RHIBuffer* Buffer;
 	};
 };
-using RHIShaderResourceBindings = std::vector<RHIShaderResourceBinding>;
 
-struct RHIShaderResourceContainer
-{
-};
+using RHIShaderResourceLayout = std::array<std::vector<RHIShaderResourceBinding>, (size_t)ERHIShaderStage::Num>;
 
 struct RHIGraphicsPipelineCreateInfo
 {
@@ -46,174 +43,47 @@ struct RHIComputePipelineCreateInfo
 {
 };
 
-struct RHIPipelineState
+class RHIPipelineState
 {
-#if 0
 public:
-	enum class EDirtyFlags : uint8_t
+	RHIPipelineState(const RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo);
+
+	bool IsDirty() const { return m_Dirty; }
+
+	void Commit(RHICommandBuffer* CommandBuffer);
+	virtual void CommitShaderResources() = 0;
+
+	template<ERHIShaderStage Stage>
+	inline void SetBuffer(uint32_t Binding, RHIBuffer* Buffer)
 	{
-		Resources,
-		VertexBuffer,
-		IndexBuffer,
-		Viewport,
-		ScissorRect,
-		PolygonMode,
-		Max
-	};
-
-	PipelineState(const GraphicsPipelineDesc& Desc);
-
-	virtual ~PipelineState() = default;
-
-	template<EShaderStage Stage>
-	void SetImage(uint32_t Binding, const IImageSharedPtr& Image)
-	{
-		if (auto Variable = ShaderVariableTable.Find(Stage, Binding))
-		{
-			if (Variable->Get() != Image.get())
-			{
-				assert(Variable->ShaderStage() == Stage);
-				assert(Variable->ResourceType() == EResourceType::SampledImage || Variable->ResourceType() == EResourceType::StorageImage);
-
-				SetDirty<EDirtyFlags::Resources>(true);
-				Variable->Set(Image);
-				WriteImage(Stage, Binding, Image.get());
-			}
-		}
+		size_t Index = static_cast<size_t>(Stage);
+		MarkDirty(m_ShaderResourceLayout[Index][Binding].Buffer == Buffer);
+		m_ShaderResourceLayout[Index][Binding].Buffer = Buffer;
 	}
 
-	template<EShaderStage Stage>
-	void SetSampler(uint32_t Binding, const ISamplerSharedPtr& Sampler)
-	{
-		if (auto Variable = ShaderVariableTable.Find(Stage, Binding))
-		{
-			if (Variable->Get() != Sampler.get())
-			{
-				assert(Variable->ShaderStage() == Stage);
-				assert(Variable->ResourceType() == EResourceType::Sampler);
-
-				SetDirty<EDirtyFlags::Resources>(true);
-				Variable->Set(Sampler);
-				WriteSampler(Stage, Binding, Sampler.get());
-			}
-		}
-	}
-
-	template<EShaderStage Stage>
-	void SetUniformBuffer(uint32_t Binding, const IBufferSharedPtr& Buffer)
-	{
-		if (auto Variable = ShaderVariableTable.Find(Stage, Binding))
-		{
-			if (Variable->Get() != Buffer.get())
-			{
-				assert(Variable->ShaderStage() == Stage);
-				assert(Variable->ResourceType() == EResourceType::UniformBuffer);
-
-				SetDirty<EDirtyFlags::Resources>(true);
-				Variable->Set(Buffer);
-				WriteUniformBuffer(Stage, Binding, Buffer.get());
-			}
-		}
-	}
-
-	void SetVertexBuffer(IBuffer* Buffer)
-	{
-		if (VertexBuffer != Buffer)
-		{
-			SetDirty<EDirtyFlags::VertexBuffer>(true);
-			VertexBuffer = Buffer;
-		}
-	}
-
-	void SetIndexBuffer(IBuffer* Buffer, EIndexFormat Format)
-	{
-		if (IndexBuffer.first != Buffer)
-		{
-			SetDirty<EDirtyFlags::IndexBuffer>(true);
-			IndexBuffer = std::make_pair(Buffer, Format);
-		}
-	}
-
-	void SetPolygonMode(EPolygonMode Mode)
-	{
-		if (PolygonMode != Mode)
-		{
-			SetDirty<EDirtyFlags::PolygonMode>(true);
-			PolygonMode = Mode;
-		}
-	}
-
-	void SetViewport(const Viewport& InViewport)
-	{
-		if (Viewport != InViewport)
-		{
-			SetDirty<EDirtyFlags::Viewport>(true);
-			Viewport = InViewport;
-		}
-	}
-
-	void SetScissorRect(const ScissorRect& Rect)
-	{
-		if (Scissor != Rect)
-		{
-			SetDirty<EDirtyFlags::ScissorRect>(true);
-			Scissor = Rect;
-		}
-	}
-
-	const PipelineShaderVariableTable& GetShaderVariableTable() const
-	{
-		return ShaderVariableTable;
-	}
-
-	template<EDirtyFlags Flags>
-	const bool IsDirty() const
-	{
-		return Dirty[static_cast<size_t>(Flags)];
-	}
-
-	template<EDirtyFlags Flags>
-	void SetDirty(bool IsDirty)
-	{
-		Dirty.set(static_cast<size_t>(Flags), IsDirty);
-	}
-
-	void Reset()
-	{
-		Dirty.reset();
-	}
+	const RHIShaderResourceLayout& GetShaderResourceLayout() const { return m_ShaderResourceLayout; }
 protected:
-	virtual void WriteImage(EShaderStage Stage, uint32_t Binding, IImage* Image) = 0;
-	virtual void WriteSampler(EShaderStage Stage, uint32_t Binding, ISampler* Sampler) = 0;
-	virtual void WriteUniformBuffer(EShaderStage Stage, uint32_t Binding, IBuffer* Buffer) = 0;
-public:
-	IBuffer* VertexBuffer = nullptr;
-	std::pair<IBuffer*, EIndexFormat> IndexBuffer;
-	Viewport Viewport;
-	ScissorRect Scissor;
-	EPolygonMode PolygonMode = EPolygonMode::Solid;
-	IFrameBuffer* FrameBuffer = nullptr;
-private:
-	std::bitset<static_cast<size_t>(EDirtyFlags::Max)> Dirty;
-	PipelineShaderVariableTable ShaderVariableTable;
-#endif
-};
+	void MarkDirty(bool Dirty) { m_Dirty |= Dirty; }
+	void ClearDirty() { m_Dirty = false; }
 
-class RHIDescriptorSet
-{
-public:
-	virtual void Commit(const RHIShaderResourceBindings& CreateInfo) = 0;
+	bool m_Dirty = false;
+	RHIShaderResourceLayout m_ShaderResourceLayout;
 };
 
 #define ENABLE_SHADER_HOT_RELOAD 1
 
 class RHIPipeline
 {
+public:
+	RHIPipelineState* GetPipelineState() const { return m_PipelineState.get(); }
+protected:
+	std::shared_ptr<RHIPipelineState> m_PipelineState;
 };
 
 class RHIGraphicsPipeline : public RHIPipeline
 {
 #if ENABLE_SHADER_HOT_RELOAD
+public:
 	RHIGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo)
 		: m_CreateInfo(CreateInfo)
 	{

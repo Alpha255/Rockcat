@@ -1,91 +1,3 @@
-#if 0
-VulkanRenderPassPtr VkRenderStateCache::getOrCreateRenderPass(const RenderPassDesc& Desc)
-{
-	for (auto& pair : m_RenderPassCache)
-	{
-		if (pair.first == CreateInfo.hash())
-		{
-			return pair.second;
-		}
-	}
-
-	if (CreateInfo.AttachmentDescs.size() == 0u)
-	{
-		RenderPassDesc defaultRenderPassDesc;
-		defaultRenderPassDesc.AttachmentDescs.resize(2u);
-		defaultRenderPassDesc.AttachmentDescs[0] = 
-		{
-			FormatAttribute::attribute_Vk(m_Swapchain->colorFormat()).Format,
-			1u,
-			RenderPassDesc::EAttachmentLoadOp::Clear,
-			RenderPassDesc::EAttachmentStoreOp::DontCare,
-			RenderPassDesc::EAttachmentLoadOp::Clear,
-			RenderPassDesc::EAttachmentStoreOp::DontCare,
-			Texture::EImageLayout::Undefined,
-			Texture::EImageLayout::Present
-		};
-
-		defaultRenderPassDesc.AttachmentDescs[1] =
-		{
-			FormatAttribute::attribute_Vk(m_Swapchain->depthStencilFormat()).Format,
-			1u,
-			RenderPassDesc::EAttachmentLoadOp::Clear,
-			RenderPassDesc::EAttachmentStoreOp::DontCare,
-			RenderPassDesc::EAttachmentLoadOp::Clear,
-			RenderPassDesc::EAttachmentStoreOp::DontCare,
-			Texture::EImageLayout::Undefined,
-			Texture::EImageLayout::DepthStencilAttachment
-		};
-
-		defaultRenderPassDesc.SubPasses.resize(1u);
-		defaultRenderPassDesc.SubPasses[0] =
-		{
-			{},
-			{ 
-				{
-					0u,
-					Texture::EImageLayout::ColorAttachment
-				} 
-			},
-			{},
-			{},
-			{
-				1u,
-				Texture::EImageLayout::DepthStencilAttachment
-			}
-		};
-
-		defaultRenderPassDesc.SubPassDependencies.resize(2u);
-		defaultRenderPassDesc.SubPassDependencies[0] =
-		{
-			VK_SUBPASS_EXTERNAL,
-			0u,
-			RenderPassDesc::EPipelineStageFlags::BottomOfPipe,
-			RenderPassDesc::EPipelineStageFlags::ColorAttachmentOutput,
-			RenderPassDesc::EAccessFlags::MemoryRead,
-			RenderPassDesc::EAccessFlags::ColorAttachmentRead | RenderPassDesc::EAccessFlags::ColorAttachmentWrite,
-		};
-
-		defaultRenderPassDesc.SubPassDependencies[1] =
-		{
-			0u,
-			VK_SUBPASS_EXTERNAL,
-			RenderPassDesc::EPipelineStageFlags::ColorAttachmentOutput,
-			RenderPassDesc::EPipelineStageFlags::BottomOfPipe,
-			RenderPassDesc::EAccessFlags::ColorAttachmentRead | RenderPassDesc::EAccessFlags::ColorAttachmentWrite,
-			RenderPassDesc::EAccessFlags::MemoryRead,
-		};
-
-		auto renderPass = create_shared<VulkanRenderPass>(defaultRenderPassDesc);
-		m_RenderPassCache.push_back(std::make_pair(CreateInfo.hash(), renderPass));
-		return renderPass;
-	}
-
-	auto renderPass = create_shared<VulkanRenderPass>(Desc);
-	m_RenderPassCache.push_back(std::make_pair(CreateInfo.hash(), renderPass));
-	return renderPass;
-}
-#else
 #include "RHI/Vulkan/VulkanPipeline.h"
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanRHI.h"
@@ -107,6 +19,7 @@ VulkanPipeline::VulkanPipeline(const VulkanDevice& Device)
 
 VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::PipelineCache PipelineCache, const RHIGraphicsPipelineCreateInfo& CreateInfo)
 	: VulkanPipeline(Device)
+	, RHIGraphicsPipeline(CreateInfo)
 {
 	std::vector<VulkanShader> Shaders;
 	std::vector<vk::PipelineShaderStageCreateInfo> ShaderStageCreateInfos;
@@ -224,7 +137,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 		.setDynamicStates(DynamicStates);
 
 	auto InputState = VulkanInputLayout(CreateInfo.InputLayout);
-	
+
 	auto InputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo()
 		.setTopology(GetPrimitiveTopology(CreateInfo.PrimitiveTopology))
 		.setPrimitiveRestartEnable(false);
@@ -245,83 +158,117 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 
 	/// #TODO Batch creations ???
 	VERIFY_VK(GetNativeDevice().createGraphicsPipelines(PipelineCache, 1u, &vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+
+	m_PipelineState = std::make_shared<VulkanPipelineState>(Device, CreateInfo);
 }
 
-#if 0
-VulkanGraphicsPipelineState::VulkanGraphicsPipelineState(const GraphicsPipelineDesc& Desc, VkDescriptorSet DescriptorSet)
-	: PipelineState(Desc)
-	, m_DescriptorSet(DescriptorSet)
+VulkanPipelineState::VulkanPipelineState(const VulkanDevice& Device, const RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo)
+	: VkBaseDeviceResource(Device)
+	, RHIPipelineState(GfxPipelineCreateInfo)
 {
-	assert(m_DescriptorSet != VK_NULL_HANDLE);
+	m_DescriptorSetLayout = std::make_unique<VulkanDescriptorSetLayout>(Device, GetShaderResourceLayout());
+	m_PipelineLayout = std::make_unique<VulkanPipelineLayout>(Device, m_DescriptorSetLayout->GetNative());
 
-	CreateInfo.Shaders.ForEach([this, DescriptorSet](const IShader* Shader) {
-		for (auto& Variable : Shader->Desc()->Variables)
+	InitWrites();
+}
+
+void VulkanPipelineState::CommitShaderResources()
+{
+	for (auto& ShaderStageResources : GetShaderResourceLayout())
+	{
+		for (auto& ResourceInfo : ShaderStageResources)
 		{
-			VkWriteDescriptorSet WriteDescriptorSet
+			switch (ResourceInfo.Type)
 			{
-				VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-				nullptr,
-				DescriptorSet,
-				Variable.Binding,
-				0u,
-				1u,
-				VkType::DescriptorType(Variable.Type)
-			};
-
-			if (Variable.Type == EResourceType::Sampler ||
-				Variable.Type == EResourceType::CombinedImageSampler ||
-				Variable.Type == EResourceType::SampledImage ||
-				Variable.Type == EResourceType::StorageImage)
-			{
-				m_ImageInfos.emplace_back(
-					VkDescriptorImageInfo
-					{
-						VK_NULL_HANDLE,
-						VK_NULL_HANDLE,
-						VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL /// #TODO
-					});
-				WriteDescriptorSet.pImageInfo = &m_ImageInfos.back();
-				m_Writes.emplace_back(WriteDescriptorSet);
-			}
-			else if (Variable.Type == EResourceType::UniformBuffer)
-			{
-				m_BufferInfos.emplace_back(
-					VkDescriptorBufferInfo
-					{
-						VK_NULL_HANDLE,
-						0u,
-						VK_WHOLE_SIZE  /// #TODO
-					});
-				WriteDescriptorSet.pBufferInfo = &m_BufferInfos.back();
-				m_Writes.emplace_back(WriteDescriptorSet);
+			case ERHIResourceType::UniformTexelBuffer:
+			case ERHIResourceType::StorageTexelBuffer:
+			case ERHIResourceType::UniformBuffer:
+			case ERHIResourceType::StorageBuffer:
+			case ERHIResourceType::UniformBufferDynamic:
+			case ERHIResourceType::StorageBufferDynamic:
+				m_BufferInfos[ResourceInfo.DescriptorIndex].setBuffer(nullptr);
+				break;
+			case ERHIResourceType::SampledImage:
+			case ERHIResourceType::StorageImage:
+				m_ImageInfos[ResourceInfo.DescriptorIndex].setImageView(nullptr);
+				break;
+			case ERHIResourceType::CombinedImageSampler:
+				m_ImageInfos[ResourceInfo.DescriptorIndex].setImageView(nullptr);
+				break;
+			case ERHIResourceType::Sampler:
+				m_ImageInfos[ResourceInfo.DescriptorIndex].setSampler(nullptr);
+				break;
+			default:
+				assert(false);
+				break;
 			}
 		}
-	});
+	}
+
+	GetNativeDevice().updateDescriptorSets(static_cast<uint32_t>(m_Writes.size()), m_Writes.data(), 0u, nullptr);
 }
 
-void VulkanGraphicsPipelineState::WriteImage(EShaderStage, uint32_t Binding, IImage* Image)
+void VulkanPipelineState::InitWrites()
 {
-	auto VkImage = static_cast<VulkanImage*>(Image);
-	const_cast<VkDescriptorImageInfo*>(m_Writes[Binding].pImageInfo)->imageView = VkImage->GetOrCrateImageView(AllSubresource);  /// #TODO
+	for (auto& ShaderStageResources : m_ShaderResourceLayout)
+	{
+		for (auto& ResourceInfo : ShaderStageResources)
+		{
+			auto& Write = m_Writes.emplace_back(vk::WriteDescriptorSet());
+			Write.setDstSet(m_Set)
+				.setDescriptorCount(1u)
+				.setDescriptorType(GetDescriptorType(ResourceInfo.Type))
+				.setDstBinding(ResourceInfo.Binding);
 
-	VkImage->RequiredState = EResourceState::ShaderResource;
-	ResourcesNeedTransitionState.emplace_back(ResourceNeedTransitionState{VkImage, nullptr});
+			switch (ResourceInfo.Type)
+			{
+			case ERHIResourceType::UniformTexelBuffer:
+			case ERHIResourceType::StorageTexelBuffer:
+			case ERHIResourceType::UniformBuffer:
+			case ERHIResourceType::StorageBuffer:
+			case ERHIResourceType::UniformBufferDynamic:
+			case ERHIResourceType::StorageBufferDynamic:
+				ResourceInfo.DescriptorIndex = static_cast<uint32_t>(m_BufferInfos.size());
+
+				m_BufferInfos.emplace_back(vk::DescriptorBufferInfo()
+					.setBuffer(nullptr)
+					.setOffset(0u)
+					.setRange(0u));
+
+				Write.setPBufferInfo(&m_BufferInfos.back());
+				break;
+			case ERHIResourceType::SampledImage:
+			case ERHIResourceType::StorageImage:
+				ResourceInfo.DescriptorIndex = static_cast<uint32_t>(m_ImageInfos.size());
+
+				m_ImageInfos.emplace_back(vk::DescriptorImageInfo()
+					.setImageView(nullptr)
+					.setImageLayout(vk::ImageLayout::eUndefined)
+					.setSampler(nullptr));
+				Write.setPImageInfo(&m_ImageInfos.back());
+				break;
+			case ERHIResourceType::CombinedImageSampler:
+				ResourceInfo.DescriptorIndex = static_cast<uint32_t>(m_ImageInfos.size());
+
+				m_ImageInfos.emplace_back(vk::DescriptorImageInfo()
+					.setImageView(nullptr)
+					.setImageLayout(vk::ImageLayout::eUndefined)
+					.setSampler(nullptr));
+				Write.setPImageInfo(&m_ImageInfos.back());
+				break;
+			case ERHIResourceType::Sampler:
+				ResourceInfo.DescriptorIndex = static_cast<uint32_t>(m_ImageInfos.size());
+
+				m_ImageInfos.emplace_back(vk::DescriptorImageInfo()
+					.setImageView(nullptr)
+					.setImageLayout(vk::ImageLayout::eUndefined)
+					.setSampler(nullptr));
+				Write.setPImageInfo(&m_ImageInfos.back());
+				break;
+			default:
+				assert(false);
+				break;
+			}
+		}
+	}
 }
-
-void VulkanGraphicsPipelineState::WriteSampler(EShaderStage, uint32_t Binding, ISampler* Sampler)
-{
-	const_cast<VkDescriptorImageInfo*>(m_Writes[Binding].pImageInfo)
-		->sampler = static_cast<VulkanSampler*>(Sampler)->Get();
-}
-
-void VulkanGraphicsPipelineState::WriteUniformBuffer(EShaderStage, uint32_t Binding, IBuffer* Buffer)
-{
-	auto VkBuffer = static_cast<VulkanBuffer*>(Buffer);
-	const_cast<VkDescriptorBufferInfo*>(m_Writes[Binding].pBufferInfo)->buffer = VkBuffer->Get();
-
-	VkBuffer->RequiredState = EResourceState::UniformBuffer;
-	ResourcesNeedTransitionState.emplace_back(ResourceNeedTransitionState{ nullptr, VkBuffer });
-}
-#endif
-
-#endif

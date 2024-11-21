@@ -267,7 +267,7 @@ private:
 			}
 			if (!Mesh->HasNormals())
 			{
-				LOG_CAT_ERROR(LogAssimpImporter, "The mesh has no normals!");
+				LOG_CAT_WARNING(LogAssimpImporter, "The mesh has no normals!");
 				continue;
 			}
 			if (!Mesh->HasFaces())

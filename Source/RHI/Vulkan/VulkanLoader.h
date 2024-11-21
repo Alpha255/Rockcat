@@ -325,11 +325,6 @@ public:
 	using NativeType = VkObject::NativeType;
 	using BaseType::BaseType;
 
-	VkHwResource(const class VulkanDevice& Device, const char* Name)
-		: VkDeviceResource<VkObject>(Device)
-	{
-	}
-
 	void SetObjectName(const char* Name)
 	{
 		assert(Name);

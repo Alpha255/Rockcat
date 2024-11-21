@@ -36,17 +36,24 @@ std::vector<uint32_t> VulkanDescriptorLimitations::GetLimitationList() const
 	return Limitations;
 }
 
-VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(const VulkanDevice& Device, const RHIShaderResourceBindings& CreateInfo)
+VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(const VulkanDevice& Device, const RHIShaderResourceLayout& LayoutDesc)
 	: VkHwResource(Device)
 {
-	std::vector<vk::DescriptorSetLayoutBinding> Bindings(CreateInfo.size());
-	for (uint32_t Index = 0u; Index < CreateInfo.size(); ++Index)
+	std::vector<vk::DescriptorSetLayoutBinding> Bindings;
+	for (uint32_t Stage = 0u; Stage < LayoutDesc.size(); ++Stage)
 	{
-		Bindings[Index].setBinding(CreateInfo[Index].Binding)
-			.setDescriptorType(GetDescriptorType(CreateInfo[Index].Type))
-			.setDescriptorCount(1u)
-			.setStageFlags(GetShaderStageFlags(CreateInfo[Index].Stage))
-			.setPImmutableSamplers(nullptr);
+		for (auto& ResourceInfo : LayoutDesc[Stage])
+		{
+			auto Binding = vk::DescriptorSetLayoutBinding();
+
+			Binding.setBinding(ResourceInfo.Binding)
+				.setDescriptorType(GetDescriptorType(ResourceInfo.Type))
+				.setDescriptorCount(1u)
+				.setStageFlags(GetShaderStageFlags(static_cast<ERHIShaderStage>(Stage)))
+				.setPImmutableSamplers(nullptr);
+
+			Bindings.emplace_back(std::move(Binding));
+		}
 	}
 
 	auto vkCreateInfo = vk::DescriptorSetLayoutCreateInfo()
@@ -54,13 +61,12 @@ VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(const VulkanDevice& Device,
 	VERIFY_VK(GetNativeDevice().createDescriptorSetLayout(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
-VulkanPipelineLayout::VulkanPipelineLayout(const VulkanDevice& Device, const RHIShaderResourceBindings& CreateInfo)
+VulkanPipelineLayout::VulkanPipelineLayout(const VulkanDevice& Device, const vk::DescriptorSetLayout& DescriptorSetLayout)
 	: VkHwResource(Device)
-	, m_DescriptorSetLayout(Device, CreateInfo)
 {
 	auto vkCreateInfo = vk::PipelineLayoutCreateInfo()
 		.setSetLayoutCount(1u)
-		.setPSetLayouts(&m_DescriptorSetLayout.GetNative()); // TODO: PushConstants
+		.setPSetLayouts(&DescriptorSetLayout); // TODO: PushConstants
 	VERIFY_VK(GetNativeDevice().createPipelineLayout(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
@@ -144,72 +150,4 @@ vk::DescriptorSet VulkanDescriptorPool::Alloc(vk::DescriptorSetLayout Descriptor
 bool VulkanDescriptorPool::IsFull() const
 {
 	return m_AllocatedCount >= s_DescriptorLimitations->MaxDescriptorSetsPerPool;
-}
-
-VulkanDescriptorSet::VulkanDescriptorSet(const VulkanDevice& Device, vk::PipelineLayout PipelineLayout, vk::DescriptorSetLayout DescriptorSetLayout, vk::DescriptorSet Set)
-	: VkDeviceResource(Device)
-	, m_PipelineLayout(PipelineLayout)
-	, m_DescriptorSetLayout(DescriptorSetLayout)
-{
-	m_Native = Set;
-}
-
-void VulkanDescriptorSet::Commit(const RHIShaderResourceBindings& Bindings)
-{
-	std::vector<vk::DescriptorBufferInfo> Buffers;
-	std::vector<vk::DescriptorImageInfo> Images;
-	std::vector<vk::WriteDescriptorSet> Writes;
-
-	for (auto& Variable : Bindings)
-	{
-		auto Write = vk::WriteDescriptorSet()
-			.setDstSet(GetNative())
-			.setDescriptorCount(1u)
-			.setDescriptorType(GetDescriptorType(Variable.Type))
-			.setDstBinding(Variable.Binding);
-
-		switch (Variable.Type)
-		{
-		case ERHIResourceType::UniformTexelBuffer:
-		case ERHIResourceType::StorageTexelBuffer:
-		case ERHIResourceType::UniformBuffer:
-		case ERHIResourceType::StorageBuffer:
-		case ERHIResourceType::UniformBufferDynamic:
-		case ERHIResourceType::StorageBufferDynamic:
-			Buffers.emplace_back(vk::DescriptorBufferInfo()
-				.setBuffer(Cast<VulkanBuffer>(Variable.Buffer)->GetNative())
-				.setOffset(0u)
-				.setRange(0u));
-			Write.setPBufferInfo(&Buffers.back());
-			break;
-		case ERHIResourceType::SampledImage:
-		case ERHIResourceType::StorageImage:
-			Images.emplace_back(vk::DescriptorImageInfo()
-				.setImageView(nullptr)
-				.setImageLayout(vk::ImageLayout::eUndefined)
-				.setSampler(nullptr));
-			Write.setPImageInfo(&Images.back());
-			break;
-		case ERHIResourceType::CombinedImageSampler:
-			Images.emplace_back(vk::DescriptorImageInfo()
-				.setImageView(nullptr)
-				.setImageLayout(vk::ImageLayout::eUndefined)
-				.setSampler(nullptr));
-			Write.setPImageInfo(&Images.back());
-			break;
-		case ERHIResourceType::Sampler:
-			Images.emplace_back(vk::DescriptorImageInfo()
-				.setImageView(nullptr)
-				.setImageLayout(vk::ImageLayout::eUndefined)
-				.setSampler(Cast<VulkanSampler>(Variable.Sampler)->GetNative()));
-			Write.setPImageInfo(&Images.back());
-			break;
-		default:
-			assert(false);
-			break;
-		}
-		Writes.emplace_back(std::move(Write));
-	}
-
-	GetNativeDevice().updateDescriptorSets(static_cast<uint32_t>(Writes.size()), Writes.data(), 0u, nullptr);
 }
