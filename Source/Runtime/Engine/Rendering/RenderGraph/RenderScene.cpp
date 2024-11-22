@@ -2,6 +2,7 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/Asset/GlobalShaders/DefaultShading.h"
 #include "Engine/Services/RenderService.h"
+#include "Engine/Rendering/RenderGraph/RenderPass/GeometryPass.h"
 
 MeshDrawCommand::MeshDrawCommand(const StaticMesh& Mesh)
 	: IndexBuffer(Mesh.GetIndexBuffer())
@@ -16,90 +17,9 @@ MeshDrawCommand::MeshDrawCommand(const StaticMesh& Mesh)
 	VertexArgs.NumVertex = Mesh.GetNumVertex();
 }
 
-struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<GenericVS, DepthOnly>
+void RenderScene::RegisterMeshDrawCommandBuilder(EGeometryPassFilter Filter, IGeometryPassMeshDrawCommandBuilder* Builder)
 {
-	PreDepthPassMeshDrawCommandBuilder(const GraphicsSettings& InGfxSettings)
-		: GeometryPassMeshDrawCommandBuilder(InGfxSettings)
-	{
-		PassShader.VertexShader.SetDefine("_HAS_NORMAL_", false);
-
-		GfxPipelineCreateInfo.DepthStencilState.SetEnableDepth(true)
-			.SetEnableDepthWrite(true)
-			.SetDepthCompareFunc(GfxSettings.InverseDepth ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
-
-		GfxPipelineCreateInfo.SetShader(&PassShader.VertexShader)
-			.SetShader(&PassShader.FragmentShader);
-	}
-
-	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene& InScene) override final
-	{
-		auto Command = MeshDrawCommand(Mesh);
-
-		uint16_t Location = 0u;
-		EVertexAttributes DepthOnlyVertexAttributes = EVertexAttributes::Position;
-		bool SupportTexel = false;
-
-		if (auto Buffer = Mesh.GetVertexBuffer(DepthOnlyVertexAttributes))
-		{
-			Command.AddVertexStream(Location++, 0u, Buffer);
-		}
-		if (auto Buffer = Mesh.GetVertexBuffer(EVertexAttributes::UV0))
-		{
-			Command.AddVertexStream(Location++, 0u, Buffer);
-			SupportTexel = true;
-			DepthOnlyVertexAttributes = DepthOnlyVertexAttributes | EVertexAttributes::UV0;
-			PassShader.VertexShader.SetDefine("_HAS_UV0_", true);
-		}
-
-		return Command;
-	}
-
-	RHIGraphicsPipelineCreateInfo GfxPipelineCreateInfo;
-};
-
-class OpaquePassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<GenericVS, DefaultLit>
-{
-public:
-	using GeometryPassMeshDrawCommandBuilder::GeometryPassMeshDrawCommandBuilder;
-
-	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene& InScene) override final
-	{
-		auto Command = MeshDrawCommand(Mesh);
-		return Command;
-	}
-};
-
-class TransluentPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<GenericVS, DefaultLit>
-{
-public:
-	using GeometryPassMeshDrawCommandBuilder::GeometryPassMeshDrawCommandBuilder;
-
-	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene& InScene) override final
-	{
-		auto Command = MeshDrawCommand(Mesh);
-		return Command;
-	}
-};
-
-class ShadowPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<GenericVS, GenericShadow>
-{
-public:
-	using GeometryPassMeshDrawCommandBuilder::GeometryPassMeshDrawCommandBuilder;
-
-	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene& InScene) override final
-	{
-		auto Command = MeshDrawCommand(Mesh);
-		return Command;
-	}
-};
-
-RenderScene::RenderScene(const GraphicsSettings& GfxSettings)
-	: m_GfxSettings(GfxSettings)
-{
-	m_MeshDrawCommandBuilders[(uint32_t)EGeometryPassFilter::PreDepth] = std::make_unique<PreDepthPassMeshDrawCommandBuilder>(GfxSettings);
-	m_MeshDrawCommandBuilders[(uint32_t)EGeometryPassFilter::Opaque] = std::make_unique<OpaquePassMeshDrawCommandBuilder>(GfxSettings);
-	m_MeshDrawCommandBuilders[(uint32_t)EGeometryPassFilter::Translucent] = std::make_unique<TransluentPassMeshDrawCommandBuilder>(GfxSettings);
-	m_MeshDrawCommandBuilders[(uint32_t)EGeometryPassFilter::ShadowCast] = std::make_unique<ShadowPassMeshDrawCommandBuilder>(GfxSettings);
+	m_MeshDrawCommandBuilders[static_cast<size_t>(Filter)].reset(Builder);
 }
 
 void RenderScene::BuildMeshDrawCommands(const Scene& InScene)

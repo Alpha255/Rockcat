@@ -209,6 +209,7 @@ struct VSInput
 		#if _HAS_COLOR_
 			VK_LOCATION(1) float4 Color : COLOR;
 		#endif
+	#endif
 #endif
 };
 

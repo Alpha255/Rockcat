@@ -41,10 +41,10 @@ class VulkanPipelineState : public RHIPipelineState, public VkBaseDeviceResource
 {
 public:
 	VulkanPipelineState(const class VulkanDevice& Device, const RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo);
-
-	virtual void CommitShaderResources();
 private:
 	void InitWrites();
+
+	void CommitShaderResources() override final;
 
 	std::unique_ptr<VulkanDescriptorSetLayout> m_DescriptorSetLayout;
 	std::unique_ptr<VulkanPipelineLayout> m_PipelineLayout;

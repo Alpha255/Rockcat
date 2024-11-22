@@ -69,32 +69,6 @@ struct MeshDrawCommand
 	}
 };
 
-template<class TVertexShader, class TFragmentShader>
-struct GeometryPassShaders
-{
-	TVertexShader VertexShader;
-	TFragmentShader FragmentShader;
-};
-
-struct IGeometryPassMeshDrawCommandBuilder
-{
-	IGeometryPassMeshDrawCommandBuilder(const GraphicsSettings& InGfxSettings)
-		: GfxSettings(InGfxSettings)
-	{
-	}
-
-	virtual MeshDrawCommand Build(const class StaticMesh& Mesh, const class Scene& InScene) = 0;
-
-	const GraphicsSettings& GfxSettings;
-};
-
-template<class TVertexShader, class TFragmentShader>
-struct GeometryPassMeshDrawCommandBuilder : public IGeometryPassMeshDrawCommandBuilder
-{
-	using IGeometryPassMeshDrawCommandBuilder::IGeometryPassMeshDrawCommandBuilder;
-	GeometryPassShaders<TVertexShader, TFragmentShader> PassShader;
-};
-
 class RenderScene
 {
 public:
@@ -104,10 +78,12 @@ public:
 
 	const std::vector<MeshDrawCommand>& GetMeshDrawCommands(EGeometryPassFilter MeshPass) const { return m_MeshDrawCommands[(size_t)MeshPass]; }
 	const std::vector<std::shared_ptr<IView>>& GetViews() const { return m_Views; }
+
+	void RegisterMeshDrawCommandBuilder(EGeometryPassFilter Filter, struct IGeometryPassMeshDrawCommandBuilder* Builder);
 protected:
 private:
 	std::array<std::vector<MeshDrawCommand>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommands;
-	std::array<std::unique_ptr<IGeometryPassMeshDrawCommandBuilder>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommandBuilders;
+	std::array<std::shared_ptr<struct IGeometryPassMeshDrawCommandBuilder>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommandBuilders;
 	const GraphicsSettings& m_GfxSettings;
 	mutable std::vector<std::shared_ptr<IView>> m_Views;
 };

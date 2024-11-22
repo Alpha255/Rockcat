@@ -51,7 +51,6 @@ public:
 	bool IsDirty() const { return m_Dirty; }
 
 	void Commit(RHICommandBuffer* CommandBuffer);
-	virtual void CommitShaderResources() = 0;
 
 	template<ERHIShaderStage Stage>
 	inline void SetBuffer(uint32_t Binding, RHIBuffer* Buffer)
@@ -65,6 +64,8 @@ public:
 protected:
 	void MarkDirty(bool Dirty) { m_Dirty |= Dirty; }
 	void ClearDirty() { m_Dirty = false; }
+
+	virtual void CommitShaderResources() = 0;
 
 	bool m_Dirty = false;
 	RHIShaderResourceLayout m_ShaderResourceLayout;

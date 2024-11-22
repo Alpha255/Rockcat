@@ -5,7 +5,7 @@
 class RenderPass
 {
 public:
-	RenderPass(DAGNodeID ID, const char* Name, class ResourceManager& ResourceMgr);
+	RenderPass(DAGNodeID ID, const char* Name, class RenderGraph& Graph);
 
 	const char* GetName() const { return m_Name.data(); }
 
@@ -22,16 +22,16 @@ public:
 
 	virtual void OnGUI() {};
 protected:
-	class ResourceManager& GetResourceManager() { return m_ResourceMgr; }
+	class ResourceManager& GetResourceManager();
 	RDGResource& RegisterResource(const char* Name, RDGResource::EVisibility Visibility);
 private:
 	DAGNodeID m_NodeID;
 	std::string_view m_Name;
 	std::vector<RenderPassField> m_Fields;
-	class ResourceManager& m_ResourceMgr;
+	class RenderGraph& m_Graph;
 };
 
 #define DECLARE_RENDERPASS_CONSTRUCTOR(Pass, Parent) \
-	Pass(DAGNodeID ID, class ResourceManager& ResourceMgr) \
-		: Parent(ID, #Pass, ResourceMgr) \
+	Pass(DAGNodeID ID, class RenderGraph& Graph) \
+		: Parent(ID, #Pass, Graph) \
 	{} \

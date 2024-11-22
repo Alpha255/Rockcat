@@ -10,13 +10,20 @@ public:
 	template<class TPass>
 	RenderGraph& AddPass()
 	{
-		m_RenderPasses.emplace_back(std::make_shared<TPass>(m_Graph.AddNode(), *m_ResourceMgr));
+		m_RenderPasses.emplace_back(std::make_shared<TPass>(m_Graph.AddNode(), *this));
 		return *this;
 	}
 
 	void Execute(const class Scene& InScene);
 
 	static std::shared_ptr<RenderGraph> Create(const GraphicsSettings& GfxSettings);
+
+	RenderScene& GetRenderScene() { return *m_RenderScene; }
+	const RenderScene& GetRenderScene() const { return *m_RenderScene; }
+
+	class ResourceManager& GetResourceManager() { return *m_ResourceMgr; }
+
+	const GraphicsSettings& GetGraphicsSettings() const { return m_GfxSettings; }
 protected:
 	virtual void SetupRenderPasses() = 0;
 private:

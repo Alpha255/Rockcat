@@ -256,6 +256,11 @@ RHIGraphicsPipelinePtr VulkanDevice::CreateGraphicsPipeline(const RHIGraphicsPip
 	return std::make_shared<VulkanGraphicsPipeline>(*this, m_PipelineCache->GetNative(), CreateInfo);
 }
 
+RHIPipelineStatePtr VulkanDevice::CreatePipelineState(const RHIGraphicsPipelineCreateInfo& CreateInfo)
+{
+	return std::make_shared<VulkanPipelineState>(*this, CreateInfo);
+}
+
 RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& /*CreateInfo*/)
 {
 	return RHIBufferPtr();

@@ -3,6 +3,8 @@
 #include "Engine/RHI/RHIDevice.h"
 #include "Engine/RHI/RHICommandListContext.h"
 #include "Engine/Scene/Components/StaticMesh.h"
+#include "Engine/Rendering/RenderGraph/RenderGraph.h"
+#include "Engine/Rendering/RenderGraph/RenderScene.h"
 #include "Engine/Async/Task.h"
 
 class MeshDrawTask : public Task
@@ -27,6 +29,14 @@ private:
 	const MeshDrawCommand* m_DrawCommand;
 	RHICommandBuffer* m_CommandBuffer;
 };
+
+GeometryPass::GeometryPass(DAGNodeID ID, const char* Name, RenderGraph& Graph, EGeometryPassFilter Filter, IGeometryPassMeshDrawCommandBuilder* MeshDrawCommandBuilder)
+	: RenderPass(ID, Name, Graph)
+	, m_Filter(Filter)
+{
+	assert(MeshDrawCommandBuilder);
+	Graph.GetRenderScene().RegisterMeshDrawCommandBuilder(Filter, MeshDrawCommandBuilder);
+}
 
 void GeometryPass::Execute(RHIDevice& Device, const RenderScene& Scene)
 {

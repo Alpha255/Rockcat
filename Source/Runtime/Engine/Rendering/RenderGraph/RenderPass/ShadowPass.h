@@ -5,7 +5,7 @@
 class ShadowPass : public GeometryPass
 {
 public:
-	ShadowPass(DAGNodeID ID, class ResourceManager& ResourceMgr);
+	ShadowPass(DAGNodeID ID, class RenderGraph& Graph);
 
 	void Compile() override final {}
 protected:

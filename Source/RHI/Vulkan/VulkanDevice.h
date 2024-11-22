@@ -17,7 +17,7 @@ public:
 	RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& CreateInfo) override final;
 	RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& CreateInfo) override final;
 	RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo) override final;
-	RHIPipelineStatePtr CreatePipelineState(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) override final;
+	RHIPipelineStatePtr CreatePipelineState(const RHIGraphicsPipelineCreateInfo& CreateInfo) override final;
 	RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& CreateInfo) override final;
 	RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& CreateInfo) override final;
 

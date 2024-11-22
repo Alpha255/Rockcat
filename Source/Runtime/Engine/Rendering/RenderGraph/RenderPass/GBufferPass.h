@@ -1,14 +1,13 @@
 #pragma once
 
 #include "Engine/Rendering/RenderGraph/RenderPass/GeometryPass.h"
+#include "Engine/Asset/GlobalShaders/DefaultShading.h"
 
 class GBufferPass : public GeometryPass
 {
+protected:
 public:
-	GBufferPass(DAGNodeID ID, class ResourceManager& ResourceMgr)
-		: GeometryPass(ID, "GBufferPass", ResourceMgr, EGeometryPassFilter::Opaque)
-	{
-	}
+	GBufferPass(DAGNodeID ID, class RenderGraph& Graph);
 
 	void Compile() override final {}
 };

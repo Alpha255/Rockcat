@@ -5,10 +5,7 @@
 class TranslucentPass : public GeometryPass
 {
 public:
-	TranslucentPass(DAGNodeID ID, class ResourceManager& ResourceMgr)
-		: GeometryPass(ID, "TranslucentPass", ResourceMgr, EGeometryPassFilter::Translucent)
-	{
-	}
+	TranslucentPass(DAGNodeID ID, class RenderGraph& Graph);
 
 	void Compile() override final {}
 };
