@@ -26,9 +26,9 @@ vk::ImageViewType GetImageViewDimension(ERHITextureDimension Dimension);
 vk::DebugReportObjectTypeEXT GetDebugReportObjectType(vk::ObjectType Type);
 vk::CommandBufferLevel GetCommandBufferLevel(ERHICommandBufferLevel Level);
 vk::VertexInputRate GetInputRate(ERHIVertexInputRate InputRate);
+vk::AttachmentLoadOp GetAttachmentLoadOp(ERHIAttachmentLoadOp LoadOp);
+vk::AttachmentStoreOp GetAttachmentStoreOp(ERHIAttachmentStoreOp StoreOp);
 #if 0
-VkAttachmentLoadOp attachmentLoadOp(RenderPassDesc::EAttachmentLoadOp op);
-VkAttachmentStoreOp attachmentStoreOp(RenderPassDesc::EAttachmentStoreOp op);
 VkImageLayout imageLayout(Texture::EImageLayout layout);
 VkPipelineStageFlags pipelineStageFlags(GfxFlags flags);
 VkAccessFlags accessFlags(GfxFlags flags);

@@ -406,30 +406,37 @@ vk::VertexInputRate GetInputRate(ERHIVertexInputRate InputRate)
 	}
 }
 
+vk::AttachmentLoadOp GetAttachmentLoadOp(ERHIAttachmentLoadOp LoadOp)
+{
+	switch (LoadOp)
+	{
+	default:
+	case ERHIAttachmentLoadOp::None:
+		return vk::AttachmentLoadOp::eNoneKHR;
+	case ERHIAttachmentLoadOp::Load:
+		return vk::AttachmentLoadOp::eLoad;
+	case ERHIAttachmentLoadOp::Clear:
+		return vk::AttachmentLoadOp::eClear;
+	case ERHIAttachmentLoadOp::DontCare:
+		return vk::AttachmentLoadOp::eDontCare;
+	}
+}
+
+vk::AttachmentStoreOp GetAttachmentStoreOp(ERHIAttachmentStoreOp StoreOp)
+{
+	switch (StoreOp)
+	{
+	default:
+	case ERHIAttachmentStoreOp::None:
+		return vk::AttachmentStoreOp::eNone;
+	case ERHIAttachmentStoreOp::Store:
+		return vk::AttachmentStoreOp::eStore;
+	case ERHIAttachmentStoreOp::DontCare:
+		return vk::AttachmentStoreOp::eDontCare;
+	}
+}
+
 #if 0
-VkAttachmentLoadOp attachmentLoadOp(RenderPassDesc::EAttachmentLoadOp op)
-{
-	switch (op)
-	{
-	case RenderPassDesc::EAttachmentLoadOp::Load:     return VK_ATTACHMENT_LOAD_OP_LOAD;
-	case RenderPassDesc::EAttachmentLoadOp::Clear:    return VK_ATTACHMENT_LOAD_OP_CLEAR;
-	case RenderPassDesc::EAttachmentLoadOp::DontCare: return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	}
-
-	return VK_ATTACHMENT_LOAD_OP_MAX_ENUM;
-}
-
-VkAttachmentStoreOp attachmentStoreOp(RenderPassDesc::EAttachmentStoreOp op)
-{
-	switch (op)
-	{
-	case RenderPassDesc::EAttachmentStoreOp::Store:    return VK_ATTACHMENT_STORE_OP_STORE;
-	case RenderPassDesc::EAttachmentStoreOp::DontCare: return VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	}
-
-	return VK_ATTACHMENT_STORE_OP_MAX_ENUM;
-}
-
 VkImageLayout imageLayout(Texture::EImageLayout layout)
 {
 	switch (layout)

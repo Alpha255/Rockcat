@@ -285,7 +285,7 @@ template<class T, class Any>
 inline std::shared_ptr<T> Cast(const std::shared_ptr<Any>& SharedPtrRef) { return std::static_pointer_cast<T>(SharedPtrRef); }
 
 template<class T, class Any>
-inline std::shared_ptr<T> Cast(std::shared_ptr<Any>&& SharedPtrRef) { return std::static_pointer_cast<T>(SharedPtrRef); }
+inline std::shared_ptr<T> Cast(std::shared_ptr<Any>& SharedPtrRef) { return std::static_pointer_cast<T>(SharedPtrRef); }
 
 template<class T, class Any>
 inline T& Cast(Any& Ref) { return static_cast<T&>(Ref); }

@@ -21,6 +21,8 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 	: VulkanPipeline(Device)
 	, RHIGraphicsPipeline(CreateInfo)
 {
+	m_PipelineState = std::make_shared<VulkanPipelineState>(Device, CreateInfo);
+
 	std::vector<VulkanShader> Shaders;
 	std::vector<vk::PipelineShaderStageCreateInfo> ShaderStageCreateInfos;
 	for (auto Shader : CreateInfo.Shaders)
@@ -32,7 +34,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 				.SetShaderBinary(Shader->GetBinary(ERenderHardwareInterface::Vulkan))
 				.SetName(Shader->GetName().string());
 
-			auto& ShaderModule = Shaders.emplace_back(VulkanShader(Device, ShaderCreateInfo));
+			auto& ShaderModule = Shaders.emplace_back(VulkanShader(Device, ShaderCreateInfo)); // TODO: Cache shader module ???
 			auto ShaderStageCreateInfo = vk::PipelineShaderStageCreateInfo()
 				.setStage(GetShaderStage(ShaderCreateInfo.Stage))
 				.setModule(ShaderModule.GetNative())
@@ -136,7 +138,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 	auto DynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
 		.setDynamicStates(DynamicStates);
 
-	auto InputState = VulkanInputLayout(CreateInfo.InputLayout);
+	auto InputState = VulkanInputLayout(CreateInfo.InputLayout);  /// TODO: Cache input layout ?
 
 	auto InputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo()
 		.setTopology(GetPrimitiveTopology(CreateInfo.PrimitiveTopology))
@@ -153,13 +155,11 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 		.setPDepthStencilState(&DepthStencilStateCreateInfo)
 		.setPColorBlendState(&BlendStateCreateInfo)
 		.setPDynamicState(&DynamicStateCreateInfo)
-		.setLayout(nullptr)
+		.setLayout(Cast<VulkanPipelineState>(m_PipelineState)->GetPipelineLayout())
 		.setRenderPass(nullptr);
 
 	/// #TODO Batch creations ???
 	VERIFY_VK(GetNativeDevice().createGraphicsPipelines(PipelineCache, 1u, &vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
-
-	m_PipelineState = std::make_shared<VulkanPipelineState>(Device, CreateInfo);
 }
 
 VulkanPipelineState::VulkanPipelineState(const VulkanDevice& Device, const RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo)

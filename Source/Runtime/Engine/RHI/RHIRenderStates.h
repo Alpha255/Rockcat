@@ -320,13 +320,22 @@ struct RHIAttachmentReference
 struct RHIAttachmentDesc
 {
 	ERHIFormat Format = ERHIFormat::Unknown;
-	uint8_t SampleCount = 1u;
-	ERHIAttachmentLoadOp LoadOp = ERHIAttachmentLoadOp::Clear;
+	ERHISampleCount SampleCount = ERHISampleCount::Sample_1_Bit;
+	ERHIAttachmentLoadOp LoadOp = ERHIAttachmentLoadOp::DontCare;
 	ERHIAttachmentStoreOp StoreOp = ERHIAttachmentStoreOp::DontCare;
-	ERHIAttachmentLoadOp StencilLoadOp = ERHIAttachmentLoadOp::Clear;
+	ERHIAttachmentLoadOp StencilLoadOp = ERHIAttachmentLoadOp::DontCare;
 	ERHIAttachmentStoreOp StencilStoreOp = ERHIAttachmentStoreOp::DontCare;
 	ERHIResourceState InitialState = ERHIResourceState::Unknown;
 	ERHIResourceState FinalState = ERHIResourceState::Unknown;
+
+	inline RHIAttachmentDesc& SetFormat(ERHIFormat InFormat) { Format = InFormat; return *this; }
+	inline RHIAttachmentDesc& SetSampleCount(ERHISampleCount InSampleCount) { SampleCount = InSampleCount; return *this; }
+	inline RHIAttachmentDesc& SetLoadOp(ERHIAttachmentLoadOp InLoadOp) { LoadOp = InLoadOp; return *this; }
+	inline RHIAttachmentDesc& SetStoreOp(ERHIAttachmentStoreOp InStoreOp) { StoreOp = InStoreOp; return *this; }
+	inline RHIAttachmentDesc& SetStencilLoadOp(ERHIAttachmentLoadOp InLoadOp) { StencilLoadOp = InLoadOp; return *this; }
+	inline RHIAttachmentDesc& SetStencilStoreOp(ERHIAttachmentStoreOp InStoreOp) { StencilStoreOp = InStoreOp; return *this; }
+	inline RHIAttachmentDesc& SetInitialState(ERHIResourceState InState) { InitialState = InState; return *this; }
+	inline RHIAttachmentDesc& SetFinalState(ERHIResourceState InState) { FinalState = InState; return *this; }
 };
 
 struct RHISubpassDependency

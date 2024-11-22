@@ -15,6 +15,11 @@ ResourceManager& RenderPass::GetResourceManager()
 	return m_Graph.GetResourceManager();
 }
 
+const GraphicsSettings& RenderPass::GetGraphicsSettings() const
+{
+	return m_Graph.GetGraphicsSettings();
+}
+
 RDGResource& RenderPass::RegisterResource(const char* Name, RDGResource::EVisibility Visibility)
 {
     auto& Ret = GetResourceManager().GetOrAllocateResource(Name, Visibility);

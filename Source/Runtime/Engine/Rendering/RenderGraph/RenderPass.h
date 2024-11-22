@@ -23,6 +23,7 @@ public:
 	virtual void OnGUI() {};
 protected:
 	class ResourceManager& GetResourceManager();
+	const GraphicsSettings& GetGraphicsSettings() const;
 	RDGResource& RegisterResource(const char* Name, RDGResource::EVisibility Visibility);
 private:
 	DAGNodeID m_NodeID;
