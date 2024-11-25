@@ -2,7 +2,7 @@
     "class Scene": {
         "class SceneAsset": {
             "m_AssimpScenes": [
-                "glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf"
+                "glTF-Sample-Assets/Models/BoxTextured/glTF/BoxTextured.gltf"
             ],
             "m_Graph": {
                 "ptr_wrapper": {
