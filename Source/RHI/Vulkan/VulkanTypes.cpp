@@ -412,7 +412,7 @@ vk::AttachmentLoadOp GetAttachmentLoadOp(ERHIAttachmentLoadOp LoadOp)
 	{
 	default:
 	case ERHIAttachmentLoadOp::None:
-		return vk::AttachmentLoadOp::eNoneKHR;
+		return vk::AttachmentLoadOp::eNoneEXT;
 	case ERHIAttachmentLoadOp::Load:
 		return vk::AttachmentLoadOp::eLoad;
 	case ERHIAttachmentLoadOp::Clear:
