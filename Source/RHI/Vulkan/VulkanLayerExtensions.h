@@ -24,20 +24,22 @@ struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayer
 
 	bool HasKhronosValidationLayer = true;
 
-	bool HasKHRSurfaceExt = true;
-	bool HasDebugUtilsExt = true;
-	bool HasDebugReportExt = true;
-	bool HasValidationFeaturesExt = true;
-	bool HasValidationFeaturesExt_GPUAssisted = false;
-	bool HasValidationFeaturesExt_GPUAssistedReserveBindingSlot = false;
-	bool HasValidationFeaturesExt_BestPractices = true;
-	bool HasValidationFeaturesExt_DebugPrintf = false;
-	bool HasValidationFeaturesExt_Synchronization = true;
+	bool HasKHRSurface = true;
+	bool HasDebugUtils = true;
+	bool HasDebugReport = true;
+	bool HasValidationFeatures = true;
+	bool HasValidationFeatures_GPUAssisted = false;
+	bool HasValidationFeatures_GPUAssistedReserveBindingSlot = false;
+	bool HasValidationFeatures_BestPractices = true;
+	bool HasValidationFeatures_DebugPrintf = false;
+	bool HasValidationFeatures_Synchronization = true;
 	bool HasGetPhysicalDeviceProperties2 = false;
-	bool HasDebugMarkerExt = true;
+	bool HasDebugMarker = true;
 	bool HasTimelineSemaphore = false;
 	bool HasFullscreenExclusive = false;
 	bool HasDynamicState = false;
+	bool HasDepthStencilResolve = false;
+	bool HasRenderPass2 = false;
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -45,19 +47,22 @@ struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayer
 		Ar(
 			CEREAL_NVP(DebugLayerLevel),
 			CEREAL_NVP(HasKhronosValidationLayer),
-			CEREAL_NVP(HasKHRSurfaceExt),
-			CEREAL_NVP(HasDebugUtilsExt),
-			CEREAL_NVP(HasDebugReportExt),
-			CEREAL_NVP(HasValidationFeaturesExt),
-			CEREAL_NVP(HasValidationFeaturesExt_GPUAssisted),
-			CEREAL_NVP(HasValidationFeaturesExt_GPUAssistedReserveBindingSlot),
-			CEREAL_NVP(HasValidationFeaturesExt_BestPractices),
-			CEREAL_NVP(HasValidationFeaturesExt_DebugPrintf),
-			CEREAL_NVP(HasValidationFeaturesExt_Synchronization),
+			CEREAL_NVP(HasKHRSurface),
+			CEREAL_NVP(HasDebugUtils),
+			CEREAL_NVP(HasDebugReport),
+			CEREAL_NVP(HasValidationFeatures),
+			CEREAL_NVP(HasValidationFeatures_GPUAssisted),
+			CEREAL_NVP(HasValidationFeatures_GPUAssistedReserveBindingSlot),
+			CEREAL_NVP(HasValidationFeatures_BestPractices),
+			CEREAL_NVP(HasValidationFeatures_DebugPrintf),
+			CEREAL_NVP(HasValidationFeatures_Synchronization),
 			CEREAL_NVP(HasGetPhysicalDeviceProperties2),
-			CEREAL_NVP(HasDebugMarkerExt),
+			CEREAL_NVP(HasDebugMarker),
 			CEREAL_NVP(HasTimelineSemaphore),
-			CEREAL_NVP(HasFullscreenExclusive)
+			CEREAL_NVP(HasFullscreenExclusive),
+			CEREAL_NVP(HasDynamicState),
+			CEREAL_NVP(HasDepthStencilResolve),
+			CEREAL_NVP(HasRenderPass2)
 		);
 	}
 };
@@ -65,30 +70,43 @@ struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayer
 class VulkanLayer
 {
 public:
-	VulkanLayer(const char* Name, bool Needed)
+	using OnInstanceCreation = std::function<void(const VulkanLayerExtensionConfigurations&, vk::InstanceCreateInfo&)>;
+	using OnDeviceCreation = std::function<void(const VulkanLayerExtensionConfigurations&, vk::DeviceCreateInfo&)>;
+
+	VulkanLayer(const char* Name, bool Supported, bool Needed, bool* EnabledInConfig)
 		: m_Name(Name)
+		, m_Supported(Supported)
 		, m_Needed(Needed)
+		, m_EnabledInConfig(EnabledInConfig)
 	{
 	}
 
-	inline bool IsEnabled() const { return m_Enabled; }
+	inline bool IsEnabled() const { return m_EnabledInConfig ? (*m_EnabledInConfig && m_Supported) : m_Supported; }
+	inline bool IsSupported() const { return m_Supported; }
 	inline bool IsNeeded() const { return m_Needed; }
 	inline const char* GetName() const { return m_Name.data(); }
+	inline OnInstanceCreation& GetOnInstanceCreation() { return m_OnInstanceCreation; }
+	inline OnDeviceCreation& GetOnDeviceCreation() { return m_OnDeviceCreation; }
 
-	static VulkanLayerArray GetWantedInstanceLayers();
+	inline void SetOnInstanceCreation(OnInstanceCreation&& Func) { m_OnInstanceCreation = std::move(Func); }
+	inline void SetOnDeviceCreation(OnDeviceCreation&& Func) { m_OnDeviceCreation = std::move(Func); }
 
-	static VulkanLayerArray GetWantedDeviceLayers();
+	static VulkanLayerArray GetWantedInstanceLayers(VulkanLayerExtensionConfigurations& Configs);
+	static VulkanLayerArray GetWantedDeviceLayers(VulkanLayerExtensionConfigurations& Configs);
 protected:
 	friend class VulkanInstance;
 	friend class VulkanDevice;
 
-	bool SetEnabled(const VulkanLayerExtensionConfigurations* Configs, bool Supported) { m_Enabled = IsEnabledInConfig(Configs) && Supported; return m_Enabled; }
-	virtual bool IsEnabledInConfig(const VulkanLayerExtensionConfigurations* Configs) const { return Configs && false; }
-	virtual void SetEnabledToConfig(VulkanLayerExtensionConfigurations* /*Config*/) const {}
+	void SetSupported(bool Supported) { m_Supported = Supported; }
+	void SetEnabledInConfig(bool Enabled) { if (m_EnabledInConfig) { *m_EnabledInConfig = Enabled; } }
 private:
 	std::string_view m_Name;
-	bool m_Enabled = false;
+	bool m_Supported = false;
 	bool m_Needed = false;
+
+	bool* m_EnabledInConfig = nullptr;
+	OnInstanceCreation m_OnInstanceCreation;
+	OnDeviceCreation m_OnDeviceCreation;
 };
 
 class VulkanExtension : public VulkanLayer
@@ -96,29 +114,8 @@ class VulkanExtension : public VulkanLayer
 public:
 	using VulkanLayer::VulkanLayer;
 
-	static VulkanExtensionArray GetWantedInstanceExtensions();
-
-	static VulkanExtensionArray GetWantedDeviceExtensions();
-};
-
-class VulkanInstanceExtension : public VulkanExtension
-{
-public:
-	using VulkanExtension::VulkanExtension;
-
-	virtual void PreInstanceCreation(VulkanLayerExtensionConfigurations* Configs, vk::InstanceCreateInfo& /*CreateInfo*/) { SetEnabledToConfig(Configs); }
-protected:
-	friend class VulkanInstance;
-};
-
-class VulkanDeviceExtension : public VulkanExtension
-{
-public:
-	using VulkanExtension::VulkanExtension;
-
-	virtual void PreDeviceCreation(VulkanLayerExtensionConfigurations* Configs, vk::DeviceCreateInfo& /*CreateInfo*/) { SetEnabledToConfig(Configs); }
-protected:
-	friend class VulkanDevice;
+	static VulkanExtensionArray GetWantedInstanceExtensions(VulkanLayerExtensionConfigurations& Configs);
+	static VulkanExtensionArray GetWantedDeviceExtensions(VulkanLayerExtensionConfigurations& Configs);
 };
 
 void LogEnabledLayerAndExtensions(const VulkanLayerArray& Layers, const VulkanExtensionArray& Extensions, const char* Category);

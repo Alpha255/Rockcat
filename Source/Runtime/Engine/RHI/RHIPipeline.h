@@ -55,9 +55,31 @@ public:
 	template<ERHIShaderStage Stage>
 	inline void SetBuffer(uint32_t Binding, RHIBuffer* Buffer)
 	{
+		assert(Stage < ERHIShaderStage::Num);
 		size_t Index = static_cast<size_t>(Stage);
+		assert(Binding < m_ShaderResourceLayout[Index].size());
 		MarkDirty(m_ShaderResourceLayout[Index][Binding].Buffer == Buffer);
 		m_ShaderResourceLayout[Index][Binding].Buffer = Buffer;
+	}
+
+	template<ERHIShaderStage Stage>
+	inline void SetTexture(uint32_t Binding, RHITexture* Texture)
+	{
+		assert(Stage < ERHIShaderStage::Num);
+		size_t Index = static_cast<size_t>(Stage);
+		assert(Binding < m_ShaderResourceLayout[Index].size());
+		MarkDirty(m_ShaderResourceLayout[Index][Binding].Texture == Texture);
+		m_ShaderResourceLayout[Index][Binding].Texture = Texture;
+	}
+
+	template<ERHIShaderStage Stage>
+	inline void SetSampler(uint32_t Binding, RHISampler* Sampler)
+	{
+		assert(Stage < ERHIShaderStage::Num);
+		size_t Index = static_cast<size_t>(Stage);
+		assert(Binding < m_ShaderResourceLayout[Index].size());
+		MarkDirty(m_ShaderResourceLayout[Index][Binding].Sampler == Sampler);
+		m_ShaderResourceLayout[Index][Binding].Sampler = Sampler;
 	}
 
 	const RHIShaderResourceLayout& GetShaderResourceLayout() const { return m_ShaderResourceLayout; }

@@ -26,3 +26,10 @@ RDGResource& RenderPass::RegisterResource(const char* Name, RDGResource::EVisibi
     m_Fields.emplace_back(RenderPassField{Ret.GetNodeID(), Visibility});
     return Ret;
 }
+
+std::vector<RDGResource> RenderPass::GetFields(RDGResource::EVisibility Visibility) const
+{
+	std::vector<RDGResource> Fields;
+
+	return std::vector<RDGResource>();
+}

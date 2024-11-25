@@ -156,11 +156,11 @@ void VulkanCommandBuffer::BeginDebugMarker(const char* Name, const Math::Color& 
 {
 	assert(m_State == EState::Recording && Name);
 
-	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtilsExt)
+	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtils)
 	{
 		
 	}
-	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarkerExt)
+	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarker)
 	{
 		auto vkDebugMarkerInfo = vk::DebugMarkerMarkerInfoEXT()
 			.setColor({ MarkerColor.x, MarkerColor.y, MarkerColor.z, MarkerColor.w })
@@ -173,11 +173,11 @@ void VulkanCommandBuffer::EndDebugMarker()
 {
 	assert(m_State == EState::Recording);
 
-	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtilsExt)
+	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtils)
 	{
 
 	}
-	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarkerExt)
+	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarker)
 	{
 		GetNative().debugMarkerEndEXT();
 	}

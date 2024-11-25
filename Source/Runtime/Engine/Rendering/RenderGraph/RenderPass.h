@@ -16,6 +16,11 @@ public:
 	RDGResource& AddInputOutput(const char* Name) { return RegisterResource(Name, RDGResource::EVisibility::Input | RDGResource::EVisibility::Output); }
 	RDGResource& AddInternal(const char* Name) { return RegisterResource(Name, RDGResource::EVisibility::Internal); }
 
+	inline std::vector<RDGResource> GetInputs() const { return GetFields(RDGResource::EVisibility::Input); }
+	inline std::vector<RDGResource> GetOutputs() const { return GetFields(RDGResource::EVisibility::Output); }
+	inline std::vector<RDGResource> GetInputOutps() const { return GetFields(RDGResource::EVisibility::Input | RDGResource::EVisibility::Output); }
+	inline std::vector<RDGResource> GetInternals() const { return GetFields(RDGResource::EVisibility::Internal); }
+
 	virtual void Compile() = 0;
 
 	virtual void Execute(class RHIDevice&, const RenderScene&) = 0;
@@ -25,6 +30,8 @@ protected:
 	class ResourceManager& GetResourceManager();
 	const GraphicsSettings& GetGraphicsSettings() const;
 	RDGResource& RegisterResource(const char* Name, RDGResource::EVisibility Visibility);
+
+	std::vector<RDGResource> GetFields(RDGResource::EVisibility Visibility) const;
 private:
 	DAGNodeID m_NodeID;
 	std::string_view m_Name;

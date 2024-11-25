@@ -88,49 +88,57 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 
 	GetQueueFamilyIndex(m_PhysicalDevice, GraphicsQueueIndex, ComputeQueueIndex, TransferQueueIndex, PresentQueueIndex);
 
-	auto WantedLayers = VulkanLayer::GetWantedDeviceLayers();
-	auto WantedExtensions = VulkanExtension::GetWantedDeviceExtensions();
+	auto WantedLayers = VulkanLayer::GetWantedDeviceLayers(*Configs);
+	auto WantedExtensions = VulkanExtension::GetWantedDeviceExtensions(*Configs);
 
 	std::vector<const char*> EnabledLayers;
 	std::vector<const char*> EnabledExtensions;
 
 	std::string LogValidDeviceLayers("Found valid device layers:\n");
 	auto LayerProperties = m_PhysicalDevice.enumerateDeviceLayerProperties();
+
 	for (const auto& LayerProperty : LayerProperties)
 	{
-		auto LayerIt = std::find_if(WantedLayers.begin(), WantedLayers.end(), [&LayerProperty](const std::unique_ptr<VulkanLayer>& Layer) {
-			return strcmp(Layer->GetName(), LayerProperty.layerName.data()) == 0;
-			});
-		if (LayerIt != WantedLayers.end())
-		{
-			if ((*LayerIt)->SetEnabled(Configs, true))
-			{
-				EnabledLayers.push_back(LayerProperty.layerName.data());
-			}
-		}
-
 		LogValidDeviceLayers += StringUtils::Format("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
 	}
 	LOG_CAT_DEBUG(LogVulkanRHI, LogValidDeviceLayers.c_str());
 
+	for (auto& Layer : WantedLayers)
+	{
+		auto LayerIt = std::find_if(LayerProperties.cbegin(), LayerProperties.cend(), [&Layer](const vk::LayerProperties& Property) {
+			return strcmp(Layer->GetName(), Property.layerName.data()) == 0;
+		});
+
+		Layer->SetSupported(LayerIt != LayerProperties.cend());
+
+		if (Layer->IsEnabled())
+		{
+			EnabledLayers.push_back(Layer->GetName());
+		}
+	}
+
 	std::string LogValidDeviceExtensions("Found valid device extensions:\n");
 	auto ExtensionProperties = m_PhysicalDevice.enumerateDeviceExtensionProperties();
+
 	for (const auto& ExtensionProperty : ExtensionProperties)
 	{
-		auto ExtensionIt = std::find_if(WantedExtensions.begin(), WantedExtensions.end(), [&ExtensionProperty](const std::unique_ptr<VulkanExtension>& Extension) {
-			return strcmp(Extension->GetName(), ExtensionProperty.extensionName.data()) == 0;
-			});
-		if (ExtensionIt != WantedExtensions.end())
-		{
-			if ((*ExtensionIt)->SetEnabled(Configs, true))
-			{
-				EnabledExtensions.push_back(ExtensionProperty.extensionName.data());
-			}
-		}
-
 		LogValidDeviceExtensions += StringUtils::Format("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
 	}
 	LOG_CAT_DEBUG(LogVulkanRHI, LogValidDeviceExtensions.c_str());
+
+	for (auto& Ext : WantedExtensions)
+	{
+		auto ExtensionIt = std::find_if(ExtensionProperties.cbegin(), ExtensionProperties.cend(), [&Ext](const vk::ExtensionProperties& Property) {
+			return strcmp(Ext->GetName(), Property.extensionName.data()) == 0;
+		});
+
+		Ext->SetSupported(ExtensionIt != ExtensionProperties.cend());
+
+		if (Ext->IsEnabled())
+		{
+			EnabledExtensions.push_back(Ext->GetName());
+		}
+	}
 
 	LogEnabledLayerAndExtensions(WantedLayers, WantedExtensions, "device");
 
@@ -179,9 +187,9 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 
 	for (auto& Extension : WantedExtensions)
 	{
-		if (Extension->IsEnabled())
+		if (Extension->IsEnabled() && Extension->GetOnDeviceCreation())
 		{
-			Cast<VulkanDeviceExtension>(Extension.get())->PreDeviceCreation(Configs, CreateInfo);
+			Extension->GetOnDeviceCreation()(*Configs, CreateInfo);
 		}
 	}
 

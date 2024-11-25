@@ -117,70 +117,78 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugReportCallback(
 
 VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 {
-	auto WantedLayers = VulkanLayer::GetWantedInstanceLayers();
-	auto WantedExtensions = VulkanExtension::GetWantedInstanceExtensions();
+	auto WantedLayers = VulkanLayer::GetWantedInstanceLayers(*Configs);
+	auto WantedExtensions = VulkanExtension::GetWantedInstanceExtensions(*Configs);
 
 	std::vector<const char*> EnabledLayers;
 	std::vector<const char*> EnabledExtensions;
 
-	std::string LogValidInstanceLayers("VulkanRHI: Found valid instance layers:\n");
 	auto LayerProperties = vk::enumerateInstanceLayerProperties();
+	std::string LogValidInstanceLayers("VulkanRHI: Found valid instance layers:\n");
+
 	for (const auto& LayerProperty : LayerProperties)
 	{
-		auto LayerIt = std::find_if(WantedLayers.begin(), WantedLayers.end(), [&LayerProperty](const std::unique_ptr<VulkanLayer>& Layer) {
-			return strcmp(Layer->GetName(), LayerProperty.layerName.data()) == 0;
-			});
-		if (LayerIt != WantedLayers.end())
-		{
-			if ((*LayerIt)->SetEnabled(Configs, true))
-			{
-				EnabledLayers.push_back(LayerProperty.layerName.data());
-			}
-		}
-
 		LogValidInstanceLayers += StringUtils::Format("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
 	}
 	LOG_CAT_DEBUG(LogVulkanRHI, LogValidInstanceLayers.c_str());
+	
+	for (auto& Layer : WantedLayers)
+	{
+		auto LayerPropertyIt = std::find_if(LayerProperties.cbegin(), LayerProperties.cend(), [&Layer](const vk::LayerProperties& Property) {
+			return strcmp(Property.layerName.data(), Layer->GetName());
+		});
+		
+		Layer->SetSupported(LayerPropertyIt != LayerProperties.cend());
+		
+		if (Layer->IsEnabled())
+		{
+			EnabledLayers.push_back(Layer->GetName());
+		}
+	}
 
-	VulkanExtensionArray::iterator DebugUtilExt = WantedExtensions.end();
-	VulkanExtensionArray::iterator DebugReportExt = WantedExtensions.end();
+	VulkanExtension* DebugUtilExt = nullptr;
+	VulkanExtension* DebugReportExt = nullptr;
 
 	std::string LogValidInstanceExtensions("Found valid instance extensions:\n");
 	auto ExtensionProperties = vk::enumerateInstanceExtensionProperties();
+
 	for (const auto& ExtensionProperty : ExtensionProperties)
 	{
-		auto ExtensionIt = std::find_if(WantedExtensions.begin(), WantedExtensions.end(), [&ExtensionProperty](const std::unique_ptr<VulkanExtension>& Extension) {
-			return strcmp(Extension->GetName(), ExtensionProperty.extensionName.data()) == 0;
-			});
-		if (ExtensionIt != WantedExtensions.end())
-		{
-			if ((*ExtensionIt)->SetEnabled(Configs, true))
-			{
-				EnabledExtensions.push_back(ExtensionProperty.extensionName.data());
-			}
-
-			if (std::strcmp((*ExtensionIt)->GetName(), VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0)
-			{
-				DebugUtilExt = ExtensionIt;
-			}
-			if (std::strcmp((*ExtensionIt)->GetName(), VK_EXT_DEBUG_REPORT_EXTENSION_NAME) == 0)
-			{
-				DebugReportExt = ExtensionIt;
-			}
-		}
-
 		LogValidInstanceExtensions += StringUtils::Format("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
 	}
 	LOG_CAT_DEBUG(LogVulkanRHI, LogValidInstanceExtensions.c_str());
 
-	if (DebugUtilExt != WantedExtensions.end() && (*DebugUtilExt)->IsEnabled())
+	for (auto& Ext : WantedExtensions)
 	{
-		if (DebugReportExt != WantedExtensions.end() && (*DebugReportExt)->IsEnabled())
+		auto ExtensionIt = std::find_if(ExtensionProperties.cbegin(), ExtensionProperties.cend(), [&Ext](const vk::ExtensionProperties& Property) {
+			return strcmp(Property.extensionName.data(), Ext->GetName()) == 0;
+		});
+
+		Ext->SetSupported(ExtensionIt != ExtensionProperties.cend());
+
+		if (Ext->IsEnabled())
 		{
-			(*DebugReportExt)->SetEnabled(Configs, false);
+			EnabledExtensions.push_back(Ext->GetName());
+
+			if (std::strcmp(Ext->GetName(), VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0)
+			{
+				DebugUtilExt = Ext.get();
+			}
+			if (std::strcmp(Ext->GetName(), VK_EXT_DEBUG_REPORT_EXTENSION_NAME) == 0)
+			{
+				DebugReportExt = Ext.get();
+			}
+		}
+	}
+
+	if (DebugUtilExt && DebugUtilExt->IsEnabled())
+	{
+		if (DebugReportExt && DebugReportExt->IsEnabled())
+		{
+			DebugReportExt->SetEnabledInConfig(false);
 			EnabledExtensions.erase(std::find_if(EnabledExtensions.begin(), EnabledExtensions.end(), [](const char* ExtensionName) {
 				return strcmp(ExtensionName, VK_EXT_DEBUG_REPORT_EXTENSION_NAME) == 0;
-				}));
+			}));
 		}
 	}
 
@@ -196,9 +204,9 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 
 	for (auto& Extension : WantedExtensions)
 	{
-		if (Extension->IsEnabled())
+		if (Extension->IsEnabled() && Extension->GetOnInstanceCreation())
 		{
-			Cast<VulkanInstanceExtension>(Extension.get())->PreInstanceCreation(const_cast<VulkanLayerExtensionConfigurations*>(Configs), CreateInfo);
+			Extension->GetOnInstanceCreation()(*Configs, CreateInfo);
 		}
 	}
 
@@ -208,7 +216,7 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 	VULKAN_HPP_DEFAULT_DISPATCHER.init(m_Instance);
 #endif
 
-	SetupRuntimeDebug(Configs, (*DebugUtilExt)->IsEnabled(), (*DebugReportExt)->IsEnabled());
+	SetupRuntimeDebug(Configs, DebugUtilExt->IsEnabled(), DebugReportExt->IsEnabled());
 }
 
 void VulkanInstance::SetupRuntimeDebug(const VulkanLayerExtensionConfigurations* Configs, bool EnableDebugUtils, bool EnableDebugReports)
