@@ -42,11 +42,13 @@ workspace "Rockcat"
 			location "./Out/Intermediate/VCProjects"
 			files {
 				"./Source/Runtime/**",
-				"./Assets/Shaders/*.hlsli",
-				"./Assets/Shaders/*.vert",
-				"./Assets/Shaders/*.frag",
-				"./Assets/Shaders/*.comp",
-				"./Assets/Shaders/*.h",
+				"./Assets/Shaders/**"
+			}
+			removefiles {
+				"./Assets/**.json"
+			}
+			vpaths {
+				["Source/*"] = { "./Source/Runtime/**" },
 			}
 			defines { "STB_IMAGE_IMPLEMENTATION" }
 			includedirs {
