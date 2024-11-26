@@ -46,41 +46,93 @@ protected:
 
 struct RHIFrameBufferCreateInfo
 {
+	struct RHIAttachment
+	{
+		const RHITexture* Texture = nullptr;
+		RHISubresource Subresource = RHI::AllSubresource;
+
+		uint32_t GetWidth() const { assert(Texture); return Texture->GetWidth() / (1 << Subresource.BaseMipLevel); }
+		uint32_t GetHeight() const { assert(Texture); return Texture->GetHeight() / (1 << Subresource.BaseMipLevel); }
+		uint32_t GetArrayLayers() const { return Subresource.NumLayers; }
+	};
+
 	uint32_t Width = 0u;
 	uint32_t Height = 0u;
 	uint32_t ArrayLayers = 0u;
+
+	RHIAttachment DepthStencilAttachment;
+	std::vector<RHIAttachment> ColorAttachments;
+
 	std::string Name;
 
-	const RHITexture* DepthStencilAttachment = nullptr;
-	std::vector<const RHITexture*> ColorAttachments;
+	inline uint32_t GetNumColorAttachments() const { return NumColorAttachments; }
 
-	inline RHIFrameBufferCreateInfo& SetWidth(uint32_t InWidth) { Width = InWidth; }
-	inline RHIFrameBufferCreateInfo& SetHeight(uint32_t InHeight) { Height = InHeight; }
-	inline RHIFrameBufferCreateInfo& SetArrayLayers(uint32_t InLayers) { ArrayLayers = InLayers; }
-
-	inline RHIFrameBufferCreateInfo& AddColorAttachment(const RHITexture* Color)
+	inline RHIFrameBufferCreateInfo& AddColorAttachment(const RHITexture* Texture, RHISubresource Subresource = RHI::AllSubresource)
 	{
-		assert(ColorAttachments.size() < ERHILimitations::MaxRenderTargets && Color && RHI::IsColor(Color->GetFormat()));
-		ColorAttachments.emplace_back(Color);
+		assert(Texture && ColorAttachments.size() < (ERHILimitations::MaxRenderTargets - 1u) && RHI::IsColor(Texture->GetFormat()));
+
+		auto& Attachment = ColorAttachments.emplace_back(RHIAttachment{
+			Texture,
+			Subresource
+		});
+
+		SetWidth(Attachment.GetWidth());
+		SetHeight(Attachment.GetHeight());
+		SetArrayLayers(Attachment.GetArrayLayers());
+		++NumColorAttachments;
+
 		return *this;
 	}
 
-	inline RHIFrameBufferCreateInfo& SetColorAttachment(uint32_t Index, const RHITexture* Color)
+	inline RHIFrameBufferCreateInfo& SetColorAttachment(uint32_t Index, const RHITexture* Texture, RHISubresource Subresource = RHI::AllSubresource)
 	{
-		assert(Index < ERHILimitations::MaxRenderTargets && Color && RHI::IsColor(Color->GetFormat()));
-		ColorAttachments[Index] = Color;
+		assert(Texture && Index < ColorAttachments.size() && Index < ERHILimitations::MaxRenderTargets && RHI::IsColor(Texture->GetFormat()));
+
+		auto& Attachment = ColorAttachments[Index];
+		Attachment.Texture = Texture;
+		Attachment.Subresource = Subresource;
+
+		SetWidth(Attachment.GetWidth());
+		SetHeight(Attachment.GetHeight());
+		SetArrayLayers(Attachment.GetArrayLayers());
+
 		return *this;
 	}
 
-	inline RHIFrameBufferCreateInfo& SetDepthStencilAttachment(const RHITexture* DepthStencil)
+	inline RHIFrameBufferCreateInfo& SetDepthStencilAttachment(const RHITexture* Texture, RHISubresource Subresource = RHI::AllSubresource)
 	{
-		assert(DepthStencil && RHI::IsDepthStenci(DepthStencil->GetFormat()));
-		DepthStencilAttachment = DepthStencil;
+		assert(Texture && (RHI::IsDepth(Texture->GetFormat()) || RHI::IsDepthStencil(Texture->GetFormat())));
+
+		DepthStencilAttachment.Texture = Texture;
+		DepthStencilAttachment.Subresource = Subresource;
+
+		SetWidth(DepthStencilAttachment.GetWidth());
+		SetHeight(DepthStencilAttachment.GetHeight());
+		SetArrayLayers(DepthStencilAttachment.GetArrayLayers());
+
 		return *this;
 	}
 
 	template<class T>
 	inline RHIFrameBufferCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
+private:
+	uint32_t NumColorAttachments = 0u;
+
+	void SetWidth(uint32_t InWidth)
+	{
+		assert(Width == 0 || InWidth == Width);
+		Width = InWidth;
+	}
+	void SetHeight(uint32_t InHeight)
+	{
+		assert(Height == 0 || InHeight == Height);
+		Height = InHeight;
+	}
+	void SetArrayLayers(uint32_t InArrayLayers)
+	{
+		assert(ArrayLayers == 0 || InArrayLayers == ArrayLayers);
+		ArrayLayers = InArrayLayers;
+	}
 };
 
 class RHIFrameBuffer : public RHIResource

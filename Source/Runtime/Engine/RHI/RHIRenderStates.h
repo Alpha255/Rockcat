@@ -311,55 +311,72 @@ enum class ERHIAttachmentStoreOp : uint8_t
 	DontCare
 };
 
-struct RHIAttachmentReference
-{
-	uint32_t Index = ~0u; /// VK_ATTACHMENT_UNUSED
-	ERHIResourceState State = ERHIResourceState::Unknown;
-};
-
-struct RHIAttachmentDesc
-{
-	ERHIFormat Format = ERHIFormat::Unknown;
-	ERHISampleCount SampleCount = ERHISampleCount::Sample_1_Bit;
-	ERHIAttachmentLoadOp LoadOp = ERHIAttachmentLoadOp::DontCare;
-	ERHIAttachmentStoreOp StoreOp = ERHIAttachmentStoreOp::DontCare;
-	ERHIAttachmentLoadOp StencilLoadOp = ERHIAttachmentLoadOp::DontCare;
-	ERHIAttachmentStoreOp StencilStoreOp = ERHIAttachmentStoreOp::DontCare;
-	ERHIResourceState InitialState = ERHIResourceState::Unknown;
-	ERHIResourceState FinalState = ERHIResourceState::Unknown;
-
-	inline RHIAttachmentDesc& SetFormat(ERHIFormat InFormat) { Format = InFormat; return *this; }
-	inline RHIAttachmentDesc& SetSampleCount(ERHISampleCount InSampleCount) { SampleCount = InSampleCount; return *this; }
-	inline RHIAttachmentDesc& SetLoadOp(ERHIAttachmentLoadOp InLoadOp) { LoadOp = InLoadOp; return *this; }
-	inline RHIAttachmentDesc& SetStoreOp(ERHIAttachmentStoreOp InStoreOp) { StoreOp = InStoreOp; return *this; }
-	inline RHIAttachmentDesc& SetStencilLoadOp(ERHIAttachmentLoadOp InLoadOp) { StencilLoadOp = InLoadOp; return *this; }
-	inline RHIAttachmentDesc& SetStencilStoreOp(ERHIAttachmentStoreOp InStoreOp) { StencilStoreOp = InStoreOp; return *this; }
-	inline RHIAttachmentDesc& SetInitialState(ERHIResourceState InState) { InitialState = InState; return *this; }
-	inline RHIAttachmentDesc& SetFinalState(ERHIResourceState InState) { FinalState = InState; return *this; }
-};
-
-struct RHISubpassDependency
-{
-	uint32_t SrcSubpassIndex = ~0u;  /// VK_SUBPASS_EXTERNAL
-	uint32_t DstSubpassIndex = ~0u;
-	//GfxFlags SrcStageFlags = 0u;
-	//GfxFlags DstStageFlags = 0u;
-	//GfxFlags SrcAccessFlags = 0u;
-	//GfxFlags DstAccessFlags = 0u;
-};
-
-struct RHISubpassDesc
-{
-	std::vector<RHIAttachmentReference> InputAttachments;
-	std::vector<RHIAttachmentReference> ColorAttachments;
-	std::vector<RHIAttachmentReference> ResolveAttachments;
-	std::vector<uint32_t> PreserveAttachments;
-	RHIAttachmentReference DepthStencilAttachment;
-};
-
 struct RHIRenderPassCreateInfo
 {
-	std::vector<RHIAttachmentDesc> AttachmentDescs;
-	std::vector<RHISubpassDesc> SubPasses;
-	std::vector<RHISubpassDependency> SubPassDependencies;
+	struct RHIAttachment
+	{
+		ERHIFormat Format = ERHIFormat::Unknown;
+
+		ERHIAttachmentLoadOp LoadOp = ERHIAttachmentLoadOp::None;
+		ERHIAttachmentStoreOp StoreOp = ERHIAttachmentStoreOp::None;
+
+		ERHIAttachmentLoadOp StencilLoadOp = ERHIAttachmentLoadOp::None;
+		ERHIAttachmentStoreOp StencilStoreOp = ERHIAttachmentStoreOp::None;
+	};
+
+	ERHISampleCount SampleCount = ERHISampleCount::Sample_1_Bit;
+
+	std::vector<RHIAttachment> ColorAttachments;
+	RHIAttachment DepthStencilAttachment;
+
+	inline bool HasDepthStencil() const { return RHI::IsDepthStencil(DepthStencilAttachment.Format) || RHI::IsDepth(DepthStencilAttachment.Format); }
+	inline uint32_t GetNumColorAttachments() const { return NumColorAttachments; }
+	inline RHIRenderPassCreateInfo& SetSampleCount(ERHISampleCount InSampleCount) { SampleCount = InSampleCount; return *this; }
+
+	inline RHIRenderPassCreateInfo& AddColorAttachment(ERHIFormat Format, ERHIAttachmentLoadOp LoadOp = ERHIAttachmentLoadOp::DontCare, ERHIAttachmentStoreOp StoreOp = ERHIAttachmentStoreOp::DontCare)
+	{
+		assert(RHI::IsColor(Format) && ColorAttachments.size() < (ERHILimitations::MaxRenderTargets - 1u));
+
+		ColorAttachments.emplace_back(RHIAttachment
+			{
+				Format,
+				LoadOp,
+				StoreOp,
+				ERHIAttachmentLoadOp::DontCare,
+				ERHIAttachmentStoreOp::DontCare
+			});
+		++NumColorAttachments;
+		return *this;
+	}
+
+	inline RHIRenderPassCreateInfo& SetColorAttachment(uint32_t Index, ERHIFormat Format, ERHIAttachmentLoadOp LoadOp = ERHIAttachmentLoadOp::DontCare, ERHIAttachmentStoreOp StoreOp = ERHIAttachmentStoreOp::DontCare)
+	{
+		assert(RHI::IsColor(Format) && Index < ColorAttachments.size() && Index < ERHILimitations::MaxRenderTargets);
+
+		ColorAttachments[Index].Format = Format;
+		ColorAttachments[Index].LoadOp = LoadOp;
+		ColorAttachments[Index].StoreOp = StoreOp;
+
+		return *this;
+	}
+
+	inline RHIRenderPassCreateInfo& SetDepthStencilAttachment(
+		ERHIFormat Format,
+		ERHIAttachmentLoadOp LoadOp = ERHIAttachmentLoadOp::DontCare,
+		ERHIAttachmentStoreOp StoreOp = ERHIAttachmentStoreOp::DontCare,
+		ERHIAttachmentLoadOp StencilLoadOp = ERHIAttachmentLoadOp::DontCare,
+		ERHIAttachmentStoreOp StencilStoreOp = ERHIAttachmentStoreOp::DontCare)
+	{
+		assert(RHI::IsDepthStencil(Format) || RHI::IsDepth(Format));
+
+		DepthStencilAttachment.Format = Format;
+		DepthStencilAttachment.LoadOp = LoadOp;
+		DepthStencilAttachment.StoreOp = StoreOp;
+		DepthStencilAttachment.StencilLoadOp = StencilLoadOp;
+		DepthStencilAttachment.StencilStoreOp = StencilStoreOp;
+
+		return *this;
+	}
+private:
+	uint32_t NumColorAttachments = 0u;
 };

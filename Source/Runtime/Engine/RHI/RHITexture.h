@@ -22,33 +22,33 @@ struct RHISubresource
 	static constexpr uint32_t AllArrayLayers = ~0u;
 
 	uint32_t BaseMipLevel = 0u;
-	uint32_t LevelCount = 1u;
+	uint32_t NumMips = 1u;
 
 	uint32_t BaseArrayLayer = 0u;
-	uint32_t LayerCount = 1u;
+	uint32_t NumLayers = 1u;
 
 	struct Hasher
 	{
 		size_t operator()(const RHISubresource& Subresource) const noexcept
 		{
-			return ComputeHash(Subresource.BaseMipLevel, Subresource.LevelCount, Subresource.BaseArrayLayer, Subresource.LayerCount);
+			return ComputeHash(Subresource.BaseMipLevel, Subresource.NumMips, Subresource.BaseArrayLayer, Subresource.NumLayers);
 		}
 	};
 
 	bool operator==(const RHISubresource& Other) const
 	{
 		return BaseMipLevel == Other.BaseMipLevel &&
-			LevelCount == Other.LevelCount &&
+			NumMips == Other.NumMips &&
 			BaseArrayLayer == Other.BaseArrayLayer &&
-			LayerCount == Other.LayerCount;
+			NumLayers == Other.NumLayers;
 	}
 
 	bool operator!=(const RHISubresource& Other) const
 	{
 		return BaseMipLevel != Other.BaseMipLevel ||
-			LevelCount != Other.LevelCount ||
+			NumMips != Other.NumMips ||
 			BaseArrayLayer != Other.BaseArrayLayer ||
-			LayerCount != Other.LayerCount;
+			NumLayers != Other.NumLayers;
 	}
 };
 

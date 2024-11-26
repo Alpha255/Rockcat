@@ -25,7 +25,7 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 	{
 		//m_VkAttributes.Aspect = VK_IMAGE_ASPECT_COLOR_BIT;
 	}
-	else if (RHI::IsDepthStenci(CreateInfo.Format))
+	else if (RHI::IsDepthStencil(CreateInfo.Format))
 	{
 		//m_VkAttributes.Aspect = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
 	}

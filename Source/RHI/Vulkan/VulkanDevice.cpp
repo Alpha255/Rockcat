@@ -195,13 +195,16 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 	VERIFY_VK(m_PhysicalDevice.createDevice(&CreateInfo, nullptr, &m_LogicalDevice));
 
 	auto PhysicalDeviceProperties = m_PhysicalDevice.getProperties();
-	LOG_CAT_INFO(LogVulkanRHI, "Created vulkan device on adapter: \"{}\", DeviceID = {}. DeviceType = {}. VulkanAPI Version: {}.{}.{}",
+	LOG_CAT_INFO(LogVulkanRHI, "Created vulkan device on adapter: \"{}\", DeviceID = {}. DeviceType = {}. VulkanAPI Version: {}.{}.{}, Driver Version: {}.{}.{}",
 		PhysicalDeviceProperties.deviceName.data(),
 		PhysicalDeviceProperties.deviceID,
 		vk::to_string(PhysicalDeviceProperties.deviceType).c_str(),
 		VK_VERSION_MAJOR(PhysicalDeviceProperties.apiVersion),
 		VK_VERSION_MINOR(PhysicalDeviceProperties.apiVersion),
-		VK_VERSION_PATCH(PhysicalDeviceProperties.apiVersion));
+		VK_VERSION_PATCH(PhysicalDeviceProperties.apiVersion),
+		VK_VERSION_MAJOR(PhysicalDeviceProperties.driverVersion),
+		VK_VERSION_MINOR(PhysicalDeviceProperties.driverVersion),
+		VK_VERSION_PATCH(PhysicalDeviceProperties.driverVersion));
 
 	m_Limits = PhysicalDeviceProperties.limits;
 

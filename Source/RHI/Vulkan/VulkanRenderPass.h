@@ -5,7 +5,7 @@
 class VulkanRenderPass final : public VkHwResource<vk::RenderPass>
 {
 public:
-	VulkanRenderPass(const class VulkanDevice& Device, const RHIFrameBufferCreateInfo& CreateInfo);
+	VulkanRenderPass(const class VulkanDevice& Device, const RHIRenderPassCreateInfo& CreateInfo);
 	
 	~VulkanRenderPass() = default;
 protected:

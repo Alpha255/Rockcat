@@ -3,6 +3,7 @@
 #include "Engine/Asset/SceneAsset.h"
 #include "Engine/Asset/AssetDatabase.h"
 #include "Engine/Asset/GlobalShaders/DefaultShading.h"
+#include <assimp/version.h>
 #include <Submodules/assimp/include/assimp/Importer.hpp>
 #include <Submodules/assimp/include/assimp/ProgressHandler.hpp>
 #include <Submodules/assimp/include/assimp/scene.h>
@@ -25,6 +26,7 @@ public:
 			AssetType("Stereolithography", ".stl", AssetType::EContentsType::Text),
 			AssetType("XFile", ".x", AssetType::EContentsType::Text)})
 	{
+		LOG_INFO("Create Assimp scene importer, assimp version: {}.{}.{}", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionPatch());
 	}
 
 	void LoadAssetData(std::shared_ptr<Asset>&, AssetType::EContentsType) override final {} /// Just load from file to avoid base path of texture broken

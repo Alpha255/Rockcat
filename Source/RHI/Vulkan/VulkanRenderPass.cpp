@@ -2,7 +2,7 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "Engine/Services/SpdLogService.h"
 
-VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIFrameBufferCreateInfo& CreateInfo)
+VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIRenderPassCreateInfo& CreateInfo)
 	: VkHwResource(Device)
 {
 	/*********************************************************************************************************************
@@ -36,34 +36,40 @@ VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIFrameBuf
 
 	std::vector<vk::AttachmentReference> ColorAttachmentReferences(CreateInfo.ColorAttachments.size());
 	std::vector<vk::AttachmentDescription> AttachmentDescriptions(CreateInfo.ColorAttachments.size());
+
 	vk::AttachmentReference DepthAttachmentReference;
 
-	for (uint32_t ColorAttachmentIndex = 0u; ColorAttachmentIndex < CreateInfo.ColorAttachments.size(); ++ColorAttachmentIndex)
+	auto SampleCount = GetSampleCount(CreateInfo.SampleCount);
+	for (uint32_t Index = 0u; Index < CreateInfo.ColorAttachments.size(); ++Index)
 	{
-		AttachmentDescriptions[ColorAttachmentIndex]
-			.setFormat(GetFormat(CreateInfo.ColorAttachments[ColorAttachmentIndex]->GetFormat()))
-			.setSamples(vk::SampleCountFlagBits::e1)
-			.setLoadOp(vk::AttachmentLoadOp::eLoad)
-			.setStoreOp(vk::AttachmentStoreOp::eStore)
-			.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-			.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+		auto& Attachment = CreateInfo.ColorAttachments[Index];
+
+		AttachmentDescriptions[Index]
+			.setFormat(GetFormat(Attachment.Format))
+			.setSamples(SampleCount)
+			.setLoadOp(GetAttachmentLoadOp(Attachment.LoadOp))
+			.setStoreOp(GetAttachmentStoreOp(Attachment.StoreOp))
+			.setStencilLoadOp(GetAttachmentLoadOp(Attachment.StencilLoadOp))
+			.setStencilStoreOp(GetAttachmentStoreOp(Attachment.StencilStoreOp))
 			.setInitialLayout(vk::ImageLayout::eColorAttachmentOptimal)
 			.setFinalLayout(vk::ImageLayout::eColorAttachmentOptimal);
 
-		ColorAttachmentReferences[ColorAttachmentIndex]
-			.setAttachment(ColorAttachmentIndex)
+		ColorAttachmentReferences[Index]
+			.setAttachment(Index)
 			.setLayout(vk::ImageLayout::eAttachmentOptimal);
 	}
 
-	if (CreateInfo.DepthStencilAttachment)
+	if (CreateInfo.HasDepthStencil())
 	{
+		auto& Attachment = CreateInfo.DepthStencilAttachment;
+
 		AttachmentDescriptions.emplace_back(vk::AttachmentDescription())
-			.setFormat(GetFormat(CreateInfo.DepthStencilAttachment->GetFormat()))
-			.setSamples(vk::SampleCountFlagBits::e1)
-			.setLoadOp(vk::AttachmentLoadOp::eLoad)
-			.setStoreOp(vk::AttachmentStoreOp::eStore)
-			.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-			.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+			.setFormat(GetFormat(Attachment.Format))
+			.setSamples(SampleCount)
+			.setLoadOp(GetAttachmentLoadOp(Attachment.LoadOp))
+			.setStoreOp(GetAttachmentStoreOp(Attachment.StoreOp))
+			.setStencilLoadOp(GetAttachmentLoadOp(Attachment.StencilLoadOp))
+			.setStencilStoreOp(GetAttachmentStoreOp(Attachment.StencilStoreOp))
 			.setInitialLayout(vk::ImageLayout::eStencilAttachmentOptimal)
 			.setFinalLayout(vk::ImageLayout::eStencilAttachmentOptimal);
 

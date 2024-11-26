@@ -137,7 +137,7 @@ namespace RHI
 
 	bool IsColor(ERHIFormat Format);
 	bool IsDepth(ERHIFormat Format);
-	bool IsDepthStenci(ERHIFormat Format);
+	bool IsDepthStencil(ERHIFormat Format);
 
 	void CalculateFormatBytes(uint32_t Width, uint32_t Height, ERHIFormat Format, __out size_t& SliceBytes, __out size_t& RowBytes);
 }

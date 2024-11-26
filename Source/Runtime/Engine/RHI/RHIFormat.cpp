@@ -171,7 +171,7 @@ namespace RHI
 
 	ERHIFormat GetRHIFormat(DXGI_FORMAT DXGIFormat)
 	{
-		for (auto & Attrs : s_FormatAttributes)
+		for (auto& Attrs : s_FormatAttributes)
 		{
 			if (Attrs.DXGIFormat == DXGIFormat)
 			{
@@ -197,7 +197,7 @@ namespace RHI
 
 	bool IsColor(ERHIFormat Format)
 	{
-		return !(IsDepth(Format) || IsDepthStenci(Format));
+		return !(IsDepth(Format) || IsDepthStencil(Format)) && Format != ERHIFormat::Unknown;
 	}
 
 	bool IsDepth(ERHIFormat Format)
@@ -205,7 +205,7 @@ namespace RHI
 		return Format == ERHIFormat::D16_UNorm || Format == ERHIFormat::D32_Float;
 	}
 
-	bool IsDepthStenci(ERHIFormat Format)
+	bool IsDepthStencil(ERHIFormat Format)
 	{
 		return Format == ERHIFormat::D24_UNorm_S8_UInt || Format == ERHIFormat::D32_Float_S8_UInt;
 	}
