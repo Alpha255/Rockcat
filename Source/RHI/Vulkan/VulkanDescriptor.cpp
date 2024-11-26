@@ -44,30 +44,29 @@ VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(const VulkanDevice& Device,
 	{
 		for (auto& ResourceInfo : LayoutDesc[Stage])
 		{
-			auto Binding = vk::DescriptorSetLayoutBinding();
-
-			Binding.setBinding(ResourceInfo.Binding)
+			Bindings.emplace_back(vk::DescriptorSetLayoutBinding())
+				.setBinding(ResourceInfo.Binding)
 				.setDescriptorType(GetDescriptorType(ResourceInfo.Type))
 				.setDescriptorCount(1u)
 				.setStageFlags(GetShaderStageFlags(static_cast<ERHIShaderStage>(Stage)))
 				.setPImmutableSamplers(nullptr);
-
-			Bindings.emplace_back(std::move(Binding));
 		}
 	}
 
-	auto vkCreateInfo = vk::DescriptorSetLayoutCreateInfo()
-		.setBindings(Bindings);
-	VERIFY_VK(GetNativeDevice().createDescriptorSetLayout(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+	vk::DescriptorSetLayoutCreateInfo CreateInfo;
+	CreateInfo.setBindings(Bindings);
+
+	VERIFY_VK(GetNativeDevice().createDescriptorSetLayout(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
 VulkanPipelineLayout::VulkanPipelineLayout(const VulkanDevice& Device, const vk::DescriptorSetLayout& DescriptorSetLayout)
 	: VkHwResource(Device)
 {
-	auto vkCreateInfo = vk::PipelineLayoutCreateInfo()
-		.setSetLayoutCount(1u)
+	vk::PipelineLayoutCreateInfo CreateInfo;
+	CreateInfo.setSetLayoutCount(1u)
 		.setPSetLayouts(&DescriptorSetLayout); // TODO: PushConstants
-	VERIFY_VK(GetNativeDevice().createPipelineLayout(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+	
+	VERIFY_VK(GetNativeDevice().createPipelineLayout(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
 std::shared_ptr<VulkanDescriptorLimitations> VulkanDescriptorPool::s_DescriptorLimitations;
@@ -110,16 +109,18 @@ VulkanDescriptorPool::VulkanDescriptorPool(const VulkanDevice& Device)
 	std::vector<vk::DescriptorPoolSize> DescriptorPoolSizes(static_cast<size_t>(vk::DescriptorType::eInputAttachment) + 1u);
 	for (auto DescriptorIndex = vk::DescriptorType::eSampler; DescriptorIndex <= vk::DescriptorType::eInputAttachment;)
 	{
-		DescriptorPoolSizes[static_cast<size_t>(DescriptorIndex)] = vk::DescriptorPoolSize()
+		DescriptorPoolSizes[static_cast<size_t>(DescriptorIndex)]
 			.setDescriptorCount(ConfigLimits[static_cast<size_t>(DescriptorIndex)])
 			.setType(DescriptorIndex);
+
 		DescriptorIndex = static_cast<vk::DescriptorType>(static_cast<size_t>(DescriptorIndex) + 1u);
 	}
 
-	auto vkCreateInfo = vk::DescriptorPoolCreateInfo()
-		.setPoolSizes(DescriptorPoolSizes)
+	vk::DescriptorPoolCreateInfo CreateInfo;
+	CreateInfo.setPoolSizes(DescriptorPoolSizes)
 		.setMaxSets(s_DescriptorLimitations->MaxDescriptorSetsPerPool);
-	VERIFY_VK(GetNativeDevice().createDescriptorPool(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+	
+	VERIFY_VK(GetNativeDevice().createDescriptorPool(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
 void VulkanDescriptorPool::Reset()
@@ -136,13 +137,14 @@ vk::DescriptorSet VulkanDescriptorPool::Alloc(vk::DescriptorSetLayout Descriptor
 {
 	assert(!IsFull() && DescriptorSetLayout);
 
-	auto AllocInfo = vk::DescriptorSetAllocateInfo()
-		.setDescriptorPool(m_Native)
+	vk::DescriptorSetAllocateInfo AllocInfo;
+	AllocInfo.setDescriptorPool(m_Native)
 		.setPSetLayouts(&DescriptorSetLayout)
 		.setDescriptorSetCount(1u);
 
 	vk::DescriptorSet DescriptorSet;
 	VERIFY_VK(GetNativeDevice().allocateDescriptorSets(&AllocInfo, &DescriptorSet));
+
 	++m_AllocatedCount;
 	return DescriptorSet;
 }

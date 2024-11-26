@@ -2,18 +2,21 @@
     "struct VulkanLayerExtensionConfigurations": {
         "DebugLayerLevel": 3,
         "HasKhronosValidationLayer": true,
-        "HasKHRSurfaceExt": true,
-        "HasDebugUtilsExt": true,
-        "HasDebugReportExt": true,
-        "HasValidationFeaturesExt": true,
-        "HasValidationFeaturesExt_GPUAssisted": false,
-        "HasValidationFeaturesExt_GPUAssistedReserveBindingSlot": false,
-        "HasValidationFeaturesExt_BestPractices": true,
-        "HasValidationFeaturesExt_DebugPrintf": false,
-        "HasValidationFeaturesExt_Synchronization": true,
+        "HasKHRSurface": true,
+        "HasDebugUtils": true,
+        "HasDebugReport": true,
+        "HasValidationFeatures": true,
+        "HasValidationFeatures_GPUAssisted": false,
+        "HasValidationFeatures_GPUAssistedReserveBindingSlot": false,
+        "HasValidationFeatures_BestPractices": true,
+        "HasValidationFeatures_DebugPrintf": false,
+        "HasValidationFeatures_Synchronization": true,
         "HasGetPhysicalDeviceProperties2": true,
-        "HasDebugMarkerExt": true,
+        "HasDebugMarker": true,
         "HasTimelineSemaphore": false,
-        "HasFullscreenExclusive": false
+        "HasFullscreenExclusive": false,
+        "HasDynamicState": true,
+        "HasDepthStencilResolve":  false,
+        "HasRenderPass2": true
     }
 }

@@ -57,8 +57,7 @@ VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIFrameBuf
 
 	if (CreateInfo.DepthStencilAttachment)
 	{
-		AttachmentDescriptions.emplace_back(
-			vk::AttachmentDescription()
+		AttachmentDescriptions.emplace_back(vk::AttachmentDescription())
 			.setFormat(GetFormat(CreateInfo.DepthStencilAttachment->GetFormat()))
 			.setSamples(vk::SampleCountFlagBits::e1)
 			.setLoadOp(vk::AttachmentLoadOp::eLoad)
@@ -66,15 +65,14 @@ VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIFrameBuf
 			.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
 			.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
 			.setInitialLayout(vk::ImageLayout::eStencilAttachmentOptimal)
-			.setFinalLayout(vk::ImageLayout::eStencilAttachmentOptimal));
+			.setFinalLayout(vk::ImageLayout::eStencilAttachmentOptimal);
 
-		DepthAttachmentReference
-			.setAttachment(static_cast<uint32_t>(AttachmentDescriptions.size()) - 1u)
+		DepthAttachmentReference.setAttachment(static_cast<uint32_t>(AttachmentDescriptions.size()) - 1u)
 			.setLayout(vk::ImageLayout::eStencilAttachmentOptimal);
 	}
 
-	auto SubpassDescription = vk::SubpassDescription()
-		.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
+	vk::SubpassDescription SubpassDescription;
+	SubpassDescription.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
 		.setColorAttachments(ColorAttachmentReferences)
 		.setPDepthStencilAttachment(&DepthAttachmentReference);
 
@@ -86,8 +84,8 @@ VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIFrameBuf
 	VK_DEPENDENCY_DEVICE_GROUP_BIT specifies that dependencies are non-device-local dependency.
 	************************************************************************************/
 
-	auto SubpassDependency = vk::SubpassDependency()
-		.setSrcSubpass(VK_SUBPASS_EXTERNAL)
+	vk::SubpassDependency SubpassDependency;
+	SubpassDependency.setSrcSubpass(VK_SUBPASS_EXTERNAL)
 		.setDstSubpass(0u)
 		.setSrcStageMask(vk::PipelineStageFlagBits::eTopOfPipe)
 		.setDstStageMask(vk::PipelineStageFlagBits::eBottomOfPipe)
@@ -95,14 +93,14 @@ VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIFrameBuf
 		.setDstAccessMask(vk::AccessFlagBits::eNoneKHR)
 		.setDependencyFlags(vk::DependencyFlagBits::eByRegion);
 
-	auto vkCreateInfo = vk::RenderPassCreateInfo()
-		.setAttachments(AttachmentDescriptions)
+	vk::RenderPassCreateInfo RenderPassCreateInfo;
+	RenderPassCreateInfo.setAttachments(AttachmentDescriptions)
 		.setSubpassCount(1u)
 		.setPSubpasses(&SubpassDescription)
 		.setDependencyCount(1u)
 		.setPDependencies(&SubpassDependency);
 
-	VERIFY_VK(GetNativeDevice().createRenderPass(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+	VERIFY_VK(GetNativeDevice().createRenderPass(&RenderPassCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
 VulkanFramebuffer::VulkanFramebuffer(const VulkanDevice& Device, const RHIFrameBufferCreateInfo& CreateInfo)
@@ -131,12 +129,12 @@ VulkanFramebuffer::VulkanFramebuffer(const VulkanDevice& Device, const RHIFrameB
 	//	//Attachments.push_back(Image->GetOrCrateImageView(AllSubresource));
 	//}
 
-	auto vkCreateInfo = vk::FramebufferCreateInfo()
+	vk::FramebufferCreateInfo FrameBufferCreateInfo;
 		//.setRenderPass(m_RenderPass)
-		.setAttachments(Attachments)
+	FrameBufferCreateInfo.setAttachments(Attachments)
 		.setWidth(CreateInfo.Width)
 		.setHeight(CreateInfo.Height)
 		.setLayers(CreateInfo.ArrayLayers);
 
-	VERIFY_VK(GetNativeDevice().createFramebuffer(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+	VERIFY_VK(GetNativeDevice().createFramebuffer(&FrameBufferCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }

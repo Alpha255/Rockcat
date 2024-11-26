@@ -170,17 +170,16 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 	std::vector<vk::DeviceQueueCreateInfo> QueueCreateInfos;
 	for (auto QueueFamilyIndex : QueueFamilyIndices)
 	{
-		QueueCreateInfos.emplace_back(std::move(
-			vk::DeviceQueueCreateInfo()
-				.setQueueFamilyIndex(QueueFamilyIndex)
-				.setQueueCount(1u)
-				.setPQueuePriorities(&Priority)));
-		}
+		QueueCreateInfos.emplace_back(vk::DeviceQueueCreateInfo())
+			.setQueueFamilyIndex(QueueFamilyIndex)
+			.setQueueCount(1u)
+			.setPQueuePriorities(&Priority);
+	}
 
 	auto DeviceFeatures = m_PhysicalDevice.getFeatures();
 
-	auto CreateInfo = vk::DeviceCreateInfo()
-		.setQueueCreateInfos(QueueCreateInfos)
+	vk::DeviceCreateInfo CreateInfo;
+	CreateInfo.setQueueCreateInfos(QueueCreateInfos)
 		.setPEnabledLayerNames(EnabledLayers)
 		.setPEnabledExtensionNames(EnabledExtensions)
 		.setPEnabledFeatures(&DeviceFeatures);

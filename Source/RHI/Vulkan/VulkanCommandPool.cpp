@@ -22,21 +22,22 @@ VulkanCommandPool::VulkanCommandPool(const VulkanDevice& Device, uint32_t QueueF
 			If the protected memory feature is not enabled, the VK_COMMAND_POOL_CREATE_PROTECTED_BIT bit of flags must not be set.
 	**************************/
 
-	auto vkCreateInfo = vk::CommandPoolCreateInfo()
-		.setQueueFamilyIndex(QueueFamilyIndex)
+	vk::CommandPoolCreateInfo CreateInfo;
+	CreateInfo.setQueueFamilyIndex(QueueFamilyIndex)
 		.setFlags(vk::CommandPoolCreateFlags());
-	VERIFY_VK(GetNativeDevice().createCommandPool(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+
+	VERIFY_VK(GetNativeDevice().createCommandPool(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
 std::shared_ptr<VulkanCommandBuffer> VulkanCommandPool::AllocateCommandBuffer(ERHICommandBufferLevel Level)
 {
-	auto vkAllocateInfo = vk::CommandBufferAllocateInfo()
-		.setCommandBufferCount(1u)
+	vk::CommandBufferAllocateInfo AllocateInfo;
+	AllocateInfo.setCommandBufferCount(1u)
 		.setCommandPool(GetNative())
 		.setLevel(GetCommandBufferLevel(Level));
 
 	auto CommandBuffer = std::make_shared<VulkanCommandBuffer>(GetDevice(), *this, Level);
-	VERIFY_VK(GetNativeDevice().allocateCommandBuffers(&vkAllocateInfo, &CommandBuffer->GetNative()));
+	VERIFY_VK(GetNativeDevice().allocateCommandBuffers(&AllocateInfo, &CommandBuffer->GetNative()));
 
 	return CommandBuffer;
 }

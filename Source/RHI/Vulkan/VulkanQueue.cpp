@@ -211,14 +211,14 @@ void VulkanQueue::Submit(VulkanCommandBuffer* CommandBuffer, uint32_t NumSignalS
 		WaitSemaphores.push_back(Semaphore->GetNative());
 	}
 
-	auto vkSubmitInfo = vk::SubmitInfo()
-		.setCommandBufferCount(1u)
+	vk::SubmitInfo SubmitInfo;
+	SubmitInfo.setCommandBufferCount(1u)
 		.setPCommandBuffers(&CommandBuffer->GetNative())
 		.setSignalSemaphores(Semaphores)
 		.setWaitSemaphores(WaitSemaphores)
 		.setWaitDstStageMask(CommandBuffer->GetWaitDstStageFlags());
 
-	VERIFY_VK(GetNative().submit(1u, &vkSubmitInfo, CommandBuffer->GetFence()->GetNative()));
+	VERIFY_VK(GetNative().submit(1u, &SubmitInfo, CommandBuffer->GetFence()->GetNative()));
 }
 
 void VulkanQueue::WaitIdle()

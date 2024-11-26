@@ -11,10 +11,11 @@ VulkanSurface::VulkanSurface(const VulkanDevice& Device, const void* WindowHandl
 	assert(WindowHandle);
 
 #if defined(PLATFORM_WIN32)
-	auto vkCreateInfo = vk::Win32SurfaceCreateInfoKHR()
-		.setHinstance(reinterpret_cast<::HINSTANCE>(PlatformMisc::GetCurrentModuleHandle()))
+	vk::Win32SurfaceCreateInfoKHR CreateInfo;
+	CreateInfo.setHinstance(reinterpret_cast<::HINSTANCE>(PlatformMisc::GetCurrentModuleHandle()))
 		.setHwnd(reinterpret_cast<::HWND>(const_cast<void*>(WindowHandle)));
-	VERIFY_VK(GetNativeInstance().createWin32SurfaceKHR(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+
+	VERIFY_VK(GetNativeInstance().createWin32SurfaceKHR(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 #else
 	assert(0);
 #endif
@@ -197,8 +198,9 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 	/// VK_SHARING_MODE_CONCURRENT: Images can be used across multiple queue families without explicit ownership transfers,
 	/// concurrent mode requires you to specify at least two distinct queue families
 	vk::SwapchainKHR OldSwapchain = m_Native;
-	auto vkCreateInfo = vk::SwapchainCreateInfoKHR()
-		.setOldSwapchain(m_Native)
+
+	vk::SwapchainCreateInfoKHR CreateInfo;
+	CreateInfo.setOldSwapchain(m_Native)
 		.setSurface(m_Surface->GetNative())
 		.setMinImageCount(PresentMode == vk::PresentModeKHR::eMailbox ? std::min<uint32_t>(SurfaceCapabilities.minImageCount + 1u, SurfaceCapabilities.maxImageCount) : SurfaceCapabilities.minImageCount)
 		.setImageFormat(m_ColorFormat)
@@ -237,12 +239,13 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 	*******************************************************************************************************************************************************************/
 	if (VulkanRHI::GetLayerExtensionConfigs().HasFullscreenExclusive)
 	{
-		auto FullscreenExclusiveInfo = vk::SurfaceFullScreenExclusiveInfoEXT()
-			.setFullScreenExclusive(m_Fullscreen ? vk::FullScreenExclusiveEXT::eAllowed : vk::FullScreenExclusiveEXT::eDisallowed);
-		SetPNext(vkCreateInfo, FullscreenExclusiveInfo);
+		vk::SurfaceFullScreenExclusiveInfoEXT FullscreenExclusiveInfo;
+		FullscreenExclusiveInfo.setFullScreenExclusive(m_Fullscreen ? vk::FullScreenExclusiveEXT::eAllowed : vk::FullScreenExclusiveEXT::eDisallowed);
+
+		SetPNext(CreateInfo, FullscreenExclusiveInfo);
 	}
 
-	VERIFY_VK(GetNativeDevice().createSwapchainKHR(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+	VERIFY_VK(GetNativeDevice().createSwapchainKHR(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
 	if (OldSwapchain)
 	{
@@ -255,8 +258,9 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 	//m_BackBuffers.resize(Count);
 	for (uint32_t ImageIndex = 0u; ImageIndex < Images.size(); ++ImageIndex)
 	{
-		auto CreateInfo = RHITextureCreateInfo()
-			.SetWidth(m_Width)
+		RHITextureCreateInfo TextureCreateInfo;
+		
+		TextureCreateInfo.SetWidth(m_Width)
 			.SetHeight(m_Height)
 			.SetDepth(1u)
 			.SetArrayLayers(1u)
@@ -266,7 +270,7 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 			.SetSampleCount(ERHISampleCount::Sample_1_Bit)
 			.SetUsages(ERHIBufferUsageFlags::None)
 			.SetName(StringUtils::Format("SwapchainImage-%d", ImageIndex));
-		auto Image = std::make_shared<VulkanTexture>(GetDevice(), CreateInfo, Images[ImageIndex]);
+		auto Image = std::make_shared<VulkanTexture>(GetDevice(), TextureCreateInfo, Images[ImageIndex]);
 
 		//FrameBufferDesc Desc;
 		//Desc.AddColorAttachment(Image);
@@ -351,8 +355,8 @@ void VulkanSwapchain::Present()
 
 	/// Before an application can present an image, the image��s layout must be transitioned to the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout, 
 	/// or for a shared presentable image the VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR layout.
-	auto PresentInfo = vk::PresentInfoKHR()
-		.setWaitSemaphores(WaitSemaphores)
+	vk::PresentInfoKHR PresentInfo;
+	PresentInfo.setWaitSemaphores(WaitSemaphores)
 		.setSwapchains(Swapchains)
 		.setPImageIndices(&m_CurImageIndex);
 

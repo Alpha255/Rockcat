@@ -79,7 +79,13 @@ workspace "Rockcat"
 				kind "StaticLib"
 				language "C++"
 				location "./Out/Intermediate/VCProjects"
-				files "./Source/RHI/Vulkan/**"
+				files {
+					"./Source/RHI/Vulkan/**",
+					"./Assets/Configs/VkLayerAndExtensionConfigs.json"
+				}
+				removefiles {
+					"./Source/RHI/Vulkan/Documents/**"
+				}
 				includedirs {
 					"$(SolutionDir)",
 					"$(SolutionDir)Source",
@@ -87,6 +93,14 @@ workspace "Rockcat"
 					"$(SolutionDir)Submodules/cereal/include",
 					"$(SolutionDir)Submodules/spdlog/include",
 					"$(VK_SDK_PATH)/Include",
+				}
+				vpaths {
+					["Configs"] = {
+						"./Assets/Configs/VkLayerAndExtensionConfigs.json"
+					},
+					[""] = {
+						"./Source/RHI/Vulkan/**",
+					}
 				}
 			project "D3D12RHI"
 				kind "StaticLib"

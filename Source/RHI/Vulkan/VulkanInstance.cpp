@@ -194,11 +194,11 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 
 	LogEnabledLayerAndExtensions(WantedLayers, WantedExtensions, "instance");
 
-	auto ApplicationInfo = vk::ApplicationInfo()
-		.setApplicationVersion(VK_HEADER_VERSION_COMPLETE);
+	vk::ApplicationInfo ApplicationInfo;
+	ApplicationInfo.setApplicationVersion(VK_HEADER_VERSION_COMPLETE);
 
-	auto CreateInfo = vk::InstanceCreateInfo()
-		.setPEnabledLayerNames(EnabledLayers)
+	vk::InstanceCreateInfo CreateInfo;
+	CreateInfo.setPEnabledLayerNames(EnabledLayers)
 		.setPEnabledExtensionNames(EnabledExtensions)
 		.setPApplicationInfo(&ApplicationInfo);
 
@@ -216,7 +216,7 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 	VULKAN_HPP_DEFAULT_DISPATCHER.init(m_Instance);
 #endif
 
-	SetupRuntimeDebug(Configs, DebugUtilExt->IsEnabled(), DebugReportExt->IsEnabled());
+	SetupRuntimeDebug(Configs, DebugUtilExt ? DebugUtilExt->IsEnabled() : false, DebugReportExt ? DebugReportExt->IsEnabled() : false);
 }
 
 void VulkanInstance::SetupRuntimeDebug(const VulkanLayerExtensionConfigurations* Configs, bool EnableDebugUtils, bool EnableDebugReports)
@@ -250,11 +250,12 @@ void VulkanInstance::SetupRuntimeDebug(const VulkanLayerExtensionConfigurations*
 				break;
 			}
 
-			auto CreateInfo = vk::DebugUtilsMessengerCreateInfoEXT()
-				.setMessageSeverity(MessageSeverityFlags)
+			vk::DebugUtilsMessengerCreateInfoEXT CreateInfo;
+			CreateInfo.setMessageSeverity(MessageSeverityFlags)
 				.setMessageType(MessageTypeFlags)
 				.setPfnUserCallback(vkDebugUtilsMessengerCallback)
 				.setPUserData(this);
+
 			VERIFY_VK(m_Instance.createDebugUtilsMessengerEXT(&CreateInfo, nullptr, &m_DebugUtilsMessenger));
 		}
 		else if (EnableDebugReports)
@@ -280,10 +281,11 @@ void VulkanInstance::SetupRuntimeDebug(const VulkanLayerExtensionConfigurations*
 				break;
 			}
 
-			auto CreateInfo = vk::DebugReportCallbackCreateInfoEXT()
-				.setFlags(DebugReportFlags)
+			vk::DebugReportCallbackCreateInfoEXT CreateInfo;
+			CreateInfo.setFlags(DebugReportFlags)
 				.setPfnCallback(vkDebugReportCallback)
 				.setPUserData(this);
+
 			VERIFY_VK(m_Instance.createDebugReportCallbackEXT(&CreateInfo, nullptr, &m_DebugReportCallback));
 		}
 	}

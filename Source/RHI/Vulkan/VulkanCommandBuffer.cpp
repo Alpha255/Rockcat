@@ -64,10 +64,10 @@ void VulkanCommandBuffer::Begin()
 
 	assert(m_State == EState::Initial);
 
-	auto vkBeginInfo = vk::CommandBufferBeginInfo()
-		.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+	vk::CommandBufferBeginInfo BeginInfo;
+	BeginInfo.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 	
-	VERIFY_VK(GetNative().begin(&vkBeginInfo));
+	VERIFY_VK(GetNative().begin(&BeginInfo));
 
 	SetState(EState::Recording);
 }
@@ -162,10 +162,11 @@ void VulkanCommandBuffer::BeginDebugMarker(const char* Name, const Math::Color& 
 	}
 	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarker)
 	{
-		auto vkDebugMarkerInfo = vk::DebugMarkerMarkerInfoEXT()
-			.setColor({ MarkerColor.x, MarkerColor.y, MarkerColor.z, MarkerColor.w })
+		vk::DebugMarkerMarkerInfoEXT DebugMarkerInfo;
+
+		DebugMarkerInfo.setColor({ MarkerColor.x, MarkerColor.y, MarkerColor.z, MarkerColor.w })
 			.setPMarkerName(Name);
-		GetNative().debugMarkerBeginEXT(&vkDebugMarkerInfo);
+		GetNative().debugMarkerBeginEXT(&DebugMarkerInfo);
 	}
 }
 
@@ -481,26 +482,27 @@ void VulkanCommandBuffer::SetViewport(const RHIViewport& Viewport)
 {
 	assert(m_State == EState::Recording);
 
-	auto vkViewport = vk::Viewport()
-		.setX(Viewport.LeftTop.x)
+	vk::Viewport ViewportInfo;
+	ViewportInfo.setX(Viewport.LeftTop.x)
 		.setY(Viewport.LeftTop.y)
 		.setWidth(Viewport.Extent.x)
 		.setHeight(Viewport.Extent.y)
 		.setMinDepth(Viewport.DepthRange.x)
 		.setMaxDepth(Viewport.DepthRange.y);
-	GetNative().setViewport(0u, 1u, &vkViewport);
+
+	GetNative().setViewport(0u, 1u, &ViewportInfo);
 }
 
 void VulkanCommandBuffer::SetViewports(const RHIViewport* Viewports, uint32_t NumViewports)
 {
 	assert(m_State == EState::Recording && Viewports);
 
-	std::vector<vk::Viewport> vkViewports(NumViewports);
+	std::vector<vk::Viewport> ViewportInfos(NumViewports);
 	for (uint32_t Index = 0u; Index < NumViewports; ++Index)
 	{
 		auto& Viewport = Viewports[Index];
-		vkViewports[Index] = vk::Viewport()
-			.setX(Viewport.LeftTop.x)
+
+		ViewportInfos[Index].setX(Viewport.LeftTop.x)
 			.setY(Viewport.LeftTop.y)
 			.setWidth(Viewport.Extent.x)
 			.setHeight(Viewport.Extent.y)
@@ -508,32 +510,34 @@ void VulkanCommandBuffer::SetViewports(const RHIViewport* Viewports, uint32_t Nu
 			.setMaxDepth(Viewport.DepthRange.y);
 	}
 
-	GetNative().setViewport(0u, vkViewports);
+	GetNative().setViewport(0u, ViewportInfos);
 }
 
 void VulkanCommandBuffer::SetScissorRect(const RHIScissorRect& ScissorRect)
 {
 	assert(m_State == EState::Recording);
 
-	auto vkRect = vk::Rect2D()
-		.setExtent(vk::Extent2D(ScissorRect.Extent.x, ScissorRect.Extent.y))
+	vk::Rect2D Rect;
+	Rect.setExtent(vk::Extent2D(ScissorRect.Extent.x, ScissorRect.Extent.y))
 		.setOffset(vk::Offset2D(ScissorRect.LeftTop.x, ScissorRect.LeftTop.y));
-	GetNative().setScissor(0u, 1u, &vkRect);
+
+	GetNative().setScissor(0u, 1u, &Rect);
 }
 
 void VulkanCommandBuffer::SetScissorRects(const RHIScissorRect* ScissorRects, uint32_t NumScissorRects)
 {
 	assert(m_State == EState::Recording && ScissorRects);
 
-	std::vector<vk::Rect2D> vkRects(NumScissorRects);
+	std::vector<vk::Rect2D> Rects(NumScissorRects);
 	for (uint32_t Index = 0u; Index < NumScissorRects; ++Index)
 	{
 		auto& ScissorRect = ScissorRects[Index];
-		vkRects[Index] = vk::Rect2D()
-			.setExtent(vk::Extent2D(ScissorRect.Extent.x, ScissorRect.Extent.y))
+
+		Rects[Index].setExtent(vk::Extent2D(ScissorRect.Extent.x, ScissorRect.Extent.y))
 			.setOffset(vk::Offset2D(ScissorRect.LeftTop.x, ScissorRect.LeftTop.y));
 	}
-	GetNative().setScissor(0u, vkRects);
+
+	GetNative().setScissor(0u, Rects);
 }
 
 void VulkanCommandBuffer::PushConstants(ERHIShaderStage Stage, const RHIBuffer* ConstantsBuffer, const void* Data, size_t Size, size_t Offset)

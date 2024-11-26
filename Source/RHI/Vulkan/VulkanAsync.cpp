@@ -7,8 +7,9 @@
 VulkanFence::VulkanFence(const VulkanDevice& Device, bool Signaled)
 	: VkHwResource(Device)
 {
-	auto CreateInfo = vk::FenceCreateInfo()
-		.setFlags(Signaled ? vk::FenceCreateFlagBits::eSignaled : vk::FenceCreateFlags());
+	vk::FenceCreateInfo CreateInfo;
+	CreateInfo.setFlags(Signaled ? vk::FenceCreateFlagBits::eSignaled : vk::FenceCreateFlags());
+
 	VERIFY_VK(GetNativeDevice().createFence(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
@@ -52,8 +53,8 @@ VulkanSemaphore::VulkanSemaphore(const VulkanDevice& Device)
 	/// Semaphores have two states - signaled and unsignaled. The state of a semaphore can be signaled after execution of a batch of commands is completed. 
 	/// A batch can wait for a semaphore to become signaled before it begins execution, and the semaphore is also unsignaled before the batch begins execution.
 
-	auto CreateInfo = vk::SemaphoreCreateInfo();
-	auto SemaphoreTypeCreateInfo = vk::SemaphoreTypeCreateInfo();
+	vk::SemaphoreCreateInfo CreateInfo;
+	vk::SemaphoreTypeCreateInfo SemaphoreTypeCreateInfo;
 
 	if (VulkanRHI::GetLayerExtensionConfigs().HasTimelineSemaphore)
 	{
@@ -91,10 +92,11 @@ void VulkanSemaphore::Wait(uint64_t Value, uint64_t Nanoseconds) const
 {
 	if (VulkanRHI::GetLayerExtensionConfigs().HasTimelineSemaphore)
 	{
-		auto WaitInfo = vk::SemaphoreWaitInfo()
-			.setSemaphoreCount(1u)
+		vk::SemaphoreWaitInfo WaitInfo;
+		WaitInfo.setSemaphoreCount(1u)
 			.setPSemaphores(&m_Native)
 			.setPValues(&Value);
+
 		VERIFY_VK(GetNativeDevice().waitSemaphores(&WaitInfo, Nanoseconds));
 	}
 }
@@ -103,9 +105,10 @@ void VulkanSemaphore::Signal(uint64_t Value) const
 {
 	if (VulkanRHI::GetLayerExtensionConfigs().HasTimelineSemaphore)
 	{
-		auto SignalInfo = vk::SemaphoreSignalInfo()
-			.setSemaphore(m_Native)
+		vk::SemaphoreSignalInfo SignalInfo;
+		SignalInfo.setSemaphore(m_Native)
 			.setValue(Value);
+
 		VERIFY_VK(GetNativeDevice().signalSemaphore(&SignalInfo));
 	}
 }
@@ -117,7 +120,7 @@ VulkanEvent::VulkanEvent(const VulkanDevice& Device)
 	/// A device can wait for an event to become signaled before executing further operations. 
 	/// No command exists to wait for an event to become signaled on the host.
 
-	auto CreateInfo = vk::EventCreateInfo();
+	vk::EventCreateInfo CreateInfo;
 	VERIFY_VK(GetNativeDevice().createEvent(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
 	/// The state of an event can also be updated on the device by commands inserted in command buffers.

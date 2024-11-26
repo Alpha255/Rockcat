@@ -82,8 +82,8 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 	}
 	else
 	{
-		auto vkCreateInfo = vk::ImageCreateInfo()
-			.setFlags((CreateInfo.Dimension == ERHITextureDimension::T_Cube || CreateInfo.Dimension == ERHITextureDimension::T_Cube_Array) ?
+		vk::ImageCreateInfo ImageCreateInfo;
+		ImageCreateInfo.setFlags((CreateInfo.Dimension == ERHITextureDimension::T_Cube || CreateInfo.Dimension == ERHITextureDimension::T_Cube_Array) ?
 				vk::ImageCreateFlagBits::eCubeCompatible : vk::ImageCreateFlags())
 			.setImageType(::GetDimension(CreateInfo.Dimension))
 			.setFormat(::GetFormat(CreateInfo.Format))
@@ -98,7 +98,8 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 			.setUsage(UsageFlags)
 			.setSharingMode(vk::SharingMode::eExclusive)
 			.setInitialLayout(vk::ImageLayout::eUndefined);
-		VERIFY_VK(GetNativeDevice().createImage(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+
+		VERIFY_VK(GetNativeDevice().createImage(&ImageCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
 		if (VulkanRHI::GetGraphicsSettings().BatchResourceDataTransfer)
 		{
@@ -203,8 +204,8 @@ VulkanSampler::VulkanSampler(const VulkanDevice& Device, const RHISamplerCreateI
 	  The compare operation is selected by the VkCompareOp value set by VkSamplerCreateInfo::compareOp.
 	  The reference value from the SPIR-V operand Dref and the texel depth value Dtex are used as the reference and test values, respectively, in that operation.
 	*/
-	auto vkCreateInfo = vk::SamplerCreateInfo()
-		.setMinFilter(GetFilter(CreateInfo.MinMagFilter))
+	vk::SamplerCreateInfo SamplerCreateInfo;
+	SamplerCreateInfo.setMinFilter(GetFilter(CreateInfo.MinMagFilter))
 		.setMagFilter(GetFilter(CreateInfo.MinMagFilter))
 		.setMipmapMode(CreateInfo.MinMagFilter == ERHIFilter::Nearest ? vk::SamplerMipmapMode::eNearest : vk::SamplerMipmapMode::eLinear)
 		.setAddressModeU(GetSamplerAddressMode(CreateInfo.AddressModeU))
@@ -219,5 +220,6 @@ VulkanSampler::VulkanSampler(const VulkanDevice& Device, const RHISamplerCreateI
 		.setMaxLod(CreateInfo.MaxLOD)
 		.setBorderColor(GetBorderColor(CreateInfo.BorderColor))
 		.setUnnormalizedCoordinates(false);
-	VERIFY_VK(GetNativeDevice().createSampler(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+
+	VERIFY_VK(GetNativeDevice().createSampler(&SamplerCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }

@@ -160,8 +160,8 @@ void VkBaseDeviceResource::SetObjectName(vk::ObjectType Type, uint64_t Object, c
 
 	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtils)
 	{
-		auto DebugUtilsObjectNameInfo = vk::DebugUtilsObjectNameInfoEXT()
-			.setObjectType(Type)
+		vk::DebugUtilsObjectNameInfoEXT DebugUtilsObjectNameInfo;
+		DebugUtilsObjectNameInfo.setObjectType(Type)
 			.setObjectHandle(Object)
 			.setPObjectName(Name);
 
@@ -169,8 +169,8 @@ void VkBaseDeviceResource::SetObjectName(vk::ObjectType Type, uint64_t Object, c
 	}
 	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarker)
 	{
-		auto DebugMarkerObjectNameInfo = vk::DebugMarkerObjectNameInfoEXT()
-			.setObjectType(GetDebugReportObjectType(Type))
+		vk::DebugMarkerObjectNameInfoEXT DebugMarkerObjectNameInfo;
+		DebugMarkerObjectNameInfo.setObjectType(GetDebugReportObjectType(Type))
 			.setObject(Object)
 			.setPObjectName(Name);
 

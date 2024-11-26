@@ -8,8 +8,8 @@
 VulkanPipelineCache::VulkanPipelineCache(const VulkanDevice& Device)
 	: VkHwResource(Device)
 {
-	vk::PipelineCacheCreateInfo vkCreateInfo;
-	VERIFY_VK(GetNativeDevice().createPipelineCache(&vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+	vk::PipelineCacheCreateInfo CreateInfo;
+	VERIFY_VK(GetNativeDevice().createPipelineCache(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
 VulkanPipeline::VulkanPipeline(const VulkanDevice& Device)
@@ -29,23 +29,23 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 	{
 		if (Shader)
 		{
-			auto ShaderCreateInfo = RHIShaderCreateInfo()
-				.SetStage(Shader->GetStage())
+			RHIShaderCreateInfo ShaderCreateInfo;
+			ShaderCreateInfo.SetStage(Shader->GetStage())
 				.SetShaderBinary(Shader->GetBinary(ERenderHardwareInterface::Vulkan))
 				.SetName(Shader->GetName().string());
 
 			auto& ShaderModule = Shaders.emplace_back(VulkanShader(Device, ShaderCreateInfo)); // TODO: Cache shader module ???
-			auto ShaderStageCreateInfo = vk::PipelineShaderStageCreateInfo()
+
+			ShaderStageCreateInfos.emplace_back(vk::PipelineShaderStageCreateInfo())
 				.setStage(GetShaderStage(ShaderCreateInfo.Stage))
 				.setModule(ShaderModule.GetNative())
 				.setPName("main");
-			ShaderStageCreateInfos.emplace_back(std::move(ShaderStageCreateInfo));
 		}
 	}
 	assert(ShaderStageCreateInfos.size() > 0u);
 
-	auto RasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo()
-		.setDepthClampEnable(CreateInfo.RasterizationState.EnableDepthClamp)
+	vk::PipelineRasterizationStateCreateInfo RasterizationStateCreateInfo;
+	RasterizationStateCreateInfo.setDepthClampEnable(CreateInfo.RasterizationState.EnableDepthClamp)
 		.setRasterizerDiscardEnable(false)
 		.setPolygonMode(GetPolygonMode(CreateInfo.RasterizationState.PolygonMode))
 		.setCullMode(GetCullMode(CreateInfo.RasterizationState.CullMode))
@@ -56,16 +56,16 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 		.setDepthBiasSlopeFactor(CreateInfo.RasterizationState.DepthBiasSlope)
 		.setLineWidth(CreateInfo.RasterizationState.LineWidth);
 
-	auto FrontFaceStencilState = vk::StencilOpState()
-		.setFailOp(GetStencilOp(CreateInfo.DepthStencilState.FrontFaceStencil.FailOp))
+	vk::StencilOpState FrontFaceStencilState;
+	FrontFaceStencilState.setFailOp(GetStencilOp(CreateInfo.DepthStencilState.FrontFaceStencil.FailOp))
 		.setPassOp(GetStencilOp(CreateInfo.DepthStencilState.FrontFaceStencil.PassOp))
 		.setDepthFailOp(GetStencilOp(CreateInfo.DepthStencilState.FrontFaceStencil.DepthFailOp))
 		.setCompareOp(GetCompareFunc(CreateInfo.DepthStencilState.FrontFaceStencil.CompareFunc))
 		.setCompareMask(CreateInfo.DepthStencilState.StencilReadMask)
 		.setWriteMask(CreateInfo.DepthStencilState.StencilWriteMask)
 		.setReference(CreateInfo.DepthStencilState.FrontFaceStencil.Ref);
-	auto BackFaceStencilState = vk::StencilOpState()
-		.setFailOp(GetStencilOp(CreateInfo.DepthStencilState.BackFaceStencil.FailOp))
+	vk::StencilOpState BackFaceStencilState;
+	BackFaceStencilState.setFailOp(GetStencilOp(CreateInfo.DepthStencilState.BackFaceStencil.FailOp))
 		.setPassOp(GetStencilOp(CreateInfo.DepthStencilState.BackFaceStencil.PassOp))
 		.setDepthFailOp(GetStencilOp(CreateInfo.DepthStencilState.BackFaceStencil.DepthFailOp))
 		.setCompareOp(GetCompareFunc(CreateInfo.DepthStencilState.BackFaceStencil.CompareFunc))
@@ -73,8 +73,8 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 		.setWriteMask(CreateInfo.DepthStencilState.StencilWriteMask)
 		.setReference(CreateInfo.DepthStencilState.BackFaceStencil.Ref);
 
-	auto DepthStencilStateCreateInfo = vk::PipelineDepthStencilStateCreateInfo()
-		.setDepthTestEnable(CreateInfo.DepthStencilState.EnableDepth)
+	vk::PipelineDepthStencilStateCreateInfo DepthStencilStateCreateInfo;
+	DepthStencilStateCreateInfo.setDepthTestEnable(CreateInfo.DepthStencilState.EnableDepth)
 		.setDepthWriteEnable(CreateInfo.DepthStencilState.EnableDepthWrite)
 		.setDepthCompareOp(GetCompareFunc(CreateInfo.DepthStencilState.DepthCompareFunc))
 		.setDepthBoundsTestEnable(CreateInfo.DepthStencilState.EnableDepthBoundsTest)
@@ -89,7 +89,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 	{
 		auto& BlendState = CreateInfo.BlendState.RenderTargetBlends[AttachmentIndex];
 
-		ColorBlendAttachmentStates.emplace_back(vk::PipelineColorBlendAttachmentState()
+		ColorBlendAttachmentStates.emplace_back(vk::PipelineColorBlendAttachmentState())
 			.setBlendEnable(BlendState.Enable)
 			.setSrcColorBlendFactor(GetBlendFactor(BlendState.SrcColor))
 			.setDstColorBlendFactor(GetBlendFactor(BlendState.DstColor))
@@ -97,21 +97,22 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 			.setSrcAlphaBlendFactor(GetBlendFactor(BlendState.SrcAlpha))
 			.setDstAlphaBlendFactor(GetBlendFactor(BlendState.DstAlpha))
 			.setAlphaBlendOp(GetBlendOp(BlendState.AlphaOp))
-			.setColorWriteMask(GetColorComponentFlags(BlendState.ColorMask)));
+			.setColorWriteMask(GetColorComponentFlags(BlendState.ColorMask));
 	}
-	auto BlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo()
-		.setLogicOpEnable(CreateInfo.BlendState.EnableLogicOp)
+	
+	vk::PipelineColorBlendStateCreateInfo BlendStateCreateInfo;
+	BlendStateCreateInfo.setLogicOpEnable(CreateInfo.BlendState.EnableLogicOp)
 		.setLogicOp(GetLogicOp(CreateInfo.BlendState.LogicOp))
 		.setAttachments(ColorBlendAttachmentStates);
 
 	vk::PipelineTessellationStateCreateInfo TessellationStateCreateInfo;
 
-	auto ViewportStateCreateInfo = vk::PipelineViewportStateCreateInfo()
-		.setScissorCount(1u)
+	vk::PipelineViewportStateCreateInfo ViewportStateCreateInfo;
+	ViewportStateCreateInfo.setScissorCount(1u)
 		.setViewportCount(1u);
 
-	auto MultisampleStateCreateInfo = vk::PipelineMultisampleStateCreateInfo()
-		.setRasterizationSamples(GetSampleCount(CreateInfo.MultisampleState.SampleCount))
+	vk::PipelineMultisampleStateCreateInfo MultisampleStateCreateInfo;
+	MultisampleStateCreateInfo.setRasterizationSamples(GetSampleCount(CreateInfo.MultisampleState.SampleCount))
 		.setSampleShadingEnable(CreateInfo.MultisampleState.EnableSampleShading)
 		.setMinSampleShading(CreateInfo.MultisampleState.MinSampleShading)
 		.setPSampleMask(CreateInfo.MultisampleState.SampleMask)
@@ -135,17 +136,17 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 		DynamicStates.push_back(vk::DynamicState::ePrimitiveTopologyEXT);
 	}
 
-	auto DynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
-		.setDynamicStates(DynamicStates);
+	vk::PipelineDynamicStateCreateInfo DynamicStateCreateInfo;
+	DynamicStateCreateInfo.setDynamicStates(DynamicStates);
 
-	auto InputState = VulkanInputLayout(CreateInfo.InputLayout);  /// TODO: Cache input layout ?
+	VulkanInputLayout InputState(CreateInfo.InputLayout);  /// TODO: Cache input layout ?
 
-	auto InputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo()
-		.setTopology(GetPrimitiveTopology(CreateInfo.PrimitiveTopology))
+	vk::PipelineInputAssemblyStateCreateInfo InputAssemblyStateCreateInfo;
+	InputAssemblyStateCreateInfo.setTopology(GetPrimitiveTopology(CreateInfo.PrimitiveTopology))
 		.setPrimitiveRestartEnable(false);
 
-	auto vkCreateInfo = vk::GraphicsPipelineCreateInfo()
-		.setStages(ShaderStageCreateInfos)
+	vk::GraphicsPipelineCreateInfo PipelineCreateInfo;
+	PipelineCreateInfo.setStages(ShaderStageCreateInfos)
 		.setPVertexInputState(&InputState)
 		.setPInputAssemblyState(&InputAssemblyStateCreateInfo)
 		.setPTessellationState(&TessellationStateCreateInfo)
@@ -159,7 +160,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 		.setRenderPass(nullptr);
 
 	/// #TODO Batch creations ???
-	VERIFY_VK(GetNativeDevice().createGraphicsPipelines(PipelineCache, 1u, &vkCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+	VERIFY_VK(GetNativeDevice().createGraphicsPipelines(PipelineCache, 1u, &PipelineCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
 VulkanPipelineState::VulkanPipelineState(const VulkanDevice& Device, const RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo)
@@ -230,10 +231,10 @@ void VulkanPipelineState::InitWrites()
 			case ERHIResourceType::StorageBufferDynamic:
 				ResourceInfo.DescriptorIndex = static_cast<uint32_t>(m_BufferInfos.size());
 
-				m_BufferInfos.emplace_back(vk::DescriptorBufferInfo()
+				m_BufferInfos.emplace_back(vk::DescriptorBufferInfo())
 					.setBuffer(nullptr)
 					.setOffset(0u)
-					.setRange(0u));
+					.setRange(0u);
 
 				Write.setPBufferInfo(&m_BufferInfos.back());
 				break;
@@ -241,28 +242,28 @@ void VulkanPipelineState::InitWrites()
 			case ERHIResourceType::StorageImage:
 				ResourceInfo.DescriptorIndex = static_cast<uint32_t>(m_ImageInfos.size());
 
-				m_ImageInfos.emplace_back(vk::DescriptorImageInfo()
+				m_ImageInfos.emplace_back(vk::DescriptorImageInfo())
 					.setImageView(nullptr)
 					.setImageLayout(vk::ImageLayout::eUndefined)
-					.setSampler(nullptr));
+					.setSampler(nullptr);
 				Write.setPImageInfo(&m_ImageInfos.back());
 				break;
 			case ERHIResourceType::CombinedImageSampler:
 				ResourceInfo.DescriptorIndex = static_cast<uint32_t>(m_ImageInfos.size());
 
-				m_ImageInfos.emplace_back(vk::DescriptorImageInfo()
+				m_ImageInfos.emplace_back(vk::DescriptorImageInfo())
 					.setImageView(nullptr)
 					.setImageLayout(vk::ImageLayout::eUndefined)
-					.setSampler(nullptr));
+					.setSampler(nullptr);
 				Write.setPImageInfo(&m_ImageInfos.back());
 				break;
 			case ERHIResourceType::Sampler:
 				ResourceInfo.DescriptorIndex = static_cast<uint32_t>(m_ImageInfos.size());
 
-				m_ImageInfos.emplace_back(vk::DescriptorImageInfo()
+				m_ImageInfos.emplace_back(vk::DescriptorImageInfo())
 					.setImageView(nullptr)
 					.setImageLayout(vk::ImageLayout::eUndefined)
-					.setSampler(nullptr));
+					.setSampler(nullptr);
 				Write.setPImageInfo(&m_ImageInfos.back());
 				break;
 			default:

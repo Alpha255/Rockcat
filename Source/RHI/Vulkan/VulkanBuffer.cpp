@@ -75,10 +75,11 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 		/// #TODO Align
 	}
 
-	auto CreateInfo = vk::BufferCreateInfo()
-		.setSize(AlignedSize)
+	vk::BufferCreateInfo CreateInfo;
+	CreateInfo.setSize(AlignedSize)
 		.setUsage(UsageFlags)
 		.setSharingMode(vk::SharingMode::eExclusive);
+
 	VERIFY_VK(GetNativeDevice().createBuffer(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
 	//m_DeviceMemory = VulkanMemoryAllocator::Get().Alloc(Get(), CreateInfo.AccessFlags);
@@ -154,10 +155,11 @@ void VulkanBuffer::FlushMappedRange(size_t Size, size_t Offset)
 	assert(!m_Coherent && m_MappedMemory);
 	assert(Offset + Size <= m_Size || (Size == VK_WHOLE_SIZE && Offset < m_Size));
 
-	auto MappedRange = vk::MappedMemoryRange()
-		.setMemory(m_Memory)
+	vk::MappedMemoryRange MappedRange;
+	MappedRange.setMemory(m_Memory)
 		.setSize(Size)
 		.setOffset(Offset);
+
 	VERIFY_VK(GetNativeDevice().flushMappedMemoryRanges(1u, &MappedRange));
 }
 
@@ -168,10 +170,11 @@ void VulkanBuffer::InvalidateMappedRange(size_t Size, size_t Offset)
 	assert(!m_Coherent && m_MappedMemory);
 	assert(Offset + Size <= m_Size || (Size == VK_WHOLE_SIZE && Offset < m_Size));
 
-	auto MappedRange = vk::MappedMemoryRange()
-		.setMemory(m_Memory)
+	vk::MappedMemoryRange MappedRange;
+	MappedRange.setMemory(m_Memory)
 		.setSize(Size)
 		.setOffset(Offset);
+
 	VERIFY_VK(GetNativeDevice().invalidateMappedMemoryRanges(1u, &MappedRange));
 }
 
