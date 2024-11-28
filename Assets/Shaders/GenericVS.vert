@@ -1,6 +1,6 @@
 #include "Shaders/Definitions.h"
 
-DECLARE_GLOBAL_GENERIC_VS_VARIABLES
+DEFINITION_SHADER_VARIABLES_GENERIC_VS
 
 VSOutput main(VSInput Input)
 {
@@ -10,7 +10,10 @@ VSOutput main(VSInput Input)
 
 	Output.WorldPosition = WorldPosition.xyz;
 	Output.Position = mul(ProjectionMatrix, mul(ViewMatrix, WorldPosition));
+
+#if _HAS_NORMAL_
 	Output.WorldNormal = mul(WorldMatrix, float4(Input.Normal, 1.0)).xyz;
+#endif
 
 #if _HAS_TANGENT_
 	Output.WorldTangent = mul(WorldMatrix, float4(Input.Tangent, 1.0)).xyz;

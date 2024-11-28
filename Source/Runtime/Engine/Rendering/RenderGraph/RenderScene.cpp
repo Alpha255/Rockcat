@@ -22,7 +22,7 @@ void RenderScene::RegisterMeshDrawCommandBuilder(EGeometryPassFilter Filter, IGe
 	m_MeshDrawCommandBuilders[static_cast<size_t>(Filter)].reset(Builder);
 }
 
-void RenderScene::BuildMeshDrawCommands(const Scene& InScene)
+void RenderScene::BuildMeshDrawCommands(const Scene& InScene, RHIDevice& Device, bool Async)
 {
 	for (auto& MeshDrawCmds : m_MeshDrawCommands)
 	{
@@ -30,9 +30,7 @@ void RenderScene::BuildMeshDrawCommands(const Scene& InScene)
 		MeshDrawCmds.reserve(1024u);
 	}
 
-	auto& RHIDevice = RenderService::Get().GetBackend(m_GfxSettings.RenderHardwareInterface).GetDevice();
-
-	if (m_GfxSettings.AsyncMeshDrawCommandsBuilding)
+	if (Async)
 	{
 		assert(false);
 	}
@@ -49,7 +47,7 @@ void RenderScene::BuildMeshDrawCommands(const Scene& InScene)
 			{
 				if (auto Mesh = InScene.GetStaticMesh(Node->GetDataIndex()))
 				{
-					const_cast<StaticMesh*>(Mesh)->CreateRHIBuffers(RHIDevice);
+					const_cast<StaticMesh*>(Mesh)->CreateRHIBuffers(Device);
 
 					for (uint32_t Index = 0u; Index < (uint32_t)EGeometryPassFilter::Num; ++Index)
 					{

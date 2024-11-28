@@ -20,16 +20,21 @@ const GraphicsSettings& RenderPass::GetGraphicsSettings() const
 	return m_Graph.GetGraphicsSettings();
 }
 
-RDGResource& RenderPass::RegisterResource(const char* Name, RDGResource::EVisibility Visibility)
+void RenderPass::AddField(RDGResourceID ID, RDGResource::EVisibility Visibility)
 {
-    auto& Ret = GetResourceManager().GetOrAllocateResource(Name, Visibility);
-    m_Fields.emplace_back(RenderPassField{Ret.GetNodeID(), Visibility});
-    return Ret;
+	for (auto& Field : m_Fields)
+	{
+		if (Field.ResourceID == ID)
+		{
+			Field.Visibility = Field.Visibility | Visibility;
+			break;
+		}
+	}
+
+	m_Fields.emplace_back(RenderPassField{ ID, Visibility });
 }
 
-std::vector<RDGResource> RenderPass::GetFields(RDGResource::EVisibility Visibility) const
+RDGResource& RenderPass::AddResource(RDGResource::EType Type, const char* Name, RDGResource::EVisibility Visibility)
 {
-	std::vector<RDGResource> Fields;
-
-	return std::vector<RDGResource>();
+	return GetResourceManager().GetOrAllocateResource(Type, Name, Visibility);
 }

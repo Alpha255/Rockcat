@@ -10,12 +10,12 @@
 class MeshDrawTask : public Task
 {
 public:
-	MeshDrawTask(const MeshDrawCommand* Command, RHICommandListContext* CommandListContext)
+	MeshDrawTask(const MeshDrawCommand& Command, RHICommandListContext* CommandListContext)
 		: Task("MeshDrawTask", Task::EPriority::High)
 		, m_DrawCommand(Command)
 		, m_CommandBuffer(CommandListContext->GetCommandBuffer())
 	{
-		assert(m_DrawCommand && m_CommandBuffer);
+		assert(m_CommandBuffer);
 	}
 
 	void Execute() override final
@@ -26,7 +26,7 @@ public:
 		//m_CommandBuffer->DrawIndexedInstanced(Mesh.GetNumIndex(), m_DrawCommand->NumInstances, 0u, 0, 0u);
 	}
 private:
-	const MeshDrawCommand* m_DrawCommand;
+	const MeshDrawCommand& m_DrawCommand;
 	RHICommandBuffer* m_CommandBuffer;
 };
 
@@ -40,16 +40,16 @@ GeometryPass::GeometryPass(DAGNodeID ID, const char* Name, RenderGraph& Graph, E
 
 void GeometryPass::Execute(RHIDevice& Device, const RenderScene& Scene)
 {
-	//if (GetRHI().GetGraphicsSettings().AsyncCommandlistSubmission)
-	//{
-	//	assert(false);
-	//}
-	//else
-	//{
-	//	auto RHICmdListContext = Device.GetImmediateCommandListContext(ERHIDeviceQueue::Graphics);
-	//	for (auto DrawCommand : Scene.GetDrawCommands(m_Filter))
-	//	{
-	//		MeshDrawTask(DrawCommand, RHICmdListContext).Execute();
-	//	}
-	//}
+	if (GetGraphicsSettings().AsyncCommandlistSubmission)
+	{
+		assert(false);
+	}
+	else
+	{
+		auto CommandListContext = Device.GetImmediateCommandListContext(ERHIDeviceQueue::Graphics);
+		for (auto& DrawCommand : Scene.GetMeshDrawCommands(m_Filter))
+		{
+			MeshDrawTask(DrawCommand, CommandListContext).Execute();
+		}
+	}
 }

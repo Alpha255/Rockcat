@@ -22,18 +22,12 @@ struct VertexStream
 	const RHIBuffer* Buffer = nullptr;
 };
 
-struct GraphicsPipelineKey
-{
-	size_t Hash = 0u;
-	RHIGraphicsPipeline* Pipeline = nullptr;
-};
-
 struct MeshDrawCommand
 {
 	std::vector<VertexStream> VertexStreams;
 	const RHIBuffer* IndexBuffer = nullptr;
 
-	GraphicsPipelineKey GfxPipelineKey;
+	RHIGraphicsPipeline* GraphicsPipeline = nullptr;
 
 	uint32_t FirstIndex = 0u;
 	uint32_t NumPrimitives = 0u;
@@ -72,9 +66,7 @@ struct MeshDrawCommand
 class RenderScene
 {
 public:
-	RenderScene(const GraphicsSettings& GfxSettings);
-
-	void BuildMeshDrawCommands(const class Scene& InScene);
+	void BuildMeshDrawCommands(const class Scene& InScene, class RHIDevice& Device, bool Async);
 
 	const std::vector<MeshDrawCommand>& GetMeshDrawCommands(EGeometryPassFilter MeshPass) const { return m_MeshDrawCommands[(size_t)MeshPass]; }
 	const std::vector<std::shared_ptr<IView>>& GetViews() const { return m_Views; }
@@ -84,6 +76,11 @@ protected:
 private:
 	std::array<std::vector<MeshDrawCommand>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommands;
 	std::array<std::shared_ptr<struct IGeometryPassMeshDrawCommandBuilder>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommandBuilders;
-	const GraphicsSettings& m_GfxSettings;
 	mutable std::vector<std::shared_ptr<IView>> m_Views;
+};
+
+namespace SceneTextures
+{
+	const char* const SceneColor = "SceneColor";
+	const char* const SceneDepth = "SceneDepth";
 };

@@ -16,6 +16,8 @@ struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBu
 
 		GfxPipelineCreateInfo.SetShader(&PassShader.VertexShader)
 			.SetShader(&PassShader.FragmentShader);
+		
+		GfxPipelineCreateInfo.RenderPassCreateInfo.SetDepthStencilAttachment(ERHIFormat::D32_Float_S8_UInt);
 	}
 
 	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene& InScene) override final
@@ -38,10 +40,17 @@ struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBu
 			PassShader.VertexShader.SetDefine("_HAS_UV0_", true);
 		}
 
+		if (LastVertexAttributes != DepthOnlyVertexAttributes)
+		{
+			GfxPipelineCreateInfo.InputLayout = MeshData::GetInputLayoutCreateInfo(DepthOnlyVertexAttributes);
+			LastVertexAttributes = DepthOnlyVertexAttributes;
+		}
+
 		return Command;
 	}
 
 	RHIGraphicsPipelineCreateInfo GfxPipelineCreateInfo;
+	EVertexAttributes LastVertexAttributes = EVertexAttributes::Num;
 };
 
 PreDepthPass::PreDepthPass(DAGNodeID ID, RenderGraph& Graph)
@@ -53,7 +62,7 @@ void PreDepthPass::Compile()
 {
 	auto& GfxSettings = GetGraphicsSettings();
 
-	AddOutput("SceneDepth").CreateAsTexture()
+	AddOutput(RDGResource::EType::Texture, SceneTextures::SceneDepth).GetTextureCreateInfo()
 		.SetWidth(GfxSettings.Resolution.Width)
 		.SetHeight(GfxSettings.Resolution.Height)
 		.SetDimension(ERHITextureDimension::T_2D)

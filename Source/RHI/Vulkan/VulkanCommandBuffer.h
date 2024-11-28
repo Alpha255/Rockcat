@@ -29,7 +29,7 @@ public:
 	void EndDebugMarker() override final;
 
 	void SetVertexBuffer(const RHIBuffer* Buffer, uint32_t StartSlot, size_t Offset) override final;
-	void SetIndexBuffer(const RHIBuffer* Buffer, size_t Offset, ERHIIndexFormat Format) override final;
+	void SetIndexBuffer(const RHIBuffer* Buffer, size_t Offset, ERHIIndexFormat IndexFormat) override final;
 	void SetPrimitiveTopology(ERHIPrimitiveTopology Topology);
 
 	void Draw(uint32_t VertexCount, uint32_t FirstVertex) override final;
@@ -43,7 +43,7 @@ public:
 	void Dispatch(uint32_t GroupX, uint32_t GroupY, uint32_t GroupZ) override final;
 	void DispatchIndirect(const RHIBuffer* IndirectBuffer, size_t Offset) override final;
 
-	void PushConstants(ERHIShaderStage Stage, const RHIBuffer* ConstantsBuffer, const void* Data, size_t Size, size_t Offset) override final;
+	void PushConstants(ERHIShaderStage Stage, const RHIBuffer* Buffer, const void* Data, size_t Size, size_t Offset) override final;
 
 	void SetGraphicsPipeline(const RHIGraphicsPipeline* GraphicsPipeline) override final;
 

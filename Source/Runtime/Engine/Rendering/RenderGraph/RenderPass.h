@@ -11,15 +11,10 @@ public:
 
 	DAGNodeID GetNodeID() const { return m_NodeID; }
 
-	RDGResource& AddInput(const char* Name) { return RegisterResource(Name, RDGResource::EVisibility::Input); }
-	RDGResource& AddOutput(const char* Name) { return RegisterResource(Name, RDGResource::EVisibility::Output); }
-	RDGResource& AddInputOutput(const char* Name) { return RegisterResource(Name, RDGResource::EVisibility::Input | RDGResource::EVisibility::Output); }
-	RDGResource& AddInternal(const char* Name) { return RegisterResource(Name, RDGResource::EVisibility::Internal); }
-
-	inline std::vector<RDGResource> GetInputs() const { return GetFields(RDGResource::EVisibility::Input); }
-	inline std::vector<RDGResource> GetOutputs() const { return GetFields(RDGResource::EVisibility::Output); }
-	inline std::vector<RDGResource> GetInputOutps() const { return GetFields(RDGResource::EVisibility::Input | RDGResource::EVisibility::Output); }
-	inline std::vector<RDGResource> GetInternals() const { return GetFields(RDGResource::EVisibility::Internal); }
+	RDGResource& AddInput(RDGResource::EType Type, const char* Name) { return AddResource(Type, Name, RDGResource::EVisibility::Input); }
+	RDGResource& AddOutput(RDGResource::EType Type, const char* Name) { return AddResource(Type, Name, RDGResource::EVisibility::Output); }
+	RDGResource& AddInputOutput(RDGResource::EType Type, const char* Name) { return AddResource(Type, Name, RDGResource::EVisibility::Input | RDGResource::EVisibility::Output); }
+	RDGResource& AddInternal(RDGResource::EType Type, const char* Name) { return AddResource(Type, Name, RDGResource::EVisibility::Internal); }
 
 	virtual void Compile() = 0;
 
@@ -29,9 +24,15 @@ public:
 protected:
 	class ResourceManager& GetResourceManager();
 	const GraphicsSettings& GetGraphicsSettings() const;
-	RDGResource& RegisterResource(const char* Name, RDGResource::EVisibility Visibility);
 
-	std::vector<RDGResource> GetFields(RDGResource::EVisibility Visibility) const;
+	RDGResource& AddResource(RDGResource::EType Type, const char* Name, RDGResource::EVisibility Visibility);
+	void AddField(RDGResourceID ID, RDGResource::EVisibility Visibility);
+
+	void AddResource(RDGResource& Resource, RDGResource::EVisibility Visibility)
+	{
+		Resource.SetVisibility(Visibility);
+		AddField(Resource.GetID(), Visibility);
+	}
 private:
 	DAGNodeID m_NodeID;
 	std::string_view m_Name;

@@ -140,6 +140,7 @@ std::vector<const RHIBuffer*> StaticMesh::GetVertexBuffers(EVertexAttributes Att
 
 const RHIBuffer* StaticMesh::GetVertexBuffer(EVertexAttributes Attributes) const
 {
+	/// TODO: Pack all buffer into one ???
 	const size_t Index = PopulationCount(static_cast<size_t>(Attributes));
 	switch (Attributes)
 	{

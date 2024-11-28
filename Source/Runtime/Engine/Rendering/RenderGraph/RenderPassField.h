@@ -5,6 +5,9 @@
 
 using DAGNodeID = DirectedAcyclicGraph::NodeID;
 
+using RDGResourceIDAllocator = ObjectIDAllocator<class RDGResource, uint32_t>;
+using RDGResourceID = RDGResourceIDAllocator::TID;
+
 class RDGResource
 {
 public:
@@ -16,18 +19,15 @@ public:
 		Internal = 0x4
 	};
 
-	enum class EResourceType
+	enum class EType
 	{
 		Buffer,
 		Texture,
 	};
 
-	RDGResource(DAGNodeID ID, const char* Name, EVisibility Visibility)
-		: m_Visibility(Visibility)
-		, m_NodeID(ID)
-		, m_Name(Name)
-	{
-	}
+	RDGResource(RDGResourceID ID, EType Type, const char* Name, EVisibility Visibility);
+
+	RDGResourceID GetID() const { return m_ID; }
 
 	RDGResource& SetName(const char* Name) { m_Name = Name; return *this; }
 	const char* GetName() const { return m_Name.data(); }
@@ -35,44 +35,48 @@ public:
 	EVisibility GetVisibility() const { return m_Visibility; }
 	RDGResource& SetVisibility(EVisibility Visibility);
 
-	EResourceType GetType() const { return m_Type; }
+	EType GetType() const { return m_Type; }
 
-	DAGNodeID GetNodeID() const { return m_NodeID; }
+	void CreateRHI(class RHIDevice& Device);
 
-	RHITextureCreateInfo& CreateAsTexture();
-	RHIBufferCreateInfo& CreateAsBuffer();
+	template<class T>
+	inline T* GetRHI() const { return Cast<T>(m_RHIResource.get()); }
 
 	const RHITextureCreateInfo& GetTextureCreateInfo() const
 	{
-		assert(m_Type == EResourceType::Texture && m_ResourceCreateInfo.has_value());
+		assert(m_Type == EType::Texture && m_ResourceCreateInfo.has_value());
+		return std::get<RHITextureCreateInfo>(m_ResourceCreateInfo.value());
+	}
+	RHITextureCreateInfo& GetTextureCreateInfo()
+	{
+		assert(m_Type == EType::Texture && m_ResourceCreateInfo.has_value());
 		return std::get<RHITextureCreateInfo>(m_ResourceCreateInfo.value());
 	}
 
 	const RHIBufferCreateInfo& GetBufferCreateInfo() const
 	{
-		assert(m_Type == EResourceType::Buffer && m_ResourceCreateInfo.has_value());
+		assert(m_Type == EType::Buffer && m_ResourceCreateInfo.has_value());
 		return std::get<RHIBufferCreateInfo>(m_ResourceCreateInfo.value());
 	}
-
-	template<class Archive>
-	void serialize(Archive& Ar)
+	RHIBufferCreateInfo& GetBufferCreateInfo()
 	{
-		Ar(
-			CEREAL_NVP(m_Visibility),
-			CEREAL_NVP(m_Type),
-			//CEREAL_NVP(m_Name),
-			CEREAL_NVP(m_NodeID),
-			CEREAL_NVP(m_ResourceCreateInfo)
-		);
+		assert(m_Type == EType::Buffer && m_ResourceCreateInfo.has_value());
+		return std::get<RHIBufferCreateInfo>(m_ResourceCreateInfo.value());
 	}
 protected:
 	using ResourceCreateInfo = std::variant<RHIBufferCreateInfo, RHITextureCreateInfo>;
 private:
+	void CreateAsTexture();
+	void CreateAsBuffer();
+
+	inline void SetType(EType Type) { m_Type = Type; }
+
+	RDGResourceID m_ID;
 	EVisibility m_Visibility = EVisibility::None;
-	EResourceType m_Type = EResourceType::Texture;
-	DAGNodeID m_NodeID;
+	EType m_Type = EType::Texture;
 	std::string_view m_Name;
 
+	RHIResourcePtr m_RHIResource;
 	std::optional<ResourceCreateInfo> m_ResourceCreateInfo;
 };
 
@@ -80,6 +84,6 @@ ENUM_FLAG_OPERATORS(RDGResource::EVisibility)
 
 struct RenderPassField
 {
-	DAGNodeID ResourceID;
+	RDGResourceID ResourceID;
 	RDGResource::EVisibility Visibility;
 };

@@ -31,12 +31,15 @@ struct RHIGraphicsPipelineCreateInfo
 	RHIInputLayoutCreateInfo InputLayout;
 	std::array<const ShaderAsset*, (size_t)ERHIShaderStage::Num> Shaders;
 
+	RHIRenderPassCreateInfo RenderPassCreateInfo;
+
 	inline RHIGraphicsPipelineCreateInfo& SetPrimitiveTopology(ERHIPrimitiveTopology InTopology) { PrimitiveTopology = InTopology; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetRasterizationState(const RHIRasterizationStateCreateInfo& InRasterizationState) { RasterizationState = InRasterizationState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetBlendState(const RHIBlendStateCreateInfo& InBlendState) { BlendState = InBlendState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetDepthStencilState(const RHIDepthStencilStateCreateInfo& InDepthStencilState) { DepthStencilState = InDepthStencilState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetMultisampleState(const RHIMultisampleStateCreateInfo& InMultisampleState) { MultisampleState = InMultisampleState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetShader(const ShaderAsset* Shader) { Shaders[static_cast<size_t>(Shader->GetStage())] = Shader; return *this; }
+	inline RHIGraphicsPipelineCreateInfo& SetRenderPassCreateInfo(const RHIRenderPassCreateInfo& InRenderPassCreateInfo) { RenderPassCreateInfo = InRenderPassCreateInfo; return *this; }
 };
 
 struct RHIComputePipelineCreateInfo

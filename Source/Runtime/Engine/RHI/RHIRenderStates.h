@@ -333,7 +333,7 @@ struct RHIRenderPassCreateInfo
 	inline uint32_t GetNumColorAttachments() const { return NumColorAttachments; }
 	inline RHIRenderPassCreateInfo& SetSampleCount(ERHISampleCount InSampleCount) { SampleCount = InSampleCount; return *this; }
 
-	inline RHIRenderPassCreateInfo& AddColorAttachment(ERHIFormat Format, ERHIAttachmentLoadOp LoadOp = ERHIAttachmentLoadOp::DontCare, ERHIAttachmentStoreOp StoreOp = ERHIAttachmentStoreOp::DontCare)
+	inline RHIRenderPassCreateInfo& AddColorAttachment(ERHIFormat Format, ERHIAttachmentLoadOp LoadOp = ERHIAttachmentLoadOp::DontCare, ERHIAttachmentStoreOp StoreOp = ERHIAttachmentStoreOp::Store)
 	{
 		assert(RHI::IsColor(Format) && ColorAttachments.size() < (ERHILimitations::MaxRenderTargets - 1u));
 
@@ -349,7 +349,7 @@ struct RHIRenderPassCreateInfo
 		return *this;
 	}
 
-	inline RHIRenderPassCreateInfo& SetColorAttachment(uint32_t Index, ERHIFormat Format, ERHIAttachmentLoadOp LoadOp = ERHIAttachmentLoadOp::DontCare, ERHIAttachmentStoreOp StoreOp = ERHIAttachmentStoreOp::DontCare)
+	inline RHIRenderPassCreateInfo& SetColorAttachment(uint32_t Index, ERHIFormat Format, ERHIAttachmentLoadOp LoadOp = ERHIAttachmentLoadOp::DontCare, ERHIAttachmentStoreOp StoreOp = ERHIAttachmentStoreOp::Store)
 	{
 		assert(RHI::IsColor(Format) && Index < ColorAttachments.size() && Index < ERHILimitations::MaxRenderTargets);
 
@@ -363,9 +363,9 @@ struct RHIRenderPassCreateInfo
 	inline RHIRenderPassCreateInfo& SetDepthStencilAttachment(
 		ERHIFormat Format,
 		ERHIAttachmentLoadOp LoadOp = ERHIAttachmentLoadOp::DontCare,
-		ERHIAttachmentStoreOp StoreOp = ERHIAttachmentStoreOp::DontCare,
+		ERHIAttachmentStoreOp StoreOp = ERHIAttachmentStoreOp::Store,
 		ERHIAttachmentLoadOp StencilLoadOp = ERHIAttachmentLoadOp::DontCare,
-		ERHIAttachmentStoreOp StencilStoreOp = ERHIAttachmentStoreOp::DontCare)
+		ERHIAttachmentStoreOp StencilStoreOp = ERHIAttachmentStoreOp::Store)
 	{
 		assert(RHI::IsDepthStencil(Format) || RHI::IsDepth(Format));
 

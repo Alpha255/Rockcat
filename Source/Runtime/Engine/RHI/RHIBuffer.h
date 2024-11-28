@@ -67,6 +67,8 @@ struct RHIFrameBufferCreateInfo
 
 	inline uint32_t GetNumColorAttachments() const { return NumColorAttachments; }
 
+	inline bool HasDepthStencil() const { return DepthStencilAttachment.Texture != nullptr && (RHI::IsDepth(DepthStencilAttachment.Texture->GetFormat()) || RHI::IsDepthStencil(DepthStencilAttachment.Texture->GetFormat())); }
+
 	inline RHIFrameBufferCreateInfo& AddColorAttachment(const RHITexture* Texture, RHISubresource Subresource = RHI::AllSubresource)
 	{
 		assert(Texture && ColorAttachments.size() < (ERHILimitations::MaxRenderTargets - 1u) && RHI::IsColor(Texture->GetFormat()));

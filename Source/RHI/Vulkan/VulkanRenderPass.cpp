@@ -109,13 +109,18 @@ VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIRenderPa
 	VERIFY_VK(GetNativeDevice().createRenderPass(&RenderPassCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
-VulkanFramebuffer::VulkanFramebuffer(const VulkanDevice& Device, const RHIFrameBufferCreateInfo& CreateInfo)
+VulkanFramebuffer::VulkanFramebuffer(const VulkanDevice& Device, vk::RenderPass CompatibleRenderPass, const RHIFrameBufferCreateInfo& CreateInfo)
 	: VkHwResource(Device)
 	, RHIFrameBuffer(CreateInfo)
 {
 	std::vector<vk::ImageView> Attachments;
-	//for (auto& ColorAttachment : CreateInfo.ColorAttachments)
-	//{
+	for (auto& Color : CreateInfo.ColorAttachments)
+	{
+		assert(Color.Texture && 
+			Color.GetWidth() == CreateInfo.Width &&
+			Color.GetHeight() == CreateInfo.Height && 
+			Color.GetArrayLayers() == CreateInfo.ArrayLayers);
+
 	//	if (ColorAttachment.Image)
 	//	{
 	//		auto Image = Cast<VulkanImage>(ColorAttachment.Image);
@@ -133,11 +138,18 @@ VulkanFramebuffer::VulkanFramebuffer(const VulkanDevice& Device, const RHIFrameB
 	//	assert(Image);
 
 	//	//Attachments.push_back(Image->GetOrCrateImageView(AllSubresource));
-	//}
+	}
+
+	if (CreateInfo.HasDepthStencil())
+	{
+		assert(CreateInfo.DepthStencilAttachment.GetWidth() == CreateInfo.Width && 
+			CreateInfo.DepthStencilAttachment.GetHeight() == CreateInfo.Height && 
+			CreateInfo.DepthStencilAttachment.GetArrayLayers() == CreateInfo.ArrayLayers);
+	}
 
 	vk::FramebufferCreateInfo FrameBufferCreateInfo;
-		//.setRenderPass(m_RenderPass)
-	FrameBufferCreateInfo.setAttachments(Attachments)
+	FrameBufferCreateInfo.setRenderPass(CompatibleRenderPass)
+		.setAttachments(Attachments)
 		.setWidth(CreateInfo.Width)
 		.setHeight(CreateInfo.Height)
 		.setLayers(CreateInfo.ArrayLayers);

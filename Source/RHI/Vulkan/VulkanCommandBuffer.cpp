@@ -3,6 +3,7 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanBuffer.h"
+#include "RHI/Vulkan/VulkanPipeline.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 #include "Engine/Services/SpdLogService.h"
 
@@ -62,7 +63,7 @@ void VulkanCommandBuffer::Begin()
 		specifies that a command buffer can be resubmitted to a queue while it is in the pending state, and recorded into multiple primary command buffers.
 	******************************************************************************************************************************************************************/
 
-	assert(m_State == EState::Initial);
+	assert(IsReady());
 
 	vk::CommandBufferBeginInfo BeginInfo;
 	BeginInfo.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
@@ -74,7 +75,7 @@ void VulkanCommandBuffer::Begin()
 
 void VulkanCommandBuffer::End()
 {
-	assert(m_State == EState::Recording);
+	assert(IsRecording());
 
 	//if (m_InsideRenderPass)
 	//{
@@ -143,9 +144,9 @@ void VulkanCommandBuffer::Reset()
 	/// Any primary command buffer that is in the recording or executable state and has commandBuffer recorded into it, becomes invalid.
 	/// VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT specifies that most or all memory resources currently owned by the command buffer should be returned to the parent command pool. 
 	/// If this flag is not set, then the command buffer may hold onto memory resources and reuse them when recording commands.
-	
+
 	/// commandBuffer must have been allocated from a pool that was created with the VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT
-	assert(m_State != EState::Executable);
+	assert(!IsEnded());
 
 	GetNative().reset(vk::CommandBufferResetFlagBits::eReleaseResources);
 
@@ -154,25 +155,25 @@ void VulkanCommandBuffer::Reset()
 
 void VulkanCommandBuffer::BeginDebugMarker(const char* Name, const Math::Color& MarkerColor)
 {
-	assert(m_State == EState::Recording && Name);
+	assert(IsRecording() && Name);
 
 	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtils)
 	{
-		
+
 	}
 	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarker)
 	{
 		vk::DebugMarkerMarkerInfoEXT DebugMarkerInfo;
-
 		DebugMarkerInfo.setColor({ MarkerColor.x, MarkerColor.y, MarkerColor.z, MarkerColor.w })
 			.setPMarkerName(Name);
+
 		GetNative().debugMarkerBeginEXT(&DebugMarkerInfo);
 	}
 }
 
 void VulkanCommandBuffer::EndDebugMarker()
 {
-	assert(m_State == EState::Recording);
+	assert(IsRecording());
 
 	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtils)
 	{
@@ -186,75 +187,74 @@ void VulkanCommandBuffer::EndDebugMarker()
 
 void VulkanCommandBuffer::SetVertexBuffer(const RHIBuffer* Buffer, uint32_t StartSlot, size_t Offset)
 {
-	assert(m_State == EState::Recording);
+	assert(IsRecording());
+	assert(StartSlot < GetDevice().GetPhysicalDeviceLimits().maxVertexInputBindings);
 
 	GetNative().bindVertexBuffers(StartSlot, 1u, &Cast<VulkanBuffer>(Buffer)->GetNative(), &Offset);
 }
 
-void VulkanCommandBuffer::SetIndexBuffer(const RHIBuffer* Buffer, size_t Offset, ERHIIndexFormat Format)
+void VulkanCommandBuffer::SetIndexBuffer(const RHIBuffer* Buffer, size_t Offset, ERHIIndexFormat IndexFormat)
 {
-	assert(m_State == EState::Recording);
+	assert(IsRecording() && Buffer);
 
-	GetNative().bindIndexBuffer(Cast<VulkanBuffer>(Buffer)->GetNative(), Offset, Format == ERHIIndexFormat::UInt32 ? vk::IndexType::eUint32 : vk::IndexType::eUint16);
+	GetNative().bindIndexBuffer(Cast<VulkanBuffer>(Buffer)->GetNative(), Offset, GetIndexType(IndexFormat));
 }
 
 void VulkanCommandBuffer::SetPrimitiveTopology(ERHIPrimitiveTopology Topology)
 {
-	assert(m_State == EState::Recording);
+	assert(IsRecording());
 
-#if VK_VERSION_1_3
-	GetNative().setPrimitiveTopology(GetPrimitiveTopology(Topology));
-#else
-	assert(VulkanRHI::GetLayerExtensionConfigs().HasDynamicState);
-	GetNative().setPrimitiveTopologyEXT(GetPrimitiveTopology(Topology));
-#endif
+	if (VulkanRHI::GetLayerExtensionConfigs().HasDynamicState)
+	{
+		GetNative().setPrimitiveTopologyEXT(GetPrimitiveTopology(Topology));
+	}
 }
 
 void VulkanCommandBuffer::Draw(uint32_t VertexCount, uint32_t FirstVertex)
 {
-	assert(m_State == EState::Recording);
+	assert(IsRecording());
 	GetNative().draw(VertexCount, 1u, FirstVertex, 0u);
 }
 
 void VulkanCommandBuffer::DrawInstanced(uint32_t VertexCount, uint32_t InstanceCount, uint32_t FirstVertex, uint32_t FirstInstance)
 {
-	assert(m_State == EState::Recording);
+	assert(IsRecording());
 	GetNative().draw(VertexCount, InstanceCount, FirstVertex, FirstInstance);
 }
 
 void VulkanCommandBuffer::DrawIndirect(const RHIBuffer* IndirectBuffer, size_t Offset, uint32_t DrawCount, uint32_t Stride)
 {
-	assert(m_State == EState::Recording);
+	assert(IsRecording());
 	GetNative().drawIndirect(Cast<VulkanBuffer>(IndirectBuffer)->GetNative(), Offset, DrawCount, Stride);
 }
 
 void VulkanCommandBuffer::DrawIndexed(uint32_t IndexCount, uint32_t FirstIndex, int32_t VertexOffset)
 {
-	assert(m_State == EState::Recording);
+	assert(IsRecording());
 	GetNative().drawIndexed(IndexCount, 1, FirstIndex, VertexOffset, 0u);
 }
 
 void VulkanCommandBuffer::DrawIndexedInstanced(uint32_t IndexCount, uint32_t InstanceCount, uint32_t FirstIndex, int32_t VertexOffset, uint32_t FirstInstance)
 {
-	assert(m_State == EState::Recording);
+	assert(IsRecording());
 	GetNative().drawIndexed(IndexCount, InstanceCount, FirstIndex, VertexOffset, FirstInstance);
 }
 
 void VulkanCommandBuffer::DrawIndexedIndirect(const RHIBuffer* IndirectBuffer, size_t Offset, uint32_t DrawCount, uint32_t Stride)
 {
-	assert(m_State == EState::Recording);
+	assert(IsRecording());
 	GetNative().drawIndexedIndirect(Cast<VulkanBuffer>(IndirectBuffer)->GetNative(), Offset, DrawCount, Stride);
 }
 
 void VulkanCommandBuffer::Dispatch(uint32_t GroupX, uint32_t GroupY, uint32_t GroupZ)
 {
-	assert(m_State == EState::Recording);
+	assert(IsRecording());
 	GetNative().dispatch(GroupX, GroupY, GroupZ);
 }
 
 void VulkanCommandBuffer::DispatchIndirect(const RHIBuffer* IndirectBuffer, size_t Offset)
 {
-	assert(m_State == EState::Recording && IndirectBuffer);
+	assert(IsRecording() && IndirectBuffer);
 	GetNative().dispatchIndirect(Cast<VulkanBuffer>(IndirectBuffer)->GetNative(), Offset);
 }
 
@@ -480,7 +480,7 @@ void VulkanCommandBuffer::DispatchIndirect(const RHIBuffer* IndirectBuffer, size
 
 void VulkanCommandBuffer::SetViewport(const RHIViewport& Viewport)
 {
-	assert(m_State == EState::Recording);
+	assert(IsRecording());
 
 	vk::Viewport ViewportInfo;
 	ViewportInfo.setX(Viewport.LeftTop.x)
@@ -495,7 +495,7 @@ void VulkanCommandBuffer::SetViewport(const RHIViewport& Viewport)
 
 void VulkanCommandBuffer::SetViewports(const RHIViewport* Viewports, uint32_t NumViewports)
 {
-	assert(m_State == EState::Recording && Viewports);
+	assert(IsRecording() && Viewports);
 
 	std::vector<vk::Viewport> ViewportInfos(NumViewports);
 	for (uint32_t Index = 0u; Index < NumViewports; ++Index)
@@ -515,7 +515,7 @@ void VulkanCommandBuffer::SetViewports(const RHIViewport* Viewports, uint32_t Nu
 
 void VulkanCommandBuffer::SetScissorRect(const RHIScissorRect& ScissorRect)
 {
-	assert(m_State == EState::Recording);
+	assert(IsRecording());
 
 	vk::Rect2D Rect;
 	Rect.setExtent(vk::Extent2D(ScissorRect.Extent.x, ScissorRect.Extent.y))
@@ -526,7 +526,7 @@ void VulkanCommandBuffer::SetScissorRect(const RHIScissorRect& ScissorRect)
 
 void VulkanCommandBuffer::SetScissorRects(const RHIScissorRect* ScissorRects, uint32_t NumScissorRects)
 {
-	assert(m_State == EState::Recording && ScissorRects);
+	assert(IsRecording() && ScissorRects);
 
 	std::vector<vk::Rect2D> Rects(NumScissorRects);
 	for (uint32_t Index = 0u; Index < NumScissorRects; ++Index)
@@ -540,8 +540,10 @@ void VulkanCommandBuffer::SetScissorRects(const RHIScissorRect* ScissorRects, ui
 	GetNative().setScissor(0u, Rects);
 }
 
-void VulkanCommandBuffer::PushConstants(ERHIShaderStage Stage, const RHIBuffer* ConstantsBuffer, const void* Data, size_t Size, size_t Offset)
+void VulkanCommandBuffer::PushConstants(ERHIShaderStage Stage, const RHIBuffer* Buffer, const void* Data, size_t Size, size_t Offset)
 {
+	assert(IsRecording() && Buffer && Data && Size && Size < GetDevice().GetPhysicalDeviceLimits().maxPushConstantsSize);
+
 	//(void)ConstantsBuffer;
 
 	//assert(m_State == EState::Recording && Data && Size && Size <= m_Device->PhysicalLimits().maxPushConstantsSize && m_CurGfxPipeline);
@@ -557,9 +559,11 @@ void VulkanCommandBuffer::PushConstants(ERHIShaderStage Stage, const RHIBuffer* 
 
 void VulkanCommandBuffer::SetGraphicsPipeline(const RHIGraphicsPipeline* GraphicsPipeline)
 {
-//	assert(m_State == EState::Recording && DstPipeline);
-//
-//	auto VkPipeline = static_cast<VulkanGraphicsPipeline*>(DstPipeline);
+	assert(IsRecording() && GraphicsPipeline);
+
+	auto VulkanGfxPipeline = Cast<VulkanGraphicsPipeline>(GraphicsPipeline);
+	assert(VulkanGfxPipeline);
+
 //	assert(VkPipeline);
 //
 //	if (m_CurGfxPipeline != VkPipeline)
@@ -672,6 +676,8 @@ void VulkanCommandBuffer::SetGraphicsPipeline(const RHIGraphicsPipeline* Graphic
 
 void VulkanCommandBuffer::ClearColorTexture(const RHITexture* Texture, const Math::Color& ClearColor)
 {
+	assert(!IsInsideRenderPass() && Texture);
+
 //#if true
 //	if (m_InsideRenderPass)
 //	{
@@ -706,6 +712,7 @@ void VulkanCommandBuffer::ClearColorTexture(const RHITexture* Texture, const Mat
 
 void VulkanCommandBuffer::ClearDepthStencilTexture(const RHITexture* Texture, bool ClearDepth, bool ClearStencil, float Depth, uint8_t Stencil)
 {
+	assert(!IsInsideRenderPass() && Texture);
 //#if true
 //	if (m_InsideRenderPass)
 //	{
@@ -754,10 +761,12 @@ void VulkanCommandBuffer::ClearDepthStencilTexture(const RHITexture* Texture, bo
 
 void VulkanCommandBuffer::WriteBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t Offset)
 {
+	assert(Buffer && Data);
 }
 
 void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, size_t Offset)
 {
+	assert(Texture && Data);
 }
 
 //void VulkanCommandBuffer::SetPolygonMode(EPolygonMode Mode)

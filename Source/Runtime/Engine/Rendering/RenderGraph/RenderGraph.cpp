@@ -1,6 +1,7 @@
 #include "Engine/Rendering/RenderGraph/RenderGraph.h"
 #include "Engine/Rendering/RenderGraph/ResourceManager.h"
 #include "Engine/Rendering/RenderGraph/ForwardRenderingPath.h"
+#include "Engine/Services/RenderService.h"
 #include "Engine/Scene/Scene.h"
 
 std::shared_ptr<RenderGraph> RenderGraph::Create(const GraphicsSettings& GfxSettings)
@@ -25,8 +26,8 @@ std::shared_ptr<RenderGraph> RenderGraph::Create(const GraphicsSettings& GfxSett
 
 RenderGraph::RenderGraph(const GraphicsSettings& GfxSettings)
 	: m_GfxSettings(GfxSettings)
-	, m_ResourceMgr(std::move(std::make_shared<ResourceManager>(GfxSettings, m_Graph)))
-	, m_RenderScene(std::move(std::make_shared<RenderScene>(GfxSettings)))
+	, m_ResourceMgr(std::move(std::make_shared<ResourceManager>()))
+	, m_RenderScene(std::move(std::make_shared<RenderScene>()))
 {
 }
 
@@ -45,17 +46,19 @@ void RenderGraph::Compile()
 
 void RenderGraph::Execute(const Scene& InScene)
 {
+	RHIDevice& Device = RenderService::Get().GetBackend(m_GfxSettings.RenderHardwareInterface).GetDevice();
+
 	if (InScene.IsDirty())
 	{
-		m_RenderScene->BuildMeshDrawCommands(InScene);
+		m_RenderScene->BuildMeshDrawCommands(InScene, Device, m_GfxSettings.AsyncMeshDrawCommandsBuilding);
 	}
 
 	Compile();
 
-	m_ResourceMgr->ResolveResources();
+	m_ResourceMgr->ResolveResources(Device);
 
 	for (auto& Pass : m_RenderPasses)
 	{
-		//Pass->Execute(m_ResourceMgr->GetRHI().GetDevice(), *m_RenderScene);
+		Pass->Execute(Device, *m_RenderScene);
 	}
 }

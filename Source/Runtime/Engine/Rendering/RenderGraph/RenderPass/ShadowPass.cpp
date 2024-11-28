@@ -27,11 +27,6 @@ public:
 	}
 };
 
-RenderScene::RenderScene(const GraphicsSettings& GfxSettings)
-	: m_GfxSettings(GfxSettings)
-{
-}
-
 ShadowPass::ShadowPass(DAGNodeID ID, RenderGraph& Graph)
 	: GeometryPass(
 		ID, 

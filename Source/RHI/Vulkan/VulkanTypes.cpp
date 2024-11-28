@@ -436,6 +436,18 @@ vk::AttachmentStoreOp GetAttachmentStoreOp(ERHIAttachmentStoreOp StoreOp)
 	}
 }
 
+vk::IndexType GetIndexType(ERHIIndexFormat Format)
+{
+	switch (Format)
+	{
+	default:
+	case ERHIIndexFormat::UInt32:
+		return vk::IndexType::eUint32;
+	case ERHIIndexFormat::UInt16:
+		return vk::IndexType::eUint16;
+	}
+}
+
 #if 0
 VkImageLayout imageLayout(Texture::EImageLayout layout)
 {
