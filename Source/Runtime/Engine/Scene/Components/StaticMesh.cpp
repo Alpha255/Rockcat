@@ -7,12 +7,13 @@ RHIInputLayoutCreateInfo MeshData::GetInputLayoutCreateInfo() const
 
 MeshData::MeshData(uint32_t InNumVertex, uint32_t InNumIndex, uint32_t InNumPrimitive, bool InHasNormal, bool InHasTangent,
 	bool InHasUV0, bool InHasUV1, bool InHasColor, ERHIPrimitiveTopology InPrimitiveTopology,
-	const Math::AABB& InBoundingBox)
+	const Math::AABB& InBoundingBox, const char* const InName)
 	: MeshProperty(
 		InNumVertex, InNumIndex, InNumPrimitive, InHasNormal, InHasTangent,
 		InHasUV0, InHasUV1, InHasColor,
 		InNumVertex >= std::numeric_limits<uint16_t>::max() ? ERHIIndexFormat::UInt32 : ERHIIndexFormat::UInt16,
 		InPrimitiveTopology, InBoundingBox)
+	, Name(InName ? InName : "")
 {
 	assert(NumVertex && NumIndex && NumPrimitive);
 

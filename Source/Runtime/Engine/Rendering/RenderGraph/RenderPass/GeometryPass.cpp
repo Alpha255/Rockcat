@@ -7,30 +7,69 @@
 #include "Engine/Rendering/RenderGraph/RenderScene.h"
 #include "Engine/Async/Task.h"
 
-class MeshDrawTask : public Task
+struct ScopeDebugMarker
 {
-public:
+	ScopeDebugMarker(RHICommandBuffer* InCommandBuffer, const std::string_view& MarkerName, const Math::Color& MarkerColor)
+		: ShouldMarker(!MarkerName.empty())
+		, CommandBuffer(InCommandBuffer)
+	{
+		assert(InCommandBuffer);
+
+		if (ShouldMarker)
+		{
+			CommandBuffer->BeginDebugMarker(MarkerName.data(), MarkerColor);
+		}
+	}
+
+	~ScopeDebugMarker()
+	{
+		if (ShouldMarker)
+		{
+			CommandBuffer->EndDebugMarker();
+		}
+	}
+
+	bool ShouldMarker = false;
+	RHICommandBuffer* CommandBuffer = nullptr;
+};
+
+struct MeshDrawTask : public Task
+{
 	MeshDrawTask(const MeshDrawCommand& Command, RHICommandListContext* CommandListContext)
 		: Task("MeshDrawTask", Task::EPriority::High)
-		, m_DrawCommand(Command)
-		, m_CommandBuffer(CommandListContext->GetCommandBuffer())
+		, DrawCommand(Command)
+		, CommandBuffer(CommandListContext->GetCommandBuffer())
 	{
-		assert(m_CommandBuffer);
+		assert(CommandBuffer);
 	}
 
 	void Execute() override final
 	{
-		//auto& Mesh = *m_DrawCommand->Mesh;
-		//m_CommandBuffer->SetVertexBuffer(Mesh.GetVertexBuffer(), 0u, 0u);
-		//m_CommandBuffer->SetIndexBuffer(Mesh.GetIndexBuffer(), 0u, Mesh.GetIndexFormat());
-		//m_CommandBuffer->DrawIndexedInstanced(Mesh.GetNumIndex(), m_DrawCommand->NumInstances, 0u, 0, 0u);
+		/// How to update shader resources, how to update uniform buffer ???
+		auto PipelineState = DrawCommand.GraphicsPipeline->GetPipelineState();
+		assert(PipelineState);
+
+		ScopeDebugMarker DebugMarker(CommandBuffer, DrawCommand.MeshName, Math::Color::Random());
+
+		CommandBuffer->SetGraphicsPipeline(DrawCommand.GraphicsPipeline);
+		CommandBuffer->SetVertexStream(0u, DrawCommand.VertexStream);
+		CommandBuffer->SetIndexBuffer(
+			DrawCommand.IndexBuffer, 
+			DrawCommand.FirstIndex * static_cast<size_t>(DrawCommand.IndexFormat), 
+			DrawCommand.IndexFormat);
+		CommandBuffer->DrawIndexedInstanced(DrawCommand.NumIndex, DrawCommand.NumInstances, DrawCommand.FirstIndex, DrawCommand.VertexArgs.BaseIndex);
 	}
-private:
-	const MeshDrawCommand& m_DrawCommand;
-	RHICommandBuffer* m_CommandBuffer;
+
+	const MeshDrawCommand& DrawCommand;
+	RHICommandBuffer* CommandBuffer;
 };
 
-GeometryPass::GeometryPass(DAGNodeID ID, const char* Name, RenderGraph& Graph, EGeometryPassFilter Filter, IGeometryPassMeshDrawCommandBuilder* MeshDrawCommandBuilder)
+GeometryPass::GeometryPass(
+	DAGNodeID ID, 
+	const char* Name, 
+	RenderGraph& Graph, 
+	EGeometryPassFilter Filter, 
+	IGeometryPassMeshDrawCommandBuilder* MeshDrawCommandBuilder)
 	: RenderPass(ID, Name, Graph)
 	, m_Filter(Filter)
 {

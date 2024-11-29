@@ -202,6 +202,24 @@ inline size_t ComputeHash(const RHIMultisampleStateCreateInfo& Desc)
 }
 
 template<>
+inline size_t ComputeHash(const RHIRenderPassCreateInfo& Desc)
+{
+	size_t Hash = ComputeHash(
+		Desc.GetNumColorAttachments(),
+		Desc.HasDepthStencil(),
+		Desc.SampleCount);
+
+	for (auto& Attachment : Desc.ColorAttachments)
+	{
+		HashCombine(Hash, Attachment.Format);
+	}
+	
+	HashCombine(Hash, Desc.DepthStencilAttachment.Format);
+
+	return Hash;
+}
+
+template<>
 inline size_t ComputeHash(const RHIGraphicsPipelineCreateInfo& Desc)
 {
 	auto Hash = ComputeHash(
@@ -209,13 +227,17 @@ inline size_t ComputeHash(const RHIGraphicsPipelineCreateInfo& Desc)
 		ComputeHash(Desc.RasterizationState),
 		ComputeHash(Desc.BlendState),
 		ComputeHash(Desc.DepthStencilState),
-		ComputeHash(Desc.MultisampleState));
+		ComputeHash(Desc.MultisampleState),
+		ComputeHash(Desc.InputLayout));
+
 	for (auto Shader : Desc.Shaders)
 	{
 		if (Shader)
 		{
 			HashCombine(Hash, Shader);
+			HashCombine(Hash, Shader->ComputeHash());
 		}
 	}
+
 	return Hash;
 }

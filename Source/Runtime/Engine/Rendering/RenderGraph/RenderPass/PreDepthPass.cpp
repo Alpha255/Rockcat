@@ -2,17 +2,19 @@
 #include "Engine/Rendering/RenderGraph/RenderGraph.h"
 #include "Engine/Asset/GlobalShaders/DefaultShading.h"
 #include "Engine/Scene/Components/StaticMesh.h"
+#include "Engine/RHI/RHIInterface.h"
+#include "Engine/RHI/RHIDevice.h"
 
 struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<GenericVS, DepthOnly>
 {
-	PreDepthPassMeshDrawCommandBuilder(const GraphicsSettings& InGfxSettings)
-		: GeometryPassMeshDrawCommandBuilder(InGfxSettings)
+	PreDepthPassMeshDrawCommandBuilder(RHIInterface& InBackend)
+		: GeometryPassMeshDrawCommandBuilder(InBackend)
 	{
 		PassShader.VertexShader.SetDefine("_HAS_NORMAL_", false);
 
 		GfxPipelineCreateInfo.DepthStencilState.SetEnableDepth(true)
 			.SetEnableDepthWrite(true)
-			.SetDepthCompareFunc(GfxSettings.InverseDepth ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
+			.SetDepthCompareFunc(InBackend.GetGraphicsSettings().InverseDepth ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
 
 		GfxPipelineCreateInfo.SetShader(&PassShader.VertexShader)
 			.SetShader(&PassShader.FragmentShader);
@@ -30,20 +32,31 @@ struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBu
 
 		if (auto Buffer = Mesh.GetVertexBuffer(DepthOnlyVertexAttributes))
 		{
-			Command.AddVertexStream(Location++, 0u, Buffer);
+			Command.VertexStream.Add(Location++, 0u, Buffer);
 		}
 		if (auto Buffer = Mesh.GetVertexBuffer(EVertexAttributes::UV0))
 		{
-			Command.AddVertexStream(Location++, 0u, Buffer);
+			Command.VertexStream.Add(Location++, 0u, Buffer);
 			SupportTexel = true;
 			DepthOnlyVertexAttributes = DepthOnlyVertexAttributes | EVertexAttributes::UV0;
 			PassShader.VertexShader.SetDefine("_HAS_UV0_", true);
 		}
 
-		if (LastVertexAttributes != DepthOnlyVertexAttributes)
+		if (LastVertexAttributes != DepthOnlyVertexAttributes || LastPrimitiveTopology != Mesh.GetPrimitiveTopology())
 		{
 			GfxPipelineCreateInfo.InputLayout = MeshData::GetInputLayoutCreateInfo(DepthOnlyVertexAttributes);
 			LastVertexAttributes = DepthOnlyVertexAttributes;
+
+			LastPrimitiveTopology = Mesh.GetPrimitiveTopology();
+			GfxPipelineCreateInfo.SetPrimitiveTopology(Mesh.GetPrimitiveTopology());
+
+			Command.GraphicsPipeline = Backend.GetDevice().GetOrCreateGraphicsPipeline(GfxPipelineCreateInfo);
+			LastGraphicsPipeline = Command.GraphicsPipeline;
+		}
+		else
+		{
+			assert(LastGraphicsPipeline);
+			Command.GraphicsPipeline = LastGraphicsPipeline;
 		}
 
 		return Command;
@@ -51,10 +64,12 @@ struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBu
 
 	RHIGraphicsPipelineCreateInfo GfxPipelineCreateInfo;
 	EVertexAttributes LastVertexAttributes = EVertexAttributes::Num;
+	ERHIPrimitiveTopology LastPrimitiveTopology = ERHIPrimitiveTopology::Num;
+	RHIGraphicsPipeline* LastGraphicsPipeline = nullptr;
 };
 
 PreDepthPass::PreDepthPass(DAGNodeID ID, RenderGraph& Graph)
-	: GeometryPass(ID, "PreDepthPass", Graph, EGeometryPassFilter::PreDepth, new PreDepthPassMeshDrawCommandBuilder(Graph.GetGraphicsSettings()))
+	: GeometryPass(ID, "PreDepthPass", Graph, EGeometryPassFilter::PreDepth, new PreDepthPassMeshDrawCommandBuilder(Graph.GetBackend()))
 {
 }
 

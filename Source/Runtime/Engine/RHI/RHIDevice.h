@@ -64,11 +64,15 @@ public:
 	virtual RHICommandListContextPtr AcquireDeferredCommandListContext() = 0;
 	virtual void ReleaseDeferredCommandListContext(RHICommandListContextPtr& CmdListContext) = 0;
 
+	RHIGraphicsPipeline* GetOrCreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo);
+
 	const char* const GetAdapterName() const { return m_AdapterName.c_str(); }
 protected:
 	std::mutex m_CmdListContextLock;
 private:
 	std::string m_AdapterName;
+
+	std::unordered_map<size_t, RHIGraphicsPipelinePtr> m_GraphicsPipelineCache;
 };
 
 class RHISwapchain

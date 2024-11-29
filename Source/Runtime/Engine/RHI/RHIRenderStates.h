@@ -109,7 +109,8 @@ enum class ERHIPrimitiveTopology : uint8_t
 	LineStripAdjacency,
 	TriangleListAdjacency,
 	TriangleStripAdjacency,
-	PatchList
+	PatchList,
+	Num
 };
 
 struct RHIRenderTargetBlendDesc
@@ -379,4 +380,23 @@ struct RHIRenderPassCreateInfo
 	}
 private:
 	uint32_t NumColorAttachments = 0u;
+};
+
+struct RHIVertexBuffer
+{
+	uint32_t Location = 0;
+	size_t Offset = 0u;
+	const RHIBuffer* Buffer = nullptr;
+};
+
+struct RHIVertexStream
+{
+	RHIVertexStream& Add(uint32_t Location, size_t Offset, const RHIBuffer* Buffer)
+	{
+		assert(Buffer && Location < ERHILimitations::MaxVertexStreams);
+		VertexBuffers.emplace_back(RHIVertexBuffer{ Location, Offset, Buffer });
+		return *this;
+	}
+
+	std::vector<RHIVertexBuffer> VertexBuffers;
 };

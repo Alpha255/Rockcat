@@ -7,7 +7,7 @@ class TransluentPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandB
 public:
 	using GeometryPassMeshDrawCommandBuilder::GeometryPassMeshDrawCommandBuilder;
 
-	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene& InScene) override final
+	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene&) override final
 	{
 		auto Command = MeshDrawCommand(Mesh);
 		return Command;
@@ -15,6 +15,6 @@ public:
 };
 
 TranslucentPass::TranslucentPass(DAGNodeID ID, RenderGraph& Graph)
-	: GeometryPass(ID, "TranslucentPass", Graph, EGeometryPassFilter::Translucent, new TransluentPassMeshDrawCommandBuilder(Graph.GetGraphicsSettings()))
+	: GeometryPass(ID, "TranslucentPass", Graph, EGeometryPassFilter::Translucent, new TransluentPassMeshDrawCommandBuilder(Graph.GetBackend()))
 {
 }

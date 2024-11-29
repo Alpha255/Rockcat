@@ -90,6 +90,10 @@ void D3D12CommandList::SetVertexBuffer(const RHIBuffer* Buffer, uint32_t StartSl
 	GetNative()->IASetVertexBuffers(StartSlot, 1u, &BufferView);
 }
 
+void D3D12CommandList::SetVertexStream(uint32_t StartSlot, const RHIVertexStream& VertexStream)
+{
+}
+
 void D3D12CommandList::SetIndexBuffer(const RHIBuffer* Buffer, size_t Offset, ERHIIndexFormat Format)
 {
 	assert(m_State == EState::Recording);

@@ -29,6 +29,7 @@ public:
 	void EndDebugMarker() override final;
 
 	void SetVertexBuffer(const RHIBuffer* Buffer, uint32_t StartSlot, size_t Offset) override final;
+	void SetVertexStream(uint32_t StartSlot, const RHIVertexStream& VertexStream) override final;
 	void SetIndexBuffer(const RHIBuffer* Buffer, size_t Offset, ERHIIndexFormat IndexFormat) override final;
 	void SetPrimitiveTopology(ERHIPrimitiveTopology Topology);
 

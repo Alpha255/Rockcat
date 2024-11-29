@@ -24,7 +24,7 @@ struct VertexStream
 
 struct MeshDrawCommand
 {
-	std::vector<VertexStream> VertexStreams;
+	RHIVertexStream VertexStream;
 	const RHIBuffer* IndexBuffer = nullptr;
 
 	RHIGraphicsPipeline* GraphicsPipeline = nullptr;
@@ -33,6 +33,8 @@ struct MeshDrawCommand
 	uint32_t NumPrimitives = 0u;
 	uint32_t NumIndex = 0u;
 	uint32_t NumInstances = 1u;
+
+	std::string_view MeshName;
 	
 	MaterialID Material;
 
@@ -43,7 +45,7 @@ struct MeshDrawCommand
 	{
 		struct
 		{
-			uint32_t BaseIndex;
+			int32_t BaseIndex;
 			uint32_t NumVertex;
 		} VertexArgs;
 
@@ -55,12 +57,6 @@ struct MeshDrawCommand
 	};
 
 	MeshDrawCommand(const class StaticMesh& Mesh);
-
-	inline void AddVertexStream(uint16_t Location, uint16_t Offset, const RHIBuffer* Buffer)
-	{
-		assert(Buffer);
-		VertexStreams.emplace_back(VertexStream{ Location, Offset, Buffer });
-	}
 };
 
 class RenderScene

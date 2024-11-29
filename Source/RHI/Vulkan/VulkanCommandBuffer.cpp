@@ -159,7 +159,11 @@ void VulkanCommandBuffer::BeginDebugMarker(const char* Name, const Math::Color& 
 
 	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtils)
 	{
+		vk::DebugUtilsLabelEXT DebugUtilsLabel;
+		DebugUtilsLabel.setColor({ MarkerColor.x, MarkerColor.y, MarkerColor.z, MarkerColor.w })
+			.setPLabelName(Name);
 
+		GetNative().beginDebugUtilsLabelEXT(&DebugUtilsLabel);
 	}
 	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarker)
 	{
@@ -177,7 +181,7 @@ void VulkanCommandBuffer::EndDebugMarker()
 
 	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtils)
 	{
-
+		GetNative().endDebugUtilsLabelEXT();
 	}
 	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarker)
 	{
@@ -191,6 +195,24 @@ void VulkanCommandBuffer::SetVertexBuffer(const RHIBuffer* Buffer, uint32_t Star
 	assert(StartSlot < GetDevice().GetPhysicalDeviceLimits().maxVertexInputBindings);
 
 	GetNative().bindVertexBuffers(StartSlot, 1u, &Cast<VulkanBuffer>(Buffer)->GetNative(), &Offset);
+}
+
+void VulkanCommandBuffer::SetVertexStream(uint32_t StartSlot, const RHIVertexStream& VertexStream)
+{
+	assert(IsRecording());
+	assert(StartSlot < GetDevice().GetPhysicalDeviceLimits().maxVertexInputBindings);
+
+	std::vector<vk::Buffer> VertexBuffers(VertexStream.VertexBuffers.size());
+	std::vector<vk::DeviceSize> Offsets(VertexStream.VertexBuffers.size());
+	assert(VertexBuffers.size() < GetDevice().GetPhysicalDeviceLimits().maxVertexInputBindings);
+
+	for (uint32_t Index = 0u; Index < VertexStream.VertexBuffers.size(); ++Index)
+	{
+		VertexBuffers[Index] = Cast<VulkanBuffer>(VertexStream.VertexBuffers[Index].Buffer)->GetNative();
+		Offsets[Index] = VertexStream.VertexBuffers[Index].Offset;
+	}
+
+	GetNative().bindVertexBuffers(StartSlot, VertexBuffers, Offsets);
 }
 
 void VulkanCommandBuffer::SetIndexBuffer(const RHIBuffer* Buffer, size_t Offset, ERHIIndexFormat IndexFormat)

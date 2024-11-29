@@ -1,6 +1,7 @@
 #include "Engine/Rendering/RenderGraph/RenderPass.h"
 #include "Engine/Rendering/RenderGraph/RenderGraph.h"
 #include "Engine/Rendering/RenderGraph/ResourceManager.h"
+#include "Engine/RHI/RHIInterface.h"
 
 RenderPass::RenderPass(DAGNodeID ID, const char* Name, RenderGraph& Graph)
 	: m_NodeID(ID)
@@ -17,7 +18,7 @@ ResourceManager& RenderPass::GetResourceManager()
 
 const GraphicsSettings& RenderPass::GetGraphicsSettings() const
 {
-	return m_Graph.GetGraphicsSettings();
+	return m_Graph.GetBackend().GetGraphicsSettings();
 }
 
 void RenderPass::AddField(RDGResourceID ID, RDGResource::EVisibility Visibility)

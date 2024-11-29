@@ -88,7 +88,7 @@ struct MeshData : public MeshProperty
 {
 	MeshData(uint32_t InNumVertex, uint32_t InNumIndex, uint32_t InNumPrimitive, bool InHasNormal, bool InHasTangent,
 		bool InHasUV0, bool InHasUV1, bool InHasColor, ERHIPrimitiveTopology InPrimitiveTopology,
-		const Math::AABB& InBoundingBox);
+		const Math::AABB& InBoundingBox, const char* const InName = nullptr);
 
 	MeshData(const MeshData&) = default;
 	MeshData& operator=(const MeshData&) = default;
@@ -204,6 +204,8 @@ struct MeshData : public MeshProperty
 	RHIBufferPtr RHIPackedVertexBuffer;
 	RHIBufferPtr RHIIndexBuffer;
 	std::array<RHIBufferPtr, (size_t)EVertexAttributes::Num> RHIVertexBuffers;
+
+	std::string Name;
 };
 
 class StaticMesh : private MeshData
@@ -219,6 +221,7 @@ public:
 	inline const Math::Sphere& GetBoundingSphere() const { return BoundingSphere; }
 	inline ERHIPrimitiveTopology GetPrimitiveTopology() const { return PrimitiveTopology; }
 	inline ERHIIndexFormat GetIndexFormat() const { return IndexFormat; }
+	inline const char* const GetName() const { return Name.c_str(); }
 
 	inline MaterialID GetMaterialID() const { return m_Material; }
 

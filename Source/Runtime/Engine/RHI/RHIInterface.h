@@ -26,6 +26,8 @@ public:
 
 	virtual RHIDevice& GetDevice() = 0;
 
+	const GraphicsSettings& GetGraphicsSettings() const { return GetGraphicsSettings(GetRHIType()); }
+
 	static const char* GetRHIName(ERenderHardwareInterface RHI)
 	{
 		switch (RHI)

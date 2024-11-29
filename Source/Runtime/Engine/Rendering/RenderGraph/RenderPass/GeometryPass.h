@@ -12,14 +12,14 @@ struct GeometryPassShaders
 
 struct IGeometryPassMeshDrawCommandBuilder
 {
-	IGeometryPassMeshDrawCommandBuilder(const GraphicsSettings& InGfxSettings)
-		: GfxSettings(InGfxSettings)
+	IGeometryPassMeshDrawCommandBuilder(class RHIInterface& InBackend)
+		: Backend(InBackend)
 	{
 	}
 
 	virtual MeshDrawCommand Build(const class StaticMesh& Mesh, const class Scene& InScene) = 0;
 
-	const GraphicsSettings& GfxSettings;
+	class RHIInterface& Backend;
 };
 
 template<class TVertexShader, class TFragmentShader>
@@ -32,7 +32,12 @@ struct GeometryPassMeshDrawCommandBuilder : public IGeometryPassMeshDrawCommandB
 class GeometryPass : public RenderPass
 {
 public:
-	GeometryPass(DAGNodeID ID, const char* Name, class RenderGraph& Graph, EGeometryPassFilter Filter, IGeometryPassMeshDrawCommandBuilder* MeshDrawCommandBuilder);
+	GeometryPass(
+		DAGNodeID ID, 
+		const char* Name, 
+		class RenderGraph& Graph, 
+		EGeometryPassFilter Filter, 
+		IGeometryPassMeshDrawCommandBuilder* MeshDrawCommandBuilder);
 
 	void Execute(class RHIDevice& Device, const RenderScene& Scene);
 

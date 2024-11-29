@@ -6,6 +6,7 @@
 
 MeshDrawCommand::MeshDrawCommand(const StaticMesh& Mesh)
 	: IndexBuffer(Mesh.GetIndexBuffer())
+	, MeshName(Mesh.GetName())
 	, Material(Mesh.GetMaterialID())
 	, FirstIndex(0u)
 	, NumPrimitives(Mesh.GetNumPrimitive())
@@ -13,7 +14,7 @@ MeshDrawCommand::MeshDrawCommand(const StaticMesh& Mesh)
 	, PrimitiveTopology(Mesh.GetPrimitiveTopology())
 	, IndexFormat(Mesh.GetIndexFormat())
 {
-	VertexArgs.BaseIndex = 0u;
+	VertexArgs.BaseIndex = 0;
 	VertexArgs.NumVertex = Mesh.GetNumVertex();
 }
 

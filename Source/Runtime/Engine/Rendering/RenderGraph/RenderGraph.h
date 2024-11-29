@@ -5,7 +5,7 @@
 class RenderGraph
 {
 public:
-	RenderGraph(const GraphicsSettings& GfxSettings);
+	RenderGraph(class RHIInterface& Backend);
 
 	template<class TPass>
 	RenderGraph& AddPass()
@@ -18,12 +18,12 @@ public:
 
 	static std::shared_ptr<RenderGraph> Create(const GraphicsSettings& GfxSettings);
 
+	class RHIInterface& GetBackend() { return m_Backend; }
+
 	RenderScene& GetRenderScene() { return *m_RenderScene; }
 	const RenderScene& GetRenderScene() const { return *m_RenderScene; }
 
 	class ResourceManager& GetResourceManager() { return *m_ResourceMgr; }
-
-	const GraphicsSettings& GetGraphicsSettings() const { return m_GfxSettings; }
 protected:
 	virtual void SetupRenderPasses() = 0;
 private:
@@ -35,5 +35,5 @@ private:
 	std::shared_ptr<class ResourceManager> m_ResourceMgr;
 	std::shared_ptr<RenderScene> m_RenderScene;
 	std::vector<std::shared_ptr<RenderPass>> m_RenderPasses;
-	const GraphicsSettings& m_GfxSettings;
+	class RHIInterface& m_Backend;
 };

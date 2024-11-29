@@ -20,7 +20,7 @@ class ShadowPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuild
 public:
 	using GeometryPassMeshDrawCommandBuilder::GeometryPassMeshDrawCommandBuilder;
 
-	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene& InScene) override final
+	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene&) override final
 	{
 		auto Command = MeshDrawCommand(Mesh);
 		return Command;
@@ -33,6 +33,6 @@ ShadowPass::ShadowPass(DAGNodeID ID, RenderGraph& Graph)
 		"ShadowPass",
 		Graph,
 		EGeometryPassFilter::ShadowCast,
-		new ShadowPassMeshDrawCommandBuilder(Graph.GetGraphicsSettings()))
+		new ShadowPassMeshDrawCommandBuilder(Graph.GetBackend()))
 {
 }

@@ -40,6 +40,7 @@ public:
 	virtual void EndDebugMarker() = 0;
 
 	virtual void SetVertexBuffer(const RHIBuffer* Buffer, uint32_t StartSlot, size_t Offset) = 0;
+	virtual void SetVertexStream(uint32_t StartSlot, const RHIVertexStream& VertexStream) = 0;
 	virtual void SetIndexBuffer(const RHIBuffer* Buffer, size_t Offset, ERHIIndexFormat Format) = 0;
 	virtual void SetPrimitiveTopology(ERHIPrimitiveTopology Topology) = 0;
 

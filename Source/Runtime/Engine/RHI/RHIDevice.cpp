@@ -33,17 +33,6 @@ IInputLayoutSharedPtr IDevice::GetOrCreateInputLayout(const InputLayoutDesc& Des
 	return InputLayout;
 }
 
-IPipelineSharedPtr IDevice::GetOrCreateGraphicsPipeline(const GraphicsPipelineDesc& Desc)
-{
-	auto& Ret = m_GraphicsPipelineCache[Desc.Hash()];
-	if (!Ret)
-	{
-		Ret = CreateGraphicsPipeline(Desc);
-	}
-
-	return Ret;
-}
-
 IFrameBufferSharedPtr IDevice::GetOrCreateFrameBuffer(const FrameBufferDesc& Desc)
 {
 	auto& Ret = m_FrameBufferCache[Desc.Hash()];
@@ -57,3 +46,28 @@ IFrameBufferSharedPtr IDevice::GetOrCreateFrameBuffer(const FrameBufferDesc& Des
 
 NAMESPACE_END(RHI)
 #endif
+
+#include "Engine/RHI/RHIDevice.h"
+
+RHIGraphicsPipeline* RHIDevice::GetOrCreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo)
+{
+	size_t Hash = ComputeHash<RHIGraphicsPipelineCreateInfo>(RHICreateInfo);
+
+	auto It = m_GraphicsPipelineCache.find(Hash);
+	if (It == m_GraphicsPipelineCache.end())
+	{
+		auto Result = m_GraphicsPipelineCache.emplace(std::make_pair(Hash, CreateGraphicsPipeline(RHICreateInfo)));
+		if (Result.second)
+		{
+			return Result.first->second.get();
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+	else
+	{
+		return It->second.get();
+	}
+}

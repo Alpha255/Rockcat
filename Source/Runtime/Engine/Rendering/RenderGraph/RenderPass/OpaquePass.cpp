@@ -245,6 +245,6 @@ public:
 };
 
 OpaquePass::OpaquePass(DAGNodeID ID, RenderGraph& Graph)
-	: GeometryPass(ID, "OpaquePass", Graph, EGeometryPassFilter::Opaque, new OpaquePassMeshDrawCommandBuilder(Graph.GetGraphicsSettings()))
+	: GeometryPass(ID, "OpaquePass", Graph, EGeometryPassFilter::Opaque, new OpaquePassMeshDrawCommandBuilder(Graph.GetBackend()))
 {
 }
