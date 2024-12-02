@@ -11,6 +11,7 @@ public:
 	void ResolveResources(class RHIDevice& Device);
 
 	RDGResource& GetOrAllocateResource(RDGResource::EType Type, const char* Name, RDGResource::EVisibility Visibility);
+	const RDGResource& GetResource(RDGResourceID ID);
 
 	void OnWindowResized(uint32_t /*Width*/, uint32_t /*Height*/);
 private:

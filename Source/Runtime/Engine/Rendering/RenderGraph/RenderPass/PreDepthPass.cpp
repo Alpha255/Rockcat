@@ -20,9 +20,16 @@ struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBu
 			.SetShader(&PassShader.FragmentShader);
 		
 		GfxPipelineCreateInfo.RenderPassCreateInfo.SetDepthStencilAttachment(ERHIFormat::D32_Float_S8_UInt);
+
+		auto& GfxSettings = Backend.GetGraphicsSettings();
+		RHIViewport Viewport(GfxSettings.Resolution.Width, GfxSettings.Resolution.Height);
+		RHIScissorRect ScissorRect(GfxSettings.Resolution.Width, GfxSettings.Resolution.Height);
+
+		GfxPipelineCreateInfo.AddViewport(Viewport)
+			.AddScissorRect(ScissorRect);
 	}
 
-	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene& InScene) override final
+	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene&) override final
 	{
 		auto Command = MeshDrawCommand(Mesh);
 

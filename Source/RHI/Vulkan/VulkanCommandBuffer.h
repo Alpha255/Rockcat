@@ -67,6 +67,7 @@ public:
 	const std::vector<VulkanSemaphore*> GetWaitSemaphores() const { return m_WaitSemaphores; }
 	const std::vector<vk::PipelineStageFlags>& GetWaitDstStageFlags() const { return m_WaitDstStageFlags; }
 protected:
+	friend class VulkanCommandListContext;
 private:
 	class VulkanCommandPool& m_Pool;
 	VulkanFence m_Fence;

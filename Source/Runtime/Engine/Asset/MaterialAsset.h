@@ -60,9 +60,6 @@ protected:
 		, m_ID(ID)
 	{
 		SetShadingMode(ShadingMode);
-
-		VertexShader::RegisterShaderVariables(*this);
-		FragmentShader::RegisterShaderVariables(*this);
 	}
 public:
 	using MaterialType = T;

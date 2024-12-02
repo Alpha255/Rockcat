@@ -65,6 +65,7 @@ public:
 	virtual void ReleaseDeferredCommandListContext(RHICommandListContextPtr& CmdListContext) = 0;
 
 	RHIGraphicsPipeline* GetOrCreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo);
+	RHIFrameBuffer* GetOrCreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo);
 
 	const char* const GetAdapterName() const { return m_AdapterName.c_str(); }
 protected:
@@ -73,6 +74,7 @@ private:
 	std::string m_AdapterName;
 
 	std::unordered_map<size_t, RHIGraphicsPipelinePtr> m_GraphicsPipelineCache;
+	std::unordered_map<size_t, RHIFrameBufferPtr> m_FrameBufferCache;
 };
 
 class RHISwapchain

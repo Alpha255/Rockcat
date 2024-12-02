@@ -26,7 +26,7 @@ public:
 
 	void Compile() override final {}
 
-	void Execute(class RHIDevice&, const RenderScene&) override final {}
+	void Execute(const RenderScene&) override final {}
 protected:
 private:
 	EMode m_Mode = EMode::FullscreenTriangle;

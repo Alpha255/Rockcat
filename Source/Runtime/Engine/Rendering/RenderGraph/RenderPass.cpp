@@ -21,6 +21,16 @@ const GraphicsSettings& RenderPass::GetGraphicsSettings() const
 	return m_Graph.GetBackend().GetGraphicsSettings();
 }
 
+RHIInterface& RenderPass::GetRHIBackend()
+{
+	return m_Graph.GetBackend();
+}
+
+RHIDevice& RenderPass::GetRHIDevice()
+{
+	return m_Graph.GetBackend().GetDevice();
+}
+
 void RenderPass::AddField(RDGResourceID ID, RDGResource::EVisibility Visibility)
 {
 	for (auto& Field : m_Fields)
@@ -33,6 +43,11 @@ void RenderPass::AddField(RDGResourceID ID, RDGResource::EVisibility Visibility)
 	}
 
 	m_Fields.emplace_back(RenderPassField{ ID, Visibility });
+}
+
+std::vector<const RDGResource*> RenderPass::GetResources(RDGResource::EVisibility Visibility) const
+{
+	return std::vector<const RDGResource*>();
 }
 
 RDGResource& RenderPass::AddResource(RDGResource::EType Type, const char* Name, RDGResource::EVisibility Visibility)

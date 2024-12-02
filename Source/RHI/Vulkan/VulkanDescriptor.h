@@ -66,7 +66,8 @@ public:
 
 	void Reset();
 
-	vk::DescriptorSet Alloc(vk::DescriptorSetLayout DescriptorSetLayout);
+	vk::DescriptorSet Allocate(vk::DescriptorSetLayout DescriptorSetLayout);
+	void Free(vk::DescriptorSet Set);
 
 	bool IsFull() const;
 protected:

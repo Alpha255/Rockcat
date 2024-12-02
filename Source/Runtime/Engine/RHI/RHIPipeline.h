@@ -29,6 +29,8 @@ struct RHIGraphicsPipelineCreateInfo
 	RHIDepthStencilStateCreateInfo DepthStencilState;
 	RHIMultisampleStateCreateInfo MultisampleState;
 	RHIInputLayoutCreateInfo InputLayout;
+	std::vector<RHIViewport> Viewports;
+	std::vector<RHIScissorRect> ScissorRects;
 	std::array<const ShaderAsset*, (size_t)ERHIShaderStage::Num> Shaders;
 
 	RHIRenderPassCreateInfo RenderPassCreateInfo;
@@ -40,6 +42,20 @@ struct RHIGraphicsPipelineCreateInfo
 	inline RHIGraphicsPipelineCreateInfo& SetMultisampleState(const RHIMultisampleStateCreateInfo& InMultisampleState) { MultisampleState = InMultisampleState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetShader(const ShaderAsset* Shader) { Shaders[static_cast<size_t>(Shader->GetStage())] = Shader; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetRenderPassCreateInfo(const RHIRenderPassCreateInfo& InRenderPassCreateInfo) { RenderPassCreateInfo = InRenderPassCreateInfo; return *this; }
+	
+	inline RHIGraphicsPipelineCreateInfo& AddViewport(const RHIViewport& Viewport) 
+	{
+		assert(Viewports.size() < ERHILimitations::MaxViewports);
+		Viewports.emplace_back(Viewport); 
+		return *this;
+	}
+
+	inline RHIGraphicsPipelineCreateInfo& AddScissorRect(const RHIScissorRect& ScissorRect)
+	{
+		assert(ScissorRects.size() < ERHILimitations::MaxScissorRects);
+		ScissorRects.emplace_back(ScissorRect);
+		return *this;
+	}
 };
 
 struct RHIComputePipelineCreateInfo
@@ -55,8 +71,7 @@ public:
 
 	void Commit(RHICommandBuffer* CommandBuffer);
 
-	template<ERHIShaderStage Stage>
-	inline void SetBuffer(uint32_t Binding, RHIBuffer* Buffer)
+	inline void SetBuffer(ERHIShaderStage Stage, uint32_t Binding, RHIBuffer* Buffer)
 	{
 		assert(Stage < ERHIShaderStage::Num);
 		size_t Index = static_cast<size_t>(Stage);
@@ -65,8 +80,7 @@ public:
 		m_ShaderResourceLayout[Index][Binding].Buffer = Buffer;
 	}
 
-	template<ERHIShaderStage Stage>
-	inline void SetTexture(uint32_t Binding, RHITexture* Texture)
+	inline void SetTexture(ERHIShaderStage Stage, uint32_t Binding, RHITexture* Texture)
 	{
 		assert(Stage < ERHIShaderStage::Num);
 		size_t Index = static_cast<size_t>(Stage);
@@ -75,8 +89,7 @@ public:
 		m_ShaderResourceLayout[Index][Binding].Texture = Texture;
 	}
 
-	template<ERHIShaderStage Stage>
-	inline void SetSampler(uint32_t Binding, RHISampler* Sampler)
+	inline void SetSampler(ERHIShaderStage Stage, uint32_t Binding, RHISampler* Sampler)
 	{
 		assert(Stage < ERHIShaderStage::Num);
 		size_t Index = static_cast<size_t>(Stage);
@@ -90,7 +103,7 @@ protected:
 	void MarkDirty(bool Dirty) { m_Dirty |= Dirty; }
 	void ClearDirty() { m_Dirty = false; }
 
-	virtual void CommitShaderResources() = 0;
+	virtual void CommitShaderResources(RHICommandBuffer* CommandBuffer) = 0;
 
 	bool m_Dirty = false;
 	RHIShaderResourceLayout m_ShaderResourceLayout;
@@ -237,6 +250,24 @@ inline size_t ComputeHash(const RHIGraphicsPipelineCreateInfo& Desc)
 			HashCombine(Hash, Shader);
 			HashCombine(Hash, Shader->ComputeHash());
 		}
+	}
+
+	return Hash;
+}
+
+template<>
+inline size_t ComputeHash(const RHIFrameBufferCreateInfo& Desc)
+{
+	auto Hash = ComputeHash(Desc.Width, Desc.Height, Desc.ArrayLayers);
+
+	for (auto& Color : Desc.ColorAttachments)
+	{
+		HashCombine(Hash, Color.Texture);
+	}
+
+	if (Desc.HasDepthStencil())
+	{
+		HashCombine(Hash, Desc.DepthStencilAttachment.Texture);
 	}
 
 	return Hash;

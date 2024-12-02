@@ -39,10 +39,12 @@ public:
 		EGeometryPassFilter Filter, 
 		IGeometryPassMeshDrawCommandBuilder* MeshDrawCommandBuilder);
 
-	void Execute(class RHIDevice& Device, const RenderScene& Scene);
+	void Execute(const RenderScene& Scene) override;
 
 	EGeometryPassFilter GetGeometryPassFilter() const { return m_Filter; }
 protected:
+	virtual RHIFrameBuffer* GetFrameBuffer();
 private:
 	EGeometryPassFilter m_Filter;
+	RHIFrameBuffer* m_FrameBuffer = nullptr;
 };

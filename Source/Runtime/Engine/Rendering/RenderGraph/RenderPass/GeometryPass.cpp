@@ -45,7 +45,8 @@ struct MeshDrawTask : public Task
 
 	void Execute() override final
 	{
-		/// How to update shader resources, how to update uniform buffer ???
+		/// How to update shader resources ??? 
+		/// How to update uniform buffer ???
 		auto PipelineState = DrawCommand.GraphicsPipeline->GetPipelineState();
 		assert(PipelineState);
 
@@ -77,7 +78,24 @@ GeometryPass::GeometryPass(
 	Graph.GetRenderScene().RegisterMeshDrawCommandBuilder(Filter, MeshDrawCommandBuilder);
 }
 
-void GeometryPass::Execute(RHIDevice& Device, const RenderScene& Scene)
+RHIFrameBuffer* GeometryPass::GetFrameBuffer()
+{
+	if (!m_FrameBuffer)
+	{
+		RHIFrameBufferCreateInfo CreateInfo;
+		for (auto Resource : GetOutputs())
+		{
+			if (Resource && Resource->GetType() == RDGResource::EType::Texture)
+			{
+				CreateInfo.AddAttachment(Resource->GetRHI<RHITexture>());
+			}
+		}
+	}
+	
+	return m_FrameBuffer;
+}
+
+void GeometryPass::Execute(const RenderScene& Scene)
 {
 	if (GetGraphicsSettings().AsyncCommandlistSubmission)
 	{
@@ -85,7 +103,7 @@ void GeometryPass::Execute(RHIDevice& Device, const RenderScene& Scene)
 	}
 	else
 	{
-		auto CommandListContext = Device.GetImmediateCommandListContext(ERHIDeviceQueue::Graphics);
+		auto CommandListContext = GetRHIDevice().GetImmediateCommandListContext(ERHIDeviceQueue::Graphics);
 		for (auto& DrawCommand : Scene.GetMeshDrawCommands(m_Filter))
 		{
 			MeshDrawTask(DrawCommand, CommandListContext).Execute();

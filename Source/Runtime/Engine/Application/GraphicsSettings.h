@@ -94,6 +94,33 @@ struct GraphicsSettings
 		}
 	};
 
+	struct DebugDrawSettings
+	{
+		enum class EGBufferDebugMode : uint8_t
+		{
+			None,
+			BaseColor,
+			Normal,
+			Roughness,
+			Metalness,
+			Occlusion,
+			Specular,
+			Emissive
+		};
+
+		bool Wireframe = false;
+		EGBufferDebugMode GBufferDebugMode = EGBufferDebugMode::None;
+
+		template<class Archive>
+		void serialize(Archive& Ar)
+		{
+			Ar(
+				CEREAL_NVP(Wireframe),
+				CEREAL_NVP(GBufferDebugMode)
+			);
+		}
+	};
+
 	DisplayResolution Resolution;
 	bool VSync = false;
 	bool FullScreen = false;

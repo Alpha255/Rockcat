@@ -115,6 +115,23 @@ struct RHIFrameBufferCreateInfo
 		return *this;
 	}
 
+	inline RHIFrameBufferCreateInfo& AddAttachment(const RHITexture* Texture, RHISubresource Subresource = RHI::AllSubresource)
+	{
+		assert(Texture);
+
+		if (RHI::IsColor(Texture->GetFormat()))
+		{
+			AddColorAttachment(Texture, Subresource);
+		}
+		else
+		{
+			assert(!HasDepthStencil());
+			SetDepthStencilAttachment(Texture, Subresource);
+		}
+
+		return *this;
+	}
+
 	template<class T>
 	inline RHIFrameBufferCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 private:

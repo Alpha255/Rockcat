@@ -32,7 +32,7 @@ void RHIPipelineState::Commit(RHICommandBuffer* CommandBuffer)
 
 	if (IsDirty())
 	{
-		CommitShaderResources();
+		CommitShaderResources(CommandBuffer);
 		ClearDirty();
 	}
 }

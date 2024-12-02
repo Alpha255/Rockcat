@@ -59,6 +59,6 @@ void RenderGraph::Execute(const Scene& InScene)
 
 	for (auto& Pass : m_RenderPasses)
 	{
-		Pass->Execute(m_Backend.GetDevice(), *m_RenderScene);
+		Pass->Execute(*m_RenderScene);
 	}
 }

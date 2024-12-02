@@ -3,6 +3,7 @@
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 #include "RHI/Vulkan/VulkanShader.h"
+#include "RHI/Vulkan/VulkanCommandListContext.h"
 #include "Engine/Services/SpdLogService.h"
 
 VulkanPipelineCache::VulkanPipelineCache(const VulkanDevice& Device)
@@ -107,10 +108,6 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 
 	vk::PipelineTessellationStateCreateInfo TessellationStateCreateInfo;
 
-	vk::PipelineViewportStateCreateInfo ViewportStateCreateInfo;
-	ViewportStateCreateInfo.setScissorCount(1u)
-		.setViewportCount(1u);
-
 	vk::PipelineMultisampleStateCreateInfo MultisampleStateCreateInfo;
 	MultisampleStateCreateInfo.setRasterizationSamples(GetSampleCount(CreateInfo.MultisampleState.SampleCount))
 		.setSampleShadingEnable(CreateInfo.MultisampleState.EnableSampleShading)
@@ -119,25 +116,52 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 		.setAlphaToCoverageEnable(CreateInfo.MultisampleState.EnableAlphaToCoverage)
 		.setAlphaToOneEnable(CreateInfo.MultisampleState.EnableAlphaToOne);
 
-	/// Set viewport/scissor dynamic
-	std::vector<vk::DynamicState> DynamicStates
-	{
-		vk::DynamicState::eViewport,
-		vk::DynamicState::eScissor
-	};
-
-	/// Provided by VK_VERSION_1_3
-	/// VK_DYNAMIC_STATE_CULL_MODE specifies that the cullMode state in VkPipelineRasterizationStateCreateInfo will be ignored 
-	/// and must be set dynamically with vkCmdSetCullMode before any drawing commands.
+	vk::PipelineViewportStateCreateInfo ViewportStateCreateInfo;
+	
+	vk::PipelineDynamicStateCreateInfo DynamicStateCreateInfo;
 	if (VulkanRHI::GetLayerExtensionConfigs().HasDynamicState)
 	{
-		DynamicStates.push_back(vk::DynamicState::eCullModeEXT);
-		DynamicStates.push_back(vk::DynamicState::eFrontFaceEXT);
-		DynamicStates.push_back(vk::DynamicState::ePrimitiveTopologyEXT);
+		std::vector<vk::DynamicState> DynamicStates
+		{
+			vk::DynamicState::eViewport,
+			vk::DynamicState::eScissor,
+			vk::DynamicState::eCullMode,
+			vk::DynamicState::ePolygonModeEXT,
+			//vk::DynamicState::eFrontFace,
+			//vk::DynamicState::ePrimitiveTopology,
+		};
+		DynamicStateCreateInfo.setDynamicStates(DynamicStates);
 	}
+	else
+	{
+		assert(CreateInfo.ScissorRects.size() && CreateInfo.Viewports.size());
 
-	vk::PipelineDynamicStateCreateInfo DynamicStateCreateInfo;
-	DynamicStateCreateInfo.setDynamicStates(DynamicStates);
+		std::vector<vk::Viewport> Viewports(CreateInfo.Viewports.size());
+		std::vector<vk::Rect2D> ScissorRects(CreateInfo.ScissorRects.size());
+
+		for (uint32_t Index = 0; Index < CreateInfo.Viewports.size(); ++Index)
+		{
+			auto& Viewport = CreateInfo.Viewports[Index];
+
+			Viewports[Index].setX(Viewport.LeftTop.x)
+				.setY(Viewport.LeftTop.y)
+				.setWidth(Viewport.Extent.x)
+				.setHeight(Viewport.Extent.y)
+				.setMinDepth(Viewport.DepthRange.x)
+				.setMaxDepth(Viewport.DepthRange.y);
+		}
+
+		for (uint32_t Index = 0u; Index < CreateInfo.ScissorRects.size(); ++Index)
+		{
+			auto& Scissor = CreateInfo.ScissorRects[Index];
+
+			ScissorRects[Index].setExtent(vk::Extent2D(Scissor.Extent.x, Scissor.Extent.y))
+				.setOffset(vk::Offset2D(Scissor.LeftTop.x, Scissor.LeftTop.y));
+		}
+
+		ViewportStateCreateInfo.setViewports(Viewports)
+			.setScissors(ScissorRects);
+	}
 
 	VulkanInputLayout InputState(CreateInfo.InputLayout);  /// TODO: Cache input layout ?
 
@@ -169,12 +193,19 @@ VulkanPipelineState::VulkanPipelineState(const VulkanDevice& Device, const RHIGr
 {
 	m_DescriptorSetLayout = std::make_unique<VulkanDescriptorSetLayout>(Device, GetShaderResourceLayout());
 	m_PipelineLayout = std::make_unique<VulkanPipelineLayout>(Device, m_DescriptorSetLayout->GetNative());
-
-	InitWrites();
 }
 
-void VulkanPipelineState::CommitShaderResources()
+void VulkanPipelineState::CommitShaderResources(RHICommandBuffer* CommandBuffer)
 {
+	assert(CommandBuffer);
+
+	if (!m_Set)
+	{
+		auto Context = Cast<VulkanCommandListContext>(CommandBuffer->GetContext());
+		m_Set = Context->AcquireDescriptorPool().Allocate(m_DescriptorSetLayout->GetNative());
+		InitWrites();
+	}
+
 	for (auto& ShaderStageResources : GetShaderResourceLayout())
 	{
 		for (auto& ResourceInfo : ShaderStageResources)

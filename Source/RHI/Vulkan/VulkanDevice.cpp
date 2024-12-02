@@ -7,6 +7,7 @@
 #include "RHI/Vulkan/VulkanShader.h"
 #include "RHI/Vulkan/VulkanPipeline.h"
 #include "RHI/Vulkan/VulkanCommandListContext.h"
+#include "RHI/Vulkan/VulkanDescriptor.h"
 #include "Engine/Services/TaskFlowService.h"
 
 VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
@@ -237,6 +238,8 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 	{
 		m_ThreadedCmdListContexts.emplace(std::make_shared<VulkanCommandListContext>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Graphics]));
 	}
+
+	m_DescriptorPoolMgr = std::make_unique<VulkanDescriptorPoolManager>(*this);
 
 	m_PipelineCache = std::make_shared<VulkanPipelineCache>(*this);
 }

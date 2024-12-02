@@ -68,6 +68,8 @@ public:
 	const std::vector<std::shared_ptr<IView>>& GetViews() const { return m_Views; }
 
 	void RegisterMeshDrawCommandBuilder(EGeometryPassFilter Filter, struct IGeometryPassMeshDrawCommandBuilder* Builder);
+
+	void OnDebugDrawSettingsUpdated(); /// TODO
 protected:
 private:
 	std::array<std::vector<MeshDrawCommand>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommands;

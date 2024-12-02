@@ -7,7 +7,11 @@
 class GenericVS : public ShaderAsset
 {
 public:
-	GenericVS() : ShaderAsset("GenericVS.vert") {}
+	GenericVS() 
+		: ShaderAsset("GenericVS.vert") 
+	{
+		RegisterShaderVariables(*this);
+	}
 
 	DEFINITION_SHADER_VARIABLES_GENERIC_VS
 
@@ -23,7 +27,11 @@ public:
 class DefaultUnlit : public ShaderAsset
 {
 public:
-	DefaultUnlit() : ShaderAsset("DefaultUnlit.frag") {}
+	DefaultUnlit() 
+		: ShaderAsset("DefaultUnlit.frag") 
+	{
+		RegisterShaderVariables(*this);
+	}
 
 	DEFINITION_SHADER_VARIABLES_UNLIT
 
@@ -39,7 +47,11 @@ public:
 class DefaultLit : public ShaderAsset
 {
 public:
-	DefaultLit() : ShaderAsset("DefaultLit.frag") {}
+	DefaultLit() 
+		: ShaderAsset("DefaultLit.frag") 
+	{
+		RegisterShaderVariables(*this);
+	}
 
 	DEFINITION_SHADER_VARIABLES_LIT
 
@@ -55,7 +67,11 @@ public:
 class DefaultToon : public ShaderAsset
 {
 public:
-	DefaultToon() : ShaderAsset("DefaultToon.frag") {}
+	DefaultToon() 
+		: ShaderAsset("DefaultToon.frag") 
+	{
+		RegisterShaderVariables(*this);
+	}
 
 	DEFINITION_SHADER_VARIABLES_TOON
 
@@ -71,7 +87,11 @@ public:
 class DepthOnly : public ShaderAsset
 {
 public:
-	DepthOnly() : ShaderAsset("DepthOnly.frag") {}
+	DepthOnly() 
+		: ShaderAsset("DepthOnly.frag") 
+	{
+		RegisterShaderVariables(*this);
+	}
 
 	DEFINITION_SHADER_VARIABLES_DEPTH_ONLY
 
@@ -87,7 +107,11 @@ public:
 class GenericShadow : public ShaderAsset
 {
 public:
-	GenericShadow() : ShaderAsset("GenericShadow.frag") {}
+	GenericShadow() 
+		: ShaderAsset("GenericShadow.frag") 
+	{
+		//RegisterShaderVariables(*this);
+	}
 
 	template<class Archive>
 	void serialize(Archive& Ar)

@@ -47,7 +47,7 @@ public:
 private:
 	void InitWrites();
 
-	void CommitShaderResources() override final;
+	void CommitShaderResources(RHICommandBuffer* CommandBuffer) override final;
 
 	std::unique_ptr<VulkanDescriptorSetLayout> m_DescriptorSetLayout;
 	std::unique_ptr<VulkanPipelineLayout> m_PipelineLayout;

@@ -1,6 +1,7 @@
 #include "RHI/Vulkan/VulkanDescriptor.h"
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "Engine/Services/SpdLogService.h"
+#include "Engine/Services/TaskFlowService.h"
 
 //static constexpr uint32_t DescriptorPoolLimits[] =
 //{
@@ -133,7 +134,7 @@ void VulkanDescriptorPool::Reset()
 	GetNativeDevice().resetDescriptorPool(m_Native);
 }
 
-vk::DescriptorSet VulkanDescriptorPool::Alloc(vk::DescriptorSetLayout DescriptorSetLayout)
+vk::DescriptorSet VulkanDescriptorPool::Allocate(vk::DescriptorSetLayout DescriptorSetLayout)
 {
 	assert(!IsFull() && DescriptorSetLayout);
 
@@ -147,6 +148,13 @@ vk::DescriptorSet VulkanDescriptorPool::Alloc(vk::DescriptorSetLayout Descriptor
 
 	++m_AllocatedCount;
 	return DescriptorSet;
+}
+
+void VulkanDescriptorPool::Free(vk::DescriptorSet Set)
+{
+	std::vector<vk::DescriptorSet> DescriptorSets{ Set };
+	GetNativeDevice().freeDescriptorSets(m_Native, DescriptorSets);
+	--m_AllocatedCount;
 }
 
 bool VulkanDescriptorPool::IsFull() const
