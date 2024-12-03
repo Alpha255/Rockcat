@@ -137,10 +137,10 @@ static ImGuiKey ImGui_ImplWin32_VirtualKeyToImGuiKey(WPARAM wParam)
 
 void ImGuiEditorTest::OnInitialize()
 {
-    auto Window = GetAssociatedWindow();
-    m_Editor = std::make_shared<ImGuiEditor>(Window->GetWidth(), Window->GetHeight());
+    auto& Window = GetWindow();
+    m_Editor = std::make_shared<ImGuiEditor>(Window.GetWidth(), Window.GetHeight());
 
-	auto WindowHandle = const_cast<void*>(GetAssociatedWindow()->GetHandle());
+	auto WindowHandle = const_cast<void*>(Window.GetHandle());
 	VERIFY(CreateDeviceD3D(reinterpret_cast<::HWND>(WindowHandle)));
 
     // Setup Platform/Renderer backends

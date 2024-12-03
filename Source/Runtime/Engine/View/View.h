@@ -9,14 +9,14 @@ public:
 	virtual bool IsStereo() const { return false; }
 	virtual bool IsReverseDepth() const { return false; }
 
-	const std::vector<RHIViewport>& GetViewports() const { return m_Viewports; }
-	const std::vector<RHIScissorRect> GetScissorRects() const { return m_Scissors; }
+	const RHIViewport& GetViewport() const { return m_Viewport; }
+	const RHIScissorRect& GetScissorRect() const { return m_Scissor; }
 private:
-	std::vector<RHIViewport> m_Viewports;
-	std::vector<RHIScissorRect> m_Scissors;
+	RHIViewport m_Viewport;
+	RHIScissorRect m_Scissor;
 };
 
-class View : public IView
+class PlanarView : public IView
 {
 };
 

@@ -104,10 +104,8 @@ class IInputHandler
 public:
 	virtual ~IInputHandler() = default;
 
-	virtual void OnMouseEvent(const MouseEvent& Mouse) = 0;
-
-	virtual void OnKeyboardEvent(const KeyboardEvent& Keyboard) = 0;
-
-	virtual void OnWindowResized(uint32_t Width, uint32_t Height) = 0;
+	virtual void OnMouseEvent(const MouseEvent&) {}
+	virtual void OnKeyboardEvent(const KeyboardEvent&) {}
+	virtual void OnWindowResized(uint32_t, uint32_t) {}
 };
 

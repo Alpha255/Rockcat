@@ -15,13 +15,9 @@ public:
 	virtual void OnRenderFrame() {}
 	virtual void OnShutdown() {}
 
-	void OnMouseEvent(const MouseEvent& /*Mouse*/) override {}
-	void OnKeyboardEvent(const KeyboardEvent& /*Keyboard*/) override {}
-	void OnWindowResized(uint32_t /*Width*/, uint32_t /*Height*/) override {}
-
 	void Tick(float ElapsedSeconds) override;
 
-	class Window* GetAssociatedWindow() const { return m_Window.get(); }
+	const class Window& GetWindow() const { return *m_Window; }
 	const class ApplicationConfigurations& GetConfigurations() const;
 	const struct GraphicsSettings& GetGraphicsSettings() const;
 

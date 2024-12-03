@@ -52,6 +52,33 @@ enum class ERenderHardwareInterface : uint8_t
 	Num
 };
 
+struct DebugDrawSettings
+{
+	enum class EGBufferDebugMode : uint8_t
+	{
+		None,
+		BaseColor,
+		Normal,
+		Roughness,
+		Metalness,
+		Occlusion,
+		Specular,
+		Emissive
+	};
+
+	bool Wireframe = false;
+	EGBufferDebugMode GBufferDebugMode = EGBufferDebugMode::None;
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(Wireframe),
+			CEREAL_NVP(GBufferDebugMode)
+		);
+	}
+};
+
 struct GraphicsSettings
 {
 	struct DisplayResolution
@@ -94,33 +121,6 @@ struct GraphicsSettings
 		}
 	};
 
-	struct DebugDrawSettings
-	{
-		enum class EGBufferDebugMode : uint8_t
-		{
-			None,
-			BaseColor,
-			Normal,
-			Roughness,
-			Metalness,
-			Occlusion,
-			Specular,
-			Emissive
-		};
-
-		bool Wireframe = false;
-		EGBufferDebugMode GBufferDebugMode = EGBufferDebugMode::None;
-
-		template<class Archive>
-		void serialize(Archive& Ar)
-		{
-			Ar(
-				CEREAL_NVP(Wireframe),
-				CEREAL_NVP(GBufferDebugMode)
-			);
-		}
-	};
-
 	DisplayResolution Resolution;
 	bool VSync = false;
 	bool FullScreen = false;
@@ -136,6 +136,7 @@ struct GraphicsSettings
 	bool BatchResourceBarrier = false;
 	bool AsyncCommandlistSubmission = false;
 	bool AsyncMeshDrawCommandsBuilding = false;
+	bool SeparateRenderThread = false;
 	bool InverseDepth = false;
 	ERenderingPath RenderingPath = ERenderingPath::ForwardRendering;
 	ELightingPolicy LightingPolicy = ELightingPolicy::Default;
@@ -163,6 +164,7 @@ struct GraphicsSettings
 			CEREAL_NVP(BatchResourceBarrier),
 			CEREAL_NVP(AsyncCommandlistSubmission),
 			CEREAL_NVP(AsyncMeshDrawCommandsBuilding),
+			CEREAL_NVP(SeparateRenderThread),
 			CEREAL_NVP(InverseDepth),
 			CEREAL_NVP(RenderingPath),
 			CEREAL_NVP(LightingPolicy),

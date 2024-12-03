@@ -9,6 +9,9 @@
 void RenderTest::OnInitialize()
 {	
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");
+
+	auto& Window = GetWindow();
+	auto& Cameras = m_Scene->GetCameras();
 	m_RenderGraph = RenderGraph::Create(GetGraphicsSettings());
 }
 

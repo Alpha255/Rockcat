@@ -2,6 +2,7 @@
 
 #include "Core/Math/Transform.h"
 #include "Engine/Asset/MaterialAsset.h"
+#include "Engine/View/Camera.h"
 #include "Engine/Scene/SceneGraph.h"
 #include "Engine/Scene/Components/StaticMesh.h"
 
@@ -9,14 +10,15 @@ struct SceneData
 {
 	std::vector<std::shared_ptr<StaticMesh>> StaticMeshes;
 	std::vector<std::shared_ptr<MaterialProperty>> MaterialProperties;
-	std::vector<std::shared_ptr<class Camera>> m_Cameras;
+	std::vector<std::shared_ptr<Camera>> Cameras;
 	std::vector<Math::Transform> Transforms;
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_NVP(Transforms)
+			CEREAL_NVP(Transforms),
+			CEREAL_NVP(Cameras)
 		);
 	}
 };
@@ -60,6 +62,17 @@ public:
 	{
 		assert(Index < m_Data->MaterialProperties.size());
 		return m_Data->MaterialProperties[Index].get();
+	}
+
+	const class Camera& GetCamera(uint32_t Index) const
+	{
+		assert(Index < m_Data->Cameras.size());
+		return *m_Data->Cameras[Index];
+	}
+
+	const std::vector<std::shared_ptr<class Camera>>& GetCameras() const
+	{
+		return m_Data->Cameras;
 	}
 
 	template<class Archive>

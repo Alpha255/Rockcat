@@ -90,6 +90,8 @@ RHIFrameBuffer* GeometryPass::GetFrameBuffer()
 				CreateInfo.AddAttachment(Resource->GetRHI<RHITexture>());
 			}
 		}
+
+		m_FrameBuffer = GetRHIDevice().GetOrCreateFrameBuffer(CreateInfo);
 	}
 	
 	return m_FrameBuffer;
