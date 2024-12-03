@@ -18,7 +18,7 @@ public:
 	{
 		auto UnifyPath = GetUnifyAssetPath(std::forward<T>(AssetPath));
 		auto AssetIt = m_Assets.find(UnifyPath);
-		if (AssetIt != m_Assets.end())
+		if (AssetIt != m_Assets.end() && AssetIt->second->GetRawData().IsValid())
 		{
 			return Cast<TAsset, Asset>(AssetIt->second);
 		}
@@ -35,7 +35,7 @@ public:
 
 		auto UnifyPath = GetUnifyAssetPath(TargetAsset->GetPath());
 		auto AssetIt = m_Assets.find(UnifyPath);
-		if (AssetIt != m_Assets.end())
+		if (AssetIt != m_Assets.end() && AssetIt->second->GetRawData().IsValid())
 		{
 			TargetAsset = AssetIt->second;
 		}

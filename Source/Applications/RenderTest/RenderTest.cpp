@@ -7,14 +7,7 @@
 #include "Engine/Services/RenderService.h"
 
 void RenderTest::OnInitialize()
-{
-	{
-		MaterialUnlit Material;
-		Material.SetProjectionMatrix(Math::Matrix())
-			.SetViewMatrix(Math::Matrix());
-		Material.SetBaseColorMap("ToyCar\\glTF\\Fabric_baseColor.png");
-	}
-	
+{	
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");
 	m_RenderGraph = RenderGraph::Create(GetGraphicsSettings());
 }

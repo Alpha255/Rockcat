@@ -102,11 +102,11 @@ std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(
 			}
 		}
 
-		LOG_ERROR("AssetDatabase::Unknown asset type: AssetPath:\"{}\"", AssetPath.generic_string());
+		LOG_ERROR("AssetDatabase::Unknown asset type: AssetPath:\"{}\"", AssetPath.string());
 		return nullptr;
 	}
 
-	LOG_ERROR("AssetDatabase:: Asset \"{}\" do not exists.", AssetPath.generic_string());
+	LOG_ERROR("AssetDatabase:: Asset \"{}\" do not exists.", AssetPath.string());
 	return nullptr;
 }
 

@@ -222,10 +222,13 @@ void VulkanPipelineState::CommitShaderResources(RHICommandBuffer* CommandBuffer)
 				break;
 			case ERHIResourceType::SampledImage:
 			case ERHIResourceType::StorageImage:
-				m_ImageInfos[ResourceInfo.DescriptorIndex].setImageView(nullptr);
+				m_ImageInfos[ResourceInfo.DescriptorIndex].setImageView(nullptr)
+					.setImageLayout(vk::ImageLayout::eUndefined);
 				break;
 			case ERHIResourceType::CombinedImageSampler:
-				m_ImageInfos[ResourceInfo.DescriptorIndex].setImageView(nullptr);
+				m_ImageInfos[ResourceInfo.DescriptorIndex].setImageView(nullptr)
+					.setSampler(nullptr)
+					.setImageLayout(vk::ImageLayout::eUndefined);
 				break;
 			case ERHIResourceType::Sampler:
 				m_ImageInfos[ResourceInfo.DescriptorIndex].setSampler(nullptr);
@@ -238,6 +241,11 @@ void VulkanPipelineState::CommitShaderResources(RHICommandBuffer* CommandBuffer)
 	}
 
 	GetNativeDevice().updateDescriptorSets(static_cast<uint32_t>(m_Writes.size()), m_Writes.data(), 0u, nullptr);
+}
+
+void VulkanPipelineState::CommitPipelineStates(RHICommandBuffer* CommandBuffer)
+{
+	assert(CommandBuffer);
 }
 
 void VulkanPipelineState::InitWrites()

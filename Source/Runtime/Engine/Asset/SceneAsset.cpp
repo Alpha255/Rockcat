@@ -42,11 +42,11 @@ public:
 	static void MergeSceneData(SceneData& Target, const SceneData& Other)
 	{
 		Target.StaticMeshes.insert(Target.StaticMeshes.end(), Other.StaticMeshes.begin(), Other.StaticMeshes.end());
-		Target.Materials.insert(Target.Materials.end(), Other.Materials.begin(), Other.Materials.end());
+		Target.MaterialProperties.insert(Target.MaterialProperties.end(), Other.MaterialProperties.begin(), Other.MaterialProperties.end());
 		Target.Transforms.insert(Target.Transforms.end(), Other.Transforms.begin(), Other.Transforms.end());
 
 		auto MeshIt = Target.StaticMeshes.end();
-		MaterialID::IndexType StartIndex = static_cast<MaterialID::IndexType>(Target.Materials.size());
+		MaterialID::IndexType StartIndex = static_cast<MaterialID::IndexType>(Target.MaterialProperties.size());
 		if (StartIndex > 0u)
 		{
 			for (; MeshIt < Target.StaticMeshes.end(); ++MeshIt)

@@ -16,6 +16,8 @@ struct DataBlock
 {
 	size_t Size = 0u;
 	std::shared_ptr<std::byte> Data;
+	
+	inline bool IsValid() const { return Size && Data; }
 private:
 	friend class Asset;
 

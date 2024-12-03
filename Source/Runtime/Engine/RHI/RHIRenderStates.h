@@ -254,6 +254,13 @@ struct RHIViewport
 	{
 	}
 
+	RHIViewport(uint32_t Width, uint32_t Height)
+		: LeftTop(0.0f, 0.0f)
+		, Extent(static_cast<float>(Width), static_cast<float>(Height))
+		, DepthRange(0.0f, 1.0f)
+	{
+	}
+
 	RHIViewport(float Left, float Top, float Width, float Height, float MinZ = 0.0f, float MaxZ = 1.0f)
 		: LeftTop(Left, Top)
 		, Extent(Width, Height)

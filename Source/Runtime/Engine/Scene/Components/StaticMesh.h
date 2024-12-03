@@ -205,13 +205,15 @@ struct MeshData : public MeshProperty
 	RHIBufferPtr RHIIndexBuffer;
 	std::array<RHIBufferPtr, (size_t)EVertexAttributes::Num> RHIVertexBuffers;
 
+	MaterialProperty* Material = nullptr;
+
 	std::string Name;
 };
 
 class StaticMesh : private MeshData
 {
 public:
-	StaticMesh(const MeshData& Data, MaterialID Material);
+	StaticMesh(const MeshData& Data, MaterialID ID);
 
 	inline uint32_t GetNumVertex() const { return NumVertex; }
 	inline uint32_t GetNumIndex() const { return NumIndex; }
@@ -223,7 +225,9 @@ public:
 	inline ERHIIndexFormat GetIndexFormat() const { return IndexFormat; }
 	inline const char* const GetName() const { return Name.c_str(); }
 
-	inline MaterialID GetMaterialID() const { return m_Material; }
+	inline MaterialID GetMaterialID() const { return m_MaterialID; }
+	inline const MaterialProperty& GetMaterialProperty() const { assert(Material); return *Material; }
+	inline MaterialProperty& GetMaterialProperty() { assert(Material); return *Material; }
 
 	inline const RHIBuffer* GetPackedVertexBuffer() const { assert(RHIPackedVertexBuffer);  return RHIPackedVertexBuffer.get(); }
 	inline const RHIBuffer* GetIndexBuffer() const { assert(RHIIndexBuffer);  return RHIIndexBuffer.get(); }
@@ -233,16 +237,16 @@ public:
 	virtual void CreateRHIBuffers(class RHIDevice& Device);
 protected:
 	friend class SceneBuilder;
-	void SetMaterialID(MaterialID ID) { m_Material = ID; }
+	void SetMaterialID(MaterialID ID) { m_MaterialID = ID; }
 
-	MaterialID m_Material;
+	MaterialID m_MaterialID;
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
 			CEREAL_BASE(MeshProperty),
-			CEREAL_NVP(m_Material)
+			CEREAL_NVP(m_MaterialID)
 		);
 	}
 };

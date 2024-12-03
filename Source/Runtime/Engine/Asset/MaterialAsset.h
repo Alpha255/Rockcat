@@ -1,12 +1,13 @@
 #pragma once
 
 #include "Core/Math/Matrix.h"
+#include "Core/Math/Color.h"
 #include "Engine/Asset/SerializableAsset.h"
 #include "Engine/Asset/TextureAsset.h"
 #include "Engine/Asset/ShaderAsset.h"
 #include "Runtime/Engine/RHI/RHIRenderStates.h"
 
-enum class EShadingMode
+enum class EShadingMode : uint8_t
 {
 	Unlit,
 	BlinnPhong,
@@ -14,105 +15,93 @@ enum class EShadingMode
 	Toon
 };
 
-class MaterialAsset : public SerializableAsset<MaterialAsset>
+struct MaterialProperty : public SerializableAsset<MaterialProperty>
 {
-public:
-protected:
-	template<class T>
-	MaterialAsset(T&& Name)
-		: BaseClass(GetFilePath(ASSET_PATH_MATERIALS, Name, GetExtension()))
+	using BaseClass::BaseClass;
+
+	enum class ETextureType
 	{
-	}
-public:
-	virtual ~MaterialAsset() = default;
+		Diffuse,
+		Specular,
+		Ambient,
+		Emissive,
+		Height,
+		Normal,
+		Shininess,
+		Opacity,
+		Displacement,
+		Lightmap,
+		Reflection,
+		BaseColor,
+		EmissionColor,
+		Metalness,
+		DiffuseRoughness,
+		AmbientOcclusion,
+		Num
+	};
 
-	virtual const ShaderAsset& GetVertexShader() const = 0;
-	virtual const ShaderAsset& GetFragmentShader() const = 0;
+	std::string Name;
 
-	static const char* GetExtension() { return ".material"; }
+	ERHICullMode CullMode = ERHICullMode::BackFace;
+	EShadingMode ShadingMode = EShadingMode::BlinnPhong;
+	bool DoubleSided = false;
+	bool Wireframe = false;
 
-	EShadingMode GetShadingMode() const { return m_ShadingMode; }
+	float AlphaCutoff = 0.0f;
+
+	struct
+	{
+		Math::Color BaseColor = Math::Color::White;
+		Math::Color DiffuseColor = Math::Color::White;
+		Math::Color SpecularColor = Math::Color::White;
+		Math::Color EmissiveColor = Math::Color::White;
+		Math::Color TransparentColor = Math::Color::White;
+		Math::Color ReflectiveColor = Math::Color::White;
+		float Metalness = 1.0f;
+		float Roughness = 1.0f;
+		float Glossiness = 1.0f;
+		float Specular = 1.0f;
+		float Opacity = 1.0f;
+		float Shininess = 1.0f;
+
+		template<class Archive>
+		void serialize(Archive& Ar)
+		{
+			Ar(
+				CEREAL_NVP(BaseColor),
+				CEREAL_NVP(DiffuseColor),
+				CEREAL_NVP(SpecularColor),
+				CEREAL_NVP(EmissiveColor),
+				CEREAL_NVP(TransparentColor),
+				CEREAL_NVP(ReflectiveColor),
+				CEREAL_NVP(Metalness),
+				CEREAL_NVP(Roughness),
+				CEREAL_NVP(Glossiness),
+				CEREAL_NVP(Specular),
+				CEREAL_NVP(Opacity),
+				CEREAL_NVP(Shininess)
+			);
+		}
+	} Factors;
+
+	std::array<std::shared_ptr<TextureAsset>, (size_t)ETextureType::Num> Textures;
+
+	inline void MarkDirty(bool InDirty) { m_Dirty |= InDirty; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(BaseClass),
-			CEREAL_NVP(m_ShadingMode)
+			CEREAL_NVP(Name),
+			CEREAL_NVP(CullMode),
+			CEREAL_NVP(ShadingMode),
+			CEREAL_NVP(DoubleSided),
+			CEREAL_NVP(Wireframe),
+			CEREAL_NVP(AlphaCutoff),
+			CEREAL_NVP(Factors),
+			CEREAL_NVP(Textures)
 		);
 	}
-protected:
-	friend class AssimpSceneImporter;
-
-	void SetShadingMode(EShadingMode ShadingMode) { m_ShadingMode = ShadingMode; }
-	EShadingMode m_ShadingMode = EShadingMode::Unlit;
 };
 
-using MaterialID = ObjectID<MaterialAsset, uint32_t>;
-
-template<class VertexShader, class FragmentShader, class T>
-class Material : public MaterialAsset, public VertexShader, public FragmentShader
-{
-protected:
-	template<class T>
-	Material(MaterialID ID, EShadingMode ShadingMode, T&& Name)
-		: MaterialAsset(Name)
-		, m_ID(ID)
-	{
-		SetShadingMode(ShadingMode);
-	}
-public:
-	using MaterialType = T;
-	using MaterialAsset::MaterialAsset;
-
-	const MaterialID& GetID() const { return m_ID; }
-	const VertexShader& GetVertexShader() const override final { return *this; }
-	const FragmentShader& GetFragmentShader() const override final { return *this; }
-
-	template<class T>
-	void SetName(T&& Name) { SetPath(GetFilePath(ASSET_PATH_MATERIALS, Name, GetExtension())); }
-
-	ERHICullMode GetCullMode() const { return m_CullMode; }
-	void SetCullMode(ERHICullMode CullMode) { m_CullMode = CullMode; }
-
-	bool IsTwoSided() const { return m_TwoSided; }
-	void SetTwoSided(bool TwoSided) { m_TwoSided = TwoSided; }
-
-	//bool IsReady() const override final { return Asset::IsReady() && VS::IsReady() && FS::IsReady(); }
-	//void Compile() override final { VS::Compile(); FS::Compile(); }
-
-	virtual ~Material()
-	{
-		SerializeShaderVariables();
-		Save<T>(true);
-	}
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_BASE(MaterialAsset),
-			CEREAL_BASE(VertexShader),
-			CEREAL_BASE(FragmentShader),
-			CEREAL_NVP(m_CullMode),
-			CEREAL_NVP(m_TwoSided)
-		);
-	}
-protected:
-	void SerializeShaderVariables()
-	{
-		for (auto& Variable : VertexShader::GetVariables())
-		{
-			Variable.second.Value = Variable.second.Get();
-		}
-		for (auto& Variable : FragmentShader::GetVariables())
-		{
-			Variable.second.Value = Variable.second.Get();
-		}
-	}
-
-private:
-	MaterialID m_ID;
-	ERHICullMode m_CullMode = ERHICullMode::BackFace;
-	bool m_TwoSided = false;
-};
+using MaterialID = ObjectID<MaterialProperty, uint32_t>;

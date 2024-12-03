@@ -1,0 +1,16 @@
+{
+    "struct VulkanDescriptorLimitations": {
+        "MaxDescriptorSetsPerPool": 2048,
+        "MaxSampler": 256,
+        "MaxCombinedImageSampler": 2048,
+        "MaxSampledImage": 2048,
+        "MaxStorageImage": 256,
+        "MaxUniformTexelBuffer": 256,
+        "MaxStorageTexelBuffer": 256,
+        "MaxUniformBuffer": 1024,
+        "MaxStorageBuffer": 1024,
+        "MaxUniformBufferDynamic": 8,
+        "MaxStorageBufferDynamic": 8,
+        "MaxInputAttachment": 64
+    }
+}

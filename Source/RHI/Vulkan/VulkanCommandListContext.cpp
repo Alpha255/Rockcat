@@ -5,7 +5,7 @@
 
 VulkanCommandListContext::VulkanCommandListContext(const VulkanDevice& Device, VulkanQueue& Queue)
 	: m_Pool(Device, Queue.GetFamilyIndex())
-	, m_DescriptorPool(std::move(std::make_unique<VulkanDescriptorPool>(Device)))
+	, m_DescriptorPool(new VulkanDescriptorPool(Device))
 	, m_Queue(Queue)
 	, m_Device(Device)
 {

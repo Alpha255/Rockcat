@@ -239,8 +239,6 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 		m_ThreadedCmdListContexts.emplace(std::make_shared<VulkanCommandListContext>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Graphics]));
 	}
 
-	m_DescriptorPoolMgr = std::make_unique<VulkanDescriptorPoolManager>(*this);
-
 	m_PipelineCache = std::make_shared<VulkanPipelineCache>(*this);
 }
 

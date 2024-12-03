@@ -109,9 +109,9 @@ RHIInputLayoutCreateInfo MeshData::GetPackedInputLayoutCreateInfo(EVertexAttribu
 	return CreateInfo;
 }
 
-StaticMesh::StaticMesh(const MeshData& Data, MaterialID Material)
+StaticMesh::StaticMesh(const MeshData& Data, MaterialID ID)
 	: MeshData(Data)
-	, m_Material(Material)
+	, m_MaterialID(ID)
 {
 }
 

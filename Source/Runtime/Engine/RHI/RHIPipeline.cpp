@@ -15,9 +15,18 @@ RHIPipelineState::RHIPipelineState(const RHIGraphicsPipelineCreateInfo& GfxPipel
 		uint32_t MaxBindingIndex = 0u;
 		for (auto& [Name, Variable] : Shader->GetVariables())
 		{
+			RHIShaderResourceBinding Binding
+			{
+				Variable.Binding,
+				0u,
+				Variable.Type
+			};
 
+			MaxBindingIndex = std::max(MaxBindingIndex, Variable.Binding);
+			AllBindings.emplace_back(std::move(Binding));
 		}
 
+		Bindings.clear();
 		Bindings.resize(MaxBindingIndex + 1u);
 		for (auto& ResourceBinding : AllBindings)
 		{
@@ -32,6 +41,7 @@ void RHIPipelineState::Commit(RHICommandBuffer* CommandBuffer)
 
 	if (IsDirty())
 	{
+		CommitPipelineStates(CommandBuffer);
 		CommitShaderResources(CommandBuffer);
 		ClearDirty();
 	}

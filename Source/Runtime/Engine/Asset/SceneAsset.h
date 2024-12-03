@@ -8,7 +8,7 @@
 struct SceneData
 {
 	std::vector<std::shared_ptr<StaticMesh>> StaticMeshes;
-	std::vector<std::shared_ptr<MaterialAsset>> Materials;
+	std::vector<std::shared_ptr<MaterialProperty>> MaterialProperties;
 	std::vector<std::shared_ptr<class Camera>> m_Cameras;
 	std::vector<Math::Transform> Transforms;
 
@@ -56,10 +56,10 @@ public:
 		return &m_Data->Transforms[Index];
 	}
 
-	const MaterialAsset* GetMaterial(uint32_t Index) const
+	const MaterialProperty* GetMaterialProperty(uint32_t Index) const
 	{
-		assert(Index < m_Data->Materials.size());
-		return m_Data->Materials[Index].get();
+		assert(Index < m_Data->MaterialProperties.size());
+		return m_Data->MaterialProperties[Index].get();
 	}
 
 	template<class Archive>

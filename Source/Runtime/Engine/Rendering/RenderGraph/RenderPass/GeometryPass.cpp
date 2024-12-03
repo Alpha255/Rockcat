@@ -97,16 +97,19 @@ RHIFrameBuffer* GeometryPass::GetFrameBuffer()
 
 void GeometryPass::Execute(const RenderScene& Scene)
 {
-	if (GetGraphicsSettings().AsyncCommandlistSubmission)
+	for (auto& View : Scene.GetViews())
 	{
-		assert(false);
-	}
-	else
-	{
-		auto CommandListContext = GetRHIDevice().GetImmediateCommandListContext(ERHIDeviceQueue::Graphics);
-		for (auto& DrawCommand : Scene.GetMeshDrawCommands(m_Filter))
+		if (GetGraphicsSettings().AsyncCommandlistSubmission)
 		{
-			MeshDrawTask(DrawCommand, CommandListContext).Execute();
+			assert(false);
+		}
+		else
+		{
+			auto CommandListContext = GetRHIDevice().GetImmediateCommandListContext(ERHIDeviceQueue::Graphics);
+			for (auto& DrawCommand : Scene.GetMeshDrawCommands(m_Filter))
+			{
+				MeshDrawTask(DrawCommand, CommandListContext).Execute();
+			}
 		}
 	}
 }

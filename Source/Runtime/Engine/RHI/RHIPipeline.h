@@ -67,45 +67,66 @@ class RHIPipelineState
 public:
 	RHIPipelineState(const RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo);
 
-	bool IsDirty() const { return m_Dirty; }
+	bool IsDirty() const { return m_PipelineStatesDirtyFlags.any() || m_ShaderResourceDirty; }
 
 	void Commit(RHICommandBuffer* CommandBuffer);
 
-	inline void SetBuffer(ERHIShaderStage Stage, uint32_t Binding, RHIBuffer* Buffer)
+	inline RHIPipelineState& SetBuffer(ERHIShaderStage Stage, uint32_t Binding, RHIBuffer* Buffer)
 	{
 		assert(Stage < ERHIShaderStage::Num);
 		size_t Index = static_cast<size_t>(Stage);
 		assert(Binding < m_ShaderResourceLayout[Index].size());
-		MarkDirty(m_ShaderResourceLayout[Index][Binding].Buffer == Buffer);
+		MarkDirty(m_ShaderResourceLayout[Index][Binding].Buffer != Buffer);
 		m_ShaderResourceLayout[Index][Binding].Buffer = Buffer;
+		
+		return *this;
 	}
 
-	inline void SetTexture(ERHIShaderStage Stage, uint32_t Binding, RHITexture* Texture)
+	inline RHIPipelineState& SetTexture(ERHIShaderStage Stage, uint32_t Binding, RHITexture* Texture)
 	{
 		assert(Stage < ERHIShaderStage::Num);
 		size_t Index = static_cast<size_t>(Stage);
 		assert(Binding < m_ShaderResourceLayout[Index].size());
-		MarkDirty(m_ShaderResourceLayout[Index][Binding].Texture == Texture);
+		MarkDirty(m_ShaderResourceLayout[Index][Binding].Texture != Texture);
 		m_ShaderResourceLayout[Index][Binding].Texture = Texture;
+		
+		return *this;
 	}
 
-	inline void SetSampler(ERHIShaderStage Stage, uint32_t Binding, RHISampler* Sampler)
+	inline RHIPipelineState& SetSampler(ERHIShaderStage Stage, uint32_t Binding, RHISampler* Sampler)
 	{
 		assert(Stage < ERHIShaderStage::Num);
 		size_t Index = static_cast<size_t>(Stage);
 		assert(Binding < m_ShaderResourceLayout[Index].size());
-		MarkDirty(m_ShaderResourceLayout[Index][Binding].Sampler == Sampler);
+		MarkDirty(m_ShaderResourceLayout[Index][Binding].Sampler != Sampler);
 		m_ShaderResourceLayout[Index][Binding].Sampler = Sampler;
+
+		return *this;
 	}
 
 	const RHIShaderResourceLayout& GetShaderResourceLayout() const { return m_ShaderResourceLayout; }
 protected:
-	void MarkDirty(bool Dirty) { m_Dirty |= Dirty; }
-	void ClearDirty() { m_Dirty = false; }
+	enum EDirtyFlagBits
+	{
+		Viewport,
+		ScissorRect,
+		VertexStream,
+		IndexBuffer,
+		FrameBuffer,
+		Num
+	};
+
+	void MarkDirty(bool Dirty) { m_ShaderResourceDirty |= Dirty; }
+	void MarkDirty(EDirtyFlagBits Bit, bool Dirty) { m_PipelineStatesDirtyFlags.set(Bit, Dirty); }
+	void ClearDirty() { m_PipelineStatesDirtyFlags.reset(); m_ShaderResourceDirty = false; }
+	bool IsPipelineStatesDirty() const { return m_PipelineStatesDirtyFlags.any(); }
+	bool IsShaderResourceDirty() const { return m_ShaderResourceDirty; }
 
 	virtual void CommitShaderResources(RHICommandBuffer* CommandBuffer) = 0;
+	virtual void CommitPipelineStates(RHICommandBuffer* CommandBuffer) = 0;
 
-	bool m_Dirty = false;
+	bool m_ShaderResourceDirty = false;
+	std::bitset<EDirtyFlagBits::Num> m_PipelineStatesDirtyFlags;
 	RHIShaderResourceLayout m_ShaderResourceLayout;
 };
 

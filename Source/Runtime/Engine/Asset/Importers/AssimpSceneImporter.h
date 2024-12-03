@@ -62,7 +62,6 @@ public:
 					AssimpScene.Graph.Root = AssimpScene.Graph.AddNode(SceneGraph::NodeID(), AiScene->mRootNode->mName.C_Str());
 					if (ProcessNode(AiScene, AiScene->mRootNode, AssimpScene.Graph.Root, AssimpScene))
 					{
-						CompileMaterials(AssimpScene);
 						return true;
 					}
 				}
@@ -161,7 +160,7 @@ private:
 			return;
 		}
 
-		AssimpScene.Data.Materials.resize(AiScene->mNumMaterials);
+		AssimpScene.Data.MaterialProperties.resize(AiScene->mNumMaterials);
 		for (uint32_t Index = 0u; Index < AiScene->mNumMaterials; ++Index)
 		{
 			if (auto AiMaterial = AiScene->mMaterials[Index])
@@ -169,84 +168,70 @@ private:
 				aiString Name;
 				AiMaterial->Get(AI_MATKEY_NAME, Name);
 
-				aiString AlphaMode;
-				AiMaterial->Get(AI_MATKEY_GLTF_ALPHAMODE, AlphaMode);
+				auto MaterialPath = GetFilePath(ASSET_PATH_MATERIALS, (AssimpScene.GetPath().stem() / Name.C_Str()).string(), MaterialProperty::GetExtension());
+				auto NeedReload = std::filesystem::exists(MaterialPath);
+				auto& Property = AssimpScene.Data.MaterialProperties.at(Index);
+				Property = MaterialProperty::Load(MaterialPath);
 
-				aiShadingMode ShadingMode = aiShadingMode_Unlit;
-				AiMaterial->Get(AI_MATKEY_SHADING_MODEL, ShadingMode);
-
-				aiColor4D BaseColor(1.0f, 1.0f, 1.0f, 1.0f);
-				AiMaterial->Get(AI_MATKEY_BASE_COLOR, BaseColor);
-
-				aiColor4D DiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-				AiMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, DiffuseColor);
-
-				aiColor4D SpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
-				AiMaterial->Get(AI_MATKEY_COLOR_SPECULAR, SpecularColor);
-
-				aiColor4D EmissiveColor(1.0f, 1.0f, 1.0f, 1.0f);
-				AiMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, EmissiveColor);
-
-				aiColor4D TransparentColor(1.0f, 1.0f, 1.0f, 1.0f);
-				AiMaterial->Get(AI_MATKEY_COLOR_TRANSPARENT, TransparentColor);
-
-				aiColor4D ReflectiveColor(1.0f, 1.0f, 1.0f, 1.0f);
-				AiMaterial->Get(AI_MATKEY_COLOR_REFLECTIVE, ReflectiveColor);
-
-				ai_real MetallicFactor = 1.0f;
-				AiMaterial->Get(AI_MATKEY_METALLIC_FACTOR, MetallicFactor);
-
-				ai_real RoughnessFactor = 1.0f;
-				AiMaterial->Get(AI_MATKEY_ROUGHNESS_FACTOR, RoughnessFactor);
-
-				ai_real GlossinessFactor = 1.0f;
-				AiMaterial->Get(AI_MATKEY_GLOSSINESS_FACTOR, GlossinessFactor);
-
-				ai_real SpecularFactor = 1.0f;
-				AiMaterial->Get(AI_MATKEY_SPECULAR_FACTOR, SpecularFactor);
-
-				ai_real Opacity = 1.0f;
-				AiMaterial->Get(AI_MATKEY_OPACITY, Opacity);
-
-				ai_real Shininess = 1.0f;
-				AiMaterial->Get(AI_MATKEY_SHININESS, Shininess);
-
-				ai_real AlphaCutoff = 0.0f;
-				AiMaterial->Get(AI_MATKEY_GLTF_ALPHACUTOFF, AlphaCutoff);
-
-				bool TwoSided = false;
-				AiMaterial->Get(AI_MATKEY_TWOSIDED, TwoSided);
-
-				auto MaterialAssetName = (AssimpScene.GetPath().stem() / Name.C_Str()).string();
-				auto& Material = AssimpScene.Data.Materials.at(Index);
-
-				switch (ShadingMode)
+				if (NeedReload)
 				{
-				case aiShadingMode_Flat:
-				case aiShadingMode_Gouraud:
-				case aiShadingMode_Phong:
-				case aiShadingMode_Blinn:
-					Material = MaterialAsset::Load<MaterialLit>(Index, EShadingMode::BlinnPhong, MaterialAssetName.c_str());
-					break;
-				case aiShadingMode_Toon:
-					Material = MaterialAsset::Load<MaterialToon>(Index, MaterialAssetName.c_str());
-					break;
-				case aiShadingMode_OrenNayar:
-				case aiShadingMode_Minnaert:
-				case aiShadingMode_CookTorrance:
-				case aiShadingMode_Fresnel:
-				case aiShadingMode_PBR_BRDF:
-					Material = MaterialAsset::Load<MaterialLit>(Index, EShadingMode::StandardPBR, MaterialAssetName.c_str());
-					break;
-				case aiShadingMode_NoShading:
-					Material = MaterialAsset::Load<MaterialUnlit>(Index, MaterialAssetName.c_str());
-					break;
+					aiString AlphaMode;
+					AiMaterial->Get(AI_MATKEY_GLTF_ALPHAMODE, AlphaMode);
+
+					aiShadingMode ShadingMode = aiShadingMode_Unlit;
+					AiMaterial->Get(AI_MATKEY_SHADING_MODEL, ShadingMode);
+
+					Property->Name.assign(Name.C_Str());
+
+#define GET_COLOR_FACTOR(Key, Target) { aiColor4D Factor(1.0f, 1.0f, 1.0f, 1.0f); AiMaterial->Get(Key, Factor); Target = Math::Color(Factor.r, Factor.g, Factor.b, Factor.a); }
+#define GET_FACTOR(Key, Target) { ai_real Factor = 1.0f; AiMaterial->Get(Key, Factor); Target = Factor; }
+
+					GET_COLOR_FACTOR(AI_MATKEY_BASE_COLOR, Property->Factors.BaseColor);
+					GET_COLOR_FACTOR(AI_MATKEY_COLOR_DIFFUSE, Property->Factors.DiffuseColor);
+					GET_COLOR_FACTOR(AI_MATKEY_COLOR_SPECULAR, Property->Factors.SpecularColor);
+					GET_COLOR_FACTOR(AI_MATKEY_COLOR_EMISSIVE, Property->Factors.EmissiveColor);
+					GET_COLOR_FACTOR(AI_MATKEY_COLOR_TRANSPARENT, Property->Factors.TransparentColor);
+					GET_COLOR_FACTOR(AI_MATKEY_COLOR_REFLECTIVE, Property->Factors.ReflectiveColor);
+
+					GET_FACTOR(AI_MATKEY_METALLIC_FACTOR, Property->Factors.Metalness);
+					GET_FACTOR(AI_MATKEY_ROUGHNESS_FACTOR, Property->Factors.Roughness);
+					GET_FACTOR(AI_MATKEY_GLOSSINESS_FACTOR, Property->Factors.Glossiness);
+					GET_FACTOR(AI_MATKEY_SPECULAR_FACTOR, Property->Factors.Specular);
+					GET_FACTOR(AI_MATKEY_OPACITY, Property->Factors.Opacity);
+					GET_FACTOR(AI_MATKEY_SHININESS, Property->Factors.Shininess);
+
+					AiMaterial->Get(AI_MATKEY_GLTF_ALPHACUTOFF, Property->AlphaCutoff);
+					AiMaterial->Get(AI_MATKEY_TWOSIDED, Property->DoubleSided);
+#undef GET_COLOR_FACTOR
+#undef GET_FACTOR
+
+					switch (ShadingMode)
+					{
+					case aiShadingMode_Flat:
+					case aiShadingMode_Gouraud:
+					case aiShadingMode_Phong:
+					case aiShadingMode_Blinn:
+						Property->ShadingMode = EShadingMode::BlinnPhong;
+						break;
+					case aiShadingMode_Toon:
+						Property->ShadingMode = EShadingMode::Toon;
+						break;
+					case aiShadingMode_OrenNayar:
+					case aiShadingMode_Minnaert:
+					case aiShadingMode_CookTorrance:
+					case aiShadingMode_Fresnel:
+					case aiShadingMode_PBR_BRDF:
+						Property->ShadingMode = EShadingMode::StandardPBR;
+						break;
+					case aiShadingMode_NoShading:
+						Property->ShadingMode = EShadingMode::Unlit;
+						break;
+					}
+
+					Property->MarkDirty(true);
 				}
 
-				ProcessTextures(AiMaterial, Material.get(), AssimpScene.GetPath().parent_path());
-			}
-			else
-			{
+				ProcessTextures(AiMaterial, *Property, AssimpScene.GetPath().parent_path());
 			}
 		}
 	}
@@ -281,24 +266,6 @@ private:
 			{
 				LOG_CAT_ERROR(LogAssimpImporter, "Detected others primitive type, should never be happen!");
 				continue;
-			}
-
-			if (Mesh->HasTangentsAndBitangents())
-			{
-				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_TANGENT_", true);
-				GetFragmentShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_TANGENT_", true);
-			}
-			if (Mesh->HasTextureCoords(0u))
-			{
-				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_UV0_", true);
-			}
-			if (Mesh->HasTextureCoords(1u))
-			{
-				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_UV1_", true);
-			}
-			if (Mesh->HasVertexColors(0u))
-			{
-				GetVertexShader(AssimpScene, Mesh->mMaterialIndex).SetDefine("_HAS_COLOR_", true);
 			}
 
 			Math::AABB BoundingBox = Math::AABB(
@@ -372,124 +339,48 @@ private:
 		}
 	}
 
-	std::shared_ptr<Asset> SetMaterialUnlitTexture(MaterialAsset* Material, aiTextureType TextureType, const std::filesystem::path& TexturePath)
+	MaterialProperty::ETextureType GetTextureType(aiTextureType Type)
 	{
-		std::shared_ptr<TextureAsset> Image(nullptr);
-
-		if (Material->GetShadingMode() == EShadingMode::Unlit)
+		switch (Type)
 		{
-			auto Unlit = Cast<MaterialUnlit>(Material);
-
-			switch (TextureType)
-			{
-			case aiTextureType_DIFFUSE:
-			case aiTextureType_BASE_COLOR:
-				Unlit->SetBaseColorMap(TexturePath);
-				//Image = Unlit->GetBaseColorMap();
-				break;
-			}
+		case aiTextureType_DIFFUSE:
+			return MaterialProperty::ETextureType::Diffuse;
+		case aiTextureType_SPECULAR:
+			return MaterialProperty::ETextureType::Specular;
+		case aiTextureType_AMBIENT:
+			return MaterialProperty::ETextureType::Ambient;
+		case aiTextureType_EMISSIVE:
+			return MaterialProperty::ETextureType::Emissive;
+		case aiTextureType_HEIGHT:
+			return MaterialProperty::ETextureType::Height;
+		case aiTextureType_NORMALS:
+			return MaterialProperty::ETextureType::Normal;
+		case aiTextureType_SHININESS:
+			return MaterialProperty::ETextureType::Shininess;
+		case aiTextureType_OPACITY:
+			return MaterialProperty::ETextureType::Opacity;
+		case aiTextureType_DISPLACEMENT:
+			return MaterialProperty::ETextureType::Displacement;
+		case aiTextureType_LIGHTMAP:
+			return MaterialProperty::ETextureType::Lightmap;
+		case aiTextureType_REFLECTION:
+			return MaterialProperty::ETextureType::Reflection;
+		case aiTextureType_BASE_COLOR:
+			return MaterialProperty::ETextureType::BaseColor;
+		case aiTextureType_EMISSION_COLOR:
+			return MaterialProperty::ETextureType::EmissionColor;
+		case aiTextureType_METALNESS:
+			return MaterialProperty::ETextureType::Metalness;
+		case aiTextureType_DIFFUSE_ROUGHNESS:
+			return MaterialProperty::ETextureType::DiffuseRoughness;
+		case aiTextureType_AMBIENT_OCCLUSION:
+			return MaterialProperty::ETextureType::AmbientOcclusion;
+		default:
+			return MaterialProperty::ETextureType::Num;
 		}
-
-		return Image;
 	}
 
-	std::shared_ptr<Asset> SetMaterialLitTexture(MaterialAsset* Material, aiTextureType TextureType, const std::filesystem::path& TexturePath)
-	{
-		std::shared_ptr<TextureAsset> Image(nullptr);
-
-		if (Material->GetShadingMode() == EShadingMode::BlinnPhong || Material->GetShadingMode() == EShadingMode::StandardPBR)
-		{
-			auto Lit = Cast<MaterialLit>(Material);
-
-			switch (TextureType)
-			{
-			case aiTextureType_DIFFUSE:
-			case aiTextureType_BASE_COLOR:
-				Lit->SetBaseColorMap(TexturePath);
-				//Image = Lit->DefaultLitFS::GetShaderVariables().GetBaseColorMap();
-				break;
-			case aiTextureType_NORMALS:
-				Lit->SetNormalMap(TexturePath);
-				//Image = Lit->DefaultLitFS::GetShaderVariables().GetNormalMap();
-				break;
-			case aiTextureType_REFLECTION:
-				break;
-			case aiTextureType_EMISSIVE:
-			case aiTextureType_EMISSION_COLOR:
-				break;
-			}
-
-			if (Material->GetShadingMode() == EShadingMode::BlinnPhong)
-			{
-				switch (TextureType)
-				{
-				case aiTextureType_SPECULAR:
-					break;
-				case aiTextureType_AMBIENT:
-					break;
-				}
-			}
-			else if (Material->GetShadingMode() == EShadingMode::StandardPBR)
-			{
-				switch (TextureType)
-				{
-				case aiTextureType_SHININESS:
-					break;
-				case aiTextureType_OPACITY:
-					break;
-				case aiTextureType_METALNESS:
-					Lit->SetMetallicRoughnessMap(TexturePath);
-					//Image = Lit->DefaultLitFS::GetShaderVariables().GetMetallicRoughnessMap();
-					break;
-				case aiTextureType_DIFFUSE_ROUGHNESS:
-					break;
-				case aiTextureType_AMBIENT_OCCLUSION:
-					Lit->SetAOMap(TexturePath);
-					//Image = Lit->DefaultLitFS::GetShaderVariables().GetAOMap();
-					break;
-				case aiTextureType_SHEEN:
-					break;
-				case aiTextureType_CLEARCOAT:
-					break;
-				}
-			}
-		}
-
-		return Image;
-	}
-
-	std::shared_ptr<Asset> SetMaterialToonTexture(MaterialAsset* Material, aiTextureType TextureType, const std::filesystem::path& TexturePath)
-	{
-		std::shared_ptr<TextureAsset> Image(nullptr);
-
-		if (Material->GetShadingMode() == EShadingMode::Toon)
-		{
-			auto Toon = Cast<MaterialToon>(Material);
-
-			switch (TextureType)
-			{
-			case aiTextureType_DIFFUSE:
-			case aiTextureType_BASE_COLOR:
-				Toon->SetBaseColorMap(TexturePath);
-				//Image = Toon->GetBaseColorMap();
-				break;
-			}
-		}
-
-		return Image;
-	}
-
-	ShaderAsset& GetVertexShader(AssimpSceneAsset& AssimpScene, uint32_t MaterialIndex)
-	{
-		return const_cast<ShaderAsset&>(AssimpScene.Data.Materials[MaterialIndex]->GetVertexShader());
-	}
-
-	ShaderAsset& GetFragmentShader(AssimpSceneAsset& AssimpScene, uint32_t MaterialIndex)
-	{
-		return const_cast<ShaderAsset&>(AssimpScene.Data.Materials[MaterialIndex]->GetFragmentShader());
-	}
-
-	void ProcessTextures(const aiMaterial* AiMaterial, MaterialAsset* Material, const std::filesystem::path& RootPath)
+	void ProcessTextures(const aiMaterial* AiMaterial, MaterialProperty& Material, const std::filesystem::path& RootPath)
 	{
 		for (uint32_t Index = aiTextureType_DIFFUSE; Index < aiTextureType_TRANSMISSION; ++Index)
 		{
@@ -510,30 +401,17 @@ private:
 						Cast<TextureAsset>(InAsset).SetUseSRGB(TextureType == aiTextureType_DIFFUSE || TextureType == aiTextureType_BASE_COLOR);
 					};
 
-					auto Image = SetMaterialUnlitTexture(Material, TextureType, TexturePath);
-					if (!Image)
+					auto TextureIndex = GetTextureType(TextureType);
+					if (TextureIndex != MaterialProperty::ETextureType::Num)
 					{
-						Image = SetMaterialLitTexture(Material, TextureType, TexturePath);
-						if (!Image)
-						{
-							Image = SetMaterialToonTexture(Material, TextureType, TexturePath);
-						}
-					}
+						auto& Texture = Material.Textures[static_cast<size_t>(TextureIndex)];
+						Texture.reset(new TextureAsset(TexturePath));
 
-					if (Image)
-					{
-						AssetDatabase::Get().FindOrImportAsset(Image, AssetLoadCallbacks);
+						auto TextureAsset = Cast<Asset>(Texture);
+						AssetDatabase::Get().FindOrImportAsset(TextureAsset, AssetLoadCallbacks);
 					}
 				}
 			}
 		}
-	}
-
-	void CompileMaterials(AssimpSceneAsset& /*AssimpScene*/)
-	{
-		//for (auto& Material : AssimpScene.Data.Materials)
-		//{
-		//	Material->Compile();
-		//}
 	}
 };
