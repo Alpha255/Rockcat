@@ -248,6 +248,11 @@ private:
 	std::map<std::string, ShaderVariable> m_Variables;
 };
 
+struct MinimalShaderResourceLayout
+{
+
+};
+
 namespace cereal
 {
 	template<> struct LoadAndConstruct<ShaderCache>

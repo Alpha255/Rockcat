@@ -64,13 +64,13 @@ public:
 		return m_Data->MaterialProperties[Index].get();
 	}
 
-	const class Camera& GetCamera(uint32_t Index) const
+	const Camera& GetCamera(uint32_t Index) const
 	{
 		assert(Index < m_Data->Cameras.size());
 		return *m_Data->Cameras[Index];
 	}
 
-	const std::vector<std::shared_ptr<class Camera>>& GetCameras() const
+	const std::vector<std::shared_ptr<Camera>>& GetCameras() const
 	{
 		return m_Data->Cameras;
 	}
