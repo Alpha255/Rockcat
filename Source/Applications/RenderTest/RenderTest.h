@@ -7,6 +7,8 @@ class RenderTest final : public BaseApplication
 public:
 	using BaseApplication::BaseApplication;
 protected:
+	void Tick(float ElapsedSeconds) override final;
+
 	void OnInitialize() override final;
 	void OnRenderGUI(class Canvas&) override final {}
 	void OnRenderFrame() override final;

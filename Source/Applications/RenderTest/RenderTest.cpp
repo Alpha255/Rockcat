@@ -14,10 +14,15 @@ void RenderTest::OnInitialize()
 	m_RenderGraph = RenderGraph::Create(GetGraphicsSettings());
 }
 
+void RenderTest::Tick(float ElapsedSeconds)
+{
+	BaseApplication::Tick(ElapsedSeconds);
+
+	m_Scene->Update();
+}
+
 void RenderTest::OnRenderFrame()
 {
-	m_Scene->Update();
-
 	m_RenderGraph->Execute(*m_Scene);
 }
 
