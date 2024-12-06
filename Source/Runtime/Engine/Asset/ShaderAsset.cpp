@@ -36,9 +36,22 @@ private:
 	std::map<std::string, ShaderDefines> m_DefaultDefines;
 };
 
-void ShaderAsset::GetDefaultDefines()
+void ShaderAsset::SetupDefaultDefines()
 {
 	ShaderDefines::Merge(GlobalShaderCompileConfigurations::Get()->GetDefines(GetPath()));
+}
+
+const ShaderBinaryCache& ShaderAsset::GetCache() const
+{
+	if (!m_Cache)
+	{
+		m_Cache = ShaderBinaryCache::Load(GetFilePath(ASSET_PATH_SHADERCACHE, GetName(), ShaderBinaryCache::GetExtension()));
+	}
+	if (m_Cache->IsDirty())
+	{
+		m_Cache->Reload();
+	}
+	return *m_Cache;
 }
 
 ERHIShaderStage ShaderAsset::GetStage(const std::filesystem::path& Path)
@@ -78,5 +91,37 @@ void ShaderAsset::Compile(bool Force)
 		ReadRawData(AssetType::EContentsType::Text);
 		ShaderCompileService::Get().Compile(*this);
 		FreeRawData();
+	}
+}
+
+size_t ShaderVariableContainer::ComputeUniformBufferSize()
+{
+	size_t UniformBufferSize = 0u;
+	for (auto& [Name, Variable] : Variables)
+	{
+		if (Variable.Type == ERHIResourceType::UniformBuffer)
+		{
+			UniformBufferSize += Align(Variable.Stride, alignof(Math::Matrix));
+		}
+	}
+
+	return UniformBufferSize;
+}
+
+void ShaderVariableContainer::RegisterVariable(const char* Name, ShaderVariable&& Variable)
+{
+	auto It = Variables.find(Name);
+	if (It != Variables.end())
+	{
+		It->second = std::move(Variable);
+
+		if (It->second.IsValid())
+		{
+			It->second.Set(It->second.Value);
+		}
+	}
+	else
+	{
+		Variables.insert(std::make_pair(std::string(Name), std::forward<ShaderVariable>(Variable)));
 	}
 }

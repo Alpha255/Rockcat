@@ -9,7 +9,9 @@ public:
 	using Asset::Asset;
 
 	bool IsSRGB() const { return SRGB; }
+
 	const RHITexture* GetRHI() const { return Texture; }
+	void CreateRHI(class RHIDevice& Device, const struct RHITextureCreateInfo& CreateInfo);
 
 	template<class Archive>
 	void serialize(Archive& Ar)

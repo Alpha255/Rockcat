@@ -5,6 +5,7 @@
 #include "Engine/RHI/RHIPipeline.h"
 #include "Engine/View/View.h"
 #include "Engine/Asset/MaterialAsset.h"
+#include "Engine/Scene/SceneGraph.h"
 
 enum class EGeometryPassFilter
 {
@@ -24,10 +25,20 @@ struct VertexStream
 
 struct MeshDrawCommand
 {
+	enum class ECullFlags
+	{
+		None,
+		CulledByFrustum,
+		CulledByOcclusion
+	};
+
 	RHIVertexStream VertexStream;
 	const RHIBuffer* IndexBuffer = nullptr;
 
 	RHIGraphicsPipeline* GraphicsPipeline = nullptr;
+
+	std::shared_ptr<ShaderVariableContainer> VertexShaderVariables;
+	std::shared_ptr<ShaderVariableContainer> FragmentShaderVariables;
 
 	uint32_t FirstIndex = 0u;
 	uint32_t NumPrimitives = 0u;
@@ -62,7 +73,7 @@ struct MeshDrawCommand
 class RenderScene
 {
 public:
-	void BuildMeshDrawCommands(const class Scene& InScene, class RHIDevice& Device, bool Async);
+	void RebuildMeshDrawCommands(const class Scene& InScene, class RHIDevice& Device, bool Async);
 
 	const std::vector<MeshDrawCommand>& GetMeshDrawCommands(EGeometryPassFilter MeshPass) const { return m_MeshDrawCommands[(size_t)MeshPass]; }
 	const std::vector<std::shared_ptr<IView>>& GetViews() const { return m_Views; }
@@ -75,6 +86,20 @@ private:
 	std::array<std::vector<MeshDrawCommand>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommands;
 	std::array<std::shared_ptr<struct IGeometryPassMeshDrawCommandBuilder>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommandBuilders;
 	mutable std::vector<std::shared_ptr<IView>> m_Views;
+};
+
+class RenderScene2
+{
+public:
+	RenderScene2(const class Scene& InScene);
+private:
+	const class Scene& InScene;
+	using NodeIndex = SceneGraph::NodeID::IndexType;
+
+	std::vector<NodeIndex> m_PrimitiveNodes;
+	std::vector<NodeIndex> m_DirtyNodes;
+	std::vector<NodeIndex> m_AddNodes;
+	std::vector<NodeIndex> m_RemoveNodes;
 };
 
 namespace SceneTextures

@@ -276,8 +276,6 @@ void Scene::Traverse(const SceneNode::VisitFunc& Visit) const
 
 void Scene::Update()
 {
-	SetDirty(!m_AddNodes.empty() || !m_RemoveOrHiddenNodes.empty());
-
 	if (m_VisibleNodes.empty())
 	{
 		SceneViewer<BreadthFirst> SceneViewer(*this);
@@ -294,13 +292,24 @@ void Scene::Update()
 		}
 	}
 
+	uint32_t NumAddNodes = 0u;
 	for (auto Node : m_AddNodes)
 	{
-		m_VisibleNodes.insert(Node);
+		if (Node->IsAlive() && Node->IsVisible())
+		{
+			m_VisibleNodes.insert(Node);
+			++NumAddNodes;
+		}
 	}
+	m_AddNodes.clear();
 
+	uint32_t NumRemoveNodes = 0u;
 	for (auto Node : m_RemoveOrHiddenNodes)
 	{
 		m_VisibleNodes.erase(Node);
+		++NumRemoveNodes;
 	}
+	m_RemoveOrHiddenNodes.clear();
+
+	SetDirty(NumAddNodes > 0u || NumRemoveNodes > 0u);
 }

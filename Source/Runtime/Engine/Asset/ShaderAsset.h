@@ -109,10 +109,10 @@ private:
 	//std::atomic<EStatus> m_Status;
 };
 
-struct ShaderCache : public SerializableAsset<ShaderCache>
+struct ShaderBinaryCache : public SerializableAsset<ShaderBinaryCache>
 {
 	template<class T>
-	ShaderCache(T&& Path)
+	ShaderBinaryCache(T&& Path)
 		: BaseClass(std::forward<T>(Path))
 	{
 	}
@@ -186,7 +186,7 @@ public:
 		: Asset(GetFilePath(ASSET_PATH_SHADERS, Name))
 		, m_Stage(GetStage(GetPath()))
 	{
-		GetDefaultDefines();
+		SetupDefaultDefines();
 	}
 
 	ERHIShaderStage GetStage() const { return m_Stage; }
@@ -195,70 +195,61 @@ public:
 
 	const ShaderBinary* const GetBinary(ERenderHardwareInterface RHI) const { return GetCache().GetBinary(ComputeHash(), RHI); }
 
-	void RegisterVariable(const char* Name, ShaderVariable&& Variable)
-	{
-		auto It = m_Variables.find(Name);
-		if (It != m_Variables.end())
-		{
-			It->second = std::move(Variable);
-
-			if (It->second.IsValid())
-			{
-				It->second.Set(It->second.Value);
-			}
-		}
-		else
-		{
-			m_Variables.insert(std::make_pair(std::string(Name), std::forward<ShaderVariable>(Variable)));
-		}
-	}
+	virtual std::shared_ptr<struct ShaderVariableContainer> CreateVariableContainer() const { return nullptr; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(ShaderDefines),
-			CEREAL_NVP(m_Variables)
+			CEREAL_BASE(ShaderDefines)
 		);
 	}
-
-	const std::map<std::string, ShaderVariable>& GetVariables() const { return m_Variables; }
 protected:
-	const ShaderCache& GetCache() const
-	{
-		if (!m_Cache)
-		{
-			m_Cache = ShaderCache::Load(GetFilePath(ASSET_PATH_SHADERCACHE, GetName(), ShaderCache::GetExtension()));
-		}
-		if (m_Cache->IsDirty())
-		{
-			m_Cache->Reload();
-		}
-		return *m_Cache;
-	}
-
+	const ShaderBinaryCache& GetCache() const;
 	static ERHIShaderStage GetStage(const std::filesystem::path& Path);
-	std::map<std::string, ShaderVariable>& GetVariables() { return m_Variables; }
 private:
-	void GetDefaultDefines();
+	void SetupDefaultDefines();
 
-	mutable std::shared_ptr<ShaderCache> m_Cache;
+	mutable std::shared_ptr<ShaderBinaryCache> m_Cache;
 	ERHIShaderStage m_Stage;
-
-	std::map<std::string, ShaderVariable> m_Variables;
 };
 
-struct MinimalShaderResourceLayout
+struct ShaderVariableContainer
 {
+	std::map<std::string, ShaderVariable> Variables;
 
+	void RegisterVariable(const char* Name, ShaderVariable&& Variable);
+	size_t ComputeUniformBufferSize();
+
+	virtual void SetupViewParams(const class IView&) {}
+	virtual void SetupMaterialProperties(const struct MaterialProperty&) {}
+	void SetOnPipelineState(ERHIShaderStage, class RHIPipelineState&) {}
+	void CreateRHI(class RHIDevice&) {}
+
+	inline const std::map<std::string, ShaderVariable>& GetVariables() const { return Variables; }
+};
+
+template<class TShaderVariableContainer>
+class Shader : public ShaderAsset
+{
+public:
+	Shader(const char* Path)
+		: ShaderAsset(Path)
+	{
+	}
+
+	std::shared_ptr<ShaderVariableContainer> CreateVariableContainer() const override
+	{
+		return std::make_shared<TShaderVariableContainer>();
+	}
 };
 
 namespace cereal
 {
-	template<> struct LoadAndConstruct<ShaderCache>
+	template<> struct LoadAndConstruct<ShaderBinaryCache>
 	{
 		template<class Archive>
-		static void load_and_construct(Archive& Ar, cereal::construct<ShaderCache>& Construct)
+		static void load_and_construct(Archive& Ar, cereal::construct<ShaderBinaryCache>& Construct)
 		{
 			std::string NullShaderName;
 			Ar(NullShaderName);

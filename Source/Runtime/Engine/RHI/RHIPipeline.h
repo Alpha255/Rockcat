@@ -43,10 +43,32 @@ struct RHIGraphicsPipelineCreateInfo
 	inline RHIGraphicsPipelineCreateInfo& SetShader(const ShaderAsset* Shader) { Shaders[static_cast<size_t>(Shader->GetStage())] = Shader; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetRenderPassCreateInfo(const RHIRenderPassCreateInfo& InRenderPassCreateInfo) { RenderPassCreateInfo = InRenderPassCreateInfo; return *this; }
 	
+	inline RHIGraphicsPipelineCreateInfo& SetViewport(const RHIViewport& Viewport)
+	{
+		if (Viewports.empty())
+		{
+			return AddViewport(Viewport);
+		}
+
+		Viewports[0] = Viewport;
+		return *this;
+	}
+
 	inline RHIGraphicsPipelineCreateInfo& AddViewport(const RHIViewport& Viewport) 
 	{
 		assert(Viewports.size() < ERHILimitations::MaxViewports);
-		Viewports.emplace_back(Viewport); 
+		Viewports.emplace_back(Viewport);
+		return *this;
+	}
+
+	inline RHIGraphicsPipelineCreateInfo& SetScissorRect(const RHIScissorRect& ScissorRect)
+	{
+		if (ScissorRects.empty())
+		{
+			return AddScissorRect(ScissorRect);
+		}
+
+		ScissorRects[0] = ScissorRect;
 		return *this;
 	}
 

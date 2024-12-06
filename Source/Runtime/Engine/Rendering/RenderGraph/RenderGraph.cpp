@@ -50,7 +50,7 @@ void RenderGraph::Execute(const Scene& InScene)
 {
 	if (InScene.IsDirty())
 	{
-		m_RenderScene->BuildMeshDrawCommands(InScene, m_Backend.GetDevice(), m_Backend.GetGraphicsSettings().AsyncMeshDrawCommandsBuilding);
+		m_RenderScene->RebuildMeshDrawCommands(InScene, m_Backend.GetDevice(), m_Backend.GetGraphicsSettings().AsyncMeshDrawCommandsBuilding);
 	}
 
 	Compile();

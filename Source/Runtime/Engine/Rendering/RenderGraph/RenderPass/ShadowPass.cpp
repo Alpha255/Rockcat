@@ -1,6 +1,5 @@
 #include "Engine/Rendering/RenderGraph/RenderPass/ShadowPass.h"
 #include "Engine/Rendering/RenderGraph/RenderGraph.h"
-#include "Engine/Asset/GlobalShaders/DefaultShading.h"
 
 const char* GetShadowTechniqueName(EShadowTechnique Technique)
 {
@@ -15,17 +14,17 @@ const char* GetShadowTechniqueName(EShadowTechnique Technique)
 	}
 }
 
-class ShadowPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<GenericVS, GenericShadow>
-{
-public:
-	using GeometryPassMeshDrawCommandBuilder::GeometryPassMeshDrawCommandBuilder;
-
-	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene&) override final
-	{
-		auto Command = MeshDrawCommand(Mesh);
-		return Command;
-	}
-};
+//class ShadowPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<GenericVS, GenericShadow>
+//{
+//public:
+//	using GeometryPassMeshDrawCommandBuilder::GeometryPassMeshDrawCommandBuilder;
+//
+//	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene&) override final
+//	{
+//		auto Command = MeshDrawCommand(Mesh);
+//		return Command;
+//	}
+//};
 
 ShadowPass::ShadowPass(DAGNodeID ID, RenderGraph& Graph)
 	: GeometryPass(
@@ -33,6 +32,6 @@ ShadowPass::ShadowPass(DAGNodeID ID, RenderGraph& Graph)
 		"ShadowPass",
 		Graph,
 		EGeometryPassFilter::ShadowCast,
-		new ShadowPassMeshDrawCommandBuilder(Graph.GetBackend()))
+		nullptr)
 {
 }

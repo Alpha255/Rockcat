@@ -1,11 +1,11 @@
 #include "Engine/Rendering/RenderGraph/RenderPass/PreDepthPass.h"
 #include "Engine/Rendering/RenderGraph/RenderGraph.h"
-#include "Engine/Asset/GlobalShaders/DefaultShading.h"
+#include "Engine/Asset/GlobalShaders/GlobalShaders.h"
 #include "Engine/Scene/Components/StaticMesh.h"
 #include "Engine/RHI/RHIInterface.h"
 #include "Engine/RHI/RHIDevice.h"
 
-struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<GenericVS, DepthOnly>
+struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<DefaultVS, DepthOnlyFS>
 {
 	PreDepthPassMeshDrawCommandBuilder(RHIInterface& InBackend)
 		: GeometryPassMeshDrawCommandBuilder(InBackend)
@@ -21,12 +21,12 @@ struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBu
 		
 		GfxPipelineCreateInfo.RenderPassCreateInfo.SetDepthStencilAttachment(ERHIFormat::D32_Float_S8_UInt);
 
-		auto& GfxSettings = Backend.GetGraphicsSettings();
-		RHIViewport Viewport(GfxSettings.Resolution.Width, GfxSettings.Resolution.Height);
-		RHIScissorRect ScissorRect(GfxSettings.Resolution.Width, GfxSettings.Resolution.Height);
+		//auto& GfxSettings = Backend.GetGraphicsSettings();
+		//RHIViewport Viewport(GfxSettings.Resolution.Width, GfxSettings.Resolution.Height);
+		//RHIScissorRect ScissorRect(GfxSettings.Resolution.Width, GfxSettings.Resolution.Height);
 
-		GfxPipelineCreateInfo.AddViewport(Viewport)
-			.AddScissorRect(ScissorRect);
+		//GfxPipelineCreateInfo.SetViewport(Viewport)
+		//	.SetScissorRect(ScissorRect);
 	}
 
 	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene&) override final
@@ -36,6 +36,12 @@ struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBu
 		uint16_t Location = 0u;
 		EVertexAttributes DepthOnlyVertexAttributes = EVertexAttributes::Position;
 		bool SupportTexel = false;
+
+		Command.VertexShaderVariables = PassShader.VertexShader.CreateVariableContainer();
+		Command.FragmentShaderVariables = PassShader.FragmentShader.CreateVariableContainer();
+
+		Command.VertexShaderVariables->SetupMaterialProperties(Mesh.GetMaterialProperty());
+		Command.FragmentShaderVariables->SetupMaterialProperties(Mesh.GetMaterialProperty());
 
 		if (auto Buffer = Mesh.GetVertexBuffer(DepthOnlyVertexAttributes))
 		{

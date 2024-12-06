@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Engine/Rendering/RenderGraph/RenderPass/GeometryPass.h"
-#include "Engine/Asset/GlobalShaders/DefaultShading.h"
 
 class GBufferPass : public GeometryPass
 {

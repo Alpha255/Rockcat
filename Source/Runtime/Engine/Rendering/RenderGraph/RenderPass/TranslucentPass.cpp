@@ -1,20 +1,19 @@
 #include "Engine/Rendering/RenderGraph/RenderPass/TranslucentPass.h"
 #include "Engine/Rendering/RenderGraph/RenderGraph.h"
-#include "Engine/Asset/GlobalShaders/DefaultShading.h"
 
-class TransluentPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<GenericVS, DefaultLit>
-{
-public:
-	using GeometryPassMeshDrawCommandBuilder::GeometryPassMeshDrawCommandBuilder;
-
-	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene&) override final
-	{
-		auto Command = MeshDrawCommand(Mesh);
-		return Command;
-	}
-};
+//class TransluentPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<GenericVS, DefaultLit>
+//{
+//public:
+//	using GeometryPassMeshDrawCommandBuilder::GeometryPassMeshDrawCommandBuilder;
+//
+//	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene&) override final
+//	{
+//		auto Command = MeshDrawCommand(Mesh);
+//		return Command;
+//	}
+//};
 
 TranslucentPass::TranslucentPass(DAGNodeID ID, RenderGraph& Graph)
-	: GeometryPass(ID, "TranslucentPass", Graph, EGeometryPassFilter::Translucent, new TransluentPassMeshDrawCommandBuilder(Graph.GetBackend()))
+	: GeometryPass(ID, "TranslucentPass", Graph, EGeometryPassFilter::Translucent, nullptr)
 {
 }

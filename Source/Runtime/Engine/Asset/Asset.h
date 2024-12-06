@@ -5,7 +5,7 @@
 DECLARE_OBJECT_ID(Asset, uint32_t)
 
 #define ASSET_PATH_SHADERS      "Shaders\\"
-#define ASSET_PATH_SHADERCACHE  "Shaders\\ShaderCache\\"
+#define ASSET_PATH_SHADERCACHE  "Shaders\\ShaderBinaryCache\\"
 #define ASSET_PATH_IMAGES       "Images\\"
 #define ASSET_PATH_MATERIALS    "Materials\\"
 #define ASSET_PATH_MODELS       "glTF-Sample-Models\\2.0\\"

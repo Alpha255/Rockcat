@@ -48,7 +48,7 @@ void ShaderImporter::Reimport(std::shared_ptr<IAsset> Asset)
 	auto Shader = std::static_pointer_cast<ShaderAsset>(Asset);
 	assert(Shader);
 
-	Shader->Object = RHI::ShaderCache::Load(Shader->Path.c_str());
+	Shader->Object = RHI::ShaderBinaryCache::Load(Shader->Path.c_str());
 
 	assert(File::Exists(Shader->Path.c_str()));
 

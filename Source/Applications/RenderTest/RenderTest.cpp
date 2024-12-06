@@ -1,7 +1,6 @@
 #include "Applications/RenderTest/RenderTest.h"
 #include "Core/Main.h"
 #include "Engine/Scene/Scene.h"
-#include "Engine/Asset/GlobalShaders/DefaultShading.h"
 #include "Engine/Application/ApplicationConfigurations.h"
 #include "Engine/Rendering/RenderGraph/ForwardRenderingPath.h"
 #include "Engine/Services/RenderService.h"

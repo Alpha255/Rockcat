@@ -86,6 +86,12 @@ struct MaterialProperty : public SerializableAsset<MaterialProperty>
 
 	std::array<std::shared_ptr<TextureAsset>, (size_t)ETextureType::Num> Textures;
 
+	inline std::shared_ptr<TextureAsset>& GetTexture(ETextureType Type) 
+	{
+		assert(Type < ETextureType::Num);
+		return Textures[static_cast<size_t>(Type)];
+	}
+
 	inline void MarkDirty(bool InDirty) { m_Dirty |= InDirty; }
 
 	template<class Archive>

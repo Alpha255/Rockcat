@@ -2,7 +2,6 @@
 
 #include "Engine/Asset/SceneAsset.h"
 #include "Engine/Asset/AssetDatabase.h"
-#include "Engine/Asset/GlobalShaders/DefaultShading.h"
 #include <assimp/version.h>
 #include <Submodules/assimp/include/assimp/Importer.hpp>
 #include <Submodules/assimp/include/assimp/ProgressHandler.hpp>
