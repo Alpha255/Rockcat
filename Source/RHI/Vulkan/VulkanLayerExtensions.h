@@ -40,6 +40,20 @@ struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayer
 	bool HasDynamicState = false;
 	bool HasDepthStencilResolve = false;
 	bool HasRenderPass2 = false;
+	bool HasHostImageCopy = false;
+	bool HasDynamicRendering = false;
+	bool HasGraphicsPipelineLibrary = false;
+	bool HasInlineUniformBlock = false;
+	bool HasConservativeRasterization = false;
+	bool HasConditionalRendering = false;
+	bool HasDebugPrintf = false;
+	bool HasPushDescriptor = false;
+	bool HasMaintenance1 = false;
+	bool HasMaintenance2 = false;
+	bool HasMaintenance3 = false;
+	bool HasMaintenance4 = false;
+	bool HasMaintenance5 = false;
+	bool HasMaintenance6 = false;
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -62,7 +76,21 @@ struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayer
 			CEREAL_NVP(HasFullscreenExclusive),
 			CEREAL_NVP(HasDynamicState),
 			CEREAL_NVP(HasDepthStencilResolve),
-			CEREAL_NVP(HasRenderPass2)
+			CEREAL_NVP(HasRenderPass2),
+			CEREAL_NVP(HasHostImageCopy),
+			CEREAL_NVP(HasDynamicRendering),
+			CEREAL_NVP(HasGraphicsPipelineLibrary),
+			CEREAL_NVP(HasInlineUniformBlock),
+			CEREAL_NVP(HasConservativeRasterization),
+			CEREAL_NVP(HasConditionalRendering),
+			CEREAL_NVP(HasDebugPrintf),
+			CEREAL_NVP(HasPushDescriptor),
+			CEREAL_NVP(HasMaintenance1),
+			CEREAL_NVP(HasMaintenance2),
+			CEREAL_NVP(HasMaintenance3),
+			CEREAL_NVP(HasMaintenance4),
+			CEREAL_NVP(HasMaintenance5),
+			CEREAL_NVP(HasMaintenance6),
 		);
 	}
 };
