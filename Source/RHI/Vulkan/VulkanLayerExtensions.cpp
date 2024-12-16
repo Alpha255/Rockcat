@@ -29,7 +29,7 @@ VulkanExtensionArray VulkanExtension::GetWantedInstanceExtensions(VulkanLayerExt
 
 	ADD_EXTENSION(VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_surface, true, HasKHRSurface);
 #if PLATFORM_WIN32
-	ADD_EXTENSION(VK_KHR_WIN32_SURFACE_EXTENSION_NAME, VK_KHR_surface, true, HasKHRSurface);
+	ADD_EXTENSION(VK_KHR_WIN32_SURFACE_EXTENSION_NAME, VK_KHR_win32_surface, true, HasKHRSurface);
 #elif PLATFORM_LINUX
 	ADD_EXTENSION(VK_KHR_XCB_SURFACE_EXTENSION_NAME, VK_KHR_surface, true, HasKHRSurface);
 #else

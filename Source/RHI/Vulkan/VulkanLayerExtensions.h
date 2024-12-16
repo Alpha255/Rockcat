@@ -90,7 +90,7 @@ struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayer
 			CEREAL_NVP(HasMaintenance3),
 			CEREAL_NVP(HasMaintenance4),
 			CEREAL_NVP(HasMaintenance5),
-			CEREAL_NVP(HasMaintenance6),
+			CEREAL_NVP(HasMaintenance6)
 		);
 	}
 };
@@ -125,7 +125,6 @@ protected:
 	friend class VulkanInstance;
 	friend class VulkanDevice;
 
-	void SetSupported(bool Supported) { m_Supported = Supported; }
 	void SetEnabledInConfig(bool Enabled) { if (m_EnabledInConfig) { *m_EnabledInConfig = Enabled; } }
 private:
 	std::string_view m_Name;

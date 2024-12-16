@@ -16,7 +16,21 @@
         "HasTimelineSemaphore": false,
         "HasFullscreenExclusive": false,
         "HasDynamicState": true,
-        "HasDepthStencilResolve":  false,
-        "HasRenderPass2": true
+        "HasDepthStencilResolve": false,
+        "HasRenderPass2": true,
+        "HasHostImageCopy": false,
+        "HasDynamicRendering": false,
+        "HasGraphicsPipelineLibrary": false,
+        "HasInlineUniformBlock": false,
+        "HasConservativeRasterization": false,
+        "HasConditionalRendering": false,
+        "HasDebugPrintf": false,
+        "HasPushDescriptor": false,
+        "HasMaintenance1": false,
+        "HasMaintenance2": false,
+        "HasMaintenance3": false,
+        "HasMaintenance4": false,
+        "HasMaintenance5": false,
+        "HasMaintenance6": false
     }
 }
