@@ -12,7 +12,7 @@ struct DefaultVSShaderVariableContainer : public ShaderVariableContainer
 		RegisterShaderVariables(*this);
 	}
 
-	void SetupViewParams(const IView& View) override final
+	void SetupViewParams(const SceneView& View) override final
 	{
 	}
 };

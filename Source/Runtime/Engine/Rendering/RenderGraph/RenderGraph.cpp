@@ -12,7 +12,7 @@ std::shared_ptr<RenderGraph> RenderGraph::Create(const GraphicsSettings& GfxSett
 	switch (GfxSettings.RenderingPath)
 	{
 	case ERenderingPath::ForwardRendering:
-		Graph = std::make_shared<ForwardRenderingPath>(Backend);
+		Graph.reset(new ForwardRenderingPath(Backend));
 		break;
 	case ERenderingPath::DeferredShading:
 		assert(false);
@@ -28,8 +28,8 @@ std::shared_ptr<RenderGraph> RenderGraph::Create(const GraphicsSettings& GfxSett
 
 RenderGraph::RenderGraph(RHIInterface& Backend)
 	: m_Backend(Backend)
-	, m_ResourceMgr(std::move(std::make_shared<ResourceManager>()))
-	, m_RenderScene(std::move(std::make_shared<RenderScene>()))
+	, m_ResourceMgr(new ResourceManager())
+	, m_RenderScene(new RenderScene())
 {
 }
 

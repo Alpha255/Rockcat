@@ -3,10 +3,10 @@
 #include "Editor/ImGuiPanel.h"
 #include "Editor/ImGuiGizmo.h"
 
-class SceneView : public ImGuiPanel
+class SceneViewPanel : public ImGuiPanel
 {
 public:
-	SceneView();
+	SceneViewPanel();
 protected:
 	void OnDraw() override final;
 private:

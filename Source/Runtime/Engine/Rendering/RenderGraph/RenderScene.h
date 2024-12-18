@@ -3,9 +3,9 @@
 #include "Engine/Rendering/RenderGraph/RenderPassField.h"
 #include "Engine/RHI/RHIRenderStates.h"
 #include "Engine/RHI/RHIPipeline.h"
-#include "Engine/View/View.h"
 #include "Engine/Asset/MaterialAsset.h"
 #include "Engine/Scene/SceneGraph.h"
+#include "Engine/Scene/SceneView.h"
 
 enum class EGeometryPassFilter
 {
@@ -76,7 +76,7 @@ public:
 	void RebuildMeshDrawCommands(const class Scene& InScene, class RHIDevice& Device, bool Async);
 
 	const std::vector<MeshDrawCommand>& GetMeshDrawCommands(EGeometryPassFilter MeshPass) const { return m_MeshDrawCommands[(size_t)MeshPass]; }
-	const std::vector<std::shared_ptr<IView>>& GetViews() const { return m_Views; }
+	const std::vector<std::shared_ptr<SceneView>>& GetViews() const { return m_Views; }
 
 	void RegisterMeshDrawCommandBuilder(EGeometryPassFilter Filter, struct IGeometryPassMeshDrawCommandBuilder* Builder);
 
@@ -85,7 +85,7 @@ protected:
 private:
 	std::array<std::vector<MeshDrawCommand>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommands;
 	std::array<std::shared_ptr<struct IGeometryPassMeshDrawCommandBuilder>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommandBuilders;
-	mutable std::vector<std::shared_ptr<IView>> m_Views;
+	mutable std::vector<std::shared_ptr<SceneView>> m_Views;
 };
 
 class RenderScene2

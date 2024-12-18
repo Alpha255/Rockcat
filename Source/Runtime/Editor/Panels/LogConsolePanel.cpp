@@ -1,7 +1,7 @@
-#include "Editor/Panels/LogConsole.h"
+#include "Editor/Panels/LogConsolePanel.h"
 #include "Editor/Icons/Icons.h"
 
-LogConsole::LogMessage::LogMessage(const spdlog::details::log_msg& Message, int32_t MessageID)
+LogConsolePanel::LogMessage::LogMessage(const spdlog::details::log_msg& Message, int32_t MessageID)
 	: Level(Message.level)
 	, Text(Message.formatted.c_str())
 	, Time(Message.time)
@@ -9,7 +9,7 @@ LogConsole::LogMessage::LogMessage(const spdlog::details::log_msg& Message, int3
 {
 }
 
-LogConsole::LogConsole()
+LogConsolePanel::LogConsolePanel()
 	: ImGuiPanel("Log", ICON_LOG_CONSOLE)
 {
 	m_LogLevelConfigs.resize(spdlog::level::level_enum::off);
@@ -50,13 +50,13 @@ LogConsole::LogConsole()
 	}
 }
 
-void LogConsole::Log(const SpdLogMessage& Log)
+void LogConsolePanel::Log(const SpdLogMessage& Log)
 {
 	/// TODO: Thread safe ???
 	m_LogMessages.emplace_back(LogMessage(Log, static_cast<int32_t>(m_LogMessages.size())));
 }
 
-void LogConsole::DrawHeader()
+void LogConsolePanel::DrawHeader()
 {
 	ImGui::AlignTextToFramePadding();
 	
@@ -122,7 +122,7 @@ void LogConsole::DrawHeader()
 	}
 }
 
-void LogConsole::DrawTexts()
+void LogConsolePanel::DrawLogs()
 {
 	if (ImGui::BeginTable("Logs", 2,
 		ImGuiTableFlags_NoSavedSettings |
@@ -171,9 +171,9 @@ void LogConsole::DrawTexts()
 	}
 }
 
-void LogConsole::OnDraw()
+void LogConsolePanel::OnDraw()
 {
 	DrawHeader();
 	ImGui::Separator();
-	DrawTexts();
+	DrawLogs();
 }

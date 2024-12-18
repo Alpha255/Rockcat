@@ -272,14 +272,14 @@ void Scene::Traverse(const SceneNode::VisitFunc& Visit) const
 #endif
 
 #include "Engine/Scene/Scene.h"
-#include "Engine/Scene/SceneViewer.h"
+#include "Engine/Scene/SceneVisitor.h"
 
 void Scene::Update()
 {
 	if (m_VisibleNodes.empty())
 	{
-		SceneViewer<BreadthFirst> SceneViewer(*this);
-		auto Node = SceneViewer.Get();
+		SceneVisitor<BreadthFirst> SceneVisitor(*this);
+		auto Node = SceneVisitor.Get();
 
 		while (Node != SceneNodeIterator())
 		{
@@ -288,7 +288,7 @@ void Scene::Update()
 				m_VisibleNodes.insert(&(*Node));
 			}
 
-			Node = SceneViewer.Next();
+			Node = SceneVisitor.Next();
 		}
 	}
 

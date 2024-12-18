@@ -2,10 +2,10 @@
 
 #include "Editor/ImGuiPanel.h"
 
-class AssetBrowser : public ImGuiPanel
+class AssetBrowserPanel : public ImGuiPanel
 {
 public:
-	AssetBrowser();
+	AssetBrowserPanel();
 protected:
 	void OnDraw() override final;
 private:

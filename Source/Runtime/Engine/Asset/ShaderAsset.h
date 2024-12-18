@@ -221,7 +221,7 @@ struct ShaderVariableContainer
 	void RegisterVariable(const char* Name, ShaderVariable&& Variable);
 	size_t ComputeUniformBufferSize();
 
-	virtual void SetupViewParams(const class IView&) {}
+	virtual void SetupViewParams(const class SceneView&) {}
 	virtual void SetupMaterialProperties(const struct MaterialProperty&) {}
 	void SetOnPipelineState(ERHIShaderStage, class RHIPipelineState&) {}
 	void CreateRHI(class RHIDevice&) {}

@@ -1,7 +1,7 @@
-#include "Editor/Panels/SceneView.h"
+#include "Editor/Panels/SceneViewPanel.h"
 #include "Editor/Icons/Icons.h"
 
-SceneView::SceneView()
+SceneViewPanel::SceneViewPanel()
 	: ImGuiPanel(
 		"Scene", 
 		ICON_SCENE_VIEW,
@@ -12,12 +12,12 @@ SceneView::SceneView()
 {
 }
 
-void SceneView::OnDraw()
+void SceneViewPanel::OnDraw()
 {
 	DrawToolBar();
 }
 
-void SceneView::DrawToolBar()
+void SceneViewPanel::DrawToolBar()
 {
 	ImGui::Indent();
 	IMGUI_SCOPED_COLOR(ImGuiCol_Button, Math::Color::Black);
@@ -54,7 +54,7 @@ void SceneView::DrawToolBar()
 	ImGui::Unindent();
 }
 
-void SceneView::DrawToolBarButton(const char* const Label, const char* const Tooltip, bool Highlight, bool DrawSeperator, std::function<void()>&& BtnClickCallback)
+void SceneViewPanel::DrawToolBarButton(const char* const Label, const char* const Tooltip, bool Highlight, bool DrawSeperator, std::function<void()>&& BtnClickCallback)
 {
 	static const Math::Color HightlightColor(0.28f, 0.56f, 0.9f, 1.0f);
 

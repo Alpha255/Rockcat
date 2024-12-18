@@ -3,10 +3,10 @@
 #include "Editor/ImGuiPanel.h"
 #include "Engine/Services/SpdLogService.h"
 
-class LogConsole : public ImGuiPanel, public SpdLogService::LogRedirector
+class LogConsolePanel : public ImGuiPanel, public SpdLogService::LogRedirector
 {
 public:
-	LogConsole();
+	LogConsolePanel();
 
 	void Log(const SpdLogMessage& Log) override;
 protected:
@@ -23,7 +23,7 @@ private:
 	};
 
 	void DrawHeader();
-	void DrawTexts();
+	void DrawLogs();
 
 	struct LogLevelConfig
 	{

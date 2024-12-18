@@ -7,11 +7,11 @@ struct BreadthFirst {};
 using SceneNodeIterator = SceneGraph::NodeList::const_iterator;
 
 template<class Policy = DepthFirst>
-class SceneViewer
+class SceneVisitor
 {
 public:
-	SceneViewer(const Scene& InScene)
-		: SceneViewer(InScene.GetGraph())
+	SceneVisitor(const Scene& InScene)
+		: SceneVisitor(InScene.GetGraph())
 	{
 	}
 
@@ -19,7 +19,7 @@ public:
 
 	SceneNodeIterator& Get() { return m_Iterator; }
 private:
-	SceneViewer(const SceneGraph* const Graph)
+	SceneVisitor(const SceneGraph* const Graph)
 		: m_Graph(Graph)
 		, m_Iterator(Graph ? std::next(Graph->Nodes.cbegin(), Graph->Root.GetIndex()) : SceneNodeIterator())
 	{

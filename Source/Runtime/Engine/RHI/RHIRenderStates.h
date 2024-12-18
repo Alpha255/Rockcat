@@ -273,6 +273,16 @@ struct RHIViewport
 
 	bool operator==(const RHIViewport& Other) const { return LeftTop == Other.LeftTop && Extent == Other.Extent && DepthRange == Other.DepthRange; }
 	bool operator!=(const RHIViewport& Other) const { return LeftTop != Other.LeftTop || Extent != Other.Extent || DepthRange != Other.DepthRange; }
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(LeftTop),
+			CEREAL_NVP(Extent),
+			CEREAL_NVP(DepthRange)
+		);
+	}
 };
 
 struct RHIScissorRect
@@ -302,6 +312,15 @@ struct RHIScissorRect
 
 	inline bool operator==(const RHIScissorRect& Other) const { return LeftTop == Other.LeftTop && Extent == Other.Extent; }
 	inline bool operator!=(const RHIScissorRect& Other) const { return LeftTop != Other.LeftTop || Extent != Other.Extent; }
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(LeftTop),
+			CEREAL_NVP(Extent)
+		);
+	}
 };
 
 enum class ERHIAttachmentLoadOp : uint8_t
