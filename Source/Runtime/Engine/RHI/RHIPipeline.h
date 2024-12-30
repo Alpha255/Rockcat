@@ -179,6 +179,19 @@ class RHIComputePipeline : public RHIPipeline
 {
 };
 
+#define STD_HASHER(Description)                          \
+namespace std                                            \
+{                                                        \
+	template<>                                           \
+	struct hash<Description>                             \
+	{                                                    \
+		size_t operator()(const Description& Desc) const \
+		{                                                \
+			return ComputeHash<Description>(Desc);       \
+		}                                                \
+	};                                                   \
+}
+
 template<class RHIDescription>
 inline size_t ComputeHash(const RHIDescription&) { return 0ull; }
 
@@ -195,6 +208,7 @@ inline size_t ComputeHash(const RHIRasterizationStateCreateInfo& Desc)
 		Desc.DepthBiasSlope,
 		Desc.LineWidth);
 }
+STD_HASHER(RHIRasterizationStateCreateInfo);
 
 template<>
 inline size_t ComputeHash(const RHIBlendStateCreateInfo& Desc)
@@ -217,6 +231,7 @@ inline size_t ComputeHash(const RHIBlendStateCreateInfo& Desc)
 	}
 	return Hash;
 }
+STD_HASHER(RHIBlendStateCreateInfo);
 
 template<>
 inline size_t ComputeHash(const RHIStencilStateDesc& Desc)
@@ -228,6 +243,7 @@ inline size_t ComputeHash(const RHIStencilStateDesc& Desc)
 		Desc.CompareFunc,
 		Desc.Ref);
 }
+STD_HASHER(RHIStencilStateDesc);
 
 template<>
 inline size_t ComputeHash(const RHIDepthStencilStateCreateInfo& Desc)
@@ -245,6 +261,7 @@ inline size_t ComputeHash(const RHIDepthStencilStateCreateInfo& Desc)
 		ComputeHash(Desc.FrontFaceStencil),
 		ComputeHash(Desc.BackFaceStencil));
 }
+STD_HASHER(RHIDepthStencilStateCreateInfo);
 
 template<>
 inline size_t ComputeHash(const RHIMultisampleStateCreateInfo& Desc)
@@ -256,6 +273,7 @@ inline size_t ComputeHash(const RHIMultisampleStateCreateInfo& Desc)
 		Desc.EnableAlphaToOne,
 		Desc.MinSampleShading);
 }
+STD_HASHER(RHIMultisampleStateCreateInfo);
 
 template<>
 inline size_t ComputeHash(const RHIRenderPassCreateInfo& Desc)
@@ -274,6 +292,7 @@ inline size_t ComputeHash(const RHIRenderPassCreateInfo& Desc)
 
 	return Hash;
 }
+STD_HASHER(RHIRenderPassCreateInfo);
 
 template<>
 inline size_t ComputeHash(const RHIGraphicsPipelineCreateInfo& Desc)
@@ -297,6 +316,7 @@ inline size_t ComputeHash(const RHIGraphicsPipelineCreateInfo& Desc)
 
 	return Hash;
 }
+STD_HASHER(RHIGraphicsPipelineCreateInfo);
 
 template<>
 inline size_t ComputeHash(const RHIFrameBufferCreateInfo& Desc)
@@ -315,3 +335,4 @@ inline size_t ComputeHash(const RHIFrameBufferCreateInfo& Desc)
 
 	return Hash;
 }
+STD_HASHER(RHIFrameBufferCreateInfo);
