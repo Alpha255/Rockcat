@@ -4,6 +4,7 @@
 #include "Engine/Application/ApplicationConfigurations.h"
 #include "Engine/Rendering/RenderGraph/ForwardRenderingPath.h"
 #include "Engine/Services/RenderService.h"
+#include "Engine/Services/TaskFlowService.h"
 
 void RenderTest::OnInitialize()
 {	
@@ -12,6 +13,34 @@ void RenderTest::OnInitialize()
 	auto& Window = GetWindow();
 	auto& Cameras = m_Scene->GetCameras();
 	m_RenderGraph = RenderGraph::Create(GetGraphicsSettings());
+
+	std::vector<uint32_t> Numbers(1024u);
+	struct TestTask : public Task
+	{
+		TestTask(uint32_t Index, std::vector<uint32_t>& Numbers)
+			: Task("TestTask")
+			, MyIndex(Index)
+			, MyNumbers(Numbers)
+		{
+		}
+
+		void Execute() override final
+		{
+			MyNumbers[MyIndex] = MyIndex;
+		}
+
+		uint32_t MyIndex;
+		std::vector<uint32_t>& MyNumbers;
+	};
+
+	std::vector<Task*> Tasks(1024u);
+	for (uint32_t Index = 0u; Index < Tasks.size(); ++Index)
+	{
+		Tasks[Index] = new TestTask(Index, Numbers);
+	}
+	TF_DispatchTasks_WaitDone(Tasks, EThread::WorkerThread);
+
+	LOG_INFO("Test");
 }
 
 void RenderTest::Tick(float ElapsedSeconds)

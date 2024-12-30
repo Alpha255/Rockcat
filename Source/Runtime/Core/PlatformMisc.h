@@ -2,6 +2,7 @@
 
 #include "Core/GUID.h"
 #include "Core/Math/Vector2.h"
+#include "Engine/Async/Task.h"
 
 class PlatformMisc
 {
@@ -25,5 +26,17 @@ public:
 	static Math::Vector2 GetCurrentCursorPosition();
 
 	static size_t GetHardwareConcurrencyThreadsCount(bool UseHyperThreading);
+
+	static void SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priority);
+
+	struct ThreadPriorityGuard
+	{
+		ThreadPriorityGuard(std::thread::id ThreadID, Task::EPriority Priority);
+
+		~ThreadPriorityGuard();
+	private:
+		void* ThreadHandle = nullptr;
+		Task::EPriority TargetPriority;
+	};
 };
 

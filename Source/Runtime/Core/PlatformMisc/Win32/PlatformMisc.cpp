@@ -199,5 +199,67 @@ Guid Guid::Create()
 	return PlatformMisc::CreateGUID();
 }
 
+void PlatformMisc::SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priority)
+{
+	std::stringstream Stream;
+	Stream << ThreadID;
+
+	::DWORD DwordThreadID = std::stoul(Stream.str());
+	::HANDLE ThreadHandle = ::OpenThread(THREAD_ALL_ACCESS, false, DwordThreadID);
+	VERIFY_WITH_PLATFORM_MESSAGE(ThreadHandle);
+
+	int32_t ThreadPriority = THREAD_PRIORITY_NORMAL;
+	switch (Priority)
+	{
+	case Task::EPriority::Critical:
+		ThreadPriority = THREAD_PRIORITY_HIGHEST;
+		break;
+	case Task::EPriority::High:
+		ThreadPriority = THREAD_PRIORITY_ABOVE_NORMAL;
+		break;
+	case Task::EPriority::Low:
+		ThreadPriority = THREAD_PRIORITY_BELOW_NORMAL;
+		break;
+	}
+	VERIFY_WITH_PLATFORM_MESSAGE(::SetThreadPriority(ThreadHandle, ThreadPriority) != 0);
+}
+
+PlatformMisc::ThreadPriorityGuard::ThreadPriorityGuard(std::thread::id ThreadID, Task::EPriority Priority)
+	: TargetPriority(Priority)
+{
+	if (Priority != Task::EPriority::Normal)
+	{
+		std::stringstream Stream;
+		Stream << ThreadID;
+
+		::DWORD DwordThreadID = std::stoul(Stream.str());
+		ThreadHandle = ::OpenThread(THREAD_ALL_ACCESS, false, DwordThreadID);
+		VERIFY_WITH_PLATFORM_MESSAGE(ThreadHandle);
+
+		int32_t ThreadPriority = THREAD_PRIORITY_NORMAL;
+		switch (Priority)
+		{
+		case Task::EPriority::Critical:
+			ThreadPriority = THREAD_PRIORITY_HIGHEST;
+			break;
+		case Task::EPriority::High:
+			ThreadPriority = THREAD_PRIORITY_ABOVE_NORMAL;
+			break;
+		case Task::EPriority::Low:
+			ThreadPriority = THREAD_PRIORITY_BELOW_NORMAL;
+			break;
+		}
+		VERIFY_WITH_PLATFORM_MESSAGE(::SetThreadPriority(ThreadHandle, ThreadPriority) != 0);
+	}
+}
+
+PlatformMisc::ThreadPriorityGuard::~ThreadPriorityGuard()
+{
+	if (TargetPriority != Task::EPriority::Normal)
+	{
+		VERIFY_WITH_PLATFORM_MESSAGE(::SetThreadPriority(ThreadHandle, THREAD_PRIORITY_NORMAL) != 0);
+	}
+}
+
 #endif
 

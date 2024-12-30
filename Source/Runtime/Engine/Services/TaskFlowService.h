@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Module.h"
-#include "Engine/Async/Task.h"
+#include "Core/PlatformMisc.h"
 
 enum class EThread
 {
@@ -9,7 +9,7 @@ enum class EThread
 	RenderThread,
 	FileWatchThread,
 	WorkerThread,
-	ThreadTypes
+	Num
 };
 
 class TaskFlowService : public IService<TaskFlowService>
@@ -22,50 +22,46 @@ public:
 	void OnShutdown() override final;
 
 	template<bool WaitDone = true, class Iterator, class Callable>
-	void ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function, EThread Thread = EThread::WorkerThread)
+	tf::Future<void> ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function, EThread Thread = EThread::WorkerThread)
 	{
-		tf::Taskflow TFTaskflow;
-		TFTaskflow.for_each(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<Callable>(Function));
+		tf::Taskflow TaskFlow;
+		TaskFlow.for_each(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<Callable>(Function));
+		auto Future = m_Executors[(size_t)Thread]->run(TaskFlow);
 		if (WaitDone)
 		{
-			m_Executors[(size_t)Thread]->run(TFTaskflow).wait();
+			Future.wait();
 		}
-		else
-		{
-			m_Executors[(size_t)Thread]->run(TFTaskflow);
-		}
+		return Future;
 	}
 
 	template<size_t Step, bool WaitDone = true, class Callable>
-	void ParallelForIndex(size_t Begin, size_t End, Callable&& Function, EThread Thread = EThread::WorkerThread)
+	tf::Future<void> ParallelForRange(size_t Begin, size_t End, Callable&& Function, EThread Thread = EThread::WorkerThread)
 	{
 		assert(Step < (End - Begin));
 
-		tf::Taskflow TFTaskflow;
-		TFTaskflow.for_each_index(Begin, End, Step, std::forward<Callable>(Function));
+		tf::Taskflow TaskFlow;
+		TaskFlow.for_each_index(Begin, End, Step, std::forward<Callable>(Function));
+		auto Future = m_Executors[(size_t)Thread]->run(TaskFlow);
+
 		if (WaitDone)
 		{
-			m_Executors[(size_t)Thread]->run(TFTaskflow).wait();
+			Future.wait();
 		}
-		else
-		{
-			m_Executors[(size_t)Thread]->run(TFTaskflow);
-		}
+		return Future;
 	}
 
 	template<bool WaitDone = true, class Iterator, class CompareOp>
-	void ParallelSort(Iterator&& Begin, Iterator&& End, CompareOp&& Function, EThread Thread = EThread::WorkerThread)
+	tf::Future<void> ParallelSort(Iterator&& Begin, Iterator&& End, CompareOp&& Function, EThread Thread = EThread::WorkerThread)
 	{
-		tf::Taskflow TFTaskflow;
-		TFTaskflow.sort(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<CompareOp>(Function));
+		tf::Taskflow TaskFlow;
+		TaskFlow.sort(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<CompareOp>(Function));
+		auto Future = m_Executors[(size_t)Thread]->run(TaskFlow);
+
 		if (WaitDone)
 		{
-			m_Executors[(size_t)Thread]->run(TFTaskflow).wait();
+			Future.wait();
 		}
-		else
-		{
-			m_Executors[(size_t)Thread]->run(TFTaskflow);
-		}
+		return Future;
 	}
 
 	template<bool WaitDone = false, class Callable>
@@ -81,37 +77,61 @@ public:
 		}
 	}
 
-	void DispatchTask(Task& InTask, EThread Thread = EThread::WorkerThread)
+	template<bool WaitDone = false>
+	tf::Future<void> DispatchTask(Task& InTask, EThread Thread = EThread::WorkerThread)
 	{
-		m_Executors[(size_t)Thread]->silent_async(std::string(InTask.GetName()), [&InTask]() {
+		tf::Taskflow Taskflow;
+		Taskflow.emplace([&InTask]() {
+			PlatformMisc::ThreadPriorityGuard PriorityGuard(std::this_thread::get_id(), InTask.GetPriority());
 			InTask.Execute();
-		});
+		}).name(std::string(InTask.GetName()));
+		
+		auto Future = m_Executors[(size_t)Thread]->run(Taskflow);
+		if (WaitDone)
+		{
+			Future.wait();
+		}
+		return Future;
 	}
 
 	template<bool WaitDone = false>
-	void DispatchTasks(std::vector<Task&>& InTasks, EThread Thread = EThread::WorkerThread)
+	tf::Future<void> DispatchTasks(std::vector<Task*>& InTasks, EThread Thread = EThread::WorkerThread)
 	{
-		tf::Taskflow TempTaskflow;
-		for each (auto& Task in InTasks)
+		tf::Taskflow Taskflow;
+		for (auto& Task : InTasks)
 		{
-			tf::Task TFTask = TempTaskflow.emplace([&Task]() {
-				Task.Execute();
-			});
-			TFTask.name(std::string(Task.GetName()));
+			if (Task)
+			{
+				Taskflow.emplace([&Task]() {
+					PlatformMisc::ThreadPriorityGuard PriorityGuard(std::this_thread::get_id(), Task->GetPriority());
+					Task->Execute();
+				}).name(std::string(Task->GetName()));
+			}
 		}
+
+		auto Future = m_Executors[(size_t)Thread]->run(Taskflow);
+
 		if (WaitDone)
 		{
-			m_Executors[(size_t)Thread]->run(TempTaskflow).wait();
+			Future.wait();
 		}
-		else
+		return Future;
+	}
+
+	template<bool WaitDone = false>
+	tf::Future<void> ExecuteTaskFlow(TaskFlow& Taskflow, EThread Thread = EThread::WorkerThread)
+	{
+		auto Future = m_Executors[(size_t)Thread]->run(std::move(Taskflow));
+		if (WaitDone)
 		{
-			m_Executors[(size_t)Thread]->run(TempTaskflow);
+			Future.wait();
 		}
+		return Future;
 	}
 
 	uint8_t GetNumWorkThreads() const { return m_NumWorkThreads; }
 private:
 	bool m_UseHyperThreading;
 	uint8_t m_NumWorkThreads;
-	std::array<std::unique_ptr<tf::Executor>, (size_t)EThread::ThreadTypes> m_Executors;
+	std::array<std::unique_ptr<tf::Executor>, (size_t)EThread::Num> m_Executors;
 };
