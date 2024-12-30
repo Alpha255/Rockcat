@@ -2,15 +2,7 @@
 
 #include "Core/Module.h"
 #include "Core/PlatformMisc.h"
-
-enum class EThread
-{
-	GameThread,
-	RenderThread,
-	FileWatchThread,
-	WorkerThread,
-	Num
-};
+#include "Engine/Async/TaskFlow.h"
 
 class TaskFlowService : public IService<TaskFlowService>
 {
@@ -22,7 +14,7 @@ public:
 	void OnShutdown() override final;
 
 	template<bool WaitDone = true, class Iterator, class Callable>
-	tf::Future<void> ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function, EThread Thread = EThread::WorkerThread)
+	tf::Future<void> ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function, tf::EThread Thread = tf::EThread::WorkerThread)
 	{
 		tf::Taskflow TaskFlow;
 		TaskFlow.for_each(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<Callable>(Function));
@@ -35,7 +27,7 @@ public:
 	}
 
 	template<size_t Step, bool WaitDone = true, class Callable>
-	tf::Future<void> ParallelForRange(size_t Begin, size_t End, Callable&& Function, EThread Thread = EThread::WorkerThread)
+	tf::Future<void> ParallelForRange(size_t Begin, size_t End, Callable&& Function, tf::EThread Thread = tf::EThread::WorkerThread)
 	{
 		assert(Step < (End - Begin));
 
@@ -51,7 +43,7 @@ public:
 	}
 
 	template<bool WaitDone = true, class Iterator, class CompareOp>
-	tf::Future<void> ParallelSort(Iterator&& Begin, Iterator&& End, CompareOp&& Function, EThread Thread = EThread::WorkerThread)
+	tf::Future<void> ParallelSort(Iterator&& Begin, Iterator&& End, CompareOp&& Function, tf::EThread Thread = tf::EThread::WorkerThread)
 	{
 		tf::Taskflow TaskFlow;
 		TaskFlow.sort(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<CompareOp>(Function));
@@ -65,7 +57,7 @@ public:
 	}
 
 	template<bool WaitDone = false, class Callable>
-	void Async(Callable&& Function, EThread Thread = EThread::WorkerThread)
+	void Async(Callable&& Function, tf::EThread Thread = tf::EThread::WorkerThread)
 	{
 		if (WaitDone)
 		{
@@ -78,13 +70,13 @@ public:
 	}
 
 	template<bool WaitDone = false>
-	tf::Future<void> DispatchTask(Task& InTask, EThread Thread = EThread::WorkerThread)
+	tf::Future<void> DispatchTask(tf::ThreadTask& Task, tf::EThread Thread = tf::EThread::WorkerThread)
 	{
 		tf::Taskflow Taskflow;
-		Taskflow.emplace([&InTask]() {
-			PlatformMisc::ThreadPriorityGuard PriorityGuard(std::this_thread::get_id(), InTask.GetPriority());
-			InTask.Execute();
-		}).name(std::string(InTask.GetName()));
+		Taskflow.emplace([&Task]() {
+			PlatformMisc::ThreadPriorityGuard PriorityGuard(std::this_thread::get_id(), Task.GetPriority());
+			Task.Execute();
+		}).name(std::string(Task.GetName()));
 		
 		auto Future = m_Executors[(size_t)Thread]->run(Taskflow);
 		if (WaitDone)
@@ -95,10 +87,10 @@ public:
 	}
 
 	template<bool WaitDone = false>
-	tf::Future<void> DispatchTasks(std::vector<Task*>& InTasks, EThread Thread = EThread::WorkerThread)
+	tf::Future<void> DispatchTasks(std::vector<tf::ThreadTask*>& Tasks, tf::EThread Thread = tf::EThread::WorkerThread)
 	{
 		tf::Taskflow Taskflow;
-		for (auto& Task : InTasks)
+		for (auto& Task : Tasks)
 		{
 			if (Task)
 			{
@@ -118,10 +110,10 @@ public:
 		return Future;
 	}
 
-	template<bool WaitDone = false>
-	tf::Future<void> ExecuteTaskFlow(TaskFlow& Taskflow, EThread Thread = EThread::WorkerThread)
+	template<class TTask, bool WaitDone = false>
+	tf::Future<void> ExecuteTaskFlow(tf::ThreadTaskFlow<TTask>& TaskFlow, tf::EThread Thread = tf::EThread::WorkerThread)
 	{
-		auto Future = m_Executors[(size_t)Thread]->run(std::move(Taskflow));
+		auto Future = m_Executors[(size_t)Thread]->run(std::move(TaskFlow));
 		if (WaitDone)
 		{
 			Future.wait();
@@ -133,5 +125,88 @@ public:
 private:
 	bool m_UseHyperThreading;
 	uint8_t m_NumWorkThreads;
-	std::array<std::unique_ptr<tf::Executor>, (size_t)EThread::Num> m_Executors;
+	std::array<std::unique_ptr<tf::Executor>, (size_t)tf::EThread::Num> m_Executors;
 };
+
+namespace tf
+{
+	template<class Iterator, class Callable>
+	inline Future<void> ParallelFor_WaitDone(Iterator&& Begin, Iterator&& End, Callable&& Function, tf::EThread Thread = tf::EThread::WorkerThread)
+	{
+		return TaskFlowService::Get().ParallelFor<true>(Begin, End, Function, Thread);
+	}
+
+	template<class Iterator, class Callable>
+	inline Future<void> ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function, tf::EThread Thread = tf::EThread::WorkerThread)
+	{
+		return TaskFlowService::Get().ParallelFor<false>(Begin, End, Function, Thread);
+	}
+
+	template<size_t Step, class Callable>
+	inline Future<void> ParallelForRange_WaitDone(size_t Begin, size_t End, Callable&& Function, tf::EThread Thread = tf::EThread::WorkerThread)
+	{
+		return TaskFlowService::Get().ParallelForRange<Step, true>(Begin, End, Function, Thread);
+	}
+
+	template<size_t Step, class Callable>
+	inline Future<void> ParallelForRange(size_t Begin, size_t End, Callable&& Function, tf::EThread Thread = tf::EThread::WorkerThread)
+	{
+		return TaskFlowService::Get().ParallelForRange<Step, false>(Begin, End, Function, Thread);
+	}
+
+	template<class Iterator, class CompareOp>
+	inline Future<void> ParallelSort_WaitDone(Iterator&& Begin, Iterator&& End, CompareOp&& Function, tf::EThread Thread = tf::EThread::WorkerThread)
+	{
+		return TaskFlowService::Get().ParallelSort<true>(Begin, End, Function, Thread);
+	}
+
+	template<class Iterator, class CompareOp>
+	inline Future<void> ParallelSort(Iterator&& Begin, Iterator&& End, CompareOp&& Function, tf::EThread Thread = tf::EThread::WorkerThread)
+	{
+		return TaskFlowService::Get().ParallelSort<false>(Begin, End, Function, Thread);
+	}
+
+	template<class Callable>
+	inline void Async_WaitDone(Callable&& Function, tf::EThread Thread = tf::EThread::WorkerThread)
+	{
+		return TaskFlowService::Get().Async<true>(Function, Thread);
+	}
+
+	template<class Callable>
+	inline void Async(Callable&& Function, tf::EThread Thread = tf::EThread::WorkerThread)
+	{
+		return TaskFlowService::Get().Async<false>(Function, Thread);
+	}
+
+	inline Future<void> DispatchTask_WaitDone(ThreadTask& Task, tf::EThread Thread = tf::EThread::WorkerThread)
+	{
+		return TaskFlowService::Get().DispatchTask<true>(Task, Thread);
+	}
+
+	inline Future<void> DispatchTask(ThreadTask& Task, tf::EThread Thread = tf::EThread::WorkerThread)
+	{
+		return TaskFlowService::Get().DispatchTask<false>(Task, Thread);
+	}
+
+	inline Future<void> DispatchTasks_WaitDone(std::vector<ThreadTask*>& Tasks, tf::EThread Thread = tf::EThread::WorkerThread)
+	{
+		return TaskFlowService::Get().DispatchTasks<true>(Tasks, Thread);
+	}
+
+	inline Future<void> DispatchTasks(std::vector<ThreadTask*>& Tasks, tf::EThread Thread = tf::EThread::WorkerThread)
+	{
+		return TaskFlowService::Get().DispatchTasks<false>(Tasks, Thread);
+	}
+
+	template<class TTask>
+	inline Future<void> ExecuteTaskFlow_WaitDone(ThreadTaskFlow<TTask>& Taskflow, tf::EThread Thread = tf::EThread::WorkerThread)
+	{
+		return TaskFlowService::Get().ExecuteTaskFlow<TTask, true>(Taskflow, Thread);
+	}
+
+	template<class TTask>
+	inline Future<void> ExecuteTaskFlow(ThreadTaskFlow<TTask>& Taskflow, tf::EThread Thread = tf::EThread::WorkerThread)
+	{
+		return TaskFlowService::Get().ExecuteTaskFlow<TTask, false>(Taskflow, Thread);
+	}
+}

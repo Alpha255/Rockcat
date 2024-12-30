@@ -33,10 +33,10 @@ struct ScopeDebugMarker
 	RHICommandBuffer* CommandBuffer = nullptr;
 };
 
-struct MeshDrawTask : public Task
+struct MeshDrawTask : public tf::ThreadTask
 {
 	MeshDrawTask(const MeshDrawCommand& Command, RHICommandListContext* CommandListContext)
-		: Task("MeshDrawTask", Task::EPriority::High)
+		: tf::ThreadTask("MeshDrawTask", tf::EPriority::High)
 		, DrawCommand(Command)
 		, CommandBuffer(CommandListContext->GetCommandBuffer())
 	{

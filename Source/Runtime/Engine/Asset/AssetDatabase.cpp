@@ -7,7 +7,7 @@
 #include "Engine/Asset/Importers/AssimpSceneImporter.h"
 #include "Engine/Async/Task.h"
 
-class AssetImportTask : public Task
+class AssetImportTask : public tf::ThreadTask
 {
 public:
 	AssetImportTask(
@@ -16,7 +16,7 @@ public:
 		IAssetImporter& AssetImporter, 
 		const AssetType* Type,
 		std::optional<Asset::Callbacks>& AssetLoadCallbacks)
-		: Task(std::move(StringUtils::Format("ImportAsset: %s", AssetPath.generic_string().c_str())))
+		: tf::ThreadTask(std::move(StringUtils::Format("ImportAsset: %s", AssetPath.generic_string().c_str())))
 		, m_AssetImporter(AssetImporter)
 		, m_Asset(TargetAsset ? TargetAsset : AssetImporter.CreateAsset(AssetPath))
 		, m_AssetType(Type)
@@ -91,7 +91,7 @@ std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(
 
 				if (Async && m_EnableAsyncImport)
 				{
-					TF_DispatchTask(NewTask, EThread::WorkerThread);
+					tf::DispatchTask(NewTask, tf::EThread::WorkerThread);
 				}
 				else
 				{

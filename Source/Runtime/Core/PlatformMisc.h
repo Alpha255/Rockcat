@@ -27,16 +27,16 @@ public:
 
 	static size_t GetHardwareConcurrencyThreadsCount(bool UseHyperThreading);
 
-	static void SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priority);
+	static void SetThreadPriority(std::thread::id ThreadID, tf::EPriority Priority);
 
 	struct ThreadPriorityGuard
 	{
-		ThreadPriorityGuard(std::thread::id ThreadID, Task::EPriority Priority);
+		ThreadPriorityGuard(std::thread::id ThreadID, tf::EPriority Priority);
 
 		~ThreadPriorityGuard();
 	private:
 		void* ThreadHandle = nullptr;
-		Task::EPriority TargetPriority;
+		tf::EPriority TargetPriority;
 	};
 };
 

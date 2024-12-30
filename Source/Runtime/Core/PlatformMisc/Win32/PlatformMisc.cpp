@@ -199,7 +199,7 @@ Guid Guid::Create()
 	return PlatformMisc::CreateGUID();
 }
 
-void PlatformMisc::SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priority)
+void PlatformMisc::SetThreadPriority(std::thread::id ThreadID, tf::EPriority Priority)
 {
 	std::stringstream Stream;
 	Stream << ThreadID;
@@ -211,23 +211,23 @@ void PlatformMisc::SetThreadPriority(std::thread::id ThreadID, Task::EPriority P
 	int32_t ThreadPriority = THREAD_PRIORITY_NORMAL;
 	switch (Priority)
 	{
-	case Task::EPriority::Critical:
+	case tf::EPriority::Critical:
 		ThreadPriority = THREAD_PRIORITY_HIGHEST;
 		break;
-	case Task::EPriority::High:
+	case tf::EPriority::High:
 		ThreadPriority = THREAD_PRIORITY_ABOVE_NORMAL;
 		break;
-	case Task::EPriority::Low:
+	case tf::EPriority::Low:
 		ThreadPriority = THREAD_PRIORITY_BELOW_NORMAL;
 		break;
 	}
 	VERIFY_WITH_PLATFORM_MESSAGE(::SetThreadPriority(ThreadHandle, ThreadPriority) != 0);
 }
 
-PlatformMisc::ThreadPriorityGuard::ThreadPriorityGuard(std::thread::id ThreadID, Task::EPriority Priority)
+PlatformMisc::ThreadPriorityGuard::ThreadPriorityGuard(std::thread::id ThreadID, tf::EPriority Priority)
 	: TargetPriority(Priority)
 {
-	if (Priority != Task::EPriority::Normal)
+	if (Priority != tf::EPriority::Normal)
 	{
 		std::stringstream Stream;
 		Stream << ThreadID;
@@ -239,13 +239,13 @@ PlatformMisc::ThreadPriorityGuard::ThreadPriorityGuard(std::thread::id ThreadID,
 		int32_t ThreadPriority = THREAD_PRIORITY_NORMAL;
 		switch (Priority)
 		{
-		case Task::EPriority::Critical:
+		case tf::EPriority::Critical:
 			ThreadPriority = THREAD_PRIORITY_HIGHEST;
 			break;
-		case Task::EPriority::High:
+		case tf::EPriority::High:
 			ThreadPriority = THREAD_PRIORITY_ABOVE_NORMAL;
 			break;
-		case Task::EPriority::Low:
+		case tf::EPriority::Low:
 			ThreadPriority = THREAD_PRIORITY_BELOW_NORMAL;
 			break;
 		}
@@ -255,7 +255,7 @@ PlatformMisc::ThreadPriorityGuard::ThreadPriorityGuard(std::thread::id ThreadID,
 
 PlatformMisc::ThreadPriorityGuard::~ThreadPriorityGuard()
 {
-	if (TargetPriority != Task::EPriority::Normal)
+	if (TargetPriority != tf::EPriority::Normal)
 	{
 		VERIFY_WITH_PLATFORM_MESSAGE(::SetThreadPriority(ThreadHandle, THREAD_PRIORITY_NORMAL) != 0);
 	}

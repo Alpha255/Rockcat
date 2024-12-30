@@ -15,10 +15,12 @@ void RenderTest::OnInitialize()
 	m_RenderGraph = RenderGraph::Create(GetGraphicsSettings());
 
 	std::vector<uint32_t> Numbers(1024u);
-	struct TestTask : public Task
+	struct TestTask : public tf::ThreadTask
 	{
-		TestTask(uint32_t Index, std::vector<uint32_t>& Numbers)
-			: Task("TestTask")
+		using tf::ThreadTask::ThreadTask;
+
+		TestTask(uint32_t Index, std::vector<uint32_t>* Numbers)
+			: ThreadTask(std::string("TestTask"), tf::EPriority::Normal)
 			, MyIndex(Index)
 			, MyNumbers(Numbers)
 		{
@@ -26,19 +28,19 @@ void RenderTest::OnInitialize()
 
 		void Execute() override final
 		{
-			MyNumbers[MyIndex] = MyIndex;
+			(*MyNumbers)[MyIndex] = MyIndex;
 		}
 
 		uint32_t MyIndex;
-		std::vector<uint32_t>& MyNumbers;
+		std::vector<uint32_t>* MyNumbers;
 	};
 
-	std::vector<Task*> Tasks(1024u);
-	for (uint32_t Index = 0u; Index < Tasks.size(); ++Index)
+	tf::ThreadTaskFlow<TestTask> Flow;
+	for (uint32_t Index = 0u; Index < Numbers.size(); ++Index)
 	{
-		Tasks[Index] = new TestTask(Index, Numbers);
+		Flow.Emplace(Index, &Numbers);
 	}
-	TF_DispatchTasks_WaitDone(Tasks, EThread::WorkerThread);
+	tf::ExecuteTaskFlow_WaitDone(Flow, tf::EThread::WorkerThread);
 
 	LOG_INFO("Test");
 }
