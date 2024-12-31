@@ -15,12 +15,12 @@ void RenderTest::OnInitialize()
 	m_RenderGraph = RenderGraph::Create(GetGraphicsSettings());
 
 	std::vector<uint32_t> Numbers(1024u);
-	struct TestTask : public tf::ThreadTask
+	struct TestTask : public Task
 	{
-		using tf::ThreadTask::ThreadTask;
+		using Task::Task;
 
-		TestTask(uint32_t Index, std::vector<uint32_t>* Numbers)
-			: ThreadTask(std::string("TestTask"), tf::EPriority::Normal)
+		TestTask(uint32_t Index, std::vector<uint32_t>& Numbers)
+			: Task("TestTask")
 			, MyIndex(Index)
 			, MyNumbers(Numbers)
 		{
@@ -28,19 +28,19 @@ void RenderTest::OnInitialize()
 
 		void Execute() override final
 		{
-			(*MyNumbers)[MyIndex] = MyIndex;
+			MyNumbers[MyIndex] = MyIndex;
 		}
 
 		uint32_t MyIndex;
-		std::vector<uint32_t>* MyNumbers;
+		std::vector<uint32_t>& MyNumbers;
 	};
 
-	tf::ThreadTaskFlow<TestTask> Flow;
+	TaskFlow Flow;
 	for (uint32_t Index = 0u; Index < Numbers.size(); ++Index)
 	{
-		Flow.Emplace(Index, &Numbers);
+		Flow.Emplace<TestTask>(Index, Numbers);
 	}
-	tf::ExecuteTaskFlow_WaitDone(Flow, tf::EThread::WorkerThread);
+	tf::DispatchTaskFlow_WaitDone(Flow);
 
 	LOG_INFO("Test");
 }

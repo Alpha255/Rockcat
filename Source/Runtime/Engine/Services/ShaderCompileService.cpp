@@ -5,11 +5,11 @@
 #include <Submodules/filewatch/FileWatch.hpp>
 #pragma warning(default:4068)
 
-class ShaderCompileTask : public tf::ThreadTask
+class ShaderCompileTask : public Task
 {
 public:
 	ShaderCompileTask(const char* ShaderName)
-		: tf::ThreadTask(std::move(StringUtils::Format("ShaderCompileTask|%s", ShaderName)), tf::EPriority::High)
+		: Task(std::move(StringUtils::Format("ShaderCompileTask|%s", ShaderName)), EPriority::High)
 	{
 	}
 

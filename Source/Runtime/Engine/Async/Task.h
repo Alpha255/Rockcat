@@ -10,17 +10,18 @@
 #include <Submodules/taskflow/taskflow/algorithm/sort.hpp>
 #pragma warning(pop)
 
-namespace tf
+enum class EThread
 {
-	enum class EThread
-	{
-		GameThread,
-		RenderThread,
-		FileWatchThread,
-		WorkerThread,
-		Num
-	};
+	GameThread,
+	RenderThread,
+	FileWatchThread,
+	WorkerThread,
+	Num
+};
 
+class Task : public tf::Task
+{
+public:
 	enum class EPriority
 	{
 		Critical,
@@ -29,45 +30,87 @@ namespace tf
 		Low,
 	};
 
-	class ThreadTask : public Task
+	using tf::Task::Task;
+
+	template<class T>
+	Task(T&& Name, EPriority Priority = EPriority::Normal) // Without graph
+		: tf::Task()
+		, m_Priority(Priority)
+		, m_Name(std::forward<T>(Name))
 	{
-	public:
-		using Task::Task;
+	}
 
-		ThreadTask(std::string Name, EPriority Priority = EPriority::Normal) // Without graph
-			: m_Priority(Priority)
-			, m_Name(Name)
+	Task(const Task& Other)
+		: tf::Task(Other)
+		, m_Priority(Other.m_Priority)
+		, m_Name(Other.m_Name)
+	{
+		ResetNodeName();
+	}
+
+	Task(Task&& Other) noexcept
+		: tf::Task(std::move(static_cast<tf::Task&&>(Other)))
+		, m_Priority(Other.m_Priority)
+		, m_Name(std::move(Other.m_Name))
+	{
+		ResetNodeName();
+	}
+
+	Task& operator=(const Task& Other)
+	{
+		m_Priority = Other.m_Priority;
+		m_Name = Other.m_Name;
+		ResetNodeName();
+		return *this;
+	}
+
+	const char* GetName() const { return m_Name.c_str(); }
+
+	template<class T>
+	Task& SetName(T&& Name)
+	{
+		m_Name = std::move(std::string(std::forward<T>(Name)));
+		ResetNodeName();
+		return *this;
+	}
+
+	EPriority GetPriority() const { return m_Priority; }
+	Task& SetPriority(EPriority Priority) { m_Priority = Priority; return *this; }
+
+	virtual void Execute() = 0;
+protected:
+	friend class TaskFlow;
+
+	void SetBaseTask(tf::Task&& Task)
+	{
+		Cast<tf::Task>(*this) = Task;
+		ResetNodeName();
+	}
+private:
+	void ResetNodeName()
+	{
+#if _DEBUG
+		if (!empty())
 		{
+			tf::Task::name(m_Name);
 		}
+#endif
+	}
 
-		ThreadTask(const ThreadTask& Other)
-			: Task(Other)
-			, m_Priority(Other.m_Priority)
-			, m_Name(Other.m_Name)
-		{
-			Task::name(std::string(Other.GetName()));
-		}
+	EPriority m_Priority = EPriority::Normal;
+	std::string m_Name;
+};
 
-		ThreadTask(const Task& Other)
-			: Task(Other)
-		{
-			Task::name(std::string(GetName()));
-		}
+class TaskEvent : public tf::Future<void>
+{
+public:
+	using tf::Future<void>::Future;
 
-		const char* GetName() const { return m_Name.c_str(); }
-		ThreadTask& SetName(const char* Name) 
-		{ 
-			m_Name = Name;
-			Task::name(std::string(Name)); 
-			return *this; 
-		}
+	TaskEvent(tf::Future<void>&& Other) noexcept
+		: tf::Future<void>(std::forward<tf::Future<void>>(Other))
+	{
+	}
 
-		EPriority GetPriority() const { return m_Priority; }
-		ThreadTask& SetPriority(EPriority Priority) { m_Priority = Priority; return *this; }
-
-		virtual void Execute() = 0;
-	private:
-		EPriority m_Priority = EPriority::Normal;
-		std::string m_Name;
-	};
-}
+	inline bool IsDispatched() const { return valid(); }
+	inline bool IsCompleted() const { return valid() ? wait_for(std::chrono::milliseconds(0u)) == std::future_status::ready : false; }
+};
