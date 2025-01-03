@@ -11,21 +11,21 @@ public:
 
 	virtual ~BaseApplication() = default;
 
-	virtual void OnStartup();
-	virtual void OnRenderFrame() {}
-	virtual void OnShutdown() {}
+	virtual void Startup();
+	virtual void RenderFrame() {}
+	virtual void Shutdown() {}
+
+	virtual bool IsRequestQuit() const;
 
 	void Tick(float ElapsedSeconds) override;
 
 	const class Window& GetWindow() const { return *m_Window; }
 	const class ApplicationConfigurations& GetConfigurations() const;
 	const struct GraphicsSettings& GetGraphicsSettings() const;
-
-	bool IsRequestingQuit() const;
 protected:
-	virtual void OnWindowCreation();
-	virtual void OnInitialize() {}
-	virtual void OnRenderGUI(class Canvas&) {}
+	virtual void MakeWindow();
+	virtual void Initialize() {}
+	virtual void RenderGUI(class Canvas&) {}
 private:
 	std::shared_ptr<class ApplicationConfigurations> m_Configs;
 	std::shared_ptr<class Window> m_Window;

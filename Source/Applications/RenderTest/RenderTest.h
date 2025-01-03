@@ -9,9 +9,9 @@ public:
 protected:
 	void Tick(float ElapsedSeconds) override final;
 
-	void OnInitialize() override final;
-	void OnRenderGUI(class Canvas&) override final {}
-	void OnRenderFrame() override final;
+	void Initialize() override final;
+	void RenderGUI(class Canvas&) override final {}
+	void RenderFrame() override final;
 private:
 	std::shared_ptr<class Scene> m_Scene;
 	std::shared_ptr<class RenderGraph> m_RenderGraph;

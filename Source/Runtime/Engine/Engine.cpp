@@ -26,7 +26,7 @@ void Engine::Run()
 
 	for (auto& Application : m_Applications)
 	{
-		Application->OnStartup();
+		Application->Startup();
 	}
 
 	while (true)
@@ -37,9 +37,9 @@ void Engine::Run()
 		}
 
 		m_Applications.remove_if([](std::unique_ptr<BaseApplication>& App) {
-			if (App->IsRequestingQuit())
+			if (App->IsRequestQuit())
 			{
-				App->OnShutdown();
+				App->Shutdown();
 				return true;
 			}
 			return false;
@@ -51,7 +51,7 @@ void Engine::Run()
 
 			Application->Tick(0.0f);
 
-			Application->OnRenderFrame();
+			Application->RenderFrame();
 		}
 	}
 

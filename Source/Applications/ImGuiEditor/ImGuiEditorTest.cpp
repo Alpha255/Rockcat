@@ -135,7 +135,7 @@ static ImGuiKey ImGui_ImplWin32_VirtualKeyToImGuiKey(WPARAM wParam)
     }
 }
 
-void ImGuiEditorTest::OnInitialize()
+void ImGuiEditorTest::Initialize()
 {
     auto& Window = GetWindow();
     m_Editor = std::make_shared<ImGuiEditor>(Window.GetWidth(), Window.GetHeight());
@@ -151,12 +151,12 @@ void ImGuiEditorTest::OnInitialize()
         g_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
 }
 
-void ImGuiEditorTest::OnRenderGUI(Canvas&)
+void ImGuiEditorTest::RenderGUI(Canvas&)
 {
     m_Editor->Draw();
 }
 
-void ImGuiEditorTest::OnRenderFrame()
+void ImGuiEditorTest::RenderFrame()
 {
     ImGui_ImplDX12_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -167,7 +167,7 @@ void ImGuiEditorTest::OnRenderFrame()
     //ImGui::ShowDemoWindow(&show_demo_window);
 
     Canvas GCanvas;
-    OnRenderGUI(GCanvas);
+    RenderGUI(GCanvas);
 
     ImGui::Render();
 
@@ -263,7 +263,7 @@ void ImGuiEditorTest::OnWindowResized(uint32_t Width, uint32_t Height)
     }
 }
 
-void ImGuiEditorTest::OnShutdown()
+void ImGuiEditorTest::Shutdown()
 {
     WaitForLastSubmittedFrame();
 
