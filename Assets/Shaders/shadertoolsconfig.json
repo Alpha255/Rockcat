@@ -1,4 +1,11 @@
 {
+	"hlsl.preprocessorDefinitions": {
+		"_HAS_NORMAL_": 1,
+		"_HAS_TANGENT_": 1,
+		"_HAS_UV0_": 1,
+		"_HAS_UV1_": 1,
+		"_HAS_COLOR_": 1
+	},
 	"hlsl.additionalIncludeDirectories": [
 		".."
 	]

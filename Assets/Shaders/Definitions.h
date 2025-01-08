@@ -115,8 +115,8 @@ private: \
 #define DECLARE_SHADER_VARIABLE
 
 #define DECLARE_SV_UNIFORM_BUFFER_BEGIN(Binding) cbuffer UniformBuffer : register(b##Binding) {
-#define DECLARE_SV_UNIFORM_BUFFER_END };
-#define DECLARE_SV_UNIFORM_BUFFER(Type, Name, SetterGetter) Type Name;
+#define DECLARE_SV_UNIFORM_BUFFER_END }
+#define DECLARE_SV_UNIFORM_BUFFER(Type, Name) Type Name;
 
 #define DECLARE_SHADER_VARIABLES_END
 
@@ -131,6 +131,8 @@ private: \
 #define DECLARE_SV_TEXTURE_CUBE(Name, Binding) \
 	Texture2D Name : register(t##Binding); \
 	SamplerState Name##_Sampler : register(s##Binding);
+
+#define SAMPLE_TEXTURE2D(Texture, UV) Texture.Sample(Texture##_Sampler, UV.xy)
 
 struct VSInput
 {
@@ -326,6 +328,7 @@ struct VSOutput
 #define DEFINITION_SHADER_VARIABLES_DEPTH_ONLY \
 	DECLARE_SHADER_VARIABLES_BEGIN(DepthOnly) \
 		DECLARE_SV_UNIFORM_BUFFER_BEGIN(1) \
+			DECLARE_SV_UNIFORM_BUFFER(float, AlphaCutoff) \
 		DECLARE_SV_UNIFORM_BUFFER_END \
 		DECLARE_SV_TEXTURE_2D(BaseColorMap, 2) \
 	DECLARE_SHADER_VARIABLES_END \
