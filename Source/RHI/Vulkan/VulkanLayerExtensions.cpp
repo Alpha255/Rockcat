@@ -108,30 +108,30 @@ void LogEnabledLayerAndExtensions(const VulkanLayerArray& Layers, const VulkanEx
 {
 	for (const auto &Layer : Layers)
 	{
-		if (Layer->IsEnabled())
+		if (Layer->IsNeeded())
 		{
-			LOG_CAT_INFO(LogVulkanRHI, "Enable {} layer: \"{}\"", Category, Layer->GetName());
-		}
-		else
-		{
-			if (Layer->IsNeeded())
+			if (Layer->IsEnabled())
 			{
-				LOG_CAT_ERROR(LogVulkanRHI, "Request {} layer \"{}\" is not supported.", Category, Layer->GetName());
+				LOG_CAT_INFO(LogVulkanRHI, "Enable {} layer: \"{}\"", Category, Layer->GetName());
+			}
+			else
+			{
+				LOG_CAT_ERROR(LogVulkanRHI, "Requested {} layer \"{}\" is not supported.", Category, Layer->GetName());
 			}
 		}
 	}
 
 	for (const auto& Extension : Extensions)
 	{
-		if (Extension->IsEnabled())
+		if (Extension->IsNeeded())
 		{
-			LOG_CAT_INFO(LogVulkanRHI, "Enable {} extension: \"{}\"", Category, Extension->GetName());
-		}
-		else
-		{
-			if (Extension->IsNeeded())
+			if (Extension->IsEnabled())
 			{
-				LOG_CAT_ERROR(LogVulkanRHI, "Request {} layer \"{}\" is not supported.", Category, Extension->GetName());
+				LOG_CAT_INFO(LogVulkanRHI, "Enable {} extension: \"{}\"", Category, Extension->GetName());
+			}
+			else
+			{
+				LOG_CAT_ERROR(LogVulkanRHI, "Requested {} layer \"{}\" is not supported.", Category, Extension->GetName());
 			}
 		}
 	}

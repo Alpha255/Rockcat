@@ -9,6 +9,7 @@
 #include "Engine/Services/FileWatchService.h"
 #include "Engine/Services/ShaderCompileService.h"
 #include "Engine/Asset/AssetDatabase.h"
+#include "Engine/Paths.h"
 
 Engine& Engine::Get()
 {
@@ -60,14 +61,15 @@ void Engine::Run()
 
 bool Engine::Initialize()
 {
-	auto AssetsDirectory = PlatformMisc::GetCurrentModuleDirectory().parent_path() / "Assets";
-	if (!std::filesystem::exists(AssetsDirectory))
+	Paths::SetRoot(PlatformMisc::GetCurrentModuleDirectory().parent_path());
+
+	if (!std::filesystem::exists(Paths::AssetPath()))
 	{
-		LOG_ERROR("Invalid assets directory: {}.", AssetsDirectory.string());
+		LOG_CRITICAL("Invalid assets directory: {}.", Paths::AssetPath().string());
 		return false;
 	}
 
-	PlatformMisc::SetCurrentWorkingDirectory(AssetsDirectory);
+	PlatformMisc::SetCurrentWorkingDirectory(Paths::AssetPath());
 	LOG_INFO("Mount working directory to \"{}\".", PlatformMisc::GetCurrentWorkingDirectory().generic_string());
 
 	TaskFlowService::Get().OnStartup();

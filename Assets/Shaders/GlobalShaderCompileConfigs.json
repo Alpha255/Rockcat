@@ -2,20 +2,13 @@
     "class GlobalShaderCompileConfigurations": {
         "m_DefaultDefines": [
             {
-                "key": "Shaders/DefaultLit.frag",
-                "value": {
-                    "m_Defines": [
-                        {
-                            "key": "_HAS_TANGENT_",
-                            "value": "0"
-                        }
-                    ]
-                }
-            },
-            {
                 "key": "Shaders/GenericVS.vert",
                 "value": {
                     "m_Defines": [
+                        {
+                            "key": "_HAS_NORMAL_",
+                            "value": "0"
+                        },
                         {
                             "key": "_HAS_COLOR_",
                             "value": "0"

@@ -124,7 +124,7 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 	std::vector<const char*> EnabledExtensions;
 
 	auto LayerProperties = vk::enumerateInstanceLayerProperties();
-	std::string LogValidInstanceLayers("VulkanRHI: Found valid instance layers:\n");
+	std::string LogValidInstanceLayers("VulkanRHI: Found available instance layers:\n");
 
 	for (const auto& LayerProperty : LayerProperties)
 	{
@@ -139,6 +139,11 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 		});
 		
 		Layer->SetEnabledInConfig(LayerPropertyIt != LayerProperties.cend());
+
+		if (!Layer->IsSupported() || !Layer->IsNeeded())
+		{
+			continue;
+		}
 		
 		if (Layer->IsEnabled())
 		{
@@ -149,7 +154,7 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 	VulkanExtension* DebugUtilExt = nullptr;
 	VulkanExtension* DebugReportExt = nullptr;
 
-	std::string LogValidInstanceExtensions("Found valid instance extensions:\n");
+	std::string LogValidInstanceExtensions("Found available instance extensions:\n");
 	auto ExtensionProperties = vk::enumerateInstanceExtensionProperties();
 
 	for (const auto& ExtensionProperty : ExtensionProperties)
@@ -165,6 +170,11 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 		});
 
 		Ext->SetEnabledInConfig(ExtensionIt != ExtensionProperties.cend());
+
+		if (!Ext->IsSupported() || !Ext->IsNeeded())
+		{
+			continue;
+		}
 
 		if (Ext->IsEnabled())
 		{

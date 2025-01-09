@@ -184,7 +184,7 @@ public:
 	template<class T>
 	ShaderAsset(T&& Name)
 		: Asset(GetFilePath(ASSET_PATH_SHADERS, Name))
-		, m_Stage(GetStage(GetPath()))
+		, m_Stage(GetStageByExtension(GetExtension()))
 	{
 		SetupDefaultDefines();
 	}
@@ -193,7 +193,7 @@ public:
 
 	void Compile(bool Force = false);
 
-	const ShaderBinary* const GetBinary(ERenderHardwareInterface RHI) const { return GetCache().GetBinary(ComputeHash(), RHI); }
+	const ShaderBinary* const GetBinary(ERenderHardwareInterface RHI) const { return GetBinaryCache().GetBinary(ComputeHash(), RHI); }
 
 	virtual std::shared_ptr<struct ShaderVariableContainer> CreateVariableContainer() const { return nullptr; }
 
@@ -205,13 +205,13 @@ public:
 		);
 	}
 protected:
-	const ShaderBinaryCache& GetCache() const;
-	static ERHIShaderStage GetStage(const std::filesystem::path& Path);
+	const ShaderBinaryCache& GetBinaryCache() const;
+	static ERHIShaderStage GetStageByExtension(const std::filesystem::path& Extension);
 private:
 	void SetupDefaultDefines();
-
-	mutable std::shared_ptr<ShaderBinaryCache> m_Cache;
 	ERHIShaderStage m_Stage;
+
+	mutable std::shared_ptr<ShaderBinaryCache> m_BinaryCache;
 };
 
 struct ShaderVariableContainer

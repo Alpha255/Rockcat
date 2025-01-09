@@ -41,43 +41,43 @@ void ShaderAsset::SetupDefaultDefines()
 	ShaderDefines::Merge(GlobalShaderCompileConfigurations::Get()->GetDefines(GetPath()));
 }
 
-const ShaderBinaryCache& ShaderAsset::GetCache() const
+const ShaderBinaryCache& ShaderAsset::GetBinaryCache() const
 {
-	if (!m_Cache)
+	if (!m_BinaryCache)
 	{
-		m_Cache = ShaderBinaryCache::Load(GetFilePath(ASSET_PATH_SHADERCACHE, GetName(), ShaderBinaryCache::GetExtension()));
+		m_BinaryCache = ShaderBinaryCache::Load(GetFilePath(ASSET_PATH_SHADERCACHE, GetName(), ShaderBinaryCache::GetExtension()));
 	}
-	if (m_Cache->IsDirty())
+	if (m_BinaryCache->IsDirty())
 	{
-		m_Cache->Reload();
+		m_BinaryCache->Reload();
 	}
-	return *m_Cache;
+	return *m_BinaryCache;
 }
 
-ERHIShaderStage ShaderAsset::GetStage(const std::filesystem::path& Path)
+ERHIShaderStage ShaderAsset::GetStageByExtension(const std::filesystem::path& Extension)
 {
-	auto Extension = StringUtils::Lowercase(Path.extension().string());
-	if (Extension == ".vert")
+	auto Ext = StringUtils::Lowercase(Extension.string());
+	if (Ext == ".vert")
 	{
 		return ERHIShaderStage::Vertex;
 	}
-	else if (Extension == ".hull")
+	else if (Ext == ".hull")
 	{
 		return ERHIShaderStage::Hull;
 	}
-	else if (Extension == ".domain")
+	else if (Ext == ".domain")
 	{
 		return ERHIShaderStage::Domain;
 	}
-	else if (Extension == ".geom")
+	else if (Ext == ".geom")
 	{
 		return ERHIShaderStage::Geometry;
 	}
-	else if (Extension == ".frag")
+	else if (Ext == ".frag")
 	{
 		return ERHIShaderStage::Fragment;
 	}
-	else if (Extension == ".comp")
+	else if (Ext == ".comp")
 	{
 		return ERHIShaderStage::Compute;
 	}
@@ -86,7 +86,7 @@ ERHIShaderStage ShaderAsset::GetStage(const std::filesystem::path& Path)
 
 void ShaderAsset::Compile(bool Force)
 {
-	if (Force || IsDirty() || !GetCache().Contains(ComputeHash()))
+	if (Force || IsDirty() || !GetBinaryCache().Contains(ComputeHash()))
 	{
 		ReadRawData(AssetType::EContentsType::Text);
 		ShaderCompileService::Get().Compile(*this);

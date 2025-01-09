@@ -95,7 +95,7 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 	std::vector<const char*> EnabledLayers;
 	std::vector<const char*> EnabledExtensions;
 
-	std::string LogValidDeviceLayers("Found valid device layers:\n");
+	std::string LogValidDeviceLayers("Found available device layers:\n");
 	auto LayerProperties = m_PhysicalDevice.enumerateDeviceLayerProperties();
 
 	for (const auto& LayerProperty : LayerProperties)
@@ -112,13 +112,18 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 
 		Layer->SetEnabledInConfig(LayerIt != LayerProperties.cend());
 
+		if (!Layer->IsSupported() || !Layer->IsNeeded())
+		{
+			continue;
+		}
+
 		if (Layer->IsEnabled())
 		{
 			EnabledLayers.push_back(Layer->GetName());
 		}
 	}
 
-	std::string LogValidDeviceExtensions("Found valid device extensions:\n");
+	std::string LogValidDeviceExtensions("Found available device extensions:\n");
 	auto ExtensionProperties = m_PhysicalDevice.enumerateDeviceExtensionProperties();
 
 	for (const auto& ExtensionProperty : ExtensionProperties)
@@ -134,6 +139,11 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 		});
 
 		Ext->SetEnabledInConfig(ExtensionIt != ExtensionProperties.cend());
+
+		if (!Ext->IsSupported() || !Ext->IsNeeded())
+		{
+			continue;
+		}
 
 		if (Ext->IsEnabled())
 		{

@@ -1,6 +1,7 @@
 #include "Engine/Services/ShaderCompileService.h"
 #include "Engine/Async/Task.h"
 #include "Engine/Services/SpdLogService.h"
+#include "Engine/Paths.h"
 #pragma warning(disable:4068)
 #include <Submodules/filewatch/FileWatch.hpp>
 #pragma warning(default:4068)
@@ -8,8 +9,8 @@
 class ShaderCompileTask : public Task
 {
 public:
-	ShaderCompileTask(const char* ShaderName)
-		: Task(std::move(StringUtils::Format("ShaderCompileTask|%s", ShaderName)), EPriority::High)
+	ShaderCompileTask(const char* ShaderFilePath)
+		: Task(std::move(StringUtils::Format("ShaderCompileTask|%s", ShaderFilePath)), EPriority::High)
 	{
 	}
 
@@ -18,8 +19,6 @@ public:
 	}
 };
 
-using FileWatcher = filewatch::FileWatch<std::string>;
-static std::unique_ptr<FileWatcher> s_ShaderWatcher;
 void ShaderCompileService::OnStartup()
 {
 	REGISTER_LOG_CATEGORY(LogShaderCompile);
@@ -28,25 +27,21 @@ void ShaderCompileService::OnStartup()
 	m_Compilers[(size_t)ERenderHardwareInterface::D3D11] = std::make_unique<D3DShaderCompiler>();
 	m_Compilers[(size_t)ERenderHardwareInterface::D3D12] = std::make_unique<DxcShaderCompiler>(false);
 
-	s_ShaderWatcher = std::make_unique<FileWatcher>(ASSET_PATH_SHADERS/*, std::regex("[*.vert, *.frag, *.comp, *.geom]")*/,
-		[](const std::string& Path, filewatch::Event FileEvent) {
+	auto ShaderPath = Paths::ShaderPath().string();
+	m_ShaderFileMonitor = std::make_shared<filewatch::FileWatch<std::string>>(ShaderPath/*, std::regex("[*.vert, *.frag, *.comp, *.geom]")*/,
+		[this](const std::string& Path, filewatch::Event FileEvent) {
 			switch (FileEvent)
 			{
 			case filewatch::Event::modified:
-				LOG_INFO("{} is modified.", Path);
+				OnShaderFileModified(Path);
 				break;
 			}
 		});
 }
 
-void ShaderCompileService::OnShutdown()
+void ShaderCompileService::OnShaderFileModified(const std::string& FilePath)
 {
-	for (uint32_t Index = 0u; Index < m_Compilers.size(); ++Index)
-	{
-		m_Compilers[Index].reset();
-	}
-
-	s_ShaderWatcher.reset();
+	LOG_INFO("{} is modified.", FilePath);
 }
 
 void ShaderCompileService::Compile(const ShaderAsset& Shader)
@@ -92,4 +87,14 @@ void ShaderCompileService::DeregisterCompileTask(ERenderHardwareInterface RHI, s
 {
 	assert(RHI < ERenderHardwareInterface::Num);
 	m_CompilingTasks[size_t(RHI)].erase(Hash);
+}
+
+void ShaderCompileService::OnShutdown()
+{
+	for (uint32_t Index = 0u; Index < m_Compilers.size(); ++Index)
+	{
+		m_Compilers[Index].reset();
+	}
+
+	m_ShaderFileMonitor.reset();
 }
