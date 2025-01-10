@@ -6,17 +6,27 @@
 #include <Submodules/filewatch/FileWatch.hpp>
 #pragma warning(default:4068)
 
-class ShaderCompileTask : public Task
+struct ShaderCompileTask : public Task
 {
-public:
-	ShaderCompileTask(const char* ShaderFilePath)
-		: Task(std::move(StringUtils::Format("ShaderCompileTask|%s", ShaderFilePath)), EPriority::High)
+	ShaderCompileTask(ShaderAsset& InShader, IShaderCompiler& InCompiler)
+		: Shader(InShader)
+		, Compiler(InCompiler)
+		, Task(std::move(StringUtils::Format("ShaderCompileTask|%s", InShader.GetPath().string().c_str())), EPriority::High)
 	{
 	}
 
 	void Execute() override final
 	{
+		Shader.ReadRawData(AssetType::EContentsType::Text);
+
+		const size_t Hash = Shader.ComputeHash();
+		const auto FileName = Shader.GetPath().filename().string();
+		const auto SourceCode = reinterpret_cast<char*>(Shader.GetRawData().Data.get());
+		const auto Size = Shader.GetRawData().Size;
 	}
+
+	ShaderAsset& Shader;
+	IShaderCompiler& Compiler;
 };
 
 void ShaderCompileService::OnStartup()
@@ -44,30 +54,25 @@ void ShaderCompileService::OnShaderFileModified(const std::string& FilePath)
 	LOG_INFO("{} is modified.", FilePath);
 }
 
-void ShaderCompileService::Compile(const ShaderAsset& Shader)
+void ShaderCompileService::Compile(ShaderAsset& Shader, ERenderHardwareInterface RHI)
 {
-	const size_t Hash = Shader.ComputeHash();
-	const auto FileName = Shader.GetPath().filename().generic_string();
-	const auto SourceCode = reinterpret_cast<char*>(Shader.GetRawData().Data.get());
-	const auto Size = Shader.GetRawData().Size;
+	//for (uint32_t Index = (uint32_t)ERenderHardwareInterface::Vulkan; Index < (uint32_t)ERenderHardwareInterface::Num; ++Index)
+	//{
+	//	auto RHI = static_cast<ERenderHardwareInterface>(Index);
 
-	for (uint32_t Index = (uint32_t)ERenderHardwareInterface::Vulkan; Index < (uint32_t)ERenderHardwareInterface::Num; ++Index)
-	{
-		auto RHI = static_cast<ERenderHardwareInterface>(Index);
+	//	if (RegisterCompileTask(RHI, Hash))
+	//	{
+	//		auto Binary = GetCompiler(RHI).Compile(
+	//			FileName.c_str(),
+	//			SourceCode,
+	//			Size,
+	//			"main",
+	//			Shader.GetStage(),
+	//			Shader);
 
-		if (RegisterCompileTask(RHI, Hash))
-		{
-			auto Binary = GetCompiler(RHI).Compile(
-				FileName.c_str(),
-				SourceCode,
-				Size,
-				"main",
-				Shader.GetStage(),
-				Shader);
-
-			DeregisterCompileTask(RHI, Hash);
-		}
-	}
+	//		DeregisterCompileTask(RHI, Hash);
+	//	}
+	//}
 }
 
 bool ShaderCompileService::RegisterCompileTask(ERenderHardwareInterface RHI, size_t Hash)

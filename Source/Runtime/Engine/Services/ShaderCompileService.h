@@ -15,7 +15,7 @@ public:
 
 	void OnShutdown() override final;
 
-	void Compile(const ShaderAsset& Shader);
+	void Compile(ShaderAsset& Shader, ERenderHardwareInterface RHI);
 protected:
 	IShaderCompiler& GetCompiler(ERenderHardwareInterface RHI)
 	{

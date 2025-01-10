@@ -19,6 +19,20 @@ enum class EThread
 	Num
 };
 
+class TaskEvent : public tf::Future<void>
+{
+public:
+	using tf::Future<void>::Future;
+
+	TaskEvent(tf::Future<void>&& Other) noexcept
+		: tf::Future<void>(std::forward<tf::Future<void>>(Other))
+	{
+	}
+
+	inline bool IsDispatched() const { return valid(); }
+	inline bool IsCompleted() const { return valid() ? wait_for(std::chrono::milliseconds(0u)) == std::future_status::ready : false; }
+};
+
 class Task : public tf::Task
 {
 public:
@@ -99,18 +113,4 @@ private:
 
 	EPriority m_Priority = EPriority::Normal;
 	std::string m_Name;
-};
-
-class TaskEvent : public tf::Future<void>
-{
-public:
-	using tf::Future<void>::Future;
-
-	TaskEvent(tf::Future<void>&& Other) noexcept
-		: tf::Future<void>(std::forward<tf::Future<void>>(Other))
-	{
-	}
-
-	inline bool IsDispatched() const { return valid(); }
-	inline bool IsCompleted() const { return valid() ? wait_for(std::chrono::milliseconds(0u)) == std::future_status::ready : false; }
 };

@@ -127,7 +127,7 @@ ShaderBinary DxcShaderCompiler::Compile(
 	DxcBlob Blob;
 	VERIFY(Result->GetResult(Blob.Reference()) == S_OK);
 
-	return ShaderBinary(Blob->GetBufferSize(), Blob->GetBufferPointer());
+	return ShaderBinary("", Blob->GetBufferSize(), Blob->GetBufferPointer());
 }
 
 ShaderBinary D3DShaderCompiler::Compile(
@@ -184,7 +184,7 @@ ShaderBinary D3DShaderCompiler::Compile(
 		assert(0);
 	}
 
-	return ShaderBinary(Binary->GetBufferSize(), Binary->GetBufferPointer());
+	return ShaderBinary("", Binary->GetBufferSize(), Binary->GetBufferPointer());
 }
 
 #if 0

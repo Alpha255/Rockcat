@@ -33,7 +33,7 @@ public:
 
 	const std::map<std::string, std::string>& GetDefines() const { return m_Defines; }
 
-	size_t ComputeHash() const
+	virtual size_t ComputeHash() const
 	{
 		size_t Hash = 0u;
 		for (const auto& [Name, Value] : m_Defines)
@@ -55,25 +55,19 @@ private:
 	std::map<std::string, std::string> m_Defines;
 };
 
-class ShaderBinary
+class ShaderBinary : public SerializableAsset<ShaderBinary>
 {
 public:
-	enum class EStatus
-	{
-		None,
-		Compiling,
-		Compiled
-	};
-
-	ShaderBinary() = default;
-
-	ShaderBinary(size_t Size, const void* Compiled)
-		: m_Size(Size)
+	template<class T>
+	ShaderBinary(T&& Path, size_t Size, const void* Binary)
+		: BaseClass(std::forward<T>(Path))
+		, m_Size(Size)
 		, m_Binary(new uint8_t[Size]())
 	{
-		VERIFY(memcpy_s(m_Binary.get(), Size, Compiled, Size) == 0);
+		VERIFY(memcpy_s(m_Binary.get(), Size, Binary, Size) == 0);
 	}
 
+	std::time_t GetTimestamp() const { return m_Timestamp; }
 	size_t GetSize() const { return m_Size; }
 	const uint8_t* GetBinary() const { return m_Binary.get(); }
 	bool IsValid() const { return m_Size > 0u; }
@@ -82,63 +76,29 @@ public:
 	void load(Archive& Ar)
 	{
 		Ar(
+			CEREAL_NVP(m_Timestamp),
 			CEREAL_NVP(m_Size)
 		);
 
 		m_Binary.reset(new uint8_t[m_Size]());
 
-		Ar.loadBinaryValue(m_Binary.get(), m_Size, "Compiled");
+		Ar.loadBinaryValue(m_Binary.get(), m_Size, "Binary");
 	}
 
 	template<class Archive>
 	void save(Archive& Ar) const
 	{
 		Ar(
+			CEREAL_NVP(m_Timestamp),
 			CEREAL_NVP(m_Size)
 		);
 
-		Ar.saveBinaryValue(m_Binary.get(), m_Size, "Compiled");
+		Ar.saveBinaryValue(m_Binary.get(), m_Size, "Binary");
 	}
 private:
+	std::time_t m_Timestamp = 0u;
 	size_t m_Size = 0u;
 	std::shared_ptr<uint8_t> m_Binary;
-	//void SetStatus(EStatus Status) { m_Status.store(Status); }
-	//bool IsCompiling() const { return m_Status.load() == EStatus::Compiling; }
-	//bool IsCompiled() const { return m_Status.load() == EStatus::Compiled; }
-
-	//std::atomic<EStatus> m_Status;
-};
-
-struct ShaderBinaryCache : public SerializableAsset<ShaderBinaryCache>
-{
-	template<class T>
-	ShaderBinaryCache(T&& Path)
-		: BaseClass(std::forward<T>(Path))
-	{
-	}
-
-	static const char* GetExtension() { return ".shadercache"; }
-
-	bool Contains(size_t Hash) const { return CompiledBinaries.find(Hash) != CompiledBinaries.cend(); }
-	const ShaderBinary* const GetBinary(size_t Hash, ERenderHardwareInterface RHI) const
-	{
-		auto It = CompiledBinaries.find(Hash);
-		if (It != CompiledBinaries.end())
-		{
-			return &It->second.at((size_t)RHI);
-		}
-		return nullptr;
-	}
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(CompiledBinaries)
-		);
-	}
-
-	std::unordered_map<size_t, std::array<ShaderBinary, (size_t)ERenderHardwareInterface::Num>> CompiledBinaries;
 };
 
 struct ShaderVariable
@@ -181,21 +141,32 @@ struct ShaderVariable
 class ShaderAsset : public Asset, public ShaderDefines
 {
 public:
+	enum class ECompileStatus
+	{
+		None,
+		Compiling,
+		Compiled
+	};
+
 	template<class T>
 	ShaderAsset(T&& Name)
 		: Asset(GetFilePath(ASSET_PATH_SHADERS, Name))
 		, m_Stage(GetStageByExtension(GetExtension()))
 	{
-		SetupDefaultDefines();
 	}
 
 	ERHIShaderStage GetStage() const { return m_Stage; }
 
-	void Compile(bool Force = false);
+	void Compile(ERenderHardwareInterface RHI, bool Force = false);
 
-	const ShaderBinary* const GetBinary(ERenderHardwareInterface RHI) const { return GetBinaryCache().GetBinary(ComputeHash(), RHI); }
+	const ShaderBinary* const GetBinary(ERenderHardwareInterface RHI) const;
 
 	virtual std::shared_ptr<struct ShaderVariableContainer> CreateVariableContainer() const { return nullptr; }
+
+	size_t ComputeHash() const override
+	{
+		return ::ComputeHash(std::filesystem::hash_value(GetPath()), ShaderDefines::ComputeHash());
+	}
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -205,13 +176,9 @@ public:
 		);
 	}
 protected:
-	const ShaderBinaryCache& GetBinaryCache() const;
 	static ERHIShaderStage GetStageByExtension(const std::filesystem::path& Extension);
 private:
-	void SetupDefaultDefines();
 	ERHIShaderStage m_Stage;
-
-	mutable std::shared_ptr<ShaderBinaryCache> m_BinaryCache;
 };
 
 struct ShaderVariableContainer
@@ -243,18 +210,4 @@ public:
 		return std::make_shared<TShaderVariableContainer>();
 	}
 };
-
-namespace cereal
-{
-	template<> struct LoadAndConstruct<ShaderBinaryCache>
-	{
-		template<class Archive>
-		static void load_and_construct(Archive& Ar, cereal::construct<ShaderBinaryCache>& Construct)
-		{
-			std::string NullShaderName;
-			Ar(NullShaderName);
-			Construct(NullShaderName);
-		}
-	};
-}
 
