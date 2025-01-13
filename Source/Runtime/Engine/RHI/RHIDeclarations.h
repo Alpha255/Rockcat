@@ -36,4 +36,10 @@ DECLARE_RHI_RESOURCE_PTR(RHIGraphicsPipeline)
 DECLARE_RHI_RESOURCE_PTR(RHICommandBufferPool)
 DECLARE_RHI_RESOURCE_PTR(RHICommandListContext)
 
+#if WITH_EDITOR
+	#define SHADER_HOT_RELOAD 1
+#else
+	#define SHADER_HOT_RELOAD 0
+#endif
+
 

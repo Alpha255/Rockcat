@@ -6,6 +6,7 @@
 #include "Engine/Asset/TextureAsset.h"
 #include "Engine/Application/GraphicsSettings.h"
 #include "Engine/RHI/RHIShader.h"
+#include "Engine/Paths.h"
 
 class ShaderDefines
 {
@@ -148,9 +149,8 @@ public:
 		Compiled
 	};
 
-	template<class T>
-	ShaderAsset(T&& Name)
-		: Asset(GetFilePath(ASSET_PATH_SHADERS, Name))
+	ShaderAsset(std::filesystem::path&& Name)
+		: Asset(Paths::ShaderPath() / Name)
 		, m_Stage(GetStageByExtension(GetExtension()))
 	{
 	}
@@ -166,14 +166,6 @@ public:
 	size_t ComputeHash() const override
 	{
 		return ::ComputeHash(std::filesystem::hash_value(GetPath()), ShaderDefines::ComputeHash());
-	}
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_BASE(ShaderDefines)
-		);
 	}
 protected:
 	static ERHIShaderStage GetStageByExtension(const std::filesystem::path& Extension);

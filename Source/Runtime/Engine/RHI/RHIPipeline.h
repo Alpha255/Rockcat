@@ -152,8 +152,6 @@ protected:
 	RHIShaderResourceLayout m_ShaderResourceLayout;
 };
 
-#define ENABLE_SHADER_HOT_RELOAD 1
-
 class RHIPipeline
 {
 public:
@@ -164,7 +162,7 @@ protected:
 
 class RHIGraphicsPipeline : public RHIPipeline
 {
-#if ENABLE_SHADER_HOT_RELOAD
+#if SHADER_HOT_RELOAD
 public:
 	RHIGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo)
 		: m_CreateInfo(CreateInfo)

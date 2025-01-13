@@ -3,55 +3,44 @@
 #include "Engine/Services/TaskFlowService.h"
 #include "Engine/Asset/Importers/DDSTextureImporter.h"
 #include "Engine/Asset/Importers/StbTextureImporter.h"
-#include "Engine/Asset/Importers/ShaderAssetImporter.h"
 #include "Engine/Asset/Importers/AssimpSceneImporter.h"
 #include "Engine/Async/Task.h"
 
-class AssetImportTask : public Task
+AssetImportTask::AssetImportTask(
+	std::shared_ptr<::Asset>& InAsset,
+	std::filesystem::path&& InPath,
+	IAssetImporter& InImporter,
+	const AssetType& InType,
+	std::optional<Asset::Callbacks>& InCallbacks)
+	: Task(std::move(StringUtils::Format("AssetImportTask|%s", InPath.string().c_str())))
+	, Importer(InImporter)
+	, Asset(InAsset ? InAsset : InImporter.CreateAsset(std::move(InPath)))
+	, ContentsType(InType.ContentsType)
 {
-public:
-	AssetImportTask(
-		std::shared_ptr<Asset>& TargetAsset,
-		const std::filesystem::path& AssetPath, 
-		IAssetImporter& AssetImporter, 
-		const AssetType* Type,
-		std::optional<Asset::Callbacks>& AssetLoadCallbacks)
-		: Task(std::move(StringUtils::Format("AssetImportTask: %s", AssetPath.generic_string().c_str())))
-		, m_AssetImporter(AssetImporter)
-		, m_Asset(TargetAsset ? TargetAsset : AssetImporter.CreateAsset(AssetPath))
-		, m_AssetType(Type)
+	Asset->SetCallbacks(InCallbacks);
+}
+
+void AssetImportTask::Execute()
+{
+	Asset->OnPreLoad();
+
+	Asset->SetStatus(Asset::EStatus::Loading);
+
+	Importer.LoadAssetData(Asset, ContentsType);
+
+	if (Importer.Reimport(*Asset))
 	{
-		m_Asset->SetCallbacks(AssetLoadCallbacks);
+		Asset->SetStatus(Asset::EStatus::Ready);
+		Asset->OnReady();
+	}
+	else
+	{
+		Asset->SetStatus(Asset::EStatus::Error);
+		Asset->OnLoadFailed();
 	}
 
-	std::shared_ptr<Asset>& GetAsset() { return m_Asset; }
-
-	void Execute() override final
-	{
-		m_Asset->OnPreLoad();
-
-		m_Asset->SetStatus(Asset::EAssetStatus::Loading);
-
-		m_AssetImporter.LoadAssetData(m_Asset, m_AssetType->ContentsType);
-
-		if (m_AssetImporter.Reimport(*m_Asset))
-		{
-			m_Asset->SetStatus(Asset::EAssetStatus::Ready);
-			m_Asset->OnReady();
-		}
-		else
-		{
-			m_Asset->SetStatus(Asset::EAssetStatus::Error);
-			m_Asset->OnLoadFailed();
-		}
-
-		m_Asset->FreeRawData();
-	}
-private:
-	IAssetImporter& m_AssetImporter;
-	std::shared_ptr<Asset> m_Asset;
-	const AssetType* m_AssetType;
-};
+	Asset->FreeRawData();
+}
 
 AssetDatabase::AssetDatabase()
 	: m_EnableAsyncImport(false)
@@ -66,52 +55,68 @@ void AssetDatabase::CreateAssetImporters()
 
 	m_AssetImporters.emplace_back(std::make_unique<DDSImageImporter>());
 	m_AssetImporters.emplace_back(std::make_unique<StbImageImporter>());
-	m_AssetImporters.emplace_back(std::make_unique<ShaderAssetImporter>());
 	m_AssetImporters.emplace_back(std::make_unique<AssimpSceneImporter>());
 }
 
 std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(
 	std::shared_ptr<Asset>& TargetAsset,
-	const std::filesystem::path& AssetPath, 
+	std::filesystem::path&& AssetPath, 
 	std::optional<Asset::Callbacks>& AssetLoadCallbacks, 
 	bool Async)
 {
-	if (std::filesystem::exists(AssetPath))
+	if (!std::filesystem::exists(AssetPath))
 	{
-		auto AssetExt = AssetPath.extension();
-
-		for (auto& AssetImporter : m_AssetImporters)
-		{
-			if (auto AssetType = AssetImporter->FindValidAssetType(AssetExt))
-			{
-				AssetImportTask NewTask(TargetAsset, AssetPath, *AssetImporter, AssetType, AssetLoadCallbacks);
-				auto NewAsset = NewTask.GetAsset();
-
-				m_Assets.insert(std::make_pair(AssetPath, NewAsset));
-
-				if (Async && m_EnableAsyncImport)
-				{
-					tf::DispatchTask(NewTask, EThread::WorkerThread);
-				}
-				else
-				{
-					NewTask.Execute();
-				}
-
-				return NewAsset;
-			}
-		}
-
-		LOG_ERROR("AssetDatabase::Unknown asset type: AssetPath:\"{}\"", AssetPath.string());
+		LOG_ERROR("AssetDatabase:: Asset \"{}\" do not exists.", AssetPath.string());
 		return nullptr;
 	}
 
-	LOG_ERROR("AssetDatabase:: Asset \"{}\" do not exists.", AssetPath.string());
-	return nullptr;
+	AssetImportTask* Task = nullptr;
+
+	{
+		std::lock_guard Locker(m_AssetTasksLocker);
+		auto AssetTaskIt = m_AssetLoadTasks.find(AssetPath);
+		if (AssetTaskIt != m_AssetLoadTasks.end())
+		{
+			Task = AssetTaskIt->second.get();
+			Task->Asset->SetCallbacks(AssetLoadCallbacks);
+		}
+		else
+		{
+			for (auto& AssetImporter : m_AssetImporters)
+			{
+				if (auto AssetType = AssetImporter->FindValidAssetType(AssetPath.extension()))
+				{
+					Task = m_AssetLoadTasks.insert(std::make_pair(AssetPath,
+						std::make_shared<AssetImportTask>(TargetAsset,
+							std::move(AssetPath),
+							*AssetImporter,
+							*AssetType,
+							AssetLoadCallbacks))).first->second.get();
+				}
+			}
+		}
+	}
+
+	if (!Task)
+	{
+		LOG_ERROR("AssetDatabase::The asset type of \"{}\" is not supported!", AssetPath.string());
+		return nullptr;
+	}
+
+	if (Async && m_EnableAsyncImport)
+	{
+		tf::DispatchTask(*Task);
+	}
+	else
+	{
+		Task->Execute();
+	}
+
+	return Task->Asset;
 }
 
 void AssetDatabase::OnShutdown()
 {
-	m_Assets.clear();
+	m_AssetLoadTasks.clear();
 	m_AssetImporters.clear();
 }

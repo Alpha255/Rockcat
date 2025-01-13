@@ -37,6 +37,7 @@ void ShaderCompileService::OnStartup()
 	m_Compilers[(size_t)ERHIBackend::D3D11] = std::make_unique<D3DShaderCompiler>();
 	m_Compilers[(size_t)ERHIBackend::D3D12] = std::make_unique<DxcShaderCompiler>(false);
 
+#if SHADER_HOT_RELOAD
 	auto ShaderPath = Paths::ShaderPath().string();
 	m_ShaderFileMonitor = std::make_shared<filewatch::FileWatch<std::string>>(ShaderPath/*, std::regex("[*.vert, *.frag, *.comp, *.geom]")*/,
 		[this](const std::string& Path, filewatch::Event FileEvent) {
@@ -47,6 +48,7 @@ void ShaderCompileService::OnStartup()
 				break;
 			}
 		});
+#endif
 }
 
 void ShaderCompileService::OnShaderFileModified(const std::string& FilePath)

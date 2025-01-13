@@ -155,7 +155,7 @@ class ImGuiConfigurations : public SerializableAsset<ImGuiConfigurations>
 {
 public:
 	ImGuiConfigurations()
-		: BaseClass::BaseClass("Configs\\ImGuiEditorConfigs.json")
+		: BaseClass("Configs\\ImGuiEditorConfigs.json")
 	{
 	}
 

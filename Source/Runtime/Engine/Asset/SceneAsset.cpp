@@ -96,6 +96,6 @@ void SceneAsset::PostLoad()
 
 	for (const auto& Path : m_AssimpScenes)
 	{
-		AssetDatabase::Get().FindOrImportAsset<AssimpSceneAsset>(Path, AssetLoadCallbacks);
+		AssetDatabase::Get().GetOrReimportAsset<AssimpSceneAsset>(Path, AssetLoadCallbacks);
 	}
 }

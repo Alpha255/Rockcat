@@ -2,6 +2,7 @@
 
 #include "Engine/Asset/SceneAsset.h"
 #include "Engine/Asset/AssetDatabase.h"
+#include "Engine/Paths.h"
 #include <assimp/version.h>
 #include <Submodules/assimp/include/assimp/Importer.hpp>
 #include <Submodules/assimp/include/assimp/ProgressHandler.hpp>
@@ -30,7 +31,7 @@ public:
 
 	void LoadAssetData(std::shared_ptr<Asset>&, AssetType::EContentsType) override final {} /// Just load from file to avoid base path of texture broken
 
-	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<AssimpSceneAsset>(AssetPath); }
+	std::shared_ptr<Asset> CreateAsset(std::filesystem::path&& AssetPath) override final { return std::make_shared<AssimpSceneAsset>(std::move(AssetPath)); }
 
 	bool Reimport(Asset& InAsset) override final
 	{
@@ -167,10 +168,10 @@ private:
 				aiString Name;
 				AiMaterial->Get(AI_MATKEY_NAME, Name);
 
-				auto MaterialPath = GetFilePath(ASSET_PATH_MATERIALS, (AssimpScene.GetPath().stem() / Name.C_Str()).string(), MaterialProperty::GetExtension());
+				auto MaterialPath = (Paths::MaterialPath() / AssimpScene.GetStem() / Name.C_Str()).replace_extension(MaterialProperty::GetExtension());
 				auto NeedReload = std::filesystem::exists(MaterialPath);
 				auto& Property = AssimpScene.Data.MaterialProperties.at(Index);
-				Property = MaterialProperty::Load(MaterialPath);
+				Property = MaterialProperty::Load(std::move(MaterialPath));
 
 				if (NeedReload)
 				{
@@ -389,10 +390,10 @@ private:
 				continue;
 			}
 
-			aiString Path;
-			if (AI_SUCCESS == AiMaterial->GetTexture(TextureType, 0u, &Path))  /// TODO: How to do if the material has more than one textures for some texture type ???
+			aiString URL;
+			if (AI_SUCCESS == AiMaterial->GetTexture(TextureType, 0u, &URL))  /// TODO: How to do if the material has more than one textures for some texture type ???
 			{
-				std::filesystem::path TexturePath = RootPath / Path.C_Str();
+				std::filesystem::path TexturePath = RootPath / URL.C_Str();
 				if (std::filesystem::exists(TexturePath))
 				{
 					auto AssetLoadCallbacks = std::make_optional(Asset::Callbacks{});
@@ -404,10 +405,10 @@ private:
 					if (TextureIndex != MaterialProperty::ETextureType::Num)
 					{
 						auto& Texture = Material.Textures[static_cast<size_t>(TextureIndex)];
-						Texture.reset(new TextureAsset(TexturePath));
+						Texture.reset(new TextureAsset(std::move(TexturePath)));
 
 						auto TextureAsset = Cast<Asset>(Texture);
-						AssetDatabase::Get().FindOrImportAsset(TextureAsset, AssetLoadCallbacks);
+						AssetDatabase::Get().GetOrReimportAsset(TextureAsset, AssetLoadCallbacks);
 					}
 				}
 			}

@@ -1,10 +1,25 @@
 #pragma once
 
-#include "Engine/Asset/Asset.h"
 #include "Core/StringUtils.h"
 #include "Core/Module.h"
+#include "Engine/Asset/Asset.h"
+#include "Engine/Async/Task.h"
 
-DECLARE_OBJECT_ID(Asset, uint32_t)
+struct AssetImportTask : public Task
+{
+	AssetImportTask(
+		std::shared_ptr<Asset>& InAsset,
+		std::filesystem::path&& InPath,
+		IAssetImporter& InImporter,
+		const AssetType& InType,
+		std::optional<Asset::Callbacks>& InCallbacks);
+
+	void Execute() override final;
+
+	IAssetImporter& Importer;
+	std::shared_ptr<Asset> Asset;
+	AssetType::EContentsType ContentsType;
+};
 
 class AssetDatabase : public IService<AssetDatabase>
 {
@@ -13,42 +28,46 @@ public:
 
 	void OnShutdown() override final;
 
-	template<class TAsset, class T>
-	std::shared_ptr<TAsset> FindOrImportAsset(T&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
+	template<class TAsset>
+	std::shared_ptr<TAsset> GetOrReimportAsset(std::filesystem::path&& Path, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
 	{
-		auto UnifyPath = GetUnifyAssetPath(std::forward<T>(AssetPath));
-		auto AssetIt = m_Assets.find(UnifyPath);
-		if (AssetIt != m_Assets.end() && AssetIt->second->GetRawData().IsValid())
+		auto UnifyPath = GetUnifyAssetPath(Path);
+
+		std::lock_guard Locker(m_AssetTasksLocker);
+		auto AssetTaskIt = m_AssetLoadTasks.find(UnifyPath);
+		if (AssetTaskIt != m_AssetLoadTasks.end())
 		{
-			return Cast<TAsset, Asset>(AssetIt->second);
+			return Cast<TAsset, Asset>(AssetTaskIt->second->Asset);
 		}
 		else
 		{
 			std::shared_ptr<Asset> EmptyAsset;
-			return Cast<TAsset>(ReimportAssetImpl(EmptyAsset, UnifyPath, AssetLoadCallbacks, Async));
+			return Cast<TAsset>(ReimportAssetImpl(EmptyAsset, std::move(UnifyPath), AssetLoadCallbacks, Async));
 		}
 	}
 
-	void FindOrImportAsset(std::shared_ptr<Asset>& TargetAsset, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
+	void GetOrReimportAsset(std::shared_ptr<Asset>& TargetAsset, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
 	{
 		assert(TargetAsset);
 
 		auto UnifyPath = GetUnifyAssetPath(TargetAsset->GetPath());
-		auto AssetIt = m_Assets.find(UnifyPath);
-		if (AssetIt != m_Assets.end() && AssetIt->second->GetRawData().IsValid())
+
+		std::lock_guard Locker(m_AssetTasksLocker);
+		auto AssetTaskIt = m_AssetLoadTasks.find(UnifyPath);
+		if (AssetTaskIt != m_AssetLoadTasks.end())
 		{
-			TargetAsset = AssetIt->second;
+			TargetAsset = AssetTaskIt->second->Asset;
 		}
 		else
 		{
-			ReimportAssetImpl(TargetAsset, UnifyPath, AssetLoadCallbacks, Async);
+			ReimportAssetImpl(TargetAsset, std::move(UnifyPath), AssetLoadCallbacks, Async);
 		}
 	}
 
-	template<class T>
-	void ReimportAsset(T&& AssetPath, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
+	void ReimportAsset(std::filesystem::path&& Path, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
 	{
-		ReimportAssetImpl(nullptr, GetUnifyAssetPath(std::forward<T>(AssetPath)), AssetLoadCallbacks, Async);
+		std::shared_ptr<Asset> EmptyAsset;
+		ReimportAssetImpl(EmptyAsset, GetUnifyAssetPath(Path), AssetLoadCallbacks, Async);
 	}
 
 	void ReimportAsset(std::shared_ptr<Asset>& TargetAsset, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
@@ -58,23 +77,24 @@ public:
 		ReimportAssetImpl(TargetAsset, GetUnifyAssetPath(TargetAsset->GetPath()), AssetLoadCallbacks, Async);
 	}
 private:
-	template<class T>
-	static std::filesystem::path GetUnifyAssetPath(T&& AssetPath, bool Lowercase = false)
+	static std::filesystem::path GetUnifyAssetPath(const std::filesystem::path& Path, bool Lowercase = false)
 	{
-		auto UnifyPath = std::filesystem::path(std::forward<T>(AssetPath)).make_preferred();
-		return Lowercase ? std::filesystem::path(StringUtils::Lowercase(UnifyPath.generic_string())) : UnifyPath;
+		auto UnifyPath = std::filesystem::path(Path);
+		UnifyPath.make_preferred();
+		return Lowercase ? std::filesystem::path(StringUtils::Lowercase(UnifyPath.string())) : UnifyPath;
 	}
 
 	void CreateAssetImporters();
 
 	std::shared_ptr<Asset> ReimportAssetImpl(
 		std::shared_ptr<Asset>& TargetAsset,
-		const std::filesystem::path& AssetPath, 
+		std::filesystem::path&& AssetPath, 
 		std::optional<Asset::Callbacks>& AssetLoadCallbacks, 
 		bool Async);
 
-	std::unordered_map<std::filesystem::path, std::shared_ptr<Asset>> m_Assets;
+	std::unordered_map<std::filesystem::path, std::shared_ptr<AssetImportTask>> m_AssetLoadTasks;
 	std::vector<std::unique_ptr<IAssetImporter>> m_AssetImporters;
 	bool m_EnableAsyncImport;
+	std::mutex m_AssetTasksLocker;
 };
 

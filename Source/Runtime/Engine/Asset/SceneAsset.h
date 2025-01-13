@@ -5,6 +5,7 @@
 #include "Engine/View/Camera.h"
 #include "Engine/Scene/SceneGraph.h"
 #include "Engine/Scene/Components/StaticMesh.h"
+#include "Engine/Paths.h"
 
 struct SceneData
 {
@@ -26,9 +27,8 @@ struct SceneData
 class SceneAsset : public SerializableAsset<SceneAsset>
 {
 public:
-	template<class T>
-	SceneAsset(T&& Name)
-		: BaseClass(GetFilePath(ASSET_PATH_SCENES, Name, GetExtension()))
+	SceneAsset(std::filesystem::path&& Name)
+		: BaseClass(Paths::ScenePath() / Name)
 	{
 	}
 

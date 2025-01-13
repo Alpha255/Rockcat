@@ -83,7 +83,7 @@ void ImGuiConfigurations::LoadDefaultThemes()
 		auto ThemeName = ThemePath.stem().string();
 		if (!m_Themes.contains(ThemeName))
 		{
-			auto Theme = ImGuiTheme::Load(ThemePath);
+			auto Theme = ImGuiTheme::Load(std::move(ThemePath));
 			Theme->Name = ThemeName;
 			m_Themes.insert(std::make_pair(ThemeName, std::move(Theme)));
 		}

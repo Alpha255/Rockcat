@@ -23,7 +23,7 @@ public:
 		LOG_INFO("Create STB image importer, stb_image version: 2.3");
 	}
 
-	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<TextureAsset>(AssetPath); }
+	std::shared_ptr<Asset> CreateAsset(std::filesystem::path&& AssetPath) override final { return std::make_shared<TextureAsset>(std::move(AssetPath)); }
 
 	bool Reimport(Asset& InAsset) override final
 	{

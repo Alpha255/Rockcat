@@ -40,7 +40,7 @@ struct AssetType
 	};
 
 	std::string_view Name;
-	std::string_view Extension;
+	std::filesystem::path Extension;
 	EContentsType ContentsType;
 
 	AssetType(const char* InName, const char* InExtension, EContentsType InContentsType = EContentsType::Binary)
@@ -54,7 +54,7 @@ struct AssetType
 class Asset
 {
 public:
-	enum class EAssetStatus : uint8_t
+	enum class EStatus : uint8_t
 	{
 		NotLoaded,
 		Loading,
@@ -82,18 +82,18 @@ public:
 		AssetUnloadedCallback UnloadedCallback;
 	};
 
-	template<class T>
-	Asset(T&& Path)
-		: m_Path(std::forward<T>(Path))
-		, m_LastWriteTime(GetFileLastWriteTime(m_Path))
+	Asset(std::filesystem::path&& Path)
+		: m_Path(std::move(Path))
+		, m_LastWriteTime(GetLastWriteTime(m_Path))
 	{
 	}
 
-	EAssetStatus GetStatus() const { return m_Status.load(); }
-	virtual bool IsReady() const { return GetStatus() == EAssetStatus::Ready; }
+	EStatus GetStatus() const { return m_Status.load(); }
+	virtual bool IsReady() const { return GetStatus() == EStatus::Ready; }
 
 	const std::filesystem::path& GetPath() const { return m_Path; }
 	std::filesystem::path GetName() const { return m_Path.filename(); }
+	std::filesystem::path GetStem() const { return m_Path.stem(); }
 	std::filesystem::path GetExtension() const { return m_Path.extension(); }
 	std::time_t GetLastWriteTime() const { return m_LastWriteTime; }
 
@@ -106,7 +106,7 @@ public:
 		if (!m_Dirty)
 		{
 			std::time_t LastWriteTime = m_LastWriteTime;
-			m_LastWriteTime = GetFileLastWriteTime(m_Path);
+			m_LastWriteTime = GetLastWriteTime(m_Path);
 			m_Dirty = m_LastWriteTime != LastWriteTime;
 		}
 		return m_Dirty;
@@ -130,9 +130,9 @@ public:
 
 	static std::optional<Callbacks> s_DefaultNullCallbacks;
 protected:
-	friend class AssetImportTask;
+	friend struct AssetImportTask;
 
-	void SetStatus(EAssetStatus Status) { m_Status.store(Status); }
+	void SetStatus(EStatus Status) { m_Status.store(Status); }
 
 	virtual void OnPreLoad() { if (m_Callbacks.PreLoadCallback) { m_Callbacks.PreLoadCallback(*this); } }
 	virtual void OnReady() { if (m_Callbacks.ReadyCallback) { m_Callbacks.ReadyCallback(*this); } }
@@ -141,10 +141,7 @@ protected:
 	virtual void OnSaved() { if (m_Callbacks.SavedCallback) { m_Callbacks.SavedCallback(*this); } }
 	virtual void OnUnloaded() { if (m_Callbacks.UnloadedCallback) { m_Callbacks.UnloadedCallback(*this); } }
 
-	template<class T>
-	void SetPath(T&& Path) { m_Path = std::filesystem::path(std::forward<T>(Path)); }
-
-	static std::time_t GetFileLastWriteTime(const std::filesystem::path& Path)
+	static std::time_t GetLastWriteTime(const std::filesystem::path& Path)
 	{
 		if (std::filesystem::exists(Path))
 		{
@@ -154,7 +151,7 @@ protected:
 		return 0;
 	}
 
-	static size_t GetFileSize(const std::filesystem::path& Path)
+	static size_t GetSize(const std::filesystem::path& Path)
 	{
 		if (std::filesystem::exists(Path))
 		{
@@ -164,7 +161,7 @@ protected:
 	}
 
 	DataBlock m_RawData;
-	std::atomic<EAssetStatus> m_Status = EAssetStatus::NotLoaded;
+	std::atomic<EStatus> m_Status = EStatus::NotLoaded;
 
 	Callbacks m_Callbacks;
 
@@ -183,9 +180,9 @@ public:
 
 	const AssetType* FindValidAssetType(const std::filesystem::path& Extension) const
 	{
-		auto It = std::find_if(m_ValidAssetTypes.begin(), m_ValidAssetTypes.end(), [Extension](const AssetType& Type) {
-			return _stricmp(Extension.generic_string().c_str(), Type.Extension.data()) == 0;
-			});
+		auto It = std::find_if(m_ValidAssetTypes.begin(), m_ValidAssetTypes.end(), [&Extension](const AssetType& Type) {
+			return Extension == Type.Extension;
+		});
 		return It == m_ValidAssetTypes.cend() ? nullptr : &(*It);
 	}
 
@@ -194,7 +191,7 @@ public:
 		Asset->ReadRawData(ContentsType); 
 	}
 
-	virtual std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) = 0;
+	virtual std::shared_ptr<Asset> CreateAsset(std::filesystem::path&& AssetPath) = 0;
 	virtual bool Reimport(Asset& InAsset) = 0;
 protected:
 private:
