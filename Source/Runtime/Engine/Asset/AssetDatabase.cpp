@@ -8,13 +8,13 @@
 
 AssetImportTask::AssetImportTask(
 	std::shared_ptr<::Asset>& InAsset,
-	std::filesystem::path&& InPath,
+	const std::filesystem::path& InPath,
 	IAssetImporter& InImporter,
 	const AssetType& InType,
 	std::optional<Asset::Callbacks>& InCallbacks)
 	: Task(std::move(StringUtils::Format("AssetImportTask|%s", InPath.string().c_str())))
 	, Importer(InImporter)
-	, Asset(InAsset ? InAsset : InImporter.CreateAsset(std::move(InPath)))
+	, Asset(InAsset ? InAsset : InImporter.CreateAsset(InPath))
 	, ContentsType(InType.ContentsType)
 {
 	Asset->SetCallbacks(InCallbacks);
@@ -60,7 +60,7 @@ void AssetDatabase::CreateAssetImporters()
 
 std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(
 	std::shared_ptr<Asset>& TargetAsset,
-	std::filesystem::path&& AssetPath, 
+	const std::filesystem::path& AssetPath, 
 	std::optional<Asset::Callbacks>& AssetLoadCallbacks, 
 	bool Async)
 {
@@ -72,27 +72,24 @@ std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(
 
 	AssetImportTask* Task = nullptr;
 
+	auto AssetTaskIt = m_AssetLoadTasks.find(AssetPath);
+	if (AssetTaskIt != m_AssetLoadTasks.end())
 	{
-		std::lock_guard Locker(m_AssetTasksLocker);
-		auto AssetTaskIt = m_AssetLoadTasks.find(AssetPath);
-		if (AssetTaskIt != m_AssetLoadTasks.end())
+		Task = AssetTaskIt->second.get();
+		Task->Asset->SetCallbacks(AssetLoadCallbacks);
+	}
+	else
+	{
+		for (auto& AssetImporter : m_AssetImporters)
 		{
-			Task = AssetTaskIt->second.get();
-			Task->Asset->SetCallbacks(AssetLoadCallbacks);
-		}
-		else
-		{
-			for (auto& AssetImporter : m_AssetImporters)
+			if (auto AssetType = AssetImporter->FindValidAssetType(AssetPath))
 			{
-				if (auto AssetType = AssetImporter->FindValidAssetType(AssetPath.extension()))
-				{
-					Task = m_AssetLoadTasks.insert(std::make_pair(AssetPath,
-						std::make_shared<AssetImportTask>(TargetAsset,
-							std::move(AssetPath),
-							*AssetImporter,
-							*AssetType,
-							AssetLoadCallbacks))).first->second.get();
-				}
+				Task = m_AssetLoadTasks.insert(std::make_pair(AssetPath,
+					std::make_shared<AssetImportTask>(TargetAsset,
+						AssetPath,
+						*AssetImporter,
+						*AssetType,
+						AssetLoadCallbacks))).first->second.get();
 			}
 		}
 	}

@@ -31,7 +31,7 @@ public:
 
 	void LoadAssetData(std::shared_ptr<Asset>&, AssetType::EContentsType) override final {} /// Just load from file to avoid base path of texture broken
 
-	std::shared_ptr<Asset> CreateAsset(std::filesystem::path&& AssetPath) override final { return std::make_shared<AssimpSceneAsset>(std::move(AssetPath)); }
+	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<AssimpSceneAsset>(AssetPath); }
 
 	bool Reimport(Asset& InAsset) override final
 	{
@@ -171,7 +171,7 @@ private:
 				auto MaterialPath = (Paths::MaterialPath() / AssimpScene.GetStem() / Name.C_Str()).replace_extension(MaterialProperty::GetExtension());
 				auto NeedReload = std::filesystem::exists(MaterialPath);
 				auto& Property = AssimpScene.Data.MaterialProperties.at(Index);
-				Property = MaterialProperty::Load(std::move(MaterialPath));
+				Property = MaterialProperty::Load(MaterialPath);
 
 				if (NeedReload)
 				{
@@ -405,7 +405,7 @@ private:
 					if (TextureIndex != MaterialProperty::ETextureType::Num)
 					{
 						auto& Texture = Material.Textures[static_cast<size_t>(TextureIndex)];
-						Texture.reset(new TextureAsset(std::move(TexturePath)));
+						Texture.reset(new TextureAsset(TexturePath));
 
 						auto TextureAsset = Cast<Asset>(Texture);
 						AssetDatabase::Get().GetOrReimportAsset(TextureAsset, AssetLoadCallbacks);

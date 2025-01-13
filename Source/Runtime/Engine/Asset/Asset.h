@@ -82,11 +82,19 @@ public:
 		AssetUnloadedCallback UnloadedCallback;
 	};
 
+	Asset(const std::filesystem::path& Path)
+		: m_Path(Path)
+		, m_LastWriteTime(GetLastWriteTime(m_Path))
+	{
+	}
+
 	Asset(std::filesystem::path&& Path)
 		: m_Path(std::move(Path))
 		, m_LastWriteTime(GetLastWriteTime(m_Path))
 	{
 	}
+
+	virtual ~Asset() = default;
 
 	EStatus GetStatus() const { return m_Status.load(); }
 	virtual bool IsReady() const { return GetStatus() == EStatus::Ready; }
@@ -178,10 +186,10 @@ public:
 	{
 	}
 
-	const AssetType* FindValidAssetType(const std::filesystem::path& Extension) const
+	const AssetType* FindValidAssetType(const std::filesystem::path& Path) const
 	{
-		auto It = std::find_if(m_ValidAssetTypes.begin(), m_ValidAssetTypes.end(), [&Extension](const AssetType& Type) {
-			return Extension == Type.Extension;
+		auto It = std::find_if(m_ValidAssetTypes.begin(), m_ValidAssetTypes.end(), [&Path](const AssetType& Type) {
+			return Path.extension() == Type.Extension;
 		});
 		return It == m_ValidAssetTypes.cend() ? nullptr : &(*It);
 	}
@@ -191,7 +199,7 @@ public:
 		Asset->ReadRawData(ContentsType); 
 	}
 
-	virtual std::shared_ptr<Asset> CreateAsset(std::filesystem::path&& AssetPath) = 0;
+	virtual std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) = 0;
 	virtual bool Reimport(Asset& InAsset) = 0;
 protected:
 private:

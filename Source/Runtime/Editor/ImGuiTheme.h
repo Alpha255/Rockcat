@@ -5,11 +5,7 @@
 
 struct ImGuiTheme : public ImGuiStyle, public SerializableAsset<ImGuiTheme>
 {
-    ImGuiTheme(std::filesystem::path&& Path)
-        : ImGuiStyle()
-        , BaseClass(std::move(Path))
-    {
-    }
+    using BaseClass::BaseClass;
 
     ~ImGuiTheme()
     {

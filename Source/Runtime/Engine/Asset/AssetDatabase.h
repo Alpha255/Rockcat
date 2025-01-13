@@ -9,7 +9,7 @@ struct AssetImportTask : public Task
 {
 	AssetImportTask(
 		std::shared_ptr<Asset>& InAsset,
-		std::filesystem::path&& InPath,
+		const std::filesystem::path& InPath,
 		IAssetImporter& InImporter,
 		const AssetType& InType,
 		std::optional<Asset::Callbacks>& InCallbacks);
@@ -32,8 +32,6 @@ public:
 	std::shared_ptr<TAsset> GetOrReimportAsset(std::filesystem::path&& Path, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
 	{
 		auto UnifyPath = GetUnifyAssetPath(Path);
-
-		std::lock_guard Locker(m_AssetTasksLocker);
 		auto AssetTaskIt = m_AssetLoadTasks.find(UnifyPath);
 		if (AssetTaskIt != m_AssetLoadTasks.end())
 		{
@@ -42,7 +40,7 @@ public:
 		else
 		{
 			std::shared_ptr<Asset> EmptyAsset;
-			return Cast<TAsset>(ReimportAssetImpl(EmptyAsset, std::move(UnifyPath), AssetLoadCallbacks, Async));
+			return Cast<TAsset>(ReimportAssetImpl(EmptyAsset, UnifyPath, AssetLoadCallbacks, Async));
 		}
 	}
 
@@ -51,8 +49,6 @@ public:
 		assert(TargetAsset);
 
 		auto UnifyPath = GetUnifyAssetPath(TargetAsset->GetPath());
-
-		std::lock_guard Locker(m_AssetTasksLocker);
 		auto AssetTaskIt = m_AssetLoadTasks.find(UnifyPath);
 		if (AssetTaskIt != m_AssetLoadTasks.end())
 		{
@@ -79,8 +75,7 @@ public:
 private:
 	static std::filesystem::path GetUnifyAssetPath(const std::filesystem::path& Path, bool Lowercase = false)
 	{
-		auto UnifyPath = std::filesystem::path(Path);
-		UnifyPath.make_preferred();
+		auto UnifyPath = std::filesystem::path(std::move(std::filesystem::path(Path).make_preferred()));
 		return Lowercase ? std::filesystem::path(StringUtils::Lowercase(UnifyPath.string())) : UnifyPath;
 	}
 
@@ -88,13 +83,12 @@ private:
 
 	std::shared_ptr<Asset> ReimportAssetImpl(
 		std::shared_ptr<Asset>& TargetAsset,
-		std::filesystem::path&& AssetPath, 
+		const std::filesystem::path& AssetPath, 
 		std::optional<Asset::Callbacks>& AssetLoadCallbacks, 
 		bool Async);
 
 	std::unordered_map<std::filesystem::path, std::shared_ptr<AssetImportTask>> m_AssetLoadTasks;
 	std::vector<std::unique_ptr<IAssetImporter>> m_AssetImporters;
 	bool m_EnableAsyncImport;
-	std::mutex m_AssetTasksLocker;
 };
 
