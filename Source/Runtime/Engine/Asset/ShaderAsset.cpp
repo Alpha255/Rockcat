@@ -34,7 +34,7 @@ ERHIShaderStage ShaderAsset::GetStageByExtension(const std::filesystem::path& Ex
 	return ERHIShaderStage::Num;
 }
 
-void ShaderAsset::Compile(ERenderHardwareInterface RHI, bool Force)
+void ShaderAsset::Compile(ERHIBackend RHI, bool Force)
 {
 	if (Force || IsDirty())
 	{

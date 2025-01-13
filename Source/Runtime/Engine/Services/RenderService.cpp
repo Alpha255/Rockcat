@@ -6,25 +6,30 @@
 
 void RenderService::InitializeRHI(const GraphicsSettings& GfxSettings)
 {
-	assert(GfxSettings.RenderHardwareInterface < ERenderHardwareInterface::Num);
+	assert(GfxSettings.Interface < ERHIBackend::Num);
 
-	if (!m_RHIs[(size_t)GfxSettings.RenderHardwareInterface])
+	if (!m_Backends[(size_t)GfxSettings.Interface])
 	{
-		const char* RHIName = RHIInterface::GetRHIName(GfxSettings.RenderHardwareInterface);
-		switch (GfxSettings.RenderHardwareInterface)
+		switch (GfxSettings.Interface)
 		{
-		case ERenderHardwareInterface::Software:
-			LOG_ERROR("{} is not support yet!", RHIName);
+		case ERHIBackend::Software:
 			break;
-		case ERenderHardwareInterface::Vulkan:
-			m_RHIs[(size_t)ERenderHardwareInterface::Vulkan] = std::make_unique<VulkanRHI>(&GfxSettings);
+		case ERHIBackend::Vulkan:
+			m_Backends[(size_t)ERHIBackend::Vulkan] = std::make_unique<VulkanRHI>(&GfxSettings);
 			break;
-		case ERenderHardwareInterface::D3D11:
-			LOG_ERROR("{} is not support yet!", RHIName);
+		case ERHIBackend::D3D11:
 			break;
-		case ERenderHardwareInterface::D3D12:
-			LOG_ERROR("{} is not support yet!", RHIName);
+		case ERHIBackend::D3D12:
 			break;
+		}
+
+		if (!m_Backends[(size_t)GfxSettings.Interface])
+		{
+			LOG_CRITICAL("{} is not support yet!", RHIInterface::GetName(GfxSettings.Interface));
+		}
+		else
+		{
+			m_Backends[(size_t)GfxSettings.Interface]->PrepareStaticResources();
 		}
 	}
 }
@@ -42,8 +47,8 @@ void RenderService::OnStartup()
 
 void RenderService::OnShutdown()
 {
-	for (auto& RHI : m_RHIs)
+	for (auto& Backend : m_Backends)
 	{
-		RHI.reset();
+		Backend.reset();
 	}
 }

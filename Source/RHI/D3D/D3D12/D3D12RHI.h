@@ -10,7 +10,7 @@ public:
 
 	~D3D12RHI();
 
-	ERenderHardwareInterface GetRHIType() const override final { return ERenderHardwareInterface::D3D12; }
+	ERHIBackend GetRHIType() const override final { return ERHIBackend::D3D12; }
 
 	RHIDevice& GetDevice() override final;
 protected:

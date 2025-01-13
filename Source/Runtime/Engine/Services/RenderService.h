@@ -10,9 +10,13 @@ public:
 
 	void OnShutdown() override final;
 
-	RHIInterface& GetBackend(ERenderHardwareInterface RHIType) { return *m_RHIs[static_cast<size_t>(RHIType)]; }
+	RHIInterface& GetBackend(ERHIBackend RHI) 
+	{
+		assert(m_Backends[(size_t)RHI]);
+		return *m_Backends[(size_t)RHI];
+	}
 private:
 	void InitializeRHI(const GraphicsSettings& GfxSettings);
 
-	std::array<std::unique_ptr<RHIInterface>, (size_t)ERenderHardwareInterface::Num> m_RHIs;
+	std::array<std::unique_ptr<RHIInterface>, (size_t)ERHIBackend::Num> m_Backends;
 };

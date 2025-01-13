@@ -20,29 +20,32 @@ public:
 
 	virtual ~RHIInterface() = default;
 
-	virtual ERenderHardwareInterface GetRHIType() const { return ERenderHardwareInterface::Num; }
+	virtual ERHIBackend GetRHIType() const { return ERHIBackend::Num; }
 
-	const char* GetName() const { return GetRHIName(GetRHIType()); }
+	const char* GetName() const { return GetName(GetRHIType()); }
 
 	virtual RHIDevice& GetDevice() = 0;
 
 	const GraphicsSettings& GetGraphicsSettings() const { return GetGraphicsSettings(GetRHIType()); }
 
-	static const char* GetRHIName(ERenderHardwareInterface RHI)
+	static const char* GetName(ERHIBackend RHI)
 	{
 		switch (RHI)
 		{
-		case ERenderHardwareInterface::Software: return "Software";
-		case ERenderHardwareInterface::Vulkan: return "Vulkan";
-		case ERenderHardwareInterface::D3D11: return "D3D11";
-		case ERenderHardwareInterface::D3D12: return "D3D12";
+		case ERHIBackend::Software: return "Software";
+		case ERHIBackend::Vulkan: return "Vulkan";
+		case ERHIBackend::D3D11: return "D3D11";
+		case ERHIBackend::D3D12: return "D3D12";
 		default: return "None";
 		}
 	}
 protected:
-	virtual void InitializeGraphicsDevices() = 0;
+	friend class RenderService;
 
-	static const GraphicsSettings& GetGraphicsSettings(ERenderHardwareInterface Interface);
+	virtual void InitializeGraphicsDevices() = 0;
+	void PrepareStaticResources() {}
+
+	static const GraphicsSettings& GetGraphicsSettings(ERHIBackend Interface);
 private:
-	static std::array<const GraphicsSettings*, (size_t)ERenderHardwareInterface::Num> s_GraphicsSettings;
+	static std::array<const GraphicsSettings*, (size_t)ERHIBackend::Num> s_GraphicsSettings;
 };

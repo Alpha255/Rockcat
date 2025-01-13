@@ -6,7 +6,7 @@
 
 std::shared_ptr<RenderGraph> RenderGraph::Create(const GraphicsSettings& GfxSettings)
 {
-	auto& Backend = RenderService::Get().GetBackend(GfxSettings.RenderHardwareInterface);
+	auto& Backend = RenderService::Get().GetBackend(GfxSettings.Interface);
 	std::shared_ptr<RenderGraph> Graph;
 
 	switch (GfxSettings.RenderingPath)

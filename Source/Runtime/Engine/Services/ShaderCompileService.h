@@ -15,20 +15,20 @@ public:
 
 	void OnShutdown() override final;
 
-	void Compile(ShaderAsset& Shader, ERenderHardwareInterface RHI);
+	void Compile(ShaderAsset& Shader, ERHIBackend RHI);
 protected:
-	IShaderCompiler& GetCompiler(ERenderHardwareInterface RHI)
+	IShaderCompiler& GetCompiler(ERHIBackend RHI)
 	{
-		assert(RHI < ERenderHardwareInterface::Num && RHI > ERenderHardwareInterface::Software);
+		assert(RHI < ERHIBackend::Num && RHI > ERHIBackend::Software);
 		return *m_Compilers[(size_t)RHI];
 	}
 
-	bool RegisterCompileTask(ERenderHardwareInterface RHI, size_t Hash);
-	void DeregisterCompileTask(ERenderHardwareInterface RHI, size_t Hash);
+	bool RegisterCompileTask(ERHIBackend RHI, size_t Hash);
+	void DeregisterCompileTask(ERHIBackend RHI, size_t Hash);
 
 	void OnShaderFileModified(const std::string& FilePath);
 private:
-	std::array<std::unique_ptr<IShaderCompiler>, (size_t)ERenderHardwareInterface::Num> m_Compilers;
-	std::array<std::set<size_t>, (size_t)ERenderHardwareInterface::Num> m_CompilingTasks;
+	std::array<std::unique_ptr<IShaderCompiler>, (size_t)ERHIBackend::Num> m_Compilers;
+	std::array<std::set<size_t>, (size_t)ERHIBackend::Num> m_CompilingTasks;
 	std::shared_ptr<filewatch::FileWatch<std::string>> m_ShaderFileMonitor;
 };

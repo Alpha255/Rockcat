@@ -32,7 +32,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 		{
 			RHIShaderCreateInfo ShaderCreateInfo;
 			//ShaderCreateInfo.SetStage(Shader->GetStage())
-			//	.SetShaderBinary(Shader->GetBinary(ERenderHardwareInterface::Vulkan))
+			//	.SetShaderBinary(Shader->GetBinary(ERHIBackend::Vulkan))
 			//	.SetName(Shader->GetName().string());
 
 			auto& ShaderModule = Shaders.emplace_back(VulkanShader(Device, ShaderCreateInfo)); // TODO: Cache shader module ???

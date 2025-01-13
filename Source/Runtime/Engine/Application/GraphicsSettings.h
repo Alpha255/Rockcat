@@ -43,7 +43,7 @@ enum class EAntiAliasingTechnique : uint8_t
 	FXAA, DESCRIPTION("Fast Approximate Anti-Aliasing")
 };
 
-enum class ERenderHardwareInterface : uint8_t
+enum class ERHIBackend : uint8_t
 {
 	Software,
 	Vulkan,
@@ -142,7 +142,7 @@ struct GraphicsSettings
 	ELightingPolicy LightingPolicy = ELightingPolicy::Default;
 	EShadowTechnique ShadowTechnique = EShadowTechnique::None;
 	EAntiAliasingTechnique AntiAliasingTechnique = EAntiAliasingTechnique::None;
-	ERenderHardwareInterface RenderHardwareInterface = ERenderHardwareInterface::Num;
+	ERHIBackend Interface = ERHIBackend::Num;
 	PostProcessingSettings PostProcessing;
 
 	template<class Archive>
@@ -170,7 +170,7 @@ struct GraphicsSettings
 			CEREAL_NVP(LightingPolicy),
 			CEREAL_NVP(ShadowTechnique),
 			CEREAL_NVP(AntiAliasingTechnique),
-			CEREAL_NVP(RenderHardwareInterface),
+			CEREAL_NVP(Interface),
 			CEREAL_NVP(PostProcessing)
 		);
 	}

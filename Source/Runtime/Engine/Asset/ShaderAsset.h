@@ -157,9 +157,9 @@ public:
 
 	ERHIShaderStage GetStage() const { return m_Stage; }
 
-	void Compile(ERenderHardwareInterface RHI, bool Force = false);
+	void Compile(ERHIBackend RHI, bool Force = false);
 
-	const ShaderBinary* const GetBinary(ERenderHardwareInterface RHI) const;
+	const ShaderBinary* const GetBinary(ERHIBackend RHI) const;
 
 	virtual std::shared_ptr<struct ShaderVariableContainer> CreateVariableContainer() const { return nullptr; }
 

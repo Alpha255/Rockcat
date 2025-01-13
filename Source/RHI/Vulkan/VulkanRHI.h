@@ -10,11 +10,11 @@ public:
 
 	~VulkanRHI();
 
-	ERenderHardwareInterface GetRHIType() const override final { return ERenderHardwareInterface::Vulkan; }
+	ERHIBackend GetRHIType() const override final { return ERHIBackend::Vulkan; }
 
 	RHIDevice& GetDevice() override final;
 
-	static const GraphicsSettings& GetGraphicsSettings() { return RHIInterface::GetGraphicsSettings(ERenderHardwareInterface::Vulkan); }
+	static const GraphicsSettings& GetGraphicsSettings() { return RHIInterface::GetGraphicsSettings(ERHIBackend::Vulkan); }
 
 	static const struct VulkanLayerExtensionConfigurations& GetLayerExtensionConfigs() { return *s_LayerExtensionConfigs; }
 protected:

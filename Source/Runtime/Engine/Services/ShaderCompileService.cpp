@@ -33,9 +33,9 @@ void ShaderCompileService::OnStartup()
 {
 	REGISTER_LOG_CATEGORY(LogShaderCompile);
 
-	m_Compilers[(size_t)ERenderHardwareInterface::Vulkan] = std::make_unique<DxcShaderCompiler>(true);
-	m_Compilers[(size_t)ERenderHardwareInterface::D3D11] = std::make_unique<D3DShaderCompiler>();
-	m_Compilers[(size_t)ERenderHardwareInterface::D3D12] = std::make_unique<DxcShaderCompiler>(false);
+	m_Compilers[(size_t)ERHIBackend::Vulkan] = std::make_unique<DxcShaderCompiler>(true);
+	m_Compilers[(size_t)ERHIBackend::D3D11] = std::make_unique<D3DShaderCompiler>();
+	m_Compilers[(size_t)ERHIBackend::D3D12] = std::make_unique<DxcShaderCompiler>(false);
 
 	auto ShaderPath = Paths::ShaderPath().string();
 	m_ShaderFileMonitor = std::make_shared<filewatch::FileWatch<std::string>>(ShaderPath/*, std::regex("[*.vert, *.frag, *.comp, *.geom]")*/,
@@ -54,11 +54,11 @@ void ShaderCompileService::OnShaderFileModified(const std::string& FilePath)
 	LOG_INFO("{} is modified.", FilePath);
 }
 
-void ShaderCompileService::Compile(ShaderAsset& Shader, ERenderHardwareInterface RHI)
+void ShaderCompileService::Compile(ShaderAsset& Shader, ERHIBackend RHI)
 {
-	//for (uint32_t Index = (uint32_t)ERenderHardwareInterface::Vulkan; Index < (uint32_t)ERenderHardwareInterface::Num; ++Index)
+	//for (uint32_t Index = (uint32_t)ERHIBackend::Vulkan; Index < (uint32_t)ERHIBackend::Num; ++Index)
 	//{
-	//	auto RHI = static_cast<ERenderHardwareInterface>(Index);
+	//	auto RHI = static_cast<ERHIBackend>(Index);
 
 	//	if (RegisterCompileTask(RHI, Hash))
 	//	{
@@ -75,9 +75,9 @@ void ShaderCompileService::Compile(ShaderAsset& Shader, ERenderHardwareInterface
 	//}
 }
 
-bool ShaderCompileService::RegisterCompileTask(ERenderHardwareInterface RHI, size_t Hash)
+bool ShaderCompileService::RegisterCompileTask(ERHIBackend RHI, size_t Hash)
 {
-	assert(RHI < ERenderHardwareInterface::Num);
+	assert(RHI < ERHIBackend::Num);
 
 	if (m_CompilingTasks[size_t(RHI)].find(Hash) != m_CompilingTasks[size_t(RHI)].cend())
 	{
@@ -88,9 +88,9 @@ bool ShaderCompileService::RegisterCompileTask(ERenderHardwareInterface RHI, siz
 	return true;
 }
 
-void ShaderCompileService::DeregisterCompileTask(ERenderHardwareInterface RHI, size_t Hash)
+void ShaderCompileService::DeregisterCompileTask(ERHIBackend RHI, size_t Hash)
 {
-	assert(RHI < ERenderHardwareInterface::Num);
+	assert(RHI < ERHIBackend::Num);
 	m_CompilingTasks[size_t(RHI)].erase(Hash);
 }
 

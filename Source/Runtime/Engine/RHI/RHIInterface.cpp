@@ -1,15 +1,16 @@
 #include "Engine/RHI/RHIInterface.h"
 
-std::array<const GraphicsSettings*, (size_t)ERenderHardwareInterface::Num> RHIInterface::s_GraphicsSettings;
+std::array<const GraphicsSettings*, (size_t)ERHIBackend::Num> RHIInterface::s_GraphicsSettings;
 
 RHIInterface::RHIInterface(const GraphicsSettings* GfxSettings)
 {
-	assert(GfxSettings && GfxSettings->RenderHardwareInterface < ERenderHardwareInterface::Num);
-	s_GraphicsSettings[static_cast<size_t>(GfxSettings->RenderHardwareInterface)] = GfxSettings;
+	// TODO: How to handle multi window use same render backend
+	assert(GfxSettings && GfxSettings->Interface < ERHIBackend::Num);
+	s_GraphicsSettings[(size_t)GfxSettings->Interface] = GfxSettings;
 }
 
-const GraphicsSettings& RHIInterface::GetGraphicsSettings(ERenderHardwareInterface Interface)
+const GraphicsSettings& RHIInterface::GetGraphicsSettings(ERHIBackend Interface)
 {
-	assert(Interface < ERenderHardwareInterface::Num);
-	return *s_GraphicsSettings[static_cast<size_t>(Interface)];
+	assert(Interface < ERHIBackend::Num);
+	return *s_GraphicsSettings[(size_t)Interface];
 }
