@@ -11,20 +11,20 @@ public:
 class ShaderBaseMetaData
 {
 public:
-	ShaderBaseMetaData(std::filesystem::path&& SourceFile, const char* const Name, const char* const Entry, ERHIShaderStage Stage)
-		: m_SourceFilePath(std::move(SourceFile))
+	ShaderBaseMetaData(const char* const SourceFile, const char* const Name, const char* const Entry, ERHIShaderStage Stage)
+		: m_SourceFilePath(SourceFile)
 		, m_Name(Name)
 		, m_Entry(Entry)
 		, m_Stage(Stage)
 	{
 	}
 
-	std::filesystem::path GetSourceFilePath() const { return m_SourceFilePath; }
+	const char* const GetSourceFilePath() const { return m_SourceFilePath; }
 	const char* const GetName() const { return m_Name; }
 	const char* const GetEntryPoint() const { return m_Entry; }
 	ERHIShaderStage GetStage() const { return m_Stage; }
 private:
-	std::filesystem::path m_SourceFilePath;
+	const char* const m_SourceFilePath;
 	const char* const m_Name;
 	const char* const m_Entry;
 	ERHIShaderStage m_Stage;
