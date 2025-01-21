@@ -3,11 +3,6 @@
 #include "Assets/Shaders/Definitions.h"
 #include "Engine/Asset/MaterialAsset.h"
 
-class FShader
-{
-public:
-};
-
 class ShaderBaseMetaData
 {
 public:
@@ -30,14 +25,14 @@ private:
 	ERHIShaderStage m_Stage;
 };
 
-template<class TShader, class TFallbackShader>
+template<class TShader>
 class ShaderMetaData : public ShaderBaseMetaData
 {
 public:
 	using ShaderBaseMetaData::ShaderBaseMetaData;
 };
 
-#define IMPLEMENT_SHADER_METADATA(ShaderClass, FallbackShaderClass, SourceFile, Entry, Stage) 
+#define IMPLEMENT_SHADER_METADATA(ShaderClass, SourceFile, Entry, Stage) 
 
 class MaterialShader
 {
@@ -54,6 +49,39 @@ public:
 	template<class T>
 	T* GetShader() 
 	{
+	}
+};
+
+class FShader : public ShaderDefines
+{
+public:
+	enum class ECompileStatus
+	{
+		None,
+		Compiling,
+		Compiled
+	};
+
+	const std::map<std::string, ShaderVariable>& GetVariables() const { return m_Variables; }
+	RHIBuffer* GetUniformBuffer(RHIDevice& Device);
+	virtual void SetupViewParams(const class SceneView&) {}
+	virtual void SetupMaterialProperty(const struct MaterialProperty&) {}
+protected:
+private:
+	void RegisterVariable(const char* Name, ShaderVariable&& Variable);
+	size_t ComputeUniformBufferSize();
+
+	std::map<std::string, ShaderVariable> m_Variables;
+	RHIBufferPtr m_UniformBuffer;
+};
+
+template<class T>
+class TShader : public FShader
+{
+public:
+	TShader()
+	{
+		T::RegisterShaderVariables(*this);
 	}
 };
 
