@@ -33,9 +33,9 @@ void ShaderCompileService::OnStartup()
 {
 	REGISTER_LOG_CATEGORY(LogShaderCompile);
 
-	m_Compilers[(size_t)ERHIBackend::Vulkan] = std::make_unique<DxcShaderCompiler>(true);
-	m_Compilers[(size_t)ERHIBackend::D3D11] = std::make_unique<D3DShaderCompiler>();
-	m_Compilers[(size_t)ERHIBackend::D3D12] = std::make_unique<DxcShaderCompiler>(false);
+	m_Compilers[ERHIBackend::Vulkan] = std::make_unique<DxcShaderCompiler>(true);
+	m_Compilers[ERHIBackend::D3D11] = std::make_unique<D3DShaderCompiler>();
+	m_Compilers[ERHIBackend::D3D12] = std::make_unique<DxcShaderCompiler>(false);
 
 #if SHADER_HOT_RELOAD
 	auto ShaderPath = Paths::ShaderPath().string();
@@ -81,26 +81,26 @@ bool ShaderCompileService::RegisterCompileTask(ERHIBackend RHI, size_t Hash)
 {
 	assert(RHI < ERHIBackend::Num);
 
-	if (m_CompilingTasks[size_t(RHI)].find(Hash) != m_CompilingTasks[size_t(RHI)].cend())
+	if (m_CompilingTasks[RHI].find(Hash) != m_CompilingTasks[RHI].cend())
 	{
 		return false;
 	}
 
-	m_CompilingTasks[size_t(RHI)].insert(Hash);
+	m_CompilingTasks[RHI].insert(Hash);
 	return true;
 }
 
 void ShaderCompileService::DeregisterCompileTask(ERHIBackend RHI, size_t Hash)
 {
 	assert(RHI < ERHIBackend::Num);
-	m_CompilingTasks[size_t(RHI)].erase(Hash);
+	m_CompilingTasks[RHI].erase(Hash);
 }
 
 void ShaderCompileService::OnShutdown()
 {
-	for (uint32_t Index = 0u; Index < m_Compilers.size(); ++Index)
+	for (auto& Compiler : m_Compilers)
 	{
-		m_Compilers[Index].reset();
+		Compiler.reset();
 	}
 
 	m_ShaderFileMonitor.reset();

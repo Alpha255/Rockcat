@@ -12,11 +12,11 @@ public:
 
 	RHIInterface& GetBackend(ERHIBackend RHI) 
 	{
-		assert(m_Backends[(size_t)RHI]);
-		return *m_Backends[(size_t)RHI];
+		assert(m_Backends[RHI]);
+		return *m_Backends[RHI];
 	}
 private:
 	void InitializeRHI(const GraphicsSettings& GfxSettings);
 
-	std::array<std::unique_ptr<RHIInterface>, (size_t)ERHIBackend::Num> m_Backends;
+	Array<std::unique_ptr<RHIInterface>, ERHIBackend> m_Backends;
 };

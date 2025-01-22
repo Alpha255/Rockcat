@@ -18,7 +18,7 @@ public:
 	{
 		auto& Flow = CreateTaskFlow();
 		Flow.for_each(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<Callable>(Function));
-		Flow.Execute(*m_Executors[(size_t)Thread]);
+		Flow.Execute(*m_Executors[Thread]);
 
 		if (WaitDone)
 		{
@@ -34,7 +34,7 @@ public:
 
 		auto& Flow = CreateTaskFlow();
 		Flow.for_each_index(Begin, End, Step, std::forward<Callable>(Function));
-		Flow.Execute(*m_Executors[(size_t)Thread]);
+		Flow.Execute(*m_Executors[Thread]);
 
 		if (WaitDone)
 		{
@@ -48,7 +48,7 @@ public:
 	{
 		auto& Flow = CreateTaskFlow();
 		Flow.sort(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<CompareOp>(Function));
-		Flow.Execute(*m_Executors[(size_t)Thread]);
+		Flow.Execute(*m_Executors[Thread]);
 
 		if (WaitDone)
 		{
@@ -62,11 +62,11 @@ public:
 	{
 		if (WaitDone)
 		{
-			m_Executors[(size_t)Thread]->async(std::forward<Callable>(Function)).wait();
+			m_Executors[Thread]->async(std::forward<Callable>(Function)).wait();
 		}
 		else
 		{
-			m_Executors[(size_t)Thread]->silent_async(std::forward<Callable>(Function));
+			m_Executors[Thread]->silent_async(std::forward<Callable>(Function));
 		}
 	}
 
@@ -79,7 +79,7 @@ public:
 			InTask.Execute();
 		}).name(std::string(InTask.GetName()));
 		
-		Flow.Execute(*m_Executors[(size_t)Thread]);
+		Flow.Execute(*m_Executors[Thread]);
 		if (WaitDone)
 		{
 			Flow.Wait();
@@ -101,7 +101,7 @@ public:
 			}
 		}
 
-		Flow.Execute(*m_Executors[(size_t)Thread]);
+		Flow.Execute(*m_Executors[Thread]);
 
 		if (WaitDone)
 		{
@@ -113,7 +113,7 @@ public:
 	template<bool WaitDone = false>
 	const TaskEvent& DispatchTaskFlow(TaskFlow& Flow, EThread Thread)
 	{
-		Flow.Execute(*m_Executors[(size_t)Thread]);
+		Flow.Execute(*m_Executors[Thread]);
 
 		if (WaitDone)
 		{
@@ -131,7 +131,7 @@ private:
 	bool m_UseHyperThreading;
 	uint8_t m_NumWorkThreads;
 	std::list<TaskFlow> m_TaskFlows;
-	std::array<std::unique_ptr<tf::Executor>, (size_t)EThread::Num> m_Executors;
+	Array<std::unique_ptr<tf::Executor>, EThread> m_Executors;
 };
 
 namespace tf

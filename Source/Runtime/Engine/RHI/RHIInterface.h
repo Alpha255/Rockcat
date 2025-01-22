@@ -47,5 +47,5 @@ protected:
 
 	static const GraphicsSettings& GetGraphicsSettings(ERHIBackend Interface);
 private:
-	static std::array<const GraphicsSettings*, (size_t)ERHIBackend::Num> s_GraphicsSettings;
+	static Array<const GraphicsSettings*, ERHIBackend> s_GraphicsSettings;
 };

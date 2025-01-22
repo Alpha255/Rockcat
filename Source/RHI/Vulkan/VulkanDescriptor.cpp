@@ -41,15 +41,17 @@ VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(const VulkanDevice& Device,
 	: VkHwResource(Device)
 {
 	std::vector<vk::DescriptorSetLayoutBinding> Bindings;
-	for (uint32_t Stage = 0u; Stage < LayoutDesc.size(); ++Stage)
+	for (uint32_t Index = 0u; Index < LayoutDesc.size(); ++Index)
 	{
+		auto Stage = static_cast<ERHIShaderStage>(Index);
+
 		for (auto& ResourceInfo : LayoutDesc[Stage])
 		{
 			Bindings.emplace_back(vk::DescriptorSetLayoutBinding())
 				.setBinding(ResourceInfo.Binding)
 				.setDescriptorType(GetDescriptorType(ResourceInfo.Type))
 				.setDescriptorCount(1u)
-				.setStageFlags(GetShaderStageFlags(static_cast<ERHIShaderStage>(Stage)))
+				.setStageFlags(GetShaderStageFlags(Stage))
 				.setPImmutableSamplers(nullptr);
 		}
 	}

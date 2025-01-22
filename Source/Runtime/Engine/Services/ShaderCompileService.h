@@ -20,7 +20,7 @@ protected:
 	IShaderCompiler& GetCompiler(ERHIBackend RHI)
 	{
 		assert(RHI < ERHIBackend::Num && RHI > ERHIBackend::Software);
-		return *m_Compilers[(size_t)RHI];
+		return *m_Compilers[RHI];
 	}
 
 	bool RegisterCompileTask(ERHIBackend RHI, size_t Hash);
@@ -28,7 +28,7 @@ protected:
 
 	void OnShaderFileModified(const std::string& FilePath);
 private:
-	std::array<std::unique_ptr<IShaderCompiler>, (size_t)ERHIBackend::Num> m_Compilers;
-	std::array<std::set<size_t>, (size_t)ERHIBackend::Num> m_CompilingTasks;
+	Array<std::unique_ptr<IShaderCompiler>, ERHIBackend> m_Compilers;
+	Array<std::set<size_t>, ERHIBackend> m_CompilingTasks;
 	std::shared_ptr<filewatch::FileWatch<std::string>> m_ShaderFileMonitor;
 };

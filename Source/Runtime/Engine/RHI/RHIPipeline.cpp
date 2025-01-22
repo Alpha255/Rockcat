@@ -10,7 +10,7 @@ RHIPipelineState::RHIPipelineState(const RHIGraphicsPipelineCreateInfo& GfxPipel
 			continue;
 		}
 
-		auto& Bindings = m_ShaderResourceLayout[static_cast<size_t>(Shader->GetStage())];
+		auto& Bindings = m_ShaderResourceLayout[Shader->GetStage()];
 		auto ShaderVariableContainer = Shader->CreateVariableContainer();
 		std::vector<RHIShaderResourceBinding> AllBindings;
 		uint32_t MaxBindingIndex = 0u;

@@ -8,14 +8,14 @@ void RenderService::InitializeRHI(const GraphicsSettings& GfxSettings)
 {
 	assert(GfxSettings.Interface < ERHIBackend::Num);
 
-	if (!m_Backends[(size_t)GfxSettings.Interface])
+	if (!m_Backends[GfxSettings.Interface])
 	{
 		switch (GfxSettings.Interface)
 		{
 		case ERHIBackend::Software:
 			break;
 		case ERHIBackend::Vulkan:
-			m_Backends[(size_t)ERHIBackend::Vulkan] = std::make_unique<VulkanRHI>(&GfxSettings);
+			m_Backends[ERHIBackend::Vulkan] = std::make_unique<VulkanRHI>(&GfxSettings);
 			break;
 		case ERHIBackend::D3D11:
 			break;
@@ -23,13 +23,13 @@ void RenderService::InitializeRHI(const GraphicsSettings& GfxSettings)
 			break;
 		}
 
-		if (!m_Backends[(size_t)GfxSettings.Interface])
+		if (!m_Backends[GfxSettings.Interface])
 		{
 			LOG_CRITICAL("{} is not support yet!", RHIInterface::GetName(GfxSettings.Interface));
 		}
 		else
 		{
-			m_Backends[(size_t)GfxSettings.Interface]->PrepareStaticResources();
+			m_Backends[GfxSettings.Interface]->PrepareStaticResources();
 		}
 	}
 }

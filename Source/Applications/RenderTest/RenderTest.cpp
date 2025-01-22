@@ -5,9 +5,10 @@
 #include "Engine/Rendering/RenderGraph/ForwardRenderingPath.h"
 #include "Engine/Services/RenderService.h"
 #include "Engine/Services/TaskFlowService.h"
+#include "Engine/Asset/GlobalShaders/GlobalShaders.h"
 
 void RenderTest::Initialize()
-{	
+{
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");
 
 	auto& Window = GetWindow();

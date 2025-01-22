@@ -224,17 +224,16 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 #endif
 
 	auto CreateQueueAndImmdiateCmdListContext = [this](ERHIDeviceQueue Queue, uint32_t QueueFamilyIndex, bool Enabled) {
-		size_t QueueIndex = static_cast<size_t>(Queue);
-		size_t GraphicsQueueIndex = static_cast<size_t>(ERHIDeviceQueue::Graphics);
+		auto GraphicsQueueIndex = ERHIDeviceQueue::Graphics;
 
 		if (Enabled)
 		{
-			m_Queues[QueueIndex].reset(new VulkanQueue(*this, Queue, QueueFamilyIndex));
-			m_ImmediateCmdListContexts[QueueIndex] = std::make_shared<VulkanCommandListContext>(*this, *m_Queues[QueueIndex]);
+			m_Queues[Queue].reset(new VulkanQueue(*this, Queue, QueueFamilyIndex));
+			m_ImmediateCmdListContexts[Queue] = std::make_shared<VulkanCommandListContext>(*this, *m_Queues[Queue]);
 		}
 		else
 		{
-			m_ImmediateCmdListContexts[QueueIndex] = m_ImmediateCmdListContexts[GraphicsQueueIndex];
+			m_ImmediateCmdListContexts[Queue] = m_ImmediateCmdListContexts[GraphicsQueueIndex];
 		}
 	};
 
@@ -246,7 +245,7 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 
 	for (uint8_t Index = 0u; Index < TaskFlowService::Get().GetNumWorkThreads(); ++Index)
 	{
-		m_ThreadedCmdListContexts.emplace(std::make_shared<VulkanCommandListContext>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Graphics]));
+		m_ThreadedCmdListContexts.emplace(std::make_shared<VulkanCommandListContext>(*this, *m_Queues[ERHIDeviceQueue::Graphics]));
 	}
 
 	m_PipelineCache = std::make_shared<VulkanPipelineCache>(*this);
@@ -294,7 +293,7 @@ RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& /*CreateIn
 
 RHICommandListContext* VulkanDevice::GetImmediateCommandListContext(ERHIDeviceQueue Queue)
 {
-	return m_ImmediateCmdListContexts[(size_t)Queue].get();
+	return m_ImmediateCmdListContexts[Queue].get();
 }
 
 RHICommandListContextPtr VulkanDevice::AcquireDeferredCommandListContext()
@@ -303,7 +302,7 @@ RHICommandListContextPtr VulkanDevice::AcquireDeferredCommandListContext()
 	
 	if (m_ThreadedCmdListContexts.empty())
 	{
-		return std::make_shared<VulkanCommandListContext>(*this, *m_Queues[(size_t)ERHIDeviceQueue::Graphics]);
+		return std::make_shared<VulkanCommandListContext>(*this, *m_Queues[ERHIDeviceQueue::Graphics]);
 	}
 
 	auto CommandListContext = m_ThreadedCmdListContexts.front();

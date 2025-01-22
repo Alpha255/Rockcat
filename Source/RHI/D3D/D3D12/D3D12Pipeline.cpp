@@ -172,8 +172,8 @@ D3D12GraphicsPipelineState::D3D12GraphicsPipelineState(const D3D12Device& Device
 {
 	m_RootSignature = std::make_unique<D3D12RootSignature>(Device, RHICreateInfo);
 
-	D3D12_SHADER_BYTECODE ShaderByteCodes[(size_t)ERHIShaderStage::Num]{};
-	for (uint32_t Stage = (size_t)ERHIShaderStage::Vertex; Stage < (size_t)ERHIShaderStage::Compute; ++Stage)
+	D3D12_SHADER_BYTECODE ShaderByteCodes[ERHIShaderStage::Num]{};
+	for (uint32_t Stage = ERHIShaderStage::Vertex; Stage < ERHIShaderStage::Compute; ++Stage)
 	{
 		//if (auto Shader = RHICreateInfo.Shaders.Get(static_cast<ERHIShaderStage>(Stage)))
 		//{
@@ -185,11 +185,11 @@ D3D12GraphicsPipelineState::D3D12GraphicsPipelineState(const D3D12Device& Device
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC CreateDesc
 	{
 		m_RootSignature->GetNative(),
-		ShaderByteCodes[(size_t)ERHIShaderStage::Vertex],
-		ShaderByteCodes[(size_t)ERHIShaderStage::Fragment],
-		ShaderByteCodes[(size_t)ERHIShaderStage::Domain],
-		ShaderByteCodes[(size_t)ERHIShaderStage::Hull],
-		ShaderByteCodes[(size_t)ERHIShaderStage::Geometry],
+		ShaderByteCodes[ERHIShaderStage::Vertex],
+		ShaderByteCodes[ERHIShaderStage::Fragment],
+		ShaderByteCodes[ERHIShaderStage::Domain],
+		ShaderByteCodes[ERHIShaderStage::Hull],
+		ShaderByteCodes[ERHIShaderStage::Geometry],
 		D3D12_STREAM_OUTPUT_DESC{}
 	};
 

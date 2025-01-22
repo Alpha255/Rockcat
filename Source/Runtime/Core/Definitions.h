@@ -296,3 +296,11 @@ struct Hasher
 	{
 	}
 };
+
+template<class T, class Enum>
+class Array : public std::array<T, static_cast<size_t>(Enum::Num)>
+{
+public:
+	inline T& operator[](Enum Index) { return this->at(static_cast<size_t>(Index)); }
+	inline const T& operator[](Enum Index) const { return this->at(static_cast<size_t>(Index)); }
+};

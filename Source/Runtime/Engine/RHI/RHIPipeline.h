@@ -19,7 +19,7 @@ struct RHIShaderResourceBinding
 	};
 };
 
-using RHIShaderResourceLayout = std::array<std::vector<RHIShaderResourceBinding>, (size_t)ERHIShaderStage::Num>;
+using RHIShaderResourceLayout = Array<std::vector<RHIShaderResourceBinding>, ERHIShaderStage>;
 
 struct RHIGraphicsPipelineCreateInfo
 {
@@ -31,7 +31,7 @@ struct RHIGraphicsPipelineCreateInfo
 	RHIInputLayoutCreateInfo InputLayout;
 	std::vector<RHIViewport> Viewports;
 	std::vector<RHIScissorRect> ScissorRects;
-	std::array<const ShaderAsset*, (size_t)ERHIShaderStage::Num> Shaders;
+	Array<const ShaderAsset*, ERHIShaderStage> Shaders;
 
 	RHIRenderPassCreateInfo RenderPassCreateInfo;
 
@@ -40,7 +40,7 @@ struct RHIGraphicsPipelineCreateInfo
 	inline RHIGraphicsPipelineCreateInfo& SetBlendState(const RHIBlendStateCreateInfo& InBlendState) { BlendState = InBlendState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetDepthStencilState(const RHIDepthStencilStateCreateInfo& InDepthStencilState) { DepthStencilState = InDepthStencilState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetMultisampleState(const RHIMultisampleStateCreateInfo& InMultisampleState) { MultisampleState = InMultisampleState; return *this; }
-	inline RHIGraphicsPipelineCreateInfo& SetShader(const ShaderAsset* Shader) { Shaders[static_cast<size_t>(Shader->GetStage())] = Shader; return *this; }
+	inline RHIGraphicsPipelineCreateInfo& SetShader(const ShaderAsset* Shader) { Shaders[Shader->GetStage()] = Shader; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetRenderPassCreateInfo(const RHIRenderPassCreateInfo& InRenderPassCreateInfo) { RenderPassCreateInfo = InRenderPassCreateInfo; return *this; }
 	
 	inline RHIGraphicsPipelineCreateInfo& SetViewport(const RHIViewport& Viewport)
@@ -96,10 +96,9 @@ public:
 	inline RHIPipelineState& SetBuffer(ERHIShaderStage Stage, uint32_t Binding, RHIBuffer* Buffer)
 	{
 		assert(Stage < ERHIShaderStage::Num);
-		size_t Index = static_cast<size_t>(Stage);
-		assert(Binding < m_ShaderResourceLayout[Index].size());
-		MarkDirty(m_ShaderResourceLayout[Index][Binding].Buffer != Buffer);
-		m_ShaderResourceLayout[Index][Binding].Buffer = Buffer;
+		assert(Binding < m_ShaderResourceLayout[Stage].size());
+		MarkDirty(m_ShaderResourceLayout[Stage][Binding].Buffer != Buffer);
+		m_ShaderResourceLayout[Stage][Binding].Buffer = Buffer;
 		
 		return *this;
 	}
@@ -107,10 +106,9 @@ public:
 	inline RHIPipelineState& SetTexture(ERHIShaderStage Stage, uint32_t Binding, RHITexture* Texture)
 	{
 		assert(Stage < ERHIShaderStage::Num);
-		size_t Index = static_cast<size_t>(Stage);
-		assert(Binding < m_ShaderResourceLayout[Index].size());
-		MarkDirty(m_ShaderResourceLayout[Index][Binding].Texture != Texture);
-		m_ShaderResourceLayout[Index][Binding].Texture = Texture;
+		assert(Binding < m_ShaderResourceLayout[Stage].size());
+		MarkDirty(m_ShaderResourceLayout[Stage][Binding].Texture != Texture);
+		m_ShaderResourceLayout[Stage][Binding].Texture = Texture;
 		
 		return *this;
 	}
@@ -118,10 +116,9 @@ public:
 	inline RHIPipelineState& SetSampler(ERHIShaderStage Stage, uint32_t Binding, RHISampler* Sampler)
 	{
 		assert(Stage < ERHIShaderStage::Num);
-		size_t Index = static_cast<size_t>(Stage);
-		assert(Binding < m_ShaderResourceLayout[Index].size());
-		MarkDirty(m_ShaderResourceLayout[Index][Binding].Sampler != Sampler);
-		m_ShaderResourceLayout[Index][Binding].Sampler = Sampler;
+		assert(Binding < m_ShaderResourceLayout[Stage].size());
+		MarkDirty(m_ShaderResourceLayout[Stage][Binding].Sampler != Sampler);
+		m_ShaderResourceLayout[Stage][Binding].Sampler = Sampler;
 
 		return *this;
 	}

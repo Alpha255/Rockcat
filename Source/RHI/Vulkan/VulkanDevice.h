@@ -31,9 +31,9 @@ public:
 	const vk::PhysicalDeviceLimits& GetPhysicalDeviceLimits() const { return m_Limits; }
 private:
 	std::unique_ptr<class VulkanInstance> m_Instance;
-	std::array<std::unique_ptr<class VulkanQueue>, (size_t)ERHIDeviceQueue::Num> m_Queues;
+	Array<std::unique_ptr<class VulkanQueue>, ERHIDeviceQueue> m_Queues;
 
-	std::array<std::shared_ptr<class VulkanCommandListContext>, (size_t)ERHIDeviceQueue::Num> m_ImmediateCmdListContexts;
+	Array<std::shared_ptr<class VulkanCommandListContext>, ERHIDeviceQueue> m_ImmediateCmdListContexts;
 	std::queue<std::shared_ptr<class VulkanCommandListContext>> m_ThreadedCmdListContexts;
 
 	vk::PhysicalDeviceLimits m_Limits;
