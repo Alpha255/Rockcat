@@ -1,6 +1,16 @@
 #include "Engine/Paths.h"
+#include "Core/PlatformMisc.h"
 
-std::filesystem::path Paths::s_Root;
+const std::filesystem::path& Paths::RootPath()
+{
+	static std::filesystem::path Path;
+	if (Path.empty())
+	{
+		Path = PlatformMisc::GetCurrentModuleDirectory().parent_path();
+	}
+
+	return Path;
+}
 
 const std::filesystem::path& Paths::AssetPath()
 {

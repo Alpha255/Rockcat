@@ -61,8 +61,6 @@ void Engine::Run()
 
 bool Engine::Initialize()
 {
-	Paths::SetRoot(PlatformMisc::GetCurrentModuleDirectory().parent_path());
-
 	if (!std::filesystem::exists(Paths::AssetPath()))
 	{
 		LOG_CRITICAL("Invalid assets directory: {}.", Paths::AssetPath().string());
