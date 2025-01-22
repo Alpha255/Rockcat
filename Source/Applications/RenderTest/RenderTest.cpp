@@ -5,7 +5,7 @@
 #include "Engine/Rendering/RenderGraph/ForwardRenderingPath.h"
 #include "Engine/Services/RenderService.h"
 #include "Engine/Services/TaskFlowService.h"
-#include "Engine/Asset/GlobalShaders/GlobalShaders.h"
+#include "Engine/Asset/GlobalShaders.h"
 
 void RenderTest::Initialize()
 {

@@ -32,7 +32,7 @@ private: \
 		struct NextVariableID_##Name{}; \
 		static FuncPtr RegisterShaderVariable(NextVariableID_##Name, OwnerClass& Owner) \
 		{ \
-			ShaderVariable Variable{ ERHIResourceType::RHIType, Binding, offsetof(OwnerClass, Name), sizeof(Type) }; \
+			ShaderVariable Variable{ ERHIResourceType::RHIType, Binding, offsetof(OwnerClass, Name) - sizeof(Shader), sizeof(Type) }; \
 			Variable.Set = [&Owner](const ShaderVariable::Variant& Value) { Owner.##Name=std::get<Type>(Value);}; \
 			Variable.Get = [&Owner](){ return ShaderVariable::Variant(Owner.##Name); }; \
 			Owner.RegisterVariable(#Name, std::move(Variable)); \
@@ -56,10 +56,7 @@ private: \
 
 #define DECLARE_SV_UNIFORM_BUFFER_BEGIN(Binding) \
 	NextVariableID_UniformBuffer; \
-	private: \
-		std::shared_ptr<RHIBuffer> UniformBuffer; \
-	public: \
-		const RHIBuffer* GetUniformBuffer() const { return UniformBuffer.get(); } \
+	static uint32_t GetUniformBufferBinding() { return Binding; } \
 	typedef NextVariableID_UniformBuffer \
 
 #define DECLARE_SV_UNIFORM_BUFFER_END
@@ -73,7 +70,7 @@ private: \
 	template<class T> \
 	OwnerClass& Set##Name(T&& Path) { Name = std::make_shared<TextureAsset>(std::forward<T>(Path)); return *this; }
 
-#define DECLARE_SV_UNIFORM_BUFFER(Type, Name) DECLARE_SHADER_VARIABLE(Type, Name, UniformBuffer, ~0u, DECLARE_SV_SETER_GETTER_DEFAULT(Type, Name))
+#define DECLARE_SV_UNIFORM_BUFFER(Type, Name) DECLARE_SHADER_VARIABLE(Type, Name, UniformBuffer, GetUniformBufferBinding(), DECLARE_SV_SETER_GETTER_DEFAULT(Type, Name))
 
 #define DECLARE_SV_TEXTURE_1D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
 #define DECLARE_SV_TEXTURE_ARRAY_1D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
@@ -299,7 +296,7 @@ struct VSOutput
 
 #endif  // __cplusplus
 
-#define DEFINITION_SHADER_VARIABLES_GENERIC_VS \
+#define DEFINITION_GENERIC_VS_SHADER_VARIABLES \
 	DECLARE_SHADER_VARIABLES_BEGIN(GenericVS) \
 		DECLARE_SV_UNIFORM_BUFFER_BEGIN(0) \
 			DECLARE_SV_UNIFORM_BUFFER(float4x4, WorldMatrix) \
@@ -325,8 +322,8 @@ struct VSOutput
 		DECLARE_SV_TEXTURE_2D(AOMap, 5) \
 	DECLARE_SHADER_VARIABLES_END \
 
-#define DEFINITION_SHADER_VARIABLES_DEPTH_ONLY \
-	DECLARE_SHADER_VARIABLES_BEGIN(DepthOnly) \
+#define DEFINITION_DEPTH_ONLY_FS_SHADER_VARIABLES \
+	DECLARE_SHADER_VARIABLES_BEGIN(DepthOnlyFS) \
 		DECLARE_SV_UNIFORM_BUFFER_BEGIN(1) \
 			DECLARE_SV_UNIFORM_BUFFER(float, AlphaCutoff) \
 		DECLARE_SV_UNIFORM_BUFFER_END \
@@ -335,22 +332,6 @@ struct VSOutput
 
 #define DEFINITION_SHADER_VARIABLES_TOON \
 	DECLARE_SHADER_VARIABLES_BEGIN(DefaultToon) \
-		DECLARE_SV_UNIFORM_BUFFER_BEGIN(1) \
-		DECLARE_SV_UNIFORM_BUFFER_END \
-		DECLARE_SV_TEXTURE_2D(BaseColorMap, 2) \
-	DECLARE_SHADER_VARIABLES_END \
-
-#define DEFINITION_DEFAULT_VS_SHADER_VARIABLES \
-	DECLARE_SHADER_VARIABLES_BEGIN(DefaultVSShaderVariableContainer) \
-		DECLARE_SV_UNIFORM_BUFFER_BEGIN(0) \
-			DECLARE_SV_UNIFORM_BUFFER(float4x4, WorldMatrix) \
-			DECLARE_SV_UNIFORM_BUFFER(float4x4, ViewMatrix) \
-			DECLARE_SV_UNIFORM_BUFFER(float4x4, ProjectionMatrix) \
-		DECLARE_SV_UNIFORM_BUFFER_END \
-	DECLARE_SHADER_VARIABLES_END \
-
-#define DEFINITION_DEPTH_ONLY_SHADER_VARIABLES \
-	DECLARE_SHADER_VARIABLES_BEGIN(DepthOnlyFSShaderVariableContainer) \
 		DECLARE_SV_UNIFORM_BUFFER_BEGIN(1) \
 		DECLARE_SV_UNIFORM_BUFFER_END \
 		DECLARE_SV_TEXTURE_2D(BaseColorMap, 2) \

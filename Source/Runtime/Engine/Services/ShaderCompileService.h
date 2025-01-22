@@ -15,7 +15,7 @@ public:
 
 	void OnShutdown() override final;
 
-	void Compile(ShaderAsset& Shader, ERHIBackend RHI);
+	void Compile(Shader& InShader, ERHIBackend RHI);
 protected:
 	IShaderCompiler& GetCompiler(ERHIBackend RHI)
 	{

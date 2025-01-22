@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Math/Transform.h"
-#include "Engine/Asset/MaterialAsset.h"
+#include "Engine/Asset/Material.h"
 #include "Engine/View/Camera.h"
 #include "Engine/Scene/SceneGraph.h"
 #include "Engine/Scene/Components/StaticMesh.h"

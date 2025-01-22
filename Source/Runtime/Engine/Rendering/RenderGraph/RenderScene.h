@@ -3,7 +3,7 @@
 #include "Engine/Rendering/RenderGraph/RenderPassField.h"
 #include "Engine/RHI/RHIRenderStates.h"
 #include "Engine/RHI/RHIPipeline.h"
-#include "Engine/Asset/MaterialAsset.h"
+#include "Engine/Asset/Material.h"
 #include "Engine/Scene/SceneGraph.h"
 #include "Engine/Scene/SceneView.h"
 
@@ -36,9 +36,6 @@ struct MeshDrawCommand
 	const RHIBuffer* IndexBuffer = nullptr;
 
 	RHIGraphicsPipeline* GraphicsPipeline = nullptr;
-
-	std::shared_ptr<ShaderVariableContainer> VertexShaderVariables;
-	std::shared_ptr<ShaderVariableContainer> FragmentShaderVariables;
 
 	uint32_t FirstIndex = 0u;
 	uint32_t NumPrimitives = 0u;

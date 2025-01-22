@@ -5,7 +5,7 @@
 #include "Core/Math/AABB.h"
 #include "Core/Math/Sphere.h"
 #include "Core/Math/Color.h"
-#include "Engine/Asset/MaterialAsset.h"
+#include "Engine/Asset/Material.h"
 
 enum class EVertexAttributes : uint8_t
 {

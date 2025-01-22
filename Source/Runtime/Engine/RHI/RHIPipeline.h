@@ -3,7 +3,7 @@
 #include "Engine/RHI/RHIBuffer.h"
 #include "Engine/RHI/RHIShader.h"
 #include "Engine/RHI/RHIRenderStates.h"
-#include "Engine/Asset/ShaderAsset.h"
+#include "Engine/Asset/Shader.h"
 
 struct RHIShaderResourceBinding
 {
@@ -31,7 +31,7 @@ struct RHIGraphicsPipelineCreateInfo
 	RHIInputLayoutCreateInfo InputLayout;
 	std::vector<RHIViewport> Viewports;
 	std::vector<RHIScissorRect> ScissorRects;
-	Array<const ShaderAsset*, ERHIShaderStage> Shaders;
+	Array<const Shader*, ERHIShaderStage> Shaders;
 
 	RHIRenderPassCreateInfo RenderPassCreateInfo;
 
@@ -40,7 +40,7 @@ struct RHIGraphicsPipelineCreateInfo
 	inline RHIGraphicsPipelineCreateInfo& SetBlendState(const RHIBlendStateCreateInfo& InBlendState) { BlendState = InBlendState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetDepthStencilState(const RHIDepthStencilStateCreateInfo& InDepthStencilState) { DepthStencilState = InDepthStencilState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetMultisampleState(const RHIMultisampleStateCreateInfo& InMultisampleState) { MultisampleState = InMultisampleState; return *this; }
-	inline RHIGraphicsPipelineCreateInfo& SetShader(const ShaderAsset* Shader) { Shaders[Shader->GetStage()] = Shader; return *this; }
+	inline RHIGraphicsPipelineCreateInfo& SetShader(const Shader* InShader) { Shaders[InShader->GetStage()] = InShader; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetRenderPassCreateInfo(const RHIRenderPassCreateInfo& InRenderPassCreateInfo) { RenderPassCreateInfo = InRenderPassCreateInfo; return *this; }
 	
 	inline RHIGraphicsPipelineCreateInfo& SetViewport(const RHIViewport& Viewport)

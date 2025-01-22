@@ -8,24 +8,26 @@
 
 struct ShaderCompileTask : public Task
 {
-	ShaderCompileTask(ShaderAsset& InShader, IShaderCompiler& InCompiler)
+	ShaderCompileTask(Shader& InShader, IShaderCompiler& InCompiler)
 		: Shader(InShader)
 		, Compiler(InCompiler)
-		, Task(std::move(StringUtils::Format("ShaderCompileTask|%s", InShader.GetPath().string().c_str())), EPriority::High)
+		, Task(std::move(StringUtils::Format("ShaderCompileTask|%s", InShader.GetSourceFilePath().string().c_str())), EPriority::High)
 	{
 	}
 
 	void Execute() override final
 	{
-		Shader.ReadRawData(AssetType::EContentsType::Text);
+		auto& MetaData = Shader.GetMetaData();
+		assert(0);
+		//MetaData.ReadRawData(AssetType::EContentsType::Text);
 
 		const size_t Hash = Shader.ComputeHash();
-		const auto FileName = Shader.GetPath().filename().string();
-		const auto SourceCode = reinterpret_cast<char*>(Shader.GetRawData().Data.get());
-		const auto Size = Shader.GetRawData().Size;
+		const auto FileName = Shader.GetName().string();
+		const auto SourceCode = reinterpret_cast<char*>(MetaData.GetRawData().Data.get());
+		const auto Size = MetaData.GetRawData().Size;
 	}
 
-	ShaderAsset& Shader;
+	Shader& Shader;
 	IShaderCompiler& Compiler;
 };
 
@@ -56,7 +58,7 @@ void ShaderCompileService::OnShaderFileModified(const std::string& FilePath)
 	LOG_INFO("{} is modified.", FilePath);
 }
 
-void ShaderCompileService::Compile(ShaderAsset& Shader, ERHIBackend RHI)
+void ShaderCompileService::Compile(Shader& InShader, ERHIBackend RHI)
 {
 	//for (uint32_t Index = (uint32_t)ERHIBackend::Vulkan; Index < (uint32_t)ERHIBackend::Num; ++Index)
 	//{

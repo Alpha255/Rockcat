@@ -1,10 +1,8 @@
 #pragma once
 
-#include "Core/StringUtils.h"
 #include "Core/Math/Matrix.h"
 #include "Engine/Asset/SerializableAsset.h"
 #include "Engine/Asset/TextureAsset.h"
-#include "Engine/Application/GraphicsSettings.h"
 #include "Engine/RHI/RHIShader.h"
 #include "Engine/Paths.h"
 
@@ -129,17 +127,26 @@ struct ShaderVariable
 	Variant Value;
 
 	bool IsValid() const { return Value.index() != 0u; }
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(Value)
-		);
-	}
 };
 
-class ShaderAsset : public Asset, public ShaderDefines
+class ShaderMetaData : public Asset
+{
+public:
+	ShaderMetaData(const char* const SubPath, const char* const Entry, ERHIShaderStage Stage)
+		: Asset(Paths::ShaderPath() / SubPath)
+		, m_Entry(Entry)
+		, m_Stage(Stage)
+	{
+	}
+
+	const char* const GetEntryPoint() const { return m_Entry; }
+	ERHIShaderStage GetStage() const { return m_Stage; }
+private:
+	const char* const m_Entry;
+	ERHIShaderStage m_Stage;
+};
+
+class Shader : public ShaderDefines
 {
 public:
 	enum class ECompileStatus
@@ -149,57 +156,48 @@ public:
 		Compiled
 	};
 
-	ShaderAsset(std::filesystem::path&& Name)
-		: Asset(Paths::ShaderPath() / Name)
-		, m_Stage(GetStageByExtension(GetExtension()))
-	{
-	}
-
-	ERHIShaderStage GetStage() const { return m_Stage; }
-
-	void Compile(ERHIBackend RHI, bool Force = false);
-
-	const ShaderBinary* const GetBinary(ERHIBackend RHI) const;
-
-	virtual std::shared_ptr<struct ShaderVariableContainer> CreateVariableContainer() const { return nullptr; }
+	const std::map<std::string, ShaderVariable>& GetVariables() const { return m_Variables; }
+	RHIBuffer* GetUniformBuffer(class RHIDevice& Device);
+	virtual void SetupViewParams(const class SceneView&) {}
+	virtual void SetupMaterialProperty(const struct MaterialProperty&) {}
+	
+	virtual const ShaderMetaData& GetMetaData() const = 0;
+	virtual const std::filesystem::path& GetSourceFilePath() const = 0;
+	virtual std::filesystem::path GetName() const = 0;
+	virtual const char* const GetEntryPoint() const = 0;
+	virtual ERHIShaderStage GetStage() const = 0;
 
 	size_t ComputeHash() const override
 	{
-		return ::ComputeHash(std::filesystem::hash_value(GetPath()), ShaderDefines::ComputeHash());
+		return ::ComputeHash(std::filesystem::hash_value(GetSourceFilePath()), ShaderDefines::ComputeHash());
 	}
 protected:
-	static ERHIShaderStage GetStageByExtension(const std::filesystem::path& Extension);
-private:
-	ERHIShaderStage m_Stage;
-};
-
-struct ShaderVariableContainer
-{
-	std::map<std::string, ShaderVariable> Variables;
-
 	void RegisterVariable(const char* Name, ShaderVariable&& Variable);
+private:
 	size_t ComputeUniformBufferSize();
 
-	virtual void SetupViewParams(const class SceneView&) {}
-	virtual void SetupMaterialProperties(const struct MaterialProperty&) {}
-	void SetOnPipelineState(ERHIShaderStage, class RHIPipelineState&) {}
-	void CreateRHI(class RHIDevice&) {}
-
-	inline const std::map<std::string, ShaderVariable>& GetVariables() const { return Variables; }
+	std::map<std::string, ShaderVariable> m_Variables;
+	RHIBufferPtr m_UniformBuffer;
+	std::atomic<ECompileStatus> m_CompileStatus;
 };
 
-template<class TShaderVariableContainer>
-class Shader : public ShaderAsset
+template<class T>
+class GlobalShader : public Shader
 {
 public:
-	Shader(const char* Path)
-		: ShaderAsset(Path)
+	GlobalShader()
 	{
+		T::RegisterShaderVariables(Cast<T>(*this));
 	}
 
-	std::shared_ptr<ShaderVariableContainer> CreateVariableContainer() const override
-	{
-		return std::make_shared<TShaderVariableContainer>();
-	}
+	ERHIShaderStage GetStage() const override final { return s_MetaData.GetStage(); }
+	const ShaderMetaData& GetMetaData() const override final { return s_MetaData; }
+	const std::filesystem::path& GetSourceFilePath() const override final { return s_MetaData.GetPath(); }
+	const char* const GetEntryPoint() const override final { return s_MetaData.GetEntryPoint(); }
+	std::filesystem::path GetName() const override final { return s_MetaData.GetName(); }
+protected:
+	static ShaderMetaData s_MetaData;
 };
+
+#define DEFINITION_SHADER_METADATA(ShaderClass, SourceFile, Entry, Stage) ShaderMetaData GlobalShader<ShaderClass>::s_MetaData(SourceFile, Entry, Stage);
 

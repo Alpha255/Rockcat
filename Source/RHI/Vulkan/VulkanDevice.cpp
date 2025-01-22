@@ -281,14 +281,14 @@ RHIPipelineStatePtr VulkanDevice::CreatePipelineState(const RHIGraphicsPipelineC
 	return std::make_shared<VulkanPipelineState>(*this, CreateInfo);
 }
 
-RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& /*CreateInfo*/)
+RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& CreateInfo)
 {
-	return RHIBufferPtr();
+	return std::make_shared<VulkanBuffer>(*this, CreateInfo);
 }
 
-RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& /*CreateInfo*/)
+RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& CreateInfo)
 {
-	return RHISamplerPtr();
+	return std::make_shared<VulkanSampler>(*this, CreateInfo);
 }
 
 RHICommandListContext* VulkanDevice::GetImmediateCommandListContext(ERHIDeviceQueue Queue)

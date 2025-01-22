@@ -4,7 +4,6 @@
 #include "Core/Math/Color.h"
 #include "Engine/Asset/SerializableAsset.h"
 #include "Engine/Asset/TextureAsset.h"
-#include "Engine/Asset/ShaderAsset.h"
 #include "Runtime/Engine/RHI/RHIRenderStates.h"
 
 enum class EShadingMode : uint8_t
@@ -84,13 +83,7 @@ struct MaterialProperty : public SerializableAsset<MaterialProperty>
 		}
 	} Factors;
 
-	std::array<std::shared_ptr<TextureAsset>, (size_t)ETextureType::Num> Textures;
-
-	inline std::shared_ptr<TextureAsset>& GetTexture(ETextureType Type) 
-	{
-		assert(Type < ETextureType::Num);
-		return Textures[static_cast<size_t>(Type)];
-	}
+	Array<std::shared_ptr<TextureAsset>, ETextureType> Textures;
 
 	inline void MarkDirty(bool InDirty) { m_Dirty |= InDirty; }
 

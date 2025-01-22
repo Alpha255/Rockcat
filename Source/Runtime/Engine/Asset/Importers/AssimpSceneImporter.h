@@ -404,7 +404,7 @@ private:
 					auto TextureIndex = GetTextureType(TextureType);
 					if (TextureIndex != MaterialProperty::ETextureType::Num)
 					{
-						auto& Texture = Material.Textures[static_cast<size_t>(TextureIndex)];
+						auto& Texture = Material.Textures[TextureIndex];
 						Texture.reset(new TextureAsset(TexturePath));
 
 						auto TextureAsset = Cast<Asset>(Texture);

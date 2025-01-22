@@ -1,11 +1,11 @@
 #include "Engine/Rendering/RenderGraph/RenderPass/PreDepthPass.h"
 #include "Engine/Rendering/RenderGraph/RenderGraph.h"
-#include "Engine/Asset/GlobalShaders/GlobalShaders.h"
+#include "Engine/Asset/GlobalShaders.h"
 #include "Engine/Scene/Components/StaticMesh.h"
 #include "Engine/RHI/RHIInterface.h"
 #include "Engine/RHI/RHIDevice.h"
 
-struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<DefaultVS, DepthOnlyFS>
+struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<GenericVS, DepthOnlyFS>
 {
 	PreDepthPassMeshDrawCommandBuilder(RHIInterface& InBackend)
 		: GeometryPassMeshDrawCommandBuilder(InBackend)
@@ -36,12 +36,6 @@ struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBu
 		uint16_t Location = 0u;
 		EVertexAttributes DepthOnlyVertexAttributes = EVertexAttributes::Position;
 		bool SupportTexel = false;
-
-		Command.VertexShaderVariables = PassShader.VertexShader.CreateVariableContainer();
-		Command.FragmentShaderVariables = PassShader.FragmentShader.CreateVariableContainer();
-
-		Command.VertexShaderVariables->SetupMaterialProperties(Mesh.GetMaterialProperty());
-		Command.FragmentShaderVariables->SetupMaterialProperties(Mesh.GetMaterialProperty());
 
 		if (auto Buffer = Mesh.GetVertexBuffer(DepthOnlyVertexAttributes))
 		{
