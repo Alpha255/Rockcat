@@ -18,5 +18,9 @@ public:
 	virtual void OnStartup() {}
 	virtual void OnShutdown() {}
 
-	static T& Get() { static T s_Service; return s_Service; }
+	static T& Get()
+	{
+		static T s_Service;
+		return s_Service;
+	}
 };

@@ -1,4 +1,4 @@
-#include "Engine/Services/ShaderCompileService.h"
+#include "Engine/Services/ShaderLibrary.h"
 #include "Engine/Async/Task.h"
 #include "Engine/Services/SpdLogService.h"
 #include "Engine/Paths.h"
@@ -11,15 +11,14 @@ struct ShaderCompileTask : public Task
 	ShaderCompileTask(Shader& InShader, IShaderCompiler& InCompiler)
 		: Shader(InShader)
 		, Compiler(InCompiler)
-		, Task(std::move(StringUtils::Format("ShaderCompileTask|%s", InShader.GetSourceFilePath().string().c_str())), EPriority::High)
+		, Task(std::move(std::string("ShaderCompileTask|") + InShader.GetSourceFilePath().string()), EPriority::High)
 	{
 	}
 
 	void Execute() override final
 	{
 		auto& MetaData = Shader.GetMetaData();
-		assert(0);
-		//MetaData.ReadRawData(AssetType::EContentsType::Text);
+		MetaData.ReadRawData(AssetType::EContentsType::Text);
 
 		const size_t Hash = Shader.ComputeHash();
 		const auto FileName = Shader.GetName().string();
@@ -31,7 +30,7 @@ struct ShaderCompileTask : public Task
 	IShaderCompiler& Compiler;
 };
 
-void ShaderCompileService::OnStartup()
+void ShaderLibrary::OnStartup()
 {
 	REGISTER_LOG_CATEGORY(LogShaderCompile);
 
@@ -51,14 +50,16 @@ void ShaderCompileService::OnStartup()
 			}
 		});
 #endif
+
+	LoadCache();
 }
 
-void ShaderCompileService::OnShaderFileModified(const std::string& FilePath)
+void ShaderLibrary::OnShaderFileModified(const std::string& FilePath)
 {
 	LOG_INFO("{} is modified.", FilePath);
 }
 
-void ShaderCompileService::Compile(Shader& InShader, ERHIBackend RHI)
+void ShaderLibrary::DoCompile(Shader& InShader, ERHIBackend RHI)
 {
 	//for (uint32_t Index = (uint32_t)ERHIBackend::Vulkan; Index < (uint32_t)ERHIBackend::Num; ++Index)
 	//{
@@ -79,7 +80,7 @@ void ShaderCompileService::Compile(Shader& InShader, ERHIBackend RHI)
 	//}
 }
 
-bool ShaderCompileService::RegisterCompileTask(ERHIBackend RHI, size_t Hash)
+bool ShaderLibrary::RegisterCompileTask(ERHIBackend RHI, size_t Hash)
 {
 	assert(RHI < ERHIBackend::Num);
 
@@ -92,13 +93,35 @@ bool ShaderCompileService::RegisterCompileTask(ERHIBackend RHI, size_t Hash)
 	return true;
 }
 
-void ShaderCompileService::DeregisterCompileTask(ERHIBackend RHI, size_t Hash)
+void ShaderLibrary::DeregisterCompileTask(ERHIBackend RHI, size_t Hash)
 {
 	assert(RHI < ERHIBackend::Num);
 	m_CompilingTasks[RHI].erase(Hash);
 }
 
-void ShaderCompileService::OnShutdown()
+void ShaderLibrary::LoadCache()
+{
+}
+
+const ShaderBinary* ShaderLibrary::GetBinary(Shader& InShader, ERHIBackend Backend)
+{
+	auto Hash = InShader.ComputeHash();
+
+	std::lock_guard Locker(m_Lock);
+	auto It = m_Binaries.find(Hash);
+	if (It != m_Binaries.cend())
+	{
+		if (It->second[Backend])
+		{
+			return It->second[Backend].get();
+		}
+	}
+
+	// TODO:: Return fallback shader
+	return nullptr;
+}
+
+void ShaderLibrary::OnShutdown()
 {
 	for (auto& Compiler : m_Compilers)
 	{

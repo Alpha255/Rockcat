@@ -5,6 +5,7 @@
 #include "Engine/Asset/TextureAsset.h"
 #include "Engine/RHI/RHIShader.h"
 #include "Engine/Paths.h"
+#include "Engine/Application/GraphicsSettings.h"
 
 class ShaderDefines
 {
@@ -149,13 +150,6 @@ private:
 class Shader : public ShaderDefines
 {
 public:
-	enum class ECompileStatus
-	{
-		None,
-		Compiling,
-		Compiled
-	};
-
 	const std::map<std::string, ShaderVariable>& GetVariables() const { return m_Variables; }
 	RHIBuffer* GetUniformBuffer(class RHIDevice& Device);
 	virtual void SetupViewParams(const class SceneView&) {}
@@ -172,13 +166,15 @@ public:
 		return ::ComputeHash(std::filesystem::hash_value(GetSourceFilePath()), ShaderDefines::ComputeHash());
 	}
 protected:
+	friend struct ShaderCompileTask;
+
 	void RegisterVariable(const char* Name, ShaderVariable&& Variable);
+	virtual ShaderMetaData& GetMetaData() = 0;
 private:
 	size_t ComputeUniformBufferSize();
 
 	std::map<std::string, ShaderVariable> m_Variables;
 	RHIBufferPtr m_UniformBuffer;
-	std::atomic<ECompileStatus> m_CompileStatus;
 };
 
 template<class T>
@@ -196,6 +192,8 @@ public:
 	const char* const GetEntryPoint() const override final { return s_MetaData.GetEntryPoint(); }
 	std::filesystem::path GetName() const override final { return s_MetaData.GetName(); }
 protected:
+	ShaderMetaData& GetMetaData() override final { return s_MetaData; }
+
 	static ShaderMetaData s_MetaData;
 };
 

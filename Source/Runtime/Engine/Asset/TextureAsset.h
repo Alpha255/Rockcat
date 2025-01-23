@@ -10,7 +10,7 @@ public:
 
 	bool IsSRGB() const { return SRGB; }
 
-	const RHITexture* GetRHI() const { return Texture; }
+	const RHITexture* GetRHI() const { return Texture.get(); }
 	void CreateRHI(class RHIDevice& Device, const struct RHITextureCreateInfo& CreateInfo);
 
 	template<class Archive>
@@ -32,7 +32,7 @@ protected:
 	void SetUseSRGB(bool InSRGB) { SRGB = InSRGB; }
 
 	bool SRGB = false;
-	const RHITexture* Texture = nullptr;
+	RHITexturePtr Texture;
 };
 
 namespace cereal
