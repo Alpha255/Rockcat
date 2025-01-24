@@ -55,50 +55,30 @@ private:
 	std::map<std::string, std::string> m_Defines;
 };
 
-class ShaderBinary : public SerializableAsset<ShaderBinary>
+using ShaderBlob = DataBlock;
+
+class ShaderBinary : public SerializableAsset<ShaderBinary>, private ShaderBlob
 {
 public:
-	template<class T>
-	ShaderBinary(T&& Path, size_t Size, const void* Binary)
-		: BaseClass(std::forward<T>(Path))
-		, m_Size(Size)
-		, m_Binary(new uint8_t[Size]())
-	{
-		VERIFY(memcpy_s(m_Binary.get(), Size, Binary, Size) == 0);
-	}
+	using BaseClass::BaseClass;
 
 	std::time_t GetTimestamp() const { return m_Timestamp; }
-	size_t GetSize() const { return m_Size; }
-	const uint8_t* GetBinary() const { return m_Binary.get(); }
-	bool IsValid() const { return m_Size > 0u; }
+	size_t GetSize() const { return Size; }
+	const std::byte* GetBinary() const { return Data.get(); }
+	bool IsValid() const { return ShaderBlob::IsValid(); }
 
 	template<class Archive>
-	void load(Archive& Ar)
+	void serialize(Archive& Ar)
 	{
 		Ar(
+			CEREAL_BASE(ShaderBlob),
 			CEREAL_NVP(m_Timestamp),
-			CEREAL_NVP(m_Size)
+			CEREAL_NVP(m_Hash)
 		);
-
-		m_Binary.reset(new uint8_t[m_Size]());
-
-		Ar.loadBinaryValue(m_Binary.get(), m_Size, "Binary");
-	}
-
-	template<class Archive>
-	void save(Archive& Ar) const
-	{
-		Ar(
-			CEREAL_NVP(m_Timestamp),
-			CEREAL_NVP(m_Size)
-		);
-
-		Ar.saveBinaryValue(m_Binary.get(), m_Size, "Binary");
 	}
 private:
 	std::time_t m_Timestamp = 0u;
-	size_t m_Size = 0u;
-	std::shared_ptr<uint8_t> m_Binary;
+	size_t m_Hash = 0u;
 };
 
 struct ShaderVariable

@@ -18,7 +18,7 @@ struct AssetImportTask : public Task
 
 	IAssetImporter& Importer;
 	std::shared_ptr<Asset> Asset;
-	AssetType::EContentsType ContentsType;
+	const AssetType& Type;
 };
 
 class AssetDatabase : public IService<AssetDatabase>

@@ -99,3 +99,25 @@ const std::filesystem::path& Paths::ConfigPath()
 
 	return Path;
 }
+
+const std::filesystem::path& Paths::FontPath()
+{
+	static std::filesystem::path Path;
+	if (Path.empty())
+	{
+		Path = AssetPath() / "Fonts";
+	}
+
+	return Path;
+}
+
+const std::filesystem::path& Paths::EditorThemePath()
+{
+	static std::filesystem::path Path;
+	if (Path.empty())
+	{
+		Path = ConfigPath() / "EditorThemes";
+	}
+
+	return Path;
+}

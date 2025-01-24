@@ -18,12 +18,14 @@ struct ShaderCompileTask : public Task
 	void Execute() override final
 	{
 		auto& MetaData = Shader.GetMetaData();
-		MetaData.ReadRawData(AssetType::EContentsType::Text);
+		auto& RawData = MetaData.GetRawData(AssetType::EContentsType::Text);
 
 		const size_t Hash = Shader.ComputeHash();
 		const auto FileName = Shader.GetName().string();
-		const auto SourceCode = reinterpret_cast<char*>(MetaData.GetRawData().Data.get());
-		const auto Size = MetaData.GetRawData().Size;
+		const auto SourceCode = reinterpret_cast<char*>(RawData.Data.get());
+		const auto Size = RawData.Size;
+
+		Compiler.Compile(FileName.c_str(), SourceCode, Size, Shader.GetEntryPoint(), Shader.GetStage(), Shader);
 	}
 
 	Shader& Shader;
@@ -101,6 +103,10 @@ void ShaderLibrary::DeregisterCompileTask(ERHIBackend RHI, size_t Hash)
 
 void ShaderLibrary::LoadCache()
 {
+	for (auto& Entry : std::filesystem::recursive_directory_iterator(Paths::ShaderBinaryCachePath()))
+	{
+
+	}
 }
 
 const ShaderBinary* ShaderLibrary::GetBinary(Shader& InShader, ERHIBackend Backend)
@@ -117,7 +123,7 @@ const ShaderBinary* ShaderLibrary::GetBinary(Shader& InShader, ERHIBackend Backe
 		}
 	}
 
-	// TODO:: Return fallback shader
+	// TODO:: Return fallback shader???
 	return nullptr;
 }
 

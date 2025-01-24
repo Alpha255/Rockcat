@@ -67,7 +67,7 @@ bool Engine::Initialize()
 	}
 
 	PlatformMisc::SetCurrentWorkingDirectory(Paths::AssetPath());
-	LOG_INFO("Mount working directory to \"{}\".", PlatformMisc::GetCurrentWorkingDirectory().generic_string());
+	LOG_INFO("Mount working directory to \"{}\".", PlatformMisc::GetCurrentWorkingDirectory().string());
 
 	TaskFlowService::Get().OnStartup();
 	AssetDatabase::Get().OnStartup();

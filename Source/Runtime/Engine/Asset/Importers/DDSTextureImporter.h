@@ -14,7 +14,7 @@ public:
 
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<TextureAsset>(AssetPath); }
 
-	bool Reimport(Asset& InAsset) override final
+	bool Reimport(Asset& InAsset, const AssetType& InAssetType) override final
 	{
 		auto& Image = Cast<TextureAsset>(InAsset);
 #if 0

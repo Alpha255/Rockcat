@@ -1,6 +1,7 @@
 #include "Editor/ImGuiConfigurations.h"
 #include "Engine/Services/SpdLogService.h"
 #include "Editor/Icons/Icons.h"
+#include "Engine/Paths.h"
 
 const std::map<std::string, ImGuiFont>* ImGuiScopedFont::AllFonts = nullptr;
 
@@ -44,7 +45,7 @@ void ImGuiConfigurations::LoadDefaultFonts()
 		return MergeWithIconFont;
 	};
 
-	for (auto& Entry : std::filesystem::directory_iterator("Fonts\\"))
+	for (auto& Entry : std::filesystem::directory_iterator(Paths::FontPath()))
 	{
 		if (Entry.is_directory())
 		{
@@ -77,7 +78,7 @@ void ImGuiConfigurations::LoadDefaultFonts()
 
 void ImGuiConfigurations::LoadDefaultThemes()
 {
-	for (auto& Entry : std::filesystem::recursive_directory_iterator("Configs\\EditorThemes"))
+	for (auto& Entry : std::filesystem::recursive_directory_iterator(Paths::EditorThemePath()))
 	{
 		auto ThemePath = Entry.path();
 		auto ThemeName = ThemePath.stem().string();

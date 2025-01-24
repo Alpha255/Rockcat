@@ -14,4 +14,6 @@ public:
 	static const std::filesystem::path& ScenePath();
 	static const std::filesystem::path& GltfSampleModelPath();
 	static const std::filesystem::path& ConfigPath();
+	static const std::filesystem::path& FontPath();
+	static const std::filesystem::path& EditorThemePath();
 };

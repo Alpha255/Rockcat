@@ -2,25 +2,46 @@
 
 #include "Core/ObjectID.h"
 
-DECLARE_OBJECT_ID(Asset, uint32_t)
-
 struct DataBlock
 {
 	size_t Size = 0u;
 	std::shared_ptr<std::byte> Data;
+
+	DataBlock() = default;
+
+	DataBlock(size_t InSize, const void* InData = nullptr)
+		: Size(InSize)
+		, Data(new std::byte[InSize]())
+	{
+		if (InData)
+		{
+			VERIFY(memcpy_s(Data.get(), InSize, InData, InSize) == 0);
+		}
+	}
 	
 	inline bool IsValid() const { return Size && Data; }
-private:
-	friend class Asset;
 
-	void Allocate(size_t DataSize)
+	template<class Archive>
+	void load(Archive& Ar)
 	{
-		assert(DataSize > 0u);
-		Size = DataSize;
-		Data.reset(new std::byte[DataSize]());
+		Ar(
+			CEREAL_NVP(Size)
+		);
+
+		Data.reset(new uint8_t[Size]());
+
+		Ar.loadBinaryValue(Data.get(), Size, "Data");
 	}
 
-	void Deallocate() { Data.reset(); Size = 0u; }
+	template<class Archive>
+	void save(Archive& Ar) const
+	{
+		Ar(
+			CEREAL_NVP(Size)
+		);
+
+		Ar.saveBinaryValue(Data.get(), Size, "Data");
+	}
 };
 
 struct AssetType
@@ -97,9 +118,8 @@ public:
 	std::filesystem::path GetExtension() const { return m_Path.extension(); }
 	std::time_t GetLastWriteTime() const { return m_LastWriteTime; }
 
-	void ReadRawData(AssetType::EContentsType ContentsType);
-	void FreeRawData() { m_RawData.Deallocate(); }
-	const DataBlock& GetRawData() const { return m_RawData; }
+	void FreeRawData() { m_RawData.reset(); }
+	const DataBlock& GetRawData(AssetType::EContentsType ContentsType) const;
 
 	bool IsDirty() const
 	{
@@ -160,7 +180,7 @@ protected:
 		return 0u;
 	}
 
-	DataBlock m_RawData;
+	mutable std::unique_ptr<DataBlock> m_RawData;
 	std::atomic<EStatus> m_Status = EStatus::NotLoaded;
 
 	Callbacks m_Callbacks;
@@ -186,13 +206,13 @@ public:
 		return It == m_ValidAssetTypes.cend() ? nullptr : &(*It);
 	}
 
-	virtual void LoadAssetData(std::shared_ptr<Asset>& Asset, AssetType::EContentsType ContentsType) 
-	{ 
-		Asset->ReadRawData(ContentsType); 
+	virtual void LoadAssetData(std::shared_ptr<Asset>& Asset, AssetType::EContentsType ContentsType)
+	{
+		Asset->GetRawData(ContentsType);
 	}
 
 	virtual std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) = 0;
-	virtual bool Reimport(Asset& InAsset) = 0;
+	virtual bool Reimport(Asset& InAsset, const AssetType& InAssetType) = 0;
 protected:
 private:
 	std::vector<AssetType> m_ValidAssetTypes;

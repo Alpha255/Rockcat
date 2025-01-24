@@ -15,7 +15,7 @@ DxcShaderCompiler::DxcShaderCompiler(bool GenerateSpirv)
 	LOG_CAT_INFO(LogShaderCompile, "Create dxc shader compiler v{}.{}, spir-v is {}", Major, Minor, GenerateSpirv ? "enabled" : "disabled");
 }
 
-ShaderBinary DxcShaderCompiler::Compile(
+ShaderBlob DxcShaderCompiler::Compile(
 	const char* SourceName,
 	const char* SourceCode,
 	size_t SourceCodeSize,
@@ -121,10 +121,10 @@ ShaderBinary DxcShaderCompiler::Compile(
 	DxcBlob Blob;
 	VERIFY(Result->GetResult(Blob.Reference()) == S_OK);
 
-	return ShaderBinary("", Blob->GetBufferSize(), Blob->GetBufferPointer());
+	return ShaderBlob(Blob->GetBufferSize(), Blob->GetBufferPointer());
 }
 
-ShaderBinary D3DShaderCompiler::Compile(
+ShaderBlob D3DShaderCompiler::Compile(
 	const char* SourceName,
 	const char* SourceCode,
 	size_t SourceCodeSize,
@@ -178,5 +178,5 @@ ShaderBinary D3DShaderCompiler::Compile(
 		assert(0);
 	}
 
-	return ShaderBinary("", Binary->GetBufferSize(), Binary->GetBufferPointer());
+	return ShaderBlob(Binary->GetBufferSize(), Binary->GetBufferPointer());
 }

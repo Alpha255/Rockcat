@@ -9,7 +9,7 @@
 class IShaderCompiler
 {
 public:
-	virtual ShaderBinary Compile(
+	virtual ShaderBlob Compile(
 		const char* SourceName,
 		const char* SourceCode,
 		size_t SourceCodeSize,
@@ -17,7 +17,7 @@ public:
 		ERHIShaderStage ShaderStage,
 		const class ShaderDefines& Definitions) = 0;
 protected:
-	virtual void GetShaderReflection(const ShaderBinary& Binary) = 0;
+	virtual void GetShaderReflection(const ShaderBlob& Blob) = 0;
 
 	static const char* const GetProfile(ERHIShaderStage ShaderState, bool DXC)
 	{
@@ -40,7 +40,7 @@ class DxcShaderCompiler : public IShaderCompiler
 public:
 	DxcShaderCompiler(bool GenerateSpirv);
 
-	ShaderBinary Compile(
+	ShaderBlob Compile(
 		const char* SourceName,
 		const char* SourceCode,
 		size_t SourceCodeSize,
@@ -61,7 +61,7 @@ protected:
 	using D3D12LibraryReflection = D3DHwResource<ID3D12LibraryReflection>;
 	using D3D12ShaderReflection = D3DHwResource<ID3D12ShaderReflection>;
 
-	void GetShaderReflection(const ShaderBinary&) override final {}
+	void GetShaderReflection(const ShaderBlob&) override final {}
 private:
 	DxcUtils m_Utils;
 	DxcCompiler m_Compiler;
@@ -71,7 +71,7 @@ private:
 class D3DShaderCompiler : public IShaderCompiler
 {
 public:
-	ShaderBinary Compile(
+	ShaderBlob Compile(
 		const char* SourceName,
 		const char* SourceCode,
 		size_t SourceCodeSize,
@@ -81,5 +81,5 @@ public:
 protected:
 	using D3D11ShaderReflection = D3DHwResource<ID3D11ShaderReflection>;
 
-	void GetShaderReflection(const ShaderBinary&) override final {}
+	void GetShaderReflection(const ShaderBlob&) override final {}
 };

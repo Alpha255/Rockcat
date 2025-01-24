@@ -15,7 +15,7 @@ AssetImportTask::AssetImportTask(
 	: Task(std::move(StringUtils::Format("AssetImportTask|%s", InPath.string().c_str())))
 	, Importer(InImporter)
 	, Asset(InAsset ? InAsset : InImporter.CreateAsset(InPath))
-	, ContentsType(InType.ContentsType)
+	, Type(InType)
 {
 	Asset->SetCallbacks(InCallbacks);
 }
@@ -26,9 +26,9 @@ void AssetImportTask::Execute()
 
 	Asset->SetStatus(Asset::EStatus::Loading);
 
-	Importer.LoadAssetData(Asset, ContentsType);
+	Importer.LoadAssetData(Asset, Type.ContentsType);
 
-	if (Importer.Reimport(*Asset))
+	if (Importer.Reimport(*Asset, Type))
 	{
 		Asset->SetStatus(Asset::EStatus::Ready);
 		Asset->OnReady();

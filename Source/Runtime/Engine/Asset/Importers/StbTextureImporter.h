@@ -25,12 +25,13 @@ public:
 
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<TextureAsset>(AssetPath); }
 
-	bool Reimport(Asset& InAsset) override final
+	bool Reimport(Asset& InAsset, const AssetType& InAssetType) override final
 	{
 		auto& Image = Cast<TextureAsset>(InAsset);
+		auto& RawData = Image.GetRawData(InAssetType.ContentsType);
 
-		auto DataSize = static_cast<int32_t>(Image.GetRawData().Size);
-		auto Data = reinterpret_cast<const stbi_uc*>(Image.GetRawData().Data.get());
+		auto DataSize = static_cast<int32_t>(RawData.Size);
+		auto Data = reinterpret_cast<const stbi_uc*>(RawData.Data.get());
 
 		int32_t Width = 0, Height = 0, Channels = 0, OriginalChannels = STBI_default;
 
@@ -67,7 +68,7 @@ public:
 			.SetDimension(ERHITextureDimension::T_2D)
 			.SetFormat(Image.IsSRGB() ? ERHIFormat::RGBA8_UNorm_SRGB : ERHIFormat::RGBA8_UNorm)
 			.SetName(InAsset.GetPath().filename().string())
-			.SetInitialData(DataSize, Image.GetRawData().Data);
+			.SetInitialData(DataSize, RawData.Data);
 
 		return false;
 #if 0
