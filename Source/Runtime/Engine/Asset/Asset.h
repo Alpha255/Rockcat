@@ -28,7 +28,7 @@ struct DataBlock
 			CEREAL_NVP(Size)
 		);
 
-		Data.reset(new uint8_t[Size]());
+		Data.reset(new std::byte[Size]());
 
 		Ar.loadBinaryValue(Data.get(), Size, "Data");
 	}

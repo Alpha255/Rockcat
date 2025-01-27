@@ -57,28 +57,35 @@ private:
 
 using ShaderBlob = DataBlock;
 
-class ShaderBinary : public SerializableAsset<ShaderBinary>, private ShaderBlob
+class ShaderBinary : public SerializableAsset<ShaderBinary>
 {
 public:
 	using BaseClass::BaseClass;
 
+	ShaderBinary(const std::string& ShaderName, ERHIBackend Backend, std::time_t Timestamp, size_t Hash, ShaderBlob&& Blob);
+
 	std::time_t GetTimestamp() const { return m_Timestamp; }
-	size_t GetSize() const { return Size; }
-	const std::byte* GetBinary() const { return Data.get(); }
-	bool IsValid() const { return ShaderBlob::IsValid(); }
+	size_t GetHash() const { return m_Hash; }
+	size_t GetSize() const { return m_Blob.Size; }
+	ERHIBackend GetBackend() const { return m_Backend; }
+	const std::byte* GetBinary() const { return m_Blob.Data.get(); }
+	bool IsValid() const { return m_Blob.IsValid(); }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(ShaderBlob),
 			CEREAL_NVP(m_Timestamp),
-			CEREAL_NVP(m_Hash)
+			CEREAL_NVP(m_Hash),
+			CEREAL_NVP(m_Backend),
+			CEREAL_NVP(m_Blob)
 		);
 	}
 private:
 	std::time_t m_Timestamp = 0u;
 	size_t m_Hash = 0u;
+	ERHIBackend m_Backend = ERHIBackend::Num;
+	ShaderBlob m_Blob;
 };
 
 struct ShaderVariable

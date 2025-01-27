@@ -9,6 +9,13 @@
 class IShaderCompiler
 {
 public:
+	IShaderCompiler(ERHIBackend Backend)
+		: m_Backend(Backend)
+	{
+	}
+
+	ERHIBackend GetBackend() const { return m_Backend; }
+
 	virtual ShaderBlob Compile(
 		const char* SourceName,
 		const char* SourceCode,
@@ -33,12 +40,14 @@ protected:
 			return nullptr;
 		}
 	}
+private:
+	ERHIBackend m_Backend = ERHIBackend::Num;
 };
 
 class DxcShaderCompiler : public IShaderCompiler
 {
 public:
-	DxcShaderCompiler(bool GenerateSpirv);
+	DxcShaderCompiler(ERHIBackend Backend, bool GenerateSpirv);
 
 	ShaderBlob Compile(
 		const char* SourceName,
@@ -71,6 +80,8 @@ private:
 class D3DShaderCompiler : public IShaderCompiler
 {
 public:
+	using IShaderCompiler::IShaderCompiler;
+
 	ShaderBlob Compile(
 		const char* SourceName,
 		const char* SourceCode,

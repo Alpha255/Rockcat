@@ -16,6 +16,8 @@ public:
 	void OnShutdown() override final;
 
 	const ShaderBinary* GetBinary(Shader& InShader, ERHIBackend Backend);
+
+	void AddBinary(const std::shared_ptr<ShaderBinary>& Binary);
 protected:
 	IShaderCompiler& GetCompiler(ERHIBackend RHI)
 	{
