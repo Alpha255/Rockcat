@@ -67,58 +67,68 @@ void ShaderLibrary::OnShaderFileModified(const std::string& FilePath)
 	LOG_INFO("{} is modified.", FilePath);
 }
 
-void ShaderLibrary::DoCompile(Shader& InShader, ERHIBackend RHI)
+void ShaderLibrary::DoCompile(Shader& InShader, ERHIBackend Backend, size_t Hash)
 {
-	//for (uint32_t Index = (uint32_t)ERHIBackend::Vulkan; Index < (uint32_t)ERHIBackend::Num; ++Index)
-	//{
-	//	auto RHI = static_cast<ERHIBackend>(Index);
+	assert(Backend < ERHIBackend::Num);
 
-	//	if (RegisterCompileTask(RHI, Hash))
-	//	{
-	//		auto Binary = GetCompiler(RHI).Compile(
-	//			FileName.c_str(),
-	//			SourceCode,
-	//			Size,
-	//			"main",
-	//			Shader.GetStage(),
-	//			Shader);
+	tf::Async([this, Backend, Hash, &InShader]() {
+		if (RegisterCompileTask(Backend, Hash))
+		{
+			auto& Compiler = GetCompiler(Backend);
 
-	//		DeregisterCompileTask(RHI, Hash);
-	//	}
-	//}
+			auto& MetaData = InShader.GetMetaData();
+			auto& RawData = MetaData.GetRawData(AssetType::EContentsType::Text);
+
+			const time_t Timestamp = MetaData.GetLastWriteTime();
+			const auto FileName = InShader.GetName().string();
+			const auto SourceCode = reinterpret_cast<char*>(RawData.Data.get());
+			const auto Size = RawData.Size;
+
+			auto Blob = Compiler.Compile(FileName.c_str(), SourceCode, Size, InShader.GetEntryPoint(), InShader.GetStage(), InShader);
+			auto Binary = std::make_shared<ShaderBinary>(FileName, Backend, Timestamp, Hash, std::move(Blob));
+			Binary->Save(true);
+			AddBinary(Binary);
+
+			DeregisterCompileTask(Backend, Hash);
+		}
+	});
 }
 
-bool ShaderLibrary::RegisterCompileTask(ERHIBackend RHI, size_t Hash)
+bool ShaderLibrary::RegisterCompileTask(ERHIBackend Backend, size_t Hash)
 {
-	assert(RHI < ERHIBackend::Num);
+	assert(Backend < ERHIBackend::Num);
 
-	if (m_CompilingTasks[RHI].find(Hash) != m_CompilingTasks[RHI].cend())
+	std::lock_guard Lock(m_CompileTaskLock);
+
+	if (m_CompilingTasks[Backend].find(Hash) != m_CompilingTasks[Backend].cend())
 	{
 		return false;
 	}
 
-	m_CompilingTasks[RHI].insert(Hash);
+	m_CompilingTasks[Backend].insert(Hash);
 	return true;
 }
 
-void ShaderLibrary::DeregisterCompileTask(ERHIBackend RHI, size_t Hash)
+void ShaderLibrary::DeregisterCompileTask(ERHIBackend Backend, size_t Hash)
 {
-	assert(RHI < ERHIBackend::Num);
-	m_CompilingTasks[RHI].erase(Hash);
+	assert(Backend < ERHIBackend::Num);
+
+	std::lock_guard Lock(m_CompileTaskLock);
+	m_CompilingTasks[Backend].erase(Hash);
 }
 
 void ShaderLibrary::LoadCache()
 {
 	if (std::filesystem::exists(Paths::ShaderBinaryCachePath()))
 	{
-		auto DirectoryVisitor = std::filesystem::recursive_directory_iterator(Paths::ShaderBinaryCachePath());
-		auto Begin = std::filesystem::begin(DirectoryVisitor);
-		auto End = std::filesystem::end(DirectoryVisitor);
-		tf::ParallelFor(Begin, End, [this](const std::filesystem::directory_entry& Entry) {
-			if (Entry.is_regular_file())
+		tf::Async([this]() {
+			for (auto& Entry : std::filesystem::recursive_directory_iterator(Paths::ShaderBinaryCachePath()))
 			{
-				auto Binary = ShaderBinary::Load(Entry.path());
-				AddBinary(Binary);
+				if (Entry.is_regular_file())
+				{
+					auto Binary = ShaderBinary::Load(Entry.path());
+					AddBinary(Binary);
+				}
 			}
 		});
 	}
@@ -138,7 +148,7 @@ const ShaderBinary* ShaderLibrary::GetBinary(Shader& InShader, ERHIBackend Backe
 		}
 	}
 
-	// TODO:: Return fallback shader???
+	DoCompile(InShader, Backend, Hash);
 	return nullptr;
 }
 

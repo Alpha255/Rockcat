@@ -40,7 +40,7 @@ Temp/
 .vs/
 __pycache__/
 Assets/Configurations
-Assets/Shaders/ShaderCache
+Assets/Shaders/ShaderBinaryCache
 Assets/Shaders/Cache
 Assets/Materials/
 build

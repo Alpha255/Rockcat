@@ -116,7 +116,7 @@ ShaderBlob DxcShaderCompiler::Compile(
 		DxcBlobEncoding Error;
 		VERIFY(Result->GetErrorBuffer(Error.Reference()) == S_OK);
 		LOG_CAT_ERROR(LogShaderCompile, "Failed to compile shader: {}, error message: {}", SourceName, static_cast<const char*>(Error->GetBufferPointer()));
-		assert(0);
+		return ShaderBlob(0u);
 	}
 
 	DxcBlob Blob;

@@ -140,13 +140,9 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 		
 		Layer->SetEnabledInConfig(LayerPropertyIt != LayerProperties.cend());
 
-		if (!Layer->IsSupported() || !Layer->IsNeeded())
+		if (Layer->IsSupported() || Layer->IsEnabled())
 		{
-			continue;
-		}
-		
-		if (Layer->IsEnabled())
-		{
+			Layer->SetSpecVersion(LayerPropertyIt->specVersion);
 			EnabledLayers.push_back(Layer->GetName());
 		}
 	}
@@ -171,13 +167,9 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 
 		Ext->SetEnabledInConfig(ExtensionIt != ExtensionProperties.cend());
 
-		if (!Ext->IsSupported() || !Ext->IsNeeded())
+		if (Ext->IsSupported() && Ext->IsEnabled())
 		{
-			continue;
-		}
-
-		if (Ext->IsEnabled())
-		{
+			Ext->SetSpecVersion(ExtensionIt->specVersion);
 			EnabledExtensions.push_back(Ext->GetName());
 
 			if (std::strcmp(Ext->GetName(), VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0)

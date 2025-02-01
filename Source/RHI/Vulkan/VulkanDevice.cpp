@@ -112,12 +112,7 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 
 		Layer->SetEnabledInConfig(LayerIt != LayerProperties.cend());
 
-		if (!Layer->IsSupported() || !Layer->IsNeeded())
-		{
-			continue;
-		}
-
-		if (Layer->IsEnabled())
+		if (Layer->IsSupported() && Layer->IsEnabled())
 		{
 			EnabledLayers.push_back(Layer->GetName());
 		}
@@ -140,13 +135,9 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 
 		Ext->SetEnabledInConfig(ExtensionIt != ExtensionProperties.cend());
 
-		if (!Ext->IsSupported() || !Ext->IsNeeded())
+		if (Ext->IsSupported() && Ext->IsEnabled())
 		{
-			continue;
-		}
-
-		if (Ext->IsEnabled())
-		{
+			Ext->SetSpecVersion(ExtensionIt->specVersion);
 			EnabledExtensions.push_back(Ext->GetName());
 		}
 	}

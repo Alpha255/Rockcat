@@ -19,24 +19,25 @@ public:
 
 	void AddBinary(const std::shared_ptr<ShaderBinary>& Binary);
 protected:
-	IShaderCompiler& GetCompiler(ERHIBackend RHI)
+	IShaderCompiler& GetCompiler(ERHIBackend Backend)
 	{
-		assert(RHI < ERHIBackend::Num && RHI > ERHIBackend::Software);
-		return *m_Compilers[RHI];
+		assert(Backend < ERHIBackend::Num && Backend > ERHIBackend::Software);
+		return *m_Compilers[Backend];
 	}
 
-	bool RegisterCompileTask(ERHIBackend RHI, size_t Hash);
-	void DeregisterCompileTask(ERHIBackend RHI, size_t Hash);
+	bool RegisterCompileTask(ERHIBackend Backend, size_t Hash);
+	void DeregisterCompileTask(ERHIBackend Backend, size_t Hash);
 
 	void OnShaderFileModified(const std::string& FilePath);
 
 	void LoadCache();
 
-	void DoCompile(Shader& InShader, ERHIBackend RHI);
+	void DoCompile(Shader& InShader, ERHIBackend Backend, size_t Hash);
 private:
 	Array<std::unique_ptr<IShaderCompiler>, ERHIBackend> m_Compilers;
 	Array<std::set<size_t>, ERHIBackend> m_CompilingTasks;
 	std::shared_ptr<filewatch::FileWatch<std::string>> m_ShaderFileMonitor;
 	std::map<size_t, Array<std::shared_ptr<ShaderBinary>, ERHIBackend>> m_Binaries;
 	std::mutex m_Lock;
+	std::mutex m_CompileTaskLock;
 };

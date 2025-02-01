@@ -112,6 +112,7 @@ public:
 	inline bool IsEnabled() const { return m_EnabledInConfig ? (*m_EnabledInConfig && m_Supported) : m_Supported; }
 	inline bool IsSupported() const { return m_Supported; }
 	inline bool IsNeeded() const { return m_Needed; }
+	inline uint32_t GetSpecVersion() const { return m_SpecVersion; }
 	inline const char* GetName() const { return m_Name.data(); }
 	inline OnInstanceCreation& GetOnInstanceCreation() { return m_OnInstanceCreation; }
 	inline OnDeviceCreation& GetOnDeviceCreation() { return m_OnDeviceCreation; }
@@ -126,11 +127,12 @@ protected:
 	friend class VulkanDevice;
 
 	void SetEnabledInConfig(bool Enabled) { if (m_EnabledInConfig) { *m_EnabledInConfig = Enabled; } }
+	void SetSpecVersion(uint32_t Version) { m_SpecVersion = Version; }
 private:
 	std::string_view m_Name;
 	bool m_Supported = false;
 	bool m_Needed = false;
-
+	uint32_t m_SpecVersion = 0u;
 	bool* m_EnabledInConfig = nullptr;
 	OnInstanceCreation m_OnInstanceCreation;
 	OnDeviceCreation m_OnDeviceCreation;

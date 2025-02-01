@@ -1,6 +1,6 @@
 #include "Shaders/Definitions.h"
 
-DEFINITION_SHADER_VARIABLES_GENERIC_VS
+DEFINITION_GENERIC_VS_SHADER_VARIABLES
 
 VSOutput main(VSInput Input)
 {

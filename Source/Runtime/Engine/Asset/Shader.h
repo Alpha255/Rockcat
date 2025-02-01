@@ -154,6 +154,7 @@ public:
 	}
 protected:
 	friend struct ShaderCompileTask;
+	friend class ShaderLibrary;
 
 	void RegisterVariable(const char* Name, ShaderVariable&& Variable);
 	virtual ShaderMetaData& GetMetaData() = 0;
@@ -177,7 +178,7 @@ public:
 	const ShaderMetaData& GetMetaData() const override final { return s_MetaData; }
 	const std::filesystem::path& GetSourceFilePath() const override final { return s_MetaData.GetPath(); }
 	const char* const GetEntryPoint() const override final { return s_MetaData.GetEntryPoint(); }
-	std::filesystem::path GetName() const override final { return s_MetaData.GetName(); }
+	std::filesystem::path GetName() const override final { return s_MetaData.GetStem(); }
 protected:
 	ShaderMetaData& GetMetaData() override final { return s_MetaData; }
 
