@@ -25,6 +25,6 @@ private:
 	static std::shared_ptr<struct VulkanLayerExtensionConfigurations> s_LayerExtensionConfigs;
 
 #if USE_DYNAMIC_VK_LOADER
-	const vk::DynamicLoader m_DynamicLoader;
+	const vk::detail::DynamicLoader m_DynamicLoader;
 #endif
 };

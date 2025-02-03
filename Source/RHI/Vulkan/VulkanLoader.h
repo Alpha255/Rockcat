@@ -334,7 +334,7 @@ public:
 
 	virtual ~VkHwResource()
 	{ 
-		BaseType::GetNativeDevice().destroy(BaseType::GetNative(), VK_ALLOCATION_CALLBACKS, vk::defaultDispatchLoaderDynamic);
+		BaseType::GetNativeDevice().destroy(BaseType::GetNative(), VK_ALLOCATION_CALLBACKS, vk::detail::defaultDispatchLoaderDynamic);
 		BaseType::GetNative() = nullptr;
 	}
 };

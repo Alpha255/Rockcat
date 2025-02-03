@@ -67,7 +67,7 @@ workspace "Rockcat"
 			}
 			filter { "configurations:Debug or DebugEditor" }
 				links {
-					"spirv-cross-cored"
+					"spirv-cross-core"
 				}
 			filter { "configurations:Release or ReleaseEditor" }
 				links {
