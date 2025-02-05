@@ -1,5 +1,5 @@
 {
-    "class ImGuiConfigurations": {
+    "class ImGuiConfiguration": {
         "m_DefaultTheme": "Classic",
         "m_DefaultFont": "Inter",
         "m_Fonts": [

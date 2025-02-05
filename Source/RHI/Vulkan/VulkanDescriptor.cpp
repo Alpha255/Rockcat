@@ -1,41 +1,9 @@
 #include "RHI/Vulkan/VulkanDescriptor.h"
 #include "RHI/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanEnvConfiguration.h"
+#include "RHI/Vulkan/VulkanRHI.h"
 #include "Engine/Services/SpdLogService.h"
 #include "Engine/Services/TaskFlowService.h"
-
-//static constexpr uint32_t DescriptorPoolLimits[] =
-//{
-//	256u,  DESCRIPTION(VK_DESCRIPTOR_TYPE_SAMPLER)
-//	2048u, DESCRIPTION(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-//	2048u, DESCRIPTION(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE)
-//	256u,  DESCRIPTION(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
-//	256u,  DESCRIPTION(VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER)
-//	256u,  DESCRIPTION(VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER)
-//	1024u, DESCRIPTION(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-//	1024u, DESCRIPTION(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-//	8u,    DESCRIPTION(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC)
-//	8u,    DESCRIPTION(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC)
-//	64u,   DESCRIPTION(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT)
-//};
-//
-//static constexpr uint32_t DescriptorSetsLimit = 2048u;
-
-std::vector<uint32_t> VulkanDescriptorLimitations::GetLimitationList() const
-{
-	std::vector<uint32_t> Limitations((size_t)vk::DescriptorType::eInputAttachment + 1u);
-	Limitations[(size_t)vk::DescriptorType::eSampler] = MaxSampler;
-	Limitations[(size_t)vk::DescriptorType::eCombinedImageSampler] = MaxCombinedImageSampler;
-	Limitations[(size_t)vk::DescriptorType::eSampledImage] = MaxSampledImage;
-	Limitations[(size_t)vk::DescriptorType::eStorageImage] = MaxStorageImage;
-	Limitations[(size_t)vk::DescriptorType::eUniformTexelBuffer] = MaxUniformTexelBuffer;
-	Limitations[(size_t)vk::DescriptorType::eStorageTexelBuffer] = MaxStorageTexelBuffer;
-	Limitations[(size_t)vk::DescriptorType::eUniformBuffer] = MaxUniformBuffer;
-	Limitations[(size_t)vk::DescriptorType::eStorageBuffer] = MaxStorageBuffer;
-	Limitations[(size_t)vk::DescriptorType::eUniformBufferDynamic] = MaxUniformBufferDynamic;
-	Limitations[(size_t)vk::DescriptorType::eStorageBufferDynamic] = MaxStorageBufferDynamic;
-	Limitations[(size_t)vk::DescriptorType::eInputAttachment] = MaxInputAttachment;
-	return Limitations;
-}
 
 VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(const VulkanDevice& Device, const RHIShaderResourceLayout& LayoutDesc)
 	: VkHwResource(Device)
@@ -72,20 +40,12 @@ VulkanPipelineLayout::VulkanPipelineLayout(const VulkanDevice& Device, const vk:
 	VERIFY_VK(GetNativeDevice().createPipelineLayout(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
-std::shared_ptr<VulkanDescriptorLimitations> VulkanDescriptorPool::s_DescriptorLimitations;
-
 VulkanDescriptorPool::VulkanDescriptorPool(const VulkanDevice& Device)
 	: VkHwResource(Device)
 {
-	if (!s_DescriptorLimitations)
-	{
-		s_DescriptorLimitations = VulkanDescriptorLimitations::Load("Configs\\VkDescriptorLimitations.json");
-		assert(s_DescriptorLimitations);
-	}
-
 #if _DEBUG
-	auto& DeviceLimits = GetDevice().GetPhysicalDeviceLimits();
-	auto ConfigLimits = s_DescriptorLimitations->GetLimitationList();
+	auto& DeviceLimits = Device.GetPhysicalDeviceLimits();
+	auto ConfigLimits = VulkanRHI::GetEnvConfigs().GetDescriptorLimitationList();
 
 	const std::vector<uint32_t> DeviceDescriptorLimits = 
 	{
@@ -121,7 +81,7 @@ VulkanDescriptorPool::VulkanDescriptorPool(const VulkanDevice& Device)
 
 	vk::DescriptorPoolCreateInfo CreateInfo;
 	CreateInfo.setPoolSizes(DescriptorPoolSizes)
-		.setMaxSets(s_DescriptorLimitations->MaxDescriptorSetsPerPool);
+		.setMaxSets(VulkanRHI::GetDescriptorLimitationConfigs().MaxDescriptorSetsPerPool);
 	
 	VERIFY_VK(GetNativeDevice().createDescriptorPool(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
@@ -161,5 +121,5 @@ void VulkanDescriptorPool::Free(vk::DescriptorSet Set)
 
 bool VulkanDescriptorPool::IsFull() const
 {
-	return m_AllocatedCount >= s_DescriptorLimitations->MaxDescriptorSetsPerPool;
+	return m_AllocatedCount >= VulkanRHI::GetDescriptorLimitationConfigs().MaxDescriptorSetsPerPool;
 }

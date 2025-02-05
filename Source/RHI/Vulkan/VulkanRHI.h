@@ -14,15 +14,15 @@ public:
 
 	RHIDevice& GetDevice() override final;
 
+	static const struct VulkanEnvConfiguration& GetEnvConfigs() { return *s_EnvConfigs; }
+	static const struct VulkanExtensionConfiguration& GetExtConfigs();
+	static const struct VulkanDescriptorLimitationConfiguration& GetDescriptorLimitationConfigs();
 	static const GraphicsSettings& GetGraphicsSettings() { return RHIInterface::GetGraphicsSettings(ERHIBackend::Vulkan); }
-
-	static const struct VulkanLayerExtensionConfigurations& GetLayerExtensionConfigs() { return *s_LayerExtensionConfigs; }
 protected:
 	void InitializeGraphicsDevices() override final;
 private:
 	std::unique_ptr<class VulkanDevice> m_Device;
-
-	static std::shared_ptr<struct VulkanLayerExtensionConfigurations> s_LayerExtensionConfigs;
+	static std::shared_ptr<struct VulkanEnvConfiguration> s_EnvConfigs;
 
 #if USE_DYNAMIC_VK_LOADER
 	const vk::detail::DynamicLoader m_DynamicLoader;

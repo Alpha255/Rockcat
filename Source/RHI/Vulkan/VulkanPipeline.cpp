@@ -119,7 +119,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 	vk::PipelineViewportStateCreateInfo ViewportStateCreateInfo;
 	
 	vk::PipelineDynamicStateCreateInfo DynamicStateCreateInfo;
-	if (VulkanRHI::GetLayerExtensionConfigs().HasDynamicState)
+	if (VulkanRHI::GetExtConfigs().DynamicState)
 	{
 		std::vector<vk::DynamicState> DynamicStates
 		{

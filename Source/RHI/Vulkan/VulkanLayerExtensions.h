@@ -1,9 +1,10 @@
 #pragma once
 
 #include "RHI/Vulkan/VulkanTypes.h"
+#include "RHI/Vulkan/VulkanEnvConfiguration.h"
 #include "Engine/Asset/SerializableAsset.h"
 
-#define VK_LAYER_EXT_CONFIG_PATH "Configs\\VkLayerAndExtensionConfigs.json"
+#define VK_ENV_CONFIG_PATH "Configs\\VkEnvConfigs.json"
 #define VK_LAYER_KHRONOS_VALIDATION_NAME "VK_LAYER_KHRONOS_validation"
 
 using VulkanLayerArray = std::vector<std::unique_ptr<class VulkanLayer>>;
@@ -16,90 +17,11 @@ inline void SetPNext(LastStruct& Last, NextStruct& Next)
 	Last.pNext = (void*)&Next;
 }
 
-struct VulkanLayerExtensionConfigurations : public SerializableAsset<VulkanLayerExtensionConfigurations>
-{
-	using BaseClass::BaseClass;
-
-	ERHIDebugLayerLevel DebugLayerLevel = ERHIDebugLayerLevel::Error;
-
-	bool HasKhronosValidationLayer = true;
-
-	bool HasKHRSurface = true;
-	bool HasDebugUtils = true;
-	bool HasDebugReport = true;
-	bool HasValidationFeatures = true;
-	bool HasValidationFeatures_GPUAssisted = false;
-	bool HasValidationFeatures_GPUAssistedReserveBindingSlot = false;
-	bool HasValidationFeatures_BestPractices = true;
-	bool HasValidationFeatures_DebugPrintf = false;
-	bool HasValidationFeatures_Synchronization = true;
-	bool HasGetPhysicalDeviceProperties2 = false;
-	bool HasDebugMarker = true;
-	bool HasTimelineSemaphore = false;
-	bool HasFullscreenExclusive = false;
-	bool HasDynamicState = false;
-	bool HasDepthStencilResolve = false;
-	bool HasRenderPass2 = false;
-	bool HasHostImageCopy = false;
-	bool HasDynamicRendering = false;
-	bool HasGraphicsPipelineLibrary = false;
-	bool HasInlineUniformBlock = false;
-	bool HasConservativeRasterization = false;
-	bool HasConditionalRendering = false;
-	bool HasDebugPrintf = false;
-	bool HasPushDescriptor = false;
-	bool HasMaintenance1 = false;
-	bool HasMaintenance2 = false;
-	bool HasMaintenance3 = false;
-	bool HasMaintenance4 = false;
-	bool HasMaintenance5 = false;
-	bool HasMaintenance6 = false;
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(DebugLayerLevel),
-			CEREAL_NVP(HasKhronosValidationLayer),
-			CEREAL_NVP(HasKHRSurface),
-			CEREAL_NVP(HasDebugUtils),
-			CEREAL_NVP(HasDebugReport),
-			CEREAL_NVP(HasValidationFeatures),
-			CEREAL_NVP(HasValidationFeatures_GPUAssisted),
-			CEREAL_NVP(HasValidationFeatures_GPUAssistedReserveBindingSlot),
-			CEREAL_NVP(HasValidationFeatures_BestPractices),
-			CEREAL_NVP(HasValidationFeatures_DebugPrintf),
-			CEREAL_NVP(HasValidationFeatures_Synchronization),
-			CEREAL_NVP(HasGetPhysicalDeviceProperties2),
-			CEREAL_NVP(HasDebugMarker),
-			CEREAL_NVP(HasTimelineSemaphore),
-			CEREAL_NVP(HasFullscreenExclusive),
-			CEREAL_NVP(HasDynamicState),
-			CEREAL_NVP(HasDepthStencilResolve),
-			CEREAL_NVP(HasRenderPass2),
-			CEREAL_NVP(HasHostImageCopy),
-			CEREAL_NVP(HasDynamicRendering),
-			CEREAL_NVP(HasGraphicsPipelineLibrary),
-			CEREAL_NVP(HasInlineUniformBlock),
-			CEREAL_NVP(HasConservativeRasterization),
-			CEREAL_NVP(HasConditionalRendering),
-			CEREAL_NVP(HasDebugPrintf),
-			CEREAL_NVP(HasPushDescriptor),
-			CEREAL_NVP(HasMaintenance1),
-			CEREAL_NVP(HasMaintenance2),
-			CEREAL_NVP(HasMaintenance3),
-			CEREAL_NVP(HasMaintenance4),
-			CEREAL_NVP(HasMaintenance5),
-			CEREAL_NVP(HasMaintenance6)
-		);
-	}
-};
-
 class VulkanLayer
 {
 public:
-	using OnInstanceCreation = std::function<void(const VulkanLayerExtensionConfigurations&, vk::InstanceCreateInfo&)>;
-	using OnDeviceCreation = std::function<void(const VulkanLayerExtensionConfigurations&, vk::DeviceCreateInfo&)>;
+	using OnInstanceCreation = std::function<void(const VulkanExtensionConfiguration&, vk::InstanceCreateInfo&)>;
+	using OnDeviceCreation = std::function<void(const VulkanExtensionConfiguration&, vk::DeviceCreateInfo&)>;
 
 	VulkanLayer(const char* Name, bool Supported, bool Needed, bool* EnabledInConfig)
 		: m_Name(Name)
@@ -120,8 +42,8 @@ public:
 	inline void SetOnInstanceCreation(OnInstanceCreation&& Func) { m_OnInstanceCreation = std::move(Func); }
 	inline void SetOnDeviceCreation(OnDeviceCreation&& Func) { m_OnDeviceCreation = std::move(Func); }
 
-	static VulkanLayerArray GetWantedInstanceLayers(VulkanLayerExtensionConfigurations& Configs);
-	static VulkanLayerArray GetWantedDeviceLayers(VulkanLayerExtensionConfigurations& Configs);
+	static VulkanLayerArray GetWantedInstanceLayers(VulkanExtensionConfiguration& Configs);
+	static VulkanLayerArray GetWantedDeviceLayers(VulkanExtensionConfiguration& Configs);
 protected:
 	friend class VulkanInstance;
 	friend class VulkanDevice;
@@ -143,8 +65,8 @@ class VulkanExtension : public VulkanLayer
 public:
 	using VulkanLayer::VulkanLayer;
 
-	static VulkanExtensionArray GetWantedInstanceExtensions(VulkanLayerExtensionConfigurations& Configs);
-	static VulkanExtensionArray GetWantedDeviceExtensions(VulkanLayerExtensionConfigurations& Configs);
+	static VulkanExtensionArray GetWantedInstanceExtensions(VulkanExtensionConfiguration& Configs);
+	static VulkanExtensionArray GetWantedDeviceExtensions(VulkanExtensionConfiguration& Configs);
 };
 
 void LogEnabledLayerAndExtensions(const VulkanLayerArray& Layers, const VulkanExtensionArray& Extensions, const char* Category);

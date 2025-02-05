@@ -1,11 +1,11 @@
 #include "Engine/Application/BaseApplication.h"
-#include "Engine/Application/ApplicationConfigurations.h"
+#include "Engine/Application/ApplicationConfiguration.h"
 #include "Core/Window.h"
 #include "Engine/Services/RenderService.h"
 
 BaseApplication::BaseApplication(const char* ConfigurationName)
 { 
-	m_Configs = ApplicationConfigurations::Load(ConfigurationName ? ConfigurationName : "Defalut.json");
+	m_Configs = ApplicationConfiguration::Load(ConfigurationName ? ConfigurationName : "Defalut.json");
 }
 
 void BaseApplication::Startup()
@@ -30,7 +30,7 @@ void BaseApplication::Tick(float /*ElapsedSeconds*/)
 	}
 }
 
-const ApplicationConfigurations& BaseApplication::GetConfigurations() const
+const ApplicationConfiguration& BaseApplication::GetConfigurations() const
 { 
 	return *m_Configs;
 }

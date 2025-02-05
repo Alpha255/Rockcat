@@ -1,7 +1,7 @@
 #include "Engine/Engine.h"
 #include "Core/PlatformMisc.h"
 #include "Engine/Application/BaseApplication.h"
-#include "Engine/Application/ApplicationConfigurations.h"
+#include "Engine/Application/ApplicationConfiguration.h"
 #include "Engine/Profile/Profiler.h"
 #include "Engine/Services/SpdLogService.h"
 #include "Engine/Services/RenderService.h"

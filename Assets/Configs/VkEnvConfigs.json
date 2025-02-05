@@ -1,0 +1,52 @@
+{
+    "struct VulkanEnvConfiguration": {
+        "DebugLayerLevel": 3,
+        "ExtensionConfigs": {
+            "KhronosValidationLayer": true,
+            "KHRSurface": true,
+            "DebugUtils": true,
+            "DebugReport": true,
+            "ValidationFeatures": true,
+            "ValidationFeatures_GPUAssisted": false,
+            "ValidationFeatures_GPUAssistedReserveBindingSlot": false,
+            "ValidationFeatures_BestPractices": true,
+            "ValidationFeatures_DebugPrintf": false,
+            "ValidationFeatures_Synchronization": true,
+            "GetPhysicalDeviceProperties2": false,
+            "DebugMarker": true,
+            "TimelineSemaphore": false,
+            "FullscreenExclusive": false,
+            "DynamicState": false,
+            "DepthStencilResolve": false,
+            "RenderPass2": false,
+            "HostImageCopy": false,
+            "DynamicRendering": false,
+            "GraphicsPipelineLibrary": false,
+            "InlineUniformBlock": false,
+            "ConservativeRasterization": false,
+            "ConditionalRendering": false,
+            "DebugPrintf": false,
+            "PushDescriptor": false,
+            "Maintenance1": false,
+            "Maintenance2": false,
+            "Maintenance3": false,
+            "Maintenance4": false,
+            "Maintenance5": false,
+            "Maintenance6": false
+        },
+        "DescriptorLimitationConfigs": {
+            "MaxDescriptorSetsPerPool": 2048,
+            "MaxSampler": 256,
+            "MaxCombinedImageSampler": 2048,
+            "MaxSampledImage": 2048,
+            "MaxStorageImage": 256,
+            "MaxUniformTexelBuffer": 256,
+            "MaxStorageTexelBuffer": 256,
+            "MaxUniformBuffer": 1024,
+            "MaxStorageBuffer": 1024,
+            "MaxUniformBufferDynamic": 8,
+            "MaxStorageBufferDynamic": 8,
+            "MaxInputAttachment": 64
+        }
+    }
+}

@@ -157,7 +157,7 @@ void VulkanCommandBuffer::BeginDebugMarker(const char* Name, const Math::Color& 
 {
 	assert(IsRecording() && Name);
 
-	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtils)
+	if (VulkanRHI::GetExtConfigs().DebugUtils)
 	{
 		vk::DebugUtilsLabelEXT DebugUtilsLabel;
 		DebugUtilsLabel.setColor({ MarkerColor.x, MarkerColor.y, MarkerColor.z, MarkerColor.w })
@@ -165,7 +165,7 @@ void VulkanCommandBuffer::BeginDebugMarker(const char* Name, const Math::Color& 
 
 		GetNative().beginDebugUtilsLabelEXT(&DebugUtilsLabel);
 	}
-	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarker)
+	else if (VulkanRHI::GetExtConfigs().DebugMarker)
 	{
 		vk::DebugMarkerMarkerInfoEXT DebugMarkerInfo;
 		DebugMarkerInfo.setColor({ MarkerColor.x, MarkerColor.y, MarkerColor.z, MarkerColor.w })
@@ -179,11 +179,11 @@ void VulkanCommandBuffer::EndDebugMarker()
 {
 	assert(IsRecording());
 
-	if (VulkanRHI::GetLayerExtensionConfigs().HasDebugUtils)
+	if (VulkanRHI::GetExtConfigs().DebugUtils)
 	{
 		GetNative().endDebugUtilsLabelEXT();
 	}
-	else if (VulkanRHI::GetLayerExtensionConfigs().HasDebugMarker)
+	else if (VulkanRHI::GetExtConfigs().DebugMarker)
 	{
 		GetNative().debugMarkerEndEXT();
 	}
@@ -226,7 +226,7 @@ void VulkanCommandBuffer::SetPrimitiveTopology(ERHIPrimitiveTopology Topology)
 {
 	assert(IsRecording());
 
-	if (VulkanRHI::GetLayerExtensionConfigs().HasDynamicState)
+	if (VulkanRHI::GetExtConfigs().DynamicState)
 	{
 		GetNative().setPrimitiveTopologyEXT(GetPrimitiveTopology(Topology));
 	}

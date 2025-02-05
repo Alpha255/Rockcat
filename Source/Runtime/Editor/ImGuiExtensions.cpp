@@ -1,5 +1,5 @@
 #include "Editor/ImGuiExtensions.h"
-#include "Editor/ImGuiConfigurations.h"
+#include "Editor/ImGuiConfiguration.h"
 
 namespace ImGui
 {

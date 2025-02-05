@@ -1,17 +1,17 @@
-#include "Editor/ImGuiConfigurations.h"
+#include "Editor/ImGuiConfiguration.h"
 #include "Engine/Services/SpdLogService.h"
 #include "Editor/Icons/Icons.h"
 #include "Engine/Paths.h"
 
 const std::map<std::string, ImGuiFont>* ImGuiScopedFont::AllFonts = nullptr;
 
-void ImGuiConfigurations::PostLoad()
+void ImGuiConfiguration::PostLoad()
 {
 	LoadDefaultFonts();
 	LoadDefaultThemes();
 }
 
-void ImGuiConfigurations::LoadDefaultFonts()
+void ImGuiConfiguration::LoadDefaultFonts()
 {
 	auto& IO = ImGui::GetIO();
 	IO.FontGlobalScale = 1.0f;
@@ -76,7 +76,7 @@ void ImGuiConfigurations::LoadDefaultFonts()
 	}
 }
 
-void ImGuiConfigurations::LoadDefaultThemes()
+void ImGuiConfiguration::LoadDefaultThemes()
 {
 	for (auto& Entry : std::filesystem::recursive_directory_iterator(Paths::EditorThemePath()))
 	{
@@ -97,12 +97,12 @@ void ImGuiConfigurations::LoadDefaultThemes()
 	SetTheme(m_DefaultTheme, true);
 }
 
-void ImGuiConfigurations::SetTheme(const char* const ThemeName, bool Force)
+void ImGuiConfiguration::SetTheme(const char* const ThemeName, bool Force)
 {
 	SetTheme(std::string(ThemeName ? ThemeName : ""), Force);
 }
 
-void ImGuiConfigurations::SetTheme(const std::string& ThemeName, bool Force)
+void ImGuiConfiguration::SetTheme(const std::string& ThemeName, bool Force)
 {
 	if (!ThemeName.empty() && (m_DefaultTheme != ThemeName || Force))
 	{
@@ -116,7 +116,7 @@ void ImGuiConfigurations::SetTheme(const std::string& ThemeName, bool Force)
 	}
 }
 
-ImGuiConfigurations::~ImGuiConfigurations()
+ImGuiConfiguration::~ImGuiConfiguration()
 {
-	Save<ImGuiConfigurations>(true);
+	Save<ImGuiConfiguration>(true);
 }

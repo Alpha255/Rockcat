@@ -8,9 +8,10 @@
 #include "RHI/Vulkan/VulkanPipeline.h"
 #include "RHI/Vulkan/VulkanCommandListContext.h"
 #include "RHI/Vulkan/VulkanDescriptor.h"
+#include "RHI/Vulkan/VulkanEnvConfiguration.h"
 #include "Engine/Services/TaskFlowService.h"
 
-VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
+VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 {
 	m_Instance = std::make_unique<VulkanInstance>(Configs);
 
@@ -89,8 +90,8 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 
 	GetQueueFamilyIndex(m_PhysicalDevice, GraphicsQueueIndex, ComputeQueueIndex, TransferQueueIndex, PresentQueueIndex);
 
-	auto WantedLayers = VulkanLayer::GetWantedDeviceLayers(*Configs);
-	auto WantedExtensions = VulkanExtension::GetWantedDeviceExtensions(*Configs);
+	auto WantedLayers = VulkanLayer::GetWantedDeviceLayers(Configs);
+	auto WantedExtensions = VulkanExtension::GetWantedDeviceExtensions(Configs);
 
 	std::vector<const char*> EnabledLayers;
 	std::vector<const char*> EnabledExtensions;
@@ -112,7 +113,7 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 
 		Layer->SetEnabledInConfig(LayerIt != LayerProperties.cend());
 
-		if (Layer->IsSupported() && Layer->IsEnabled())
+		if (Layer->IsEnabled())
 		{
 			EnabledLayers.push_back(Layer->GetName());
 		}
@@ -135,7 +136,7 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 
 		Ext->SetEnabledInConfig(ExtensionIt != ExtensionProperties.cend());
 
-		if (Ext->IsSupported() && Ext->IsEnabled())
+		if (Ext->IsEnabled())
 		{
 			Ext->SetSpecVersion(ExtensionIt->specVersion);
 			EnabledExtensions.push_back(Ext->GetName());
@@ -190,7 +191,7 @@ VulkanDevice::VulkanDevice(VulkanLayerExtensionConfigurations* Configs)
 	{
 		if (Extension->IsEnabled() && Extension->GetOnDeviceCreation())
 		{
-			Extension->GetOnDeviceCreation()(*Configs, CreateInfo);
+			Extension->GetOnDeviceCreation()(Configs, CreateInfo);
 		}
 	}
 

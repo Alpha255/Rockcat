@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Editor/ImGuiConfigurations.h"
+#include "Editor/ImGuiConfiguration.h"
 
 class ImGuiEditor
 {
@@ -25,7 +25,7 @@ private:
 
 	void DrawMenuBar();
 
-	std::shared_ptr<ImGuiConfigurations> m_Configs;
+	std::shared_ptr<ImGuiConfiguration> m_Configs;
 	std::vector<std::shared_ptr<class ImGuiPanel>> m_Panels;
 	std::vector<std::string> m_RecentScenes;
 	bool m_ShowThemeEditor = false;

@@ -18,7 +18,7 @@ ImGuiEditor::ImGuiEditor(uint32_t AppWindowWidth, uint32_t AppWindowHeight)
     IO.ConfigWindowsMoveFromTitleBarOnly = true;
     //io.ConfigDockingTransparentPayload = true;
 	
-	m_Configs = ImGuiConfigurations::Load();
+	m_Configs = ImGuiConfiguration::Load();
     
     auto LogPanel = m_Panels.emplace_back(std::make_shared<LogConsolePanel>()).get();
     m_Panels.emplace_back(std::make_shared<SceneViewPanel>());

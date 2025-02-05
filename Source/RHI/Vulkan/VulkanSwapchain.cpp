@@ -237,7 +237,7 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 
 		VK_FULL_SCREEN_EXCLUSIVE_APPLICATION_CONTROLLED_EXT indicates the application will manage full-screen exclusive mode by using the vkAcquireFullScreenExclusiveModeEXT and vkReleaseFullScreenExclusiveModeEXT commands.
 	*******************************************************************************************************************************************************************/
-	if (VulkanRHI::GetLayerExtensionConfigs().HasFullscreenExclusive)
+	if (VulkanRHI::GetExtConfigs().FullscreenExclusive)
 	{
 		vk::SurfaceFullScreenExclusiveInfoEXT FullscreenExclusiveInfo;
 		FullscreenExclusiveInfo.setFullScreenExclusive(m_Fullscreen ? vk::FullScreenExclusiveEXT::eAllowed : vk::FullScreenExclusiveEXT::eDisallowed);

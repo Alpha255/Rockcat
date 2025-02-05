@@ -121,7 +121,7 @@ struct ImGuiScopedFont
 		}
 	}
 private:
-	friend class ImGuiConfigurations;
+	friend class ImGuiConfiguration;
 	static const std::map<std::string, ImGuiFont>* AllFonts;
 	bool FontPushed = false;
 };
@@ -151,15 +151,15 @@ struct ImGuiScopedID
 };
 #define IMGUI_SCOPED_ID(ID) ImGuiScopedID CAT(_ScopedID_, __LINE__)(ID)
 
-class ImGuiConfigurations : public SerializableAsset<ImGuiConfigurations>
+class ImGuiConfiguration : public SerializableAsset<ImGuiConfiguration>
 {
 public:
-	ImGuiConfigurations()
+	ImGuiConfiguration()
 		: BaseClass("Configs\\ImGuiEditorConfigs.json")
 	{
 	}
 
-	~ImGuiConfigurations();
+	~ImGuiConfiguration();
 
 	void SetTheme(const std::string& ThemeName, bool Force = false);
 	void SetTheme(const char* const ThemeName, bool Force = false);

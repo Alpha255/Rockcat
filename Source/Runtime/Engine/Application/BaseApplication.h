@@ -20,13 +20,13 @@ public:
 	void Tick(float ElapsedSeconds) override;
 
 	const class Window& GetWindow() const { return *m_Window; }
-	const class ApplicationConfigurations& GetConfigurations() const;
+	const class ApplicationConfiguration& GetConfigurations() const;
 	const struct GraphicsSettings& GetGraphicsSettings() const;
 protected:
 	virtual void MakeWindow();
 	virtual void Initialize() {}
 	virtual void RenderGUI(class Canvas&) {}
 private:
-	std::shared_ptr<class ApplicationConfigurations> m_Configs;
+	std::shared_ptr<class ApplicationConfiguration> m_Configs;
 	std::shared_ptr<class Window> m_Window;
 };

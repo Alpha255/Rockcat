@@ -6,7 +6,7 @@
 class VulkanDevice final : public RHIDevice
 {
 public:
-	VulkanDevice(struct VulkanLayerExtensionConfigurations* Configs);
+	VulkanDevice(struct VulkanExtensionConfiguration& Configs);
 
 	~VulkanDevice();
 

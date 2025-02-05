@@ -1,5 +1,7 @@
 #include "RHI/Vulkan/VulkanInstance.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
+#include "RHI/Vulkan/VulkanEnvConfiguration.h"
+#include "RHI/Vulkan/VulkanRHI.h"
 #include "Engine/Services/SpdLogService.h"
 
 #if !USE_DYNAMIC_VK_LOADER
@@ -115,10 +117,10 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugReportCallback(
 	return VK_FALSE;
 }
 
-VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
+VulkanInstance::VulkanInstance(VulkanExtensionConfiguration& Configs)
 {
-	auto WantedLayers = VulkanLayer::GetWantedInstanceLayers(*Configs);
-	auto WantedExtensions = VulkanExtension::GetWantedInstanceExtensions(*Configs);
+	auto WantedLayers = VulkanLayer::GetWantedInstanceLayers(Configs);
+	auto WantedExtensions = VulkanExtension::GetWantedInstanceExtensions(Configs);
 
 	std::vector<const char*> EnabledLayers;
 	std::vector<const char*> EnabledExtensions;
@@ -137,10 +139,10 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 		auto LayerPropertyIt = std::find_if(LayerProperties.cbegin(), LayerProperties.cend(), [&Layer](const vk::LayerProperties& Property) {
 			return strcmp(Property.layerName.data(), Layer->GetName());
 		});
-		
+
 		Layer->SetEnabledInConfig(LayerPropertyIt != LayerProperties.cend());
 
-		if (Layer->IsSupported() || Layer->IsEnabled())
+		if (Layer->IsEnabled())
 		{
 			Layer->SetSpecVersion(LayerPropertyIt->specVersion);
 			EnabledLayers.push_back(Layer->GetName());
@@ -167,7 +169,7 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 
 		Ext->SetEnabledInConfig(ExtensionIt != ExtensionProperties.cend());
 
-		if (Ext->IsSupported() && Ext->IsEnabled())
+		if (Ext->IsEnabled())
 		{
 			Ext->SetSpecVersion(ExtensionIt->specVersion);
 			EnabledExtensions.push_back(Ext->GetName());
@@ -208,7 +210,7 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 	{
 		if (Extension->IsEnabled() && Extension->GetOnInstanceCreation())
 		{
-			Extension->GetOnInstanceCreation()(*Configs, CreateInfo);
+			Extension->GetOnInstanceCreation()(Configs, CreateInfo);
 		}
 	}
 
@@ -218,12 +220,14 @@ VulkanInstance::VulkanInstance(VulkanLayerExtensionConfigurations* Configs)
 	VULKAN_HPP_DEFAULT_DISPATCHER.init(m_Instance);
 #endif
 
-	SetupRuntimeDebug(Configs, DebugUtilExt ? DebugUtilExt->IsEnabled() : false, DebugReportExt ? DebugReportExt->IsEnabled() : false);
+	SetupRuntimeDebug(DebugUtilExt ? DebugUtilExt->IsEnabled() : false, DebugReportExt ? DebugReportExt->IsEnabled() : false);
 }
 
-void VulkanInstance::SetupRuntimeDebug(const VulkanLayerExtensionConfigurations* Configs, bool EnableDebugUtils, bool EnableDebugReports)
+void VulkanInstance::SetupRuntimeDebug(bool EnableDebugUtils, bool EnableDebugReports)
 {
-	if (Configs->DebugLayerLevel > ERHIDebugLayerLevel::None)
+	auto DebugLayerLevel = VulkanRHI::GetEnvConfigs().DebugLayerLevel;
+
+	if (DebugLayerLevel > ERHIDebugLayerLevel::None)
 	{
 		if (EnableDebugUtils)
 		{
@@ -235,7 +239,7 @@ void VulkanInstance::SetupRuntimeDebug(const VulkanLayerExtensionConfigurations*
 
 			vk::DebugUtilsMessageSeverityFlagsEXT MessageSeverityFlags;
 			vk::DebugUtilsMessageTypeFlagsEXT MessageTypeFlags;
-			switch (Configs->DebugLayerLevel)
+			switch (DebugLayerLevel)
 			{
 			case ERHIDebugLayerLevel::Verbose:
 				MessageSeverityFlags |= vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose;
@@ -269,7 +273,7 @@ void VulkanInstance::SetupRuntimeDebug(const VulkanLayerExtensionConfigurations*
 #endif
 
 			vk::DebugReportFlagsEXT DebugReportFlags;
-			switch (Configs->DebugLayerLevel)
+			switch (DebugLayerLevel)
 			{
 			case ERHIDebugLayerLevel::Verbose:
 				DebugReportFlags |= vk::DebugReportFlagBitsEXT::eDebug;

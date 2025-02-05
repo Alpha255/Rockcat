@@ -4,7 +4,7 @@
 #include "Engine/Application/GraphicsSettings.h"
 #include "Engine/Asset/SerializableAsset.h"
 
-class ApplicationConfigurations : public SerializableAsset<ApplicationConfigurations>
+class ApplicationConfiguration : public SerializableAsset<ApplicationConfiguration>
 {
 public:
 	using BaseClass::BaseClass;

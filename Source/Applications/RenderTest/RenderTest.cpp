@@ -1,7 +1,7 @@
 #include "Applications/RenderTest/RenderTest.h"
 #include "Core/Main.h"
 #include "Engine/Scene/Scene.h"
-#include "Engine/Application/ApplicationConfigurations.h"
+#include "Engine/Application/ApplicationConfiguration.h"
 #include "Engine/Rendering/RenderGraph/ForwardRenderingPath.h"
 #include "Engine/Services/RenderService.h"
 #include "Engine/Services/TaskFlowService.h"

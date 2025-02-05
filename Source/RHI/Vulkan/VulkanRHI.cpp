@@ -1,13 +1,14 @@
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
+#include "RHI/Vulkan/VulkanEnvConfiguration.h"
 #include "Engine/Services/SpdLogService.h"
 
 #if USE_DYNAMIC_VK_LOADER
-	VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
+VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 #endif
 
-std::shared_ptr<VulkanLayerExtensionConfigurations> VulkanRHI::s_LayerExtensionConfigs;
+std::shared_ptr<VulkanEnvConfiguration> VulkanRHI::s_EnvConfigs;
 
 VulkanRHI::VulkanRHI(const GraphicsSettings* GfxSettings)
 	: RHIInterface(GfxSettings)
@@ -23,8 +24,9 @@ void VulkanRHI::InitializeGraphicsDevices()
 	assert(vkGetInstanceProcAddr);
 	VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);	
 #endif
-	s_LayerExtensionConfigs = VulkanLayerExtensionConfigurations::Load(VK_LAYER_EXT_CONFIG_PATH);
-	m_Device = std::make_unique<VulkanDevice>(s_LayerExtensionConfigs.get());
+	s_EnvConfigs = VulkanEnvConfiguration::Load(VK_ENV_CONFIG_PATH);
+	m_Device = std::make_unique<VulkanDevice>(s_EnvConfigs->ExtensionConfigs);
+	s_EnvConfigs->Save(true);
 }
 
 VulkanRHI::~VulkanRHI()
@@ -37,6 +39,16 @@ VulkanRHI::~VulkanRHI()
 RHIDevice& VulkanRHI::GetDevice()
 {
 	return *m_Device;
+}
+
+const VulkanExtensionConfiguration& VulkanRHI::GetExtConfigs()
+{
+	return s_EnvConfigs->ExtensionConfigs;
+}
+
+const VulkanDescriptorLimitationConfiguration& VulkanRHI::GetDescriptorLimitationConfigs()
+{
+	return s_EnvConfigs->DescriptorLimitationConfigs;
 }
 
 #if 0
