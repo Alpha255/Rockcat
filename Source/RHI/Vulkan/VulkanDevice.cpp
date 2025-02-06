@@ -111,7 +111,10 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 			return strcmp(Layer->GetName(), Property.layerName.data()) == 0;
 		});
 
-		Layer->SetEnabledInConfig(LayerIt != LayerProperties.cend());
+		if (Layer->IsEnabled())
+		{
+			Layer->SetEnabledInConfig(LayerIt != LayerProperties.cend());
+		}
 
 		if (Layer->IsEnabled())
 		{
@@ -134,7 +137,10 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 			return strcmp(Ext->GetName(), Property.extensionName.data()) == 0;
 		});
 
-		Ext->SetEnabledInConfig(ExtensionIt != ExtensionProperties.cend());
+		if (Ext->IsEnabled())
+		{
+			Ext->SetEnabledInConfig(ExtensionIt != ExtensionProperties.cend());
+		}
 
 		if (Ext->IsEnabled())
 		{
