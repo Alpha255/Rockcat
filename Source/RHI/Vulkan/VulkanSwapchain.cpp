@@ -27,14 +27,14 @@ VulkanSurface::~VulkanSurface()
 	m_Native = nullptr;
 }
 
-VulkanSwapchain::VulkanSwapchain(const VulkanDevice& Device, const void* WindowHandle, uint32_t Width, uint32_t Height)
+VulkanSwapchain::VulkanSwapchain(const VulkanDevice& Device, const void* WindowHandle, uint32_t Width, uint32_t Height, bool VSync, bool Fullscreen, bool HDR)
 	: VkHwResource(Device)
-	, m_VSync(VulkanRHI::GetGraphicsSettings().VSync)
-	, m_Fullscreen(VulkanRHI::GetGraphicsSettings().FullScreen)
+	, m_VSync(VSync)
+	, m_Fullscreen(Fullscreen)
 	, m_WindowHandle(WindowHandle)
 	, m_Width(Width)
 	, m_Height(Height)
-	, m_ColorFormat(VulkanRHI::GetGraphicsSettings().SRGBSwapchain ? vk::Format::eR8G8B8A8Srgb : vk::Format::eR8G8B8A8Unorm)
+	, m_ColorFormat(HDR ? vk::Format::eA2R10G10B10UnormPack32 : vk::Format::eR8G8B8A8Unorm)
 	//, m_PresentComplete(std::move(std::make_unique<VulkanSemaphore>(Device)))
 {
 	Create(true);
@@ -353,7 +353,7 @@ void VulkanSwapchain::Present()
 	//vk::Queue PresentQueue = m_Device->Queue(EQueueType::Graphics)->Get();
 	vk::Queue PresentQueue;
 
-	/// Before an application can present an image, the image��s layout must be transitioned to the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout, 
+	/// Before an application can present an image, the image's layout must be transitioned to the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout, 
 	/// or for a shared presentable image the VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR layout.
 	vk::PresentInfoKHR PresentInfo;
 	PresentInfo.setWaitSemaphores(WaitSemaphores)

@@ -13,20 +13,14 @@
 /// ****  Depth range [0-1]
 /// </summary>
 
-class RHIInterface
+class RHIBackend
 {
 public:
-	RHIInterface(const GraphicsSettings* GfxSettings);
-
-	virtual ~RHIInterface() = default;
-
-	virtual ERHIBackend GetRHIType() const { return ERHIBackend::Num; }
-
-	const char* GetName() const { return GetName(GetRHIType()); }
-
+	virtual ~RHIBackend() = default;
+	virtual ERHIBackend GetType() const { return ERHIBackend::Num; }
 	virtual RHIDevice& GetDevice() = 0;
 
-	const GraphicsSettings& GetGraphicsSettings() const { return GetGraphicsSettings(GetRHIType()); }
+	const char* GetName() const { return GetName(GetType()); }
 
 	static const char* GetName(ERHIBackend RHI)
 	{
@@ -42,10 +36,6 @@ public:
 protected:
 	friend class RenderService;
 
-	virtual void InitializeGraphicsDevices() = 0;
-	void PrepareStaticResources() {}
-
-	static const GraphicsSettings& GetGraphicsSettings(ERHIBackend Interface);
-private:
-	static Array<const GraphicsSettings*, ERHIBackend> s_GraphicsSettings;
+	virtual void InitializeGraphicsDevice() = 0;
+	void PrepareGlobalResources() {}
 };

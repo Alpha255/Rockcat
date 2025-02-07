@@ -18,11 +18,7 @@ Engine& Engine::Get()
 
 void Engine::Run()
 {
-	if (!m_Initialized)
-	{
-		m_Initialized = Initialize();
-		assert(m_Initialized);
-	}
+	Initialize();
 
 	for (auto& Application : m_Applications)
 	{
@@ -58,12 +54,17 @@ void Engine::Run()
 	Finalize();
 }
 
-bool Engine::Initialize()
+void Engine::Initialize()
 {
+	if (m_Initialized)
+	{
+		return;
+	}
+
 	if (!std::filesystem::exists(Paths::AssetPath()))
 	{
 		LOG_CRITICAL("Invalid assets directory: {}.", Paths::AssetPath().string());
-		return false;
+		return;
 	}
 
 	PlatformMisc::SetCurrentWorkingDirectory(Paths::AssetPath());
@@ -74,7 +75,7 @@ bool Engine::Initialize()
 	RenderService::Get().OnStartup();
 	ShaderLibrary::Get().OnStartup();
 
-	return true;
+	m_Initialized = true;
 }
 
 void Engine::Finalize()

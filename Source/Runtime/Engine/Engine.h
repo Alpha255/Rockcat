@@ -13,18 +13,9 @@ public:
 	void Run();
 
 	template<class TApplication>
-	struct ApplicationRegister
+	void RegisterApplication(const char* ConfigurationPath)
 	{
-		ApplicationRegister(const char* ConfigurationName)
-		{
-			Engine::Get().RegisterApplication<TApplication>(ConfigurationName);
-		}
-	};
-
-	template<class TApplication>
-	void RegisterApplication(const char* ConfigurationName)
-	{
-		m_Applications.emplace_back(std::make_unique<TApplication>(ConfigurationName));
+		m_Applications.emplace_back(std::make_unique<TApplication>(ConfigurationPath));
 	}
 
 	template<class TModule>
@@ -36,7 +27,7 @@ public:
 
 #define GetModule(ModuleType) GetModuleByName<ModuleType>(#ModuleType)
 private:
-	bool Initialize();
+	void Initialize();
 	void Finalize();
 
 	std::list<std::unique_ptr<BaseApplication>> m_Applications;
@@ -44,6 +35,15 @@ private:
 	bool m_Initialized = false;
 };
 
-#define REGISTER_APPLICATION(ApplicationType, ConfigurationName) \
-	static Engine::ApplicationRegister<ApplicationType> CAT(s_##ApplicationType##_, __LINE__)(ConfigurationName);
+template<class TApplication>
+struct ApplicationRegister
+{
+	ApplicationRegister(const char* ConfigurationPath)
+	{
+		Engine::Get().RegisterApplication<TApplication>(ConfigurationPath);
+	}
+};
+
+#define REGISTER_APPLICATION(ApplicationType, ConfigurationPath) \
+	static ApplicationRegister<ApplicationType> CAT(s_##ApplicationType##_, __LINE__)(ConfigurationPath);
 

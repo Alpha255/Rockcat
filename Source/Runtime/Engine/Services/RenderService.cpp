@@ -1,21 +1,20 @@
 #include "Engine/Services/RenderService.h"
 #include "Engine/Services/SpdLogService.h"
 #include "Engine/Engine.h"
-#include "Engine/Application/ApplicationConfiguration.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 
-void RenderService::InitializeRHI(const GraphicsSettings& GfxSettings)
+std::shared_ptr<RHIBackend> RenderService::GetOrCreateBackend(ERHIBackend Backend)
 {
-	assert(GfxSettings.Interface < ERHIBackend::Num);
+	assert(Backend < ERHIBackend::Num);
 
-	if (!m_Backends[GfxSettings.Interface])
+	if (!m_Backends[Backend])
 	{
-		switch (GfxSettings.Interface)
+		switch (Backend)
 		{
 		case ERHIBackend::Software:
 			break;
 		case ERHIBackend::Vulkan:
-			m_Backends[ERHIBackend::Vulkan] = std::make_unique<VulkanRHI>(&GfxSettings);
+			m_Backends[ERHIBackend::Vulkan] = std::make_shared<VulkanRHI>();
 			break;
 		case ERHIBackend::D3D11:
 			break;
@@ -23,24 +22,26 @@ void RenderService::InitializeRHI(const GraphicsSettings& GfxSettings)
 			break;
 		}
 
-		if (!m_Backends[GfxSettings.Interface])
+		if (!m_Backends[Backend])
 		{
-			LOG_CRITICAL("{} is not support yet!", RHIInterface::GetName(GfxSettings.Interface));
+			LOG_CRITICAL("Render backend \"{}\" is not support yet!", RHIBackend::GetName(Backend));
 		}
 		else
 		{
-			m_Backends[GfxSettings.Interface]->PrepareStaticResources();
+			m_Backends[Backend]->InitializeGraphicsDevice();
+			m_Backends[Backend]->PrepareGlobalResources();
 		}
 	}
+
+	return m_Backends[Backend];
 }
 
 void RenderService::OnStartup()
 {
 	for (auto& Application : Engine::Get().GetApplications())
 	{
-		if (Application->GetConfigurations().IsEnableRendering())
+		if (Application->IsEnableRendering())
 		{
-			InitializeRHI(Application->GetConfigurations().GetGraphicsSettings());
 		}
 	}
 }

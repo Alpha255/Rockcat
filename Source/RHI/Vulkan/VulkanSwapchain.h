@@ -14,9 +14,7 @@ public:
 class VulkanSwapchain final : public VkHwResource<vk::SwapchainKHR>
 {
 public:
-	VulkanSwapchain(const class VulkanDevice& Device, const void* WindowHandle, uint32_t Width, uint32_t Height);
-
-	~VulkanSwapchain() = default;
+	VulkanSwapchain(const class VulkanDevice& Device, const void* WindowHandle, uint32_t Width, uint32_t Height, bool VSync, bool Fullscreen, bool HDR);
 
 	void Resize(uint32_t Width, uint32_t Height)
 	{

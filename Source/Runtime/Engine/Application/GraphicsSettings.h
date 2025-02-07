@@ -52,46 +52,31 @@ enum class ERHIBackend : uint8_t
 	Num
 };
 
-struct DebugDrawSettings
+struct RenderSettings
 {
-	enum class EGBufferDebugMode : uint8_t
+	struct DebugDrawSettings
 	{
-		None,
-		BaseColor,
-		Normal,
-		Roughness,
-		Metalness,
-		Occlusion,
-		Specular,
-		Emissive
-	};
+		enum class EGBufferDebugMode : uint8_t
+		{
+			None,
+			BaseColor,
+			Normal,
+			Roughness,
+			Metalness,
+			Occlusion,
+			Specular,
+			Emissive
+		};
 
-	bool Wireframe = false;
-	EGBufferDebugMode GBufferDebugMode = EGBufferDebugMode::None;
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(Wireframe),
-			CEREAL_NVP(GBufferDebugMode)
-		);
-	}
-};
-
-struct GraphicsSettings
-{
-	struct DisplayResolution
-	{
-		uint32_t Width = 1280u;
-		uint32_t Height = 720u;
+		bool Wireframe = false;
+		EGBufferDebugMode GBufferDebugMode = EGBufferDebugMode::None;
 
 		template<class Archive>
 		void serialize(Archive& Ar)
 		{
 			Ar(
-				CEREAL_NVP(Width),
-				CEREAL_NVP(Height)
+				CEREAL_NVP(Wireframe),
+				CEREAL_NVP(GBufferDebugMode)
 			);
 		}
 	};
@@ -121,10 +106,8 @@ struct GraphicsSettings
 		}
 	};
 
-	DisplayResolution Resolution;
 	bool VSync = false;
-	bool FullScreen = false;
-	bool SRGBSwapchain = false;
+	bool FullScreen = false;;
 	bool MotionVectors = false;
 	bool FrustumCulling = true;
 	bool EnableTiledBasedLightCulling = false;
@@ -142,17 +125,16 @@ struct GraphicsSettings
 	ELightingPolicy LightingPolicy = ELightingPolicy::Default;
 	EShadowTechnique ShadowTechnique = EShadowTechnique::None;
 	EAntiAliasingTechnique AntiAliasingTechnique = EAntiAliasingTechnique::None;
-	ERHIBackend Interface = ERHIBackend::Num;
+	ERHIBackend Backend = ERHIBackend::Num;
 	PostProcessingSettings PostProcessing;
+	DebugDrawSettings DebugDraw;
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_NVP(Resolution),
 			CEREAL_NVP(VSync),
 			CEREAL_NVP(FullScreen),
-			CEREAL_NVP(SRGBSwapchain),
 			CEREAL_NVP(MotionVectors),
 			CEREAL_NVP(FrustumCulling),
 			CEREAL_NVP(EnableTiledBasedLightCulling),
@@ -170,8 +152,9 @@ struct GraphicsSettings
 			CEREAL_NVP(LightingPolicy),
 			CEREAL_NVP(ShadowTechnique),
 			CEREAL_NVP(AntiAliasingTechnique),
-			CEREAL_NVP(Interface),
-			CEREAL_NVP(PostProcessing)
+			CEREAL_NVP(Backend),
+			CEREAL_NVP(PostProcessing),
+			CEREAL_NVP(DebugDraw)
 		);
 	}
 };

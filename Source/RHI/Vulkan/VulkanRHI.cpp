@@ -10,14 +10,12 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 std::shared_ptr<VulkanEnvConfiguration> VulkanRHI::s_EnvConfigs;
 
-VulkanRHI::VulkanRHI(const GraphicsSettings* GfxSettings)
-	: RHIInterface(GfxSettings)
+VulkanRHI::VulkanRHI()
 {
 	REGISTER_LOG_CATEGORY(LogVulkanRHI);
-	InitializeGraphicsDevices();
 }
 
-void VulkanRHI::InitializeGraphicsDevices()
+void VulkanRHI::InitializeGraphicsDevice()
 {
 #if USE_DYNAMIC_VK_LOADER
 	const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = m_DynamicLoader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Module.h"
-#include "Engine/RHI/RHIInterface.h"
+#include "Engine/RHI/RHIBackend.h"
 
 class RenderService : public IService<RenderService>
 {
@@ -9,14 +9,8 @@ public:
 	void OnStartup() override final;
 
 	void OnShutdown() override final;
-
-	RHIInterface& GetBackend(ERHIBackend RHI) 
-	{
-		assert(m_Backends[RHI]);
-		return *m_Backends[RHI];
-	}
 private:
-	void InitializeRHI(const GraphicsSettings& GfxSettings);
+	std::shared_ptr<RHIBackend> GetOrCreateBackend(ERHIBackend Backend);
 
-	Array<std::unique_ptr<RHIInterface>, ERHIBackend> m_Backends;
+	Array<std::shared_ptr<RHIBackend>, ERHIBackend> m_Backends;
 };

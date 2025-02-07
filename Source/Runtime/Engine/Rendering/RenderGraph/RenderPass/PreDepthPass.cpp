@@ -2,7 +2,7 @@
 #include "Engine/Rendering/RenderGraph/RenderGraph.h"
 #include "Engine/Asset/GlobalShaders.h"
 #include "Engine/Scene/Components/StaticMesh.h"
-#include "Engine/RHI/RHIInterface.h"
+#include "Engine/RHI/RHIBackend.h"
 #include "Engine/RHI/RHIDevice.h"
 
 struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<GenericVS, DepthOnlyFS>

@@ -1,5 +1,5 @@
 #include "Engine/Rendering/RenderGraph/RenderPass/GeometryPass.h"
-#include "Engine/RHI/RHIInterface.h"
+#include "Engine/RHI/RHIBackend.h"
 #include "Engine/RHI/RHIDevice.h"
 #include "Engine/RHI/RHICommandListContext.h"
 #include "Engine/Scene/Components/StaticMesh.h"
