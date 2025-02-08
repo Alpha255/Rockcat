@@ -7,14 +7,14 @@
 
 struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<GenericVS, DepthOnlyFS>
 {
-	PreDepthPassMeshDrawCommandBuilder(RHIInterface& InBackend)
+	PreDepthPassMeshDrawCommandBuilder(RHIBackend& InBackend)
 		: GeometryPassMeshDrawCommandBuilder(InBackend)
 	{
 		PassShader.VertexShader.SetDefine("_HAS_NORMAL_", false);
 
 		GfxPipelineCreateInfo.DepthStencilState.SetEnableDepth(true)
 			.SetEnableDepthWrite(true)
-			.SetDepthCompareFunc(InBackend.GetGraphicsSettings().InverseDepth ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
+			.SetDepthCompareFunc(false ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
 
 		GfxPipelineCreateInfo.SetShader(&PassShader.VertexShader)
 			.SetShader(&PassShader.FragmentShader);
@@ -82,11 +82,9 @@ PreDepthPass::PreDepthPass(DAGNodeID ID, RenderGraph& Graph)
 
 void PreDepthPass::Compile()
 {
-	auto& GfxSettings = GetGraphicsSettings();
-
 	AddOutput(RDGResource::EType::Texture, SceneTextures::SceneDepth).GetTextureCreateInfo()
-		.SetWidth(GfxSettings.Resolution.Width)
-		.SetHeight(GfxSettings.Resolution.Height)
+		.SetWidth(0)
+		.SetHeight(0)
 		.SetDimension(ERHITextureDimension::T_2D)
 		.SetFormat(ERHIFormat::D32_Float_S8_UInt)
 		.SetUsages(ERHIBufferUsageFlags::DepthStencil);

@@ -91,7 +91,7 @@ RHIFrameBuffer* GeometryPass::GetFrameBuffer()
 			}
 		}
 
-		m_FrameBuffer = GetRHIDevice().GetOrCreateFrameBuffer(CreateInfo);
+		m_FrameBuffer = GetDevice().GetOrCreateFrameBuffer(CreateInfo);
 	}
 	
 	return m_FrameBuffer;
@@ -101,13 +101,13 @@ void GeometryPass::Execute(const RenderScene& Scene)
 {
 	for (auto& View : Scene.GetViews())
 	{
-		if (GetGraphicsSettings().AsyncCommandlistSubmission)
+		if (RHIBackend::GetConfigs().AsyncCommandlistSubmission)
 		{
 			assert(false);
 		}
 		else
 		{
-			auto CommandListContext = GetRHIDevice().GetImmediateCommandListContext(ERHIDeviceQueue::Graphics);
+			auto CommandListContext = GetDevice().GetImmediateCommandListContext(ERHIDeviceQueue::Graphics);
 			for (auto& DrawCommand : Scene.GetMeshDrawCommands(m_Filter))
 			{
 				MeshDrawTask(DrawCommand, CommandListContext).Execute();

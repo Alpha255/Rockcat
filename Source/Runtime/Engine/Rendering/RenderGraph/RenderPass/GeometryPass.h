@@ -12,14 +12,14 @@ struct GeometryPassShaders
 
 struct IGeometryPassMeshDrawCommandBuilder
 {
-	IGeometryPassMeshDrawCommandBuilder(class RHIInterface& InBackend)
+	IGeometryPassMeshDrawCommandBuilder(class RHIBackend& InBackend)
 		: Backend(InBackend)
 	{
 	}
 
 	virtual MeshDrawCommand Build(const class StaticMesh& Mesh, const class Scene& InScene) = 0;
 
-	class RHIInterface& Backend;
+	class RHIBackend& Backend;
 };
 
 template<class TVertexShader, class TFragmentShader>

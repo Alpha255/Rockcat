@@ -22,7 +22,7 @@ void RenderScene::RegisterMeshDrawCommandBuilder(EGeometryPassFilter Filter, IGe
 	m_MeshDrawCommandBuilders[static_cast<size_t>(Filter)].reset(Builder);
 }
 
-void RenderScene::RebuildMeshDrawCommands(const Scene& InScene, RHIDevice& Device, bool Async)
+void RenderScene::RebuildMeshDrawCommands(const Scene& InScene, RHIDevice& Device)
 {
 	for (auto& MeshDrawCmds : m_MeshDrawCommands)
 	{
@@ -30,7 +30,7 @@ void RenderScene::RebuildMeshDrawCommands(const Scene& InScene, RHIDevice& Devic
 		MeshDrawCmds.reserve(1024u);
 	}
 
-	if (Async)
+	if (RHIBackend::GetConfigs().AsyncMeshDrawCommandsBuilding)
 	{
 		assert(false);
 	}

@@ -426,3 +426,19 @@ struct RHIVertexStream
 
 	std::vector<RHIVertexBuffer> VertexBuffers;
 };
+
+struct RHISwapchainCreateInfo
+{
+	const void* WindowHandle = nullptr;
+	uint32_t Width = 0u;
+	uint32_t Height = 0u;
+	bool Fullscreen = false;
+	bool VSync = false;
+	bool HDR = false;
+
+	inline RHISwapchainCreateInfo& SetWindowHandle(const void* InWindowHandle) { WindowHandle = InWindowHandle; return *this; }
+	inline RHISwapchainCreateInfo& SetWidth(uint32_t InWidth) { Width = InWidth; return *this; }
+	inline RHISwapchainCreateInfo& SetHeight(uint32_t InHeight) { Height = InHeight; return *this; }
+	inline RHISwapchainCreateInfo& SetFullscreen(bool InFullscreen) { Fullscreen = InFullscreen; return *this; }
+	inline RHISwapchainCreateInfo& SetVSync(bool InVSync) { VSync = InVSync; return *this; }
+};

@@ -16,17 +16,17 @@ ResourceManager& RenderPass::GetResourceManager()
 	return m_Graph.GetResourceManager();
 }
 
-const GraphicsSettings& RenderPass::GetGraphicsSettings() const
+const RenderSettings& RenderPass::GetRenderSettings() const
 {
-	return m_Graph.GetBackend().GetGraphicsSettings();
+	return m_Graph.GetRenderSettings();
 }
 
-RHIInterface& RenderPass::GetRHIBackend()
+RHIBackend& RenderPass::GetBackend()
 {
 	return m_Graph.GetBackend();
 }
 
-RHIDevice& RenderPass::GetRHIDevice()
+RHIDevice& RenderPass::GetDevice()
 {
 	return m_Graph.GetBackend().GetDevice();
 }

@@ -174,3 +174,10 @@
 #ifndef VK_KHR_maintenance6
 	#define VK_KHR_maintenance6 0
 #endif
+
+#ifndef VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	#define VK_KHR_SWAPCHAIN_EXTENSION_NAME "VK_KHR_swapchain"
+#endif
+#ifndef VK_KHR_swapchain
+	#define VK_KHR_swapchain0
+#endif

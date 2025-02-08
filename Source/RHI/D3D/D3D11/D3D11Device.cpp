@@ -161,6 +161,11 @@ RHISamplerPtr D3D11Device::CreateSampler(const RHISamplerCreateInfo& RHICreateIn
 	return RHISamplerPtr();
 }
 
+RHISwapchainPtr D3D11Device::CreateSwapchain(const RHISwapchainCreateInfo& CreateInfo)
+{
+	return nullptr;
+}
+
 RHICommandListContext* D3D11Device::GetImmediateCommandListContext(ERHIDeviceQueue Queue)
 {
 	return nullptr;

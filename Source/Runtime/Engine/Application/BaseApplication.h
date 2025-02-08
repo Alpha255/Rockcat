@@ -19,6 +19,7 @@ public:
 
 	const class Window& GetWindow();
 	class RHIBackend& GetRenderBackend();
+	class RHISwapchain& GetRenderSwapchain();
 	const struct RenderSettings& GetRenderSettings() const;
 protected:
 	friend class RenderService;
@@ -32,5 +33,5 @@ private:
 	std::shared_ptr<struct ApplicationConfiguration> m_Configs;
 	std::shared_ptr<class Window> m_Window;
 	std::shared_ptr<class RHIBackend> m_RenderBackend;
-	std::shared_ptr<class RHIViewport> m_Viewport;
+	std::shared_ptr<class RHISwapchain> m_Swapchain;
 };

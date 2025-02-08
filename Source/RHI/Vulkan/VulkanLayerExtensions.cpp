@@ -74,6 +74,7 @@ VulkanExtensionArray VulkanExtension::GetWantedDeviceExtensions(VulkanExtensionC
 {
 	VulkanExtensionArray WantedExts;
 
+	ADD_EXTENSION(VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_swapchain, true, KHRSurface);
 	ADD_EXTENSION(VK_EXT_DEBUG_MARKER_EXTENSION_NAME, VK_EXT_debug_marker, false, DebugMarker);
 	ADD_EXTENSION(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME, VK_KHR_timeline_semaphore, false, TimelineSemaphore);
 	ADD_EXTENSION(VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME, VK_EXT_full_screen_exclusive, false, FullscreenExclusive);

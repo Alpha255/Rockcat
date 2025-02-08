@@ -4,15 +4,14 @@
 #include "Engine/Services/RenderService.h"
 #include "Engine/Scene/Scene.h"
 
-std::shared_ptr<RenderGraph> RenderGraph::Create(const GraphicsSettings& GfxSettings)
+std::shared_ptr<RenderGraph> RenderGraph::Create(RHIBackend& Backend, const RenderSettings& GraphicsSettings)
 {
-	auto& Backend = RenderService::Get().GetBackend(GfxSettings.Interface);
 	std::shared_ptr<RenderGraph> Graph;
 
-	switch (GfxSettings.RenderingPath)
+	switch (GraphicsSettings.RenderingPath)
 	{
 	case ERenderingPath::ForwardRendering:
-		Graph.reset(new ForwardRenderingPath(Backend));
+		Graph.reset(new ForwardRenderingPath(Backend, GraphicsSettings));
 		break;
 	case ERenderingPath::DeferredShading:
 		assert(false);
@@ -26,8 +25,9 @@ std::shared_ptr<RenderGraph> RenderGraph::Create(const GraphicsSettings& GfxSett
 	return Graph;
 }
 
-RenderGraph::RenderGraph(RHIInterface& Backend)
+RenderGraph::RenderGraph(RHIBackend& Backend, const RenderSettings& GraphicsSettings)
 	: m_Backend(Backend)
+	, m_RenderSettings(GraphicsSettings)
 	, m_ResourceMgr(new ResourceManager())
 	, m_RenderScene(new RenderScene())
 {
@@ -50,7 +50,7 @@ void RenderGraph::Execute(const Scene& InScene)
 {
 	if (InScene.IsDirty())
 	{
-		m_RenderScene->RebuildMeshDrawCommands(InScene, m_Backend.GetDevice(), m_Backend.GetGraphicsSettings().AsyncMeshDrawCommandsBuilding);
+		m_RenderScene->RebuildMeshDrawCommands(InScene, m_Backend.GetDevice());
 	}
 
 	Compile();

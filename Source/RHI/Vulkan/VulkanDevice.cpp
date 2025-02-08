@@ -9,6 +9,7 @@
 #include "RHI/Vulkan/VulkanCommandListContext.h"
 #include "RHI/Vulkan/VulkanDescriptor.h"
 #include "RHI/Vulkan/VulkanEnvConfiguration.h"
+#include "RHI/Vulkan/VulkanSwapchain.h"
 #include "Engine/Services/TaskFlowService.h"
 
 VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
@@ -152,7 +153,7 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 	LogEnabledLayerAndExtensions(WantedLayers, WantedExtensions, "device");
 
 	std::set<uint32_t> QueueFamilyIndices{ GraphicsQueueIndex, PresentQueueIndex };
-	if (VulkanRHI::GetGraphicsSettings().EnableAsyncCompute)
+	if (VulkanRHI::GetConfigs().EnableAsyncCompute)
 	{
 		if (ComputeQueueIndex != GraphicsQueueIndex)
 		{
@@ -160,10 +161,10 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 		}
 		else
 		{
-			const_cast<GraphicsSettings*>(&VulkanRHI::GetGraphicsSettings())->EnableAsyncCompute = false;
+			const_cast<RHIBackendConfiguration*>(&VulkanRHI::GetConfigs())->EnableAsyncCompute = false;
 		}
 	}
-	if (VulkanRHI::GetGraphicsSettings().EnableAsyncTransfer)
+	if (VulkanRHI::GetConfigs().EnableAsyncTransfer)
 	{
 		if (TransferQueueIndex != GraphicsQueueIndex)
 		{
@@ -171,7 +172,7 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 		}
 		else
 		{
-			const_cast<GraphicsSettings*>(&VulkanRHI::GetGraphicsSettings())->EnableAsyncTransfer = false;
+			const_cast<RHIBackendConfiguration*>(&VulkanRHI::GetConfigs())->EnableAsyncTransfer = false;
 		}
 	}
 
@@ -236,8 +237,8 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 	};
 
 	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Graphics, GraphicsQueueIndex, true);
-	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Transfer, TransferQueueIndex, VulkanRHI::GetGraphicsSettings().EnableAsyncTransfer);
-	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Compute, ComputeQueueIndex, VulkanRHI::GetGraphicsSettings().EnableAsyncCompute);
+	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Transfer, TransferQueueIndex, VulkanRHI::GetConfigs().EnableAsyncTransfer);
+	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Compute, ComputeQueueIndex, VulkanRHI::GetConfigs().EnableAsyncCompute);
 	
 	assert(PresentQueueIndex == GraphicsQueueIndex);
 
@@ -287,6 +288,11 @@ RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& CreateInfo)
 RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& CreateInfo)
 {
 	return std::make_shared<VulkanSampler>(*this, CreateInfo);
+}
+
+RHISwapchainPtr VulkanDevice::CreateSwapchain(const RHISwapchainCreateInfo& CreateInfo)
+{
+	return std::make_shared<VulkanSwapchain>(*this, CreateInfo);
 }
 
 RHICommandListContext* VulkanDevice::GetImmediateCommandListContext(ERHIDeviceQueue Queue)

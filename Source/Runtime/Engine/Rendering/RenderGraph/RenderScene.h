@@ -70,7 +70,7 @@ struct MeshDrawCommand
 class RenderScene
 {
 public:
-	void RebuildMeshDrawCommands(const class Scene& InScene, class RHIDevice& Device, bool Async);
+	void RebuildMeshDrawCommands(const class Scene& InScene, class RHIDevice& Device);
 
 	const std::vector<MeshDrawCommand>& GetMeshDrawCommands(EGeometryPassFilter MeshPass) const { return m_MeshDrawCommands[(size_t)MeshPass]; }
 	const std::vector<std::shared_ptr<SceneView>>& GetViews() const { return m_Views; }

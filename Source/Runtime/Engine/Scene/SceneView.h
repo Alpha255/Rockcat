@@ -6,8 +6,7 @@
 class SceneView
 {
 public:
-	SceneView() = default;
-	SceneView(const struct GraphicsSettings& GfxSettings);
+	SceneView();
 
 	virtual bool IsStereo() const { return false; }
 

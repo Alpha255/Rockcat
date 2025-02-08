@@ -1,7 +1,7 @@
 #include "Engine/Application/BaseApplication.h"
 #include "Engine/Application/ApplicationConfiguration.h"
 #include "Engine/Services/RenderService.h"
-#include "Engine/RHI/RHIViewport.h"
+#include "Engine/RHI/RHISwapchain.h"
 #include "Core/Window.h"
 
 BaseApplication::BaseApplication(const char* ConfigurationPath)
@@ -20,6 +20,19 @@ void BaseApplication::MakeWindow()
 	if (m_Configs->EnableWindow)
 	{
 		m_Window = std::make_shared<Window>(m_Configs->WindowDesc, this);
+
+		if (m_Configs->EnableRendering)
+		{
+			assert(m_RenderBackend);
+
+			RHISwapchainCreateInfo CreateInfo;
+			CreateInfo.SetWindowHandle(m_Window->GetHandle())
+				.SetWidth(m_Window->GetWidth())
+				.SetHeight(m_Window->GetHeight())
+				.SetFullscreen(GetRenderSettings().FullScreen)
+				.SetVSync(GetRenderSettings().VSync);
+			m_Swapchain = m_RenderBackend->GetDevice().CreateSwapchain(CreateInfo);
+		}
 	}
 }
 
@@ -43,6 +56,12 @@ RHIBackend& BaseApplication::GetRenderBackend()
 {
 	assert(m_Configs->EnableRendering && m_RenderBackend);
 	return *m_RenderBackend;
+}
+
+RHISwapchain& BaseApplication::GetRenderSwapchain()
+{
+	assert(m_Configs->EnableRendering && m_Swapchain);
+	return *m_Swapchain;
 }
 
 const Window& BaseApplication::GetWindow()

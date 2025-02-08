@@ -24,9 +24,9 @@ public:
 protected:
 	class ResourceManager& GetResourceManager();
 
-	const GraphicsSettings& GetGraphicsSettings() const;
-	class RHIInterface& GetRHIBackend();
-	class RHIDevice& GetRHIDevice();
+	const RenderSettings& GetRenderSettings() const;
+	class RHIBackend& GetBackend();
+	class RHIDevice& GetDevice();
 
 	RDGResource& AddResource(RDGResource::EType Type, const char* Name, RDGResource::EVisibility Visibility);
 	void AddField(RDGResourceID ID, RDGResource::EVisibility Visibility);

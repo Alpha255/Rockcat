@@ -51,21 +51,22 @@ public:
 
 	virtual void WaitIdle() const = 0;
 
-	virtual RHIShaderPtr CreateShader(const RHIShaderCreateInfo& RHICreateInfo) = 0;
-	virtual RHITexturePtr CreateTexture(const RHITextureCreateInfo& RHICreateInfo) = 0;
-	virtual RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo) = 0;
-	virtual RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo) = 0;
-	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) = 0;
-	virtual RHIPipelineStatePtr CreatePipelineState(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) = 0;
-	virtual RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo) = 0;
-	virtual RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& RHICreateInfo) = 0;
+	virtual RHIShaderPtr CreateShader(const RHIShaderCreateInfo& CreateInfo) = 0;
+	virtual RHITexturePtr CreateTexture(const RHITextureCreateInfo& CreateInfo) = 0;
+	virtual RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& CreateInfo) = 0;
+	virtual RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& CreateInfo) = 0;
+	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo) = 0;
+	virtual RHIPipelineStatePtr CreatePipelineState(const RHIGraphicsPipelineCreateInfo& CreateInfo) = 0;
+	virtual RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& CreateInfo) = 0;
+	virtual RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& CreateInfo) = 0;
+	virtual RHISwapchainPtr CreateSwapchain(const RHISwapchainCreateInfo& CreateInfo) = 0;
 
 	virtual RHICommandListContext* GetImmediateCommandListContext(ERHIDeviceQueue Queue) = 0;
 	virtual RHICommandListContextPtr AcquireDeferredCommandListContext() = 0;
 	virtual void ReleaseDeferredCommandListContext(RHICommandListContextPtr& CmdListContext) = 0;
 
-	RHIGraphicsPipeline* GetOrCreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo);
-	RHIFrameBuffer* GetOrCreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo);
+	RHIGraphicsPipeline* GetOrCreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo);
+	RHIFrameBuffer* GetOrCreateFrameBuffer(const RHIFrameBufferCreateInfo& CreateInfo);
 
 	const char* const GetAdapterName() const { return m_AdapterName.c_str(); }
 protected:
@@ -75,30 +76,4 @@ private:
 
 	std::unordered_map<size_t, RHIGraphicsPipelinePtr> m_GraphicsPipelineCache;
 	std::unordered_map<size_t, RHIFrameBufferPtr> m_FrameBufferCache;
-};
-
-class RHISwapchain
-{
-public:
-	RHISwapchain(const void* WindowHandle, uint32_t Width, uint32_t Height, bool Fullscreen, bool VSync)
-		: m_WindowHandle(WindowHandle)
-		, m_Width(Width)
-		, m_Height(Height)
-		, m_Fullscreen(Fullscreen)
-		, m_VSync(VSync)
-	{
-		assert(m_WindowHandle);
-	}
-
-	inline uint32_t GetWidth() const { return m_Width; }
-	inline uint32_t Height() const { return m_Height; }
-	inline bool IsFullscreen() const { return m_Fullscreen; }
-	inline bool IsEnableVSync() const { return m_VSync; }
-private:
-	bool m_VSync = false;
-	bool m_Fullscreen = false;
-	uint32_t m_Width = 0u;
-	uint32_t m_Height = 0u;
-
-	const void* m_WindowHandle = nullptr;
 };

@@ -40,9 +40,7 @@ void RenderService::OnStartup()
 {
 	for (auto& Application : Engine::Get().GetApplications())
 	{
-		if (Application->IsEnableRendering())
-		{
-		}
+		Application->SetRenderBackend(GetOrCreateBackend(Application->GetRenderSettings().Backend));
 	}
 }
 

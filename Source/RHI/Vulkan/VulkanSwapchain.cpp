@@ -27,14 +27,10 @@ VulkanSurface::~VulkanSurface()
 	m_Native = nullptr;
 }
 
-VulkanSwapchain::VulkanSwapchain(const VulkanDevice& Device, const void* WindowHandle, uint32_t Width, uint32_t Height, bool VSync, bool Fullscreen, bool HDR)
+VulkanSwapchain::VulkanSwapchain(const VulkanDevice& Device, const RHISwapchainCreateInfo& CreateInfo)
 	: VkHwResource(Device)
-	, m_VSync(VSync)
-	, m_Fullscreen(Fullscreen)
-	, m_WindowHandle(WindowHandle)
-	, m_Width(Width)
-	, m_Height(Height)
-	, m_ColorFormat(HDR ? vk::Format::eA2R10G10B10UnormPack32 : vk::Format::eR8G8B8A8Unorm)
+	, RHISwapchain(CreateInfo)
+	, m_ColorFormat(CreateInfo.HDR ? vk::Format::eA2R10G10B10UnormPack32 : vk::Format::eR8G8B8A8Unorm)
 	//, m_PresentComplete(std::move(std::make_unique<VulkanSemaphore>(Device)))
 {
 	Create(true);
@@ -255,8 +251,8 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 
 	auto Images = GetNativeDevice().getSwapchainImagesKHR(m_Native);
 
-	//m_BackBuffers.resize(Count);
-	for (uint32_t ImageIndex = 0u; ImageIndex < Images.size(); ++ImageIndex)
+	m_BackBuffers.resize(Images.size());
+	for (uint32_t Index = 0u; Index < Images.size(); ++Index)
 	{
 		RHITextureCreateInfo TextureCreateInfo;
 		
@@ -269,14 +265,11 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 			.SetFormat(RHI::GetRHIFormat(m_ColorFormat))
 			.SetSampleCount(ERHISampleCount::Sample_1_Bit)
 			.SetUsages(ERHIBufferUsageFlags::None)
-			.SetName(StringUtils::Format("SwapchainImage-%d", ImageIndex));
-		auto Image = std::make_shared<VulkanTexture>(GetDevice(), TextureCreateInfo, Images[ImageIndex]);
-
-		//FrameBufferDesc Desc;
-		//Desc.AddColorAttachment(Image);
-
-		//m_BackBuffers[ImageIndex] = std::make_shared<VulkanFramebuffer>(m_Device, Desc);
+			.SetName(StringUtils::Format("SwapchainImage-%d", Index));
+		m_BackBuffers[Index] = std::make_shared<VulkanTexture>(GetDevice(), TextureCreateInfo, Images[Index]);
 	}
+
+	SetNumBackBuffer(CreateInfo.minImageCount);
 }
 
 void VulkanSwapchain::Recreate()
@@ -298,7 +291,16 @@ void VulkanSwapchain::Recreate()
 	}
 }
 
-void VulkanSwapchain::AcquireNextImage()
+void VulkanSwapchain::Resize(uint32_t Width, uint32_t Height)
+{
+	if ((Width && Height) && (m_Width != Width || m_Height != Height))
+	{
+		m_Width = Width;
+		m_Height = Height;
+	}
+}
+
+void VulkanSwapchain::AdvanceFrame()
 {
 	assert(m_Native);
 
@@ -308,7 +310,7 @@ void VulkanSwapchain::AcquireNextImage()
 		//m_PresentComplete->Get(),            /// Signal present complete semaphore
 		nullptr,
 		nullptr,                               /// No fence to signal???
-		&m_CurImageIndex);
+		&m_BackBufferIndex);
 
 	/// VK_SUBOPTIMAL_KHR: A swapchain no longer matches the surface properties exactly, but can still be used to present to the surface successfully.
 	// assert(m_CurImageIndex < m_BackBuffers.size());
@@ -358,7 +360,7 @@ void VulkanSwapchain::Present()
 	vk::PresentInfoKHR PresentInfo;
 	PresentInfo.setWaitSemaphores(WaitSemaphores)
 		.setSwapchains(Swapchains)
-		.setPImageIndices(&m_CurImageIndex);
+		.setPImageIndices(&m_BackBufferIndex);
 
 	auto Result = PresentQueue.presentKHR(&PresentInfo);
 	if (!(Result == vk::Result::eSuccess || Result == vk::Result::eSuboptimalKHR))

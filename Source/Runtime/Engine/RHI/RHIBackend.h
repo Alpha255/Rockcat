@@ -16,11 +16,15 @@
 class RHIBackend
 {
 public:
+	RHIBackend();
+
 	virtual ~RHIBackend() = default;
 	virtual ERHIBackend GetType() const { return ERHIBackend::Num; }
 	virtual RHIDevice& GetDevice() = 0;
 
 	const char* GetName() const { return GetName(GetType()); }
+
+	static const RHIBackendConfiguration& GetConfigs() { return *s_Configs; }
 
 	static const char* GetName(ERHIBackend RHI)
 	{
@@ -38,4 +42,6 @@ protected:
 
 	virtual void InitializeGraphicsDevice() = 0;
 	void PrepareGlobalResources() {}
+
+	static std::shared_ptr<RHIBackendConfiguration> s_Configs;
 };

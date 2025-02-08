@@ -18,6 +18,7 @@ public:
 	RHIPipelineStatePtr CreatePipelineState(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) override final;
 	RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo) override final;
 	RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& RHICreateInfo) override final;
+	RHISwapchainPtr CreateSwapchain(const RHISwapchainCreateInfo& CreateInfo) override final;
 
 	RHICommandListContext* GetImmediateCommandListContext(ERHIDeviceQueue Queue) override final;
 	RHICommandListContextPtr AcquireDeferredCommandListContext() override final;

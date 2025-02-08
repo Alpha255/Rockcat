@@ -101,7 +101,7 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 
 		VERIFY_VK(GetNativeDevice().createImage(&ImageCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
-		if (VulkanRHI::GetGraphicsSettings().BatchResourceDataTransfer)
+		if (VulkanRHI::GetConfigs().BatchResourceDataTransfer)
 		{
 		}
 		else
