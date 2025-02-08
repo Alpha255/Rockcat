@@ -37,6 +37,13 @@ public:
 		Destroyed,
 	};
 
+	enum class EMode : uint8_t
+	{
+		Windowed,
+		BorderlessFullscreen,
+		ExclusiveFullscreen
+	};
+
 	Window(const WindowCreateInfo& CreateInfo, IInputHandler* InputHandler);
 
 	const uint32_t GetWidth() const { return m_Width; }
@@ -45,6 +52,8 @@ public:
 	const bool IsActive() const { return m_State == EState::OnFocus; }
 	const bool IsDestroyed() const { return m_State == EState::Destroyed; }
 	const EState GetState() const { return m_State; }
+
+	void SetMode(EMode Mode);
 
 	void ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam);
 
@@ -73,6 +82,7 @@ private:
 	uint32_t m_Width = 0u;
 	uint32_t m_Height = 0u;
 	EState m_State = EState::OnFocus;
+	EMode m_Mode = EMode::Windowed;
 	void* m_Handle = nullptr;
 	IInputHandler* m_InputHandler = nullptr;
 	MouseEvent m_MouseEvent;

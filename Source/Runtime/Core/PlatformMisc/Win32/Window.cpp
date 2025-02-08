@@ -285,6 +285,54 @@ void Window::ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam)
 	}
 }
 
+void Window::SetMode(EMode Mode)
+{
+	if (m_Mode == Mode)
+	{
+		return;
+	}
+
+	m_Mode = Mode;
+
+	::HWND Handle = reinterpret_cast<::HWND>(m_Handle);
+	const ::LONG WindowedStyle = WS_OVERLAPPEDWINDOW;
+	const ::LONG FullscreenStyle = WS_POPUP;
+	::LONG WindowStyle = ::GetWindowLong(Handle, GWL_STYLE);
+	::UINT Flags = SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED;
+	
+	::RECT WindowRect;
+	::GetClientRect(Handle, &WindowRect);
+
+	const int32_t Left = WindowRect.left;
+	const int32_t Top = WindowRect.top;
+	int32_t Width = 0, Height = 0;
+
+	if (Mode == EMode::Windowed)
+	{
+		WindowStyle &= ~FullscreenStyle;
+		WindowStyle |= WindowedStyle;
+		Flags |= SWP_NOSIZE;
+	}
+	else if (Mode == EMode::BorderlessFullscreen || Mode == EMode::ExclusiveFullscreen)
+	{
+		WindowStyle &= ~WindowedStyle;
+		WindowStyle |= FullscreenStyle;
+
+		::HMONITOR Monitor = ::MonitorFromWindow(Handle, Mode == EMode::ExclusiveFullscreen ? MONITOR_DEFAULTTOPRIMARY : MONITOR_DEFAULTTONEAREST);
+		::MONITORINFO MonitorInfo;
+		MonitorInfo.cbSize = sizeof(::MONITORINFO);
+		::GetMonitorInfo(Monitor, &MonitorInfo);
+
+		Width = static_cast<int32_t>(MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left);
+		Height = static_cast<int32_t>(MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top);
+	}
+
+	::SetWindowLong(Handle, GWL_STYLE, WindowStyle);
+	::SetWindowPos(Handle, nullptr, Left, Top, Width, Height, Flags);
+
+	UpdateSize(true);
+}
+
 void Window::PollMessage()
 {
 	::MSG Message;
