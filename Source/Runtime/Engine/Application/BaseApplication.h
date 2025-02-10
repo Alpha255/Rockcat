@@ -16,7 +16,6 @@ public:
 	virtual void PumpMessages();
 	virtual void Finalize() {}
 
-	void Tick(float /*ElapsedSeconds*/) override {}
 	const Viewport& GetRenderViewport() { return *m_RenderViewport; }
 	class RHIBackend& GetRenderBackend();
 	const struct RenderSettings& GetRenderSettings() const;

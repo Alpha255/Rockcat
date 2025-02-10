@@ -6,12 +6,14 @@ class RenderTest final : public BaseApplication
 {
 public:
 	using BaseApplication::BaseApplication;
-protected:
-	void Tick(float ElapsedSeconds) override final;
 
 	void Initialize() override final;
-	void RenderGUI(class Canvas&) override final {}
+
+	void Tick(float ElapsedSeconds) override final;
+
 	void RenderFrame() override final;
+protected:
+	void RenderGUI(class Canvas&) override final {}
 private:
 	std::shared_ptr<class Scene> m_Scene;
 	std::shared_ptr<class RenderGraph> m_RenderGraph;

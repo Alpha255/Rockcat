@@ -11,8 +11,6 @@ void RenderTest::Initialize()
 
 void RenderTest::Tick(float ElapsedSeconds)
 {
-	BaseApplication::Tick(ElapsedSeconds);
-
 	m_Scene->Update();
 }
 
