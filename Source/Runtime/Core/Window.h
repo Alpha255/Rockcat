@@ -34,7 +34,7 @@ enum class EWindowMode : uint8_t
 	ExclusiveFullscreen
 };
 
-class Window : public MessageHandler
+class Window
 {
 public:
 	Window(const WindowCreateInfo& CreateInfo);
@@ -46,6 +46,10 @@ public:
 	const bool IsDestroyed() const { return m_Status == EWindowStatus::Destroyed; }
 
 	void SetMode(EWindowMode Mode);
+
+	static void PumpMessages();
+
+	void ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam);
 protected:
 	void UpdateSize();
 private:

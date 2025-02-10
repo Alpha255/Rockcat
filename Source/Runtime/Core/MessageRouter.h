@@ -135,8 +135,6 @@ public:
 	void RegisterMessageHandler(MessageHandler* Handler);
 	void DeregisterMessageHandler(MessageHandler* Handler);
 
-	void ProcessMessageWin32(uint32_t Message, size_t WParam, intptr_t LParam);
-protected:
 	inline void DispatchMouseEvent(const MouseEvent& Event)
 	{
 		std::for_each(m_Handlers.begin(), m_Handlers.end(), [Event](MessageHandler* Handler) {

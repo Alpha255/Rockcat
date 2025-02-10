@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Engine/Rendering/RenderGraph/RenderPass.h"
+#include "Core/MessageRouter.h"
 
-class RenderGraph
+class RenderGraph : public MessageHandler
 {
 public:
 	static std::shared_ptr<RenderGraph> Create(class RHIBackend& Backend, const struct RenderSettings& GraphicsSettings, const class Viewport& RenderViewport);
@@ -25,6 +26,8 @@ public:
 	const RenderScene& GetRenderScene() const { return *m_RenderScene; }
 
 	class ResourceManager& GetResourceManager() { return *m_ResourceMgr; }
+
+	void OnWindowResized(uint32_t Width, uint32_t Height) override final;
 protected:
 	virtual void SetupRenderPasses() = 0;
 private:

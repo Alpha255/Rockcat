@@ -33,6 +33,7 @@ RenderGraph::RenderGraph(RHIBackend& Backend, const RenderSettings& GraphicsSett
 	, m_ResourceMgr(new ResourceManager())
 	, m_RenderScene(new RenderScene())
 {
+	MessageRouter::Get().RegisterMessageHandler(this);
 }
 
 void RenderGraph::Compile()
@@ -46,6 +47,12 @@ void RenderGraph::Compile()
 
 		SetDirty(false);
 	}
+}
+
+void RenderGraph::OnWindowResized(uint32_t Width, uint32_t Height)
+{
+	(void)Width;
+	(void)Height;
 }
 
 void RenderGraph::Execute(const Scene& InScene)

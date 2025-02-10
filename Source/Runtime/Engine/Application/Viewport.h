@@ -2,9 +2,10 @@
 
 #include "Core/Definitions.h"
 #include "Core/Window.h"
+#include "Core/MessageRouter.h"
 #include "Engine/RHI/RHIDeclarations.h"
 
-class Viewport
+class Viewport : public MessageHandler
 {
 public:
 	Viewport(class RHIBackend& Backend, const struct WindowCreateInfo& WindowInfo, bool Fullscreen, bool VSync);
@@ -19,6 +20,8 @@ public:
 
 	const Window& GetWindow() const { return *m_Window; }
 	const RHISwapchain& GetSwapchain() const { return *m_Swapchain; }
+
+	void OnWindowResized(uint32_t Width, uint32_t Height) override final;
 private:
 	std::unique_ptr<Window> m_Window;
 	RHISwapchainPtr m_Swapchain;

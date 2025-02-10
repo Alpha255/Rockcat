@@ -38,16 +38,7 @@ const RenderSettings& BaseApplication::GetRenderSettings() const
 
 void BaseApplication::PumpMessages()
 {
-#if PLATFORM_WIN32
-	::MSG Message;
-	if (::PeekMessageA(&Message, nullptr, 0u, 0u, PM_REMOVE))
-	{
-		::TranslateMessage(&Message);
-		::DispatchMessageA(&Message);
-	}
-#else
-	assert(0);
-#endif
+	Window::PumpMessages();
 }
 
 bool BaseApplication::IsRequestQuit() const
