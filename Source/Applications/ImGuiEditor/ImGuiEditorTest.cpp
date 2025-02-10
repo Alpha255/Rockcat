@@ -137,7 +137,7 @@ static ImGuiKey ImGui_ImplWin32_VirtualKeyToImGuiKey(WPARAM wParam)
 
 void ImGuiEditorTest::Initialize()
 {
-    auto& Window = GetWindow();
+    auto& Window = GetRenderViewport().GetWindow();
     m_Editor = std::make_shared<ImGuiEditor>(Window.GetWidth(), Window.GetHeight());
 
 	auto WindowHandle = const_cast<void*>(Window.GetHandle());
@@ -149,6 +149,8 @@ void ImGuiEditorTest::Initialize()
         DXGI_FORMAT_R8G8B8A8_UNORM, g_pd3dSrvDescHeap,
         g_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
         g_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
+
+    MessageRouter::Get().RegisterMessageHandler(this);
 }
 
 void ImGuiEditorTest::RenderGUI(Canvas&)
@@ -217,7 +219,7 @@ void ImGuiEditorTest::OnMouseEvent(const MouseEvent& Mouse)
     if (ImGui::GetCurrentContext() != nullptr)
     {
         ImGuiIO& io = ImGui::GetIO();
-        if (Mouse.OnMove)
+        if (Mouse.IsMoving)
         {
             io.AddMousePosEvent(Mouse.Position.x, Mouse.Position.y);
         }
@@ -263,7 +265,7 @@ void ImGuiEditorTest::OnWindowResized(uint32_t Width, uint32_t Height)
     }
 }
 
-void ImGuiEditorTest::Shutdown()
+void ImGuiEditorTest::Finalize()
 {
     WaitForLastSubmittedFrame();
 
