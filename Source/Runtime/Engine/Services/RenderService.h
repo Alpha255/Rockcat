@@ -10,7 +10,7 @@ public:
 
 	void OnShutdown() override final;
 private:
-	std::shared_ptr<RHIBackend> GetOrCreateBackend(ERHIBackend Backend);
+	RHIBackend* GetOrCreateBackend(ERHIBackend Backend);
 
-	Array<std::shared_ptr<RHIBackend>, ERHIBackend> m_Backends;
+	Array<std::unique_ptr<RHIBackend>, ERHIBackend> m_Backends;
 };

@@ -108,7 +108,7 @@ void Camera::OnMouseEvent(const MouseEvent& Mouse)
 	if (Mouse.Button != EMouseButton::None)
 	{
 		m_MouseMovements.SetButton(Mouse.Button, Mouse.State == EKeyState::Down);
-		m_MouseMovements.SetButtonDoubleClicked(Mouse.Button, Mouse.State == EKeyState::DBClick);
+		m_MouseMovements.SetButtonDoubleClicked(Mouse.Button, Mouse.State == EKeyState::DoubleClick);
 	}
 
 	switch (Mouse.Button)
@@ -138,7 +138,7 @@ void Camera::OnMouseEvent(const MouseEvent& Mouse)
 	m_MouseMovements.WheelMove = Mouse.WheelDelta != 0;
 	m_MouseMovements.WheelDelta += Mouse.WheelDelta;
 
-	if (m_MouseMovements.IsButtonDown(EMouseButton::LButton) && Mouse.OnMove)
+	if (m_MouseMovements.IsButtonDown(EMouseButton::LButton) && Mouse.IsMoving)
 	{
 		Math::Vector3 currentPos = ScaleToScreenPosition(Mouse.Position.x, Mouse.Position.y);
 		Math::Vector3 corss = m_LastPos.Cross(currentPos);

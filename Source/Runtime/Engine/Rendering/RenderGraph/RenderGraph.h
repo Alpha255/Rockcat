@@ -5,9 +5,9 @@
 class RenderGraph
 {
 public:
-	static std::shared_ptr<RenderGraph> Create(class RHIBackend& Backend, const struct RenderSettings& GraphicsSettings);
+	static std::shared_ptr<RenderGraph> Create(class RHIBackend& Backend, const struct RenderSettings& GraphicsSettings, const class Viewport& RenderViewport);
 
-	RenderGraph(class RHIBackend& Backend, const struct RenderSettings& GraphicsSettings);
+	RenderGraph(class RHIBackend& Backend, const struct RenderSettings& GraphicsSettings, const class Viewport& RenderViewport);
 
 	template<class TPass>
 	RenderGraph& AddPass()
@@ -38,4 +38,5 @@ private:
 	std::vector<std::shared_ptr<RenderPass>> m_RenderPasses;
 	class RHIBackend& m_Backend;
 	const struct RenderSettings& m_RenderSettings;
+	const class Viewport& m_RenderViewport;
 };

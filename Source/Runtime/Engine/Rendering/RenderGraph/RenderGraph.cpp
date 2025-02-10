@@ -3,15 +3,16 @@
 #include "Engine/Rendering/RenderGraph/ForwardRenderingPath.h"
 #include "Engine/Services/RenderService.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Application/Viewport.h"
 
-std::shared_ptr<RenderGraph> RenderGraph::Create(RHIBackend& Backend, const RenderSettings& GraphicsSettings)
+std::shared_ptr<RenderGraph> RenderGraph::Create(RHIBackend& Backend, const RenderSettings& GraphicsSettings, const Viewport& RenderViewport)
 {
 	std::shared_ptr<RenderGraph> Graph;
 
 	switch (GraphicsSettings.RenderingPath)
 	{
 	case ERenderingPath::ForwardRendering:
-		Graph.reset(new ForwardRenderingPath(Backend, GraphicsSettings));
+		Graph.reset(new ForwardRenderingPath(Backend, GraphicsSettings, RenderViewport));
 		break;
 	case ERenderingPath::DeferredShading:
 		assert(false);
@@ -25,9 +26,10 @@ std::shared_ptr<RenderGraph> RenderGraph::Create(RHIBackend& Backend, const Rend
 	return Graph;
 }
 
-RenderGraph::RenderGraph(RHIBackend& Backend, const RenderSettings& GraphicsSettings)
+RenderGraph::RenderGraph(RHIBackend& Backend, const RenderSettings& GraphicsSettings, const Viewport& RenderViewport)
 	: m_Backend(Backend)
 	, m_RenderSettings(GraphicsSettings)
+	, m_RenderViewport(RenderViewport)
 	, m_ResourceMgr(new ResourceManager())
 	, m_RenderScene(new RenderScene())
 {

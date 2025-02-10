@@ -22,7 +22,7 @@ void Engine::Run()
 
 	for (auto& Application : m_Applications)
 	{
-		Application->Startup();
+		Application->Initialize();
 	}
 
 	while (true)
@@ -35,7 +35,7 @@ void Engine::Run()
 		m_Applications.remove_if([](std::unique_ptr<BaseApplication>& App) {
 			if (App->IsRequestQuit())
 			{
-				App->Shutdown();
+				App->Finalize();
 				return true;
 			}
 			return false;
@@ -44,6 +44,8 @@ void Engine::Run()
 		for (auto& Application : m_Applications)
 		{
 			//PROFILE_EVENT("%s.Frame", Application->GetConfigurations().GetWindowCreateInfo().Title.c_str());
+
+			Application->PumpMessages();
 
 			Application->Tick(0.0f);
 

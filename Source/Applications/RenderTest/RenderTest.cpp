@@ -6,7 +6,7 @@
 void RenderTest::Initialize()
 {
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");
-	m_RenderGraph = RenderGraph::Create(GetRenderBackend(), GetRenderSettings());
+	m_RenderGraph = RenderGraph::Create(GetRenderBackend(), GetRenderSettings(), GetRenderViewport());
 }
 
 void RenderTest::Tick(float ElapsedSeconds)

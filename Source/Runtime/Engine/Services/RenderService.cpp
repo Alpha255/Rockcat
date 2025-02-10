@@ -3,7 +3,7 @@
 #include "Engine/Engine.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 
-std::shared_ptr<RHIBackend> RenderService::GetOrCreateBackend(ERHIBackend Backend)
+RHIBackend* RenderService::GetOrCreateBackend(ERHIBackend Backend)
 {
 	assert(Backend < ERHIBackend::Num);
 
@@ -14,7 +14,7 @@ std::shared_ptr<RHIBackend> RenderService::GetOrCreateBackend(ERHIBackend Backen
 		case ERHIBackend::Software:
 			break;
 		case ERHIBackend::Vulkan:
-			m_Backends[ERHIBackend::Vulkan] = std::make_shared<VulkanRHI>();
+			m_Backends[ERHIBackend::Vulkan] = std::make_unique<VulkanRHI>();
 			break;
 		case ERHIBackend::D3D11:
 			break;
@@ -33,7 +33,7 @@ std::shared_ptr<RHIBackend> RenderService::GetOrCreateBackend(ERHIBackend Backen
 		}
 	}
 
-	return m_Backends[Backend];
+	return m_Backends[Backend].get();
 }
 
 void RenderService::OnStartup()

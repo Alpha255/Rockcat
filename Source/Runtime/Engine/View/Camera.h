@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Core/InputState.h"
+#include "Core/MessageRouter.h"
 #include "Core/Math/Matrix.h"
 
-class Camera : public IInputHandler
+class Camera : public MessageHandler
 {
 public:
 	enum class EMode : uint8_t

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/InputState.h"
+#include "Core/MessageRouter.h"
 
 #define MINIMAL_WINDOW_SIZE 32
 
@@ -27,65 +27,34 @@ struct WindowCreateInfo
 	}
 };
 
-class Window
+enum class EWindowMode : uint8_t
+{
+	Windowed,
+	BorderlessFullscreen,
+	ExclusiveFullscreen
+};
+
+class Window : public MessageHandler
 {
 public:
-	enum class EState : uint8_t
-	{
-		LostFocus,
-		OnFocus,
-		Destroyed,
-	};
-
-	enum class EMode : uint8_t
-	{
-		Windowed,
-		BorderlessFullscreen,
-		ExclusiveFullscreen
-	};
-
-	Window(const WindowCreateInfo& CreateInfo, IInputHandler* InputHandler);
+	Window(const WindowCreateInfo& CreateInfo);
 
 	const uint32_t GetWidth() const { return m_Width; }
 	const uint32_t GetHeight() const { return m_Height; }
 	const void* GetHandle() const { return m_Handle; }
-	const bool IsActive() const { return m_State == EState::OnFocus; }
-	const bool IsDestroyed() const { return m_State == EState::Destroyed; }
-	const EState GetState() const { return m_State; }
+	const bool IsActivate() const { return m_Status == EWindowStatus::Activate; }
+	const bool IsDestroyed() const { return m_Status == EWindowStatus::Destroyed; }
 
-	void SetMode(EMode Mode);
-
-	void ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam);
-
-	void PollMessage();
+	void SetMode(EWindowMode Mode);
 protected:
-	void UpdateSize(bool Signal = false);
-
-	void OnMouseEvent()
-	{
-		if (m_InputHandler)
-		{
-			m_InputHandler->OnMouseEvent(m_MouseEvent);
-		}
-	}
-
-	void OnKeyboardEvent()
-	{
-		if (m_InputHandler)
-		{
-			m_InputHandler->OnKeyboardEvent(m_KeyboardEvent);
-		}
-	}
+	void UpdateSize();
 private:
 	uint32_t m_MinWidth = 0u;
 	uint32_t m_MinHeight = 0u;
 	uint32_t m_Width = 0u;
 	uint32_t m_Height = 0u;
-	EState m_State = EState::OnFocus;
-	EMode m_Mode = EMode::Windowed;
+	EWindowStatus m_Status = EWindowStatus::Activate;
+	EWindowMode m_Mode = EWindowMode::Windowed;
 	void* m_Handle = nullptr;
-	IInputHandler* m_InputHandler = nullptr;
-	MouseEvent m_MouseEvent;
-	KeyboardEvent m_KeyboardEvent;
 };
 
