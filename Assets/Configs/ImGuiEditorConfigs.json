@@ -12,10 +12,7 @@
                         "OversampleH": 1,
                         "OversampleV": 1,
                         "PixelSnapH": true,
-                        "GlyphExtraSpacing": {
-                            "Vec2.x": 0.0,
-                            "Vec2.y": 0.0
-                        },
+                        "GlyphExtraAdvanceX": 0.0,
                         "GlyphOffset": {
                             "Vec2.x": 0.0,
                             "Vec2.y": 1.0
