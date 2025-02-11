@@ -10,13 +10,13 @@ public:
 
 	~Scene() { Save<Scene>(IsDirty()); }
 
-	inline const std::vector<SceneGraph::NodeID>& GetVisibleNodes() { return m_NodeCollection.VisibleNodes; }
-	inline const std::vector<SceneGraph::NodeID>& GetAddNodes() { return m_NodeCollection.AddNodes; }
-	inline const std::vector<SceneGraph::NodeID>& GetHiddenNodes() { return m_NodeCollection.HiddenNodes; }
-	inline const std::vector<SceneGraph::Node>& GetRemovedNodes() { return m_NodeCollection.RemovedNodes; }
+	inline const std::vector<SceneGraph::NodeID>& GetVisibleNodes() const { return m_NodeCollection.VisibleNodes; }
+	inline const std::vector<SceneGraph::NodeID>& GetAddNodes() const { return m_NodeCollection.AddNodes; }
+	inline const std::vector<SceneGraph::NodeID>& GetHiddenNodes() const { return m_NodeCollection.HiddenNodes; }
+	inline const std::vector<SceneGraph::Node>& GetRemovedNodes() const { return m_NodeCollection.RemovedNodes; }
 
 	inline bool HasNodes() const { return GetNumNodes() > 0u; }
-	inline uint32_t GetNumNodes() const { return GetGraph().GetNumNodes(); }
+	inline size_t GetNumNodes() const { return GetGraph().GetNumNodes(); }
 
 	inline const SceneGraph::Node& GetNode(const SceneGraph::NodeID ID) const { return GetGraph().GetNode(ID); }
 

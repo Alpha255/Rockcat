@@ -47,12 +47,12 @@ struct MeshDrawTask : public Task
 	{
 		/// How to update shader resources ??? 
 		/// How to update uniform buffer ???
-		auto PipelineState = DrawCommand.GraphicsPipeline->GetPipelineState();
-		assert(PipelineState);
+		//auto PipelineState = DrawCommand.GraphicsPipeline->GetPipelineState();
+		//assert(PipelineState);
 
 		ScopeDebugMarker DebugMarker(CommandBuffer, DrawCommand.MeshName, Math::Color::Random());
 
-		CommandBuffer->SetGraphicsPipeline(DrawCommand.GraphicsPipeline);
+		//CommandBuffer->SetGraphicsPipeline(DrawCommand.GraphicsPipeline);
 		CommandBuffer->SetVertexStream(0u, DrawCommand.VertexStream);
 		CommandBuffer->SetIndexBuffer(
 			DrawCommand.IndexBuffer, 
@@ -64,19 +64,6 @@ struct MeshDrawTask : public Task
 	const MeshDrawCommand& DrawCommand;
 	RHICommandBuffer* CommandBuffer;
 };
-
-GeometryPass::GeometryPass(
-	DAGNodeID ID, 
-	const char* Name, 
-	RenderGraph& Graph, 
-	EGeometryPass Filter, 
-	IGeometryPassMeshDrawCommandBuilder* MeshDrawCommandBuilder)
-	: RenderPass(ID, Name, Graph)
-	, m_Filter(Filter)
-{
-	assert(MeshDrawCommandBuilder);
-	Graph.GetRenderScene().RegisterMeshDrawCommandBuilder(Filter, MeshDrawCommandBuilder);
-}
 
 RHIFrameBuffer* GeometryPass::GetFrameBuffer()
 {
@@ -107,11 +94,11 @@ void GeometryPass::Execute(const RenderScene& Scene)
 		}
 		else
 		{
-			auto CommandListContext = GetDevice().GetImmediateCommandListContext(ERHIDeviceQueue::Graphics);
-			for (auto& DrawCommand : Scene.GetMeshDrawCommands(m_Filter))
-			{
-				MeshDrawTask(DrawCommand, CommandListContext).Execute();
-			}
+			//auto CommandListContext = GetDevice().GetImmediateCommandListContext(ERHIDeviceQueue::Graphics);
+			//for (auto& DrawCommand : Scene.GetCommands())
+			//{
+			//	MeshDrawTask(DrawCommand, CommandListContext).Execute();
+			//}
 		}
 	}
 }

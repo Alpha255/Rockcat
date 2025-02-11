@@ -1,9 +1,9 @@
 #include "RHI/D3D/D3D11/D3D11Shader.h"
 #include "RHI/D3D/D3D11/D3D11Device.h"
-#include "Engine/Asset/ShaderAsset.h"
 #include "Engine/Services/SpdLogService.h"
 
 D3D11VertexShader::D3D11VertexShader(const D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo)
+	: RHIShader(RHICreateInfo)
 {
 	VERIFY_D3D(Device->CreateVertexShader(
 		RHICreateInfo.Binary->GetBinary(),
@@ -13,6 +13,7 @@ D3D11VertexShader::D3D11VertexShader(const D3D11Device& Device, const RHIShaderC
 }
 
 D3D11HullShader::D3D11HullShader(const D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo)
+	: RHIShader(RHICreateInfo)
 {
 	VERIFY_D3D(Device->CreateHullShader(
 		RHICreateInfo.Binary->GetBinary(),
@@ -22,6 +23,7 @@ D3D11HullShader::D3D11HullShader(const D3D11Device& Device, const RHIShaderCreat
 }
 
 D3D11DomainShader::D3D11DomainShader(const D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo)
+	: RHIShader(RHICreateInfo)
 {
 	VERIFY_D3D(Device->CreateDomainShader(
 		RHICreateInfo.Binary->GetBinary(),
@@ -31,6 +33,7 @@ D3D11DomainShader::D3D11DomainShader(const D3D11Device& Device, const RHIShaderC
 }
 
 D3D11GeometryShader::D3D11GeometryShader(const D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo)
+	: RHIShader(RHICreateInfo)
 {
 	VERIFY_D3D(Device->CreateGeometryShader(
 		RHICreateInfo.Binary->GetBinary(),
@@ -40,6 +43,7 @@ D3D11GeometryShader::D3D11GeometryShader(const D3D11Device& Device, const RHISha
 }
 
 D3D11ComputeShader::D3D11ComputeShader(const D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo)
+	: RHIShader(RHICreateInfo)
 {
 	VERIFY_D3D(Device->CreateComputeShader(
 		RHICreateInfo.Binary->GetBinary(),
@@ -49,6 +53,7 @@ D3D11ComputeShader::D3D11ComputeShader(const D3D11Device& Device, const RHIShade
 }
 
 D3D11FragmentShader::D3D11FragmentShader(const D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo)
+	: RHIShader(RHICreateInfo)
 {
 	VERIFY_D3D(Device->CreatePixelShader(
 		RHICreateInfo.Binary->GetBinary(),

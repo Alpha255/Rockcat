@@ -77,12 +77,13 @@ public:
 
 	const std::vector<std::shared_ptr<SceneView>>& GetViews() const { return m_Views; }
 
-	void RebuildMeshDrawCommands();
+	const std::vector<MeshDrawCommand>& GetCommands(EGeometryPass Filter) const { return m_Commands[Filter]; }
+
+	void BuildMeshDrawCommands();
 
 	static void RegisterMeshDrawCommandBuilder(EGeometryPass Filter, struct IMeshDrawCommandBuilder* Builder);
 protected:
-	template<class Index>
-	inline IMeshDrawCommandBuilder* GetBuilder(Index Filter) { return s_Builders[Filter].get(); }
+	inline struct IMeshDrawCommandBuilder* GetBuilder(EGeometryPass Filter) { return s_Builders[Filter].get(); }
 private:
 	void TraverseScene();
 
@@ -90,7 +91,7 @@ private:
 
 	std::vector<std::shared_ptr<SceneView>> m_Views;
 	
-	Array<std::vector<MeshDrawCommand>, EGeometryPass> m_MeshDrawCommands;
+	Array<std::vector<MeshDrawCommand>, EGeometryPass> m_Commands;
 
 	struct PrimitiveNodes
 	{
@@ -101,7 +102,7 @@ private:
 		std::vector<SceneGraph::NodeID> PendingNodes;
 	} m_PrimitiveNodes;
 
-	static Array<std::unique_ptr<IMeshDrawCommandBuilder>, EGeometryPass> s_Builders;
+	static Array<std::unique_ptr<struct IMeshDrawCommandBuilder>, EGeometryPass> s_Builders;
 };
 
 namespace SceneTextures

@@ -14,7 +14,7 @@ struct ImGuiFontConfigs : public ImFontConfig
 			CEREAL_NVP(OversampleH),
 			CEREAL_NVP(OversampleV),
 			CEREAL_NVP(PixelSnapH),
-			CEREAL_NVP(GlyphExtraSpacing),
+			CEREAL_NVP(GlyphExtraAdvanceX),
 			CEREAL_NVP(GlyphOffset),
 			CEREAL_NVP(GlyphMinAdvanceX),
 			CEREAL_NVP(GlyphMaxAdvanceX),

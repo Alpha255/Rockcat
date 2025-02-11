@@ -30,8 +30,7 @@ public:
 				auto Child = Node.HasChild() ? Node.GetChild() + StartIndex : SceneGraph::NodeID();
 				auto Sibling = Node.HasSibling() ? Node.GetSibling() + StartIndex : SceneGraph::NodeID();
 				
-				GraphNode.SetAlive(Node.IsAlive())
-					.SetVisible(Node.IsAlive())
+				GraphNode.SetVisible(Node.IsVisible())
 					.SetParent(Parent)
 					.SetChild(Child)
 					.SetSibling(Sibling);

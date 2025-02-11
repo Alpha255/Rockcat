@@ -172,15 +172,15 @@ D3D12GraphicsPipelineState::D3D12GraphicsPipelineState(const D3D12Device& Device
 {
 	m_RootSignature = std::make_unique<D3D12RootSignature>(Device, RHICreateInfo);
 
-	D3D12_SHADER_BYTECODE ShaderByteCodes[ERHIShaderStage::Num]{};
-	for (uint32_t Stage = ERHIShaderStage::Vertex; Stage < ERHIShaderStage::Compute; ++Stage)
-	{
-		//if (auto Shader = RHICreateInfo.Shaders.Get(static_cast<ERHIShaderStage>(Stage)))
-		//{
-		//	Shaders[Stage].BytecodeLength = Shader->Desc()->BinarySize;
-		//	Shaders[Stage].pShaderBytecode = Shader->Desc()->Binary.data();
-		//}
-	}
+	Array<D3D12_SHADER_BYTECODE, ERHIShaderStage> ShaderByteCodes;
+	//for (uint32_t Stage = ERHIShaderStage::Vertex; Stage < ERHIShaderStage::Compute; ++Stage)
+	//{
+	//	//if (auto Shader = RHICreateInfo.Shaders.Get(static_cast<ERHIShaderStage>(Stage)))
+	//	//{
+	//	//	Shaders[Stage].BytecodeLength = Shader->Desc()->BinarySize;
+	//	//	Shaders[Stage].pShaderBytecode = Shader->Desc()->Binary.data();
+	//	//}
+	//}
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC CreateDesc
 	{

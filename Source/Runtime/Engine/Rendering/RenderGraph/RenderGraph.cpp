@@ -31,7 +31,6 @@ RenderGraph::RenderGraph(RHIBackend& Backend, const RenderSettings& GraphicsSett
 	, m_RenderSettings(GraphicsSettings)
 	, m_RenderViewport(RenderViewport)
 	, m_ResourceMgr(new ResourceManager())
-	, m_RenderScene(new RenderScene())
 {
 	MessageRouter::Get().RegisterMessageHandler(this);
 }
@@ -57,10 +56,11 @@ void RenderGraph::OnWindowResized(uint32_t Width, uint32_t Height)
 
 void RenderGraph::Execute(const Scene& InScene)
 {
-	if (InScene.IsDirty())
+	if (!m_RenderScene || (&m_RenderScene->GetScene() != &InScene))
 	{
-		m_RenderScene->RebuildMeshDrawCommands(InScene, m_Backend.GetDevice());
+		m_RenderScene = std::make_shared<RenderScene>(InScene);
 	}
+	m_RenderScene->BuildMeshDrawCommands();
 
 	Compile();
 

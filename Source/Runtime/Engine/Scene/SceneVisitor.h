@@ -5,10 +5,7 @@
 struct DepthFirst {};
 struct BreadthFirst {};
 
-struct SceneNodeIterator : public SceneGraph::NodeList::const_iterator
-{
-	inline const bool IsValid() const { return _Ptr != nullptr; }
-};
+using SceneNodeIterator = SceneGraph::NodeList::const_iterator;
 
 template<class Policy = DepthFirst>
 class SceneVisitor
@@ -21,7 +18,7 @@ public:
 
 	SceneNodeIterator Next() { return Next(Policy()); }
 
-	SceneNodeIterator& Get() { return m_Iterator; }
+	SceneNodeIterator Get() { return m_Iterator; }
 private:
 	SceneVisitor(const SceneGraph& Graph)
 		: m_Graph(Graph)

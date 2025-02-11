@@ -77,7 +77,6 @@ struct SceneGraph
 				CEREAL_NVP(m_Child),
 				CEREAL_NVP(m_Sibling),
 				CEREAL_NVP(m_Masks),
-				CEREAL_NVP(m_Alive),
 				CEREAL_NVP(m_Visible),
 				CEREAL_NVP(m_Selected),
 				CEREAL_NVP(m_Name)

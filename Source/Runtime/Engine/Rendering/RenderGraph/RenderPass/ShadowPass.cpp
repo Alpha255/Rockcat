@@ -28,11 +28,6 @@ const char* GetShadowTechniqueName(EShadowTechnique Technique)
 //};
 
 ShadowPass::ShadowPass(DAGNodeID ID, RenderGraph& Graph)
-	: GeometryPass(
-		ID, 
-		"ShadowPass",
-		Graph,
-		EGeometryPass::ShadowCast,
-		nullptr)
+	: GeometryPass(ID, "ShadowPass", Graph)
 {
 }

@@ -5,19 +5,18 @@
 #include "Engine/RHI/RHIBackend.h"
 #include "Engine/RHI/RHIDevice.h"
 
-struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<GenericVS, DepthOnlyFS>
+struct PreDepthPassMeshDrawCommandBuilder : public MeshDrawCommandBuilder<GenericVS, DepthOnlyFS>
 {
-	PreDepthPassMeshDrawCommandBuilder(RHIBackend& InBackend)
-		: GeometryPassMeshDrawCommandBuilder(InBackend)
+	PreDepthPassMeshDrawCommandBuilder()
 	{
-		PassShader.VertexShader.SetDefine("_HAS_NORMAL_", false);
+		PassShaders.VertexShader.SetDefine("_HAS_NORMAL_", false);
 
 		GfxPipelineCreateInfo.DepthStencilState.SetEnableDepth(true)
 			.SetEnableDepthWrite(true)
 			.SetDepthCompareFunc(false ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
 
-		GfxPipelineCreateInfo.SetShader(&PassShader.VertexShader)
-			.SetShader(&PassShader.FragmentShader);
+		GfxPipelineCreateInfo.SetShader(&PassShaders.VertexShader)
+			.SetShader(&PassShaders.FragmentShader);
 		
 		GfxPipelineCreateInfo.RenderPassCreateInfo.SetDepthStencilAttachment(ERHIFormat::D32_Float_S8_UInt);
 
@@ -29,7 +28,7 @@ struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBu
 		//	.SetScissorRect(ScissorRect);
 	}
 
-	MeshDrawCommand Build(const StaticMesh& Mesh, const Scene&) override final
+	MeshDrawCommand Build(const StaticMesh& Mesh) override final
 	{
 		auto Command = MeshDrawCommand(Mesh);
 
@@ -46,7 +45,7 @@ struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBu
 			Command.VertexStream.Add(Location++, 0u, Buffer);
 			SupportTexel = true;
 			DepthOnlyVertexAttributes = DepthOnlyVertexAttributes | EVertexAttributes::UV0;
-			PassShader.VertexShader.SetDefine("_HAS_UV0_", true);
+			PassShaders.VertexShader.SetDefine("_HAS_UV0_", true);
 		}
 
 		if (LastVertexAttributes != DepthOnlyVertexAttributes || LastPrimitiveTopology != Mesh.GetPrimitiveTopology())
@@ -57,13 +56,13 @@ struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBu
 			LastPrimitiveTopology = Mesh.GetPrimitiveTopology();
 			GfxPipelineCreateInfo.SetPrimitiveTopology(Mesh.GetPrimitiveTopology());
 
-			Command.GraphicsPipeline = Backend.GetDevice().GetOrCreateGraphicsPipeline(GfxPipelineCreateInfo);
-			LastGraphicsPipeline = Command.GraphicsPipeline;
+			//Command.GraphicsPipeline = Backend.GetDevice().GetOrCreateGraphicsPipeline(GfxPipelineCreateInfo);
+			//LastGraphicsPipeline = Command.GraphicsPipeline;
 		}
 		else
 		{
 			assert(LastGraphicsPipeline);
-			Command.GraphicsPipeline = LastGraphicsPipeline;
+			//Command.GraphicsPipeline = LastGraphicsPipeline;
 		}
 
 		return Command;

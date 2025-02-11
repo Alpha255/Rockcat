@@ -281,34 +281,34 @@ void Scene::UpdateNodeCollection()
 		SceneVisitor<BreadthFirst> SceneVisitor(*this);
 		auto Node = SceneVisitor.Get();
 
-		while (Node.IsValid())
-		{
-			if (Node->IsVisible())
-			{
-				m_NodeCollection.VisibleNodes.push_back(Node->GetID());
-			}
+		//while (Node->GetID().IsValid())
+		//{
+		//	if (Node->IsVisible())
+		//	{
+		//		m_NodeCollection.VisibleNodes.push_back(Node->GetID());
+		//	}
 
-			Node = SceneVisitor.Next();
-		}
+		//	Node = SceneVisitor.Next();
+		//}
 	}
 
-	for (auto ID : m_NodeCollection.AddNodes)
-	{
-		if (GetNode(ID).IsVisible())
-		{
-			m_NodeCollection.VisibleNodes.push_back(ID);
-		}
-	}
+	//for (auto ID : m_NodeCollection.AddNodes)
+	//{
+	//	if (GetNode(ID).IsVisible())
+	//	{
+	//		m_NodeCollection.VisibleNodes.push_back(ID);
+	//	}
+	//}
 
-	for (auto ID : m_NodeCollection.HiddenNodes)
-	{
-		m_NodeCollection.VisibleNodes.erase(std::find(m_NodeCollection.HiddenNodes.begin(), m_NodeCollection.HiddenNodes.end(), ID));
-	}
+	//for (auto ID : m_NodeCollection.HiddenNodes)
+	//{
+	//	m_NodeCollection.VisibleNodes.erase(std::find(m_NodeCollection.HiddenNodes.begin(), m_NodeCollection.HiddenNodes.end(), ID));
+	//}
 
-	for (auto ID : m_NodeCollection.RemovedNodes)
-	{
-		m_NodeCollection.VisibleNodes.erase(std::find(m_NodeCollection.VisibleNodes.begin(), m_NodeCollection.VisibleNodes.end(), ID));
-	}
+	//for (auto ID : m_NodeCollection.RemovedNodes)
+	//{
+	//	m_NodeCollection.VisibleNodes.erase(std::find(m_NodeCollection.VisibleNodes.begin(), m_NodeCollection.VisibleNodes.end(), ID));
+	//}
 
 	SetDirty(m_NodeCollection.HasDirtyNodes());
 	m_NodeCollection.ClearDirtyNodes();

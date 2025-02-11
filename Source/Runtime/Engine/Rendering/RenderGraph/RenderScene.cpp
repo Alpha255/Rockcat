@@ -30,12 +30,12 @@ void RenderScene::TraverseScene()
 {
 }
 
-void RenderScene::RebuildMeshDrawCommands()
+void RenderScene::BuildMeshDrawCommands()
 {
-	for (auto& MeshDrawCmds : m_MeshDrawCommands)
+	for (auto& Commands : m_Commands)
 	{
-		MeshDrawCmds.clear();
-		MeshDrawCmds.reserve(1024u);
+		Commands.clear();
+		Commands.reserve(1024u);
 	}
 
 	if (RHIBackend::GetConfigs().AsyncMeshDrawCommandsBuilding)
@@ -44,32 +44,32 @@ void RenderScene::RebuildMeshDrawCommands()
 	}
 	else
 	{
-		for (auto Node : m_Scene.GetVisibleNodes())
+		for (auto ID : m_Scene.GetVisibleNodes())
 		{
-			if (!Node)
+			if (!ID.IsValid())
 			{
 				continue;
 			}
 
-			if (Node->IsStaticMesh())
-			{
-				if (auto Mesh = m_Scene.GetStaticMesh(Node->GetDataIndex()))
-				{
-					///const_cast<StaticMesh*>(Mesh)->CreateRHIBuffers(Device);
+			//if (Node->IsStaticMesh())
+			//{
+			//	if (auto Mesh = m_Scene.GetStaticMesh(Node->GetDataIndex()))
+			//	{
+			//		///const_cast<StaticMesh*>(Mesh)->CreateRHIBuffers(Device);
 
-					for (size_t Index = 0u; Index < (size_t)EGeometryPass::Num; ++Index)
-					{
-						if (auto Builder = GetBuilder(Index))
-						{
-							m_MeshDrawCommands[Index].emplace_back(Builder->Build(*Mesh));
-						}
-					}
-				}
-			}
-			else if (Node->IsSkeletalMesh())
-			{
-				assert(false);
-			}
+			//		for (size_t Index = 0u; Index < (size_t)EGeometryPass::Num; ++Index)
+			//		{
+			//			if (auto Builder = GetBuilder(Index))
+			//			{
+			//				m_MeshDrawCommands[Index].emplace_back(Builder->Build(*Mesh));
+			//			}
+			//		}
+			//	}
+			//}
+			//else if (Node->IsSkeletalMesh())
+			//{
+			//	assert(false);
+			//}
 		}
 	}
 }
