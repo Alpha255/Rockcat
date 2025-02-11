@@ -14,6 +14,6 @@
 //};
 
 TranslucentPass::TranslucentPass(DAGNodeID ID, RenderGraph& Graph)
-	: GeometryPass(ID, "TranslucentPass", Graph, EGeometryPassFilter::Translucent, nullptr)
+	: GeometryPass(ID, "TranslucentPass", Graph, EGeometryPass::Translucent, nullptr)
 {
 }

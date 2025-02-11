@@ -69,7 +69,7 @@ GeometryPass::GeometryPass(
 	DAGNodeID ID, 
 	const char* Name, 
 	RenderGraph& Graph, 
-	EGeometryPassFilter Filter, 
+	EGeometryPass Filter, 
 	IGeometryPassMeshDrawCommandBuilder* MeshDrawCommandBuilder)
 	: RenderPass(ID, Name, Graph)
 	, m_Filter(Filter)

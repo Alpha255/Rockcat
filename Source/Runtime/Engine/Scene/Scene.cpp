@@ -274,42 +274,49 @@ void Scene::Traverse(const SceneNode::VisitFunc& Visit) const
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/SceneVisitor.h"
 
-void Scene::Update()
+void Scene::UpdateNodeCollection()
 {
-	if (m_VisibleNodes.empty())
+	if (m_NodeCollection.VisibleNodes.empty())
 	{
 		SceneVisitor<BreadthFirst> SceneVisitor(*this);
 		auto Node = SceneVisitor.Get();
 
-		while (Node != SceneNodeIterator())
+		while (Node.IsValid())
 		{
-			if (Node->IsAlive() && Node->IsVisible())
+			if (Node->IsVisible())
 			{
-				m_VisibleNodes.insert(&(*Node));
+				m_NodeCollection.VisibleNodes.push_back(Node->GetID());
 			}
 
 			Node = SceneVisitor.Next();
 		}
 	}
 
-	uint32_t NumAddNodes = 0u;
-	for (auto Node : m_AddNodes)
+	for (auto ID : m_NodeCollection.AddNodes)
 	{
-		if (Node->IsAlive() && Node->IsVisible())
+		if (GetNode(ID).IsVisible())
 		{
-			m_VisibleNodes.insert(Node);
-			++NumAddNodes;
+			m_NodeCollection.VisibleNodes.push_back(ID);
 		}
 	}
-	m_AddNodes.clear();
 
-	uint32_t NumRemoveNodes = 0u;
-	for (auto Node : m_RemoveOrHiddenNodes)
+	for (auto ID : m_NodeCollection.HiddenNodes)
 	{
-		m_VisibleNodes.erase(Node);
-		++NumRemoveNodes;
+		m_NodeCollection.VisibleNodes.erase(std::find(m_NodeCollection.HiddenNodes.begin(), m_NodeCollection.HiddenNodes.end(), ID));
 	}
-	m_RemoveOrHiddenNodes.clear();
 
-	SetDirty(NumAddNodes > 0u || NumRemoveNodes > 0u);
+	for (auto ID : m_NodeCollection.RemovedNodes)
+	{
+		m_NodeCollection.VisibleNodes.erase(std::find(m_NodeCollection.VisibleNodes.begin(), m_NodeCollection.VisibleNodes.end(), ID));
+	}
+
+	SetDirty(m_NodeCollection.HasDirtyNodes());
+	m_NodeCollection.ClearDirtyNodes();
+}
+
+void Scene::Tick(float ElapsedSeconds)
+{
+	/// #TODO Profile
+	(void)ElapsedSeconds;
+	UpdateNodeCollection();
 }

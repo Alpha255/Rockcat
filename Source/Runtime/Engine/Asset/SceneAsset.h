@@ -33,8 +33,8 @@ public:
 	}
 
 	static const char* GetExtension() { return ".scene"; }
-	const SceneGraph* GetGraph() const { return m_Graph.get(); }
-	const SceneData* GetData() const { return m_Data.get(); }
+	const SceneGraph& GetGraph() const { assert(m_Graph); return *m_Graph; }
+	const SceneData& GetData() const { assert(m_Data); return *m_Data; }
 
 	const StaticMesh* GetStaticMesh(uint32_t Index) const 
 	{ 
@@ -64,10 +64,10 @@ public:
 		return m_Data->MaterialProperties[Index].get();
 	}
 
-	const Camera& GetCamera(uint32_t Index) const
+	const Camera* GetCamera(uint32_t Index) const
 	{
 		assert(Index < m_Data->Cameras.size());
-		return *m_Data->Cameras[Index];
+		return m_Data->Cameras[Index].get();
 	}
 
 	const std::vector<std::shared_ptr<Camera>>& GetCameras() const

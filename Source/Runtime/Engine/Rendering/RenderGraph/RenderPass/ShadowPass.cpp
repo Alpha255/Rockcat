@@ -32,7 +32,7 @@ ShadowPass::ShadowPass(DAGNodeID ID, RenderGraph& Graph)
 		ID, 
 		"ShadowPass",
 		Graph,
-		EGeometryPassFilter::ShadowCast,
+		EGeometryPass::ShadowCast,
 		nullptr)
 {
 }

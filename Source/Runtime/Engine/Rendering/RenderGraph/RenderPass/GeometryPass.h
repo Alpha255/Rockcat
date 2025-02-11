@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Core/Math/Transform.h"
 #include "Engine/Rendering/RenderGraph/RenderPass.h"
 
 template<class TVertexShader, class TFragmentShader>
@@ -10,41 +9,25 @@ struct GeometryPassShaders
 	TFragmentShader FragmentShader;
 };
 
-struct IGeometryPassMeshDrawCommandBuilder
+struct IMeshDrawCommandBuilder
 {
-	IGeometryPassMeshDrawCommandBuilder(class RHIBackend& InBackend)
-		: Backend(InBackend)
-	{
-	}
-
-	virtual MeshDrawCommand Build(const class StaticMesh& Mesh, const class Scene& InScene) = 0;
-
-	class RHIBackend& Backend;
+	virtual MeshDrawCommand Build(const class StaticMesh& Mesh) = 0;
 };
 
-template<class TVertexShader, class TFragmentShader>
-struct GeometryPassMeshDrawCommandBuilder : public IGeometryPassMeshDrawCommandBuilder
+template<class VertexShader, class FragmentShader>
+struct MeshDrawCommandBuilder : public IMeshDrawCommandBuilder
 {
-	using IGeometryPassMeshDrawCommandBuilder::IGeometryPassMeshDrawCommandBuilder;
-	GeometryPassShaders<TVertexShader, TFragmentShader> PassShader;
+	GeometryPassShaders<VertexShader, FragmentShader> PassShaders;
 };
 
 class GeometryPass : public RenderPass
 {
 public:
-	GeometryPass(
-		DAGNodeID ID, 
-		const char* Name, 
-		class RenderGraph& Graph, 
-		EGeometryPassFilter Filter, 
-		IGeometryPassMeshDrawCommandBuilder* MeshDrawCommandBuilder);
+	using RenderPass::RenderPass;
 
 	void Execute(const RenderScene& Scene) override;
-
-	EGeometryPassFilter GetGeometryPassFilter() const { return m_Filter; }
 protected:
 	virtual RHIFrameBuffer* GetFrameBuffer();
 private:
-	EGeometryPassFilter m_Filter;
 	RHIFrameBuffer* m_FrameBuffer = nullptr;
 };

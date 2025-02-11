@@ -244,6 +244,6 @@ NAMESPACE_END(RHI)
 //};
 
 OpaquePass::OpaquePass(DAGNodeID ID, RenderGraph& Graph)
-	: GeometryPass(ID, "OpaquePass", Graph, EGeometryPassFilter::Opaque, nullptr)
+	: GeometryPass(ID, "OpaquePass", Graph)
 {
 }

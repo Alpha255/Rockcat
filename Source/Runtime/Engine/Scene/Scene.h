@@ -1,20 +1,26 @@
 #pragma once
 
 #include "Engine/Asset/SceneAsset.h"
+#include "Engine/Tickable.h"
 
-class Scene : public SceneAsset
+class Scene : public SceneAsset, public ITickable
 {
 public:
 	using SceneAsset::SceneAsset;
 
-	~Scene() 
-	{
-		Save<Scene>(IsDirty()); 
-	}
+	~Scene() { Save<Scene>(IsDirty()); }
 
-	void Update();
+	inline const std::vector<SceneGraph::NodeID>& GetVisibleNodes() { return m_NodeCollection.VisibleNodes; }
+	inline const std::vector<SceneGraph::NodeID>& GetAddNodes() { return m_NodeCollection.AddNodes; }
+	inline const std::vector<SceneGraph::NodeID>& GetHiddenNodes() { return m_NodeCollection.HiddenNodes; }
+	inline const std::vector<SceneGraph::Node>& GetRemovedNodes() { return m_NodeCollection.RemovedNodes; }
 
-	const std::set<const SceneGraph::Node*>& GetVisibleNodes() const { return m_VisibleNodes; }
+	inline bool HasNodes() const { return GetNumNodes() > 0u; }
+	inline uint32_t GetNumNodes() const { return GetGraph().GetNumNodes(); }
+
+	inline const SceneGraph::Node& GetNode(const SceneGraph::NodeID ID) const { return GetGraph().GetNode(ID); }
+
+	void Tick(float ElapsedSeconds) override final;
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -23,15 +29,34 @@ public:
 			CEREAL_BASE(SceneAsset)
 		);
 	}
-
-	inline bool IsDirty() const { return m_Dirty; }
 protected:
+	struct NodeCollection
+	{
+		std::vector<SceneGraph::NodeID> VisibleNodes;
+		std::vector<SceneGraph::NodeID> AddNodes;
+		std::vector<SceneGraph::NodeID> HiddenNodes;
+		std::vector<SceneGraph::Node> RemovedNodes;
+
+		inline bool HasDirtyNodes() const
+		{
+			return !AddNodes.empty() || !HiddenNodes.empty() || !RemovedNodes.empty();
+		}
+
+		void ClearDirtyNodes()
+		{
+			AddNodes.clear();
+			HiddenNodes.clear();
+			RemovedNodes.clear();
+		}
+	};
+
 	inline void SetDirty(bool Dirty) { m_Dirty = Dirty; }
+	inline bool IsDirty() const { return m_Dirty; }
+
+	void UpdateNodeCollection();
 private:
-	bool m_Dirty = true;
-	std::set<const SceneGraph::Node*> m_VisibleNodes;
-	std::vector<const SceneGraph::Node*> m_AddNodes;
-	std::vector<const SceneGraph::Node*> m_RemoveOrHiddenNodes;
-	std::vector<const SceneGraph::Node*> m_DirtyNodes;
+	bool m_Dirty = false;
+
+	NodeCollection m_NodeCollection;
 };
 

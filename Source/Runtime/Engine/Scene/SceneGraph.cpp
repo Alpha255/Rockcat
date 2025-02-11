@@ -24,3 +24,10 @@ bool SceneGraph::Node::IsCamera() const
 {
 	return (m_Masks & ENodeMasks::Camera) == ENodeMasks::Camera;
 }
+
+SceneGraph::Node SceneGraph::RemoveNode(NodeID ID)
+{
+	(void)ID;
+	assert(0);
+	return Node();
+}

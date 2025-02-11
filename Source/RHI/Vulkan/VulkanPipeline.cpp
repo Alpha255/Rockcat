@@ -125,8 +125,8 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 		{
 			vk::DynamicState::eViewport,
 			vk::DynamicState::eScissor,
-			vk::DynamicState::eCullMode,
-			vk::DynamicState::ePolygonModeEXT,
+			//vk::DynamicState::eCullMode,
+			//vk::DynamicState::ePolygonModeEXT,
 			//vk::DynamicState::eFrontFace,
 			//vk::DynamicState::ePrimitiveTopology,
 		};

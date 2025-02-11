@@ -303,4 +303,7 @@ class Array : public std::array<T, static_cast<size_t>(Enum::Num)>
 public:
 	inline T& operator[](Enum Index) { return this->at(static_cast<size_t>(Index)); }
 	inline const T& operator[](Enum Index) const { return this->at(static_cast<size_t>(Index)); }
+
+	inline T& operator[](size_t Index) { return this->at(Index); }
+	inline const T& operator[](size_t Index) const { return this->at(Index); }
 };

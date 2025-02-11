@@ -23,8 +23,9 @@ struct SceneGraph
 
 		Node() = default;
 
-		Node(const char* Name, NodeID ParentID = NodeID(), ENodeMasks Masks = ENodeMasks::None)
-			: m_Parent(ParentID)
+		Node(const char* Name, NodeID ID, NodeID ParentID = NodeID(), ENodeMasks Masks = ENodeMasks::None)
+			: m_ID(ID)
+			, m_Parent(ParentID)
 			, m_Masks(Masks)
 			, m_Name(Name ? Name : "")
 		{
@@ -34,44 +35,44 @@ struct SceneGraph
 		Node(Node&&) = default;
 		Node& operator=(const Node&) = default;
 
-		bool HasParent() const { return m_Parent.IsValid(); }
-		NodeID GetParent() const { return m_Parent; }
-		Node& SetParent(NodeID ParentID) { m_Parent = ParentID; return *this; }
+		inline NodeID GetID() const { return m_ID; }
 
-		bool HasChild() const { return m_Child.IsValid(); }
-		NodeID GetChild() const { return m_Child; }
-		Node& SetChild(NodeID ChildID) { m_Child = ChildID; return *this; }
+		inline bool HasParent() const { return m_Parent.IsValid(); }
+		inline NodeID GetParent() const { return m_Parent; }
+		inline Node& SetParent(NodeID ParentID) { m_Parent = ParentID; return *this; }
 
-		bool HasSibling() const { return m_Sibling.IsValid(); }
-		NodeID GetSibling() const { return m_Sibling; }
-		Node& SetSibling(NodeID SiblingID) { m_Sibling = SiblingID; return *this; }
+		inline bool HasChild() const { return m_Child.IsValid(); }
+		inline NodeID GetChild() const { return m_Child; }
+		inline Node& SetChild(NodeID ChildID) { m_Child = ChildID; return *this; }
 
-		bool IsAlive() const { return m_Alive; }
-		Node& SetAlive(bool Alive) { m_Alive = Alive; return *this; }
+		inline bool HasSibling() const { return m_Sibling.IsValid(); }
+		inline NodeID GetSibling() const { return m_Sibling; }
+		inline Node& SetSibling(NodeID SiblingID) { m_Sibling = SiblingID; return *this; }
 
-		bool IsVisible() const { return m_Visible; }
-		Node& SetVisible(bool Visible) { m_Visible = Visible; return *this; }
+		inline bool IsVisible() const { return m_Visible; }
+		inline Node& SetVisible(bool Visible) { m_Visible = Visible; return *this; }
 
-		bool IsSelected() const { return m_Selected; }
-		Node& SetSelected(bool Selected) { m_Selected = Selected; return *this; }
+		inline bool IsSelected() const { return m_Selected; }
+		inline Node& SetSelected(bool Selected) { m_Selected = Selected; return *this; }
 
-		const char* GetName() const { return m_Name.c_str(); }
-		Node& SetName(const char* Name) { m_Name = Name; return *this; }
+		inline const char* GetName() const { return m_Name.c_str(); }
+		inline Node& SetName(const char* Name) { m_Name = Name; return *this; }
 
-		ENodeMasks GetMasks() const { return m_Masks; }
-		Node& SetMasks(ENodeMasks Masks);
+		inline ENodeMasks GetMasks() const { return m_Masks; }
+		inline Node& SetMasks(ENodeMasks Masks);
+
+		inline uint32_t GetDataIndex() const { return m_DataIndex; }
 
 		bool IsStaticMesh() const;
 		bool IsSkeletalMesh() const;
 		bool IsLight() const;
 		bool IsCamera() const;
 
-		uint32_t GetDataIndex() const { return m_DataIndex; }
-
 		template<class Archive>
 		void serialize(Archive& Ar)
 		{
 			Ar(
+				CEREAL_NVP(m_ID),
 				CEREAL_NVP(m_Parent),
 				CEREAL_NVP(m_Child),
 				CEREAL_NVP(m_Sibling),
@@ -86,6 +87,7 @@ struct SceneGraph
 		friend class AssimpSceneImporter;
 		void SetDataIndex(uint32_t Index) { m_DataIndex = Index; }
 	private:
+		NodeID m_ID;
 		NodeID m_Parent;
 		NodeID m_Child;
 		NodeID m_Sibling;
@@ -93,7 +95,6 @@ struct SceneGraph
 		ENodeMasks m_Masks = ENodeMasks::None;
 		uint32_t m_DataIndex = 0u;
 
-		bool m_Alive = true;
 		bool m_Visible = true;
 		bool m_Selected = false;
 
@@ -105,7 +106,7 @@ struct SceneGraph
 	NodeList Nodes;
 	NodeIDAllocator IDAllocator;
 
-	size_t GetNodeCount() const { return Nodes.size(); }
+	size_t GetNumNodes() const { return Nodes.size(); }
 	bool IsEmpty() const { return Nodes.empty(); }
 
 	NodeID AddSibling(NodeID Sibling, const char* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
@@ -140,9 +141,11 @@ struct SceneGraph
 	NodeID AddNode(NodeID Parent, const char* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
 	{
 		NodeID NextID = IDAllocator.Allocate();  /// +1
-		Nodes.emplace_back(Node(Name, Parent, Masks));
+		Nodes.emplace_back(Node(Name, NextID, Parent, Masks));
 		return NextID;
 	}
+
+	Node RemoveNode(NodeID ID);
 
 	const Node* FindNodeByName(const char* NodeName) const
 	{

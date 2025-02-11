@@ -5,8 +5,6 @@
 class ImGUIPass : public RenderPass
 {
 public:
-	DECLARE_RENDERPASS_CONSTRUCTOR(ImGUIPass, RenderPass)
-
 	~ImGUIPass();
 
 	void Compile() override final {}

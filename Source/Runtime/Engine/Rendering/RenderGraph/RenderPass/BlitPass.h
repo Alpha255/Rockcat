@@ -20,8 +20,6 @@ public:
 		Linear
 	};
 
-	DECLARE_RENDERPASS_CONSTRUCTOR(BlitPass, RenderPass)
-
 	void SetMode(EMode Mode) { m_Mode = Mode; }
 
 	void Compile() override final {}

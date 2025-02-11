@@ -9,6 +9,7 @@ MessageRouter& MessageRouter::Get()
 
 void MessageRouter::RegisterMessageHandler(MessageHandler* Handler)
 {
+	/// #TODO: Bugs when enable multi applications
 	if (Handler && std::find(m_Handlers.cbegin(), m_Handlers.cend(), Handler) == m_Handlers.cend())
 	{
 		m_Handlers.push_back(Handler);

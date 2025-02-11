@@ -21,7 +21,7 @@ public:
 		}
 		else
 		{
-			auto const StartIndex = static_cast<SceneGraph::NodeID::IndexType>(Target.GetNodeCount());
+			auto const StartIndex = static_cast<SceneGraph::NodeID::IndexType>(Target.GetNumNodes());
 			for (auto& Node : Other.Nodes)
 			{
 				auto GraphNodeID = Target.AddNode(SceneGraph::NodeID(), Node.GetName(), Node.GetMasks());
@@ -86,7 +86,7 @@ void SceneAsset::PostLoad()
 
 		if (NewData->Transforms.empty())
 		{
-			NewData->Transforms.resize(NewGraph->GetNodeCount());
+			NewData->Transforms.resize(NewGraph->GetNumNodes());
 		}
 
 		// TODO: Thread safe??

@@ -76,7 +76,7 @@ struct PreDepthPassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBu
 };
 
 PreDepthPass::PreDepthPass(DAGNodeID ID, RenderGraph& Graph)
-	: GeometryPass(ID, "PreDepthPass", Graph, EGeometryPassFilter::PreDepth, new PreDepthPassMeshDrawCommandBuilder(Graph.GetBackend()))
+	: GeometryPass(ID, "PreDepthPass", Graph)
 {
 }
 

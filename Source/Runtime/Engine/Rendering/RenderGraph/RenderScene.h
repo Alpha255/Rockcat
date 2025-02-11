@@ -7,7 +7,7 @@
 #include "Engine/Scene/SceneGraph.h"
 #include "Engine/Scene/SceneView.h"
 
-enum class EGeometryPassFilter
+enum class EGeometryPass
 {
 	PreDepth,
 	Opaque,
@@ -35,19 +35,17 @@ struct MeshDrawCommand
 	RHIVertexStream VertexStream;
 	const RHIBuffer* IndexBuffer = nullptr;
 
-	RHIGraphicsPipeline* GraphicsPipeline = nullptr;
-
 	uint32_t FirstIndex = 0u;
 	uint32_t NumPrimitives = 0u;
 	uint32_t NumIndex = 0u;
 	uint32_t NumInstances = 1u;
+	ERHIIndexFormat IndexFormat = ERHIIndexFormat::UInt16;
 
 	std::string_view MeshName;
 	
 	MaterialID Material;
 
-	ERHIIndexFormat IndexFormat = ERHIIndexFormat::UInt16;
-	ERHIPrimitiveTopology PrimitiveTopology = ERHIPrimitiveTopology::TriangleList;
+	RHIGraphicsPipelineCreateInfo GraphicsPipelineDesc;
 
 	union
 	{
@@ -70,33 +68,40 @@ struct MeshDrawCommand
 class RenderScene
 {
 public:
-	void RebuildMeshDrawCommands(const class Scene& InScene, class RHIDevice& Device);
+	RenderScene(const class Scene& InScene)
+		: m_Scene(InScene)
+	{
+	}
 
-	const std::vector<MeshDrawCommand>& GetMeshDrawCommands(EGeometryPassFilter MeshPass) const { return m_MeshDrawCommands[(size_t)MeshPass]; }
+	const class Scene& GetScene() const { return m_Scene; }
+
 	const std::vector<std::shared_ptr<SceneView>>& GetViews() const { return m_Views; }
 
-	void RegisterMeshDrawCommandBuilder(EGeometryPassFilter Filter, struct IGeometryPassMeshDrawCommandBuilder* Builder);
+	void RebuildMeshDrawCommands();
 
-	void OnDebugDrawSettingsUpdated(); /// TODO
+	static void RegisterMeshDrawCommandBuilder(EGeometryPass Filter, struct IMeshDrawCommandBuilder* Builder);
 protected:
+	template<class Index>
+	inline IMeshDrawCommandBuilder* GetBuilder(Index Filter) { return s_Builders[Filter].get(); }
 private:
-	std::array<std::vector<MeshDrawCommand>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommands;
-	std::array<std::shared_ptr<struct IGeometryPassMeshDrawCommandBuilder>, (size_t)EGeometryPassFilter::Num> m_MeshDrawCommandBuilders;
-	mutable std::vector<std::shared_ptr<SceneView>> m_Views;
-};
+	void TraverseScene();
 
-class RenderScene2
-{
-public:
-	RenderScene2(const class Scene& InScene);
-private:
-	const class Scene& InScene;
-	using NodeIndex = SceneGraph::NodeID::IndexType;
+	const class Scene& m_Scene;
 
-	std::vector<NodeIndex> m_PrimitiveNodes;
-	std::vector<NodeIndex> m_DirtyNodes;
-	std::vector<NodeIndex> m_AddNodes;
-	std::vector<NodeIndex> m_RemoveNodes;
+	std::vector<std::shared_ptr<SceneView>> m_Views;
+	
+	Array<std::vector<MeshDrawCommand>, EGeometryPass> m_MeshDrawCommands;
+
+	struct PrimitiveNodes
+	{
+		std::vector<SceneGraph::NodeID> AllNodes;
+		std::vector<SceneGraph::NodeID> DirtyNodes;
+		std::vector<SceneGraph::NodeID> AddNodes;
+		std::vector<SceneGraph::NodeID> RemoveNodes;
+		std::vector<SceneGraph::NodeID> PendingNodes;
+	} m_PrimitiveNodes;
+
+	static Array<std::unique_ptr<IMeshDrawCommandBuilder>, EGeometryPass> s_Builders;
 };
 
 namespace SceneTextures

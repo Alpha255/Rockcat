@@ -8,6 +8,7 @@ public:
 	RenderPass(DAGNodeID ID, const char* Name, class RenderGraph& Graph);
 
 	const char* GetName() const { return m_Name.data(); }
+	void SetName(const char* Name) { m_Name = Name; }
 
 	DAGNodeID GetNodeID() const { return m_NodeID; }
 
@@ -17,9 +18,7 @@ public:
 	RDGResource& AddInternal(RDGResource::EType Type, const char* Name) { return AddResource(Type, Name, RDGResource::EVisibility::Internal); }
 
 	virtual void Compile() = 0;
-
 	virtual void Execute(const RenderScene&) = 0;
-
 	virtual void OnGUI() {};
 protected:
 	class ResourceManager& GetResourceManager();
@@ -49,8 +48,3 @@ private:
 	std::vector<RenderPassField> m_Fields;
 	class RenderGraph& m_Graph;
 };
-
-#define DECLARE_RENDERPASS_CONSTRUCTOR(Pass, Parent) \
-	Pass(DAGNodeID ID, class RenderGraph& Graph) \
-		: Parent(ID, #Pass, Graph) \
-	{} \
