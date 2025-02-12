@@ -138,7 +138,10 @@ private:
 			}
 			else
 			{
-				AssimpScene.Graph.GetNode(GraphNodeID).SetDataIndex(MeshIndex);
+				if (auto SceneNode = const_cast<SceneGraph::Node*>(AssimpScene.Graph.GetNode(GraphNodeID)))
+				{
+					SceneNode->SetDataIndex(MeshIndex);
+				}
 			}
 		}
 

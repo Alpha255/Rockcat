@@ -68,39 +68,43 @@ struct MeshDrawCommand
 class RenderScene
 {
 public:
-	RenderScene(const class Scene& InScene)
-		: m_Scene(InScene)
-	{
-	}
+	RenderScene(const class Scene& InScene);
 
 	const class Scene& GetScene() const { return m_Scene; }
-
 	const std::vector<std::shared_ptr<SceneView>>& GetViews() const { return m_Views; }
-
 	const std::vector<MeshDrawCommand>& GetCommands(EGeometryPass Filter) const { return m_Commands[Filter]; }
 
 	void BuildMeshDrawCommands();
 
 	static void RegisterMeshDrawCommandBuilder(EGeometryPass Filter, struct IMeshDrawCommandBuilder* Builder);
 protected:
-	inline struct IMeshDrawCommandBuilder* GetBuilder(EGeometryPass Filter) { return s_Builders[Filter].get(); }
+	template<class Index>
+	inline struct IMeshDrawCommandBuilder* GetBuilder(Index Filter) { return s_Builders[Filter].get(); }
 private:
-	void TraverseScene();
+	void GetScenePrimitives();
+	void UpdateScenePrimitives();
+	void RemoveInvalidCommands();
 
 	const class Scene& m_Scene;
 
+	struct PrimitiveCollection
+	{
+		std::vector<SceneGraph::NodeID> Add;
+		std::vector<SceneGraph::NodeID> Remove;
+
+		inline void Clear()
+		{
+			Add.clear();
+			Remove.clear();
+		}
+	} m_Primitives;
+
 	std::vector<std::shared_ptr<SceneView>> m_Views;
-	
+
+	std::unordered_map<SceneGraph::NodeID, size_t> m_NodeIDCommandMap;
 	Array<std::vector<MeshDrawCommand>, EGeometryPass> m_Commands;
 
-	struct PrimitiveNodes
-	{
-		std::vector<SceneGraph::NodeID> AllNodes;
-		std::vector<SceneGraph::NodeID> DirtyNodes;
-		std::vector<SceneGraph::NodeID> AddNodes;
-		std::vector<SceneGraph::NodeID> RemoveNodes;
-		std::vector<SceneGraph::NodeID> PendingNodes;
-	} m_PrimitiveNodes;
+	std::mutex m_CommandsMutex;
 
 	static Array<std::unique_ptr<struct IMeshDrawCommandBuilder>, EGeometryPass> s_Builders;
 };

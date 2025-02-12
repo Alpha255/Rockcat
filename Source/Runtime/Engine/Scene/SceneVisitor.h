@@ -17,7 +17,6 @@ public:
 	}
 
 	SceneNodeIterator Next() { return Next(Policy()); }
-
 	SceneNodeIterator Get() { return m_Iterator; }
 private:
 	SceneVisitor(const SceneGraph& Graph)

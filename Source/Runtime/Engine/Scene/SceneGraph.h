@@ -55,7 +55,6 @@ struct SceneGraph
 		inline Node& SetName(const char* Name) { m_Name = Name; return *this; }
 
 		inline ENodeMasks GetMasks() const { return m_Masks; }
-		inline Node& SetMasks(ENodeMasks Masks);
 
 		inline uint32_t GetDataIndex() const { return m_DataIndex; }
 
@@ -79,9 +78,13 @@ struct SceneGraph
 		}
 	protected:
 		friend class AssimpSceneImporter;
+		friend struct SceneGraph;
 
 		inline void SetDataIndex(uint32_t Index) { m_DataIndex = Index; }
 		inline void SetID(NodeID ID) { m_ID = ID; }
+
+		inline bool IsAlive() const { return m_Alive; }
+		inline void SetAlive(bool Alive) { m_Alive = Alive; }
 	private:
 		NodeID m_ID;
 		NodeID m_Parent;
@@ -91,6 +94,7 @@ struct SceneGraph
 		ENodeMasks m_Masks = ENodeMasks::None;
 		uint32_t m_DataIndex = 0u;
 
+		bool m_Alive = false;
 		bool m_Visible = true;
 		bool m_Selected = false;
 
@@ -98,11 +102,9 @@ struct SceneGraph
 	};
 	using NodeList = std::vector<Node>;
 
+	uint32_t NumPrimitives = 0u;
 	NodeID Root;
 	NodeList Nodes;
-
-	inline size_t GetNumNodes() const { return Nodes.size(); }
-	inline bool IsEmpty() const { return Nodes.empty(); }
 
 	NodeID AddSibling(NodeID Sibling, const char* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
 	{
@@ -136,13 +138,16 @@ struct SceneGraph
 	NodeID AddNode(NodeID Parent, const char* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
 	{
 		NodeID ID = Nodes.back().GetID() + 1u;
-		Nodes.emplace_back(Node(Name, ID, Parent, Masks));
+		if (Nodes.emplace_back(Node(Name, ID, Parent, Masks)).IsPrimitive())
+		{
+			++NumPrimitives;
+		}
 		return ID;
 	}
 
 	Node RemoveNode(NodeID ID);
 
-	const Node* FindNodeByName(const char* NodeName) const
+	const Node* GetNodeByName(const char* NodeName) const
 	{
 		for (auto& Node : Nodes)
 		{
@@ -154,16 +159,16 @@ struct SceneGraph
 		return nullptr;
 	}
 
-	Node& GetNode(const NodeID& ID) 
+	const Node* GetNode(const NodeID& ID) const
 	{ 
 		assert(ID.IsValid() && ID.GetIndex() < Nodes.size());
-		return Nodes[ID.GetIndex()]; 
-	}
 
-	const Node& GetNode(const NodeID& ID) const
-	{
-		assert(ID.IsValid() && ID.GetIndex() < Nodes.size());
-		return Nodes[ID.GetIndex()];
+		if (Nodes[ID.GetIndex()].IsAlive())
+		{
+			return &Nodes[ID.GetIndex()];
+		}
+
+		return nullptr; 
 	}
 
 	template<class Archive>

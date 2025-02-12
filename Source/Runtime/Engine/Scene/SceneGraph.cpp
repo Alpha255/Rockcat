@@ -1,10 +1,5 @@
 #include "Engine/Scene/SceneGraph.h"
 
-SceneGraph::Node& SceneGraph::Node::SetMasks(ENodeMasks Masks) 
-{ 
-	m_Masks = (Masks | m_Masks); return *this;
-}
-
 bool SceneGraph::Node::IsPrimitive() const 
 {
 	return (m_Masks & ENodeMasks::Primitive) == ENodeMasks::Primitive;

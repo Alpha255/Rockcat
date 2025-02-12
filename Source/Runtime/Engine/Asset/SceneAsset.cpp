@@ -13,23 +13,23 @@ public:
 
 	static void MergeSceneGraph(SceneGraph& Target, const SceneGraph& Other)
 	{
-		if (Target.IsEmpty())
+		if (Target.Nodes.empty())
 		{
 			Target.Root = Other.Root;
 			Target.Nodes.insert(Target.Nodes.end(), Other.Nodes.begin(), Other.Nodes.end());
 		}
 		else
 		{
-			auto const StartIndex = static_cast<SceneGraph::NodeID::IndexType>(Target.GetNumNodes());
+			auto const StartIndex = static_cast<SceneGraph::NodeID::IndexType>(Target.Nodes.size());
 			for (auto& Node : Other.Nodes)
 			{
 				auto GraphNodeID = Target.AddNode(SceneGraph::NodeID(), Node.GetName(), Node.GetMasks());
-				auto& GraphNode = Target.GetNode(GraphNodeID);
+				auto GraphNode = const_cast<SceneGraph::Node*>(Target.GetNode(GraphNodeID));
 				auto Parent = Node.HasParent() ? Node.GetParent() + StartIndex : Target.Root;
 				auto Child = Node.HasChild() ? Node.GetChild() + StartIndex : SceneGraph::NodeID();
 				auto Sibling = Node.HasSibling() ? Node.GetSibling() + StartIndex : SceneGraph::NodeID();
 				
-				GraphNode.SetVisible(Node.IsVisible())
+				GraphNode->SetVisible(Node.IsVisible())
 					.SetParent(Parent)
 					.SetChild(Child)
 					.SetSibling(Sibling);
@@ -84,7 +84,7 @@ void SceneAsset::PostLoad()
 
 		if (NewData->Transforms.empty())
 		{
-			NewData->Transforms.resize(NewGraph->GetNumNodes());
+			NewData->Transforms.resize(NewGraph->Nodes.size());
 		}
 
 		// TODO: Thread safe??
