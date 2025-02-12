@@ -276,21 +276,21 @@ void Scene::Traverse(const SceneNode::VisitFunc& Visit) const
 
 void Scene::UpdateNodeCollection()
 {
-	if (m_NodeCollection.VisibleNodes.empty())
-	{
-		SceneVisitor<BreadthFirst> SceneVisitor(*this);
-		auto Node = SceneVisitor.Get();
+	//if (m_NodeCollection.VisibleNodes.empty())
+	//{
+	//	SceneVisitor<BreadthFirst> SceneVisitor(*this);
+	//	auto Node = SceneVisitor.Get();
 
-		//while (Node->GetID().IsValid())
-		//{
-		//	if (Node->IsVisible())
-		//	{
-		//		m_NodeCollection.VisibleNodes.push_back(Node->GetID());
-		//	}
+	//	//while (Node->GetID().IsValid())
+	//	//{
+	//	//	if (Node->IsVisible())
+	//	//	{
+	//	//		m_NodeCollection.VisibleNodes.push_back(Node->GetID());
+	//	//	}
 
-		//	Node = SceneVisitor.Next();
-		//}
-	}
+	//	//	Node = SceneVisitor.Next();
+	//	//}
+	//}
 
 	//for (auto ID : m_NodeCollection.AddNodes)
 	//{
@@ -318,5 +318,5 @@ void Scene::Tick(float ElapsedSeconds)
 {
 	/// #TODO Profile
 	(void)ElapsedSeconds;
-	UpdateNodeCollection();
+	//UpdateNodeCollection();
 }

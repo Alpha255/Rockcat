@@ -16,13 +16,9 @@ RDGResource& ResourceManager::GetOrAllocateResource(RDGResource::EType Type, con
 		return *It->second;
 	}
 
-	auto Resource = std::make_shared<RDGResource>(m_ResourceIDAllocator.Allocate(), Type, Name, Visibility);
+	auto Resource = std::make_shared<RDGResource>(RDGResourceID(m_NextResourceID++), Type, Name, Visibility);
 	m_Resources.insert(std::make_pair(std::string_view(Name), Resource));
 	return *Resource;
-}
-
-void ResourceManager::OnWindowResized(uint32_t, uint32_t)
-{
 }
 
 void ResourceManager::ResolveResources(RHIDevice& Device)

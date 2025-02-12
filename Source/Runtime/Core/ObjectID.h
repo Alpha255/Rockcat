@@ -31,30 +31,20 @@ public:
 	}
 
 	constexpr ObjectID& operator=(const TIndex Index) { m_Index = Index; return *this; }
-
 	constexpr ObjectID& operator=(const ObjectID& Other) { m_Index = Other.m_Index; return *this; }
-
 	constexpr ObjectID& operator+=(const TIndex Value) { m_Index += Value; return *this; }
-
 	constexpr ObjectID& operator-=(const TIndex Value) { m_Index -= Value; return *this; }
 
 	friend ObjectID operator+(const ObjectID& Src, const TIndex Value) { return ObjectID(Src.GetIndex() + Value); }
-
 	friend ObjectID operator-(const ObjectID& Src, const TIndex Value) { return ObjectID(Src.GetIndex() - Value); }
 
 	constexpr TIndex GetIndex() const { assert(IsValid()); return m_Index; }
 
 	constexpr operator bool() const { return IsValid(); }
-
 	constexpr bool IsValid() const { return m_Index != NullIndex; }
 
 	constexpr bool operator==(const ObjectID& Other) const { return m_Index == Other.m_Index; }
-
 	constexpr bool operator!=(const ObjectID& Other) const { return m_Index != Other.m_Index; }
-
-	constexpr bool operator==(const TIndex Index) const { return m_Index == Index; }
-
-	constexpr bool operator!=(const TIndex Index) const { return m_Index != Index; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -67,50 +57,14 @@ private:
 	TIndex m_Index = NullIndex;
 };
 
-template<class TObject, class TIndex>
-class ObjectIDAllocator
-{
-public:
-	using TID = ObjectID<TObject, TIndex>;
-
-	TID Allocate()
-	{
-		if (!m_FreeIndices.empty())
-		{
-			TIndex Index = m_FreeIndices.front();
-			m_FreeIndices.pop();
-			return TID(Index);
-		}
-
-		return TID(m_MaxIndex++);
-	}
-
-	void Free(TIndex Index) { m_FreeIndices.push(Index); }
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(m_MaxIndex),
-			CEREAL_NVP(m_FreeIndices)
-		);
-	}
-protected:
-private:
-	TIndex m_MaxIndex = 0;
-	std::queue<TIndex> m_FreeIndices;
-};
-
-#define DECLARE_OBJECT_ID(ObjectType, IDType) using ObjectType##ID = ObjectID<class ObjectType, IDType>; using ObjectType##IDAllocator = ObjectIDAllocator<class ObjectType, IDType>;
-
 namespace std
 {
 	template<class TObject, class TIndex>
 	struct hash<ObjectID<TObject, TIndex>>
 	{
-		size_t operator()(const ObjectID<TObject>& ID) const
+		size_t operator()(const ObjectID<TObject, TIndex>& ID) const
 		{
-			return std::hash<TIndex>(ID.GetIndex());
+			return std::hash<TIndex>::_Do_hash(ID.GetIndex());
 		}
 	};
 }

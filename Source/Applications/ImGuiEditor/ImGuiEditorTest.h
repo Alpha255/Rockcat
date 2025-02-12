@@ -11,6 +11,7 @@ public:
 
 	void Initialize() override final;
 	void Finalize() override final;
+	void Tick(float ElapsedSeconds) override final;
 
 	void OnMouseEvent(const MouseEvent& Mouse) override final;
 	void OnKeyboardEvent(const KeyboardEvent& Keyboard) override final;

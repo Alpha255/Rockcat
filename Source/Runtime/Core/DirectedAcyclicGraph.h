@@ -5,14 +5,8 @@
 class DirectedAcyclicGraph
 {
 public:
-	using NodeIDAllocator = ObjectIDAllocator<class Node, uint32_t>;
-	using NodeID = NodeIDAllocator::TID;
-
-	using EdgeIDAllocator = ObjectIDAllocator<class Edge, uint32_t>;
-	using EdgeID = EdgeIDAllocator::TID;
-
-	DECLARE_SMART_PTR(Node)
-	DECLARE_SMART_PTR(Edge)
+	using NodeID = ObjectID<class Node>;
+	using EdgeID = ObjectID<class Edge>;
 
 	class Node
 	{
@@ -101,24 +95,26 @@ public:
 		EdgeID m_ID;
 	};
 
-	bool IsNodeExists(const NodeID& ID) const { return m_Nodes.find(ID.GetIndex()) != m_Nodes.end(); }
-	bool IsEdgeExists(const EdgeID& ID) const { return m_Edges.find(ID.GetIndex()) != m_Edges.end(); }
+	bool IsNodeExists(const NodeID& ID) const { return m_Nodes.find(ID) != m_Nodes.end(); }
+	bool IsEdgeExists(const EdgeID& ID) const { return m_Edges.find(ID) != m_Edges.end(); }
 
-	const Node* FindNode(const NodeID& ID) const
+	const Node* GetNode(const NodeID& ID) const
 	{
-		if (IsNodeExists(ID))
+		auto It = m_Nodes.find(ID);
+		if (It != m_Nodes.end())
 		{
-			return &m_Nodes.at(ID.GetIndex());
+			return &It->second;
 		}
 
 		return nullptr;
 	}
 
-	const Edge* FindEdge(const EdgeID& ID) const
+	const Edge* GetEdge(const EdgeID& ID) const
 	{
-		if (IsEdgeExists(ID))
+		auto It = m_Edges.find(ID);
+		if (It != m_Edges.end())
 		{
-			return &m_Edges.at(ID.GetIndex());
+			return &It->second;
 		}
 
 		return nullptr;
@@ -126,26 +122,26 @@ public:
 
 	NodeID AddNode()
 	{
-		auto NewNodeID = m_NodeIDAllocator.Allocate();
-		m_Nodes.insert(std::make_pair(NewNodeID.GetIndex(), Node(NewNodeID)));
-		return NewNodeID;
+		auto ID = NodeID(m_NextNodeID++);
+		m_Nodes.insert(std::make_pair(ID, Node(ID)));
+		return ID;
 	}
 
 	std::vector<EdgeID> RemoveNode(const NodeID& ID)
 	{
 		std::vector<EdgeID> EdgesToRemove;
 
-		if (auto Node = FindNode(ID))
+		if (auto Node = GetNode(ID))
 		{
 			EdgesToRemove.insert(EdgesToRemove.end(), Node->GetInputEdges().begin(), Node->GetInputEdges().end());
 			EdgesToRemove.insert(EdgesToRemove.end(), Node->GetOutputEdges().begin(), Node->GetOutputEdges().end());
 
 			for (auto& EdgeID : EdgesToRemove)
 			{
-				m_Edges.erase(EdgeID.GetIndex());
+				m_Edges.erase(EdgeID);
 			}
 
-			m_Nodes.erase(ID.GetIndex());
+			m_Nodes.erase(ID);
 		}
 
 		return EdgesToRemove;
@@ -155,12 +151,12 @@ public:
 	{
 		if (IsNodeExists(SrcNode) && IsNodeExists(DstNode))
 		{
-			auto NewEdgeID = m_EdgeIDAllocator.Allocate();
-			m_Nodes.at(SrcNode.GetIndex()).ConnectOutputEdge(NewEdgeID);
-			m_Nodes.at(DstNode.GetIndex()).ConnectInputEdge(NewEdgeID);
-			m_Edges.insert(std::make_pair(NewEdgeID.GetIndex(), Edge(NewEdgeID, SrcNode, DstNode)));
+			auto ID = EdgeID(m_NextEdgeID++);
+			m_Nodes.at(SrcNode).ConnectOutputEdge(ID);
+			m_Nodes.at(DstNode).ConnectInputEdge(ID);
+			m_Edges.insert(std::make_pair(ID, Edge(ID, SrcNode, DstNode)));
 
-			return NewEdgeID;
+			return ID;
 		}
 
 		return EdgeID();
@@ -168,12 +164,12 @@ public:
 
 	void RemoveEdge(const EdgeID& ID)
 	{
-		if (auto Edge = FindEdge(ID))
+		if (auto Edge = GetEdge(ID))
 		{
-			m_Nodes.at(Edge->GetSourceNode().GetIndex()).RemoveEdge(ID);
-			m_Nodes.at(Edge->GetDestinationNode().GetIndex()).RemoveEdge(ID);
+			m_Nodes.at(Edge->GetSourceNode()).RemoveEdge(ID);
+			m_Nodes.at(Edge->GetDestinationNode()).RemoveEdge(ID);
 
-			m_Edges.erase(ID.GetIndex());
+			m_Edges.erase(ID);
 		}
 	}
 
@@ -182,29 +178,15 @@ public:
 	{
 		Ar(
 			CEREAL_NVP(m_Nodes),
-			CEREAL_NVP(m_Edges),
-			CEREAL_NVP(m_NodeIDAllocator),
-			CEREAL_NVP(m_EdgeIDAllocator)
+			CEREAL_NVP(m_Edges)
 		);
 	}
 protected:
 private:
-	std::unordered_map<NodeID::IndexType, Node> m_Nodes;
-	std::unordered_map<EdgeID::IndexType, Edge> m_Edges;
+	NodeID::IndexType m_NextNodeID = 0u;
+	EdgeID::IndexType m_NextEdgeID = 0u;
 
-	NodeIDAllocator m_NodeIDAllocator;
-	EdgeIDAllocator m_EdgeIDAllocator;
-};
-
-template<>
-struct std::hash<DirectedAcyclicGraph::NodeID>
-{
-	std::size_t operator()(const DirectedAcyclicGraph::NodeID& ID) const { return ID.GetIndex(); }
-};
-
-template<>
-struct std::hash<DirectedAcyclicGraph::EdgeID>
-{
-	std::size_t operator()(const DirectedAcyclicGraph::EdgeID& ID) const { return ID.GetIndex(); }
+	std::unordered_map<NodeID, Node> m_Nodes;
+	std::unordered_map<EdgeID, Edge> m_Edges;
 };
 

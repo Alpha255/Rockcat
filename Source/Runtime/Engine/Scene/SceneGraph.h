@@ -4,10 +4,7 @@
 
 struct SceneGraph
 {
-	DECLARE_OBJECT_ID(Node, uint32_t)
-
-	using MeshID = uint32_t;
-	using TransformID = uint32_t;
+	using NodeID = ObjectID<class Node>;
 
 	class Node
 	{
@@ -15,10 +12,9 @@ struct SceneGraph
 		enum class ENodeMasks
 		{
 			None,
-			StaticMesh = 1 << 0,
-			SkeletalMesh = 1 << 1,
-			Light = 1 << 2,
-			Camera = 1 << 3
+			Primitive = 1 << 0,
+			Light = 1 << 1,
+			Camera = 1 << 2
 		};
 
 		Node() = default;
@@ -63,8 +59,7 @@ struct SceneGraph
 
 		inline uint32_t GetDataIndex() const { return m_DataIndex; }
 
-		bool IsStaticMesh() const;
-		bool IsSkeletalMesh() const;
+		bool IsPrimitive() const;
 		bool IsLight() const;
 		bool IsCamera() const;
 
@@ -84,7 +79,9 @@ struct SceneGraph
 		}
 	protected:
 		friend class AssimpSceneImporter;
-		void SetDataIndex(uint32_t Index) { m_DataIndex = Index; }
+
+		inline void SetDataIndex(uint32_t Index) { m_DataIndex = Index; }
+		inline void SetID(NodeID ID) { m_ID = ID; }
 	private:
 		NodeID m_ID;
 		NodeID m_Parent;
@@ -103,10 +100,9 @@ struct SceneGraph
 
 	NodeID Root;
 	NodeList Nodes;
-	NodeIDAllocator IDAllocator;
 
-	size_t GetNumNodes() const { return Nodes.size(); }
-	bool IsEmpty() const { return Nodes.empty(); }
+	inline size_t GetNumNodes() const { return Nodes.size(); }
+	inline bool IsEmpty() const { return Nodes.empty(); }
 
 	NodeID AddSibling(NodeID Sibling, const char* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
 	{
@@ -139,9 +135,9 @@ struct SceneGraph
 
 	NodeID AddNode(NodeID Parent, const char* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
 	{
-		NodeID NextID = IDAllocator.Allocate();  /// +1
-		Nodes.emplace_back(Node(Name, NextID, Parent, Masks));
-		return NextID;
+		NodeID ID = Nodes.back().GetID() + 1u;
+		Nodes.emplace_back(Node(Name, ID, Parent, Masks));
+		return ID;
 	}
 
 	Node RemoveNode(NodeID ID);
@@ -175,8 +171,7 @@ struct SceneGraph
 	{
 		Ar(
 			CEREAL_NVP(Root),
-			CEREAL_NVP(Nodes),
-			CEREAL_NVP(IDAllocator)
+			CEREAL_NVP(Nodes)
 		);
 	}
 };

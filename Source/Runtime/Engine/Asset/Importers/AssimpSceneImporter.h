@@ -130,7 +130,7 @@ private:
 			const auto MeshIndex = AiNode->mMeshes[Index];
 			const auto Mesh = AiScene->mMeshes[MeshIndex];
 
-			auto GraphNodeID = AssimpScene.Graph.AddChild(GraphNode, Mesh->mName.C_Str(), SceneGraph::Node::ENodeMasks::StaticMesh);
+			auto GraphNodeID = AssimpScene.Graph.AddChild(GraphNode, Mesh->mName.C_Str(), SceneGraph::Node::ENodeMasks::Primitive);
 
 			if (Mesh->HasBones())
 			{

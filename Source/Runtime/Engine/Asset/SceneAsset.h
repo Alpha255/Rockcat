@@ -45,7 +45,7 @@ public:
 	const StaticMesh* GetStaticMesh(const SceneGraph::NodeID& ID) const
 	{
 		auto& Node = m_Graph->GetNode(ID);
-		if (Node.IsStaticMesh())
+		if (Node.IsPrimitive())
 		{
 			return GetStaticMesh(Node.GetDataIndex());
 		}

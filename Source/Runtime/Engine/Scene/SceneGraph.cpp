@@ -5,14 +5,9 @@ SceneGraph::Node& SceneGraph::Node::SetMasks(ENodeMasks Masks)
 	m_Masks = (Masks | m_Masks); return *this;
 }
 
-bool SceneGraph::Node::IsStaticMesh() const 
+bool SceneGraph::Node::IsPrimitive() const 
 {
-	return (m_Masks & ENodeMasks::StaticMesh) == ENodeMasks::StaticMesh;
-}
-
-bool SceneGraph::Node::IsSkeletalMesh() const 
-{
-	return (m_Masks & ENodeMasks::SkeletalMesh) == ENodeMasks::SkeletalMesh;
+	return (m_Masks & ENodeMasks::Primitive) == ENodeMasks::Primitive;
 }
 
 bool SceneGraph::Node::IsLight() const 

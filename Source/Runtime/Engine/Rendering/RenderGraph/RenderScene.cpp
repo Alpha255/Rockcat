@@ -44,32 +44,32 @@ void RenderScene::BuildMeshDrawCommands()
 	}
 	else
 	{
-		for (auto ID : m_Scene.GetVisibleNodes())
-		{
-			if (!ID.IsValid())
-			{
-				continue;
-			}
+		//for (auto ID : m_Scene.GetVisibleNodes())
+		//{
+		//	if (!ID.IsValid())
+		//	{
+		//		continue;
+		//	}
 
-			//if (Node->IsStaticMesh())
-			//{
-			//	if (auto Mesh = m_Scene.GetStaticMesh(Node->GetDataIndex()))
-			//	{
-			//		///const_cast<StaticMesh*>(Mesh)->CreateRHIBuffers(Device);
+		//	//if (Node->IsStaticMesh())
+		//	//{
+		//	//	if (auto Mesh = m_Scene.GetStaticMesh(Node->GetDataIndex()))
+		//	//	{
+		//	//		///const_cast<StaticMesh*>(Mesh)->CreateRHIBuffers(Device);
 
-			//		for (size_t Index = 0u; Index < (size_t)EGeometryPass::Num; ++Index)
-			//		{
-			//			if (auto Builder = GetBuilder(Index))
-			//			{
-			//				m_MeshDrawCommands[Index].emplace_back(Builder->Build(*Mesh));
-			//			}
-			//		}
-			//	}
-			//}
-			//else if (Node->IsSkeletalMesh())
-			//{
-			//	assert(false);
-			//}
-		}
+		//	//		for (size_t Index = 0u; Index < (size_t)EGeometryPass::Num; ++Index)
+		//	//		{
+		//	//			if (auto Builder = GetBuilder(Index))
+		//	//			{
+		//	//				m_MeshDrawCommands[Index].emplace_back(Builder->Build(*Mesh));
+		//	//			}
+		//	//		}
+		//	//	}
+		//	//}
+		//	//else if (Node->IsSkeletalMesh())
+		//	//{
+		//	//	assert(false);
+		//	//}
+		//}
 	}
 }

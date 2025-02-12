@@ -12,10 +12,7 @@ public:
 
 	RDGResource& GetOrAllocateResource(RDGResource::EType Type, const char* Name, RDGResource::EVisibility Visibility);
 	const RDGResource& GetResource(RDGResourceID ID);
-
-	void OnWindowResized(uint32_t /*Width*/, uint32_t /*Height*/);
 private:
 	std::unordered_map<std::string_view, std::shared_ptr<RDGResource>> m_Resources;
-
-	RDGResourceIDAllocator m_ResourceIDAllocator;
+	RDGResourceID::IndexType m_NextResourceID = 0u;
 };

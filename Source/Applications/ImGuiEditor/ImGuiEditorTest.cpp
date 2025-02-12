@@ -153,6 +153,11 @@ void ImGuiEditorTest::Initialize()
     MessageRouter::Get().RegisterMessageHandler(this);
 }
 
+void ImGuiEditorTest::Tick(float ElapsedSeconds)
+{
+    (void)ElapsedSeconds;
+}
+
 void ImGuiEditorTest::RenderGUI(Canvas&)
 {
     m_Editor->Draw();

@@ -4,9 +4,7 @@
 #include "Engine/RHI/RHIBuffer.h"
 
 using DAGNodeID = DirectedAcyclicGraph::NodeID;
-
-using RDGResourceIDAllocator = ObjectIDAllocator<class RDGResource, uint32_t>;
-using RDGResourceID = RDGResourceIDAllocator::TID;
+using RDGResourceID = ObjectID<class RDGResource>;
 
 class RDGResource
 {

@@ -16,7 +16,6 @@ public:
 		if (Target.IsEmpty())
 		{
 			Target.Root = Other.Root;
-			Target.IDAllocator = Other.IDAllocator;
 			Target.Nodes.insert(Target.Nodes.end(), Other.Nodes.begin(), Other.Nodes.end());
 		}
 		else
