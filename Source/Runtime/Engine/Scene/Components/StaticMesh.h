@@ -239,6 +239,8 @@ protected:
 	friend class SceneBuilder;
 	void SetMaterialID(MaterialID ID) { m_MaterialID = ID; }
 
+	void SetVertexBuffer(EVertexAttributes Attributes, RHIBufferPtr&& Buffer);
+
 	MaterialID m_MaterialID;
 
 	template<class Archive>

@@ -1,4 +1,5 @@
 #include "Engine/Scene/Components/StaticMesh.h"
+#include "Engine/RHI/RHIDevice.h"
 
 RHIInputLayoutCreateInfo MeshData::GetInputLayoutCreateInfo() const
 {
@@ -157,11 +158,86 @@ const RHIBuffer* StaticMesh::GetVertexBuffer(EVertexAttributes Attributes) const
 	return nullptr;
 }
 
+void StaticMesh::SetVertexBuffer(EVertexAttributes Attributes, RHIBufferPtr&& Buffer)
+{
+	const size_t Index = PopulationCount(static_cast<size_t>(Attributes));
+	switch (Attributes)
+	{
+	case EVertexAttributes::Position:
+	case EVertexAttributes::Normal:
+	case EVertexAttributes::Tangent:
+	case EVertexAttributes::UV0:
+	case EVertexAttributes::UV1:
+	case EVertexAttributes::Color:
+		RHIVertexBuffers[Index] = std::move(Buffer);
+	}
+}
+
 void StaticMesh::CreateRHIBuffers(RHIDevice& Device)
 {
 	if (RHIIndexBuffer || RHIPackedVertexBuffer)
 	{
 		return;
+	}
+
+	RHIBufferCreateInfo CreateInfo;
+	if (NumIndex)
+	{
+		assert(IndicesData);
+		CreateInfo.SetUsages(ERHIBufferUsageFlags::IndexBuffer)
+			.SetAccessFlags(ERHIDeviceAccessFlags::GpuRead)
+			.SetPermanentStates(ERHIResourceState::IndexBuffer)
+			.SetSize(NumIndex * static_cast<size_t>(IndexFormat))
+			.SetInitialData(IndicesData.get())
+			.SetName(StringUtils::Format("%s-IndexBuffer", GetName()));
+		RHIIndexBuffer = Device.CreateBuffer(CreateInfo);
+	}
+
+	if (NumVertex)
+	{
+		assert(PositionData);
+		CreateInfo.SetUsages(ERHIBufferUsageFlags::VertexBuffer)
+			.SetPermanentStates(ERHIResourceState::VertexBuffer)
+			.SetSize(PositionStride * NumVertex)
+			.SetInitialData(PositionData.get())
+			.SetName(StringUtils::Format("%s-PositionBuffer", GetName()));
+		SetVertexBuffer(EVertexAttributes::Position, Device.CreateBuffer(CreateInfo));
+
+		if (HasNormal())
+		{
+			assert(NormalData);
+			CreateInfo.SetSize(NormalStride * NumVertex)
+				.SetInitialData(NormalData.get())
+				.SetName(StringUtils::Format("%s-NormalBuffer", GetName()));
+			SetVertexBuffer(EVertexAttributes::Normal, Device.CreateBuffer(CreateInfo));
+		}
+
+		if (HasTangent())
+		{
+			assert(TangentData);
+			CreateInfo.SetSize(TangentAndBiTangentStride * NumVertex)
+				.SetInitialData(TangentData.get())
+				.SetName(StringUtils::Format("%s-TangentBuffer", GetName()));
+			SetVertexBuffer(EVertexAttributes::Tangent, Device.CreateBuffer(CreateInfo));
+		}
+
+		if (HasUV0())
+		{
+			assert(UV0Data);
+			CreateInfo.SetSize(UVStride * NumVertex)
+				.SetInitialData(UV0Data.get())
+				.SetName(StringUtils::Format("%s-UV0Buffer", GetName()));
+			SetVertexBuffer(EVertexAttributes::UV0, Device.CreateBuffer(CreateInfo));
+		}
+
+		if (HasUV1())
+		{
+			assert(UV1Data);
+			CreateInfo.SetSize(UVStride * NumVertex)
+				.SetInitialData(UV1Data.get())
+				.SetName(StringUtils::Format("%s-UV1Buffer", GetName()));
+			SetVertexBuffer(EVertexAttributes::UV1, Device.CreateBuffer(CreateInfo));
+		}
 	}
 
 	ClearData();
