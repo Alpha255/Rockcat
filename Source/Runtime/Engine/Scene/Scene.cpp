@@ -286,3 +286,9 @@ void Scene::Tick(float ElapsedSeconds)
 	(void)ElapsedSeconds;
 	UpdateNodeCollection();
 }
+
+Scene::~Scene()
+{
+	GetGraph().PuregeDeadNodes();
+	Save<Scene>(IsDirty());
+}

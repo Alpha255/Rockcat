@@ -2,7 +2,7 @@
     "class Scene": {
         "class SceneAsset": {
             "m_AssimpScenes": [
-                "glTF-Sample-Assets/Models/BoxTextured/glTF/BoxTextured.gltf"
+                "BoxTextured\\glTF\\BoxTextured.gltf"
             ],
             "m_Graph": {
                 "ptr_wrapper": {
@@ -13,6 +13,9 @@
                         },
                         "Nodes": [
                             {
+                                "m_ID": {
+                                    "m_Index": 0
+                                },
                                 "m_Parent": {
                                     "m_Index": 4294967295
                                 },
@@ -23,12 +26,14 @@
                                     "m_Index": 4294967295
                                 },
                                 "m_Masks": 0,
-                                "m_Alive": true,
                                 "m_Visible": true,
                                 "m_Selected": false,
                                 "m_Name": "nodes[0]"
                             },
                             {
+                                "m_ID": {
+                                    "m_Index": 1
+                                },
                                 "m_Parent": {
                                     "m_Index": 0
                                 },
@@ -39,12 +44,14 @@
                                     "m_Index": 2
                                 },
                                 "m_Masks": 0,
-                                "m_Alive": true,
                                 "m_Visible": true,
                                 "m_Selected": false,
                                 "m_Name": "nodes[1]"
                             },
                             {
+                                "m_ID": {
+                                    "m_Index": 2
+                                },
                                 "m_Parent": {
                                     "m_Index": 0
                                 },
@@ -55,18 +62,11 @@
                                     "m_Index": 4294967295
                                 },
                                 "m_Masks": 1,
-                                "m_Alive": true,
                                 "m_Visible": true,
                                 "m_Selected": false,
                                 "m_Name": "Mesh"
                             }
-                        ],
-                        "IDAllocator": {
-                            "m_MaxIndex": 3,
-                            "m_FreeIndices": {
-                                "container": []
-                            }
-                        }
+                        ]
                     }
                 }
             },
@@ -130,8 +130,7 @@
                                 }
                             }
                         ],
-                        "Cameras": [
-                        ]
+                        "Cameras": []
                     }
                 }
             }

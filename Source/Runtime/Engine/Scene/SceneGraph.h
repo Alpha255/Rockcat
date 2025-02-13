@@ -79,12 +79,13 @@ struct SceneGraph
 	protected:
 		friend class AssimpSceneImporter;
 		friend struct SceneGraph;
+		friend class SceneBuilder;
 
 		inline void SetDataIndex(uint32_t Index) { m_DataIndex = Index; }
 		inline void SetID(NodeID ID) { m_ID = ID; }
 
 		inline bool IsAlive() const { return m_Alive; }
-		inline void SetAlive(bool Alive) { m_Alive = Alive; }
+		inline Node& SetAlive(bool Alive) { m_Alive = Alive; return *this; }
 	private:
 		NodeID m_ID;
 		NodeID m_Parent;
@@ -94,7 +95,7 @@ struct SceneGraph
 		ENodeMasks m_Masks = ENodeMasks::None;
 		uint32_t m_DataIndex = 0u;
 
-		bool m_Alive = false;
+		bool m_Alive = true;
 		bool m_Visible = true;
 		bool m_Selected = false;
 
@@ -137,7 +138,7 @@ struct SceneGraph
 
 	NodeID AddNode(NodeID Parent, const char* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
 	{
-		NodeID ID = Nodes.back().GetID() + 1u;
+		NodeID ID = NodeID(static_cast<NodeID::IndexType>(Nodes.size()));
 		if (Nodes.emplace_back(Node(Name, ID, Parent, Masks)).IsPrimitive())
 		{
 			++NumPrimitives;
@@ -146,6 +147,7 @@ struct SceneGraph
 	}
 
 	Node RemoveNode(NodeID ID);
+	void PuregeDeadNodes();
 
 	const Node* GetNodeByName(const char* NodeName) const
 	{

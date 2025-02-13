@@ -6,9 +6,10 @@
 class Scene : public SceneAsset, public ITickable
 {
 public:
+	// #TODO: Save scene data into custom file format, otherwise, the scene data will be lost after the application is closed
 	using SceneAsset::SceneAsset;
 
-	~Scene() { Save<Scene>(IsDirty()); }
+	~Scene();
 
 	inline const std::vector<SceneGraph::NodeID>& GetAddNodes() const { return m_NodeCollection.AddNodes; }
 	inline const std::vector<SceneGraph::Node>& GetRemovedNodes() const { return m_NodeCollection.RemovedNodes; }
@@ -18,6 +19,14 @@ public:
 	inline const SceneGraph::Node* GetNode(const SceneGraph::NodeID& ID) const { return GetGraph().GetNode(ID); }
 
 	void Tick(float ElapsedSeconds) override final;
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(SceneAsset)
+		);
+	}
 protected:
 	struct NodeCollection
 	{

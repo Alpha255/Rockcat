@@ -6,8 +6,7 @@
 #include "Engine/Asset/Importers/AssimpSceneImporter.h"
 #include "Engine/Async/Task.h"
 
-AssetImportTask::AssetImportTask(
-	std::shared_ptr<::Asset>& InAsset,
+AssetImportTask::AssetImportTask(std::shared_ptr<::Asset>& InAsset,
 	const std::filesystem::path& InPath,
 	IAssetImporter& InImporter,
 	const AssetType& InType,

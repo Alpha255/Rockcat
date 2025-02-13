@@ -7,8 +7,7 @@
 
 struct AssetImportTask : public Task
 {
-	AssetImportTask(
-		std::shared_ptr<Asset>& InAsset,
+	AssetImportTask(std::shared_ptr<Asset>& InAsset,
 		const std::filesystem::path& InPath,
 		IAssetImporter& InImporter,
 		const AssetType& InType,
@@ -29,7 +28,7 @@ public:
 	void OnShutdown() override final;
 
 	template<class TAsset>
-	std::shared_ptr<TAsset> GetOrReimportAsset(std::filesystem::path&& Path, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
+	std::shared_ptr<TAsset> GetOrReimportAsset(const std::filesystem::path& Path, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
 	{
 		auto UnifyPath = GetUnifyAssetPath(Path);
 		auto AssetTaskIt = m_AssetLoadTasks.find(UnifyPath);
@@ -60,7 +59,7 @@ public:
 		}
 	}
 
-	void ReimportAsset(std::filesystem::path&& Path, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
+	void ReimportAsset(const std::filesystem::path& Path, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
 	{
 		std::shared_ptr<Asset> EmptyAsset;
 		ReimportAssetImpl(EmptyAsset, GetUnifyAssetPath(Path), AssetLoadCallbacks, Async);

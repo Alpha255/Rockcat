@@ -30,6 +30,7 @@ public:
 				auto Sibling = Node.HasSibling() ? Node.GetSibling() + StartIndex : SceneGraph::NodeID();
 				
 				GraphNode->SetVisible(Node.IsVisible())
+					.SetAlive(Node.IsAlive())
 					.SetParent(Parent)
 					.SetChild(Child)
 					.SetSibling(Sibling);
@@ -80,6 +81,8 @@ void SceneAsset::PostLoad()
 		{
 			SceneBuilder::MergeSceneGraph(*NewGraph, AssimpScene->Graph);
 			SceneBuilder::MergeSceneData(*NewData, AssimpScene->Data);
+
+			NewGraph->NumPrimitives += AssimpScene->Graph.NumPrimitives;
 		}
 
 		if (NewData->Transforms.empty())
@@ -94,6 +97,7 @@ void SceneAsset::PostLoad()
 
 	for (const auto& Path : m_AssimpScenes)
 	{
-		AssetDatabase::Get().GetOrReimportAsset<AssimpSceneAsset>(Path, AssetLoadCallbacks);
+		auto SceneAssetPath = Paths::GltfSampleModelPath() / Path;
+		AssetDatabase::Get().GetOrReimportAsset<AssimpSceneAsset>(SceneAssetPath, AssetLoadCallbacks);
 	}
 }

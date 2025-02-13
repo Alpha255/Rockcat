@@ -21,3 +21,7 @@ SceneGraph::Node SceneGraph::RemoveNode(NodeID ID)
 	assert(0);
 	return Node();
 }
+
+void SceneGraph::PuregeDeadNodes()
+{
+}

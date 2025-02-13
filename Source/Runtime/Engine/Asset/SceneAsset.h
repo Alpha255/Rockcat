@@ -89,6 +89,7 @@ public:
 protected:
 	friend class SceneBuilder;
 	void PostLoad() override final;
+	SceneGraph& GetGraph() { assert(m_Graph); return *m_Graph; }
 private:
 	std::vector<std::string> m_AssimpScenes;
 	std::shared_ptr<SceneGraph> m_Graph;
