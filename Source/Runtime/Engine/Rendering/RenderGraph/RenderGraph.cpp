@@ -48,6 +48,11 @@ void RenderGraph::Compile()
 	}
 }
 
+Math::UInt2 RenderGraph::GetDisplaySize() const
+{
+	return Math::UInt2(m_RenderViewport.GetWidth(), m_RenderViewport.GetHeight());
+}
+
 void RenderGraph::OnWindowResized(uint32_t Width, uint32_t Height)
 {
 	(void)Width;
@@ -60,7 +65,7 @@ void RenderGraph::Execute(const Scene& InScene)
 	{
 		m_RenderScene = std::make_shared<RenderScene>(InScene);
 	}
-	m_RenderScene->BuildMeshDrawCommands();
+	m_RenderScene->BuildMeshDrawCommands(GetRenderSettings());
 
 	Compile();
 

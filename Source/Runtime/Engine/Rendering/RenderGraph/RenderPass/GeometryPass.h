@@ -2,22 +2,9 @@
 
 #include "Engine/Rendering/RenderGraph/RenderPass.h"
 
-template<class TVertexShader, class TFragmentShader>
-struct GeometryPassShaders
+struct MeshDrawCommandBuilder
 {
-	TVertexShader VertexShader;
-	TFragmentShader FragmentShader;
-};
-
-struct IMeshDrawCommandBuilder
-{
-	virtual MeshDrawCommand Build(const class StaticMesh& Mesh) = 0;
-};
-
-template<class VertexShader, class FragmentShader>
-struct MeshDrawCommandBuilder : public IMeshDrawCommandBuilder
-{
-	GeometryPassShaders<VertexShader, FragmentShader> PassShaders;
+	virtual std::shared_ptr<MeshDrawCommand> Build(const class StaticMesh& Mesh, const struct RenderSettings& GraphicsSettings) = 0;
 };
 
 class GeometryPass : public RenderPass

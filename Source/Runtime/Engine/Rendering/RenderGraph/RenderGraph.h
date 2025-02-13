@@ -27,6 +27,8 @@ public:
 
 	class ResourceManager& GetResourceManager() { return *m_ResourceMgr; }
 
+	Math::UInt2 GetDisplaySize() const;
+
 	void OnWindowResized(uint32_t Width, uint32_t Height) override final;
 protected:
 	virtual void SetupRenderPasses() = 0;

@@ -31,7 +31,7 @@ struct RHIGraphicsPipelineCreateInfo
 	RHIInputLayoutCreateInfo InputLayout;
 	std::vector<RHIViewport> Viewports;
 	std::vector<RHIScissorRect> ScissorRects;
-	Array<const Shader*, ERHIShaderStage> Shaders;
+	Array<std::shared_ptr<Shader>, ERHIShaderStage> Shaders;
 
 	RHIRenderPassCreateInfo RenderPassCreateInfo;
 
@@ -40,7 +40,7 @@ struct RHIGraphicsPipelineCreateInfo
 	inline RHIGraphicsPipelineCreateInfo& SetBlendState(const RHIBlendStateCreateInfo& InBlendState) { BlendState = InBlendState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetDepthStencilState(const RHIDepthStencilStateCreateInfo& InDepthStencilState) { DepthStencilState = InDepthStencilState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetMultisampleState(const RHIMultisampleStateCreateInfo& InMultisampleState) { MultisampleState = InMultisampleState; return *this; }
-	inline RHIGraphicsPipelineCreateInfo& SetShader(const Shader* InShader) { Shaders[InShader->GetStage()] = InShader; return *this; }
+	inline RHIGraphicsPipelineCreateInfo& SetShader(const std::shared_ptr<Shader>& InShader) { Shaders[InShader->GetStage()] = InShader; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetRenderPassCreateInfo(const RHIRenderPassCreateInfo& InRenderPassCreateInfo) { RenderPassCreateInfo = InRenderPassCreateInfo; return *this; }
 	
 	inline RHIGraphicsPipelineCreateInfo& SetViewport(const RHIViewport& Viewport)
@@ -304,7 +304,6 @@ inline size_t ComputeHash(const RHIGraphicsPipelineCreateInfo& Desc)
 	{
 		if (Shader)
 		{
-			HashCombine(Hash, Shader);
 			HashCombine(Hash, Shader->ComputeHash());
 		}
 	}

@@ -7,8 +7,8 @@
 
 MeshDrawCommand::MeshDrawCommand(const StaticMesh& Mesh)
 	: IndexBuffer(Mesh.GetIndexBuffer())
-	, MeshName(Mesh.GetName())
-	, Material(Mesh.GetMaterialID())
+	, DebugName(Mesh.GetName())
+	, Material(&Mesh.GetMaterialProperty())
 	, FirstIndex(0u)
 	, NumPrimitives(Mesh.GetNumPrimitive())
 	, NumIndex(Mesh.GetNumIndex())
@@ -16,11 +16,9 @@ MeshDrawCommand::MeshDrawCommand(const StaticMesh& Mesh)
 {
 	VertexArgs.BaseIndex = 0;
 	VertexArgs.NumVertex = Mesh.GetNumVertex();
-
-	GraphicsPipelineDesc.SetPrimitiveTopology(Mesh.GetPrimitiveTopology());
 }
 
-Array<std::unique_ptr<IMeshDrawCommandBuilder>, EGeometryPass> RenderScene::s_Builders;
+Array<std::unique_ptr<MeshDrawCommandBuilder>, EGeometryPass> RenderScene::s_Builders;
 
 RenderScene::RenderScene(const Scene& InScene)
 	: m_Scene(InScene)
@@ -33,7 +31,7 @@ RenderScene::RenderScene(const Scene& InScene)
 	GetScenePrimitives();
 }
 
-void RenderScene::RegisterMeshDrawCommandBuilder(EGeometryPass Filter, IMeshDrawCommandBuilder* Builder)
+void RenderScene::RegisterMeshDrawCommandBuilder(EGeometryPass Filter, MeshDrawCommandBuilder* Builder)
 {
 	assert(!s_Builders[Filter]);
 	s_Builders[Filter].reset(Builder);
@@ -104,7 +102,7 @@ void RenderScene::WaitCommandsBuilding()
 	}
 }
 
-void RenderScene::BuildMeshDrawCommands()
+void RenderScene::BuildMeshDrawCommands(const RenderSettings& GraphicsSettings)
 {
 	UpdateScenePrimitives();
 	RemoveInvalidCommands();
@@ -116,14 +114,14 @@ void RenderScene::BuildMeshDrawCommands()
 			return;
 		}
 
-		m_CommandsEvent = tf::ParallelFor(m_Primitives.Add.begin(), m_Primitives.Add.end(), [this](const SceneGraph::NodeID& ID) {
+		m_CommandsEvent = tf::ParallelFor(m_Primitives.Add.begin(), m_Primitives.Add.end(), [this, GraphicsSettings](const SceneGraph::NodeID& ID) {
 			if (auto Mesh = m_Scene.GetStaticMesh(ID))
 			{
 				for (size_t Index = 0u; Index < (size_t)EGeometryPass::Num; ++Index)
 				{
 					if (auto Builder = GetBuilder(Index))
 					{
-						auto Command = Builder->Build(*Mesh);
+						auto Command = Builder->Build(*Mesh, GraphicsSettings);
 
 						std::lock_guard<std::mutex> Lock(m_CommandsMutex);
 						m_NodeIDCommandMap[ID] = m_Commands[Index].size();
@@ -144,7 +142,7 @@ void RenderScene::BuildMeshDrawCommands()
 					if (auto Builder = GetBuilder(Index))
 					{
 						m_NodeIDCommandMap[ID] = m_Commands[Index].size();
-						m_Commands[Index].emplace_back(Builder->Build(*Mesh));
+						m_Commands[Index].emplace_back(Builder->Build(*Mesh, GraphicsSettings));
 					}
 				}
 			}

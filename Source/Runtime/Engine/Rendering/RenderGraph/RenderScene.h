@@ -41,11 +41,10 @@ struct MeshDrawCommand
 	uint32_t NumInstances = 1u;
 	ERHIIndexFormat IndexFormat = ERHIIndexFormat::UInt16;
 
-	std::string_view MeshName;
+	std::string_view DebugName;
 	
-	MaterialID Material;
-
-	RHIGraphicsPipelineCreateInfo GraphicsPipelineDesc;
+	const MaterialProperty* Material = nullptr;
+	RHIGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
 
 	union
 	{
@@ -62,6 +61,7 @@ struct MeshDrawCommand
 		} IndirectArgs;
 	};
 
+	MeshDrawCommand() = default;
 	MeshDrawCommand(const class StaticMesh& Mesh);
 };
 
@@ -72,16 +72,15 @@ public:
 
 	const class Scene& GetScene() const { return m_Scene; }
 	const std::vector<std::shared_ptr<SceneView>>& GetViews() const { return m_Views; }
-	const std::vector<MeshDrawCommand>& GetCommands(EGeometryPass Filter) const { return m_Commands[Filter]; }
+	const std::vector<std::shared_ptr<MeshDrawCommand>>& GetCommands(EGeometryPass Filter) const { return m_Commands[Filter]; }
 
-	void BuildMeshDrawCommands();
-
+	void BuildMeshDrawCommands(const struct RenderSettings& GraphicsSettings);
 	void WaitCommandsBuilding();
 
-	static void RegisterMeshDrawCommandBuilder(EGeometryPass Filter, struct IMeshDrawCommandBuilder* Builder);
+	static void RegisterMeshDrawCommandBuilder(EGeometryPass Filter, struct MeshDrawCommandBuilder* Builder);
 protected:
 	template<class Index>
-	inline struct IMeshDrawCommandBuilder* GetBuilder(Index Filter) { return s_Builders[Filter].get(); }
+	inline struct MeshDrawCommandBuilder* GetBuilder(Index Filter) { return s_Builders[Filter].get(); }
 private:
 	void GetScenePrimitives();
 	void UpdateScenePrimitives();
@@ -104,12 +103,12 @@ private:
 	std::vector<std::shared_ptr<SceneView>> m_Views;
 
 	std::unordered_map<SceneGraph::NodeID, size_t> m_NodeIDCommandMap;
-	Array<std::vector<MeshDrawCommand>, EGeometryPass> m_Commands;
+	Array<std::vector<std::shared_ptr<MeshDrawCommand>>, EGeometryPass> m_Commands;
 
 	std::mutex m_CommandsMutex;
 	TaskEventPtr m_CommandsEvent;
 
-	static Array<std::unique_ptr<struct IMeshDrawCommandBuilder>, EGeometryPass> s_Builders;
+	static Array<std::unique_ptr<struct MeshDrawCommandBuilder>, EGeometryPass> s_Builders;
 };
 
 namespace SceneTextures

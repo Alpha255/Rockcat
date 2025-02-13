@@ -5,85 +5,59 @@
 #include "Engine/RHI/RHIBackend.h"
 #include "Engine/RHI/RHIDevice.h"
 
-struct PreDepthPassMeshDrawCommandBuilder : public MeshDrawCommandBuilder<GenericVS, DepthOnlyFS>
+struct PreDepthMeshDrawCommandBuilder : public MeshDrawCommandBuilder
 {
-	PreDepthPassMeshDrawCommandBuilder()
+	std::shared_ptr<MeshDrawCommand> Build(const StaticMesh& Mesh, const RenderSettings& GraphicsSettings) override final
 	{
-		PassShaders.VertexShader.SetDefine("_HAS_NORMAL_", false);
+		auto Command = std::make_shared<MeshDrawCommand>(Mesh);
+		auto& GfxPipelineCreateInfo = Command->GraphicsPipelineCreateInfo;
+		auto VertexShader = std::make_shared<GenericVS>();
+		auto FragmentShader = std::make_shared<DepthOnlyFS>();
+		
+		GfxPipelineCreateInfo.SetPrimitiveTopology(Mesh.GetPrimitiveTopology());
 
 		GfxPipelineCreateInfo.DepthStencilState.SetEnableDepth(true)
 			.SetEnableDepthWrite(true)
-			.SetDepthCompareFunc(false ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
+			.SetDepthCompareFunc(GraphicsSettings.InverseDepth ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
 
-		GfxPipelineCreateInfo.SetShader(&PassShaders.VertexShader)
-			.SetShader(&PassShaders.FragmentShader);
-		
 		GfxPipelineCreateInfo.RenderPassCreateInfo.SetDepthStencilAttachment(ERHIFormat::D32_Float_S8_UInt);
 
-		//auto& GfxSettings = Backend.GetGraphicsSettings();
-		//RHIViewport Viewport(GfxSettings.Resolution.Width, GfxSettings.Resolution.Height);
-		//RHIScissorRect ScissorRect(GfxSettings.Resolution.Width, GfxSettings.Resolution.Height);
-
-		//GfxPipelineCreateInfo.SetViewport(Viewport)
-		//	.SetScissorRect(ScissorRect);
-	}
-
-	MeshDrawCommand Build(const StaticMesh& Mesh) override final
-	{
-		auto Command = MeshDrawCommand(Mesh);
-
 		uint16_t Location = 0u;
-		EVertexAttributes DepthOnlyVertexAttributes = EVertexAttributes::Position;
-		bool SupportTexel = false;
+		EVertexAttributes VertexAttributes = EVertexAttributes::Position;
 
-		if (auto Buffer = Mesh.GetVertexBuffer(DepthOnlyVertexAttributes))
+		if (auto Buffer = Mesh.GetVertexBuffer(VertexAttributes))
 		{
-			Command.VertexStream.Add(Location++, 0u, Buffer);
+			Command->VertexStream.Add(Location++, 0u, Buffer);
 		}
 		if (auto Buffer = Mesh.GetVertexBuffer(EVertexAttributes::UV0))
 		{
-			Command.VertexStream.Add(Location++, 0u, Buffer);
-			SupportTexel = true;
-			DepthOnlyVertexAttributes = DepthOnlyVertexAttributes | EVertexAttributes::UV0;
-			PassShaders.VertexShader.SetDefine("_HAS_UV0_", true);
+			Command->VertexStream.Add(Location++, 0u, Buffer);
+			VertexAttributes = VertexAttributes | EVertexAttributes::UV0;
+			VertexShader->SetDefine("_HAS_UV0_", true);
 		}
 
-		if (LastVertexAttributes != DepthOnlyVertexAttributes || LastPrimitiveTopology != Mesh.GetPrimitiveTopology())
-		{
-			GfxPipelineCreateInfo.InputLayout = MeshData::GetInputLayoutCreateInfo(DepthOnlyVertexAttributes);
-			LastVertexAttributes = DepthOnlyVertexAttributes;
+		VertexShader->SetDefine("_HAS_NORMAL_", false);
 
-			LastPrimitiveTopology = Mesh.GetPrimitiveTopology();
-			GfxPipelineCreateInfo.SetPrimitiveTopology(Mesh.GetPrimitiveTopology());
-
-			//Command.GraphicsPipeline = Backend.GetDevice().GetOrCreateGraphicsPipeline(GfxPipelineCreateInfo);
-			//LastGraphicsPipeline = Command.GraphicsPipeline;
-		}
-		else
-		{
-			assert(LastGraphicsPipeline);
-			//Command.GraphicsPipeline = LastGraphicsPipeline;
-		}
+		GfxPipelineCreateInfo.SetShader(VertexShader)
+			.SetShader(FragmentShader);
 
 		return Command;
 	}
-
-	RHIGraphicsPipelineCreateInfo GfxPipelineCreateInfo;
-	EVertexAttributes LastVertexAttributes = EVertexAttributes::Num;
-	ERHIPrimitiveTopology LastPrimitiveTopology = ERHIPrimitiveTopology::Num;
-	RHIGraphicsPipeline* LastGraphicsPipeline = nullptr;
 };
 
 PreDepthPass::PreDepthPass(DAGNodeID ID, RenderGraph& Graph)
 	: GeometryPass(ID, "PreDepthPass", Graph)
 {
+	RenderScene::RegisterMeshDrawCommandBuilder(EGeometryPass::PreDepth, new PreDepthMeshDrawCommandBuilder());
 }
 
 void PreDepthPass::Compile()
 {
+	auto Resulotion = GetGraph().GetDisplaySize();
+
 	AddOutput(RDGResource::EType::Texture, SceneTextures::SceneDepth).GetTextureCreateInfo()
-		.SetWidth(0)
-		.SetHeight(0)
+		.SetWidth(Resulotion.x)
+		.SetHeight(Resulotion.y)
 		.SetDimension(ERHITextureDimension::T_2D)
 		.SetFormat(ERHIFormat::D32_Float_S8_UInt)
 		.SetUsages(ERHIBufferUsageFlags::DepthStencil);

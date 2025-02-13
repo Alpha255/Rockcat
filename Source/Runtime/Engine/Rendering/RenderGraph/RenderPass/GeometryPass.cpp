@@ -50,7 +50,7 @@ struct MeshDrawTask : public Task
 		//auto PipelineState = DrawCommand.GraphicsPipeline->GetPipelineState();
 		//assert(PipelineState);
 
-		ScopeDebugMarker DebugMarker(CommandBuffer, DrawCommand.MeshName, Math::Color::Random());
+		ScopeDebugMarker DebugMarker(CommandBuffer, DrawCommand.DebugName, Math::Color::Random());
 
 		//CommandBuffer->SetGraphicsPipeline(DrawCommand.GraphicsPipeline);
 		CommandBuffer->SetVertexStream(0u, DrawCommand.VertexStream);

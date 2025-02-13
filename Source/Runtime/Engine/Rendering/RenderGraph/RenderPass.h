@@ -23,6 +23,7 @@ public:
 protected:
 	class ResourceManager& GetResourceManager();
 
+	inline class RenderGraph& GetGraph() { return m_Graph; }
 	const RenderSettings& GetRenderSettings() const;
 	class RHIBackend& GetBackend();
 	class RHIDevice& GetDevice();
