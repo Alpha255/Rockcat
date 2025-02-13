@@ -76,6 +76,8 @@ public:
 
 	void BuildMeshDrawCommands();
 
+	void WaitCommandsBuilding();
+
 	static void RegisterMeshDrawCommandBuilder(EGeometryPass Filter, struct IMeshDrawCommandBuilder* Builder);
 protected:
 	template<class Index>
@@ -105,6 +107,7 @@ private:
 	Array<std::vector<MeshDrawCommand>, EGeometryPass> m_Commands;
 
 	std::mutex m_CommandsMutex;
+	TaskEventPtr m_CommandsEvent;
 
 	static Array<std::unique_ptr<struct IMeshDrawCommandBuilder>, EGeometryPass> s_Builders;
 };

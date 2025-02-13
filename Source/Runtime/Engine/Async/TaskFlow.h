@@ -31,24 +31,32 @@ public:
 		return *NewTask;
 	}
 
-	inline bool IsCompleted() const { return empty() ? true : m_Event.IsCompleted(); }
-	inline bool IsDispatched() const { return m_Event.IsDispatched(); }
+	inline bool IsCompleted() const { return empty() ? true : (m_Event ? m_Event->IsCompleted() : true); }
+	inline bool IsDispatched() const { return m_Event && m_Event->IsDispatched(); }
 	
-	inline const TaskEvent& GetEvent() const { return m_Event; }
+	inline TaskEventPtr GetEvent() const { return m_Event; }
 	
 	inline void Wait() 
 	{
 		if (IsDispatched())
 		{
-			m_Event.wait();
+			m_Event->Wait();
 		}
 	}
 
-	inline void WaitFor(size_t Milliseconds)
+	inline void WaitForSeconds(size_t Seconds)
 	{
 		if (IsDispatched())
 		{
-			m_Event.wait_for(std::chrono::milliseconds(Milliseconds));
+			m_Event->WaitForSeconds(Seconds);
+		}
+	}
+
+	inline void WaitForMilliseconds(size_t Milliseconds)
+	{
+		if (IsDispatched())
+		{
+			m_Event->WaitForMilliseconds(Milliseconds);
 		}
 	}
 protected:
@@ -58,7 +66,8 @@ protected:
 	{
 		if (!empty())
 		{
-			m_Event = std::move(Executor.run_n(*this, Repeat));
+			auto Future = std::move(Executor.run_n(*this, Repeat));
+			m_Event = std::make_shared<TaskEvent>(std::move(Future));
 		}
 	}
 
@@ -67,15 +76,16 @@ protected:
 	{
 		if (!empty())
 		{
-			m_Event = std::move(Executor.run_until(*this,
+			auto Future = Executor.run_until(*this,
 				[Repeat, Condition]() mutable {
 					return (Repeat-- == 0) && Condition();
 				},
-				std::forward<Callback>(CompletedCallback)));
+				std::forward<Callback>(CompletedCallback));
+			m_Event = std::make_shared<TaskEvent>(std::move(Future));
 		}
 	}
 private:
 	std::vector<std::shared_ptr<tf::Task>> m_Tasks;
-	TaskEvent m_Event;
+	TaskEventPtr m_Event;
 	Task::EPriority m_LastTaskPriority = Task::EPriority::Normal;
 };

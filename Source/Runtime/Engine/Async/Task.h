@@ -19,19 +19,24 @@ enum class EThread
 	Num
 };
 
-class TaskEvent : public tf::Future<void>
+class TaskEvent
 {
 public:
-	using tf::Future<void>::Future;
-
-	TaskEvent(tf::Future<void>&& Other) noexcept
-		: tf::Future<void>(std::forward<tf::Future<void>>(Other))
+	TaskEvent(tf::Future<void>&& Future) noexcept
+		: m_Future(std::move(Future))
 	{
 	}
 
-	inline bool IsDispatched() const { return valid(); }
-	inline bool IsCompleted() const { return valid() ? wait_for(std::chrono::milliseconds(0u)) == std::future_status::ready : false; }
+	inline bool IsDispatched() const { return m_Future.valid(); }
+	inline bool IsCompleted() const { return m_Future.valid() ? m_Future.wait_for(std::chrono::milliseconds(0u)) == std::future_status::ready : false; }
+	inline void Wait() { m_Future.wait(); }
+	inline void WaitForSeconds(size_t Seconds) { m_Future.wait_for(std::chrono::seconds(Seconds)); }
+	inline void WaitForMilliseconds(size_t Milliseconds) { m_Future.wait_for(std::chrono::milliseconds(Milliseconds)); }
+private:
+	tf::Future<void> m_Future;
 };
+
+using TaskEventPtr = std::shared_ptr<TaskEvent>;
 
 class Task : public tf::Task
 {
