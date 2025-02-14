@@ -10,6 +10,7 @@
 #include "RHI/Vulkan/VulkanDescriptor.h"
 #include "RHI/Vulkan/VulkanEnvConfiguration.h"
 #include "RHI/Vulkan/VulkanSwapchain.h"
+#include "RHI/Vulkan/VulkanMemoryAllocator.h"
 #include "Engine/Services/TaskFlowService.h"
 
 VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
@@ -248,6 +249,8 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 	}
 
 	m_PipelineCache = std::make_shared<VulkanPipelineCache>(*this);
+	
+	VulkanMemoryAllocator::Create(*this);
 }
 
 RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& CreateInfo)

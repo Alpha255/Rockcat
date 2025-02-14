@@ -74,7 +74,7 @@ public:
 	const std::vector<std::shared_ptr<SceneView>>& GetViews() const { return m_Views; }
 	const std::vector<std::shared_ptr<MeshDrawCommand>>& GetCommands(EGeometryPass Filter) const { return m_Commands[Filter]; }
 
-	void BuildMeshDrawCommands(const struct RenderSettings& GraphicsSettings);
+	void BuildMeshDrawCommands(class RHIDevice& Device, const struct RenderSettings& GraphicsSettings);
 	void WaitCommandsBuilding();
 
 	static void RegisterMeshDrawCommandBuilder(EGeometryPass Filter, struct MeshDrawCommandBuilder* Builder);

@@ -65,7 +65,7 @@ void RenderGraph::Execute(const Scene& InScene)
 	{
 		m_RenderScene = std::make_shared<RenderScene>(InScene);
 	}
-	m_RenderScene->BuildMeshDrawCommands(GetRenderSettings());
+	m_RenderScene->BuildMeshDrawCommands(GetBackend().GetDevice(), GetRenderSettings());
 
 	Compile();
 

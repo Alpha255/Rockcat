@@ -1,17 +1,13 @@
-#if 0
-#include "Colorful/Vulkan/VulkanMemoryAllocator.h"
-#include "Colorful/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanMemoryAllocator.h"
+#include "RHI/Vulkan/VulkanDevice.h"
 
-NAMESPACE_START(RHI)
-
-VulkanMemoryAllocator::VulkanMemoryAllocator(VulkanDevice* Device)
-	: m_Device(Device)
+VulkanMemoryAllocator::VulkanMemoryAllocator(const VulkanDevice& Device)
+	: VkBaseDeviceResource(Device)
 {
-	assert(Device);
-	vkGetPhysicalDeviceMemoryProperties(m_Device->PhysicalDevice(), &m_MemoryProperties);
+	GetNativePhysicalDevice().getMemoryProperties(&m_MemoryProperties);
 }
 
-uint32_t VulkanMemoryAllocator::GetMemoryTypeIndex(uint32_t MemTypeBits, VkMemoryPropertyFlags MemPropertyFlags) const
+uint32_t VulkanMemoryAllocator::GetMemoryTypeIndex(uint32_t MemTypeBits, vk::MemoryPropertyFlags MemPropertyFlags) const
 {
 	for (uint32_t MemTypeIndex = 0u; MemTypeIndex < m_MemoryProperties.memoryTypeCount; ++MemTypeIndex)
 	{
@@ -25,27 +21,27 @@ uint32_t VulkanMemoryAllocator::GetMemoryTypeIndex(uint32_t MemTypeBits, VkMemor
 	return InvalidMemTypeIndex;
 }
 
-VulkanDeviceMemory VulkanMemoryAllocator::Alloc(VkBuffer Buffer, EDeviceAccessFlags AccessFlags)
+vk::DeviceMemory VulkanMemoryAllocator::Allocate(vk::Buffer Buffer, ERHIDeviceAccessFlags AccessFlags)
 {
-	assert(Buffer != VK_NULL_HANDLE);
+	assert(Buffer);
 
-	VkMemoryRequirements Requirements;
-	vkGetBufferMemoryRequirements(m_Device->Get(), Buffer, &Requirements);
+	vk::MemoryRequirements Requirements;
+	GetNativeDevice().getBufferMemoryRequirements(Buffer, &Requirements);
 
-	return Alloc(Requirements, AccessFlags);
+	return Allocate(Requirements, AccessFlags);
 }
 
-VulkanDeviceMemory VulkanMemoryAllocator::Alloc(VkImage Image, EDeviceAccessFlags AccessFlags)
+vk::DeviceMemory VulkanMemoryAllocator::Allocate(vk::Image Image, ERHIDeviceAccessFlags AccessFlags)
 {
-	assert(Image != VK_NULL_HANDLE);
+	assert(Image);
 
-	VkMemoryRequirements Requirements;
-	vkGetImageMemoryRequirements(m_Device->Get(), Image, &Requirements);
+	vk::MemoryRequirements Requirements;
+	GetNativeDevice().getImageMemoryRequirements(Image, &Requirements);
 
-	return Alloc(Requirements, AccessFlags);
+	return Allocate(Requirements, AccessFlags);
 }
 
-VulkanDeviceMemory VulkanMemoryAllocator::Alloc(const VkMemoryRequirements& Requirements, EDeviceAccessFlags AccessFlags)
+vk::DeviceMemory VulkanMemoryAllocator::Allocate(const vk::MemoryRequirements& Requirements, ERHIDeviceAccessFlags AccessFlags)
 {
 	/// VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT bit specifies that memory allocated with this type can be mapped for host access using vkMapMemory.
 
@@ -55,52 +51,38 @@ VulkanDeviceMemory VulkanMemoryAllocator::Alloc(const VkMemoryRequirements& Requ
 	/// VK_MEMORY_PROPERTY_HOST_CACHED_BIT bit specifies that memory allocated with this type is cached on the host. 
 	/// Host memory accesses to uncached memory are slower than to cached memory, however uncached memory is always host coherent.
 
-	VkMemoryPropertyFlags MemPropertyFlags = 0u;
-	if (AccessFlags == EDeviceAccessFlags::GpuRead || AccessFlags == EDeviceAccessFlags::GpuReadWrite)
+	vk::MemoryPropertyFlags MemPropertyFlags;
+	if (AccessFlags == ERHIDeviceAccessFlags::GpuRead || AccessFlags == ERHIDeviceAccessFlags::GpuReadWrite)
 	{
-		MemPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+		MemPropertyFlags = vk::MemoryPropertyFlagBits::eDeviceLocal;
 	}
-	else if (AccessFlags == EDeviceAccessFlags::GpuReadCpuWrite)
+	else if (AccessFlags == ERHIDeviceAccessFlags::GpuReadCpuWrite)
 	{
-		MemPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+		MemPropertyFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
 	}
 	else
 	{
 		assert(0);
 	}
 
-	if (EnumHasAnyFlags(AccessFlags, EDeviceAccessFlags::CpuRead))
+	if (EnumHasAnyFlags(AccessFlags, ERHIDeviceAccessFlags::CpuRead))
 	{
-		MemPropertyFlags |= VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+		MemPropertyFlags |= vk::MemoryPropertyFlagBits::eHostCached;
 	}
 
 	auto MemTypeIndex = GetMemoryTypeIndex(Requirements.memoryTypeBits, MemPropertyFlags);
 	if (MemTypeIndex == InvalidMemTypeIndex)
 	{
-		MemPropertyFlags &= ~VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+		MemPropertyFlags &= ~vk::MemoryPropertyFlagBits::eHostCoherent;
 		MemTypeIndex = GetMemoryTypeIndex(Requirements.memoryTypeBits, MemPropertyFlags);
 		assert(MemTypeIndex != InvalidMemTypeIndex);
 	}
 
-	VkMemoryAllocateInfo AllocateInfo
-	{
-		VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-		nullptr,
-		Requirements.size,
-		MemTypeIndex
-	};
+	vk::MemoryAllocateInfo AllocateInfo;
+	AllocateInfo.setAllocationSize(Requirements.size)
+		.setMemoryTypeIndex(MemTypeIndex);
 
-	VkDeviceMemory DeviceMemory = VK_NULL_HANDLE;
-	VERIFY_VK(vkAllocateMemory(m_Device->Get(), &AllocateInfo, VK_ALLOCATION_CALLBACKS, &DeviceMemory));
-	return VulkanDeviceMemory
-	{
-		DeviceMemory,
-		Requirements.size,
-		EnumHasAnyFlags(MemPropertyFlags, VK_MEMORY_PROPERTY_HOST_COHERENT_BIT),
-		EnumHasAnyFlags(MemPropertyFlags, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT),
-		EnumHasAnyFlags(MemPropertyFlags, VK_MEMORY_PROPERTY_HOST_CACHED_BIT)
-	};
+	vk::DeviceMemory Memory;
+	VERIFY_VK(GetNativeDevice().allocateMemory(&AllocateInfo, VK_ALLOCATION_CALLBACKS, &Memory));
+	return Memory;
 }
-
-NAMESPACE_END(RHI)
-#endif

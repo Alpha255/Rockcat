@@ -337,7 +337,8 @@ private:
 			}
 			else
 			{
-				AssimpScene.Data.StaticMeshes.emplace_back(std::make_shared<StaticMesh>(MeshDataBlock, Mesh->mMaterialIndex));
+				AssimpScene.Data.StaticMeshes.emplace_back(std::make_shared<StaticMesh>(MeshDataBlock, Mesh->mMaterialIndex))
+					->SetMaterialProperty(AssimpScene.Data.MaterialProperties.at(Index).get());
 			}
 		}
 	}
@@ -401,7 +402,7 @@ private:
 				{
 					auto AssetLoadCallbacks = std::make_optional(Asset::Callbacks{});
 					AssetLoadCallbacks.value().PreLoadCallback = [this, &TextureType](Asset& InAsset) {
-						Cast<TextureAsset>(InAsset).SetUseSRGB(TextureType == aiTextureType_DIFFUSE || TextureType == aiTextureType_BASE_COLOR);
+						Cast<TextureAsset>(InAsset).SetLinear(TextureType != aiTextureType_DIFFUSE && TextureType != aiTextureType_BASE_COLOR);
 					};
 
 					auto TextureIndex = GetTextureType(TextureType);

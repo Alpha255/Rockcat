@@ -189,7 +189,7 @@ struct MeshData : public MeshProperty
 
 	void ClearData();
 
-	virtual void CreateRHIBuffers(class RHIDevice&) {}
+	virtual void CreateRHI(class RHIDevice&) {}
 
 	std::shared_ptr<uint8_t> PackedVerticesData;
 	std::shared_ptr<uint8_t> PositionData;
@@ -205,7 +205,7 @@ struct MeshData : public MeshProperty
 	RHIBufferPtr RHIIndexBuffer;
 	std::array<RHIBufferPtr, (size_t)EVertexAttributes::Num> RHIVertexBuffers;
 
-	MaterialProperty* Material = nullptr;
+	const MaterialProperty* Material = nullptr;
 
 	std::string Name;
 };
@@ -227,18 +227,19 @@ public:
 
 	inline MaterialID GetMaterialID() const { return m_MaterialID; }
 	inline const MaterialProperty& GetMaterialProperty() const { assert(Material); return *Material; }
-	inline MaterialProperty& GetMaterialProperty() { assert(Material); return *Material; }
 
 	inline const RHIBuffer* GetPackedVertexBuffer() const { assert(RHIPackedVertexBuffer);  return RHIPackedVertexBuffer.get(); }
 	inline const RHIBuffer* GetIndexBuffer() const { assert(RHIIndexBuffer);  return RHIIndexBuffer.get(); }
 	std::vector<const RHIBuffer*> GetVertexBuffers(EVertexAttributes Attributes) const;
 	const RHIBuffer* GetVertexBuffer(EVertexAttributes Attributes) const;
 
-	virtual void CreateRHIBuffers(class RHIDevice& Device);
+	void CreateRHI(class RHIDevice& Device) override;
 protected:
 	friend class SceneBuilder;
-	void SetMaterialID(MaterialID ID) { m_MaterialID = ID; }
+	friend class AssimpSceneImporter;
 
+	void SetMaterialID(MaterialID ID) { m_MaterialID = ID; }
+	void SetMaterialProperty(const MaterialProperty* InMaterial) { Material = InMaterial; }
 	void SetVertexBuffer(EVertexAttributes Attributes, RHIBufferPtr&& Buffer);
 
 	MaterialID m_MaterialID;

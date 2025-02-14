@@ -1,6 +1,7 @@
 #include "RHI/Vulkan/VulkanBuffer.h"
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanRHI.h"
+#include "RHI/Vulkan/VulkanMemoryAllocator.h"
 #include "Engine/Services/SpdLogService.h"
 
 VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo& RHICreateInfo)
@@ -82,7 +83,8 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 
 	VERIFY_VK(GetNativeDevice().createBuffer(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
-	//m_DeviceMemory = VulkanMemoryAllocator::Get().Alloc(Get(), CreateInfo.AccessFlags);
+	m_Memory = VulkanMemoryAllocator::Get().Allocate(GetNative(), RHICreateInfo.AccessFlags);
+	assert(m_Memory);
 
 	GetNativeDevice().bindBufferMemory(m_Native, m_Memory, 0u);
 
@@ -105,11 +107,18 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 		}
 		else
 		{
-			if (VulkanRHI::GetConfigs().BatchResourceDataTransfer)
+			if (VulkanRHI::GetConfigs().EnableAsyncTransfer)
 			{
+
 			}
 			else
 			{
+
+			}
+
+			if (VulkanRHI::GetConfigs().BatchResourceDataTransfer)
+			{
+				assert(false);
 			}
 			//auto Command = m_Device->GetOrAllocateCommandBuffer(EQueueType::Transfer, ECommandBufferLevel::Primary, true, true);
 

@@ -1,17 +1,17 @@
 #pragma once
 
 #include "Engine/Asset/Asset.h"
-#include "Engine/RHI/RHIDeclarations.h"
+#include "Engine/RHI/RHITexture.h"
 
-struct TextureAsset : public Asset
+class TextureAsset : public Asset
 {
 public:
 	using Asset::Asset;
 
-	bool IsSRGB() const { return SRGB; }
+	bool IsLinear() const { return m_Linear; }
 
-	const RHITexture* GetRHI() const { return Texture.get(); }
-	void CreateRHI(class RHIDevice& Device, const struct RHITextureCreateInfo& CreateInfo);
+	const RHITexture* GetRHI() const { assert(m_Texture); return m_Texture.get(); }
+	void CreateRHI(class RHIDevice& Device);
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -28,11 +28,14 @@ public:
 	}
 protected:
 	friend class AssimpSceneImporter;
+	friend class StbImageImporter;
+	friend class DDSImageImporter;
 
-	void SetUseSRGB(bool InSRGB) { SRGB = InSRGB; }
+	void SetLinear(bool Linear) { m_Linear = Linear; }
 
-	bool SRGB = false;
-	RHITexturePtr Texture;
+	bool m_Linear = false;
+	RHITextureCreateInfo m_CreateInfo;
+	RHITexturePtr m_Texture;
 };
 
 namespace cereal

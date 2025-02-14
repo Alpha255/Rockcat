@@ -1,34 +1,23 @@
 #pragma once
 
-#include "Colorful/Vulkan/VulkanBuffer.h"
+#include "Core/Singleton.h"
+#include "RHI/Vulkan/VulkanBuffer.h"
 
-NAMESPACE_START(RHI)
-
-class VulkanMemoryAllocator : public LazySingleton<VulkanMemoryAllocator>
+class VulkanMemoryAllocator : public LazySingleton<VulkanMemoryAllocator>, public VkBaseDeviceResource
 {
 public:
-	VulkanDeviceMemory Alloc(VkBuffer Buffer, EDeviceAccessFlags AccessFlags);
-
-	VulkanDeviceMemory Alloc(VkImage Image, EDeviceAccessFlags AccessFlags);
-
-	void Free(VkDeviceMemory) 
-	{
-	};
+	vk::DeviceMemory Allocate(vk::Buffer Buffer, ERHIDeviceAccessFlags AccessFlags);
+	vk::DeviceMemory Allocate(vk::Image Image, ERHIDeviceAccessFlags AccessFlags);
 protected:
-	friend class VulkanRenderer;
-
 	ALLOW_ACCESS_LAZY(VulkanMemoryAllocator)
 
-	VulkanMemoryAllocator(class VulkanDevice* Device);
+	VulkanMemoryAllocator(const class VulkanDevice& Device);
 
-	uint32_t GetMemoryTypeIndex(uint32_t MemTypeBits, VkMemoryPropertyFlags MemPropertyFlags) const;
+	uint32_t GetMemoryTypeIndex(uint32_t MemTypeBits, vk::MemoryPropertyFlags MemPropertyFlags) const;
 
-	VulkanDeviceMemory Alloc(const VkMemoryRequirements &Requirements, EDeviceAccessFlags AccessFlags);
+	vk::DeviceMemory Allocate(const vk::MemoryRequirements &Requirements, ERHIDeviceAccessFlags AccessFlags);
 private:
-	VkPhysicalDeviceMemoryProperties m_MemoryProperties{};
-	class VulkanDevice* m_Device = nullptr;
+	vk::PhysicalDeviceMemoryProperties m_MemoryProperties;
 
 	static constexpr uint32_t InvalidMemTypeIndex = ~0u;
 };
-
-NAMESPACE_END(RHI)

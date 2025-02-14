@@ -125,7 +125,7 @@ std::vector<const RHIBuffer*> StaticMesh::GetVertexBuffers(EVertexAttributes Att
 		if ((Attributes & Attribute) == Attribute)
 		{
 			const size_t Index = PopulationCount(static_cast<size_t>(Attribute));
-			//assert(RHIVertexBuffers[Index]);
+			assert(Index < RHIVertexBuffers.size() && RHIVertexBuffers[Index]);
 			Buffers.emplace_back(RHIVertexBuffers[Index].get());
 		}
 	};
@@ -173,7 +173,7 @@ void StaticMesh::SetVertexBuffer(EVertexAttributes Attributes, RHIBufferPtr&& Bu
 	}
 }
 
-void StaticMesh::CreateRHIBuffers(RHIDevice& Device)
+void StaticMesh::CreateRHI(RHIDevice& Device)
 {
 	if (RHIIndexBuffer || RHIPackedVertexBuffer)
 	{
@@ -237,6 +237,17 @@ void StaticMesh::CreateRHIBuffers(RHIDevice& Device)
 				.SetInitialData(UV1Data.get())
 				.SetName(StringUtils::Format("%s-UV1Buffer", GetName()));
 			SetVertexBuffer(EVertexAttributes::UV1, Device.CreateBuffer(CreateInfo));
+		}
+	}
+
+	if (Material)
+	{
+		for (auto& Texture : Material->Textures)
+		{
+			if (Texture)
+			{
+				Texture->CreateRHI(Device);
+			}
 		}
 	}
 

@@ -60,17 +60,17 @@ public:
 		if (!Bitmap)
 		{
 			LOG_CAT_ERROR(LogImageImporter, "Failed to load image: {}, fail reason: {}", Image.GetPath().generic_string(), stbi_failure_reason());
+			return false;
 		}
 
-		auto CreateInfo = RHITextureCreateInfo()
-			.SetWidth(Width)
+		Image.m_CreateInfo.SetWidth(Width)
 			.SetHeight(Height)
 			.SetDimension(ERHITextureDimension::T_2D)
-			.SetFormat(Image.IsSRGB() ? ERHIFormat::RGBA8_UNorm_SRGB : ERHIFormat::RGBA8_UNorm)
+			.SetFormat(Image.IsLinear() ? ERHIFormat::RGBA8_UNorm : ERHIFormat::RGBA8_UNorm_SRGB)
 			.SetName(InAsset.GetPath().filename().string())
-			.SetInitialData(DataSize, RawData.Data);
+			.SetInitialData(DataBlock(Channels * Width * Height, Bitmap));
 
-		return false;
+		return true;
 #if 0
 		RHI::ImageDesc Desc;
 		Desc.Width = Width;
