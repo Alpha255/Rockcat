@@ -52,12 +52,12 @@ public:
 	virtual void WaitIdle() const = 0;
 
 	virtual RHIShaderPtr CreateShader(const RHIShaderCreateInfo& CreateInfo) = 0;
-	virtual RHITexturePtr CreateTexture(const RHITextureCreateInfo& CreateInfo) = 0;
+	virtual RHITexturePtr CreateTexture(const RHITextureCreateInfo& CreateInfo, RHICommandBuffer* CommandBuffer) = 0;
 	virtual RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& CreateInfo) = 0;
 	virtual RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& CreateInfo) = 0;
 	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo) = 0;
 	virtual RHIPipelineStatePtr CreatePipelineState(const RHIGraphicsPipelineCreateInfo& CreateInfo) = 0;
-	virtual RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& CreateInfo) = 0;
+	virtual RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& CreateInfo, RHICommandBuffer* CommandBuffer) = 0;
 	virtual RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& CreateInfo) = 0;
 	virtual RHISwapchainPtr CreateSwapchain(const RHISwapchainCreateInfo& CreateInfo) = 0;
 

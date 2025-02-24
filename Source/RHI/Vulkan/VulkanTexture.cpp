@@ -1,9 +1,10 @@
 #include "RHI/Vulkan/VulkanTexture.h"
 #include "RHI/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanMemoryAllocator.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "Engine/Services/SpdLogService.h"
 
-VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateInfo& CreateInfo, vk::Image Image)
+VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateInfo& CreateInfo, RHICommandBuffer* CommandBuffer, vk::Image Image)
 	: VkHwResource(Device)
 	, RHITexture(CreateInfo)
 {
@@ -38,43 +39,35 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 		assert(false);
 	}
 
-	///RequiredState = CreateInfo.RequiredState;
-
+	ERHIDeviceAccessFlags AccessFlags = ERHIDeviceAccessFlags::None;
 	vk::ImageUsageFlags UsageFlags(vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst);
 	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::RenderTarget))
 	{
 		UsageFlags |= vk::ImageUsageFlagBits::eColorAttachment;
-		//RequiredState = EResourceState::RenderTarget;
+		AccessFlags = AccessFlags | ERHIDeviceAccessFlags::GpuReadWrite;
 	}
 	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::DepthStencil))
 	{
 		UsageFlags |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
-		//RequiredState = EResourceState::DepthWrite;
+		AccessFlags = AccessFlags | ERHIDeviceAccessFlags::GpuReadWrite;
 	}
 	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UnorderedAccess))
 	{
 		UsageFlags |= vk::ImageUsageFlagBits::eStorage;
-		//RequiredState = EResourceState::UnorderedAccess;
+		AccessFlags = AccessFlags | ERHIDeviceAccessFlags::GpuReadWrite;
 	}
 	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::ShaderResource))
 	{
 		UsageFlags |= vk::ImageUsageFlagBits::eSampled;
-		//RequiredState = EResourceState::ShaderResource;
+		AccessFlags = AccessFlags | ERHIDeviceAccessFlags::GpuRead;
 	}
 	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::InputAttachment))
 	{
 		/// VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT specifies that the image can be used to create a VkImageView suitable for occupying VkDescriptorSet slot of type VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT; 
 		/// be read from a shader as an input attachment; and be used as an input attachment in a framebuffer.
 		UsageFlags |= vk::ImageUsageFlagBits::eInputAttachment;
-		//RequiredState = EResourceState::InputAttachment;
+		AccessFlags = AccessFlags | ERHIDeviceAccessFlags::GpuReadWrite;
 	}
-
-//#if true
-//	if (CreateInfo.RequiredState == EResourceState::Present)
-//	{
-//		PermanentState = EResourceState::Present;
-//	}
-//#endif
 
 	if (Image)
 	{
@@ -93,7 +86,7 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 				CreateInfo.Dimension == ERHITextureDimension::T_3D ? CreateInfo.Depth : 1u))
 			.setMipLevels(CreateInfo.MipLevels)
 			.setArrayLayers(CreateInfo.ArrayLayers)
-			.setSamples(GetSampleCount(CreateInfo.SampleCount))
+			.setSamples(::GetSampleCount(CreateInfo.SampleCount))
 			.setTiling(vk::ImageTiling::eOptimal)
 			.setUsage(UsageFlags)
 			.setSharingMode(vk::SharingMode::eExclusive)
@@ -101,33 +94,25 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 
 		VERIFY_VK(GetNativeDevice().createImage(&ImageCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
-		if (VulkanRHI::GetConfigs().BatchResourceDataTransfer)
+		AllocateAndBindMemory(AccessFlags);
+
+		if (CreateInfo.InitialData.IsValid())
 		{
+			assert(CommandBuffer);
+			CommandBuffer->WriteTexture(this, CreateInfo.InitialData.Data.get(), CreateInfo.InitialData.Size);
 		}
-		else
-		{
-		}
-		//m_DeviceMemory = VulkanMemoryAllocator::Get().Alloc(m_Handle, EDeviceAccessFlags::GpuRead);
-		//VERIFY_VK(vkBindImageMemory(m_Device->Get(), m_Handle, m_DeviceMemory.Handle, 0u));
-
-		//if (CreateInfo.Asset.Data)
-		//{
-		//	auto Command = m_Device->GetOrAllocateCommandBuffer(EQueueType::Transfer, ECommandBufferLevel::Primary, true, true);
-
-		//	Command->CopyBufferToImage(this, CreateInfo.Asset.Data, CreateInfo.Asset.Size, AllSubresource);
-
-		//	if (m_Device->Options().BatchResourceSubmit)
-		//	{
-		//		m_Device->Queue(EQueueType::Transfer)->QueueSubmit(std::vector<ICommandBufferSharedPtr>{Command});
-		//	}
-		//	else
-		//	{
-		//		m_Device->Queue(EQueueType::Transfer)->Submit(std::vector<ICommandBufferSharedPtr>{Command});
-		//	}
-		//}
 	}
 
 	VkHwResource::SetObjectName(CreateInfo.Name.c_str());
+}
+
+void VulkanTexture::AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags)
+{
+	m_Memory = VulkanMemoryAllocator::Get().Allocate(GetNative(), AccessFlags);
+	assert(m_Memory);
+
+	/// #TODO VK_KHR_bind_memory2: On some implementations, it may be more efficient to batch memory bindings into a single command.
+	GetNativeDevice().bindImageMemory(m_Native, m_Memory, 0u);
 }
 
 //

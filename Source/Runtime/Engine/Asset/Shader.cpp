@@ -21,7 +21,7 @@ RHIBuffer* Shader::GetUniformBuffer(RHIDevice& Device)
 			.SetSize(ComputeUniformBufferSize())
 			.SetPermanentStates(ERHIResourceState::UniformBuffer);
 
-		m_UniformBuffer = Device.CreateBuffer(CreateInfo);
+		m_UniformBuffer = Device.CreateBuffer(CreateInfo, nullptr);
 	}
 
 	return m_UniformBuffer.get();

@@ -47,10 +47,10 @@ void RDGResource::CreateRHI(RHIDevice& Device)
 	switch (m_Type)
 	{
 	case EType::Buffer:
-		m_RHIResource = Device.CreateBuffer(GetBufferCreateInfo());
+		m_RHIResource = Device.CreateBuffer(GetBufferCreateInfo(), nullptr);
 		break;
 	case EType::Texture:
-		m_RHIResource = Device.CreateTexture(GetTextureCreateInfo());
+		m_RHIResource = Device.CreateTexture(GetTextureCreateInfo(), nullptr);
 		break;
 	}
 }

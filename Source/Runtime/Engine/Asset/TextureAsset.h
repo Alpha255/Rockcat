@@ -11,7 +11,7 @@ public:
 	bool IsLinear() const { return m_Linear; }
 
 	const RHITexture* GetRHI() const { assert(m_Texture); return m_Texture.get(); }
-	void CreateRHI(class RHIDevice& Device);
+	void CreateRHI(class RHIDevice& Device, class RHICommandListContext* CommandListContext);
 
 	template<class Archive>
 	void serialize(Archive& Ar)

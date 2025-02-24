@@ -82,17 +82,17 @@ public:
 
 	inline EState GetState() const { return m_State; }
 
-	inline RHICommandListContext* GetContext() { return m_Context; }
+	inline class RHICommandListContext* GetContext() { return m_Context; }
 protected:
 	inline void SetState(EState State) { m_State = State; }
 	EState m_State = EState::Initial;
 
-	void SetContext(RHICommandListContext* Context) { m_Context = Context; }
+	void SetContext(class RHICommandListContext* Context) { m_Context = Context; }
 private:
 	ERHICommandBufferLevel m_Level;
 	bool m_UseForUploadOnly;
 
-	RHICommandListContext* m_Context;
+	class RHICommandListContext* m_Context = nullptr;
 };
 
 class RHICommandBufferPool

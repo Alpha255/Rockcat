@@ -165,7 +165,7 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 			const_cast<RHIBackendConfiguration*>(&VulkanRHI::GetConfigs())->EnableAsyncCompute = false;
 		}
 	}
-	if (VulkanRHI::GetConfigs().EnableAsyncTransfer)
+	if (VulkanRHI::GetConfigs().UseTransferQueue)
 	{
 		if (TransferQueueIndex != GraphicsQueueIndex)
 		{
@@ -173,7 +173,7 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 		}
 		else
 		{
-			const_cast<RHIBackendConfiguration*>(&VulkanRHI::GetConfigs())->EnableAsyncTransfer = false;
+			const_cast<RHIBackendConfiguration*>(&VulkanRHI::GetConfigs())->UseTransferQueue = false;
 		}
 	}
 
@@ -238,7 +238,7 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 	};
 
 	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Graphics, GraphicsQueueIndex, true);
-	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Transfer, TransferQueueIndex, VulkanRHI::GetConfigs().EnableAsyncTransfer);
+	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Transfer, TransferQueueIndex, VulkanRHI::GetConfigs().UseTransferQueue);
 	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Compute, ComputeQueueIndex, VulkanRHI::GetConfigs().EnableAsyncCompute);
 	
 	assert(PresentQueueIndex == GraphicsQueueIndex);
@@ -258,9 +258,9 @@ RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& CreateInfo)
 	return std::make_shared<VulkanShader>(*this, CreateInfo);
 }
 
-RHITexturePtr VulkanDevice::CreateTexture(const RHITextureCreateInfo& CreateInfo)
+RHITexturePtr VulkanDevice::CreateTexture(const RHITextureCreateInfo& CreateInfo, RHICommandBuffer* CommandBuffer)
 {
-	return std::make_shared<VulkanTexture>(*this, CreateInfo);
+	return std::make_shared<VulkanTexture>(*this, CreateInfo, CommandBuffer);
 }
 
 RHIInputLayoutPtr VulkanDevice::CreateInputLayout(const RHIInputLayoutCreateInfo& CreateInfo)
@@ -283,9 +283,9 @@ RHIPipelineStatePtr VulkanDevice::CreatePipelineState(const RHIGraphicsPipelineC
 	return std::make_shared<VulkanPipelineState>(*this, CreateInfo);
 }
 
-RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& CreateInfo)
+RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& CreateInfo, RHICommandBuffer* CommandBuffer)
 {
-	return std::make_shared<VulkanBuffer>(*this, CreateInfo);
+	return std::make_shared<VulkanBuffer>(*this, CreateInfo, CommandBuffer);
 }
 
 RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& CreateInfo)

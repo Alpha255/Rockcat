@@ -1,9 +1,7 @@
 {
     "struct RHIBackendConfiguration": {
         "EnableAsyncCompute": true,
-        "EnableAsyncTransfer": true,
-        "BatchResourceDataTransfer": false,
-        "BatchResourceBarrier": false,
+        "UseTransferQueue": false,
         "AsyncCommandlistSubmission": false,
         "AsyncMeshDrawCommandsBuilding": false,
         "SeparateRenderThread": false

@@ -23,16 +23,14 @@ struct PreDepthMeshDrawCommandBuilder : public MeshDrawCommandBuilder
 		GfxPipelineCreateInfo.RenderPassCreateInfo.SetDepthStencilAttachment(ERHIFormat::D32_Float_S8_UInt);
 
 		uint16_t Location = 0u;
-		EVertexAttributes VertexAttributes = EVertexAttributes::Position;
 
-		if (auto Buffer = Mesh.GetVertexBuffer(VertexAttributes))
+		if (auto Buffer = Mesh.GetVertexBuffer(EVertexAttributes::Position))
 		{
 			Command->VertexStream.Add(Location++, 0u, Buffer);
 		}
 		if (auto Buffer = Mesh.GetVertexBuffer(EVertexAttributes::UV0))
 		{
 			Command->VertexStream.Add(Location++, 0u, Buffer);
-			VertexAttributes = VertexAttributes | EVertexAttributes::UV0;
 			VertexShader->SetDefine("_HAS_UV0_", true);
 		}
 

@@ -13,4 +13,8 @@ private:
 	RHIBackend* GetOrCreateBackend(ERHIBackend Backend);
 
 	Array<std::unique_ptr<RHIBackend>, ERHIBackend> m_Backends;
+
+#if !ENABLE_MULTI_RENDERER
+	ERHIBackend m_Backend = ERHIBackend::Num;
+#endif
 };

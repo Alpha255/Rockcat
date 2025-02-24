@@ -39,6 +39,7 @@ public:
 	virtual void FlushMappedRange(size_t Size = RHI_WHOLE_SIZE, size_t Offset = 0u) = 0;
 	virtual void InvalidateMappedRange(size_t Size = RHI_WHOLE_SIZE, size_t Offset = 0u) = 0;
 	virtual bool Update(const void* Data, size_t Size, size_t SrcOffset = 0u, size_t DstOffset = 0u) = 0;
+	virtual RHIBufferPtr Suballocate(const RHIBufferCreateInfo&) { return nullptr; }
 	void* GetMappedMemory() const { return m_MappedMemory; }
 protected:
 	void* m_MappedMemory = nullptr;

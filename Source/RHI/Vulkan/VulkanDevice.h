@@ -13,12 +13,12 @@ public:
 	void WaitIdle() const override final { assert(m_LogicalDevice); m_LogicalDevice.waitIdle(); }
 
 	RHIShaderPtr CreateShader(const RHIShaderCreateInfo& CreateInfo) override final;
-	RHITexturePtr CreateTexture(const RHITextureCreateInfo& CreateInfo) override final;
+	RHITexturePtr CreateTexture(const RHITextureCreateInfo& CreateInfo, RHICommandBuffer* CommandBuffer) override final;
 	RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& CreateInfo) override final;
 	RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& CreateInfo) override final;
 	RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo) override final;
 	RHIPipelineStatePtr CreatePipelineState(const RHIGraphicsPipelineCreateInfo& CreateInfo) override final;
-	RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& CreateInfo) override final;
+	RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& CreateInfo, RHICommandBuffer* CommandBuffer) override final;
 	RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& CreateInfo) override final;
 	RHISwapchainPtr CreateSwapchain(const RHISwapchainCreateInfo& CreateInfo) override final;
 

@@ -5,7 +5,7 @@
 class VulkanBuffer final : public VkHwResource<vk::Buffer>, public RHIBuffer
 {
 public:
-	VulkanBuffer(const class VulkanDevice& Device, const RHIBufferCreateInfo& CreateInfo);
+	VulkanBuffer(const class VulkanDevice& Device, const RHIBufferCreateInfo& CreateInfo, RHICommandBuffer* CommandBuffer);
 
 	~VulkanBuffer();
 
@@ -29,6 +29,8 @@ public:
 	inline bool IsHostVisible() const { return m_HostVisible; }
 	bool IsHostCached() const { return m_HostCached; }
 private:
+	void AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags);
+
 	vk::DeviceMemory m_Memory;
 
 	bool m_Coherent = false;

@@ -7,6 +7,10 @@ RHIBackend* RenderService::GetOrCreateBackend(ERHIBackend Backend)
 {
 	assert(Backend < ERHIBackend::Num);
 
+#if !ENABLE_MULTI_RENDERER
+	m_Backend = Backend;
+#endif
+
 	if (!m_Backends[Backend])
 	{
 		switch (Backend)

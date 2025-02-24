@@ -5,7 +5,7 @@
 class VulkanTexture final : public VkHwResource<vk::Image>, public RHITexture
 {
 public:
-	VulkanTexture(const class VulkanDevice& Device, const RHITextureCreateInfo& CreateInfo, vk::Image Image = vk::Image());
+	VulkanTexture(const class VulkanDevice& Device, const RHITextureCreateInfo& CreateInfo, RHICommandBuffer* CommandBuffer, vk::Image Image = vk::Image());
 
 	~VulkanTexture();
 
@@ -29,6 +29,10 @@ private:
 	ImageViewMap m_Views;
 	bool m_Own = true;
 #endif
+private:
+	void AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags);
+
+	vk::DeviceMemory m_Memory;
 };
 
 class VulkanSampler final : public VkHwResource<vk::Sampler>, public RHISampler

@@ -150,9 +150,7 @@ struct RHIBackendConfiguration : public SerializableAsset<RHIBackendConfiguratio
 	using BaseClass::BaseClass;
 
 	bool EnableAsyncCompute = true;
-	bool EnableAsyncTransfer = true;
-	bool BatchResourceDataTransfer = false;
-	bool BatchResourceBarrier = false;
+	bool UseTransferQueue = true;
 	bool AsyncCommandlistSubmission = false;
 	bool AsyncMeshDrawCommandsBuilding = false;
 	bool SeparateRenderThread = false;
@@ -162,9 +160,7 @@ struct RHIBackendConfiguration : public SerializableAsset<RHIBackendConfiguratio
 	{
 		Ar(
 			CEREAL_NVP(EnableAsyncCompute),
-			CEREAL_NVP(EnableAsyncTransfer),
-			CEREAL_NVP(BatchResourceDataTransfer),
-			CEREAL_NVP(BatchResourceBarrier),
+			CEREAL_NVP(UseTransferQueue),
 			CEREAL_NVP(AsyncCommandlistSubmission),
 			CEREAL_NVP(AsyncMeshDrawCommandsBuilding),
 			CEREAL_NVP(SeparateRenderThread)

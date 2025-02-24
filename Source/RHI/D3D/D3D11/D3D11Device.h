@@ -11,12 +11,12 @@ public:
 	void WaitIdle() const override final {}
 
 	RHIShaderPtr CreateShader(const RHIShaderCreateInfo& RHICreateInfo) override final;
-	RHITexturePtr CreateTexture(const RHITextureCreateInfo& RHICreateInfo) override final;
+	RHITexturePtr CreateTexture(const RHITextureCreateInfo& RHICreateInfo, RHICommandBuffer* CommandBuffer) override final;
 	RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo) override final;
 	RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo) override final;
 	RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) override final;
 	RHIPipelineStatePtr CreatePipelineState(const RHIGraphicsPipelineCreateInfo& RHICreateInfo) override final;
-	RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo) override final;
+	RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo, RHICommandBuffer* CommandBuffer) override final;
 	RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& RHICreateInfo) override final;
 	RHISwapchainPtr CreateSwapchain(const RHISwapchainCreateInfo& CreateInfo) override final;
 

@@ -66,22 +66,6 @@ struct MeshProperty
 	inline bool HasUV0() const { return HasAttribute(EVertexAttributes::UV0); }
 	inline bool HasUV1() const { return HasAttribute(EVertexAttributes::UV1); }
 	inline bool HasColor() const { return HasAttribute(EVertexAttributes::Color); }
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(NumVertex),
-			CEREAL_NVP(NumIndex),
-			CEREAL_NVP(NumPrimitive),
-			CEREAL_NVP(PackedVertexStride),
-			CEREAL_NVP(VertexAttributes),
-			CEREAL_NVP(IndexFormat),
-			CEREAL_NVP(PrimitiveTopology),
-			CEREAL_NVP(BoundingBox),
-			CEREAL_NVP(BoundingSphere)
-		);
-	}
 };
 
 struct MeshData : public MeshProperty
@@ -189,7 +173,7 @@ struct MeshData : public MeshProperty
 
 	void ClearData();
 
-	virtual void CreateRHI(class RHIDevice&) {}
+	virtual void CreateRHI(class RHIDevice&, class RHICommandListContext*) {}
 
 	std::shared_ptr<uint8_t> PackedVerticesData;
 	std::shared_ptr<uint8_t> PositionData;
@@ -233,7 +217,7 @@ public:
 	std::vector<const RHIBuffer*> GetVertexBuffers(EVertexAttributes Attributes) const;
 	const RHIBuffer* GetVertexBuffer(EVertexAttributes Attributes) const;
 
-	void CreateRHI(class RHIDevice& Device) override;
+	void CreateRHI(class RHIDevice& Device, class RHICommandListContext* CommandListContext) override;
 protected:
 	friend class SceneBuilder;
 	friend class AssimpSceneImporter;

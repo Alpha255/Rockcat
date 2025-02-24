@@ -4,7 +4,7 @@
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
 #include "Engine/Services/SpdLogService.h"
 
-VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo& RHICreateInfo)
+VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo& RHICreateInfo, RHICommandBuffer* CommandBuffer)
 	: VkHwResource(Device)
 	, RHIBuffer(RHICreateInfo)
 {
@@ -36,22 +36,18 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 	{
 		UsageFlags |= vk::BufferUsageFlagBits::eUniformBuffer;
 		AlignedSize = Align(RHICreateInfo.Size, GetDevice().GetPhysicalDeviceLimits().minUniformBufferOffsetAlignment);
-		//RequiredState = EResourceState::UniformBuffer;
 	}
 	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::IndexBuffer))
 	{
 		UsageFlags |= vk::BufferUsageFlagBits::eIndexBuffer;
-		//RequiredState = EResourceState::IndexBuffer;
 	}
 	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::VertexBuffer))
 	{
 		UsageFlags |= vk::BufferUsageFlagBits::eVertexBuffer;
-		//RequiredState = EResourceState::VertexBuffer;
 	}
 	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::IndirectBuffer))
 	{
 		UsageFlags |= vk::BufferUsageFlagBits::eIndirectBuffer;
-		//RequiredState = EResourceState::IndirectArgument;
 	}
 	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::StructuredBuffer))
 	{
@@ -62,17 +58,14 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 	{
 		UsageFlags |= vk::BufferUsageFlagBits::eStorageTexelBuffer;
 		AlignedSize = Align(RHICreateInfo.Size, GetDevice().GetPhysicalDeviceLimits().minTexelBufferOffsetAlignment);
-		//RequiredState = EResourceState::UnorderedAccess;
 	}
 	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::ShaderResource))
 	{
 		UsageFlags |= vk::BufferUsageFlagBits::eUniformTexelBuffer;
-		//RequiredState = EResourceState::ShaderResource;
 	}
 	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::AccelerationStructure))
 	{
 		UsageFlags |= vk::BufferUsageFlagBits::eAccelerationStructureStorageKHR;
-		//RequiredState = EResourceState::AccelerationStructure;
 		/// #TODO Align
 	}
 
@@ -83,20 +76,12 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 
 	VERIFY_VK(GetNativeDevice().createBuffer(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
-	m_Memory = VulkanMemoryAllocator::Get().Allocate(GetNative(), RHICreateInfo.AccessFlags);
-	assert(m_Memory);
-
-	GetNativeDevice().bindBufferMemory(m_Native, m_Memory, 0u);
+	AllocateAndBindMemory(RHICreateInfo.AccessFlags);
 
 	if (RHICreateInfo.InitialData)
 	{
-#if false
-		else
-		{
-			ScopedBufferMapper Mapper(this, AlignedSize, 0u);
-			VERIFY(memcpy_s(m_MappedMemory, CreateInfo.Size, CreateInfo.InitialData, CreateInfo.Size) == 0);
-		}
-#endif
+		assert(CommandBuffer);
+		CommandBuffer->WriteBuffer(this, RHICreateInfo.InitialData, RHICreateInfo.Size);
 
 		if (m_HostVisible)
 		{
@@ -105,35 +90,18 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 				FlushMappedRange(VK_WHOLE_SIZE, 0u);
 			}
 		}
-		else
-		{
-			if (VulkanRHI::GetConfigs().EnableAsyncTransfer)
-			{
-
-			}
-			else
-			{
-
-			}
-
-			if (VulkanRHI::GetConfigs().BatchResourceDataTransfer)
-			{
-				assert(false);
-			}
-			//auto Command = m_Device->GetOrAllocateCommandBuffer(EQueueType::Transfer, ECommandBufferLevel::Primary, true, true);
-
-			//Command->CopyBuffer(this, CreateInfo.InitialData, CreateInfo.Size, 0u, 0u);
-
-			//if (m_Device->Options().BatchResourceSubmit)
-			//{
-			//	m_Device->Queue(EQueueType::Transfer)->QueueSubmit(std::vector<ICommandBufferSharedPtr>{Command});
-			//}
-			//else
-			//{
-			//	m_Device->Queue(EQueueType::Transfer)->Submit(std::vector<ICommandBufferSharedPtr>{Command});
-			//}
-		}
 	}
+
+	VkHwResource::SetObjectName(RHICreateInfo.Name.c_str());
+}
+
+void VulkanBuffer::AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags)
+{
+	m_Memory = VulkanMemoryAllocator::Get().Allocate(GetNative(), AccessFlags);
+	assert(m_Memory);
+
+	/// #TODO VK_KHR_bind_memory2: On some implementations, it may be more efficient to batch memory bindings into a single command.
+	GetNativeDevice().bindBufferMemory(m_Native, m_Memory, 0u);
 }
 
 void* VulkanBuffer::Map(size_t Size, size_t Offset)

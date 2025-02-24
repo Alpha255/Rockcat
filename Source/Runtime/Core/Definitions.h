@@ -39,9 +39,17 @@
 	#if !defined(PLATFORM_WIN32)
 		#define PLATFORM_WIN32 1
 	#endif
+
+	#define ENABLE_MULTI_RENDERER 1
 #elif defined(__ANDRIOD__)
-	#define VK_USE_PLATFORM_ANDROID_KHR 1
-	#define PLATFORM_ANDROID 1
+	#if !defined(VK_USE_PLATFORM_ANDROID_KHR)
+		#define VK_USE_PLATFORM_ANDROID_KHR 1
+	#endif
+	#if !defined(PLATFORM_ANDROID)
+		#define PLATFORM_ANDROID 1
+	#endif
+
+	#define ENABLE_MULTI_RENDERER 0
 #endif
 
 #define NOMINMAX 1

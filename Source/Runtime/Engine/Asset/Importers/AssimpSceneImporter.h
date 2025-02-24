@@ -62,6 +62,9 @@ public:
 					AssimpScene.Graph.Root = AssimpScene.Graph.AddNode(SceneGraph::NodeID(), AiScene->mRootNode->mName.C_Str());
 					if (ProcessNode(AiScene, AiScene->mRootNode, AssimpScene.Graph.Root, AssimpScene))
 					{
+#if !ENABLE_MULTI_RENDERER
+						assert(false);
+#endif
 						return true;
 					}
 				}
