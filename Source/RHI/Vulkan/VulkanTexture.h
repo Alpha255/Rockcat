@@ -32,7 +32,7 @@ private:
 private:
 	void AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags);
 
-	vk::DeviceMemory m_Memory;
+	VulkanDeviceMemory m_Memory;
 };
 
 class VulkanSampler final : public VkHwResource<vk::Sampler>, public RHISampler

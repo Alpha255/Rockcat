@@ -34,7 +34,10 @@ public:
 		return CmdBufferGroup.ActiveCmdBuffer;
 	}
 
+	RHICommandBuffer* GetUploadCommandBuffer() { return nullptr; }
+
 	virtual void Submit() = 0;
+	virtual void SubmitUploadCommandBuffer() = 0;
 protected:
 	virtual RHICommandBufferPtr AllocateCommandBuffer(ERHICommandBufferLevel Level) = 0;
 

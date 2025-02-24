@@ -83,12 +83,9 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 		assert(CommandBuffer);
 		CommandBuffer->WriteBuffer(this, RHICreateInfo.InitialData, RHICreateInfo.Size);
 
-		if (m_HostVisible)
+		if (m_Memory.HostVisible && !m_Memory.HostCoherent)
 		{
-			if (!m_Coherent)
-			{
-				FlushMappedRange(VK_WHOLE_SIZE, 0u);
-			}
+			FlushMappedRange(VK_WHOLE_SIZE, 0u);
 		}
 	}
 
@@ -98,25 +95,25 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 void VulkanBuffer::AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags)
 {
 	m_Memory = VulkanMemoryAllocator::Get().Allocate(GetNative(), AccessFlags);
-	assert(m_Memory);
+	assert(m_Memory.Native);
 
 	/// #TODO VK_KHR_bind_memory2: On some implementations, it may be more efficient to batch memory bindings into a single command.
-	GetNativeDevice().bindBufferMemory(m_Native, m_Memory, 0u);
+	GetNativeDevice().bindBufferMemory(m_Native, m_Memory.Native, 0u);
 }
 
 void* VulkanBuffer::Map(size_t Size, size_t Offset)
 {
-	assert(m_HostVisible && m_MappedMemory == nullptr && (Size == VK_WHOLE_SIZE || Offset + Size <= m_Size));
+	assert(m_Memory.HostVisible && m_MappedMemory == nullptr && (Size == VK_WHOLE_SIZE || Offset + Size <= m_Size));
 
-	VERIFY_VK(GetNativeDevice().mapMemory(m_Memory, Offset, Size, vk::MemoryMapFlags(0u), &m_MappedMemory));
+	VERIFY_VK(GetNativeDevice().mapMemory(m_Memory.Native, Offset, Size, vk::MemoryMapFlags(0u), &m_MappedMemory));
 	return m_MappedMemory;
 }
 
 void VulkanBuffer::Unmap()
 {
-	assert(m_HostVisible && m_MappedMemory);
+	assert(m_Memory.HostVisible && m_MappedMemory);
 
-	GetNativeDevice().unmapMemory(m_Memory);
+	GetNativeDevice().unmapMemory(m_Memory.Native);
 	m_MappedMemory = nullptr;
 }
 
@@ -129,11 +126,11 @@ void VulkanBuffer::FlushMappedRange(size_t Size, size_t Offset)
 
 	/// #TODO Align to nonCoherentAtomSize
 	
-	assert(!m_Coherent && m_MappedMemory);
+	assert(!m_Memory.HostCoherent && m_MappedMemory);
 	assert(Offset + Size <= m_Size || (Size == VK_WHOLE_SIZE && Offset < m_Size));
 
 	vk::MappedMemoryRange MappedRange;
-	MappedRange.setMemory(m_Memory)
+	MappedRange.setMemory(m_Memory.Native)
 		.setSize(Size)
 		.setOffset(Offset);
 
@@ -144,11 +141,11 @@ void VulkanBuffer::InvalidateMappedRange(size_t Size, size_t Offset)
 {
 	/// #TODO Align to nonCoherentAtomSize
 
-	assert(!m_Coherent && m_MappedMemory);
+	assert(!m_Memory.HostCoherent && m_MappedMemory);
 	assert(Offset + Size <= m_Size || (Size == VK_WHOLE_SIZE && Offset < m_Size));
 
 	vk::MappedMemoryRange MappedRange;
-	MappedRange.setMemory(m_Memory)
+	MappedRange.setMemory(m_Memory.Native)
 		.setSize(Size)
 		.setOffset(Offset);
 
@@ -167,7 +164,7 @@ bool VulkanBuffer::Update(const void* Data, size_t Size, size_t SrcOffset, size_
 			reinterpret_cast<const uint8_t*>(Data) + SrcOffset, 
 			Size) == 0);
 
-		if (!m_Coherent)
+		if (!m_Memory.HostCoherent)
 		{
 			FlushMappedRange(Size, DstOffset);
 		}
@@ -185,9 +182,9 @@ VulkanBuffer::~VulkanBuffer()
 		Unmap();
 	}
 
-	if (m_Memory)
+	if (m_Memory.Native)
 	{
-		GetNativeDevice().freeMemory(m_Memory);
-		m_Memory = nullptr;
+		GetNativeDevice().freeMemory(m_Memory.Native);
+		m_Memory.Native = nullptr;
 	}
 }

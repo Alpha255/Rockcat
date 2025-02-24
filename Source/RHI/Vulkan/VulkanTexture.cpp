@@ -109,10 +109,10 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 void VulkanTexture::AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags)
 {
 	m_Memory = VulkanMemoryAllocator::Get().Allocate(GetNative(), AccessFlags);
-	assert(m_Memory);
+	assert(m_Memory.Native);
 
 	/// #TODO VK_KHR_bind_memory2: On some implementations, it may be more efficient to batch memory bindings into a single command.
-	GetNativeDevice().bindImageMemory(m_Native, m_Memory, 0u);
+	GetNativeDevice().bindImageMemory(m_Native, m_Memory.Native, 0u);
 }
 
 //

@@ -60,8 +60,6 @@ public:
 
 	void SetScissorRect(const RHIScissorRect& ScissorRect) override final;
 	void SetScissorRects(const RHIScissorRect* ScissorRects, uint32_t NumScissorRects) override final;
-
-	void WaitCommand(const RHICommandBuffer* CommandToWait) override final;
 private:
 	D3D12CommandAllocator m_Allocator;
 	class D3D12GraphicsPipeline* m_CurGfxPipeline = nullptr;

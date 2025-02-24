@@ -21,7 +21,7 @@ uint32_t VulkanMemoryAllocator::GetMemoryTypeIndex(uint32_t MemTypeBits, vk::Mem
 	return InvalidMemTypeIndex;
 }
 
-vk::DeviceMemory VulkanMemoryAllocator::Allocate(vk::Buffer Buffer, ERHIDeviceAccessFlags AccessFlags)
+VulkanDeviceMemory VulkanMemoryAllocator::Allocate(vk::Buffer Buffer, ERHIDeviceAccessFlags AccessFlags)
 {
 	assert(Buffer);
 
@@ -31,7 +31,7 @@ vk::DeviceMemory VulkanMemoryAllocator::Allocate(vk::Buffer Buffer, ERHIDeviceAc
 	return Allocate(Requirements, AccessFlags);
 }
 
-vk::DeviceMemory VulkanMemoryAllocator::Allocate(vk::Image Image, ERHIDeviceAccessFlags AccessFlags)
+VulkanDeviceMemory VulkanMemoryAllocator::Allocate(vk::Image Image, ERHIDeviceAccessFlags AccessFlags)
 {
 	assert(Image);
 
@@ -41,7 +41,7 @@ vk::DeviceMemory VulkanMemoryAllocator::Allocate(vk::Image Image, ERHIDeviceAcce
 	return Allocate(Requirements, AccessFlags);
 }
 
-vk::DeviceMemory VulkanMemoryAllocator::Allocate(const vk::MemoryRequirements& Requirements, ERHIDeviceAccessFlags AccessFlags)
+VulkanDeviceMemory VulkanMemoryAllocator::Allocate(const vk::MemoryRequirements& Requirements, ERHIDeviceAccessFlags AccessFlags)
 {
 	/// VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT bit specifies that memory allocated with this type can be mapped for host access using vkMapMemory.
 
@@ -51,6 +51,7 @@ vk::DeviceMemory VulkanMemoryAllocator::Allocate(const vk::MemoryRequirements& R
 	/// VK_MEMORY_PROPERTY_HOST_CACHED_BIT bit specifies that memory allocated with this type is cached on the host. 
 	/// Host memory accesses to uncached memory are slower than to cached memory, however uncached memory is always host coherent.
 
+	VulkanDeviceMemory Memory;
 	vk::MemoryPropertyFlags MemPropertyFlags;
 	if (AccessFlags == ERHIDeviceAccessFlags::GpuRead || AccessFlags == ERHIDeviceAccessFlags::GpuReadWrite)
 	{
@@ -59,6 +60,7 @@ vk::DeviceMemory VulkanMemoryAllocator::Allocate(const vk::MemoryRequirements& R
 	else if (AccessFlags == ERHIDeviceAccessFlags::GpuReadCpuWrite)
 	{
 		MemPropertyFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+		Memory.HostVisible = Memory.HostCoherent = true;
 	}
 	else
 	{
@@ -68,6 +70,7 @@ vk::DeviceMemory VulkanMemoryAllocator::Allocate(const vk::MemoryRequirements& R
 	if (EnumHasAnyFlags(AccessFlags, ERHIDeviceAccessFlags::CpuRead))
 	{
 		MemPropertyFlags |= vk::MemoryPropertyFlagBits::eHostCached;
+		Memory.HostCached = true;
 	}
 
 	auto MemTypeIndex = GetMemoryTypeIndex(Requirements.memoryTypeBits, MemPropertyFlags);
@@ -82,7 +85,6 @@ vk::DeviceMemory VulkanMemoryAllocator::Allocate(const vk::MemoryRequirements& R
 	AllocateInfo.setAllocationSize(Requirements.size)
 		.setMemoryTypeIndex(MemTypeIndex);
 
-	vk::DeviceMemory Memory;
-	VERIFY_VK(GetNativeDevice().allocateMemory(&AllocateInfo, VK_ALLOCATION_CALLBACKS, &Memory));
+	VERIFY_VK(GetNativeDevice().allocateMemory(&AllocateInfo, VK_ALLOCATION_CALLBACKS, &Memory.Native));
 	return Memory;
 }

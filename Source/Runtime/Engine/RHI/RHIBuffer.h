@@ -31,6 +31,7 @@ class RHIBuffer : public RHIResource
 public:
 	RHIBuffer(const RHIBufferCreateInfo& RHICreateInfo)
 		: RHIResource(RHICreateInfo.Name.c_str())
+		, m_Size(RHICreateInfo.Size)
 	{
 	}
 
@@ -40,8 +41,11 @@ public:
 	virtual void InvalidateMappedRange(size_t Size = RHI_WHOLE_SIZE, size_t Offset = 0u) = 0;
 	virtual bool Update(const void* Data, size_t Size, size_t SrcOffset = 0u, size_t DstOffset = 0u) = 0;
 	virtual RHIBufferPtr Suballocate(const RHIBufferCreateInfo&) { return nullptr; }
-	void* GetMappedMemory() const { return m_MappedMemory; }
+	
+	inline void* GetMappedMemory() const { return m_MappedMemory; }
+	inline size_t GetSize() const { return m_Size; }
 protected:
+	size_t m_Size = 0u;
 	void* m_MappedMemory = nullptr;
 };
 

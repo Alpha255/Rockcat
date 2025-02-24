@@ -2,6 +2,14 @@
 
 #include "RHI/Vulkan/VulkanTypes.h"
 
+struct VulkanDeviceMemory
+{
+	vk::DeviceMemory Native = nullptr;
+	bool HostCoherent = false;
+	bool HostVisible = false;
+	bool HostCached = false;
+};
+
 class VulkanBuffer final : public VkHwResource<vk::Buffer>, public RHIBuffer
 {
 public:
@@ -23,19 +31,8 @@ public:
 	void InvalidateMappedRange(size_t Size, size_t Offset) override final;
 
 	bool Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset) override final;
-
-	inline size_t GetSize() const { return m_Size; }
-	inline bool IsCoherent() const { return m_Coherent; }
-	inline bool IsHostVisible() const { return m_HostVisible; }
-	bool IsHostCached() const { return m_HostCached; }
 private:
 	void AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags);
 
-	vk::DeviceMemory m_Memory;
-
-	bool m_Coherent = false;
-	bool m_HostVisible = false;
-	bool m_HostCached = false;
-
-	size_t m_Size = 0u;
+	VulkanDeviceMemory m_Memory;
 };

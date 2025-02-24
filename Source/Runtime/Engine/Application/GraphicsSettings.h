@@ -150,7 +150,7 @@ struct RHIBackendConfiguration : public SerializableAsset<RHIBackendConfiguratio
 	using BaseClass::BaseClass;
 
 	bool EnableAsyncCompute = true;
-	bool UseTransferQueue = true;
+	bool UseTransferQueue = false;
 	bool AsyncCommandlistSubmission = false;
 	bool AsyncMeshDrawCommandsBuilding = false;
 	bool SeparateRenderThread = false;

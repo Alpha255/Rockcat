@@ -273,10 +273,6 @@ void D3D12CommandList::SetScissorRects(const RHIScissorRect* ScissorRects, uint3
 	GetNative()->RSSetScissorRects(NumScissorRects, D3DRects.data());
 }
 
-void D3D12CommandList::WaitCommand(const RHICommandBuffer* CommandToWait)
-{
-}
-
 D3D12CommandList::~D3D12CommandList()
 {
 }

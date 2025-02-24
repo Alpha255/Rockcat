@@ -11,6 +11,8 @@ public:
 
 	void Submit() override final;
 
+	void SubmitUploadCommandBuffer() override final;
+
 	VulkanDescriptorPool& AcquireDescriptorPool();
 protected:
 	RHICommandBufferPtr AllocateCommandBuffer(ERHICommandBufferLevel Level) override final

@@ -71,8 +71,6 @@ public:
 	virtual void SetScissorRect(const RHIScissorRect& ScissorRect) = 0;
 	virtual void SetScissorRects(const RHIScissorRect* ScissorRects, uint32_t NumScissorRects) = 0;
 
-	virtual void WaitCommand(const RHICommandBuffer* CommandToWait) = 0;
-
 	inline bool IsReady() const { return m_State == EState::Initial; }
 	inline bool IsRecording() const { return m_State == EState::Recording; }
 	inline bool IsInsideRenderPass() const { return m_State == EState::InsideRenderPass; }

@@ -6,8 +6,8 @@
 class VulkanMemoryAllocator : public LazySingleton<VulkanMemoryAllocator>, public VkBaseDeviceResource
 {
 public:
-	vk::DeviceMemory Allocate(vk::Buffer Buffer, ERHIDeviceAccessFlags AccessFlags);
-	vk::DeviceMemory Allocate(vk::Image Image, ERHIDeviceAccessFlags AccessFlags);
+	VulkanDeviceMemory Allocate(vk::Buffer Buffer, ERHIDeviceAccessFlags AccessFlags);
+	VulkanDeviceMemory Allocate(vk::Image Image, ERHIDeviceAccessFlags AccessFlags);
 protected:
 	ALLOW_ACCESS_LAZY(VulkanMemoryAllocator)
 
@@ -15,7 +15,7 @@ protected:
 
 	uint32_t GetMemoryTypeIndex(uint32_t MemTypeBits, vk::MemoryPropertyFlags MemPropertyFlags) const;
 
-	vk::DeviceMemory Allocate(const vk::MemoryRequirements &Requirements, ERHIDeviceAccessFlags AccessFlags);
+	VulkanDeviceMemory Allocate(const vk::MemoryRequirements &Requirements, ERHIDeviceAccessFlags AccessFlags);
 private:
 	vk::PhysicalDeviceMemoryProperties m_MemoryProperties;
 

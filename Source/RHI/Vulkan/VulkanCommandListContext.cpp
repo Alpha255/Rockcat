@@ -16,6 +16,10 @@ void VulkanCommandListContext::Submit()
 {
 }
 
+void VulkanCommandListContext::SubmitUploadCommandBuffer()
+{
+}
+
 VulkanDescriptorPool& VulkanCommandListContext::AcquireDescriptorPool()
 {
 	if (m_DescriptorPool->IsFull())
