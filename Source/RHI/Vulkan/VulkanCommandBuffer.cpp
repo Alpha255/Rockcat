@@ -788,6 +788,8 @@ void VulkanCommandBuffer::WriteBuffer(const RHIBuffer* Buffer, const void* Data,
 
 	/// #TODO: Use staging buffer manager ???
 
+	assert(!VulkanRHI::GetConfigs().UseTransferQueue);
+
 	RHIBufferCreateInfo StagingBufferCreateInfo;
 	StagingBufferCreateInfo.SetSize(Size)
 		.SetAccessFlags(ERHIDeviceAccessFlags::GpuReadCpuWrite);
@@ -796,30 +798,25 @@ void VulkanCommandBuffer::WriteBuffer(const RHIBuffer* Buffer, const void* Data,
 	StagingBuffer->Update(Data, Size, Offset, 0u);
 	StagingBuffer->Unmap();
 
-	if (VulkanRHI::GetConfigs().UseTransferQueue)
-	{
-		assert(false);
-	}
-	else
-	{
-		auto UploadCommandBuffer = Cast<VulkanCommandBuffer>(GetContext()->GetUploadCommandBuffer());
-		assert(UploadCommandBuffer);
+	auto UploadCommandBuffer = Cast<VulkanCommandBuffer>(GetContext()->GetUploadCommandBuffer());
+	assert(UploadCommandBuffer);
 
-		auto DstBuffer = Cast<VulkanBuffer>(Buffer);
-		assert(DstBuffer);
+	auto DstBuffer = Cast<VulkanBuffer>(Buffer);
+	assert(DstBuffer);
 
-		vk::BufferCopy CopyRegion(Offset, 0u, Size);
-		UploadCommandBuffer->GetNative().copyBuffer(StagingBuffer->GetNative(), DstBuffer->GetNative(), 1u, &CopyRegion);
+	vk::BufferCopy CopyRegion(Offset, 0u, Size);
+	UploadCommandBuffer->GetNative().copyBuffer(StagingBuffer->GetNative(), DstBuffer->GetNative(), 1u, &CopyRegion);
 
-		/// #TODO: Transfer buffer barrier.
+	/// #TODO: Transfer buffer barrier.
 
-		GetContext()->SubmitUploadCommandBuffer();
-	}
+	GetContext()->SubmitUploadCommandBuffer();
 }
 
 void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, size_t Offset)
 {
 	assert(Texture && Data && Size);
+	
+	assert(!VulkanRHI::GetConfigs().UseTransferQueue);
 
 	RHIBufferCreateInfo StagingBufferCreateInfo;
 	StagingBufferCreateInfo.SetSize(Size)
@@ -828,66 +825,59 @@ void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Da
 	StagingBuffer->Map(Size, Offset);
 	size_t StartOffset = Offset;
 
-	if (VulkanRHI::GetConfigs().UseTransferQueue)
-	{
-		assert(false);
-	}
-	else
-	{
-		auto UploadCommandBuffer = Cast<VulkanCommandBuffer>(GetContext()->GetUploadCommandBuffer());
-		assert(UploadCommandBuffer);
+	auto UploadCommandBuffer = Cast<VulkanCommandBuffer>(GetContext()->GetUploadCommandBuffer());
+	assert(UploadCommandBuffer);
 
-		auto DstImage = Cast<VulkanTexture>(Texture);
-		assert(DstImage);
+	auto DstImage = Cast<VulkanTexture>(Texture);
+	assert(DstImage);
 
-		std::vector<vk::BufferImageCopy> CopyRegions;
-		CopyRegions.reserve(Texture->GetArrayLayers() * Texture->GetMipLevels() * Texture->GetDepth());
-		for (uint32_t Layer = 0u; Layer < Texture->GetArrayLayers(); ++Layer)
+	std::vector<vk::BufferImageCopy> CopyRegions;
+	CopyRegions.reserve(Texture->GetArrayLayers() * Texture->GetMipLevels() * Texture->GetDepth());
+	for (uint32_t Layer = 0u; Layer < Texture->GetArrayLayers(); ++Layer)
+	{
+		for (uint32_t MipLevel = 0u; MipLevel < Texture->GetMipLevels(); ++MipLevel)
 		{
-			for (uint32_t MipLevel = 0u; MipLevel < Texture->GetMipLevels(); ++MipLevel)
+			for (uint32_t Depth = 0u; Depth < Texture->GetDepth(); ++Depth)
 			{
-				for (uint32_t Depth = 0u; Depth < Texture->GetDepth(); ++Depth)
-				{
-					uint32_t MipWidth = std::max(Texture->GetWidth() >> MipLevel, 1u);
-					uint32_t MipHeight = std::max(Texture->GetHeight() >> MipLevel, 1u);
-					
-					size_t SliceBytes = 0u;
-					size_t RowBytes = 0u;
-					RHI::CalculateFormatBytes(
-						MipWidth,
+				uint32_t MipWidth = std::max(Texture->GetWidth() >> MipLevel, 1u);
+				uint32_t MipHeight = std::max(Texture->GetHeight() >> MipLevel, 1u);
+
+				size_t SliceBytes = 0u;
+				size_t RowBytes = 0u;
+				RHI::CalculateFormatBytes(
+					MipWidth,
+					MipHeight,
+					Texture->GetFormat(),
+					SliceBytes,
+					RowBytes);
+				uint32_t RowPitch = static_cast<uint32_t>(SliceBytes * Depth);
+
+				CopyRegions.emplace_back(
+					vk::BufferImageCopy(
+						StartOffset,
+						RowPitch,
 						MipHeight,
-						Texture->GetFormat(),
-						SliceBytes,
-						RowBytes);
-					uint32_t RowPitch = static_cast<uint32_t>(SliceBytes * Depth);
+						vk::ImageSubresourceLayers(
+							vk::ImageAspectFlagBits::eColor,
+							MipLevel,
+							Layer,
+							1u),
+						vk::Offset3D(0, 0, 0),
+						vk::Extent3D(MipWidth, MipHeight, 1u)
+					));
 
-					CopyRegions.emplace_back(
-						vk::BufferImageCopy(
-							StartOffset,
-							RowPitch,
-							MipHeight,
-							vk::ImageSubresourceLayers(
-								vk::ImageAspectFlagBits::eColor,
-								MipLevel,
-								Layer,
-								1u),
-							vk::Offset3D(0, 0, 0),
-							vk::Extent3D(MipWidth, MipHeight, 1u)
-						));
-
-					StagingBuffer->Update(reinterpret_cast<uint8_t*>(StagingBuffer->GetMappedMemory()), RowPitch, StartOffset, StartOffset);
-					StartOffset += RowPitch;
-				}
+				StagingBuffer->Update(reinterpret_cast<uint8_t*>(StagingBuffer->GetMappedMemory()), RowPitch, StartOffset, StartOffset);
+				StartOffset += RowPitch;
 			}
 		}
-		StagingBuffer->Unmap();
-
-		UploadCommandBuffer->GetNative().copyBufferToImage(StagingBuffer->GetNative(), DstImage->GetNative(), vk::ImageLayout::eTransferDstOptimal, CopyRegions);
-
-		/// #TODO: Transfer image barrier.
-
-		GetContext()->SubmitUploadCommandBuffer();
 	}
+	StagingBuffer->Unmap();
+
+	UploadCommandBuffer->GetNative().copyBufferToImage(StagingBuffer->GetNative(), DstImage->GetNative(), vk::ImageLayout::eTransferDstOptimal, CopyRegions);
+
+	/// #TODO: Transfer image barrier.
+
+	GetContext()->SubmitUploadCommandBuffer();
 }
 
 //void VulkanCommandBuffer::SetPolygonMode(EPolygonMode Mode)

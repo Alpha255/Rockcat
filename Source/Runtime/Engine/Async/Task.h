@@ -14,9 +14,9 @@ enum class EThread
 {
 	GameThread,
 	RenderThread,
-	FileWatchThread,
 	WorkerThread,
-	Num
+	Num,
+	MainThread
 };
 
 class TaskEvent

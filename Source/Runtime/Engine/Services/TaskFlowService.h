@@ -16,6 +16,8 @@ public:
 	template<bool WaitDone = true, class Iterator, class Callable>
 	TaskEventPtr ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function, EThread Thread)
 	{
+		assert(Thread < EThread::Num);
+
 		auto& Flow = CreateTaskFlow();
 		Flow.for_each(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<Callable>(Function));
 		Flow.Execute(*m_Executors[Thread]);
@@ -30,6 +32,7 @@ public:
 	template<size_t Step, bool WaitDone = true, class Callable>
 	TaskEventPtr ParallelForRange(size_t Begin, size_t End, Callable&& Function, EThread Thread)
 	{
+		assert(Thread < EThread::Num);
 		assert(Step < (End - Begin));
 
 		auto& Flow = CreateTaskFlow();
@@ -46,6 +49,8 @@ public:
 	template<bool WaitDone = true, class Iterator, class CompareOp>
 	TaskEventPtr ParallelSort(Iterator&& Begin, Iterator&& End, CompareOp&& Function, EThread Thread)
 	{
+		assert(Thread < EThread::Num);
+
 		auto& Flow = CreateTaskFlow();
 		Flow.sort(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<CompareOp>(Function));
 		Flow.Execute(*m_Executors[Thread]);
@@ -60,6 +65,8 @@ public:
 	template<bool WaitDone = false, class Callable>
 	void Async(Callable&& Function, EThread Thread)
 	{
+		assert(Thread < EThread::Num);
+
 		if (WaitDone)
 		{
 			m_Executors[Thread]->async(std::forward<Callable>(Function)).wait();
@@ -73,6 +80,8 @@ public:
 	template<bool WaitDone = false>
 	TaskEventPtr DispatchTask(Task& InTask, EThread Thread)
 	{
+		assert(Thread < EThread::Num);
+
 		auto& Flow = CreateTaskFlow();
 		Flow.emplace([&InTask]() {
 			PlatformMisc::ThreadPriorityGuard PriorityGuard(std::this_thread::get_id(), InTask.GetPriority());
@@ -90,6 +99,8 @@ public:
 	template<bool WaitDone = false>
 	TaskEventPtr DispatchTasks(const std::vector<Task*>& InTasks, EThread Thread)
 	{
+		assert(Thread < EThread::Num);
+
 		auto& Flow = CreateTaskFlow();
 		for (auto& Task : InTasks)
 		{
@@ -113,6 +124,8 @@ public:
 	template<bool WaitDone = false>
 	TaskEventPtr DispatchTaskFlow(TaskFlow& Flow, EThread Thread)
 	{
+		assert(Thread < EThread::Num);
+
 		Flow.Execute(*m_Executors[Thread]);
 
 		if (WaitDone)
