@@ -300,6 +300,7 @@ public:
 	const vk::Instance& GetNativeInstance() const;
 protected:
 	void SetObjectName(vk::ObjectType Type, uint64_t Object, const char* Name);
+	FORCEINLINE class VulkanDevice& GetDevice() { return const_cast<VulkanDevice&>(m_Device); }
 private:
 	const class VulkanDevice& m_Device;
 };

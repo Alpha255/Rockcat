@@ -335,6 +335,12 @@ const VulkanQueue& VulkanDevice::GetQueue(ERHIDeviceQueue Queue) const
 	return *m_Queues[Queue];
 }
 
+void VulkanDevice::WaitIdle() const
+{
+	assert(m_LogicalDevice);
+	m_LogicalDevice.waitIdle();
+}
+
 VulkanDevice::~VulkanDevice()
 {
 	m_LogicalDevice.destroy();

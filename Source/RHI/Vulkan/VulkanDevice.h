@@ -10,7 +10,7 @@ public:
 
 	~VulkanDevice();
 
-	void WaitIdle() const override final { assert(m_LogicalDevice); m_LogicalDevice.waitIdle(); }
+	void WaitIdle() const override final;
 
 	RHIShaderPtr CreateShader(const RHIShaderCreateInfo& CreateInfo) override final;
 	RHITexturePtr CreateTexture(const RHITextureCreateInfo& CreateInfo, RHICommandBuffer* CommandBuffer) override final;

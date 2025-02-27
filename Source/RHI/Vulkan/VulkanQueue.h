@@ -12,9 +12,9 @@ public:
 	const uint32_t GetFamilyIndex() const { return m_FamilyIndex; }
 	const ERHIDeviceQueue GetType() const { return m_Type; }
 
-	void Submit(class VulkanCommandBuffer* CommandBuffer, uint32_t NumSignalSemaphores, class VulkanSemaphore* SignalSemaphores);
+	void Submit(class VulkanCommandBuffer* CommandBuffer, uint32_t NumSignalSemaphores, class VulkanSemaphore* SignalSemaphores) const;
 
-	void WaitIdle();
+	void WaitIdle() const;
 protected:
 private:
 	ERHIDeviceQueue m_Type = ERHIDeviceQueue::Num;

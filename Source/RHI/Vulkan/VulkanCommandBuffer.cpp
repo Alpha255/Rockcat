@@ -804,7 +804,7 @@ void VulkanCommandBuffer::WriteBuffer(const RHIBuffer* Buffer, const void* Data,
 	GetNative().copyBuffer(StagingBuffer->GetNative(), DstBuffer->GetNative(), 1u, &CopyRegion);
 }
 
-void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, uint32_t ArrayLayer, uint32_t MipLevel, const void* Data, size_t Size, size_t SrcOffset)
+void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, uint32_t ArrayLayer, uint32_t MipLevel, size_t SrcOffset)
 {
 	assert(Texture && Data && Size);
 

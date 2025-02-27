@@ -81,7 +81,7 @@ workspace "Rockcat"
 				location "./Out/Intermediate/VCProjects"
 				files {
 					"./Source/RHI/Vulkan/**",
-					"./Assets/Configs/VkLayerAndExtensionConfigs.json"
+					"./Assets/Configs/VkEnvConfigs.json"
 				}
 				removefiles {
 					"./Source/RHI/Vulkan/Documents/**"
@@ -96,7 +96,7 @@ workspace "Rockcat"
 				}
 				vpaths {
 					["Configs"] = {
-						"./Assets/Configs/VkLayerAndExtensionConfigs.json"
+						"./Assets/Configs/VkEnvConfigs.json"
 					},
 					[""] = {
 						"./Source/RHI/Vulkan/**",

@@ -63,7 +63,7 @@ public:
 	virtual void ClearDepthStencilTexture(const RHITexture* Texture, bool ClearDepth = true, bool ClearStencil = true, float Depth = 1.0f, uint8_t Stencil = 0xF) = 0;
 
 	virtual void WriteBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t SrcOffset = 0u, size_t DstOffset = 0u) = 0;
-	virtual void WriteTexture(const RHITexture* Texture, uint32_t ArrayLayer, uint32_t MipLevel, const void* Data, size_t Size, size_t SrcOffset = 0u) = 0;
+	virtual void WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, uint32_t ArrayLayer, uint32_t MipLevel, size_t SrcOffset = 0u) = 0;
 	virtual void WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, size_t SrcOffset = 0u) = 0;
 
 	virtual void SetViewport(const RHIViewport& Viewport) = 0;

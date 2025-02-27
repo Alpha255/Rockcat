@@ -193,7 +193,7 @@ VulkanQueue::VulkanQueue(const VulkanDevice& Device, ERHIDeviceQueue QueueType, 
 	GetNativeDevice().getQueue(FamilyIndex, 0u, &m_Native);
 }
 
-void VulkanQueue::Submit(VulkanCommandBuffer* CommandBuffer, uint32_t NumSignalSemaphores, VulkanSemaphore* SignalSemaphores)
+void VulkanQueue::Submit(VulkanCommandBuffer* CommandBuffer, uint32_t NumSignalSemaphores, VulkanSemaphore* SignalSemaphores) const
 {
 	assert(CommandBuffer);
 	assert((NumSignalSemaphores == 0u && !SignalSemaphores) || (NumSignalSemaphores > 0u && SignalSemaphores));
@@ -221,7 +221,7 @@ void VulkanQueue::Submit(VulkanCommandBuffer* CommandBuffer, uint32_t NumSignalS
 	VERIFY_VK(GetNative().submit(1u, &SubmitInfo, CommandBuffer->GetFence()->GetNative()));
 }
 
-void VulkanQueue::WaitIdle()
+void VulkanQueue::WaitIdle() const
 {
 	/**************************************************************************************************************************
 		vkQueueWaitIdle is equivalent to having submitted a valid fence to every previously executed queue submission command that accepts a fence,
