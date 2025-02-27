@@ -9,7 +9,7 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 	, RHITexture(CreateInfo)
 {
 	assert(CreateInfo.Format != ERHIFormat::Unknown && CreateInfo.Dimension != ERHITextureDimension::Unknown);
-	assert(CreateInfo.ArrayLayers <= GetDevice().GetPhysicalDeviceLimits().maxImageArrayLayers);
+	assert(CreateInfo.NumArrayLayer <= GetDevice().GetPhysicalDeviceLimits().maxImageArrayLayers);
 	assert(
 		(CreateInfo.Dimension == ERHITextureDimension::T_1D && CreateInfo.Width <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension1D) ||
 		((CreateInfo.Dimension == ERHITextureDimension::T_2D || CreateInfo.Dimension == ERHITextureDimension::T_2D_Array) &&
@@ -84,8 +84,8 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 				CreateInfo.Width,
 				CreateInfo.Dimension == ERHITextureDimension::T_1D || CreateInfo.Dimension == ERHITextureDimension::T_1D_Array ? 1u : CreateInfo.Height,
 				CreateInfo.Dimension == ERHITextureDimension::T_3D ? CreateInfo.Depth : 1u))
-			.setMipLevels(CreateInfo.MipLevels)
-			.setArrayLayers(CreateInfo.ArrayLayers)
+			.setMipLevels(CreateInfo.NumMipLevel)
+			.setArrayLayers(CreateInfo.NumArrayLayer)
 			.setSamples(::GetSampleCount(CreateInfo.SampleCount))
 			.setTiling(vk::ImageTiling::eOptimal)
 			.setUsage(UsageFlags)
@@ -99,7 +99,7 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 		if (CreateInfo.InitialData.IsValid())
 		{
 			assert(CommandBuffer);
-			CommandBuffer->WriteTexture(this, CreateInfo.InitialData.Data.get(), CreateInfo.InitialData.Size);
+			//CommandBuffer->WriteTexture(this, CreateInfo.InitialData.Data.get(), CreateInfo.InitialData.Size);
 		}
 	}
 

@@ -28,6 +28,9 @@ public:
 
 	inline const vk::Device& GetNative() const { return m_LogicalDevice; }
 	inline const vk::PhysicalDevice& GetPhysicalDevice() const { return m_PhysicalDevice; }
+	
+	const class VulkanQueue& GetQueue(ERHIDeviceQueue Queue) const;
+
 	const vk::Instance& GetInstance() const;
 	const vk::PhysicalDeviceLimits& GetPhysicalDeviceLimits() const { return m_Limits; }
 private:

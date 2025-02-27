@@ -17,7 +17,7 @@ public:
 
 	~VulkanBuffer();
 
-	void* Map(size_t Size, size_t Offset) override final;
+	void* Map(ERHIMapMode Mode, size_t Size, size_t Offset) override final;
 
 	void Unmap() override final;
 
@@ -29,8 +29,6 @@ public:
 	/// which have been made available to the host memory domain using the VK_ACCESS_HOST_WRITE_BIT and VK_ACCESS_HOST_READ_BIT access types, 
 	/// are made visible to the host. If a range of non-coherent memory is written by the host and then invalidated without first being flushed, its contents are undefined.
 	void InvalidateMappedRange(size_t Size, size_t Offset) override final;
-
-	bool Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset) override final;
 private:
 	void AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags);
 

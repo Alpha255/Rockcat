@@ -4,19 +4,9 @@
 
 /// https://docs.microsoft.com/en-us/windows/win32/api/dxgiformat/ne-dxgiformat-dxgi_format
 
-struct FormatAttributes
-{
-	ERHIFormat RHIFormat = ERHIFormat::Unknown;
-	DXGI_FORMAT DXGIFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
-	VkFormat VulkanFormat = VkFormat::VK_FORMAT_UNDEFINED;
-	size_t BytesPerPixel = 0u;
-	size_t BitsPerPixel = 0u;
-	std::string_view Name;
-};
+#define RHI_FORMAT_ATTRIBUTE(RHIFormat, DXGIFormat, VulkanFormat, BytesPerPixel, BitsPerPixel) RHIFormatAttributes{ ERHIFormat::RHIFormat, DXGI_FORMAT::DXGIFormat, VkFormat::VulkanFormat, 0u, 0u, 0u, BytesPerPixel, BitsPerPixel, 0u, 0u, #RHIFormat }
 
-#define RHI_FORMAT_ATTRIBUTE(RHIFormat, DXGIFormat, VulkanFormat, BytesPerPixel, BitsPerPixel) FormatAttributes{ ERHIFormat::RHIFormat, DXGI_FORMAT::DXGIFormat, VkFormat::VulkanFormat, BytesPerPixel, BitsPerPixel, #RHIFormat }
-
-static const std::vector<FormatAttributes> s_FormatAttributes
+static std::vector<RHIFormatAttributes> s_FormatAttributes
 {
 	RHI_FORMAT_ATTRIBUTE(Unknown,                  DXGI_FORMAT_UNKNOWN,                    VK_FORMAT_UNDEFINED,                0u,  0u),
 	RHI_FORMAT_ATTRIBUTE(D16_UNorm,                DXGI_FORMAT_D16_UNORM,                  VK_FORMAT_D16_UNORM,                2u,  16u), 
@@ -210,7 +200,7 @@ namespace RHI
 		return Format == ERHIFormat::D24_UNorm_S8_UInt || Format == ERHIFormat::D32_Float_S8_UInt;
 	}
 
-	void CalculateFormatBytes(uint32_t Width, uint32_t Height, ERHIFormat Format, __out size_t& SliceBytes, __out size_t& RowBytes)
+	RHIFormatAttributes GetFormatAttributes(uint32_t Width, uint32_t Height, ERHIFormat Format)
 	{
 		bool IsCompressed =
 			Format == ERHIFormat::BC1_Typeless ||
@@ -248,52 +238,52 @@ namespace RHI
 			Format == ERHIFormat::Y210 ||
 			Format == ERHIFormat::Y216;
 
-		const auto& Attributes = s_FormatAttributes[static_cast<size_t>(Format)];
-		uint32_t Cols = Width;
-		uint32_t Rows = Height;
-		size_t Bytes = Attributes.BytesPerPixel;
+		RHIFormatAttributes& Attributes = s_FormatAttributes[static_cast<size_t>(Format)];
+		Attributes.NumCols = Width;
+		Attributes.NumRows = Height;
+		Attributes.BlockSize = IsCompressed ? 4u : 1u;
 
 		if (IsCompressed)
 		{
-			uint32_t BlockWide = 0u;
+			uint32_t BlockWidth = 0u;
 			if (Width > 0u)
 			{
-				BlockWide = std::max<uint32_t>(1u, (Width + 3u) / 4u);
+				BlockWidth = std::max<uint32_t>(1u, (Width + 3u) / 4u);
 			}
-			uint32_t BlockHigh = 0u;
+			uint32_t BlockHeight = 0u;
 			if (Height > 0u)
 			{
-				BlockHigh = std::max<uint32_t>(1u, (Height + 3u) / 4u);
+				BlockHeight = std::max<uint32_t>(1u, (Height + 3u) / 4u);
 			}
-			RowBytes = BlockWide * Bytes;
-			Rows = BlockHigh;
-			SliceBytes = RowBytes * BlockHigh;
-			Cols = BlockWide;
+			Attributes.RowPitch = BlockWidth * Attributes.BytesPerPixel;
+			Attributes.SlicePitch = Attributes.RowPitch * BlockHeight;
+			Attributes.NumRows = BlockWidth;
+			Attributes.NumCols = BlockHeight;
 		}
 		else if (IsPacked)
 		{
-			RowBytes = ((Width + 1u) >> 1u) * Bytes;
-			Rows = Height;
-			SliceBytes = RowBytes * Height;
+			Attributes.RowPitch = ((Width + 1u) >> 1u) * Attributes.BytesPerPixel;
+			Attributes.SlicePitch = Attributes.RowPitch * Height;
 		}
 		else if (Format == ERHIFormat::NV11)
 		{
-			RowBytes = ((Width + 3u) >> 2u) * 4u;
-			Rows = Height * 2u;
-			SliceBytes = RowBytes * Rows;
+			Attributes.RowPitch = ((Width + 3u) >> 2u) * 4u;
+			Attributes.NumRows = Height * 2u;
+			Attributes.SlicePitch = Attributes.RowPitch * Attributes.NumRows;
 		}
 		else if (IsPlanar)
 		{
-			RowBytes = ((Width + 1u) >> 1u) * Bytes;
-			SliceBytes = (RowBytes * Height) + ((RowBytes * Height + 1u) >> 1u);
-			Rows = Height + ((Height + 1u) >> 1u);
+			Attributes.RowPitch = ((Width + 1u) >> 1u) * Attributes.BytesPerPixel;
+			Attributes.SlicePitch = (Attributes.RowPitch * Height) + ((Attributes.RowPitch * Height + 1u) >> 1u);
+			Attributes.NumRows = Height + ((Height + 1u) >> 1u);
 		}
 		else
 		{
 			assert(Attributes.BitsPerPixel);
-			RowBytes = (Width * Attributes.BitsPerPixel + 7u) / 8u;
-			Rows = Height;
-			SliceBytes = RowBytes * Height;
+			Attributes.RowPitch = (Width * Attributes.BitsPerPixel + 7u) / 8u;
+			Attributes.SlicePitch = Attributes.RowPitch * Height;
 		}
+
+		return Attributes;
 	}
 }

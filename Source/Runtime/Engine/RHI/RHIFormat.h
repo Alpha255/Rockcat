@@ -125,6 +125,22 @@ enum class ERHIFormat : uint16_t
 	NV11
 };
 
+struct RHIFormatAttributes
+{
+	ERHIFormat RHIFormat = ERHIFormat::Unknown;
+	DXGI_FORMAT DXGIFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
+	VkFormat VulkanFormat = VkFormat::VK_FORMAT_UNDEFINED;
+
+	uint32_t NumCols = 0u;
+	uint32_t NumRows = 0u;
+	uint32_t BlockSize = 0u;
+	size_t BytesPerPixel = 0u;
+	size_t BitsPerPixel = 0u;
+	size_t RowPitch = 0u;
+	size_t SlicePitch = 0u;
+	std::string_view Name;
+};
+
 namespace RHI
 {
 	DXGI_FORMAT GetDXGIFormat(ERHIFormat Format);
@@ -138,5 +154,5 @@ namespace RHI
 	bool IsDepth(ERHIFormat Format);
 	bool IsDepthStencil(ERHIFormat Format);
 
-	void CalculateFormatBytes(uint32_t Width, uint32_t Height, ERHIFormat Format, __out size_t& SliceBytes, __out size_t& RowBytes);
+	RHIFormatAttributes GetFormatAttributes(uint32_t Width, uint32_t Height, ERHIFormat Format);
 }

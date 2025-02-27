@@ -26,6 +26,20 @@ struct RHIBufferCreateInfo
 	inline RHIBufferCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 };
 
+enum class ERHIMapMode
+{
+	ReadOnly,
+	WriteOnly
+};
+
+struct RHIMappedMemory
+{
+	void* Memory = nullptr;
+	size_t Size = 0u;
+	size_t Offset = 0u;
+	ERHIMapMode Mode = ERHIMapMode::ReadOnly;
+};
+
 class RHIBuffer : public RHIResource
 {
 public:
@@ -35,18 +49,17 @@ public:
 	{
 	}
 
-	virtual void* Map(size_t Size = RHI_WHOLE_SIZE, size_t Offset = 0u) = 0;
+	virtual void* Map(ERHIMapMode Mode, size_t Size = RHI_WHOLE_SIZE, size_t Offset = 0u) = 0;
 	virtual void Unmap() = 0;
 	virtual void FlushMappedRange(size_t Size = RHI_WHOLE_SIZE, size_t Offset = 0u) = 0;
 	virtual void InvalidateMappedRange(size_t Size = RHI_WHOLE_SIZE, size_t Offset = 0u) = 0;
-	virtual bool Update(const void* Data, size_t Size, size_t SrcOffset = 0u, size_t DstOffset = 0u) = 0;
 	virtual RHIBufferPtr Suballocate(const RHIBufferCreateInfo&) { return nullptr; }
 	
-	inline void* GetMappedMemory() const { return m_MappedMemory; }
+	inline void* GetMapped() const { return m_MappedMemory.Memory; }
 	inline size_t GetSize() const { return m_Size; }
 protected:
 	size_t m_Size = 0u;
-	void* m_MappedMemory = nullptr;
+	RHIMappedMemory m_MappedMemory;
 };
 
 struct RHIFrameBufferCreateInfo

@@ -62,8 +62,8 @@ struct RHITextureCreateInfo
 	uint32_t Width = 1u;
 	uint32_t Height = 1u;
 	uint32_t Depth = 1u;
-	uint16_t ArrayLayers = 1u;
-	uint16_t MipLevels = 1u;
+	uint16_t NumArrayLayer = 1u;
+	uint16_t NumMipLevel = 1u;
 
 	ERHITextureDimension Dimension = ERHITextureDimension::Unknown;
 	ERHISampleCount SampleCount = ERHISampleCount::Sample_1_Bit;
@@ -71,7 +71,7 @@ struct RHITextureCreateInfo
 	ERHIFormat Format = ERHIFormat::Unknown;
 	ERHIBufferUsageFlags BufferUsageFlags = ERHIBufferUsageFlags::None;
 
-	ERHIResourceState PermanentStates = ERHIResourceState::Unknown;
+	ERHIResourceState PermanentState = ERHIResourceState::Unknown;
 
 	DataBlock InitialData;
 
@@ -80,13 +80,13 @@ struct RHITextureCreateInfo
 	inline RHITextureCreateInfo& SetWidth(uint32_t Value) { Width = Value; return *this; }
 	inline RHITextureCreateInfo& SetHeight(uint32_t Value) { Height = Value; return *this; }
 	inline RHITextureCreateInfo& SetDepth(uint32_t Value) { Depth = Value; return *this; }
-	inline RHITextureCreateInfo& SetMipLevels(uint32_t Value) { MipLevels = static_cast<uint16_t>(Value); return *this; }
-	inline RHITextureCreateInfo& SetArrayLayers(uint32_t Value) { ArrayLayers = static_cast<uint16_t>(Value); return *this; }
+	inline RHITextureCreateInfo& SetNumMipLevel(uint32_t Value) { NumMipLevel = static_cast<uint16_t>(Value); return *this; }
+	inline RHITextureCreateInfo& SetNumArrayLayer(uint32_t Value) { NumArrayLayer = static_cast<uint16_t>(Value); return *this; }
 	inline RHITextureCreateInfo& SetFormat(ERHIFormat Value) { Format = Value; return *this; }
 	inline RHITextureCreateInfo& SetDimension(ERHITextureDimension Value) { Dimension = Value; return *this; }
 	inline RHITextureCreateInfo& SetSampleCount(ERHISampleCount Count) { SampleCount = Count; return *this; }
 	inline RHITextureCreateInfo& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; };
-	inline RHITextureCreateInfo& SetPermanentStates(ERHIResourceState States) { PermanentStates = States; return *this; }
+	inline RHITextureCreateInfo& SetPermanentState(ERHIResourceState States) { PermanentState = States; return *this; }
 	inline RHITextureCreateInfo& SetInitialData(const DataBlock& Data) { InitialData = Data; return *this; }
 	inline RHITextureCreateInfo& SetInitialData(size_t Size, const std::shared_ptr<std::byte>& Data) { InitialData.Size = Size; InitialData.Data = Data; return *this; }
 
@@ -101,10 +101,11 @@ public:
 		: m_Width(CreateInfo.Width)
 		, m_Height(CreateInfo.Height)
 		, m_Depth(CreateInfo.Depth)
-		, m_ArrayLayers(CreateInfo.ArrayLayers)
-		, m_MipLevels(CreateInfo.MipLevels)
+		, m_NumArrayLayer(CreateInfo.NumArrayLayer)
+		, m_NumMipLevel(CreateInfo.NumMipLevel)
 		, m_Dimension(CreateInfo.Dimension)
 		, m_Format(CreateInfo.Format)
+		, m_State(CreateInfo.PermanentState)
 		, RHIResource(CreateInfo.Name.c_str())
 	{
 	}
@@ -112,20 +113,22 @@ public:
 	inline uint32_t GetWidth() const { return m_Width; }
 	inline uint32_t GetHeight() const { return m_Height; }
 	inline uint32_t GetDepth() const { return m_Depth; }
-	inline uint32_t GetArrayLayers() const { return m_ArrayLayers; }
-	inline uint32_t GetMipLevels() const { return m_MipLevels; }
+	inline uint32_t GetNumArrayLayer() const { return m_NumArrayLayer; }
+	inline uint32_t GetNumMipLevel() const { return m_NumMipLevel; }
 	inline ERHITextureDimension GetDimension() const { return m_Dimension; }
 	inline ERHIFormat GetFormat() const { return m_Format; }
+	inline ERHIResourceState GetState() const { return m_State; }
 private:
-	uint32_t m_Width = 1u;
-	uint32_t m_Height = 1u;
-	uint32_t m_Depth = 1u;
+	uint32_t m_Width;
+	uint32_t m_Height;
+	uint32_t m_Depth;
 
-	uint32_t m_ArrayLayers = 1u;
-	uint32_t m_MipLevels = 1u;
+	uint32_t m_NumArrayLayer;
+	uint32_t m_NumMipLevel;
 
-	ERHITextureDimension m_Dimension = ERHITextureDimension::Unknown;
-	ERHIFormat m_Format = ERHIFormat::Unknown;
+	ERHITextureDimension m_Dimension;
+	ERHIFormat m_Format;
+	ERHIResourceState m_State;
 };
 
 enum class ERHIFilter : uint8_t

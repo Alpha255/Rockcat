@@ -329,6 +329,12 @@ const vk::Instance& VulkanDevice::GetInstance() const
 	return m_Instance->GetNative();
 }
 
+const VulkanQueue& VulkanDevice::GetQueue(ERHIDeviceQueue Queue) const
+{
+	assert(Queue < ERHIDeviceQueue::Num);
+	return *m_Queues[Queue];
+}
+
 VulkanDevice::~VulkanDevice()
 {
 	m_LogicalDevice.destroy();

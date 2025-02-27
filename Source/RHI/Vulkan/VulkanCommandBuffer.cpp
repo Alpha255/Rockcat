@@ -5,6 +5,7 @@
 #include "RHI/Vulkan/VulkanBuffer.h"
 #include "RHI/Vulkan/VulkanPipeline.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
+#include "RHI/Vulkan/VulkanBarrier.h"
 #include "Engine/RHI/RHICommandListContext.h"
 #include "Engine/Services/SpdLogService.h"
 
@@ -782,102 +783,141 @@ void VulkanCommandBuffer::ClearDepthStencilTexture(const RHITexture* Texture, bo
 //	}
 }
 
-void VulkanCommandBuffer::WriteBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t Offset)
+void VulkanCommandBuffer::WriteBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset)
 {
-	assert(Buffer && Data && Size);
+	assert(Buffer && Data && Size && SrcOffset < Size && Size < Buffer->GetSize());
 
 	/// #TODO: Use staging buffer manager ???
-
-	assert(!VulkanRHI::GetConfigs().UseTransferQueue);
-
-	RHIBufferCreateInfo StagingBufferCreateInfo;
-	StagingBufferCreateInfo.SetSize(Size)
-		.SetAccessFlags(ERHIDeviceAccessFlags::GpuReadCpuWrite);
-	auto StagingBuffer = std::make_shared<VulkanBuffer>(GetDevice(),StagingBufferCreateInfo, nullptr);
-	StagingBuffer->Map(Size, Offset);
-	StagingBuffer->Update(Data, Size, Offset, 0u);
-	StagingBuffer->Unmap();
-
-	auto UploadCommandBuffer = Cast<VulkanCommandBuffer>(GetContext()->GetUploadCommandBuffer());
-	assert(UploadCommandBuffer);
-
-	auto DstBuffer = Cast<VulkanBuffer>(Buffer);
-	assert(DstBuffer);
-
-	vk::BufferCopy CopyRegion(Offset, 0u, Size);
-	UploadCommandBuffer->GetNative().copyBuffer(StagingBuffer->GetNative(), DstBuffer->GetNative(), 1u, &CopyRegion);
-
-	/// #TODO: Transfer buffer barrier.
-
-	GetContext()->SubmitUploadCommandBuffer();
-}
-
-void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, size_t Offset)
-{
-	assert(Texture && Data && Size);
-	
-	assert(!VulkanRHI::GetConfigs().UseTransferQueue);
 
 	RHIBufferCreateInfo StagingBufferCreateInfo;
 	StagingBufferCreateInfo.SetSize(Size)
 		.SetAccessFlags(ERHIDeviceAccessFlags::GpuReadCpuWrite);
 	auto StagingBuffer = std::make_shared<VulkanBuffer>(GetDevice(), StagingBufferCreateInfo, nullptr);
-	StagingBuffer->Map(Size, Offset);
-	size_t StartOffset = Offset;
+	auto Mapped = StagingBuffer->Map(ERHIMapMode::WriteOnly, Size, 0u);
+	VERIFY(memcpy_s(Mapped, Size, reinterpret_cast<const uint8_t*>(Data) + SrcOffset, Size) == 0);
+	StagingBuffer->Unmap();
 
-	auto UploadCommandBuffer = Cast<VulkanCommandBuffer>(GetContext()->GetUploadCommandBuffer());
-	assert(UploadCommandBuffer);
+	auto DstBuffer = Cast<VulkanBuffer>(Buffer);
+	assert(DstBuffer);
+
+	vk::BufferCopy CopyRegion(0u, DstOffset, Size);
+	GetNative().copyBuffer(StagingBuffer->GetNative(), DstBuffer->GetNative(), 1u, &CopyRegion);
+}
+
+void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, uint32_t ArrayLayer, uint32_t MipLevel, const void* Data, size_t Size, size_t SrcOffset)
+{
+	assert(Texture && Data && Size);
+
+	RHIBufferCreateInfo StagingBufferCreateInfo;
+	StagingBufferCreateInfo.SetSize(Size)
+		.SetAccessFlags(ERHIDeviceAccessFlags::GpuReadCpuWrite);
+	auto StagingBuffer = std::make_shared<VulkanBuffer>(GetDevice(), StagingBufferCreateInfo, nullptr);
+	auto Mapped = reinterpret_cast<uint8_t*>(StagingBuffer->Map(ERHIMapMode::WriteOnly, Size, 0u));
+
+	auto DstImage = Cast<VulkanTexture>(Texture);
+	assert(DstImage);
+
+	uint32_t MipWidth = std::max(Texture->GetWidth() >> MipLevel, 1u);
+	uint32_t MipHeight = std::max(Texture->GetHeight() >> MipLevel, 1u);
+	uint32_t MipDepth = std::max(Texture->GetDepth() >> MipLevel, 1u);
+	auto FormatAttributes = RHI::GetFormatAttributes(MipWidth, MipHeight, Texture->GetFormat());
+
+	for (uint32_t Depth = 0u; Depth < MipDepth; ++Depth)
+	{
+		const uint8_t* Source = reinterpret_cast<const uint8_t*>(Data) + SrcOffset + FormatAttributes.SlicePitch * Depth;
+
+		for (uint32_t Row = 0u; Row < FormatAttributes.NumRows; ++Row)
+		{
+			VERIFY(memcpy_s(Mapped, FormatAttributes.RowPitch, Source, FormatAttributes.RowPitch) == 0);
+			
+			Mapped += FormatAttributes.RowPitch;
+			Source += FormatAttributes.RowPitch;
+		}
+	}
+
+	StagingBuffer->Unmap();
+
+	vk::ImageSubresourceRange SubresourceRange(vk::ImageAspectFlagBits::eColor, MipLevel, 1u, ArrayLayer, 1u);
+	ERHIDeviceQueue DstQueue = VulkanRHI::GetConfigs().UseTransferQueue ? ERHIDeviceQueue::Transfer : ERHIDeviceQueue::Graphics;
+
+	VulkanPipelineBarrier Barrier(GetDevice());
+	Barrier.AddImageLayoutTransition(ERHIDeviceQueue::Graphics, DstQueue, DstImage->GetNative(), vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, SubresourceRange)
+		.Submit(this);
+
+	vk::BufferImageCopy CopyRegion(
+		0u,
+		FormatAttributes.NumCols * FormatAttributes.BlockSize,
+		FormatAttributes.NumRows * FormatAttributes.BlockSize,
+		vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, MipLevel, ArrayLayer, 1u),
+		vk::Offset3D(0, 0, 0),
+		vk::Extent3D(MipWidth, MipHeight, MipDepth));
+	GetNative().copyBufferToImage(StagingBuffer->GetNative(), DstImage->GetNative(), vk::ImageLayout::eTransferDstOptimal, 1u, &CopyRegion);
+
+	Barrier.AddImageLayoutTransition(ERHIDeviceQueue::Graphics, DstQueue, DstImage->GetNative(), vk::ImageLayout::eTransferDstOptimal, ::GetImageLayout(Texture->GetState()), SubresourceRange)
+		.Submit(this);
+}
+
+void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, size_t SrcOffset)
+{
+	assert(Texture && Data && Size);
+
+	RHIBufferCreateInfo StagingBufferCreateInfo;
+	StagingBufferCreateInfo.SetSize(Size)
+		.SetAccessFlags(ERHIDeviceAccessFlags::GpuReadCpuWrite);
+	auto StagingBuffer = std::make_shared<VulkanBuffer>(GetDevice(), StagingBufferCreateInfo, nullptr);
+	auto Mapped = reinterpret_cast<uint8_t*>(StagingBuffer->Map(ERHIMapMode::WriteOnly, Size, 0u));
 
 	auto DstImage = Cast<VulkanTexture>(Texture);
 	assert(DstImage);
 
 	std::vector<vk::BufferImageCopy> CopyRegions;
-	CopyRegions.reserve(Texture->GetArrayLayers() * Texture->GetMipLevels() * Texture->GetDepth());
-	for (uint32_t Layer = 0u; Layer < Texture->GetArrayLayers(); ++Layer)
+	CopyRegions.reserve(Texture->GetNumArrayLayer() * Texture->GetNumMipLevel());
+
+	for (uint32_t ArrayLayer = 0u; ArrayLayer < Texture->GetNumArrayLayer(); ++ArrayLayer)
 	{
-		for (uint32_t MipLevel = 0u; MipLevel < Texture->GetMipLevels(); ++MipLevel)
+		for (uint32_t MipLevel = 0u; MipLevel < Texture->GetNumMipLevel(); ++MipLevel)
 		{
-			for (uint32_t Depth = 0u; Depth < Texture->GetDepth(); ++Depth)
+			uint32_t MipWidth = std::max(Texture->GetWidth() >> MipLevel, 1u);
+			uint32_t MipHeight = std::max(Texture->GetHeight() >> MipLevel, 1u);
+			uint32_t MipDepth = std::max(Texture->GetDepth() >> MipLevel, 1u);
+			auto FormatAttributes = RHI::GetFormatAttributes(MipWidth, MipHeight, Texture->GetFormat());
+
+			for (uint32_t Depth = 0u; Depth < MipDepth; ++Depth)
 			{
-				uint32_t MipWidth = std::max(Texture->GetWidth() >> MipLevel, 1u);
-				uint32_t MipHeight = std::max(Texture->GetHeight() >> MipLevel, 1u);
+				const uint8_t* Source = reinterpret_cast<const uint8_t*>(Data) + SrcOffset + FormatAttributes.SlicePitch * Depth;
 
-				size_t SliceBytes = 0u;
-				size_t RowBytes = 0u;
-				RHI::CalculateFormatBytes(
-					MipWidth,
-					MipHeight,
-					Texture->GetFormat(),
-					SliceBytes,
-					RowBytes);
-				uint32_t RowPitch = static_cast<uint32_t>(SliceBytes * Depth);
+				for (uint32_t Row = 0u; Row < FormatAttributes.NumRows; ++Row)
+				{
+					VERIFY(memcpy_s(Mapped, FormatAttributes.RowPitch, Source, FormatAttributes.RowPitch) == 0);
 
-				CopyRegions.emplace_back(
-					vk::BufferImageCopy(
-						StartOffset,
-						RowPitch,
-						MipHeight,
-						vk::ImageSubresourceLayers(
-							vk::ImageAspectFlagBits::eColor,
-							MipLevel,
-							Layer,
-							1u),
-						vk::Offset3D(0, 0, 0),
-						vk::Extent3D(MipWidth, MipHeight, 1u)
-					));
-
-				StagingBuffer->Update(reinterpret_cast<uint8_t*>(StagingBuffer->GetMappedMemory()), RowPitch, StartOffset, StartOffset);
-				StartOffset += RowPitch;
+					Mapped += FormatAttributes.RowPitch;
+					Source += FormatAttributes.RowPitch;
+				}
 			}
+
+			CopyRegions.emplace_back(vk::BufferImageCopy(
+				0u,
+				FormatAttributes.NumCols * FormatAttributes.BlockSize,
+				FormatAttributes.NumRows * FormatAttributes.BlockSize,
+				vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, MipLevel, ArrayLayer, 1u),
+				vk::Offset3D(0, 0, 0),
+				vk::Extent3D(MipWidth, MipHeight, MipDepth)));
 		}
 	}
+
 	StagingBuffer->Unmap();
 
-	UploadCommandBuffer->GetNative().copyBufferToImage(StagingBuffer->GetNative(), DstImage->GetNative(), vk::ImageLayout::eTransferDstOptimal, CopyRegions);
+	vk::ImageSubresourceRange SubresourceRange(vk::ImageAspectFlagBits::eColor, 0u, Texture->GetNumMipLevel(), 0u, Texture->GetNumArrayLayer());
+	ERHIDeviceQueue DstQueue = VulkanRHI::GetConfigs().UseTransferQueue ? ERHIDeviceQueue::Transfer : ERHIDeviceQueue::Graphics;
 
-	/// #TODO: Transfer image barrier.
+	VulkanPipelineBarrier Barrier(GetDevice());
+	Barrier.AddImageLayoutTransition(ERHIDeviceQueue::Graphics, DstQueue, DstImage->GetNative(), vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, SubresourceRange)
+		.Submit(this);
 
-	GetContext()->SubmitUploadCommandBuffer();
+	GetNative().copyBufferToImage(StagingBuffer->GetNative(), DstImage->GetNative(), vk::ImageLayout::eTransferDstOptimal, CopyRegions);
+
+	Barrier.AddImageLayoutTransition(ERHIDeviceQueue::Graphics, DstQueue, DstImage->GetNative(), vk::ImageLayout::eTransferDstOptimal, ::GetImageLayout(Texture->GetState()), SubresourceRange)
+		.Submit(this);
 }
 
 //void VulkanCommandBuffer::SetPolygonMode(EPolygonMode Mode)

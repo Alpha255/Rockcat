@@ -101,20 +101,32 @@ void VulkanBuffer::AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags)
 	GetNativeDevice().bindBufferMemory(m_Native, m_Memory.Native, 0u);
 }
 
-void* VulkanBuffer::Map(size_t Size, size_t Offset)
+void* VulkanBuffer::Map(ERHIMapMode Mode, size_t Size, size_t Offset)
 {
-	assert(m_Memory.HostVisible && m_MappedMemory == nullptr && (Size == VK_WHOLE_SIZE || Offset + Size <= m_Size));
+	assert(m_Memory.HostVisible && (Size == VK_WHOLE_SIZE || Offset + Size <= m_Size));
 
-	VERIFY_VK(GetNativeDevice().mapMemory(m_Memory.Native, Offset, Size, vk::MemoryMapFlags(0u), &m_MappedMemory));
-	return m_MappedMemory;
+	if (m_MappedMemory.Memory && (m_MappedMemory.Mode != Mode || m_MappedMemory.Size != Size || m_MappedMemory.Offset != Offset))
+	{
+		Unmap();
+	}
+
+	if (!m_MappedMemory.Memory)
+	{
+		VERIFY_VK(GetNativeDevice().mapMemory(m_Memory.Native, Offset, Size, vk::MemoryMapFlags(0u), &m_MappedMemory.Memory));
+	}
+
+	return m_MappedMemory.Memory;
 }
 
 void VulkanBuffer::Unmap()
 {
-	assert(m_Memory.HostVisible && m_MappedMemory);
+	assert(m_Memory.HostVisible);
 
-	GetNativeDevice().unmapMemory(m_Memory.Native);
-	m_MappedMemory = nullptr;
+	if (m_MappedMemory.Memory)
+	{
+		GetNativeDevice().unmapMemory(m_Memory.Native);
+		m_MappedMemory.Memory = nullptr;
+	}
 }
 
 void VulkanBuffer::FlushMappedRange(size_t Size, size_t Offset)
@@ -126,7 +138,7 @@ void VulkanBuffer::FlushMappedRange(size_t Size, size_t Offset)
 
 	/// #TODO Align to nonCoherentAtomSize
 	
-	assert(!m_Memory.HostCoherent && m_MappedMemory);
+	assert(!m_Memory.HostCoherent && m_MappedMemory.Memory);
 	assert(Offset + Size <= m_Size || (Size == VK_WHOLE_SIZE && Offset < m_Size));
 
 	vk::MappedMemoryRange MappedRange;
@@ -141,7 +153,7 @@ void VulkanBuffer::InvalidateMappedRange(size_t Size, size_t Offset)
 {
 	/// #TODO Align to nonCoherentAtomSize
 
-	assert(!m_Memory.HostCoherent && m_MappedMemory);
+	assert(!m_Memory.HostCoherent && m_MappedMemory.Memory);
 	assert(Offset + Size <= m_Size || (Size == VK_WHOLE_SIZE && Offset < m_Size));
 
 	vk::MappedMemoryRange MappedRange;
@@ -152,32 +164,9 @@ void VulkanBuffer::InvalidateMappedRange(size_t Size, size_t Offset)
 	VERIFY_VK(GetNativeDevice().invalidateMappedMemoryRanges(1u, &MappedRange));
 }
 
-bool VulkanBuffer::Update(const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset)
-{
-	assert(Data && Size && Size <= m_Size);
-
-	if (m_MappedMemory)
-	{
-		VERIFY(memcpy_s(
-			reinterpret_cast<uint8_t*>(m_MappedMemory) + DstOffset, 
-			Size, 
-			reinterpret_cast<const uint8_t*>(Data) + SrcOffset, 
-			Size) == 0);
-
-		if (!m_Memory.HostCoherent)
-		{
-			FlushMappedRange(Size, DstOffset);
-		}
-
-		return true;
-	}
-
-	return false;
-}
-
 VulkanBuffer::~VulkanBuffer()
 {
-	if (m_MappedMemory)
+	if (m_MappedMemory.Memory)
 	{
 		Unmap();
 	}

@@ -448,98 +448,40 @@ vk::IndexType GetIndexType(ERHIIndexFormat Format)
 	}
 }
 
-#if 0
-VkImageLayout imageLayout(Texture::EImageLayout layout)
+vk::ImageLayout GetImageLayout(ERHIResourceState State)
 {
-	switch (layout)
+	switch (State)
 	{
-	case Texture::EImageLayout::Undefined:
-		return VK_IMAGE_LAYOUT_UNDEFINED;
-	case Texture::EImageLayout::TransferDst:
-		return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-	case Texture::EImageLayout::ColorAttachment:
-		return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	case Texture::EImageLayout::DepthStencilAttachment:
-		return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	case Texture::EImageLayout::TransferSrc:
-		return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-	case Texture::EImageLayout::Present:
-		return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-	case Texture::EImageLayout::FragmentShaderRead:
-	case Texture::EImageLayout::PixelDepthStencilRead:
-	case Texture::EImageLayout::ComputeShaderReadWrite:
-	case Texture::EImageLayout::FragmentShaderReadWrite:
-		assert(0);
-		return VK_IMAGE_LAYOUT_UNDEFINED;
+	case ERHIResourceState::Unknown:
+	case ERHIResourceState::Common:
+	case ERHIResourceState::VertexBuffer:
+	case ERHIResourceState::UniformBuffer:
+	case ERHIResourceState::IndexBuffer:
+	case ERHIResourceState::IndirectArgument:
+	case ERHIResourceState::StreamOut:
+	case ERHIResourceState::AccelerationStructure:
+		return vk::ImageLayout::eUndefined;
+	case ERHIResourceState::ShaderResource:
+		return vk::ImageLayout::eShaderReadOnlyOptimal;
+	case ERHIResourceState::UnorderedAccess:
+		return vk::ImageLayout::eGeneral;
+	case ERHIResourceState::RenderTarget:
+		return vk::ImageLayout::eColorAttachmentOptimal;
+	case ERHIResourceState::DepthWrite:
+		return vk::ImageLayout::eDepthStencilAttachmentOptimal;
+	case ERHIResourceState::DepthRead:
+		return vk::ImageLayout::eDepthStencilReadOnlyOptimal;
+	case ERHIResourceState::TransferDst:
+	case ERHIResourceState::ResolveDst:
+		return vk::ImageLayout::eTransferDstOptimal;
+	case ERHIResourceState::TransferSrc:
+	case ERHIResourceState::ResolveSrc:
+		return vk::ImageLayout::eTransferSrcOptimal;
+	case ERHIResourceState::Present:
+		return vk::ImageLayout::ePresentSrcKHR;
+	case ERHIResourceState::ShadingRate:
+		return vk::ImageLayout::eFragmentShadingRateAttachmentOptimalKHR;
+	default:
+		return vk::ImageLayout::eUndefined;
 	}
-
-	assert(0);
-	return VK_IMAGE_LAYOUT_MAX_ENUM;
 }
-
-VkPipelineStageFlags pipelineStageFlags(GfxFlags flags)
-{
-	static_assert(RenderPassDesc::EPipelineStageFlags::TopOfPipe == VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::DrawIndirect == VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::VertexInput == VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::VertexShader == VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::HullShader == VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::DomainShader == VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::GeometryShader == VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::FragmentShader == VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::BeforeEarlyZ == VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::AfterEarlyZ == VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::ColorAttachmentOutput == VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::ComputeShader == VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::Transfer == VK_PIPELINE_STAGE_TRANSFER_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::BottomOfPipe == VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::Host == VK_PIPELINE_STAGE_HOST_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::AllGraphics == VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::AllCommands == VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::TransformFeedback == VK_PIPELINE_STAGE_TRANSFORM_FEEDBACK_BIT_EXT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::ConditionalRendering == VK_PIPELINE_STAGE_CONDITIONAL_RENDERING_BIT_EXT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::AcceleartionStructureBuild == VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::RayTracingShader == VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::ShadingRateImage == VK_PIPELINE_STAGE_SHADING_RATE_IMAGE_BIT_NV, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::TaskShader == VK_PIPELINE_STAGE_TASK_SHADER_BIT_NV, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::MeshShader == VK_PIPELINE_STAGE_MESH_SHADER_BIT_NV, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::FragmentDensityProcess == VK_PIPELINE_STAGE_FRAGMENT_DENSITY_PROCESS_BIT_EXT, "Missmatched!!");
-	static_assert(RenderPassDesc::EPipelineStageFlags::CommandPreProcess == VK_PIPELINE_STAGE_COMMAND_PREPROCESS_BIT_NV, "Missmatched!!");
-
-	return static_cast<VkPipelineStageFlags>(flags);
-}
-
-VkAccessFlags accessFlags(GfxFlags flags)
-{
-	static_assert(RenderPassDesc::EAccessFlags::IndirectCommandRead == VK_ACCESS_INDIRECT_COMMAND_READ_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::IndexRead == VK_ACCESS_INDEX_READ_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::VertexRead == VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::UniformRead == VK_ACCESS_UNIFORM_READ_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::InputAttachmentRead == VK_ACCESS_INPUT_ATTACHMENT_READ_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::ShaderRead == VK_ACCESS_SHADER_READ_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::ShaderWrite == VK_ACCESS_SHADER_WRITE_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::ColorAttachmentRead == VK_ACCESS_COLOR_ATTACHMENT_READ_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::ColorAttachmentWrite == VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::DepthStencilAttachmentRead == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::DepthStencilAttachmentWrite == VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::TransferRead == VK_ACCESS_TRANSFER_READ_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::TransferWrite == VK_ACCESS_TRANSFER_WRITE_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::HostRead == VK_ACCESS_HOST_READ_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::HostWrite == VK_ACCESS_HOST_WRITE_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::MemoryRead == VK_ACCESS_MEMORY_READ_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::MemoryWrite == VK_ACCESS_MEMORY_WRITE_BIT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::TransformFeedbackWrite == VK_ACCESS_TRANSFORM_FEEDBACK_WRITE_BIT_EXT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::TransformFeedbackCounterRead == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_READ_BIT_EXT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::TransformFeedbackCounterWrite == VK_ACCESS_TRANSFORM_FEEDBACK_COUNTER_WRITE_BIT_EXT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::ConditionalRenderingRead == VK_ACCESS_CONDITIONAL_RENDERING_READ_BIT_EXT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::ColorAttachmentReadNonCoherent == VK_ACCESS_COLOR_ATTACHMENT_READ_NONCOHERENT_BIT_EXT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::AcclerationStructureRead == VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::AcclerationStructureWrite == VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::ShadingRateImageRead == VK_ACCESS_SHADING_RATE_IMAGE_READ_BIT_NV, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::FragmentDensityMapRead == VK_ACCESS_FRAGMENT_DENSITY_MAP_READ_BIT_EXT, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::CommandPreProcessRead == VK_ACCESS_COMMAND_PREPROCESS_READ_BIT_NV, "Missmatched");
-	static_assert(RenderPassDesc::EAccessFlags::CommandPreProcessWrite == VK_ACCESS_COMMAND_PREPROCESS_WRITE_BIT_NV, "Missmatched");
-
-	return static_cast<VkAccessFlags>(flags);
-}
-#endif

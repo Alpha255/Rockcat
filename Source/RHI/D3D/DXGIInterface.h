@@ -178,7 +178,7 @@ public:
 	DxgiAdapter(const DxgiFactory& Factory);
 };
 
-inline uint32_t CalcSubresource(uint32_t MipSlice, uint32_t ArraySlice, uint32_t PlaneSlice, uint32_t MipLevels, uint32_t ArraySize)
+inline uint32_t CalcSubresource(uint32_t MipLevel, uint32_t ArrayLayer, uint32_t NumMips, uint32_t NumArray, uint32_t PlaneSlice)
 {
-	return MipSlice + (ArraySlice * MipLevels) + (PlaneSlice * MipLevels * ArraySize);
+	return MipLevel + (ArrayLayer * NumMips) + (PlaneSlice * NumMips * NumArray);
 }

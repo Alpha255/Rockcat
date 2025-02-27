@@ -52,8 +52,9 @@ public:
 
 	void ClearDepthStencilTexture(const RHITexture* Texture, bool ClearDepth, bool ClearStencil, float Depth, uint8_t Stencil) override final;
 
-	void WriteBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t Offset) override final;
-	void WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, size_t Offset) override final;
+	void WriteBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset) override final;
+	void WriteTexture(const RHITexture* Texture, uint32_t ArrayLayer, uint32_t MipLevel, const void* Data, size_t Size, size_t SrcOffset) override final;
+	void WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, size_t SrcOffset) override final;
 
 	void SetViewport(const RHIViewport& Viewport) override final;
 	void SetViewports(const RHIViewport* Viewports, uint32_t NumViewports) override final;
