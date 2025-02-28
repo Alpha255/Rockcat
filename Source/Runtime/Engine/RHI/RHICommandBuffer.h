@@ -13,7 +13,7 @@ enum class ERHICommandBufferLevel : uint8_t
 class RHICommandBuffer
 {
 public:
-	enum class EState
+	enum class EStatus
 	{
 		Invalid,
 		Initial,
@@ -26,7 +26,6 @@ public:
 
 	RHICommandBuffer(ERHICommandBufferLevel Level)
 		: m_Level(Level)
-		, m_UseForUploadOnly(false)
 	{
 	}
 
@@ -72,26 +71,23 @@ public:
 	virtual void SetScissorRect(const RHIScissorRect& ScissorRect) = 0;
 	virtual void SetScissorRects(const RHIScissorRect* ScissorRects, uint32_t NumScissorRects) = 0;
 
-	inline bool IsReady() const { return m_State == EState::Initial; }
-	inline bool IsRecording() const { return m_State == EState::Recording; }
-	inline bool IsInsideRenderPass() const { return m_State == EState::InsideRenderPass; }
-	inline bool IsEnded() const { return m_State == EState::Executable; }
-	inline bool IsSubmitted() const { return m_State == EState::Pending; }
-	inline bool IsNeedReset() const { return m_State == EState::NeedReset; }
+	inline bool IsReady() const { return m_Status == EStatus::Initial; }
+	inline bool IsRecording() const { return m_Status == EStatus::Recording; }
+	inline bool IsInsideRenderPass() const { return m_Status == EStatus::InsideRenderPass; }
+	inline bool IsEnded() const { return m_Status == EStatus::Executable; }
+	inline bool IsSubmitted() const { return m_Status == EStatus::Pending; }
+	inline bool IsNeedReset() const { return m_Status == EStatus::NeedReset; }
 
-	inline EState GetState() const { return m_State; }
-
-	inline class RHICommandListContext* GetContext() { return m_Context; }
+	inline EStatus GetStatus() const { return m_Status; }
 protected:
-	inline void SetState(EState State) { m_State = State; }
-	EState m_State = EState::Initial;
+	friend class RHICommandListContext;
 
-	void SetContext(class RHICommandListContext* Context) { m_Context = Context; }
+	inline void SetStatus(EStatus State) { m_Status = State; }
+	virtual void RefreshStatus() = 0;
+
+	EStatus m_Status = EStatus::Initial;
 private:
 	ERHICommandBufferLevel m_Level;
-	bool m_UseForUploadOnly;
-
-	class RHICommandListContext* m_Context = nullptr;
 };
 
 class RHICommandBufferPool

@@ -201,9 +201,10 @@ void VulkanPipelineState::CommitShaderResources(RHICommandBuffer* CommandBuffer)
 
 	if (!m_Set)
 	{
-		auto Context = Cast<VulkanCommandListContext>(CommandBuffer->GetContext());
-		m_Set = Context->AcquireDescriptorPool().Allocate(m_DescriptorSetLayout->GetNative());
-		InitWrites();
+		assert(false);
+		//auto Context = Cast<VulkanCommandListContext>(CommandBuffer->GetContext());
+		//m_Set = Context->AcquireDescriptorPool().Allocate(m_DescriptorSetLayout->GetNative());
+		//InitWrites();
 	}
 
 	for (auto& ShaderStageResources : GetShaderResourceLayout())

@@ -218,7 +218,7 @@ void VulkanQueue::Submit(VulkanCommandBuffer* CommandBuffer, uint32_t NumSignalS
 		.setWaitSemaphores(WaitSemaphores)
 		.setWaitDstStageMask(CommandBuffer->GetWaitDstStageFlags());
 
-	VERIFY_VK(GetNative().submit(1u, &SubmitInfo, CommandBuffer->GetFence()->GetNative()));
+	VERIFY_VK(GetNative().submit(1u, &SubmitInfo, CommandBuffer->GetFence().GetNative()));
 }
 
 void VulkanQueue::WaitIdle() const

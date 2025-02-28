@@ -55,7 +55,7 @@ void VulkanCommandPool::Reset(bool ReleaseResources)
 
 void VulkanCommandPool::Free(std::shared_ptr<VulkanCommandBuffer>& CommandBuffer)
 {
-	assert(CommandBuffer->GetState() != VulkanCommandBuffer::EState::Executable);
+	assert(!CommandBuffer->IsEnded());
 	
 	std::vector<vk::CommandBuffer> CommandBuffers{ CommandBuffer->GetNative() };
 	GetNativeDevice().freeCommandBuffers(GetNative(), CommandBuffers);

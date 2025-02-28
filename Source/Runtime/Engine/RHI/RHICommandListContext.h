@@ -7,47 +7,57 @@ class RHICommandListContext
 public:
 	RHICommandBuffer* GetCommandBuffer(ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary)
 	{
-		auto& CmdBufferGroup = Level == ERHICommandBufferLevel::Primary ? m_PrimaryCmdBufferGroup : m_SecondaryCmdBufferGroup;
-		if (auto ActiveCmdBuffer = CmdBufferGroup.ActiveCmdBuffer)
+		auto& CommandBufferList = Level == ERHICommandBufferLevel::Primary ? m_PrimaryCommandBufferList : m_SecondaryCommandBufferList;
+		std::lock_guard Locker(CommandBufferList.Lock);
+
+		if (CommandBufferList.Active && CommandBufferList.Active->IsRecording())
 		{
-			if (ActiveCmdBuffer->IsRecording())
+			return CommandBufferList.Active;
+		}
+
+		for (auto& CommandBuffer : CommandBufferList)
+		{
+			CommandBuffer->RefreshStatus();
+			RHICommandBuffer*& ActiveCommandBuffer = CommandBufferList.Active;
+
+			if (CommandBuffer->IsRecording())
 			{
-				return ActiveCmdBuffer;
+				ActiveCommandBuffer = CommandBuffer.get();
 			}
-			else if (ActiveCmdBuffer->IsReady())
+			else if (CommandBuffer->IsReady())
 			{
-				ActiveCmdBuffer->Begin();
-				return ActiveCmdBuffer;
+				CommandBuffer->Begin();
+				ActiveCommandBuffer = CommandBuffer.get();
 			}
-			else if (ActiveCmdBuffer->IsNeedReset())
+			else if (CommandBuffer->IsNeedReset())
 			{
-				ActiveCmdBuffer->Reset();
-				ActiveCmdBuffer->Begin();
-				return ActiveCmdBuffer;
+				CommandBuffer->Reset();
+				CommandBuffer->Begin();
+				ActiveCommandBuffer = CommandBuffer.get();
+			}
+
+			if (ActiveCommandBuffer)
+			{
+				return ActiveCommandBuffer;
 			}
 		}
 
-		CmdBufferGroup.ActiveCmdBuffer = CmdBufferGroup.OnFlyCmdBuffers.emplace_back(AllocateCommandBuffer(Level)).get();
-		assert(CmdBufferGroup.ActiveCmdBuffer);
-
-		CmdBufferGroup.ActiveCmdBuffer->Begin();
-		return CmdBufferGroup.ActiveCmdBuffer;
+		CommandBufferList.Active = CommandBufferList.emplace_back(AllocateCommandBuffer(Level)).get();
+		assert(CommandBufferList.Active);
+		CommandBufferList.Active->Begin();
+		return CommandBufferList.Active;
 	}
 
-	RHICommandBuffer* GetUploadCommandBuffer() { return nullptr; }
-
-	virtual void Submit() = 0;
-	virtual void SubmitUploadCommandBuffer() = 0;
+	virtual void SubmitActiveCommandBuffer() = 0;
 protected:
 	virtual RHICommandBufferPtr AllocateCommandBuffer(ERHICommandBufferLevel Level) = 0;
 
-	struct CommandBufferGroup
+	struct RHICommandBufferList : public std::vector<RHICommandBufferPtr>
 	{
-		std::vector<RHICommandBufferPtr> OnFlyCmdBuffers;
-		std::queue<RHICommandBufferPtr> FreedCmdBuffers;
-		RHICommandBuffer* ActiveCmdBuffer = nullptr;
+		std::mutex Lock;
+		RHICommandBuffer* Active = nullptr;
 	};
 
-	CommandBufferGroup m_PrimaryCmdBufferGroup;
-	CommandBufferGroup m_SecondaryCmdBufferGroup;
+	RHICommandBufferList m_PrimaryCommandBufferList;
+	RHICommandBufferList m_SecondaryCommandBufferList;
 };

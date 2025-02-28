@@ -13,7 +13,7 @@ VulkanCommandBuffer::VulkanCommandBuffer(const VulkanDevice& Device, VulkanComma
 	: VkDeviceResource(Device)
 	, RHICommandBuffer(Level)
 	, m_Pool(Pool)
-	, m_Fence(Device, true)
+	, m_Fence(Device, false)
 {
 	/**************************************************************************************************************************************************
 	Each command buffer is always in one of the following states:
@@ -72,7 +72,7 @@ void VulkanCommandBuffer::Begin()
 	
 	VERIFY_VK(GetNative().begin(&BeginInfo));
 
-	SetState(EState::Recording);
+	SetStatus(EStatus::Recording);
 }
 
 void VulkanCommandBuffer::End()
@@ -86,12 +86,12 @@ void VulkanCommandBuffer::End()
 
 	GetNative().end();
 
-	SetState(EState::Executable);
+	SetStatus(EStatus::Executable);
 }
 
 //void VulkanCommandBuffer::BeginRenderPass(IFrameBuffer* FrameBuffer)
 //{
-//	assert(m_State == EState::Recording && FrameBuffer && !m_InsideRenderPass);
+//	assert(m_State == EStatus::Recording && FrameBuffer && !m_InsideRenderPass);
 //
 //	auto VkFrameBuffer = static_cast<VulkanFramebuffer*>(FrameBuffer);
 //	assert(VkFrameBuffer);
@@ -133,7 +133,7 @@ void VulkanCommandBuffer::End()
 //
 //void VulkanCommandBuffer::EndRenderPass()
 //{
-//	assert(m_State == EState::Recording && m_InsideRenderPass);
+//	assert(m_State == EStatus::Recording && m_InsideRenderPass);
 //
 //	vkCmdEndRenderPass(m_Handle);
 //
@@ -152,7 +152,7 @@ void VulkanCommandBuffer::Reset()
 
 	GetNative().reset(vk::CommandBufferResetFlagBits::eReleaseResources);
 
-	SetState(EState::Initial);
+	SetStatus(EStatus::Initial);
 }
 
 void VulkanCommandBuffer::BeginDebugMarker(const char* Name, const Math::Color& MarkerColor)
@@ -282,226 +282,6 @@ void VulkanCommandBuffer::DispatchIndirect(const RHIBuffer* IndirectBuffer, size
 	GetNative().dispatchIndirect(Cast<VulkanBuffer>(IndirectBuffer)->GetNative(), Offset);
 }
 
-//void VulkanCommandBuffer::CopyBufferToImage(const RHIImage* DstImage, const void* SrcBuffer, uint32_t BufferSize, const RHIImageSubresourceRange& SubresourceRange)
-//{
-//#if true
-//	if (m_InsideRenderPass)
-//	{
-//		EndRenderPass();
-//	}
-//#endif
-//
-//	assert(!m_InsideRenderPass && m_State == EState::Recording && DstImage && SrcBuffer && BufferSize);
-//
-//	/// bufferRowLength and bufferImageHeight specify in texels a subregion of a larger two- or three-dimensional image in buffer memory, 
-//	/// and control the addressing calculations. If either of these values is zero, 
-//	/// that aspect of the buffer memory is considered to be tightly packed according to the imageExtent.
-//	
-//	size_t NumMipLevels = SubresourceRange.LevelCount;
-//	size_t NumArrayLayers = SubresourceRange.LayerCount;
-//	if (SubresourceRange.LevelCount == ImageSubresourceRange::AllMipLevels)
-//	{
-//		NumMipLevels = DstImage->MipLevels();
-//	}
-//	if (SubresourceRange.LayerCount == ImageSubresourceRange::AllArrayLayers)
-//	{
-//		NumArrayLayers = DstImage->ArrayLayers();
-//	}
-//
-//	assert(SubresourceRange.BaseMipLevel < NumMipLevels&& SubresourceRange.BaseArrayLayer < NumArrayLayers);
-//	assert(NumMipLevels > 0u && NumMipLevels < ImageSubresourceRange::AllMipLevels);
-//	assert(NumArrayLayers > 0u && NumArrayLayers < ImageSubresourceRange::AllArrayLayers);
-//
-//	auto StagingHeap = StagingBufferAllocator::Get().Alloc(BufferSize); /// #TODO Memory waste when not all subresources ???
-//	assert(StagingHeap->Size >= BufferSize);
-//
-//	size_t Offset = StagingHeap->CurOffset;
-//	uint8_t* MappedAddress = reinterpret_cast<uint8_t*>(StagingHeap->Buffer->MappedMemory());
-//	if (SubresourceRange == AllSubresource)
-//	{
-//		VERIFY(memcpy_s(MappedAddress + Offset, BufferSize, SrcBuffer, BufferSize) == 0);
-//	}
-//
-//	auto VkImage = static_cast<VulkanImage*>(DstImage);
-//
-//	std::vector<VkBufferImageCopy> ImageCopys(NumMipLevels * NumArrayLayers);
-//	for (uint32_t MipIndex = SubresourceRange.BaseMipLevel; MipIndex < NumMipLevels; ++MipIndex)
-//	{
-//		for (uint32_t ArrayIndex = SubresourceRange.BaseArrayLayer; ArrayIndex < NumArrayLayers; ++ArrayIndex)
-//		{
-//			/// size_t index = i * levels + j;
-//			uint32_t MipWidth = std::max(DstImage->Width() >> DstImage->MipLevels(), 1u);
-//			uint32_t MipHeight = std::max(DstImage->Height() >> DstImage->MipLevels(), 1u);
-//			uint32_t MipDepth = std::max(DstImage->Depth() >> DstImage->MipLevels(), 1u);
-//			uint32_t SliceBytes = 0u;
-//			uint32_t RowBytes = 0u;
-//			auto ColRowBytes = FormatAttribute::CalculateFormatBytes(
-//				MipWidth,
-//				MipHeight,
-//				DstImage->Format(),
-//				SliceBytes,
-//				RowBytes);
-//			
-//			ImageCopys[MipIndex] = VkBufferImageCopy
-//			{
-//				static_cast<uint32_t>(Offset),
-//				ColRowBytes.first,
-//				ColRowBytes.second,
-//				VkImageSubresourceLayers
-//				{
-//					VkImage->VkAttributes().Aspect,
-//					MipIndex,
-//					ArrayIndex,
-//					1u
-//				},
-//				VkOffset3D {0, 0, 0},
-//				VkExtent3D
-//				{
-//					MipWidth,
-//					MipHeight,
-//					MipDepth
-//				}
-//			};
-//
-//			uint32_t RowPitch = SliceBytes * MipDepth;
-//			if (SubresourceRange != AllSubresource)
-//			{
-//				VERIFY(memcpy_s(MappedAddress + Offset, RowPitch, reinterpret_cast<const uint8_t*>(SrcBuffer) + RowPitch, RowPitch) == 0);
-//			}
-//
-//			Offset += RowPitch;
-//		}
-//	}
-//
-//	VkImageSubresourceRange VkSubresourceRange
-//	{
-//		VkImage->VkAttributes().Aspect,
-//		SubresourceRange.BaseMipLevel,
-//		SubresourceRange.LevelCount == ImageSubresourceRange::AllMipLevels ? VK_REMAINING_MIP_LEVELS : SubresourceRange.LevelCount,
-//		SubresourceRange.BaseArrayLayer,
-//		SubresourceRange.LayerCount == ImageSubresourceRange::AllArrayLayers ? VK_REMAINING_ARRAY_LAYERS : SubresourceRange.LayerCount
-//	};
-//
-//	m_Barrier->TransitionResourceState(VkImage, VkImage->CurrentState, EResourceState::TransferDst, VkSubresourceRange);
-//
-//	vkCmdCopyBufferToImage(
-//		m_Handle,
-//		std::static_pointer_cast<VulkanBuffer>(StagingHeap->Buffer)->Get(),
-//		VkImage->Get(),
-//		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-//		static_cast<uint32_t>(ImageCopys.size()),
-//		ImageCopys.data());
-//
-//	m_Barrier->TransitionResourceState(VkImage, EResourceState::TransferDst, VkImage->RequiredState, VkSubresourceRange);
-//}
-
-//void VulkanCommandBuffer::CopyBuffer(const RHIBuffer* DstBuffer, const void* Data, size_t DataSize, size_t SrcOffset, size_t DstOffset)
-//{
-//	/// https://github.com/KhronosGroup/Vulkan-Docs/wiki/Synchronization-Examples-(Legacy-synchronization-APIs)
-//	/// Global memory barrier covers all resources. Generally considered more efficient to do a global memory barrier than per-resource barriers, 
-//	/// per-resource barriers should usually be used for queue ownership transfers and image layout transitions - otherwise use global barriers.
-//
-//	assert(m_State == EState::Recording && DstBuffer && DataSize && Data);
-
-//	if (DstBuffer->Update(Data, DataSize, SrcOffset, DstOffset))
-//	{
-//		return;
-//	}
-//
-//#if true
-//	if (m_InsideRenderPass)
-//	{
-//		EndRenderPass();
-//	}
-//#endif
-//
-//	auto VkBuffer = static_cast<VulkanBuffer*>(DstBuffer);
-//
-//	assert(!m_InsideRenderPass);
-//
-//	auto Heap = StagingBufferAllocator::Get().Alloc(DataSize);
-//	uint8_t* MappedAddress = reinterpret_cast<uint8_t*>(Heap->Buffer->MappedMemory());
-//	VERIFY(memcpy_s(MappedAddress + Heap->CurOffset, DataSize, Data, DataSize) == 0);
-//
-//	VkBufferCopy CopyRegion
-//	{
-//		SrcOffset + Heap->CurOffset,
-//		DstOffset,
-//		DataSize
-//	};
-//
-//	m_Tracker.Buffers.insert(VkBuffer);
-//
-//	m_Barrier->TransitionResourceState(VkBuffer, VkBuffer->CurrentState, EResourceState::TransferDst);
-//
-//	vkCmdCopyBuffer(
-//		m_Handle,
-//		static_cast<VulkanBuffer*>(Heap->Buffer.get())->Get(),
-//		VkBuffer->Get(),
-//		1u,
-//		&CopyRegion);
-//
-//	m_Barrier->TransitionResourceState(VkBuffer, EResourceState::TransferDst, VkBuffer->RequiredState);
-//}
-
-//void VulkanCommandBuffer::CopyImage(IImage* SrcImage, const ImageSlice& SrcSlice, IImage* DstImage, const ImageSlice& DstSlice)
-//{
-//#if true
-//	if (m_InsideRenderPass)
-//	{
-//		EndRenderPass();
-//	}
-//#endif
-//
-//	/// https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#formats-compatibility
-//	assert(m_State == EState::Recording && !m_InsideRenderPass && SrcImage && DstImage);
-//
-//	auto VkSrcImage = static_cast<VulkanImage*>(SrcImage);
-//	auto VkDstImage = static_cast<VulkanImage*>(DstImage);
-//
-//	VkImageCopy ImageCopy;
-//	ImageCopy.srcSubresource = VkImageSubresourceLayers
-//	{
-//		VkSrcImage->VkAttributes().Aspect,
-//		0u,
-//		0u,
-//		VkSrcImage->ArrayLayers(),
-//	};
-//	ImageCopy.srcOffset = VkOffset3D{SrcSlice.X, SrcSlice.Y, SrcSlice.Z};
-//	ImageCopy.dstSubresource = VkImageSubresourceLayers
-//	{
-//		VkDstImage->VkAttributes().Aspect,
-//		0u,
-//		0u,
-//		VkDstImage->ArrayLayers(),
-//	};
-//	ImageCopy.dstOffset = VkOffset3D{DstSlice.X, DstSlice.Y, DstSlice.Z};
-//	ImageCopy.extent = VkExtent3D{DstSlice.Width, DstSlice.Height, DstSlice.Depth};
-//
-//	VkImageSubresourceRange SrcSubresourceRange
-//	{
-//		VkSrcImage->VkAttributes().Aspect,
-//		0u,
-//		VK_REMAINING_MIP_LEVELS,
-//		0u,
-//		VK_REMAINING_ARRAY_LAYERS
-//	};
-//
-//	VkImageSubresourceRange DstSubresourceRange
-//	{
-//		VkDstImage->VkAttributes().Aspect,
-//		0u,
-//		VK_REMAINING_MIP_LEVELS,
-//		0u,
-//		VK_REMAINING_ARRAY_LAYERS
-//	};
-//
-//	m_Barrier->TransitionResourceState(VkSrcImage, VkSrcImage->CurrentState, EResourceState::TransferSrc, SrcSubresourceRange);
-//	m_Barrier->TransitionResourceState(VkDstImage, VkDstImage->CurrentState, EResourceState::TransferDst, DstSubresourceRange);
-//
-//	vkCmdCopyImage(m_Handle, VkSrcImage->Get(), VkSrcImage->VkAttributes().Layout, VkDstImage->Get(), VkDstImage->VkAttributes().Layout, 1u, &ImageCopy);
-//}
-
 void VulkanCommandBuffer::SetViewport(const RHIViewport& Viewport)
 {
 	assert(IsRecording());
@@ -564,13 +344,26 @@ void VulkanCommandBuffer::SetScissorRects(const RHIScissorRect* ScissorRects, ui
 	GetNative().setScissor(0u, Rects);
 }
 
+void VulkanCommandBuffer::RefreshStatus()
+{
+	if (IsSubmitted())
+	{
+		if (m_Fence.IsSignaled())
+		{
+			m_Fence.Reset();
+			++m_FenceSignaledCounter;
+			SetStatus(EStatus::NeedReset);
+		}
+	}
+}
+
 void VulkanCommandBuffer::PushConstants(ERHIShaderStage Stage, const RHIBuffer* Buffer, const void* Data, size_t Size, size_t Offset)
 {
 	assert(IsRecording() && Buffer && Data && Size && Size < GetDevice().GetPhysicalDeviceLimits().maxPushConstantsSize);
 
 	//(void)ConstantsBuffer;
 
-	//assert(m_State == EState::Recording && Data && Size && Size <= m_Device->PhysicalLimits().maxPushConstantsSize && m_CurGfxPipeline);
+	//assert(m_State == EStatus::Recording && Data && Size && Size <= m_Device->PhysicalLimits().maxPushConstantsSize && m_CurGfxPipeline);
 
 	//vkCmdPushConstants(
 	//	m_Handle, 
@@ -601,10 +394,10 @@ void VulkanCommandBuffer::SetGraphicsPipeline(const RHIGraphicsPipeline* Graphic
 //#endif
 }
 //
-//	auto VkState = static_cast<VulkanGraphicsPipelineState*>(VkPipeline->State());
+//	auto VkState = static_cast<VulkanGraphicsPipelinEStatus*>(VkPipeline->State());
 //	assert(VkState);
 //
-//	EnsurePipelineResourceStates(VkState);
+//	EnsurePipelineResourcEStatuss(VkState);
 //
 //	BeginRenderPass(VkState->FrameBuffer);
 //
@@ -620,7 +413,7 @@ void VulkanCommandBuffer::SetGraphicsPipeline(const RHIGraphicsPipeline* Graphic
 //		0u,
 //		nullptr);
 //
-//	if (VkState->IsDirty<PipelineState::EDirtyFlags::Resources>())
+//	if (VkState->IsDirty<PipelinEStatus::EDirtyFlags::Resources>())
 //	{
 //		vkUpdateDescriptorSets(
 //			m_Device->Get(),
@@ -630,7 +423,7 @@ void VulkanCommandBuffer::SetGraphicsPipeline(const RHIGraphicsPipeline* Graphic
 //			nullptr);
 //	}
 //
-//	/// if (VkState->IsDirty<PipelineState::EDirtyFlags::VertexBuffer>() && VkState->VertexBuffer)
+//	/// if (VkState->IsDirty<PipelinEStatus::EDirtyFlags::VertexBuffer>() && VkState->VertexBuffer)
 //	{
 //		if (VkState->VertexBuffer)
 //		{
@@ -640,7 +433,7 @@ void VulkanCommandBuffer::SetGraphicsPipeline(const RHIGraphicsPipeline* Graphic
 //		}
 //	}
 //
-//	/// if (VkState->IsDirty<PipelineState::EDirtyFlags::IndexBuffer>() && VkState->IndexBuffer.first)
+//	/// if (VkState->IsDirty<PipelinEStatus::EDirtyFlags::IndexBuffer>() && VkState->IndexBuffer.first)
 //	{
 //		if (VkState->IndexBuffer.first)
 //		{
@@ -652,7 +445,7 @@ void VulkanCommandBuffer::SetGraphicsPipeline(const RHIGraphicsPipeline* Graphic
 //		}
 //	}
 //
-//	/// if (VkState->IsDirty<PipelineState::EDirtyFlags::Viewport>())
+//	/// if (VkState->IsDirty<PipelinEStatus::EDirtyFlags::Viewport>())
 //	{
 //		std::vector<VkViewport> Viewports
 //		{
@@ -669,7 +462,7 @@ void VulkanCommandBuffer::SetGraphicsPipeline(const RHIGraphicsPipeline* Graphic
 //		vkCmdSetViewport(m_Handle, 0u, 1u, Viewports.data());
 //	}
 //
-//	/// if (VkState->IsDirty<PipelineState::EDirtyFlags::ScissorRect>())
+//	/// if (VkState->IsDirty<PipelinEStatus::EDirtyFlags::ScissorRect>())
 //	{
 //		std::vector<VkRect2D> ScissorRects
 //		{
@@ -690,7 +483,7 @@ void VulkanCommandBuffer::SetGraphicsPipeline(const RHIGraphicsPipeline* Graphic
 //		vkCmdSetScissor(m_Handle, 0u, 1u, ScissorRects.data());
 //	}
 //
-//	if (VkState->IsDirty<PipelineState::EDirtyFlags::PolygonMode>())
+//	if (VkState->IsDirty<PipelinEStatus::EDirtyFlags::PolygonMode>())
 //	{
 //		SetPolygonMode(VkState->PolygonMode);
 //	}
@@ -723,7 +516,7 @@ void VulkanCommandBuffer::ClearColorTexture(const RHITexture* Texture, const Mat
 //		0u,
 //		VK_REMAINING_ARRAY_LAYERS
 //	};
-//	m_Barrier->TransitionResourceState(VkImage, VkImage->CurrentState, EResourceState::TransferDst, SubresourceRange);
+//	m_Barrier->TransitionResourcEStatus(VkImage, VkImage->CurrentState, EResourcEStatus::TransferDst, SubresourceRange);
 //
 //	VkClearColorValue ClearColorValue
 //	{
@@ -731,7 +524,7 @@ void VulkanCommandBuffer::ClearColorTexture(const RHITexture* Texture, const Mat
 //	};
 //	vkCmdClearColorImage(m_Handle, VkImage->Get(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &ClearColorValue, 1u, &SubresourceRange);
 //
-//	m_Barrier->TransitionResourceState(VkImage, EResourceState::TransferDst, VkImage->RequiredState, SubresourceRange);
+//	m_Barrier->TransitionResourcEStatus(VkImage, EResourcEStatus::TransferDst, VkImage->RequiredState, SubresourceRange);
 }
 
 void VulkanCommandBuffer::ClearDepthStencilTexture(const RHITexture* Texture, bool ClearDepth, bool ClearStencil, float Depth, uint8_t Stencil)
@@ -770,7 +563,7 @@ void VulkanCommandBuffer::ClearDepthStencilTexture(const RHITexture* Texture, bo
 //			0u,
 //			VK_REMAINING_ARRAY_LAYERS
 //		};
-//		m_Barrier->TransitionResourceState(VkImage, VkImage->CurrentState, EResourceState::TransferDst, SubresourceRange);
+//		m_Barrier->TransitionResourcEStatus(VkImage, VkImage->CurrentState, EResourcEStatus::TransferDst, SubresourceRange);
 //
 //		VkClearDepthStencilValue ClearDepthStencilValue
 //		{
@@ -779,13 +572,14 @@ void VulkanCommandBuffer::ClearDepthStencilTexture(const RHITexture* Texture, bo
 //		};
 //		vkCmdClearDepthStencilImage(m_Handle, VkImage->Get(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &ClearDepthStencilValue, 1u, &SubresourceRange);
 //
-//		m_Barrier->TransitionResourceState(VkImage, EResourceState::TransferDst, VkImage->RequiredState, SubresourceRange);
+//		m_Barrier->TransitionResourcEStatus(VkImage, EResourcEStatus::TransferDst, VkImage->RequiredState, SubresourceRange);
 //	}
 }
 
 void VulkanCommandBuffer::WriteBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset)
 {
 	assert(Buffer && Data && Size && SrcOffset < Size && Size < Buffer->GetSize());
+	assert(!IsInsideRenderPass());
 
 	/// #TODO: Use staging buffer manager ???
 
@@ -807,6 +601,7 @@ void VulkanCommandBuffer::WriteBuffer(const RHIBuffer* Buffer, const void* Data,
 void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, uint32_t ArrayLayer, uint32_t MipLevel, size_t SrcOffset)
 {
 	assert(Texture && Data && Size);
+	assert(!IsInsideRenderPass());
 
 	RHIBufferCreateInfo StagingBufferCreateInfo;
 	StagingBufferCreateInfo.SetSize(Size)
@@ -860,6 +655,7 @@ void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Da
 void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, size_t SrcOffset)
 {
 	assert(Texture && Data && Size);
+	assert(!IsInsideRenderPass());
 
 	RHIBufferCreateInfo StagingBufferCreateInfo;
 	StagingBufferCreateInfo.SetSize(Size)
@@ -907,7 +703,7 @@ void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Da
 
 	StagingBuffer->Unmap();
 
-	vk::ImageSubresourceRange SubresourceRange(vk::ImageAspectFlagBits::eColor, 0u, Texture->GetNumMipLevel(), 0u, Texture->GetNumArrayLayer());
+	vk::ImageSubresourceRange SubresourceRange(vk::ImageAspectFlagBits::eColor, 0u, VK_REMAINING_MIP_LEVELS, 0u, VK_REMAINING_ARRAY_LAYERS);
 	ERHIDeviceQueue DstQueue = VulkanRHI::GetConfigs().UseTransferQueue ? ERHIDeviceQueue::Transfer : ERHIDeviceQueue::Graphics;
 
 	VulkanPipelineBarrier Barrier(GetDevice());
@@ -925,7 +721,7 @@ void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Da
 //#if VK_EXT_extended_dynamic_state
 //	if (m_Device->EnabledExtensions().ExtendedDynamicState)
 //	{
-//		assert(m_State == EState::Recording);
+//		assert(m_State == EStatus::Recording);
 //
 //		vkCmdSetCullModeEXT(m_Handle, VkType::PolygonMode(Mode));
 //	}
@@ -966,30 +762,30 @@ void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Da
 //	If vkCmdExecuteCommands is not being called within a render pass instance, each element of pCommandBuffers must not have been recorded with the VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT
 //	*************************************************************************************************************************/
 //
-//	assert(Level() == ECommandBufferLevel::Primary && Commands.size() > 0u && m_State == EState::Recording);
+//	assert(Level() == ECommandBufferLevel::Primary && Commands.size() > 0u && m_State == EStatus::Recording);
 //
 //	std::vector<VkCommandBuffer> VkCommands;
 //
 //	std::transform(Commands.begin(), Commands.end(), VkCommands.begin(), [](std::shared_ptr<VulkanCommandBuffer> Command) {
-//		assert(Command->Level() == ECommandBufferLevel::Secondary && Command->State() == EState::Pending || Command->State() == EState::Executable);
+//		assert(Command->Level() == ECommandBufferLevel::Secondary && Command->State() == EStatus::Pending || Command->State() == EStatus::Executable);
 //		return Command->Get();
 //		});
 //
 //	vkCmdExecuteCommands(m_Handle, static_cast<uint32_t>(VkCommands.size()), VkCommands.data());
 //}
 
-//void VulkanCommandBuffer::EnsurePipelineResourceStates(VulkanGraphicsPipelineState* State)
+//void VulkanCommandBuffer::EnsurePipelineResourcEStatuss(VulkanGraphicsPipelinEStatus* State)
 //{
 //	assert(State && State->FrameBuffer);
 //
 //	for (auto& Image : State->FrameBuffer->Description().ColorAttachments)
 //	{
 //		auto VkImage = static_cast<VulkanImage*>(Image.get());
-//		VkImage->RequiredState = EResourceState::RenderTarget;
+//		VkImage->RequiredState = EResourcEStatus::RenderTarget;
 //
 //		m_Tracker.Images.insert(VkImage);
 //
-//		if (VkImage->PermanentState != EResourceState::Unknown)
+//		if (VkImage->PermanentState != EResourcEStatus::Unknown)
 //		{
 //			m_Tracker.PermanentImages.insert(VkImage);
 //		}
@@ -998,7 +794,7 @@ void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Da
 //	if (State->FrameBuffer->Description().DepthStencilAttachment)
 //	{
 //		auto VkImage = static_cast<VulkanImage*>(State->FrameBuffer->Description().DepthStencilAttachment.get());
-//		VkImage->RequiredState = EResourceState::DepthWrite;
+//		VkImage->RequiredState = EResourcEStatus::DepthWrite;
 //
 //		m_Tracker.Images.insert(VkImage);
 //	}
@@ -1007,13 +803,13 @@ void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Da
 //	{
 //		if (Resource.Buffer)
 //		{
-//			Resource.Buffer->RequiredState = EResourceState::UniformBuffer;
+//			Resource.Buffer->RequiredState = EResourcEStatus::UniformBuffer;
 //			m_Tracker.Buffers.insert(Resource.Buffer);
 //		}
 //
 //		if (Resource.Image)
 //		{
-//			Resource.Image->RequiredState = EResourceState::ShaderResource;
+//			Resource.Image->RequiredState = EResourcEStatus::ShaderResource;
 //			m_Tracker.Images.insert(Resource.Image);
 //		}
 //	}
@@ -1021,7 +817,7 @@ void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Da
 //	m_Tracker.EnsureCorrectStates(m_Barrier.get());
 //}
 //
-//void VulkanCommandBuffer::VkResourceStateTracker::EnsureCorrectStates(VulkanPipelineBarrier* Barrier)
+//void VulkanCommandBuffer::VkResourcEStatusTracker::EnsureCorrectStates(VulkanPipelineBarrier* Barrier)
 //{
 //	for (auto Image : Images)
 //	{
@@ -1038,7 +834,7 @@ void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Da
 //				VK_REMAINING_ARRAY_LAYERS
 //			};
 //
-//			Barrier->TransitionResourceState(Image, Image->CurrentState, Image->RequiredState, SubresourceRange);
+//			Barrier->TransitionResourcEStatus(Image, Image->CurrentState, Image->RequiredState, SubresourceRange);
 //		}
 //	}
 //	Images.clear();
@@ -1049,7 +845,7 @@ void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const void* Da
 //
 //		if (Buffer->CurrentState != Buffer->RequiredState)
 //		{
-//			Barrier->TransitionResourceState(Buffer, Buffer->CurrentState, Buffer->RequiredState);
+//			Barrier->TransitionResourcEStatus(Buffer, Buffer->CurrentState, Buffer->RequiredState);
 //		}
 //	}
 //	Buffers.clear();

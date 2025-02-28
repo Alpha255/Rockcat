@@ -12,11 +12,7 @@ VulkanCommandListContext::VulkanCommandListContext(const VulkanDevice& Device, V
 	GetCommandBuffer();
 }
 
-void VulkanCommandListContext::Submit()
-{
-}
-
-void VulkanCommandListContext::SubmitUploadCommandBuffer()
+void VulkanCommandListContext::SubmitActiveCommandBuffer()
 {
 }
 

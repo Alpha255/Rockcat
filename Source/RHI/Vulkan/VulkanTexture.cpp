@@ -99,7 +99,7 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 		if (CreateInfo.InitialData.IsValid())
 		{
 			assert(CommandBuffer);
-			//CommandBuffer->WriteTexture(this, CreateInfo.InitialData.Data.get(), CreateInfo.InitialData.Size);
+			CommandBuffer->WriteTexture(this, CreateInfo.InitialData.Data.get(), CreateInfo.InitialData.Size);
 		}
 	}
 

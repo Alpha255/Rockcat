@@ -30,7 +30,7 @@ VulkanCommandBuffer* VulkanUploadManager::GetUploadCommandBuffer()
 	}
 
 	assert(CommandListContext);
-	return Cast<VulkanCommandBuffer>(CommandListContext->GetUploadCommandBuffer());
+	return Cast<VulkanCommandBuffer>(CommandListContext->GetCommandBuffer());
 }
 
 const VulkanQueue& VulkanUploadManager::GetQueue()
