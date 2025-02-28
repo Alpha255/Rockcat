@@ -4,6 +4,7 @@
         "UseTransferQueue": false,
         "AsyncCommandlistSubmission": false,
         "AsyncMeshDrawCommandsBuilding": false,
-        "SeparateRenderThread": false
+        "SeparateRenderThread": false,
+        "BatchResourceUpload": false
     }
 }

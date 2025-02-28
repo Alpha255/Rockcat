@@ -154,6 +154,7 @@ struct RHIBackendConfiguration : public SerializableAsset<RHIBackendConfiguratio
 	bool AsyncCommandlistSubmission = false;
 	bool AsyncMeshDrawCommandsBuilding = false;
 	bool SeparateRenderThread = false;
+	bool BatchResourceUpload = false;
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -163,7 +164,8 @@ struct RHIBackendConfiguration : public SerializableAsset<RHIBackendConfiguratio
 			CEREAL_NVP(UseTransferQueue),
 			CEREAL_NVP(AsyncCommandlistSubmission),
 			CEREAL_NVP(AsyncMeshDrawCommandsBuilding),
-			CEREAL_NVP(SeparateRenderThread)
+			CEREAL_NVP(SeparateRenderThread),
+			CEREAL_NVP(BatchResourceUpload)
 		);
 	}
 };
