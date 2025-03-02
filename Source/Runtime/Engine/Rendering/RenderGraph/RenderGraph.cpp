@@ -61,11 +61,29 @@ void RenderGraph::OnWindowResized(uint32_t Width, uint32_t Height)
 
 void RenderGraph::Execute(const Scene& InScene)
 {
+#if 1
+	if (!m_RenderScene)
+	{
+		m_RenderScene = std::make_shared<RenderScene>(InScene);
+		m_RenderScene->BuildMeshDrawCommands(GetBackend().GetDevice(), GetRenderSettings());
+		return;
+	}
+
+	if (&m_RenderScene->GetScene() != &InScene)
+	{
+		m_RenderScene = std::make_shared<RenderScene>(InScene);
+	}
+
+	m_RenderScene->BuildMeshDrawCommands(GetBackend().GetDevice(), GetRenderSettings());
+
+	/// Make render scene one frame lag than main thread ???
+#else
 	if (!m_RenderScene || (&m_RenderScene->GetScene() != &InScene))
 	{
 		m_RenderScene = std::make_shared<RenderScene>(InScene);
 	}
 	m_RenderScene->BuildMeshDrawCommands(GetBackend().GetDevice(), GetRenderSettings());
+#endif
 
 	Compile();
 

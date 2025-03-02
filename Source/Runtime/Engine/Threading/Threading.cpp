@@ -7,6 +7,8 @@ namespace Threading
 
 	void Initialize()
 	{
+		t_ThreadTag = EThread::MainThread;
+
 		tf::Async_WaitDone([]() {
 			t_ThreadTag = EThread::GameThread;
 		}, EThread::GameThread);
@@ -18,7 +20,7 @@ namespace Threading
 
 	bool IsInMainThread()
 	{
-		return false;
+		return t_ThreadTag == EThread::MainThread;
 	}
 
 	bool IsInGameThread()
