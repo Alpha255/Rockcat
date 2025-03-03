@@ -61,6 +61,7 @@ void RenderGraph::OnWindowResized(uint32_t Width, uint32_t Height)
 
 void RenderGraph::Execute(const Scene& InScene)
 {
+	// CVarAllowOneFrameThreadLag <--> FFrameEndSync::Sync
 #if 1
 	if (!m_RenderScene)
 	{
