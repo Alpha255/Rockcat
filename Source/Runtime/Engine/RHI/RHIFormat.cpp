@@ -238,7 +238,7 @@ namespace RHI
 			Format == ERHIFormat::Y210 ||
 			Format == ERHIFormat::Y216;
 
-		RHIFormatAttributes& Attributes = s_FormatAttributes[static_cast<size_t>(Format)];
+		RHIFormatAttributes Attributes = s_FormatAttributes[static_cast<size_t>(Format)];
 		Attributes.NumCols = Width;
 		Attributes.NumRows = Height;
 		Attributes.BlockSize = IsCompressed ? 4u : 1u;
