@@ -8,37 +8,38 @@ public:
 	RHICommandBuffer* GetCommandBuffer(ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary)
 	{
 		auto& CommandBufferList = Level == ERHICommandBufferLevel::Primary ? m_PrimaryCommandBufferList : m_SecondaryCommandBufferList;
-		std::lock_guard Locker(CommandBufferList.Lock);
 
 		if (CommandBufferList.Active && CommandBufferList.Active->IsRecording())
 		{
 			return CommandBufferList.Active;
 		}
 
+		CommandBufferList.Active = nullptr;
+
 		for (auto& CommandBuffer : CommandBufferList)
 		{
 			CommandBuffer->RefreshStatus();
-			RHICommandBuffer*& ActiveCommandBuffer = CommandBufferList.Active;
+			RHICommandBuffer*& Active = CommandBufferList.Active;
 
 			if (CommandBuffer->IsRecording())
 			{
-				ActiveCommandBuffer = CommandBuffer.get();
+				Active = CommandBuffer.get();
 			}
 			else if (CommandBuffer->IsReady())
 			{
 				CommandBuffer->Begin();
-				ActiveCommandBuffer = CommandBuffer.get();
+				Active = CommandBuffer.get();
 			}
 			else if (CommandBuffer->IsNeedReset())
 			{
 				CommandBuffer->Reset();
 				CommandBuffer->Begin();
-				ActiveCommandBuffer = CommandBuffer.get();
+				Active = CommandBuffer.get();
 			}
 
-			if (ActiveCommandBuffer)
+			if (Active)
 			{
-				return ActiveCommandBuffer;
+				return Active;
 			}
 		}
 
@@ -47,15 +48,63 @@ public:
 		CommandBufferList.Active->Begin();
 		return CommandBufferList.Active;
 	}
+	
+	RHICommandBuffer* GetCommandBufferAsync(ERHICommandBufferLevel Level = ERHICommandBufferLevel::Primary)
+	{
+		auto& CommandBufferList = Level == ERHICommandBufferLevel::Primary ? m_PrimaryCommandBufferList : m_SecondaryCommandBufferList;
+		
+		std::lock_guard Locker(CommandBufferList.Lock);
+
+		RHICommandBuffer* Ret = nullptr;
+		if (CommandBufferList.Active && CommandBufferList.Active->IsRecording())
+		{
+			std::swap(Ret, CommandBufferList.Active);
+			return Ret;
+		}
+
+		for (auto It = CommandBufferList.begin(); It != CommandBufferList.end(); ++It)
+		{
+			(*It)->RefreshStatus();
+
+			if ((*It)->IsRecording())
+			{
+				Ret = It->get();
+			}
+			else if ((*It)->IsReady())
+			{
+				(*It)->Begin();
+				Ret = It->get();
+			}
+			else if ((*It)->IsNeedReset())
+			{
+				(*It)->Reset();
+				(*It)->Begin();
+				Ret = It->get();
+			}
+
+			if (Ret)
+			{
+				CommandBufferList.OnTheFlyAsync.push_back(*It);
+				CommandBufferList.erase(It);
+				return Ret;
+			}
+		}
+
+		Ret = CommandBufferList.OnTheFlyAsync.emplace_back(AllocateCommandBuffer(Level)).get();
+		assert(Ret);
+		Ret->Begin();
+		return Ret;
+	}
 
 	virtual void SubmitActiveCommandBuffer() = 0;
 protected:
 	virtual RHICommandBufferPtr AllocateCommandBuffer(ERHICommandBufferLevel Level) = 0;
 
-	struct RHICommandBufferList : public std::vector<RHICommandBufferPtr>
+	struct RHICommandBufferList : public std::list<RHICommandBufferPtr>
 	{
 		std::mutex Lock;
 		RHICommandBuffer* Active = nullptr;
+		std::vector<RHICommandBufferPtr> OnTheFlyAsync;
 	};
 
 	RHICommandBufferList m_PrimaryCommandBufferList;
