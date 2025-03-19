@@ -54,7 +54,8 @@
         "TabBorderSize": 1.0,
         "TabMinWidthForCloseButton": 0.0,
         "TabBarBorderSize": 1.0,
-        "TabBarOverlineSize": 2.0,
+        "TabCloseButtonMinWidthSelected": 0.0,
+        "TabCloseButtonMinWidthUnselected": 0.0,
         "TableAngledHeadersAngle": 0.6108652353286743,
         "TableAngledHeadersTextAlign": {
             "Vec2.x": 0.5,
