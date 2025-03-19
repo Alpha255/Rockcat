@@ -349,7 +349,7 @@ void VulkanCommandBuffer::RefreshStatus()
 	if (IsSubmitted() && m_Fence.IsSignaled())
 	{
 		m_Fence.Reset();
-		m_FenceSignaledCounter.fetch_add(1u);
+		m_FenceSignaledCounter.fetch_add(1u, std::memory_order_relaxed);
 		SetStatus(EStatus::NeedReset);
 	}
 }

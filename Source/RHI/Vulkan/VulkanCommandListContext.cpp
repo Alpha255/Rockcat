@@ -14,10 +14,40 @@ VulkanCommandListContext::VulkanCommandListContext(const VulkanDevice& Device, V
 
 void VulkanCommandListContext::SubmitGraphicsCommandBuffer()
 {
+	{
+		std::lock_guard Locker(m_PrimaryCommandBufferList.Lock);
+		if (m_PrimaryCommandBufferList.Graphics)
+		{
+			SubmitUploadCommandBuffer(m_PrimaryCommandBufferList.Upload);
+		}
+	}
+
+	{
+		std::lock_guard Locker(m_SecondaryCommandBufferList.Lock);
+		if (m_SecondaryCommandBufferList.Graphics)
+		{
+			assert(false);
+		}
+	}
 }
 
 void VulkanCommandListContext::SubmitUploadCommandBuffer(RHICommandBuffer* UploadCommandBuffer)
 {
+	{
+		std::lock_guard Locker(m_PrimaryCommandBufferList.Lock);
+		auto CommandBuffer = UploadCommandBuffer ? UploadCommandBuffer : m_PrimaryCommandBufferList.Upload;
+		if (CommandBuffer)
+		{
+		}
+	}
+
+	{
+		std::lock_guard Locker(m_SecondaryCommandBufferList.Lock);
+		auto CommandBuffer = UploadCommandBuffer ? UploadCommandBuffer : m_SecondaryCommandBufferList.Upload;
+		if (CommandBuffer)
+		{
+		}
+	}
 }
 
 VulkanDescriptorPool& VulkanCommandListContext::AcquireDescriptorPool()

@@ -46,13 +46,13 @@ private:
 
 	inline void OnStagingBufferAllocated(size_t UsedSize)
 	{
-		m_AllocatedMemorySize.fetch_add(GetDefaultBlockSize());
-		m_UsedMemorySize.fetch_add(UsedSize);
+		m_AllocatedMemorySize.fetch_add(GetDefaultBlockSize(), std::memory_order_relaxed);
+		m_UsedMemorySize.fetch_add(UsedSize, std::memory_order_relaxed);
 	}
 
 	inline void OnStagingBufferFreed(size_t FreedSize)
 	{
-		m_UsedMemorySize.fetch_sub(FreedSize);
+		m_UsedMemorySize.fetch_sub(FreedSize, std::memory_order_relaxed);
 	}
 
 	RHICommandBuffer* GetUploadCommandBuffer();

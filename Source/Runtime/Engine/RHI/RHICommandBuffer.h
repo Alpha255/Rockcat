@@ -78,7 +78,7 @@ public:
 	inline bool IsSubmitted() const { return m_Status == EStatus::Submitted; }
 	inline bool IsNeedReset() const { return m_Status == EStatus::NeedReset; }
 
-	inline uint64_t GetFenceSignaledCounter() const { return m_FenceSignaledCounter.load(); }
+	inline uint64_t GetFenceSignaledCounter() const { return m_FenceSignaledCounter.load(std::memory_order_relaxed); }
 protected:
 	friend class RHICommandListContext;
 
