@@ -126,7 +126,7 @@ RHIShaderPtr D3D11Device::CreateShader(const RHIShaderCreateInfo& RHICreateInfo)
 	return RHIShaderPtr();
 }
 
-RHITexturePtr D3D11Device::CreateTexture(const RHITextureCreateInfo& RHICreateInfo, RHICommandBuffer* CommandBuffer)
+RHITexturePtr D3D11Device::CreateTexture(const RHITextureCreateInfo& RHICreateInfo)
 {
 	return RHITexturePtr();
 }
@@ -151,7 +151,7 @@ RHIPipelineStatePtr D3D11Device::CreatePipelineState(const RHIGraphicsPipelineCr
 	return RHIPipelineStatePtr();
 }
 
-RHIBufferPtr D3D11Device::CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo, RHICommandBuffer* CommandBuffer)
+RHIBufferPtr D3D11Device::CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo)
 {
 	return RHIBufferPtr();
 }

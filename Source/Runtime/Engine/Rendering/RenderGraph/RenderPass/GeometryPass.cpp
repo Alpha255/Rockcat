@@ -38,7 +38,7 @@ struct MeshDrawTask : public Task
 	MeshDrawTask(const MeshDrawCommand& Command, RHICommandListContext* CommandListContext)
 		: Task("MeshDrawTask", EPriority::High)
 		, DrawCommand(Command)
-		, CommandBuffer(CommandListContext->GetCommandBuffer())
+		, CommandBuffer(CommandListContext->GetGraphicsCommandBuffer())
 	{
 		assert(CommandBuffer);
 	}

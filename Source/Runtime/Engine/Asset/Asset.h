@@ -5,17 +5,21 @@
 struct DataBlock
 {
 	size_t Size = 0u;
+	size_t Offset = 0u;
 	std::shared_ptr<std::byte> Data;
 
 	DataBlock() = default;
 
-	DataBlock(size_t InSize, const void* InData = nullptr)
+	DataBlock(size_t InSize, const void* InData = nullptr, size_t InOffset = 0u)
 		: Size(InSize)
-		, Data(new std::byte[InSize]())
+		, Offset(InOffset)
+		, Data(new std::byte[InSize + InOffset]())
 	{
+		assert(Offset < Size);
+
 		if (InData)
 		{
-			VERIFY(memcpy_s(Data.get(), InSize, InData, InSize) == 0);
+			VERIFY(memcpy_s(Data.get() + Offset, InSize, InData, InSize) == 0);
 		}
 	}
 	
@@ -25,22 +29,24 @@ struct DataBlock
 	void load(Archive& Ar)
 	{
 		Ar(
-			CEREAL_NVP(Size)
+			CEREAL_NVP(Size),
+			CEREAL_NVP(Offset)
 		);
 
-		Data.reset(new std::byte[Size]());
+		Data.reset(new std::byte[Size + Offset]());
 
-		Ar.loadBinaryValue(Data.get(), Size, "Data");
+		Ar.loadBinaryValue(Data.get() + Offset, Size, "Data");
 	}
 
 	template<class Archive>
 	void save(Archive& Ar) const
 	{
 		Ar(
-			CEREAL_NVP(Size)
+			CEREAL_NVP(Size),
+			CEREAL_NVP(Offset)
 		);
 
-		Ar.saveBinaryValue(Data.get(), Size, "Data");
+		Ar.saveBinaryValue(Data.get() + Offset, Size, "Data");
 	}
 };
 

@@ -9,10 +9,14 @@ VulkanCommandListContext::VulkanCommandListContext(const VulkanDevice& Device, V
 	, m_Queue(Queue)
 	, m_Device(Device)
 {
-	GetCommandBuffer();
+	GetGraphicsCommandBuffer();
 }
 
-void VulkanCommandListContext::SubmitActiveCommandBuffer()
+void VulkanCommandListContext::SubmitGraphicsCommandBuffer()
+{
+}
+
+void VulkanCommandListContext::SubmitUploadCommandBuffer(RHICommandBuffer* UploadCommandBuffer)
 {
 }
 

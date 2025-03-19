@@ -3,8 +3,9 @@
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "Engine/Services/SpdLogService.h"
+#include "Engine/RHI/RHIUploadManager.h"
 
-VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateInfo& CreateInfo, RHICommandBuffer* CommandBuffer, vk::Image Image)
+VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateInfo& CreateInfo, vk::Image Image)
 	: VkHwResource(Device)
 	, RHITexture(CreateInfo)
 {
@@ -98,8 +99,7 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 
 		if (CreateInfo.InitialData.IsValid())
 		{
-			assert(CommandBuffer);
-			CommandBuffer->WriteTexture(this, CreateInfo.InitialData.Data.get(), CreateInfo.InitialData.Size);
+			RHIUploadManager::Get().QueueUploadTexture(this, CreateInfo.InitialData.Data.get(), CreateInfo.InitialData.Size, CreateInfo.InitialData.Offset);
 		}
 	}
 

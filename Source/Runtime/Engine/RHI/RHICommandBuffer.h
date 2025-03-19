@@ -19,8 +19,8 @@ public:
 		Initial,
 		Recording,
 		InsideRenderPass,
-		Executable,
-		Pending,
+		Ended,
+		Submitted,
 		NeedReset
 	};
 
@@ -61,9 +61,9 @@ public:
 	virtual void ClearColorTexture(const RHITexture* Texture, const Math::Color& ClearColor) = 0;
 	virtual void ClearDepthStencilTexture(const RHITexture* Texture, bool ClearDepth = true, bool ClearStencil = true, float Depth = 1.0f, uint8_t Stencil = 0xF) = 0;
 
-	virtual void WriteBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t SrcOffset = 0u, size_t DstOffset = 0u) = 0;
-	virtual void WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, uint32_t ArrayLayer, uint32_t MipLevel, size_t SrcOffset = 0u) = 0;
-	virtual void WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, size_t SrcOffset = 0u) = 0;
+	virtual void WriteBuffer(const RHIBuffer* Buffer, const RHIBuffer* StagingBuffer, size_t Size, size_t SrcOffset = 0u, size_t DstOffset = 0u) = 0;
+	virtual void WriteTexture(const RHITexture* Texture, const RHIBuffer* StagingBuffer, size_t Size, uint32_t ArrayLayer, uint32_t MipLevel, size_t SrcOffset = 0u) = 0;
+	virtual void WriteTexture(const RHITexture* Texture, const RHIBuffer* StagingBuffer, size_t Size, size_t SrcOffset = 0u) = 0;
 
 	virtual void SetViewport(const RHIViewport& Viewport) = 0;
 	virtual void SetViewports(const RHIViewport* Viewports, uint32_t NumViewports) = 0u;
@@ -74,11 +74,11 @@ public:
 	inline bool IsReady() const { return m_Status == EStatus::Initial; }
 	inline bool IsRecording() const { return m_Status == EStatus::Recording; }
 	inline bool IsInsideRenderPass() const { return m_Status == EStatus::InsideRenderPass; }
-	inline bool IsEnded() const { return m_Status == EStatus::Executable; }
-	inline bool IsSubmitted() const { return m_Status == EStatus::Pending; }
+	inline bool IsEnded() const { return m_Status == EStatus::Ended; }
+	inline bool IsSubmitted() const { return m_Status == EStatus::Submitted; }
 	inline bool IsNeedReset() const { return m_Status == EStatus::NeedReset; }
 
-	inline EStatus GetStatus() const { return m_Status; }
+	inline uint64_t GetFenceSignaledCounter() const { return m_FenceSignaledCounter.load(); }
 protected:
 	friend class RHICommandListContext;
 
@@ -86,6 +86,7 @@ protected:
 	virtual void RefreshStatus() = 0;
 
 	EStatus m_Status = EStatus::Initial;
+	std::atomic<uint64_t> m_FenceSignaledCounter = 0u;
 private:
 	ERHICommandBufferLevel m_Level;
 };

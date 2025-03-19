@@ -173,7 +173,7 @@ struct MeshData : public MeshProperty
 
 	void ClearData();
 
-	virtual void CreateRHI(class RHIDevice&, class RHICommandListContext*) {}
+	virtual void CreateRHI(class RHIDevice&) {}
 
 	std::shared_ptr<uint8_t> PackedVerticesData;
 	std::shared_ptr<uint8_t> PositionData;
@@ -217,7 +217,7 @@ public:
 	std::vector<const RHIBuffer*> GetVertexBuffers(EVertexAttributes Attributes) const;
 	const RHIBuffer* GetVertexBuffer(EVertexAttributes Attributes) const;
 
-	void CreateRHI(class RHIDevice& Device, class RHICommandListContext* CommandListContext) override;
+	void CreateRHI(class RHIDevice& Device) override;
 protected:
 	friend class SceneBuilder;
 	friend class AssimpSceneImporter;

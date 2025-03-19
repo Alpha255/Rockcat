@@ -52,9 +52,9 @@ public:
 
 	void ClearDepthStencilTexture(const RHITexture* Texture, bool ClearDepth, bool ClearStencil, float Depth, uint8_t Stencil) override final;
 
-	void WriteBuffer(const RHIBuffer* Buffer, const void* Data, size_t Size, size_t SrcOffset, size_t DstOffset) override final;
-	void WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, uint32_t ArrayLayer, uint32_t MipLevel, size_t SrcOffset) override final;
-	void WriteTexture(const RHITexture* Texture, const void* Data, size_t Size, size_t SrcOffset) override final;
+	void WriteBuffer(const RHIBuffer* Buffer, const RHIBuffer* StagingBuffer, size_t Size, size_t SrcOffset, size_t DstOffset) override final;
+	void WriteTexture(const RHITexture* Texture, const RHIBuffer* StagingBuffer, size_t Size, uint32_t ArrayLayer, uint32_t MipLevel, size_t SrcOffset) override final;
+	void WriteTexture(const RHITexture* Texture, const RHIBuffer* StagingBuffer, size_t Size, size_t SrcOffset) override final;
 
 	void SetViewport(const RHIViewport& Viewport) override final;
 	void SetViewports(const RHIViewport* Viewports, uint32_t NumViewports) override final;
@@ -62,7 +62,6 @@ public:
 	void SetScissorRect(const RHIScissorRect& ScissorRect) override final;
 	void SetScissorRects(const RHIScissorRect* ScissorRects, uint32_t NumScissorRects) override final;
 
-	inline uint64_t GetFenceSignaledCounter() const { return m_FenceSignaledCounter; }
 	const VulkanFence& GetFence() { return m_Fence; }
 	const std::vector<VulkanSemaphore*> GetWaitSemaphores() const { return m_WaitSemaphores; }
 	const std::vector<vk::PipelineStageFlags>& GetWaitDstStageFlags() const { return m_WaitDstStageFlags; }
@@ -73,7 +72,6 @@ protected:
 private:
 	class VulkanCommandPool& m_Pool;
 	VulkanFence m_Fence;
-	uint64_t m_FenceSignaledCounter = 0u;
 	std::vector<VulkanSemaphore*> m_WaitSemaphores;
 	std::vector<vk::PipelineStageFlags> m_WaitDstStageFlags;
 };

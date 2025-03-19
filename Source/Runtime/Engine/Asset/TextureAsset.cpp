@@ -2,15 +2,13 @@
 #include "Engine/RHI/RHIDevice.h"
 #include "Engine/RHI/RHICommandListContext.h"
 
-void TextureAsset::CreateRHI(RHIDevice& Device, RHICommandListContext* CommandListContext)
+void TextureAsset::CreateRHI(RHIDevice& Device)
 {
 	if (m_Texture)
 	{
 		return;
 	}
 
-	assert(CommandListContext);
-
-	m_Texture = Device.CreateTexture(m_CreateInfo, CommandListContext->GetCommandBuffer());
+	m_Texture = Device.CreateTexture(m_CreateInfo);
 	m_CreateInfo.InitialData.Data.reset();
 }

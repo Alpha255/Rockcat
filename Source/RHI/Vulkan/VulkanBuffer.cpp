@@ -3,8 +3,9 @@
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
 #include "Engine/Services/SpdLogService.h"
+#include "Engine/RHI/RHIUploadManager.h"
 
-VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo& RHICreateInfo, RHICommandBuffer* CommandBuffer)
+VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo& RHICreateInfo)
 	: VkHwResource(Device)
 	, RHIBuffer(RHICreateInfo)
 {
@@ -80,13 +81,11 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo
 
 	if (RHICreateInfo.InitialData)
 	{
-		assert(CommandBuffer);
-		CommandBuffer->WriteBuffer(this, RHICreateInfo.InitialData, RHICreateInfo.Size);
-
-		if (m_Memory.HostVisible && !m_Memory.HostCoherent)
-		{
-			FlushMappedRange(VK_WHOLE_SIZE, 0u);
-		}
+		RHIUploadManager::Get().QueueUploadBuffer(this, RHICreateInfo.InitialData, RHICreateInfo.Size, 0u);
+		//if (m_Memory.HostVisible && !m_Memory.HostCoherent)
+		//{
+		//	FlushMappedRange(VK_WHOLE_SIZE, 0u);
+		//}
 	}
 
 	VkHwResource::SetObjectName(RHICreateInfo.Name.c_str());

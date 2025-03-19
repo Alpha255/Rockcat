@@ -12,6 +12,7 @@
 #include "RHI/Vulkan/VulkanSwapchain.h"
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
 #include "Engine/Services/TaskFlowService.h"
+#include "Engine/RHI/RHIUploadManager.h"
 
 VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 {
@@ -251,6 +252,7 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 	m_PipelineCache = std::make_shared<VulkanPipelineCache>(*this);
 	
 	VulkanMemoryAllocator::Create(*this);
+	RHIUploadManager::Create(*this);
 }
 
 RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& CreateInfo)
@@ -258,9 +260,9 @@ RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& CreateInfo)
 	return std::make_shared<VulkanShader>(*this, CreateInfo);
 }
 
-RHITexturePtr VulkanDevice::CreateTexture(const RHITextureCreateInfo& CreateInfo, RHICommandBuffer* CommandBuffer)
+RHITexturePtr VulkanDevice::CreateTexture(const RHITextureCreateInfo& CreateInfo)
 {
-	return std::make_shared<VulkanTexture>(*this, CreateInfo, CommandBuffer);
+	return std::make_shared<VulkanTexture>(*this, CreateInfo);
 }
 
 RHIInputLayoutPtr VulkanDevice::CreateInputLayout(const RHIInputLayoutCreateInfo& CreateInfo)
@@ -283,9 +285,9 @@ RHIPipelineStatePtr VulkanDevice::CreatePipelineState(const RHIGraphicsPipelineC
 	return std::make_shared<VulkanPipelineState>(*this, CreateInfo);
 }
 
-RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& CreateInfo, RHICommandBuffer* CommandBuffer)
+RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& CreateInfo)
 {
-	return std::make_shared<VulkanBuffer>(*this, CreateInfo, CommandBuffer);
+	return std::make_shared<VulkanBuffer>(*this, CreateInfo);
 }
 
 RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& CreateInfo)

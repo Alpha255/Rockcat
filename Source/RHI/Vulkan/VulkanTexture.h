@@ -5,7 +5,7 @@
 class VulkanTexture final : public VkHwResource<vk::Image>, public RHITexture
 {
 public:
-	VulkanTexture(const class VulkanDevice& Device, const RHITextureCreateInfo& CreateInfo, RHICommandBuffer* CommandBuffer, vk::Image Image = vk::Image());
+	VulkanTexture(const class VulkanDevice& Device, const RHITextureCreateInfo& CreateInfo, vk::Image Image = vk::Image());
 
 	~VulkanTexture();
 

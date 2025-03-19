@@ -174,15 +174,12 @@ void StaticMesh::SetVertexBuffer(EVertexAttributes Attributes, RHIBufferPtr&& Bu
 	}
 }
 
-void StaticMesh::CreateRHI(RHIDevice& Device, RHICommandListContext* CommandListContext)
+void StaticMesh::CreateRHI(RHIDevice& Device)
 {
 	if (RHIIndexBuffer || RHIPackedVertexBuffer)
 	{
 		return;
 	}
-
-	assert(CommandListContext);
-	auto CommandBuffer = CommandListContext->GetCommandBuffer();
 
 	RHIBufferCreateInfo CreateInfo;
 	if (NumIndex)
@@ -194,7 +191,7 @@ void StaticMesh::CreateRHI(RHIDevice& Device, RHICommandListContext* CommandList
 			.SetSize(NumIndex * static_cast<size_t>(IndexFormat))
 			.SetInitialData(IndicesData.get())
 			.SetName(StringUtils::Format("%s-IndexBuffer", GetName()));
-		RHIIndexBuffer = Device.CreateBuffer(CreateInfo, CommandBuffer);
+		RHIIndexBuffer = Device.CreateBuffer(CreateInfo);
 	}
 
 	if (NumVertex)
@@ -205,7 +202,7 @@ void StaticMesh::CreateRHI(RHIDevice& Device, RHICommandListContext* CommandList
 			.SetSize(PositionStride * NumVertex)
 			.SetInitialData(PositionData.get())
 			.SetName(StringUtils::Format("%s-PositionBuffer", GetName()));
-		SetVertexBuffer(EVertexAttributes::Position, Device.CreateBuffer(CreateInfo, CommandBuffer));
+		SetVertexBuffer(EVertexAttributes::Position, Device.CreateBuffer(CreateInfo));
 
 		if (HasNormal())
 		{
@@ -213,7 +210,7 @@ void StaticMesh::CreateRHI(RHIDevice& Device, RHICommandListContext* CommandList
 			CreateInfo.SetSize(NormalStride * NumVertex)
 				.SetInitialData(NormalData.get())
 				.SetName(StringUtils::Format("%s-NormalBuffer", GetName()));
-			SetVertexBuffer(EVertexAttributes::Normal, Device.CreateBuffer(CreateInfo, CommandBuffer));
+			SetVertexBuffer(EVertexAttributes::Normal, Device.CreateBuffer(CreateInfo));
 		}
 
 		if (HasTangent())
@@ -222,7 +219,7 @@ void StaticMesh::CreateRHI(RHIDevice& Device, RHICommandListContext* CommandList
 			CreateInfo.SetSize(TangentAndBiTangentStride * NumVertex)
 				.SetInitialData(TangentData.get())
 				.SetName(StringUtils::Format("%s-TangentBuffer", GetName()));
-			SetVertexBuffer(EVertexAttributes::Tangent, Device.CreateBuffer(CreateInfo, CommandBuffer));
+			SetVertexBuffer(EVertexAttributes::Tangent, Device.CreateBuffer(CreateInfo));
 		}
 
 		if (HasUV0())
@@ -231,7 +228,7 @@ void StaticMesh::CreateRHI(RHIDevice& Device, RHICommandListContext* CommandList
 			CreateInfo.SetSize(UVStride * NumVertex)
 				.SetInitialData(UV0Data.get())
 				.SetName(StringUtils::Format("%s-UV0Buffer", GetName()));
-			SetVertexBuffer(EVertexAttributes::UV0, Device.CreateBuffer(CreateInfo, CommandBuffer));
+			SetVertexBuffer(EVertexAttributes::UV0, Device.CreateBuffer(CreateInfo));
 		}
 
 		if (HasUV1())
@@ -240,7 +237,7 @@ void StaticMesh::CreateRHI(RHIDevice& Device, RHICommandListContext* CommandList
 			CreateInfo.SetSize(UVStride * NumVertex)
 				.SetInitialData(UV1Data.get())
 				.SetName(StringUtils::Format("%s-UV1Buffer", GetName()));
-			SetVertexBuffer(EVertexAttributes::UV1, Device.CreateBuffer(CreateInfo, CommandBuffer));
+			SetVertexBuffer(EVertexAttributes::UV1, Device.CreateBuffer(CreateInfo));
 		}
 	}
 
@@ -250,7 +247,7 @@ void StaticMesh::CreateRHI(RHIDevice& Device, RHICommandListContext* CommandList
 		{
 			if (Texture)
 			{
-				Texture->CreateRHI(Device, CommandListContext);
+				Texture->CreateRHI(Device);
 			}
 		}
 	}
