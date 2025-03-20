@@ -8,7 +8,7 @@ BaseApplication::BaseApplication(const char* ConfigurationPath)
 	m_Configs = ApplicationConfiguration::Load(ConfigurationPath ? ConfigurationPath : "Defalut.json");
 }
 
-void BaseApplication::SetRenderBackend(class RHIBackend* Backend)
+void BaseApplication::SetRenderBackend(RHIBackend* Backend)
 {
 	if (m_Configs->EnableRendering && !m_RenderBackend)
 	{

@@ -62,13 +62,14 @@ class ShaderBinary : public SerializableAsset<ShaderBinary>
 public:
 	using BaseClass::BaseClass;
 
-	ShaderBinary(const std::string& ShaderName, ERHIBackend Backend, std::time_t Timestamp, size_t Hash, ShaderBlob&& Blob);
+	ShaderBinary(const std::string& ShaderName, ERHIBackend Backend, ERHIShaderStage Stage, std::time_t Timestamp, size_t Hash, ShaderBlob&& Blob);
 
 	std::time_t GetTimestamp() const { return m_Timestamp; }
 	size_t GetHash() const { return m_Hash; }
 	size_t GetSize() const { return m_Blob.Size; }
 	ERHIBackend GetBackend() const { return m_Backend; }
-	const std::byte* GetBinary() const { return m_Blob.Data.get(); }
+	ERHIShaderStage GetStage() const { return m_Stage; }
+	const std::byte* GetData() const { return m_Blob.Data.get(); }
 	bool IsValid() const { return m_Blob.IsValid(); }
 
 	template<class Archive>
@@ -85,6 +86,7 @@ private:
 	std::time_t m_Timestamp = 0u;
 	size_t m_Hash = 0u;
 	ERHIBackend m_Backend = ERHIBackend::Num;
+	ERHIShaderStage m_Stage = ERHIShaderStage::Num;
 	ShaderBlob m_Blob;
 };
 
@@ -144,14 +146,13 @@ public:
 	
 	virtual const ShaderMetaData& GetMetaData() const = 0;
 	virtual const std::filesystem::path& GetSourceFilePath() const = 0;
+	virtual time_t GetTimestamp() const = 0;
 	virtual std::filesystem::path GetName() const = 0;
 	virtual const char* const GetEntryPoint() const = 0;
 	virtual ERHIShaderStage GetStage() const = 0;
 
-	size_t ComputeHash() const override
-	{
-		return ::ComputeHash(std::filesystem::hash_value(GetSourceFilePath()), ShaderDefines::ComputeHash());
-	}
+	size_t ComputeHash() const override { return ::ComputeHash(ComputeBaseHash(), GetTimestamp()); }
+	size_t ComputeBaseHash() const { return ::ComputeHash(std::filesystem::hash_value(GetSourceFilePath()), ShaderDefines::ComputeHash()); }
 protected:
 	friend struct ShaderCompileTask;
 	friend class ShaderLibrary;
@@ -177,6 +178,7 @@ public:
 	ERHIShaderStage GetStage() const override final { return s_MetaData.GetStage(); }
 	const ShaderMetaData& GetMetaData() const override final { return s_MetaData; }
 	const std::filesystem::path& GetSourceFilePath() const override final { return s_MetaData.GetPath(); }
+	time_t GetTimestamp() const override final { return s_MetaData.GetLastWriteTime(); }
 	const char* const GetEntryPoint() const override final { return s_MetaData.GetEntryPoint(); }
 	std::filesystem::path GetName() const override final { return s_MetaData.GetStem(); }
 protected:

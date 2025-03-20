@@ -10,9 +10,9 @@ struct PreDepthMeshDrawCommandBuilder : public MeshDrawCommandBuilder
 	std::shared_ptr<MeshDrawCommand> Build(const StaticMesh& Mesh, const RenderSettings& GraphicsSettings) override final
 	{
 		auto Command = std::make_shared<MeshDrawCommand>(Mesh);
-		auto& GfxPipelineCreateInfo = Command->GraphicsPipelineCreateInfo;
 		auto VertexShader = std::make_shared<GenericVS>();
 		auto FragmentShader = std::make_shared<DepthOnlyFS>();
+		auto& GfxPipelineCreateInfo = Command->GraphicsPipelineCreateInfo;
 		
 		GfxPipelineCreateInfo.SetPrimitiveTopology(Mesh.GetPrimitiveTopology());
 

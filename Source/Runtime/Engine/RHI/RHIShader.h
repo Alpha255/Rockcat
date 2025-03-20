@@ -122,9 +122,3 @@ public:
 private:
 	ERHIShaderStage m_Stage = ERHIShaderStage::Num;
 };
-
-class RHIGlobalShader : public RHIShader
-{
-public:
-	using RHIShader::RHIShader;
-};

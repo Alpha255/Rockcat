@@ -9,6 +9,8 @@ public:
 	void OnStartup() override final;
 
 	void OnShutdown() override final;
+
+	RHIBackend* GetBackend(ERHIBackend Backend);
 private:
 	RHIBackend* GetOrCreateBackend(ERHIBackend Backend);
 

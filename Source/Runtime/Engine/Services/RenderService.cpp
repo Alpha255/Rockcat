@@ -40,6 +40,11 @@ RHIBackend* RenderService::GetOrCreateBackend(ERHIBackend Backend)
 	return m_Backends[Backend].get();
 }
 
+RHIBackend* RenderService::GetBackend(ERHIBackend Backend)
+{
+	return m_Backends[Backend].get();
+}
+
 void RenderService::OnStartup()
 {
 	for (auto& Application : Engine::Get().GetApplications())

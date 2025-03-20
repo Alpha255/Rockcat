@@ -15,15 +15,19 @@ public:
 
 	void OnShutdown() override final;
 
-	const ShaderBinary* GetBinary(Shader& InShader, ERHIBackend Backend);
-
-	void AddBinary(const std::shared_ptr<ShaderBinary>& Binary);
+	std::vector<const RHIShader*> GetPipelineShaders(const struct RHIGraphicsPipelineCreateInfo& GraphicsPipelineDesc, ERHIBackend Backend);
+	const RHIShader* GetPipelineShaders(const struct RHIComputePipelineCreateInfo& ComputePipelineDesc, ERHIBackend Backend);
 protected:
+	friend struct ShaderCompileTask;
+
 	IShaderCompiler& GetCompiler(ERHIBackend Backend)
 	{
 		assert(Backend < ERHIBackend::Num && Backend > ERHIBackend::Software);
 		return *m_Compilers[Backend];
 	}
+
+	void AddBinary(const std::shared_ptr<ShaderBinary>& Binary);
+	const RHIShader* GetShaderModule(Shader& InShader, ERHIBackend Backend);
 
 	bool RegisterCompileTask(ERHIBackend Backend, size_t Hash);
 	void DeregisterCompileTask(ERHIBackend Backend, size_t Hash);
@@ -32,12 +36,35 @@ protected:
 
 	void LoadCache();
 
-	void DoCompile(Shader& InShader, ERHIBackend Backend, size_t Hash);
+	void QueueCompile(const Shader& InShader, ERHIBackend Backend, size_t BaseHash, size_t TimestampaHash);
 private:
+	struct ShaderObject
+	{
+		std::shared_ptr<ShaderBinary> Binary;
+		RHIShaderPtr Module;
+
+		const RHIShader* GetOrCreateModule(ERHIBackend Backend);
+	};
+
+	struct ShaderFileWatch
+	{
+		const Shader& Target;
+		Array<bool, ERHIBackend> Backends;
+
+		ShaderFileWatch(const Shader& InShader)
+			: Target(InShader)
+		{
+		}
+	};
+
+	void RegisterShaderFileWatch(const Shader& InShader, ERHIBackend Backend, size_t Hash);
+
 	Array<std::unique_ptr<IShaderCompiler>, ERHIBackend> m_Compilers;
 	Array<std::set<size_t>, ERHIBackend> m_CompilingTasks;
 	std::shared_ptr<filewatch::FileWatch<std::string>> m_ShaderFileMonitor;
-	std::map<size_t, Array<std::shared_ptr<ShaderBinary>, ERHIBackend>> m_Binaries;
+	std::unordered_map<size_t, Array<ShaderObject, ERHIBackend>> m_ShaderObjects;
+	std::unordered_map<std::string, std::unordered_map<size_t, std::shared_ptr<ShaderFileWatch>>> m_ShadersToMonitor;
 	std::mutex m_Lock;
 	std::mutex m_CompileTaskLock;
+	std::atomic<size_t> m_MemorySize = 0u;
 };
