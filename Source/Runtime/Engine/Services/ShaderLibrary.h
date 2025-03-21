@@ -15,8 +15,7 @@ public:
 
 	void OnShutdown() override final;
 
-	std::vector<const RHIShader*> GetPipelineShaders(const struct RHIGraphicsPipelineCreateInfo& GraphicsPipelineDesc, ERHIBackend Backend);
-	const RHIShader* GetPipelineShaders(const struct RHIComputePipelineCreateInfo& ComputePipelineDesc, ERHIBackend Backend);
+	const RHIShader* GetShaderModule(const Shader& InShader, ERHIBackend Backend);
 protected:
 	friend struct ShaderCompileTask;
 
@@ -27,7 +26,6 @@ protected:
 	}
 
 	void AddBinary(const std::shared_ptr<ShaderBinary>& Binary);
-	const RHIShader* GetShaderModule(Shader& InShader, ERHIBackend Backend);
 
 	bool RegisterCompileTask(ERHIBackend Backend, size_t Hash);
 	void DeregisterCompileTask(ERHIBackend Backend, size_t Hash);

@@ -1,6 +1,7 @@
 #include "Engine/Asset/Shader.h"
 #include "Engine/RHI/RHIDevice.h"
 #include "Engine/RHI/RHIBackend.h"
+#include "Engine/Services/ShaderLibrary.h"
 
 ShaderBinary::ShaderBinary(const std::string& ShaderName, ERHIBackend Backend, ERHIShaderStage Stage, std::time_t Timestamp, size_t Hash, ShaderBlob&& Blob)
 	: BaseClass(std::move(Paths::ShaderBinaryCachePath() / RHIBackend::GetName(Backend) / StringUtils::Format("%s_%lld", ShaderName.c_str(), Timestamp)))

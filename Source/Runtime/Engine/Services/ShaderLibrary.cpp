@@ -165,32 +165,7 @@ void ShaderLibrary::LoadCache()
 	}
 }
 
-std::vector<const RHIShader*> ShaderLibrary::GetPipelineShaders(const RHIGraphicsPipelineCreateInfo& GraphicsPipelineDesc, ERHIBackend Backend)
-{
-	std::vector<const RHIShader*> PipelineShaders;
-	PipelineShaders.reserve(static_cast<size_t>(ERHIShaderStage::Num));
-
-	for (auto& Shader : GraphicsPipelineDesc.Shaders)
-	{
-		if (Shader)
-		{
-			auto Module = GetShaderModule(*Shader, Backend);
-			assert(Module);
-			PipelineShaders.emplace_back(Module);
-		}
-	}
-
-	return PipelineShaders;
-}
-
-const RHIShader* ShaderLibrary::GetPipelineShaders(const RHIComputePipelineCreateInfo& ComputePipelineDesc, ERHIBackend Backend)
-{
-	(void)ComputePipelineDesc;
-	(void)Backend;
-	return nullptr;
-}
-
-const RHIShader* ShaderLibrary::GetShaderModule(Shader& InShader, ERHIBackend Backend)
+const RHIShader* ShaderLibrary::GetShaderModule(const Shader& InShader, ERHIBackend Backend)
 {
 	auto BaseHash = InShader.ComputeBaseHash();
 
