@@ -78,7 +78,7 @@ RHIFrameBuffer* GeometryPass::GetFrameBuffer()
 			}
 		}
 
-		m_FrameBuffer = GetDevice().GetOrCreateFrameBuffer(CreateInfo);
+		m_FrameBuffer = GetRenderDevice().GetOrCreateFrameBuffer(CreateInfo);
 	}
 	
 	return m_FrameBuffer;

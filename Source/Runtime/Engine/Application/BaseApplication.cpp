@@ -17,7 +17,7 @@ void BaseApplication::SetRenderBackend(RHIBackend* Backend)
 		if (m_Configs->EnableRendering)
 		{
 			m_RenderViewport = std::make_unique<Viewport>(
-				GetRenderBackend(), 
+				GetRenderBackend().GetDevice(),
 				m_Configs->WindowDesc, 
 				m_Configs->GraphicsSettings.FullScreen, 
 				m_Configs->GraphicsSettings.VSync);

@@ -1,9 +1,10 @@
 #include "Engine/Asset/Shader.h"
 #include "Engine/RHI/RHIPipeline.h"
+#include "Engine/Services/ShaderLibrary.h"
 
 RHIPipelineState::RHIPipelineState(const RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo)
 {
-	for (auto Shader : GfxPipelineCreateInfo.Shaders)
+	for (auto& Shader : GfxPipelineCreateInfo.ShaderPipeline)
 	{
 		if (!Shader)
 		{
@@ -45,4 +46,17 @@ void RHIPipelineState::Commit(RHICommandBuffer* CommandBuffer)
 		CommitShaderResources(CommandBuffer);
 		ClearDirty();
 	}
+}
+
+size_t RHIGraphicsShaderPipeline::ComputeHash(ERHIBackend Backend) const
+{
+	size_t Hash = 0u;
+	for (auto& Shader : *this)
+	{
+		if (Shader)
+		{
+			HashCombine(Hash, ShaderLibrary::Get().GetShaderModule(*Shader, Backend));
+		}
+	}
+	return Hash;
 }

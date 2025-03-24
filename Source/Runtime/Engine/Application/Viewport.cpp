@@ -1,9 +1,9 @@
 #include "Engine/Application/Viewport.h"
-#include "Engine/RHI/RHIBackend.h"
+#include "Engine/RHI/RHIDevice.h"
 #include "Engine/RHI/RHISwapchain.h"
 #include "Runtime/Core/Window.h"
 
-Viewport::Viewport(RHIBackend& Backend, const WindowCreateInfo& WindowInfo, bool Fullscreen, bool VSync)
+Viewport::Viewport(RHIDevice& Device, const WindowCreateInfo& WindowInfo, bool Fullscreen, bool VSync)
 	: m_Window(new Window(WindowInfo))
 {
 	m_Window->SetMode(Fullscreen ? EWindowMode::ExclusiveFullscreen : EWindowMode::Windowed);
@@ -14,7 +14,7 @@ Viewport::Viewport(RHIBackend& Backend, const WindowCreateInfo& WindowInfo, bool
 		.SetHeight(m_Window->GetHeight())
 		.SetFullscreen(Fullscreen)
 		.SetVSync(VSync);
-	m_Swapchain = Backend.GetDevice().CreateSwapchain(CreateInfo);
+	m_Swapchain = Device.CreateSwapchain(CreateInfo);
 
 	MessageRouter::Get().RegisterMessageHandler(this);
 }

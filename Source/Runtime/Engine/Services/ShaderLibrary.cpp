@@ -69,11 +69,11 @@ void ShaderLibrary::OnStartup()
 #if SHADER_HOT_RELOAD
 	auto ShaderPath = Paths::ShaderPath().string();
 	m_ShaderFileMonitor = std::make_shared<filewatch::FileWatch<std::string>>(ShaderPath/*, std::regex("[*.vert, *.frag, *.comp, *.geom]")*/,
-		[this](const std::string& Path, filewatch::Event FileEvent) {
+		[this](const std::string& SubPath, filewatch::Event FileEvent) {
 			switch (FileEvent)
 			{
 			case filewatch::Event::modified:
-				OnShaderFileModified(Path);
+				OnShaderFileModified(Paths::ShaderPath() / SubPath);
 				break;
 			}
 		});
@@ -82,21 +82,41 @@ void ShaderLibrary::OnStartup()
 	LoadCache();
 }
 
-void ShaderLibrary::OnShaderFileModified(const std::string& FilePath)
+void ShaderLibrary::OnShaderFileModified(const std::filesystem::path& FilePath)
 {
-	LOG_INFO("{} is modified.", FilePath);
+	auto It = m_ShadersToMonitor.find(FilePath);
+	if (It != m_ShadersToMonitor.end())
+	{
+		LOG_INFO("ShaderLibrary: Shader file \"{}\" is modified. Queue compilling...", FilePath.string());
+
+		for (auto& [Hash, Watch] : It->second)
+		{
+			for (size_t Backend = 0; Backend < (size_t)ERHIBackend::Num; ++Backend)
+			{
+				if (Watch->Backends[Backend])
+				{
+					QueueCompile(Watch->Target, static_cast<ERHIBackend>(Backend), Hash, Watch->Target.ComputeHash());
+				}
+			}
+		}
+	}
 }
 
 void ShaderLibrary::RegisterShaderFileWatch(const Shader& InShader, ERHIBackend Backend, size_t Hash)
 {
-	auto ShaderFilePath = InShader.GetSourceFilePath().string();
+	auto& ShaderFilePath = InShader.GetSourceFilePath();
 	auto It = m_ShadersToMonitor.find(ShaderFilePath);
 	if (It == m_ShadersToMonitor.end())
 	{
 		It = m_ShadersToMonitor.emplace(ShaderFilePath, std::unordered_map<size_t, std::shared_ptr<ShaderFileWatch>>()).first;
-		auto WatchIt = It->second.emplace(Hash, std::make_shared<ShaderFileWatch>(InShader)).first;
-		WatchIt->second->Backends[Backend] = true;
 	}
+
+	auto WatchIt = It->second.find(Hash);
+	if (WatchIt != It->second.cend())
+	{
+		WatchIt = It->second.emplace(Hash, std::make_shared<ShaderFileWatch>(InShader)).first;
+	}
+	WatchIt->second->Backends[Backend] = true;
 }
 
 void ShaderLibrary::QueueCompile(const Shader& InShader, ERHIBackend Backend, size_t BaseHash, size_t TimestampaHash)
@@ -177,10 +197,10 @@ const RHIShader* ShaderLibrary::GetShaderModule(const Shader& InShader, ERHIBack
 	}
 
 #if SHADER_HOT_RELOAD
+	RegisterShaderFileWatch(InShader, Backend, BaseHash);
 #endif
 
 	QueueCompile(InShader, Backend, BaseHash, InShader.ComputeHash());
-	// ### TODO: Get fallback
 	return nullptr;
 }
 

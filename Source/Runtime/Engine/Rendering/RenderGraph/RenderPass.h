@@ -25,8 +25,7 @@ protected:
 
 	inline class RenderGraph& GetGraph() { return m_Graph; }
 	const RenderSettings& GetRenderSettings() const;
-	class RHIBackend& GetBackend();
-	class RHIDevice& GetDevice();
+	class RHIDevice& GetRenderDevice();
 
 	RDGResource& AddResource(RDGResource::EType Type, const char* Name, RDGResource::EVisibility Visibility);
 	void AddField(RDGResourceID ID, RDGResource::EVisibility Visibility);

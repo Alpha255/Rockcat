@@ -141,6 +141,7 @@ class Shader : public ShaderDefines
 public:
 	const std::map<std::string, ShaderVariable>& GetVariables() const { return m_Variables; }
 	RHIBuffer* GetUniformBuffer(class RHIDevice& Device);
+
 	virtual void SetupViewParams(const class SceneView&) {}
 	virtual void SetupMaterialProperty(const struct MaterialProperty&) {}
 	
@@ -151,6 +152,8 @@ public:
 	virtual const char* const GetEntryPoint() const = 0;
 	virtual ERHIShaderStage GetStage() const = 0;
 
+	const RHIShader* TryGetRHI(ERHIBackend Backend) const;
+
 	size_t ComputeHash() const override { return ::ComputeHash(ComputeBaseHash(), GetTimestamp()); }
 	size_t ComputeBaseHash() const { return ::ComputeHash(std::filesystem::hash_value(GetSourceFilePath()), ShaderDefines::ComputeHash()); }
 protected:
@@ -159,6 +162,7 @@ protected:
 
 	void RegisterVariable(const char* Name, ShaderVariable&& Variable);
 	virtual ShaderMetaData& GetMetaData() = 0;
+	virtual const RHIShader* GetRHIFallback() const;
 private:
 	size_t ComputeUniformBufferSize();
 
@@ -178,7 +182,7 @@ public:
 	ERHIShaderStage GetStage() const override final { return s_MetaData.GetStage(); }
 	const ShaderMetaData& GetMetaData() const override final { return s_MetaData; }
 	const std::filesystem::path& GetSourceFilePath() const override final { return s_MetaData.GetPath(); }
-	time_t GetTimestamp() const override final { return s_MetaData.GetLastWriteTime(); }
+	time_t GetTimestamp() const override final { return s_MetaData.GetLastWriteTime(GetSourceFilePath()); }
 	const char* const GetEntryPoint() const override final { return s_MetaData.GetEntryPoint(); }
 	std::filesystem::path GetName() const override final { return s_MetaData.GetStem(); }
 protected:

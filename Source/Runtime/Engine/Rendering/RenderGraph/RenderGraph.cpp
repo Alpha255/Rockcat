@@ -5,14 +5,14 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/Application/Viewport.h"
 
-std::shared_ptr<RenderGraph> RenderGraph::Create(RHIBackend& Backend, const RenderSettings& GraphicsSettings, const Viewport& RenderViewport)
+std::shared_ptr<RenderGraph> RenderGraph::Create(RHIDevice& Device, const RenderSettings& GraphicsSettings, const Viewport& RenderViewport)
 {
 	std::shared_ptr<RenderGraph> Graph;
 
 	switch (GraphicsSettings.RenderingPath)
 	{
 	case ERenderingPath::ForwardRendering:
-		Graph.reset(new ForwardRenderingPath(Backend, GraphicsSettings, RenderViewport));
+		Graph.reset(new ForwardRenderingPath(Device, GraphicsSettings, RenderViewport));
 		break;
 	case ERenderingPath::DeferredShading:
 		assert(false);
@@ -26,8 +26,8 @@ std::shared_ptr<RenderGraph> RenderGraph::Create(RHIBackend& Backend, const Rend
 	return Graph;
 }
 
-RenderGraph::RenderGraph(RHIBackend& Backend, const RenderSettings& GraphicsSettings, const Viewport& RenderViewport)
-	: m_Backend(Backend)
+RenderGraph::RenderGraph(RHIDevice& Device, const RenderSettings& GraphicsSettings, const Viewport& RenderViewport)
+	: m_RenderDevice(Device)
 	, m_RenderSettings(GraphicsSettings)
 	, m_RenderViewport(RenderViewport)
 	, m_ResourceMgr(new ResourceManager())
@@ -66,7 +66,7 @@ void RenderGraph::Execute(const Scene& InScene)
 	if (!m_RenderScene)
 	{
 		m_RenderScene = std::make_shared<RenderScene>(InScene);
-		m_RenderScene->BuildMeshDrawCommands(GetBackend().GetDevice(), GetRenderSettings());
+		m_RenderScene->BuildMeshDrawCommands(GetRenderDevice(), GetRenderSettings());
 		return;
 	}
 
@@ -75,7 +75,7 @@ void RenderGraph::Execute(const Scene& InScene)
 		m_RenderScene = std::make_shared<RenderScene>(InScene);
 	}
 
-	m_RenderScene->BuildMeshDrawCommands(GetBackend().GetDevice(), GetRenderSettings());
+	m_RenderScene->BuildMeshDrawCommands(GetRenderDevice(), GetRenderSettings());
 
 	/// Make render scene one frame lag than main thread ???
 #else
@@ -88,7 +88,7 @@ void RenderGraph::Execute(const Scene& InScene)
 
 	Compile();
 
-	m_ResourceMgr->ResolveResources(m_Backend.GetDevice());
+	m_ResourceMgr->ResolveResources(GetRenderDevice());
 
 	for (auto& Pass : m_RenderPasses)
 	{

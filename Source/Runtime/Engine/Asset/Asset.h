@@ -155,17 +155,6 @@ public:
 	}
 
 	static std::optional<Callbacks> s_DefaultNullCallbacks;
-protected:
-	friend struct AssetImportTask;
-
-	void SetStatus(EStatus Status) { m_Status.store(Status); }
-
-	virtual void OnPreLoad() { if (m_Callbacks.PreLoadCallback) { m_Callbacks.PreLoadCallback(*this); } }
-	virtual void OnReady() { if (m_Callbacks.ReadyCallback) { m_Callbacks.ReadyCallback(*this); } }
-	virtual void OnLoadFailed() { if (m_Callbacks.LoadFailedCallback) { m_Callbacks.LoadFailedCallback(*this); } }
-	virtual void OnLoadCanceled() { if (m_Callbacks.CanceledCallback) { m_Callbacks.CanceledCallback(*this); } }
-	virtual void OnSaved() { if (m_Callbacks.SavedCallback) { m_Callbacks.SavedCallback(*this); } }
-	virtual void OnUnloaded() { if (m_Callbacks.UnloadedCallback) { m_Callbacks.UnloadedCallback(*this); } }
 
 	static std::time_t GetLastWriteTime(const std::filesystem::path& Path)
 	{
@@ -185,6 +174,17 @@ protected:
 		}
 		return 0u;
 	}
+protected:
+	friend struct AssetImportTask;
+
+	void SetStatus(EStatus Status) { m_Status.store(Status); }
+
+	virtual void OnPreLoad() { if (m_Callbacks.PreLoadCallback) { m_Callbacks.PreLoadCallback(*this); } }
+	virtual void OnReady() { if (m_Callbacks.ReadyCallback) { m_Callbacks.ReadyCallback(*this); } }
+	virtual void OnLoadFailed() { if (m_Callbacks.LoadFailedCallback) { m_Callbacks.LoadFailedCallback(*this); } }
+	virtual void OnLoadCanceled() { if (m_Callbacks.CanceledCallback) { m_Callbacks.CanceledCallback(*this); } }
+	virtual void OnSaved() { if (m_Callbacks.SavedCallback) { m_Callbacks.SavedCallback(*this); } }
+	virtual void OnUnloaded() { if (m_Callbacks.UnloadedCallback) { m_Callbacks.UnloadedCallback(*this); } }
 
 	mutable std::unique_ptr<DataBlock> m_RawData;
 	std::atomic<EStatus> m_Status = EStatus::NotLoaded;

@@ -62,3 +62,26 @@ size_t Shader::ComputeUniformBufferSize()
 
 	return Size;
 }
+
+const RHIShader* Shader::TryGetRHI(ERHIBackend Backend) const
+{
+	if (auto Shader = ShaderLibrary::Get().GetShaderModule(*this, Backend))
+	{
+		return Shader;
+	}
+
+	return GetRHIFallback();
+}
+
+const RHIShader* Shader::GetRHIFallback() const
+{
+	switch (GetStage())
+	{
+	case ERHIShaderStage::Vertex:
+		return nullptr;
+	case ERHIShaderStage::Fragment:
+		return nullptr;
+	default:
+		return nullptr;
+	}
+}

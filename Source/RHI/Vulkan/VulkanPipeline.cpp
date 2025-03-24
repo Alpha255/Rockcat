@@ -5,6 +5,7 @@
 #include "RHI/Vulkan/VulkanShader.h"
 #include "RHI/Vulkan/VulkanCommandListContext.h"
 #include "Engine/Services/SpdLogService.h"
+#include "Engine/Services/ShaderLibrary.h"
 
 VulkanPipelineCache::VulkanPipelineCache(const VulkanDevice& Device)
 	: VkHwResource(Device)
@@ -26,20 +27,16 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 
 	std::vector<VulkanShader> Shaders;
 	std::vector<vk::PipelineShaderStageCreateInfo> ShaderStageCreateInfos;
-	for (auto Shader : CreateInfo.Shaders)
+	for (auto& Shader : CreateInfo.ShaderPipeline)
 	{
 		if (Shader)
 		{
-			RHIShaderCreateInfo ShaderCreateInfo;
-			ShaderCreateInfo.SetStage(Shader->GetStage())
-				//.SetShaderBinary(Shader->GetBinary(ERHIBackend::Vulkan))
-				.SetName(Shader->GetName().string());
-
-			auto& ShaderModule = Shaders.emplace_back(VulkanShader(Device, ShaderCreateInfo)); // TODO: Cache shader module ???
+			auto ShaderModule = Cast<VulkanShader>(ShaderLibrary::Get().GetShaderModule(*Shader, ERHIBackend::Vulkan));
+			assert(ShaderModule);
 
 			ShaderStageCreateInfos.emplace_back(vk::PipelineShaderStageCreateInfo())
-				.setStage(GetShaderStage(ShaderCreateInfo.Stage))
-				.setModule(ShaderModule.GetNative())
+				.setStage(GetShaderStage(Shader->GetStage()))
+				.setModule(ShaderModule->GetNative())
 				.setPName("main");
 		}
 	}

@@ -30,7 +30,7 @@ protected:
 	bool RegisterCompileTask(ERHIBackend Backend, size_t Hash);
 	void DeregisterCompileTask(ERHIBackend Backend, size_t Hash);
 
-	void OnShaderFileModified(const std::string& FilePath);
+	void OnShaderFileModified(const std::filesystem::path& FilePath);
 
 	void LoadCache();
 
@@ -61,7 +61,7 @@ private:
 	Array<std::set<size_t>, ERHIBackend> m_CompilingTasks;
 	std::shared_ptr<filewatch::FileWatch<std::string>> m_ShaderFileMonitor;
 	std::unordered_map<size_t, Array<ShaderObject, ERHIBackend>> m_ShaderObjects;
-	std::unordered_map<std::string, std::unordered_map<size_t, std::shared_ptr<ShaderFileWatch>>> m_ShadersToMonitor;
+	std::unordered_map<std::filesystem::path, std::unordered_map<size_t, std::shared_ptr<ShaderFileWatch>>> m_ShadersToMonitor;
 	std::mutex m_Lock;
 	std::mutex m_CompileTaskLock;
 	std::atomic<size_t> m_MemorySize = 0u;

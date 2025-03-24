@@ -8,7 +8,7 @@
 class Viewport : public MessageHandler
 {
 public:
-	Viewport(class RHIBackend& Backend, const struct WindowCreateInfo& WindowInfo, bool Fullscreen, bool VSync);
+	Viewport(class RHIDevice& Device, const struct WindowCreateInfo& WindowInfo, bool Fullscreen, bool VSync);
 
 	uint32_t GetWidth() const { return m_Window->GetWidth(); }
 	uint32_t GetHeight() const { return m_Window->GetHeight(); }
