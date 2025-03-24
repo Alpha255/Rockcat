@@ -93,7 +93,7 @@ void ShaderLibrary::OnShaderFileModified(const std::filesystem::path& FilePath)
 		{
 			for (size_t Backend = 0; Backend < (size_t)ERHIBackend::Num; ++Backend)
 			{
-				if (Watch->Backends[Backend])
+				if (Watch->Backends[Backend] && Watch->Target.IsDirty())
 				{
 					QueueCompile(Watch->Target, static_cast<ERHIBackend>(Backend), Hash, Watch->Target.ComputeHash());
 				}

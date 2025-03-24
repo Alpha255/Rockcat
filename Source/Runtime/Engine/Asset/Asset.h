@@ -129,13 +129,9 @@ public:
 
 	bool IsDirty() const
 	{
-		if (!m_Dirty)
-		{
-			std::time_t LastWriteTime = m_LastWriteTime;
-			m_LastWriteTime = GetLastWriteTime(m_Path);
-			m_Dirty = m_LastWriteTime != LastWriteTime;
-		}
-		return m_Dirty;
+		std::time_t LastWriteTime = m_LastWriteTime;
+		m_LastWriteTime = GetLastWriteTime(m_Path);
+		return m_LastWriteTime != LastWriteTime;
 	}
 
 	void SetCallbacks(std::optional<Callbacks>& InCallbacks)
@@ -193,7 +189,6 @@ protected:
 
 	std::filesystem::path m_Path; /// Notice the order of the members
 	mutable std::time_t m_LastWriteTime = 0u;
-	mutable bool m_Dirty = false;
 };
 
 class IAssetImporter

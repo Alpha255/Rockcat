@@ -233,8 +233,6 @@ private:
 						Property->ShadingMode = EShadingMode::Unlit;
 						break;
 					}
-
-					Property->MarkDirty(true);
 				}
 
 				ProcessTextures(AiMaterial, *Property, AssimpScene.GetPath().parent_path());

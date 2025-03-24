@@ -151,6 +151,7 @@ public:
 	virtual std::filesystem::path GetName() const = 0;
 	virtual const char* const GetEntryPoint() const = 0;
 	virtual ERHIShaderStage GetStage() const = 0;
+	virtual bool IsDirty() const = 0;
 
 	const RHIShader* TryGetRHI(ERHIBackend Backend) const;
 
@@ -185,6 +186,7 @@ public:
 	time_t GetTimestamp() const override final { return s_MetaData.GetLastWriteTime(GetSourceFilePath()); }
 	const char* const GetEntryPoint() const override final { return s_MetaData.GetEntryPoint(); }
 	std::filesystem::path GetName() const override final { return s_MetaData.GetStem(); }
+	bool IsDirty() const override final { return s_MetaData.IsDirty(); }
 protected:
 	ShaderMetaData& GetMetaData() override final { return s_MetaData; }
 
