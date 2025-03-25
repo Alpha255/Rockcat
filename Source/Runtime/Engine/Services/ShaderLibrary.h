@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Module.h"
+#include "Core/Singleton.h"
 #include "Engine/Asset/ShaderCompiler.h"
 
 namespace filewatch
@@ -8,61 +8,64 @@ namespace filewatch
 	template<class T> class FileWatch;
 };
 
-class ShaderLibrary : public IService<ShaderLibrary>
+class ShaderLibrary : public LazySingleton<ShaderLibrary>
 {
 public:
-	void OnStartup() override final;
+	~ShaderLibrary();
 
-	void OnShutdown() override final;
-
-	const RHIShader* GetShaderModule(const Shader& InShader, ERHIBackend Backend);
+	const RHIShader* GetShaderModule(const Shader& InShader);
 protected:
+	ALLOW_ACCESS_LAZY(ShaderLibrary);
+
 	friend struct ShaderCompileTask;
 
-	IShaderCompiler& GetCompiler(ERHIBackend Backend)
-	{
-		assert(Backend < ERHIBackend::Num && Backend > ERHIBackend::Software);
-		return *m_Compilers[Backend];
-	}
+	ShaderLibrary(ERHIBackend Backend, RHIDevice& Device);
 
-	void AddBinary(const std::shared_ptr<ShaderBinary>& Binary);
-
-	bool RegisterCompileTask(ERHIBackend Backend, size_t Hash);
-	void DeregisterCompileTask(ERHIBackend Backend, size_t Hash);
+	bool RegisterCompileTask(size_t Hash);
+	void DeregisterCompileTask(size_t Hash);
 
 	void OnShaderFileModified(const std::filesystem::path& FilePath);
 
-	void LoadCache();
-
-	void QueueCompile(const Shader& InShader, ERHIBackend Backend, size_t BaseHash, size_t TimestampaHash);
+	void QueueCompile(const Shader& InShader, size_t BaseHash, size_t TimestampHash);
 private:
-	struct ShaderObject
+	struct ShaderPermutation
 	{
+		const Shader& SrcShader;
 		std::shared_ptr<ShaderBinary> Binary;
 		RHIShaderPtr Module;
 
-		const RHIShader* GetOrCreateModule(ERHIBackend Backend);
-	};
+		const RHIShader* GetOrCreateRHI(RHIDevice& Device);
 
-	struct ShaderFileWatch
-	{
-		const Shader& Target;
-		Array<bool, ERHIBackend> Backends;
-
-		ShaderFileWatch(const Shader& InShader)
-			: Target(InShader)
+		ShaderPermutation(const Shader& InShader)
+			: SrcShader(InShader)
 		{
 		}
 	};
 
-	void RegisterShaderFileWatch(const Shader& InShader, ERHIBackend Backend, size_t Hash);
+	struct ShaderFileWatches
+	{
+		time_t Timestamp = 0u;
+		std::unordered_set<std::filesystem::path> IncludeFiles;
+		std::unordered_set<size_t> AllPermutations;
+	};
 
-	Array<std::unique_ptr<IShaderCompiler>, ERHIBackend> m_Compilers;
-	Array<std::set<size_t>, ERHIBackend> m_CompilingTasks;
+	void AddBinary(const Shader& InShader, std::shared_ptr<ShaderBinary>& Binary);
+
+	void RegisterShaderFileWatch(const Shader& InShader, size_t Hash);
+
+	std::unordered_set<std::filesystem::path> ParseIncludeFiles(const std::filesystem::path& ShaderFilePath);
+
+	RHIDevice& m_Device;
+	ERHIBackend m_Backend;
+
+	std::set<size_t> m_CompilingTasks;
+	std::unique_ptr<IShaderCompiler> m_Compiler;
 	std::shared_ptr<filewatch::FileWatch<std::string>> m_ShaderFileMonitor;
-	std::unordered_map<size_t, Array<ShaderObject, ERHIBackend>> m_ShaderObjects;
-	std::unordered_map<std::filesystem::path, std::unordered_map<size_t, std::shared_ptr<ShaderFileWatch>>> m_ShadersToMonitor;
-	std::mutex m_Lock;
+	std::unordered_map<std::filesystem::path, time_t> m_IncludeFiles;
+	std::unordered_map<std::filesystem::path, ShaderFileWatches> m_ShaderFileWatches;
+	std::unordered_map<size_t, ShaderPermutation> m_ShaderPermutations;
+	std::mutex m_ShaderPermutationLock;
 	std::mutex m_CompileTaskLock;
+	std::mutex m_ShaderFileWatchLock;
 	std::atomic<size_t> m_MemorySize = 0u;
 };

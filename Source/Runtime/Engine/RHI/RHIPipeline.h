@@ -24,7 +24,7 @@ using RHIShaderResourceLayout = Array<std::vector<RHIShaderResourceBinding>, ERH
 class RHIGraphicsShaderPipeline : public Array<std::shared_ptr<Shader>, ERHIShaderStage>
 {
 public:
-	size_t ComputeHash(ERHIBackend Backend) const;
+	size_t ComputeHash() const;
 };
 
 struct RHIGraphicsPipelineCreateInfo
@@ -305,6 +305,8 @@ inline size_t ComputeHash(const RHIGraphicsPipelineCreateInfo& Desc)
 		ComputeHash(Desc.DepthStencilState),
 		ComputeHash(Desc.MultisampleState),
 		ComputeHash(Desc.InputLayout));
+
+	HashCombine(Hash, Desc.ShaderPipeline.ComputeHash());
 
 	return Hash;
 }

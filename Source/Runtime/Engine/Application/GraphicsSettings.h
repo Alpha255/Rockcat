@@ -144,28 +144,3 @@ struct RenderSettings
 		);
 	}
 };
-
-struct RHIBackendConfiguration : public SerializableAsset<RHIBackendConfiguration>
-{
-	using BaseClass::BaseClass;
-
-	bool EnableAsyncCompute = true;
-	bool UseTransferQueue = false;
-	bool AsyncCommandlistSubmission = false;
-	bool AsyncMeshDrawCommandsBuilding = false;
-	bool SeparateRenderThread = false;
-	bool BatchResourceUpload = false;
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(EnableAsyncCompute),
-			CEREAL_NVP(UseTransferQueue),
-			CEREAL_NVP(AsyncCommandlistSubmission),
-			CEREAL_NVP(AsyncMeshDrawCommandsBuilding),
-			CEREAL_NVP(SeparateRenderThread),
-			CEREAL_NVP(BatchResourceUpload)
-		);
-	}
-};

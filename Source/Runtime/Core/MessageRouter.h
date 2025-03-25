@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Math/Math.h"
+#include "Core/Singleton.h"
 
 enum class EMouseButton : uint8_t
 {
@@ -127,11 +128,11 @@ public:
 	virtual void OnWindowStatusChanged(EWindowStatus) {}
 };
 
-class MessageRouter
+class MessageRouter : public LazySingleton<MessageRouter>
 {
+protected:
+	ALLOW_ACCESS_LAZY(MessageRouter);
 public:
-	static MessageRouter& Get();
-
 	void RegisterMessageHandler(MessageHandler* Handler);
 	void DeregisterMessageHandler(MessageHandler* Handler);
 

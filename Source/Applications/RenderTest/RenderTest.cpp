@@ -4,11 +4,16 @@
 #include "Engine/RHI/RHIBackend.h"
 #include "Engine/Rendering/RenderGraph/RenderGraph.h"
 #include "Engine/Services/TaskFlowService.h"
+#include "Engine/Services/ShaderLibrary.h"
+#include "Engine/Asset/GlobalShaders.h"
 
 void RenderTest::Initialize()
 {
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");
 	//m_RenderGraph = RenderGraph::Create(GetRenderBackend().GetDevice(), GetRenderSettings(), GetRenderViewport());
+
+	auto VS = new GenericVS();
+	ShaderLibrary::Get().GetShaderModule(*VS);
 }
 
 void RenderTest::Tick(float ElapsedSeconds)

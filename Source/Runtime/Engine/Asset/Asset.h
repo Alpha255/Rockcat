@@ -115,7 +115,7 @@ public:
 
 	virtual ~Asset() = default;
 
-	EStatus GetStatus() const { return m_Status.load(); }
+	EStatus GetStatus() const { return m_Status.load(std::memory_order_relaxed); }
 	virtual bool IsReady() const { return GetStatus() == EStatus::Ready; }
 
 	const std::filesystem::path& GetPath() const { return m_Path; }
@@ -173,7 +173,7 @@ public:
 protected:
 	friend struct AssetImportTask;
 
-	void SetStatus(EStatus Status) { m_Status.store(Status); }
+	void SetStatus(EStatus Status) { m_Status.store(Status, std::memory_order_release); }
 
 	virtual void OnPreLoad() { if (m_Callbacks.PreLoadCallback) { m_Callbacks.PreLoadCallback(*this); } }
 	virtual void OnReady() { if (m_Callbacks.ReadyCallback) { m_Callbacks.ReadyCallback(*this); } }

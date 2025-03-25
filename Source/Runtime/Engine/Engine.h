@@ -1,15 +1,11 @@
 #pragma once
 
+#include "Core/Singleton.h"
 #include "Engine/Application/BaseApplication.h"
 
-class Engine final : public NoneCopyable
+class Engine final : public Singleton<Engine>
 {
 public:
-	static Engine& Get();
-
-	Engine() = default;
-	~Engine() = default;
-
 	void Run();
 
 	template<class TApplication>
@@ -31,6 +27,7 @@ private:
 	void Finalize();
 
 	std::list<std::unique_ptr<BaseApplication>> m_Applications;
+	std::shared_ptr<struct RenderingConfiguration> m_RenderingConfigs;
 
 	bool m_Initialized = false;
 };

@@ -12,6 +12,7 @@
 #include "RHI/Vulkan/VulkanSwapchain.h"
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
 #include "Engine/Services/TaskFlowService.h"
+#include "Engine/Services/ShaderLibrary.h"
 #include "Engine/RHI/RHIUploadManager.h"
 
 VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
@@ -155,27 +156,17 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 	LogEnabledLayerAndExtensions(WantedLayers, WantedExtensions, "device");
 
 	std::set<uint32_t> QueueFamilyIndices{ GraphicsQueueIndex, PresentQueueIndex };
-	if (VulkanRHI::GetConfigs().EnableAsyncCompute)
+	
+	if (ComputeQueueIndex != GraphicsQueueIndex)
 	{
-		if (ComputeQueueIndex != GraphicsQueueIndex)
-		{
-			QueueFamilyIndices.insert(ComputeQueueIndex);
-		}
-		else
-		{
-			const_cast<RHIBackendConfiguration*>(&VulkanRHI::GetConfigs())->EnableAsyncCompute = false;
-		}
+		QueueFamilyIndices.insert(ComputeQueueIndex);
+		SetSupportsAsyncCompute(true);
 	}
-	if (VulkanRHI::GetConfigs().UseTransferQueue)
+
+	if (TransferQueueIndex != GraphicsQueueIndex)
 	{
-		if (TransferQueueIndex != GraphicsQueueIndex)
-		{
-			QueueFamilyIndices.insert(TransferQueueIndex);
-		}
-		else
-		{
-			const_cast<RHIBackendConfiguration*>(&VulkanRHI::GetConfigs())->UseTransferQueue = false;
-		}
+		QueueFamilyIndices.insert(TransferQueueIndex);
+		//SetSupportsTransferQueue(true);
 	}
 
 	const float Priority = 1.0f;
@@ -239,10 +230,13 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 	};
 
 	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Graphics, GraphicsQueueIndex, true);
-	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Transfer, TransferQueueIndex, VulkanRHI::GetConfigs().UseTransferQueue);
-	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Compute, ComputeQueueIndex, VulkanRHI::GetConfigs().EnableAsyncCompute);
+	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Transfer, TransferQueueIndex, SupportsTransferQueue());
+	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Compute, ComputeQueueIndex, SupportsAsyncCompute());
 	
 	assert(PresentQueueIndex == GraphicsQueueIndex);
+
+	//SetSupportsAsyncCommandlistSubmission(TaskFlowService::Get().GetNumWorkThreads() > 1u);
+	//SetSupportsAsyncMeshDrawCommandsBuilding(TaskFlowService::Get().GetNumWorkThreads() > 1u);
 
 	for (uint8_t Index = 0u; Index < TaskFlowService::Get().GetNumWorkThreads(); ++Index)
 	{
@@ -253,6 +247,7 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 	
 	VulkanMemoryAllocator::Create(*this);
 	RHIUploadManager::Create(*this);
+	ShaderLibrary::Create(ERHIBackend::Vulkan, *this);
 }
 
 RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& CreateInfo)

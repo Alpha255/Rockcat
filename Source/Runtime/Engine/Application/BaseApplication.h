@@ -20,13 +20,13 @@ public:
 	class RHIBackend& GetRenderBackend();
 	const struct RenderSettings& GetRenderSettings() const;
 protected:
-	friend class RenderService;
+	friend class Engine;
+
+	void InitializeRHI();
 
 	virtual void RenderGUI(class Canvas&) {}
-
-	void SetRenderBackend(class RHIBackend* Backend);
 private:
 	std::shared_ptr<struct ApplicationConfiguration> m_Configs;
 	std::unique_ptr<Viewport> m_RenderViewport;
-	class RHIBackend* m_RenderBackend = nullptr;
+	std::unique_ptr<class RHIBackend> m_RenderBackend;
 };

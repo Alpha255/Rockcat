@@ -605,7 +605,7 @@ void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const RHIBuffe
 	auto FormatAttributes = RHI::GetFormatAttributes(MipWidth, MipHeight, Texture->GetFormat());
 
 	vk::ImageSubresourceRange SubresourceRange(vk::ImageAspectFlagBits::eColor, MipLevel, 1u, ArrayLayer, 1u);
-	ERHIDeviceQueue DstQueue = VulkanRHI::GetConfigs().UseTransferQueue ? ERHIDeviceQueue::Transfer : ERHIDeviceQueue::Graphics;
+	ERHIDeviceQueue DstQueue = GetDevice().SupportsTransferQueue() ? ERHIDeviceQueue::Transfer : ERHIDeviceQueue::Graphics;
 
 	VulkanPipelineBarrier Barrier(GetDevice());
 	Barrier.AddImageLayoutTransition(ERHIDeviceQueue::Graphics, DstQueue, DstImage->GetNative(), vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, SubresourceRange)
@@ -658,7 +658,7 @@ void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const RHIBuffe
 	}
 
 	vk::ImageSubresourceRange SubresourceRange(vk::ImageAspectFlagBits::eColor, 0u, VK_REMAINING_MIP_LEVELS, 0u, VK_REMAINING_ARRAY_LAYERS);
-	ERHIDeviceQueue DstQueue = VulkanRHI::GetConfigs().UseTransferQueue ? ERHIDeviceQueue::Transfer : ERHIDeviceQueue::Graphics;
+	ERHIDeviceQueue DstQueue = GetDevice().SupportsTransferQueue() ? ERHIDeviceQueue::Transfer : ERHIDeviceQueue::Graphics;
 
 	VulkanPipelineBarrier Barrier(GetDevice());
 	Barrier.AddImageLayoutTransition(ERHIDeviceQueue::Graphics, DstQueue, DstImage->GetNative(), vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, SubresourceRange)

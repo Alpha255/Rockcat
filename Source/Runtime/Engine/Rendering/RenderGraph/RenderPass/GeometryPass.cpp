@@ -88,7 +88,7 @@ void GeometryPass::Execute(const RenderScene& Scene)
 {
 	for (auto& View : Scene.GetViews())
 	{
-		if (RHIBackend::GetConfigs().AsyncCommandlistSubmission)
+		if (GetRenderDevice().SupportsAsyncCommandlistSubmission())
 		{
 			assert(false);
 		}

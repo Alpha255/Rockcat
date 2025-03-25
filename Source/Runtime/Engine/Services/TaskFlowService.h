@@ -20,7 +20,7 @@ public:
 
 		auto& Flow = CreateTaskFlow();
 		Flow.for_each(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<Callable>(Function));
-		Flow.Execute(*m_Executors[Thread]);
+		Flow.Execute(GetExecutor(Thread));
 
 		if (WaitDone)
 		{
@@ -37,7 +37,7 @@ public:
 
 		auto& Flow = CreateTaskFlow();
 		Flow.for_each_index(Begin, End, Step, std::forward<Callable>(Function));
-		Flow.Execute(*m_Executors[Thread]);
+		Flow.Execute(GetExecutor(Thread));
 
 		if (WaitDone)
 		{
@@ -53,7 +53,7 @@ public:
 
 		auto& Flow = CreateTaskFlow();
 		Flow.sort(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<CompareOp>(Function));
-		Flow.Execute(*m_Executors[Thread]);
+		Flow.Execute(GetExecutor(Thread));
 
 		if (WaitDone)
 		{
@@ -88,7 +88,7 @@ public:
 			InTask.Execute();
 		}).name(std::string(InTask.GetName()));
 		
-		Flow.Execute(*m_Executors[Thread]);
+		Flow.Execute(GetExecutor(Thread));
 		if (WaitDone)
 		{
 			Flow.Wait();
@@ -112,7 +112,7 @@ public:
 			}
 		}
 
-		Flow.Execute(*m_Executors[Thread]);
+		Flow.Execute(GetExecutor(Thread));
 
 		if (WaitDone)
 		{
@@ -126,7 +126,7 @@ public:
 	{
 		assert(Thread < EThread::Num);
 
-		Flow.Execute(*m_Executors[Thread]);
+		Flow.Execute(GetExecutor(Thread));
 
 		if (WaitDone)
 		{
@@ -137,11 +137,21 @@ public:
 
 	uint8_t GetNumWorkThreads() const { return m_NumWorkThreads; }
 private:
+	inline tf::Executor& GetExecutor(EThread Thread) 
+	{
+		assert(Thread < EThread::Num);
+		auto TargetThread = (m_SeparateGameThread && Thread == EThread::GameThread) ? EThread::GameThread : EThread::WorkerThread;
+		TargetThread = (m_SeparateRenderThread && Thread == EThread::RenderThread) ? EThread::RenderThread : EThread::WorkerThread;
+		return *m_Executors[TargetThread];
+	}
+
 	TaskFlow& CreateTaskFlow() { return m_TaskFlows.emplace_back(TaskFlow()); }
 
 	void UpdateTaskFlows();
 
 	bool m_UseHyperThreading;
+	bool m_SeparateGameThread = false;
+	bool m_SeparateRenderThread = false;
 	uint8_t m_NumWorkThreads;
 	std::list<TaskFlow> m_TaskFlows;
 	Array<std::unique_ptr<tf::Executor>, EThread> m_Executors;

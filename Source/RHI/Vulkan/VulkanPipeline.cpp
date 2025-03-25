@@ -31,7 +31,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 	{
 		if (Shader)
 		{
-			auto ShaderModule = Cast<VulkanShader>(ShaderLibrary::Get().GetShaderModule(*Shader, ERHIBackend::Vulkan));
+			auto ShaderModule = Cast<VulkanShader>(ShaderLibrary::Get().GetShaderModule(*Shader));
 			assert(ShaderModule);
 
 			ShaderStageCreateInfos.emplace_back(vk::PipelineShaderStageCreateInfo())

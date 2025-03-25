@@ -103,7 +103,7 @@ void RHIUploadManager::QueueUploadBuffer(const RHIBuffer* Buffer, const void* Da
 
 void RHIUploadManager::QueueSubmitUploadCommandBuffer(RHICommandBuffer* UploadCommandBuffer)
 {
-	if (RHIBackend::GetConfigs().UseTransferQueue)
+	if (m_Device.SupportsTransferQueue())
 	{
 		auto CommandListContext = m_Device.GetImmediateCommandListContext(ERHIDeviceQueue::Transfer);
 		CommandListContext->SubmitUploadCommandBuffer(UploadCommandBuffer);
@@ -189,7 +189,7 @@ RHICommandBuffer* RHIUploadManager::GetUploadCommandBuffer()
 {
 	RHICommandListContext* CommandListContext = nullptr;
 
-	if (RHIBackend::GetConfigs().UseTransferQueue)
+	if (m_Device.SupportsTransferQueue())
 	{
 		CommandListContext = m_Device.GetImmediateCommandListContext(ERHIDeviceQueue::Transfer);
 		assert(CommandListContext);

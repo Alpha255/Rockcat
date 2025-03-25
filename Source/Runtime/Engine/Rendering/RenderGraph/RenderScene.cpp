@@ -1,8 +1,8 @@
 #include "Engine/Rendering/RenderGraph/RenderScene.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/SceneVisitor.h"
-#include "Engine/Services/RenderService.h"
 #include "Engine/Services/TaskFlowService.h"
+#include "Engine/RHI/RHIDevice.h"
 #include "Engine/Rendering/RenderGraph/RenderPass/GeometryPass.h"
 
 MeshDrawCommand::MeshDrawCommand(const StaticMesh& Mesh)
@@ -107,7 +107,7 @@ void RenderScene::BuildMeshDrawCommands(RHIDevice& Device, const RenderSettings&
 	UpdateScenePrimitives();
 	RemoveInvalidCommands();
 
-	if (RHIBackend::GetConfigs().AsyncMeshDrawCommandsBuilding)
+	if (Device.SupportsAsyncMeshDrawCommandsBuilding())
 	{
 		if (m_Primitives.Add.empty())
 		{

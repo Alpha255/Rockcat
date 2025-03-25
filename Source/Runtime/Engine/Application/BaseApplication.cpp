@@ -1,27 +1,45 @@
 #include "Engine/Application/BaseApplication.h"
 #include "Engine/Application/ApplicationConfiguration.h"
-#include "Engine/Services/RenderService.h"
-#include "Core/Window.h"
+#include "RHI/Vulkan/VulkanRHI.h"
 
 BaseApplication::BaseApplication(const char* ConfigurationPath)
 { 
 	m_Configs = ApplicationConfiguration::Load(ConfigurationPath ? ConfigurationPath : "Defalut.json");
+	MessageRouter::Create();
 }
 
-void BaseApplication::SetRenderBackend(RHIBackend* Backend)
+void BaseApplication::InitializeRHI()
 {
 	if (m_Configs->EnableRendering && !m_RenderBackend)
 	{
-		m_RenderBackend = Backend;
-
-		if (m_Configs->EnableRendering)
+		switch (m_Configs->GraphicsSettings.Backend)
 		{
-			m_RenderViewport = std::make_unique<Viewport>(
-				GetRenderBackend().GetDevice(),
-				m_Configs->WindowDesc, 
-				m_Configs->GraphicsSettings.FullScreen, 
-				m_Configs->GraphicsSettings.VSync);
+		case ERHIBackend::Software:
+			break;
+		case ERHIBackend::Vulkan:
+			m_RenderBackend = std::make_unique<VulkanRHI>();
+			break;
+		case ERHIBackend::D3D11:
+			break;
+		case ERHIBackend::D3D12:
+			break;
 		}
+
+		if (!m_RenderBackend)
+		{
+			LOG_CRITICAL("Render backend \"{}\" is not support yet!", RHIBackend::GetName(m_Configs->GraphicsSettings.Backend));
+		}
+		else
+		{
+			m_RenderBackend->InitializeGraphicsDevice();
+			m_RenderBackend->PrepareGlobalResources();
+		}
+
+		m_RenderViewport = std::make_unique<Viewport>(
+			m_RenderBackend->GetDevice(),
+			m_Configs->WindowDesc,
+			m_Configs->GraphicsSettings.FullScreen,
+			m_Configs->GraphicsSettings.VSync);
 	}
 }
 

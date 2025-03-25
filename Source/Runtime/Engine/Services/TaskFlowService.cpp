@@ -4,6 +4,8 @@
 
 TaskFlowService::TaskFlowService()
 	: m_UseHyperThreading(false)
+	, m_SeparateGameThread(false)
+	, m_SeparateRenderThread(false)
 	, m_NumWorkThreads(0u)
 {
 }
@@ -13,16 +15,22 @@ void TaskFlowService::OnStartup()
 	size_t NumSeperateThread = 0u;
 	auto NumTotalThreads = PlatformMisc::GetHardwareConcurrencyThreadsCount(m_UseHyperThreading);
 
-	m_Executors[EThread::GameThread].reset(new tf::Executor(1u));
-	NumSeperateThread += 1u;
+	if (m_SeparateGameThread)
+	{
+		m_Executors[EThread::GameThread].reset(new tf::Executor(1u));
+		NumSeperateThread += 1u;
+	}
 
-	m_Executors[EThread::RenderThread].reset(new tf::Executor(1u));
-	NumSeperateThread += 1u;
+	if (m_SeparateRenderThread)
+	{
+		m_Executors[EThread::RenderThread].reset(new tf::Executor(1u));
+		NumSeperateThread += 1u;
+	}
 
 	m_NumWorkThreads = static_cast<uint8_t>(NumTotalThreads - NumSeperateThread);
 	m_Executors[EThread::WorkerThread].reset(new tf::Executor(m_NumWorkThreads));
 
-	LOG_INFO("TaskFlow: Create taskflow executors with {} threads, {} seperate threads, {} work threads, hyper threading is {}, taskflow version: {}",
+	LOG_INFO("TaskFlow: Create taskflow executors with {} threads, {} seperate threads, {} worker threads, hyper threading is {}, taskflow version: {}",
 		NumTotalThreads,
 		NumSeperateThread,
 		m_NumWorkThreads,

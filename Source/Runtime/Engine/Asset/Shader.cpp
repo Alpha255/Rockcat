@@ -4,13 +4,18 @@
 #include "Engine/Services/ShaderLibrary.h"
 
 ShaderBinary::ShaderBinary(const std::string& ShaderName, ERHIBackend Backend, ERHIShaderStage Stage, std::time_t Timestamp, size_t Hash, ShaderBlob&& Blob)
-	: BaseClass(std::move(Paths::ShaderBinaryCachePath() / RHIBackend::GetName(Backend) / StringUtils::Format("%s_%lld", ShaderName.c_str(), Timestamp)))
+	: BaseClass(GetUniquePath(ShaderName, Backend, Hash))
 	, m_Backend(Backend)
 	, m_Stage(Stage)
 	, m_Timestamp(Timestamp)
 	, m_Hash(Hash)
 	, m_Blob(std::move(Blob))
 {
+}
+
+std::filesystem::path ShaderBinary::GetUniquePath(const std::string& ShaderName, ERHIBackend Backend, size_t Hash)
+{
+	return Paths::ShaderBinaryCachePath() / RHIBackend::GetName(Backend) / StringUtils::Format("%s_%lld", ShaderName.c_str(), Hash);
 }
 
 RHIBuffer* Shader::GetUniformBuffer(RHIDevice& Device)
@@ -63,14 +68,14 @@ size_t Shader::ComputeUniformBufferSize()
 	return Size;
 }
 
-const RHIShader* Shader::TryGetRHI(ERHIBackend Backend) const
+const RHIShader* Shader::TryGetRHI()
 {
-	if (auto Shader = ShaderLibrary::Get().GetShaderModule(*this, Backend))
+	if (!m_ShaderModule || GetMetaData().IsDirty())
 	{
-		return Shader;
+		m_ShaderModule = ShaderLibrary::Get().GetShaderModule(*this);
 	}
 
-	return GetRHIFallback();
+	return m_ShaderModule ? m_ShaderModule : GetRHIFallback();
 }
 
 const RHIShader* Shader::GetRHIFallback() const

@@ -64,6 +64,8 @@ public:
 
 	ShaderBinary(const std::string& ShaderName, ERHIBackend Backend, ERHIShaderStage Stage, std::time_t Timestamp, size_t Hash, ShaderBlob&& Blob);
 
+	static std::filesystem::path GetUniquePath(const std::string& ShaderName, ERHIBackend Backend, size_t Hash);
+
 	std::time_t GetTimestamp() const { return m_Timestamp; }
 	size_t GetHash() const { return m_Hash; }
 	size_t GetSize() const { return m_Blob.Size; }
@@ -153,7 +155,7 @@ public:
 	virtual ERHIShaderStage GetStage() const = 0;
 	virtual bool IsDirty() const = 0;
 
-	const RHIShader* TryGetRHI(ERHIBackend Backend) const;
+	const RHIShader* TryGetRHI();
 
 	size_t ComputeHash() const override { return ::ComputeHash(ComputeBaseHash(), GetTimestamp()); }
 	size_t ComputeBaseHash() const { return ::ComputeHash(std::filesystem::hash_value(GetSourceFilePath()), ShaderDefines::ComputeHash()); }
@@ -169,6 +171,8 @@ private:
 
 	std::map<std::string, ShaderVariable> m_Variables;
 	RHIBufferPtr m_UniformBuffer;
+
+	const RHIShader* m_ShaderModule = nullptr;
 };
 
 template<class T>

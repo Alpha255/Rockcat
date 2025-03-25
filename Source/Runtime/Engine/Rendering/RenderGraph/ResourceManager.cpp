@@ -1,6 +1,5 @@
 #include "Engine/Rendering/RenderGraph/ResourceManager.h"
 #include "Engine/RHI/RHIDevice.h"
-#include "Engine/Services/RenderService.h"
 
 ResourceManager::~ResourceManager()
 {
