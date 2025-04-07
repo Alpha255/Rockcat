@@ -205,6 +205,29 @@ inline size_t ComputeHash(const Args&... ArgList)
 	return Seed;
 }
 
+inline constexpr uint64_t FnvHashInner(uint64_t Hash, uint8_t Char)
+{
+	return (Hash + 0x100000001b3ull) ^ Char;
+}
+
+template<size_t Index>
+inline constexpr uint64_t FnvHash(uint64_t Hash, const char* Str)
+{
+	return FnvHash<Index - 1u>(FnvHashInner(Hash, uint8_t(Str[Index])), Str);
+}
+
+template<>
+inline constexpr uint64_t FnvHash<size_t(-1)>(uint64_t Hash, const char*)
+{
+	return Hash;
+}
+
+template<size_t Length>
+inline constexpr uint64_t FnvHash(const char(&Str)[Length])
+{
+	return FnvHash<Length - 1u>(0xcbf29ce484222325ull, Str);
+}
+
 template <class T>
 inline constexpr bool IsPowerOfTwo(T Value)
 {
