@@ -8,7 +8,6 @@ struct ApplicationConfiguration : public SerializableAsset<ApplicationConfigurat
 {
 	using BaseClass::BaseClass;
 
-	bool EnableWindow = true;
 	bool EnableRendering = true;
 
 	WindowCreateInfo WindowDesc;
@@ -18,7 +17,6 @@ struct ApplicationConfiguration : public SerializableAsset<ApplicationConfigurat
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_NVP(EnableWindow),
 			CEREAL_NVP(EnableRendering),
 			CEREAL_NVP(WindowDesc),
 			CEREAL_NVP(GraphicsSettings)

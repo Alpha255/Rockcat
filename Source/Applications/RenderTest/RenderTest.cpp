@@ -11,9 +11,6 @@ void RenderTest::Initialize()
 {
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");
 	m_RenderGraph = RenderGraph::Create(GetRenderBackend().GetDevice(), GetRenderSettings(), GetRenderViewport());
-
-	auto VS = new GenericVS();
-	ShaderLibrary::Get().GetShaderModule(*VS);
 }
 
 void RenderTest::Tick(float ElapsedSeconds)

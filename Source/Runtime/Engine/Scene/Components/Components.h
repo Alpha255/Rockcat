@@ -109,7 +109,7 @@ template<class... Components>
 class Entity2
 {
 public:
-	using ComponentList = std::tuple<Components...>;
+	using ComponentList = std::tuple<Components*...>;
 
 	Entity2()
 	{

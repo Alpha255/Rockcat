@@ -136,6 +136,14 @@ public:
 	}
 
 	uint8_t GetNumWorkThreads() const { return m_NumWorkThreads; }
+
+	bool IsThreadProcessingTasks(EThread Thread)
+	{
+		assert(Thread < EThread::Num);
+		return m_Executors[Thread]->num_topologies() > 0u;
+	}
+
+	void FrameSync(bool AllowOneFrameLag);
 private:
 	inline tf::Executor& GetExecutor(EThread Thread) 
 	{
@@ -155,6 +163,8 @@ private:
 	uint8_t m_NumWorkThreads;
 	std::list<TaskFlow> m_TaskFlows;
 	Array<std::unique_ptr<tf::Executor>, EThread> m_Executors;
+	std::array<TaskEventPtr, 2u> m_ThreadSyncEvents;
+	uint32_t m_ThreadEventIndex = 0u;
 };
 
 namespace tf

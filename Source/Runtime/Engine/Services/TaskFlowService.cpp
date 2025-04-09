@@ -38,6 +38,39 @@ void TaskFlowService::OnStartup()
 		tf::version());
 }
 
+void TaskFlowService::FrameSync(bool AllowOneFrameLag)
+{
+	if (m_SeparateRenderThread)
+	{
+		struct FrameSyncTask : public Task
+		{
+			virtual void Execute() {}
+		};
+		static FrameSyncTask s_FrameSyncTask;
+
+		m_ThreadSyncEvents[m_ThreadEventIndex] = DispatchTask(s_FrameSyncTask, EThread::RenderThread);
+
+		if (AllowOneFrameLag)
+		{
+			m_ThreadEventIndex = (m_ThreadEventIndex + 1u) % m_ThreadSyncEvents.size();
+		}
+
+		if (m_ThreadSyncEvents[m_ThreadEventIndex])
+		{
+			if (m_SeparateGameThread)
+			{
+				auto GameThreadCompledEvent = DispatchTask(s_FrameSyncTask, EThread::GameThread);
+				do {
+					GameThreadCompledEvent->WaitForMilliseconds(1u);
+				} while (!GameThreadCompledEvent->IsCompleted());
+			}
+
+			m_ThreadSyncEvents[m_ThreadEventIndex]->Wait();
+			m_ThreadSyncEvents[m_ThreadEventIndex].reset();
+		}
+	}
+}
+
 void TaskFlowService::UpdateTaskFlows()
 {
 	m_TaskFlows.remove_if([](TaskFlow& Flow) {

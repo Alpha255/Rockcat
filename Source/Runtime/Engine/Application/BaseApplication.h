@@ -15,6 +15,8 @@ public:
 	virtual bool IsRequestQuit() const;
 	virtual void PumpMessages();
 	virtual void Finalize() {}
+	
+	bool IsActivate() const;
 
 	const Viewport& GetRenderViewport() { return *m_RenderViewport; }
 	class RHIBackend& GetRenderBackend();

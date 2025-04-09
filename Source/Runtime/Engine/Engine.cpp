@@ -41,10 +41,17 @@ void Engine::Run()
 
 			Application->PumpMessages();
 
+			if (!Application->IsActivate())
+			{
+				continue;
+			}
+
 			Application->Tick(0.0f);
 
 			Application->RenderFrame();
 		}
+
+		TaskFlowService::Get().FrameSync(true);
 	}
 
 	Finalize();

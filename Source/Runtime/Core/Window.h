@@ -10,7 +10,6 @@ struct WindowCreateInfo
 	uint32_t Height = 720u;
 	uint32_t MinWidth = MINIMAL_WINDOW_SIZE;
 	uint32_t MinHeight = MINIMAL_WINDOW_SIZE;
-	bool FreezeWhenInactive = true;
 	std::string Title = "UnnamedApplication";
 
 	template<class Archive>
@@ -21,7 +20,6 @@ struct WindowCreateInfo
 			CEREAL_NVP(Height),
 			CEREAL_NVP(MinWidth),
 			CEREAL_NVP(MinHeight),
-			CEREAL_NVP(FreezeWhenInactive),
 			CEREAL_NVP(Title)
 		);
 	}

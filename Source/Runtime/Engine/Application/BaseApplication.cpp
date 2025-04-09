@@ -59,6 +59,11 @@ void BaseApplication::PumpMessages()
 	Window::PumpMessages();
 }
 
+bool BaseApplication::IsActivate() const
+{
+	return m_Configs->EnableRendering ? m_RenderViewport->GetWindow().IsActivate() : true;
+}
+
 bool BaseApplication::IsRequestQuit() const
 {
 	return m_RenderViewport ? m_RenderViewport->GetWindow().IsDestroyed() : false;
