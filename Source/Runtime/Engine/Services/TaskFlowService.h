@@ -145,6 +145,17 @@ public:
 
 	void FrameSync(bool AllowOneFrameLag);
 private:
+	template<class Callable>
+	inline void TryAsyncGameThreadTask(EThread Thread, Callable&& Function)
+	{
+		assert(Thread != EThread::GameThread || ((Thread == EThread::GameThread) && (Threading::IsInMainThread() || Threading::IsInGameThread())));
+
+		if (!m_SeparateGameThread)
+		{
+			Function();
+		}
+	}
+
 	inline tf::Executor& GetExecutor(EThread Thread) 
 	{
 		assert(Thread < EThread::Num);
