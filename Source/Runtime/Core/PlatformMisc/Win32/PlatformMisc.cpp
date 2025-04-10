@@ -201,6 +201,14 @@ Guid Guid::Create()
 
 void PlatformMisc::SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priority)
 {
+	static const char* s_ThreadPriorityNames[] =
+	{
+		"Low",
+		"Normal",
+		"High",
+		"Critical",		
+	};
+
 	std::stringstream Stream;
 	Stream << ThreadID;
 
@@ -222,6 +230,8 @@ void PlatformMisc::SetThreadPriority(std::thread::id ThreadID, Task::EPriority P
 		break;
 	}
 	VERIFY_WITH_PLATFORM_MESSAGE(::SetThreadPriority(ThreadHandle, ThreadPriority) != 0);
+
+	LOG_INFO("Set priority of thread {} to {}", DwordThreadID, s_ThreadPriorityNames[(size_t)Priority]);
 }
 
 PlatformMisc::ThreadPriorityGuard::ThreadPriorityGuard(std::thread::id ThreadID, Task::EPriority Priority)

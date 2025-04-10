@@ -13,167 +13,120 @@ public:
 
 	void OnShutdown() override final;
 
-	template<bool WaitDone = true, class Iterator, class Callable>
-	TaskEventPtr ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function, EThread Thread)
+	template<class Iterator, class Callable>
+	TaskEventPtr ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function, EThread Thread, Task::EPriority Priority = Task::EPriority::Normal)
 	{
 		assert(Thread < EThread::Num);
 
-		auto& Flow = CreateTaskFlow();
-		Flow.for_each(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<Callable>(Function));
-		Flow.Execute(GetExecutor(Thread));
-
-		if (WaitDone)
+		if (auto Executor = GetExecutor(Thread, Priority))
 		{
-			Flow.Wait();
+			tf::Taskflow Flow;
+			Flow.for_each(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<Callable>(Function));
+
+			return std::make_shared<TaskEvent>(std::move(Executor->run(std::move(Flow))));
 		}
-		return Flow.GetEvent();
+
+		std::for_each(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<Callable>(Function));
+		return std::make_shared<TaskEvent>();
 	}
 
-	template<size_t Step, bool WaitDone = true, class Callable>
-	TaskEventPtr ParallelForRange(size_t Begin, size_t End, Callable&& Function, EThread Thread)
+	template<class Iterator, class CompareOp>
+	TaskEventPtr ParallelSort(Iterator&& Begin, Iterator&& End, CompareOp&& Function, EThread Thread, Task::EPriority Priority = Task::EPriority::Normal)
 	{
 		assert(Thread < EThread::Num);
-		assert(Step < (End - Begin));
 
-		auto& Flow = CreateTaskFlow();
-		Flow.for_each_index(Begin, End, Step, std::forward<Callable>(Function));
-		Flow.Execute(GetExecutor(Thread));
-
-		if (WaitDone)
+		if (auto Executor = GetExecutor(Thread, Priority))
 		{
-			Flow.Wait();
+			tf::Taskflow Flow;
+			Flow.sort(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<CompareOp>(Function));
+			return std::make_shared<TaskEvent>(std::move(Executor->run(std::move(Flow))));
 		}
-		return Flow.GetEvent();
+
+		std::sort(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<CompareOp>(Function));
+		return std::make_shared<TaskEvent>();
 	}
 
-	template<bool WaitDone = true, class Iterator, class CompareOp>
-	TaskEventPtr ParallelSort(Iterator&& Begin, Iterator&& End, CompareOp&& Function, EThread Thread)
+	template<class Callable>
+	TaskEventPtr Async(Callable&& Function, EThread Thread, Task::EPriority Priority = Task::EPriority::Normal)
 	{
 		assert(Thread < EThread::Num);
 
-		auto& Flow = CreateTaskFlow();
-		Flow.sort(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<CompareOp>(Function));
-		Flow.Execute(GetExecutor(Thread));
-
-		if (WaitDone)
+		if (auto Executor = GetExecutor(Thread, Priority))
 		{
-			Flow.Wait();
+			return std::make_shared<TaskEvent>(std::move(Executor->async(std::forward<Callable>(Function))));
 		}
-		return Flow.GetEvent();
+
+		std::forward<Callable>(Function)();
+		return std::make_shared<TaskEvent>();
 	}
 
-	template<bool WaitDone = false, class Callable>
-	void Async(Callable&& Function, EThread Thread)
+	TaskEventPtr DispatchTask(Task& InTask, EThread Thread, Task::EPriority Priority = Task::EPriority::Normal)
 	{
 		assert(Thread < EThread::Num);
 
-		if (WaitDone)
+		if (auto Executor = GetExecutor(Thread, Priority))
 		{
-			m_Executors[Thread]->async(std::forward<Callable>(Function)).wait();
+			return std::make_shared<TaskEvent>(std::move(Executor->async([&InTask]() {
+				InTask.Execute();
+				})));
 		}
-		else
-		{
-			m_Executors[Thread]->silent_async(std::forward<Callable>(Function));
-		}
+
+		InTask.Execute();
+		return std::make_shared<TaskEvent>();
 	}
 
-	template<bool WaitDone = false>
-	TaskEventPtr DispatchTask(Task& InTask, EThread Thread)
+	TaskEventPtr DispatchTasks(const std::vector<Task*>& InTasks, EThread Thread, Task::EPriority Priority = Task::EPriority::Normal)
 	{
 		assert(Thread < EThread::Num);
 
-		auto& Flow = CreateTaskFlow();
-		Flow.emplace([&InTask]() {
-			PlatformMisc::ThreadPriorityGuard PriorityGuard(std::this_thread::get_id(), InTask.GetPriority());
-			InTask.Execute();
-		}).name(std::string(InTask.GetName()));
-		
-		Flow.Execute(GetExecutor(Thread));
-		if (WaitDone)
+		if (auto Executor = GetExecutor(Thread, Priority))
 		{
-			Flow.Wait();
+			tf::Taskflow Flow;
+			for (auto& Task : InTasks)
+			{
+				if (Task)
+				{
+					Flow.emplace([&Task]() {
+						Task->Execute();
+						}).name(std::string(Task->GetName()));
+				}
+			}
+
+			return std::make_shared<TaskEvent>(std::move(Executor->run(std::move(Flow))));
 		}
-		return Flow.GetEvent();
-	}
 
-	template<bool WaitDone = false>
-	TaskEventPtr DispatchTasks(const std::vector<Task*>& InTasks, EThread Thread)
-	{
-		assert(Thread < EThread::Num);
-
-		auto& Flow = CreateTaskFlow();
 		for (auto& Task : InTasks)
 		{
 			if (Task)
 			{
-				Flow.emplace([&Task]() {
-					Task->Execute();
-				}).name(std::string(Task->GetName()));
+				Task->Execute();
 			}
 		}
+		return std::make_shared<TaskEvent>();
+	}
 
-		Flow.Execute(GetExecutor(Thread));
+	TaskEventPtr DispatchTaskFlow(TaskFlow& Flow, EThread Thread, Task::EPriority Priority = Task::EPriority::Normal)
+	{
+		assert(Thread < EThread::Num && Thread != EThread::GameThread && Thread != EThread::RenderThread);
 
-		if (WaitDone)
-		{
-			Flow.Wait();
-		}
+		Flow.Dispatch(*GetExecutor(Thread, Priority));
 		return Flow.GetEvent();
 	}
 
-	template<bool WaitDone = false>
-	TaskEventPtr DispatchTaskFlow(TaskFlow& Flow, EThread Thread)
-	{
-		assert(Thread < EThread::Num);
-
-		Flow.Execute(GetExecutor(Thread));
-
-		if (WaitDone)
-		{
-			Flow.Wait();
-		}
-		return Flow.GetEvent();
-	}
-
-	uint8_t GetNumWorkThreads() const { return m_NumWorkThreads; }
-
-	bool IsThreadProcessingTasks(EThread Thread)
-	{
-		assert(Thread < EThread::Num);
-		return m_Executors[Thread]->num_topologies() > 0u;
-	}
+	inline uint8_t GetNumWorkerThreads() const { return m_NumWorkerThreads; }
 
 	void FrameSync(bool AllowOneFrameLag);
 private:
-	template<class Callable>
-	inline void TryAsyncGameThreadTask(EThread Thread, Callable&& Function)
-	{
-		assert(Thread != EThread::GameThread || ((Thread == EThread::GameThread) && (Threading::IsInMainThread() || Threading::IsInGameThread())));
-
-		if (!m_SeparateGameThread)
-		{
-			Function();
-		}
-	}
-
-	inline tf::Executor& GetExecutor(EThread Thread) 
-	{
-		assert(Thread < EThread::Num);
-		auto TargetThread = (m_SeparateGameThread && Thread == EThread::GameThread) ? EThread::GameThread : EThread::WorkerThread;
-		TargetThread = (m_SeparateRenderThread && Thread == EThread::RenderThread) ? EThread::RenderThread : EThread::WorkerThread;
-		return *m_Executors[TargetThread];
-	}
-
-	TaskFlow& CreateTaskFlow() { return m_TaskFlows.emplace_back(TaskFlow()); }
-
-	void UpdateTaskFlows();
+	tf::Executor* GetExecutor(EThread Thread, Task::EPriority Priority);
 
 	bool m_UseHyperThreading;
 	bool m_SeparateGameThread = false;
 	bool m_SeparateRenderThread = false;
-	uint8_t m_NumWorkThreads;
-	std::list<TaskFlow> m_TaskFlows;
-	Array<std::unique_ptr<tf::Executor>, EThread> m_Executors;
+	uint8_t m_NumThreads;
+	uint8_t m_NumWorkerThreads;
+	uint8_t m_NumSeperateThreads;
+	uint8_t m_NumForegroundThreads;
+	std::vector<std::unique_ptr<tf::Executor>> m_Executors;
 	std::array<TaskEventPtr, 2u> m_ThreadSyncEvents;
 	uint32_t m_ThreadEventIndex = 0u;
 };
@@ -181,80 +134,68 @@ private:
 namespace tf
 {
 	template<class Iterator, class Callable>
-	inline TaskEventPtr ParallelFor_WaitDone(Iterator&& Begin, Iterator&& End, Callable&& Function, EThread Thread = EThread::WorkerThread)
+	inline void ParallelFor_WaitDone(Iterator&& Begin, Iterator&& End, Callable&& Function, EThread Thread = EThread::WorkerThread, ::Task::EPriority Priority = ::Task::EPriority::Normal)
 	{
-		return TaskFlowService::Get().ParallelFor<true>(Begin, End, Function, Thread);
+		TaskFlowService::Get().ParallelFor(Begin, End, Function, Thread, Priority)->Wait();
 	}
 
 	template<class Iterator, class Callable>
-	inline TaskEventPtr ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function, EThread Thread = EThread::WorkerThread)
+	inline TaskEventPtr ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function, EThread Thread = EThread::WorkerThread, ::Task::EPriority Priority = ::Task::EPriority::Normal)
 	{
-		return TaskFlowService::Get().ParallelFor<false>(Begin, End, Function, Thread);
-	}
-
-	template<size_t Step, class Callable>
-	inline TaskEventPtr ParallelForRange_WaitDone(size_t Begin, size_t End, Callable&& Function, EThread Thread = EThread::WorkerThread)
-	{
-		return TaskFlowService::Get().ParallelForRange<Step, true>(Begin, End, Function, Thread);
-	}
-
-	template<size_t Step, class Callable>
-	inline TaskEventPtr ParallelForRange(size_t Begin, size_t End, Callable&& Function, EThread Thread = EThread::WorkerThread)
-	{
-		return TaskFlowService::Get().ParallelForRange<Step, false>(Begin, End, Function, Thread);
+		return TaskFlowService::Get().ParallelFor(Begin, End, Function, Thread, Priority);
 	}
 
 	template<class Iterator, class CompareOp>
-	inline TaskEventPtr ParallelSort_WaitDone(Iterator&& Begin, Iterator&& End, CompareOp&& Function, EThread Thread = EThread::WorkerThread)
+	inline void ParallelSort_WaitDone(Iterator&& Begin, Iterator&& End, CompareOp&& Function, EThread Thread = EThread::WorkerThread, ::Task::EPriority Priority = ::Task::EPriority::Normal)
 	{
-		return TaskFlowService::Get().ParallelSort<true>(Begin, End, Function, Thread);
+		TaskFlowService::Get().ParallelSort(Begin, End, Function, Thread, Priority)->Wait();
 	}
 
 	template<class Iterator, class CompareOp>
-	inline TaskEventPtr ParallelSort(Iterator&& Begin, Iterator&& End, CompareOp&& Function, EThread Thread = EThread::WorkerThread)
+	inline TaskEventPtr ParallelSort(Iterator&& Begin, Iterator&& End, CompareOp&& Function, EThread Thread = EThread::WorkerThread, ::Task::EPriority Priority = ::Task::EPriority::Normal)
 	{
-		return TaskFlowService::Get().ParallelSort<false>(Begin, End, Function, Thread);
+		return TaskFlowService::Get().ParallelSort(Begin, End, Function, Thread, Priority);
 	}
 
 	template<class Callable>
-	inline void Async_WaitDone(Callable&& Function, EThread Thread = EThread::WorkerThread)
+	inline void Async_WaitDone(Callable&& Function, EThread Thread = EThread::WorkerThread, ::Task::EPriority Priority = ::Task::EPriority::Normal)
 	{
-		return TaskFlowService::Get().Async<true>(Function, Thread);
+		TaskFlowService::Get().Async(Function, Thread, Priority)->Wait();
 	}
 
 	template<class Callable>
-	inline void Async(Callable&& Function, EThread Thread = EThread::WorkerThread)
+	inline TaskEventPtr Async(Callable&& Function, EThread Thread = EThread::WorkerThread, ::Task::EPriority Priority = ::Task::EPriority::Normal)
 	{
-		return TaskFlowService::Get().Async<false>(Function, Thread);
+		return TaskFlowService::Get().Async(Function, Thread, Priority);
 	}
 
-	inline TaskEventPtr DispatchTask_WaitDone(::Task& InTask, EThread Thread = EThread::WorkerThread)
+	inline void DispatchTask_WaitDone(::Task& InTask, EThread Thread = EThread::WorkerThread, ::Task::EPriority Priority = ::Task::EPriority::Normal)
 	{
-		return TaskFlowService::Get().DispatchTask<true>(InTask, Thread);
+		TaskFlowService::Get().DispatchTask(InTask, Thread, Priority)->Wait();
 	}
 
-	inline TaskEventPtr DispatchTask(::Task& InTask, EThread Thread = EThread::WorkerThread)
+	inline TaskEventPtr DispatchTask(::Task& InTask, EThread Thread = EThread::WorkerThread, ::Task::EPriority Priority = ::Task::EPriority::Normal)
 	{
-		return TaskFlowService::Get().DispatchTask<false>(InTask, Thread);
+		return TaskFlowService::Get().DispatchTask(InTask, Thread, Priority);
 	}
 
-	inline TaskEventPtr DispatchTasks_WaitDone(const std::vector<::Task*>& InTasks, EThread Thread = EThread::WorkerThread)
+	inline void DispatchTasks_WaitDone(const std::vector<::Task*>& InTasks, EThread Thread = EThread::WorkerThread, ::Task::EPriority Priority = ::Task::EPriority::Normal)
 	{
-		return TaskFlowService::Get().DispatchTasks<true>(InTasks, Thread);
+		TaskFlowService::Get().DispatchTasks(InTasks, Thread, Priority)->Wait();
 	}
 
-	inline TaskEventPtr DispatchTasks(const std::vector<::Task*>& InTasks, EThread Thread = EThread::WorkerThread)
+	inline TaskEventPtr DispatchTasks(const std::vector<::Task*>& InTasks, EThread Thread = EThread::WorkerThread, ::Task::EPriority Priority = ::Task::EPriority::Normal)
 	{
-		return TaskFlowService::Get().DispatchTasks<false>(InTasks, Thread);
+		return TaskFlowService::Get().DispatchTasks(InTasks, Thread, Priority);
 	}
 
-	inline TaskEventPtr DispatchTaskFlow_WaitDone(TaskFlow& Flow, EThread Thread = EThread::WorkerThread)
+	inline void DispatchTaskFlow_WaitDone(TaskFlow& Flow, EThread Thread = EThread::WorkerThread, ::Task::EPriority Priority = ::Task::EPriority::Normal)
 	{
-		return TaskFlowService::Get().DispatchTaskFlow<true>(Flow, Thread);
+		TaskFlowService::Get().DispatchTaskFlow(Flow, Thread, Priority)->Wait();
 	}
 
-	inline TaskEventPtr DispatchTaskFlow(TaskFlow& Flow, EThread Thread = EThread::WorkerThread)
+	inline TaskEventPtr DispatchTaskFlow(TaskFlow& Flow, EThread Thread = EThread::WorkerThread, ::Task::EPriority Priority = ::Task::EPriority::Normal)
 	{
-		return TaskFlowService::Get().DispatchTaskFlow<false>(Flow, Thread);
+		return TaskFlowService::Get().DispatchTaskFlow(Flow, Thread, Priority);
 	}
 }

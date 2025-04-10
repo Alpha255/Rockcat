@@ -22,18 +22,46 @@ enum class EThread
 class TaskEvent
 {
 public:
+	TaskEvent() = default;
+
 	TaskEvent(tf::Future<void>&& Future) noexcept
 		: m_Future(std::move(Future))
 	{
 	}
 
+	TaskEvent(std::future<void>&& Future) noexcept
+		: m_Future(std::move(Future))
+	{
+	}
+
 	inline bool IsDispatched() const { return m_Future.valid(); }
-	inline bool IsCompleted() const { return m_Future.valid() ? m_Future.wait_for(std::chrono::milliseconds(0u)) == std::future_status::ready : false; }
-	inline void Wait() { m_Future.wait(); }
-	inline void WaitForSeconds(size_t Seconds) { m_Future.wait_for(std::chrono::seconds(Seconds)); }
-	inline void WaitForMilliseconds(size_t Milliseconds) { m_Future.wait_for(std::chrono::milliseconds(Milliseconds)); }
+	inline bool IsCompleted() const { return m_Future.valid() ? m_Future.wait_for(std::chrono::milliseconds(0u)) == std::future_status::ready : true; }
+	
+	inline void Wait() 
+	{
+		if (m_Future.valid())
+		{
+			m_Future.wait();
+		}
+	}
+
+	inline void WaitForSeconds(size_t Seconds) 
+	{
+		if (m_Future.valid())
+		{
+			m_Future.wait_for(std::chrono::seconds(Seconds));
+		}
+	}
+
+	inline void WaitForMilliseconds(size_t Milliseconds)
+	{
+		if (m_Future.valid())
+		{
+			m_Future.wait_for(std::chrono::milliseconds(Milliseconds));
+		}
+	}
 private:
-	tf::Future<void> m_Future;
+	std::future<void> m_Future;
 };
 
 using TaskEventPtr = std::shared_ptr<TaskEvent>;
@@ -43,10 +71,10 @@ class Task : public tf::Task
 public:
 	enum class EPriority
 	{
-		Critical,
-		High,
-		Normal,
 		Low,
+		Normal,
+		High,
+		Critical
 	};
 
 	using tf::Task::Task;
@@ -94,7 +122,6 @@ public:
 	}
 
 	EPriority GetPriority() const { return m_Priority; }
-	Task& SetPriority(EPriority Priority) { m_Priority = Priority; return *this; }
 
 	virtual void Execute() = 0;
 protected:

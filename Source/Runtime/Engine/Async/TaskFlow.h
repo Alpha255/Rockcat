@@ -13,20 +13,7 @@ public:
 		TTask* NewTask = Cast<TTask>(m_Tasks.emplace_back(std::make_shared<TTask>(std::forward<Arg>(Args)...)).get());
 
 		NewTask->SetBaseTask(tf::Taskflow::emplace([NewTask]() {
-			thread_local Task::EPriority LastPriority = Task::EPriority::Normal;
-			bool NeedChangeThreadPriority = LastPriority != NewTask->GetPriority();
-			if (NeedChangeThreadPriority)
-			{
-				PlatformMisc::SetThreadPriority(std::this_thread::get_id(), NewTask->GetPriority());
-			}
-
 			NewTask->Execute();
-
-			if (NeedChangeThreadPriority)
-			{
-				PlatformMisc::SetThreadPriority(std::this_thread::get_id(), LastPriority);
-				LastPriority = NewTask->GetPriority();
-			}
 		}));
 		return *NewTask;
 	}
@@ -62,30 +49,11 @@ public:
 protected:
 	friend class TaskFlowService;
 
-	inline void Execute(tf::Executor& Executor, size_t Repeat = 1u)
+	inline void Dispatch(tf::Executor& Executor)
 	{
-		if (!empty())
-		{
-			auto Future = std::move(Executor.run_n(*this, Repeat));
-			m_Event = std::make_shared<TaskEvent>(std::move(Future));
-		}
-	}
-
-	template<class Pred, class Callback>
-	inline void ExecuteUntil(tf::Executor& Executor, Pred&& Condition, Callback&& CompletedCallback, size_t Repeat = 1u)
-	{
-		if (!empty())
-		{
-			auto Future = Executor.run_until(*this,
-				[Repeat, Condition]() mutable {
-					return (Repeat-- == 0) && Condition();
-				},
-				std::forward<Callback>(CompletedCallback));
-			m_Event = std::make_shared<TaskEvent>(std::move(Future));
-		}
+		m_Event = std::make_shared<TaskEvent>(std::move(std::move(Executor.run(*this))));
 	}
 private:
 	std::vector<std::shared_ptr<tf::Task>> m_Tasks;
 	TaskEventPtr m_Event;
-	Task::EPriority m_LastTaskPriority = Task::EPriority::Normal;
 };

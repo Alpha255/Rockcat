@@ -1,4 +1,5 @@
 #include "Engine/Scene/Components/Components.h"
+#include "Engine/Async/Task.h"
 
 class TestEntity : public Entity2<TransformComponent, StaticMeshComponent>
 {
@@ -9,7 +10,6 @@ public:
 	{
 		if (auto TransformComp = GetComponent<TransformComponent>())
 		{
-
 		}
 	}
 };
