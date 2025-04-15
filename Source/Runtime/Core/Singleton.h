@@ -71,8 +71,4 @@ private:
 	std::unordered_map<std::type_info, std::unique_ptr<NoneCopyable>> m_Singletons;
 };
 
-class ModuleFactory
-{
-};
-
 

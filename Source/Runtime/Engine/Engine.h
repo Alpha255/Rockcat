@@ -20,8 +20,6 @@ public:
 	}
 
 	const std::list<std::unique_ptr<BaseApplication>>& GetApplications() const { return m_Applications; }
-
-#define GetModule(ModuleType) GetModuleByName<ModuleType>(#ModuleType)
 private:
 	void Initialize();
 	void Finalize();
