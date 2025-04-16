@@ -1,5 +1,4 @@
 #include "Applications/RenderTest/RenderTest.h"
-#include "Core/Main.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/RHI/RHIBackend.h"
 #include "Engine/Rendering/RenderGraph/RenderGraph.h"
@@ -23,4 +22,4 @@ void RenderTest::RenderFrame()
 	m_RenderGraph->Execute(*m_Scene);
 }
 
-REGISTER_APPLICATION(RenderTest, "RenderTest.json")
+RUN_APPLICATION(RenderTest, "RenderTest.json")

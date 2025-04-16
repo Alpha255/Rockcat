@@ -1,5 +1,4 @@
-#include "Engine/Engine.h"
-#include "Core/PlatformMisc.h"
+#include "Engine/Application/RunApplication.h"
 #include "Engine/Application/BaseApplication.h"
 #include "Engine/Application/ApplicationConfiguration.h"
 #include "Engine/Profile/Profiler.h"
@@ -8,62 +7,42 @@
 #include "Engine/Services/ShaderLibrary.h"
 #include "Engine/Asset/AssetDatabase.h"
 #include "Engine/Paths.h"
+#include "Core/PlatformMisc.h"
 
-void Engine::Run()
+void ApplicationRunner::Run()
 {
 	Initialize();
 
-	for (auto& Application : m_Applications)
-	{
-		Application->InitializeRHI();
-		Application->Initialize();
-	}
+	GApplication->InitializeRHI();
+	GApplication->Initialize();
+
+	GTimer.reset(new CpuTimer());
 
 	while (true)
 	{
-		if (m_Applications.empty())
+		if (GApplication->IsRequestQuit())
 		{
 			break;
 		}
 
-		m_Applications.remove_if([](std::unique_ptr<BaseApplication>& App) {
-			if (App->IsRequestQuit())
-			{
-				App->Finalize();
-				return true;
-			}
-			return false;
-		});
-
-		for (auto& Application : m_Applications)
+		if (GApplication->IsActivate())
 		{
-			//PROFILE_EVENT("%s.Frame", Application->GetConfigurations().GetWindowCreateInfo().Title.c_str());
+			GApplication->PumpMessages();
 
-			Application->PumpMessages();
+			TickManager::Get().TickObjects(GTimer->GetElapsedSeconds());
 
-			if (!Application->IsActivate())
-			{
-				continue;
-			}
-
-			Application->Tick(0.0f);
-
-			Application->RenderFrame();
+			GApplication->RenderFrame();
 		}
 
 		TaskFlowService::Get().FrameSync(true);
 	}
 
+	GApplication->Finalize();
 	Finalize();
 }
 
-void Engine::Initialize()
+void ApplicationRunner::Initialize()
 {
-	if (m_Initialized)
-	{
-		return;
-	}
-
 	if (!std::filesystem::exists(Paths::AssetPath()))
 	{
 		LOG_CRITICAL("Invalid assets directory: {}.", Paths::AssetPath().string());
@@ -75,12 +54,23 @@ void Engine::Initialize()
 
 	TaskFlowService::Get().OnStartup();
 	AssetDatabase::Get().OnStartup();
-
-	m_Initialized = true;
 }
 
-void Engine::Finalize()
+void ApplicationRunner::Finalize()
 {
 	TaskFlowService::Get().OnShutdown();
 	AssetDatabase::Get().OnShutdown();
+}
+
+#if defined(PLATFORM_WIN32)
+int32_t WINAPI WinMain(_In_ HINSTANCE /*hInstance*/, _In_opt_ HINSTANCE /*hPrevInstance*/, _In_ LPSTR /*Commandline*/, _In_ int32_t /*ShowCmd*/)
+#else
+int32_t main(int32_t /*Argc*/, char** /*Argv*/)
+#endif
+{
+	extern ApplicationRunner GApplicationRunner;
+
+	GApplicationRunner.Run();
+
+	return 0;
 }

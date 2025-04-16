@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Definitions.h"
+#include "Core/Singleton.h"
 
 class ITickable
 {
@@ -12,6 +12,8 @@ public:
 		Never
 	};
 
+	ITickable();
+
 	virtual ~ITickable() = default;
 
 	virtual void Tick(float ElapsedSeconds) = 0;
@@ -19,12 +21,31 @@ public:
 	virtual bool IsTickable() const { return true; }
 
 	ETickType GetTickType() const { return m_TickType; }
-
 	void SetTickType(ETickType TickType) { m_TickType = TickType; }
-
-	static void TickObjects(float /*ElapsedSeconds*/) {}
 protected:
 	ETickType m_TickType = ETickType::Always;
 private:
+};
+
+class TickManager : public Singleton<TickManager>
+{
+public:
+	void AddTickableObject(ITickable* Tickable)
+	{
+		assert(Tickable);
+		m_TickableObjets.emplace(Tickable);
+	}
+
+	void RemoveTickableObject(ITickable* Tickable)
+	{
+		assert(Tickable);
+		m_TickableObjets.erase(Tickable);
+	}
+
+	void TickObjects(float ElapsedSeconds);
+
+	void EnqueueAsyncTickableObject(ITickable*);
+private:
+	std::unordered_set<ITickable*> m_TickableObjets;
 };
 

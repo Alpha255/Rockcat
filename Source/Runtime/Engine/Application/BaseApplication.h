@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/Application/RunApplication.h"
 #include "Engine/Tickable.h"
 #include "Engine/Application/Viewport.h"
 
@@ -22,7 +23,7 @@ public:
 	class RHIBackend& GetRenderBackend();
 	const struct RenderSettings& GetRenderSettings() const;
 protected:
-	friend class Engine;
+	friend class ApplicationRunner;
 
 	void InitializeRHI();
 

@@ -48,15 +48,9 @@ inline T& GetModule()
 }
 
 template<class T>
-class IService : public NoneCopyable
+class IService : public Singleton<T>
 {
 public:
 	virtual void OnStartup() {}
 	virtual void OnShutdown() {}
-
-	static T& Get()
-	{
-		static T s_Service;
-		return s_Service;
-	}
 };

@@ -1,5 +1,4 @@
 #include "ImGuiEditorTest.h"
-#include "Core/Main.h"
 #include "Core/Window.h"
 #include "DX12Impl.h"
 #include "Editor/ImGuiEditor.h"
@@ -281,4 +280,4 @@ void ImGuiEditorTest::Finalize()
 	CleanupDeviceD3D();
 }
 
-REGISTER_APPLICATION(ImGuiEditorTest, "ImGuiEditorTest.json")
+RUN_APPLICATION(ImGuiEditorTest, "ImGuiEditorTest.json")
