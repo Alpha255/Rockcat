@@ -1,6 +1,5 @@
 #include "RHI/D3D/DXGIInterface.h"
 #include "Engine/RHI/RHIDevice.h"
-#include "Engine/Services/SpdLogService.h"
 
 namespace D3DResult
 {

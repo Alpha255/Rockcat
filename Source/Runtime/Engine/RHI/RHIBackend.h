@@ -34,7 +34,7 @@ public:
 		}
 	}
 protected:
-	friend class BaseApplication;
+	friend class RenderService;
 
 	virtual void InitializeGraphicsDevice() = 0;
 	void PrepareGlobalResources() {}

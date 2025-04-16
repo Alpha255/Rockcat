@@ -1,6 +1,5 @@
 #include "RHI/D3D/D3D12/D3D12CommandQueue.h"
 #include "RHI/D3D/D3D12/D3D12Device.h"
-#include "Engine/Services/SpdLogService.h"
 
 D3D12CommandQueue::D3D12CommandQueue(const D3D12Device& Device, ERHIDeviceQueue Type)
 {

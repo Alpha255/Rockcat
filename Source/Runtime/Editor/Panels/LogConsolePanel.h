@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Editor/ImGuiPanel.h"
-#include "Engine/Services/SpdLogService.h"
 
 class LogConsolePanel : public ImGuiPanel, public SpdLogService::LogRedirector
 {

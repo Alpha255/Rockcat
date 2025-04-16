@@ -1,6 +1,5 @@
 #include "RHI/D3D/D3D12/D3D12Swapchain.h"
 #include "RHI/D3D/D3D12/D3D12Device.h"
-#include "Engine/Services/SpdLogService.h"
 
 #if 0
 void D3D12Swapchain::Resize(uint32_t Width, uint32_t Height)

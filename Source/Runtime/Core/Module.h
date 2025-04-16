@@ -51,6 +51,8 @@ template<class T>
 class IService : public Singleton<T>
 {
 public:
+	virtual ~IService() = default;
+
 	virtual void OnStartup() {}
 	virtual void OnShutdown() {}
 };

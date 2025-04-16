@@ -1,52 +1,23 @@
 #include "Engine/Application/BaseApplication.h"
 #include "Engine/Application/ApplicationConfiguration.h"
-#include "RHI/Vulkan/VulkanRHI.h"
+#include "Engine/Application/Viewport.h"
+#include "Core/Window.h"
+#include "Core/System.h"
+
+BaseApplication::~BaseApplication() = default;
 
 BaseApplication::BaseApplication(const char* ConfigurationPath)
 { 
 	m_Configs = ApplicationConfiguration::Load(ConfigurationPath ? ConfigurationPath : "Defalut.json");
-	MessageRouter::Create();
 }
 
-void BaseApplication::InitializeRHI()
+void BaseApplication::CreateWindowAndViewport()
 {
-	if (m_Configs->EnableRendering && !m_RenderBackend)
+	if (m_Configs->EnableRendering)
 	{
-		switch (m_Configs->GraphicsSettings.Backend)
-		{
-		case ERHIBackend::Software:
-			break;
-		case ERHIBackend::Vulkan:
-			m_RenderBackend = std::make_unique<VulkanRHI>();
-			break;
-		case ERHIBackend::D3D11:
-			break;
-		case ERHIBackend::D3D12:
-			break;
-		}
-
-		if (!m_RenderBackend)
-		{
-			LOG_CRITICAL("Render backend \"{}\" is not support yet!", RHIBackend::GetName(m_Configs->GraphicsSettings.Backend));
-		}
-		else
-		{
-			m_RenderBackend->InitializeGraphicsDevice();
-			m_RenderBackend->PrepareGlobalResources();
-		}
-
-		m_RenderViewport = std::make_unique<Viewport>(
-			m_RenderBackend->GetDevice(),
-			m_Configs->WindowDesc,
-			m_Configs->GraphicsSettings.FullScreen,
-			m_Configs->GraphicsSettings.VSync);
+		m_Window = std::make_unique<Window>(m_Configs->WindowDesc, this);
+		m_Viewport = std::make_unique<Viewport>(*m_Window, m_Configs->GraphicsSettings.FullScreen, m_Configs->GraphicsSettings.VSync);
 	}
-}
-
-RHIBackend& BaseApplication::GetRenderBackend()
-{
-	assert(m_Configs->EnableRendering && m_RenderBackend);
-	return *m_RenderBackend;
 }
 
 const RenderSettings& BaseApplication::GetRenderSettings() const
@@ -56,15 +27,14 @@ const RenderSettings& BaseApplication::GetRenderSettings() const
 
 void BaseApplication::PumpMessages()
 {
-	Window::PumpMessages();
+	System::PumpMessages();
 }
 
-bool BaseApplication::IsActivate() const
-{
-	return m_Configs->EnableRendering ? m_RenderViewport->GetWindow().IsActivate() : true;
-}
-
-bool BaseApplication::IsRequestQuit() const
-{
-	return m_RenderViewport ? m_RenderViewport->GetWindow().IsDestroyed() : false;
-}
+#if PLATFORM_WIN32
+	#include "Core/Win32/Win32DynamicLinkLibrary.hpp"
+	#include "Core/Win32/Win32System.hpp"
+	#include "Core/Win32/Win32Window.hpp"
+	#include "Engine/Application/Win32/Win32BaseApplication.hpp"
+#else
+	#error "Unknown platform"
+#endif

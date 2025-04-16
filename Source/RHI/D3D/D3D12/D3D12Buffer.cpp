@@ -1,6 +1,5 @@
 #include "RHI/D3D/D3D12/D3D12Buffer.h"
 #include "RHI/D3D/D3D12/D3D12Device.h"
-#include "Engine/Services/SpdLogService.h"
 
 D3D12Buffer::D3D12Buffer(const D3D12Device& Device, const RHIBufferCreateInfo& RHICreateInfo)
 	: RHIBuffer(RHICreateInfo)

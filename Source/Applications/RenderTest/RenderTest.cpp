@@ -1,20 +1,13 @@
 #include "Applications/RenderTest/RenderTest.h"
 #include "Engine/Scene/Scene.h"
-#include "Engine/RHI/RHIBackend.h"
 #include "Engine/Rendering/RenderGraph/RenderGraph.h"
-#include "Engine/Services/TaskFlowService.h"
-#include "Engine/Services/ShaderLibrary.h"
-#include "Engine/Asset/GlobalShaders.h"
+#include "Engine/RHI/RHIBackend.h"
+#include "Engine/Services/RenderService.h"
 
 void RenderTest::Initialize()
 {
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");
-	m_RenderGraph = RenderGraph::Create(GetRenderBackend().GetDevice(), GetRenderSettings(), GetRenderViewport());
-}
-
-void RenderTest::Tick(float ElapsedSeconds)
-{
-	m_Scene->Tick(ElapsedSeconds);
+	m_RenderGraph = RenderGraph::Create(GetRenderSettings(), GetViewport());
 }
 
 void RenderTest::RenderFrame()

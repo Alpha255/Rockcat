@@ -1,6 +1,5 @@
 #include "RHI/D3D/D3D11/D3D11TextureView.h"
 #include "RHI/D3D/D3D11/D3D11Device.h"
-#include "Engine/Services/SpdLogService.h"
 
 D3D11ShaderResourceView::D3D11ShaderResourceView(const D3D11Device& Device, const RHITextureCreateInfo& RHICreateInfo)
 {

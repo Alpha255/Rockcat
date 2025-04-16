@@ -128,10 +128,8 @@ public:
 	virtual void OnWindowStatusChanged(EWindowStatus) {}
 };
 
-class MessageRouter : public LazySingleton<MessageRouter>
+class MessageRouter : public Singleton<MessageRouter>
 {
-protected:
-	ALLOW_ACCESS_LAZY(MessageRouter);
 public:
 	void RegisterMessageHandler(MessageHandler* Handler);
 	void DeregisterMessageHandler(MessageHandler* Handler);

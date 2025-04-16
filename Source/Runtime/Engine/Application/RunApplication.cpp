@@ -4,16 +4,15 @@
 #include "Engine/Profile/Profiler.h"
 #include "Engine/Services/SpdLogService.h"
 #include "Engine/Services/TaskFlowService.h"
-#include "Engine/Services/ShaderLibrary.h"
+#include "Engine/Services/RenderService.h"
 #include "Engine/Asset/AssetDatabase.h"
 #include "Engine/Paths.h"
-#include "Core/PlatformMisc.h"
+#include "Core/System.h"
 
 void ApplicationRunner::Run()
 {
 	Initialize();
-
-	GApplication->InitializeRHI();
+	GApplication->CreateWindowAndViewport();
 	GApplication->Initialize();
 
 	GTimer.reset(new CpuTimer());
@@ -31,10 +30,13 @@ void ApplicationRunner::Run()
 
 			TickManager::Get().TickObjects(GTimer->GetElapsedSeconds());
 
-			GApplication->RenderFrame();
-		}
+			if (GApplication->GetConfigs().EnableRendering)
+			{
+				GApplication->RenderFrame();
+			}
 
-		TaskFlowService::Get().FrameSync(true);
+			TaskFlowService::Get().FrameSync(true);
+		}
 	}
 
 	GApplication->Finalize();
@@ -49,17 +51,19 @@ void ApplicationRunner::Initialize()
 		return;
 	}
 
-	PlatformMisc::SetCurrentWorkingDirectory(Paths::AssetPath());
-	LOG_INFO("Mount working directory to \"{}\".", PlatformMisc::GetCurrentWorkingDirectory().string());
+	System::SetCurrentWorkingDirectory(Paths::AssetPath());
+	LOG_INFO("Mount working directory to \"{}\".", System::GetCurrentWorkingDirectory().string());
 
 	TaskFlowService::Get().OnStartup();
 	AssetDatabase::Get().OnStartup();
+	RenderService::Get().OnStartup();
 }
 
 void ApplicationRunner::Finalize()
 {
 	TaskFlowService::Get().OnShutdown();
 	AssetDatabase::Get().OnShutdown();
+	RenderService::Get().OnShutdown();
 }
 
 #if defined(PLATFORM_WIN32)

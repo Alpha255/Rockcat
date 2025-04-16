@@ -2,8 +2,7 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
-#include "Core/PlatformMisc.h"
-#include "Engine/Services/SpdLogService.h"
+#include "Core/System.h"
 
 VulkanSurface::VulkanSurface(const VulkanDevice& Device, const void* WindowHandle)
 	: VkDeviceResource(Device)
@@ -12,7 +11,7 @@ VulkanSurface::VulkanSurface(const VulkanDevice& Device, const void* WindowHandl
 
 #if defined(PLATFORM_WIN32)
 	vk::Win32SurfaceCreateInfoKHR CreateInfo;
-	CreateInfo.setHinstance(reinterpret_cast<::HINSTANCE>(PlatformMisc::GetCurrentModuleHandle()))
+	CreateInfo.setHinstance(reinterpret_cast<::HINSTANCE>(System::GetCurrentModuleHandle()))
 		.setHwnd(reinterpret_cast<::HWND>(const_cast<void*>(WindowHandle)));
 
 	VERIFY_VK(GetNativeInstance().createWin32SurfaceKHR(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));

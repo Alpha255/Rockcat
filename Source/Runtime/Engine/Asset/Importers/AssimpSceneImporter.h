@@ -33,7 +33,7 @@ public:
 
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<AssimpSceneAsset>(AssetPath); }
 
-	bool Reimport(Asset& InAsset, const AssetType& InAssetType) override final
+	bool Reimport(Asset& InAsset, const AssetType& /*InAssetType*/) override final
 	{
 		auto& AssimpScene = Cast<AssimpSceneAsset>(InAsset);
 

@@ -1,7 +1,6 @@
 #include "RHI/Vulkan/VulkanCommandPool.h"
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanQueue.h"
-#include "Engine/Services/SpdLogService.h"
 
 VulkanCommandPool::VulkanCommandPool(const VulkanDevice& Device, uint32_t QueueFamilyIndex)
 	: VkHwResource(Device)

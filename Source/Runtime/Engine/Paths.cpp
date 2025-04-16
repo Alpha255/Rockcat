@@ -1,12 +1,12 @@
 #include "Engine/Paths.h"
-#include "Core/PlatformMisc.h"
+#include "Core/System.h"
 
 const std::filesystem::path& Paths::RootPath()
 {
 	static std::filesystem::path Path;
 	if (Path.empty())
 	{
-		Path = PlatformMisc::GetCurrentModuleDirectory().parent_path();
+		Path = System::GetCurrentModuleDirectory().parent_path();
 	}
 
 	return Path;

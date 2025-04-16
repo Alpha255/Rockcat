@@ -10,6 +10,8 @@ public:
 		GApplication.reset(App);
 	}
 
+	const class BaseApplication& GetApplication() const { return *GApplication; }
+
 	void Run();
 private:
 	void Initialize();

@@ -2,34 +2,39 @@
 
 #include "Engine/Application/RunApplication.h"
 #include "Engine/Tickable.h"
-#include "Engine/Application/Viewport.h"
 
 class BaseApplication : public NoneCopyable, public ITickable
 {
 public:
 	BaseApplication(const char* ConfigurationPath);
 
-	virtual ~BaseApplication() = default;
+	virtual ~BaseApplication();
+
+	virtual void CreateWindowAndViewport();
 
 	virtual void Initialize() {}
 	virtual void RenderFrame() {}
-	virtual bool IsRequestQuit() const;
-	virtual void PumpMessages();
 	virtual void Finalize() {}
 	
-	bool IsActivate() const;
+	void Tick(float) override {}
+	
+	virtual void PumpMessages();
 
-	const Viewport& GetRenderViewport() { return *m_RenderViewport; }
-	class RHIBackend& GetRenderBackend();
+	inline bool IsActivate() const { return m_Activate; }
+	inline bool IsRequestQuit() const { return m_RequestQuit; }
+
+	const class Viewport& GetViewport() { return *m_Viewport; }
+	const class Window& GetWindow() const { return *m_Window; }
 	const struct RenderSettings& GetRenderSettings() const;
+	const struct ApplicationConfiguration& GetConfigs() const { return *m_Configs; }
+
+	void ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam);
 protected:
-	friend class ApplicationRunner;
-
-	void InitializeRHI();
-
 	virtual void RenderGUI(class Canvas&) {}
 private:
 	std::shared_ptr<struct ApplicationConfiguration> m_Configs;
-	std::unique_ptr<Viewport> m_RenderViewport;
-	std::unique_ptr<class RHIBackend> m_RenderBackend;
+	std::unique_ptr<class Viewport> m_Viewport;
+	std::unique_ptr<class Window> m_Window;
+	bool m_Activate = true;
+	bool m_RequestQuit = false;
 };

@@ -1,7 +1,5 @@
-#include "Core/PlatformMisc.h"
+#include "Core/System.h"
 #include "Engine/Services/SpdLogService.h"
-
-#if defined(PLATFORM_WIN32)
 
 #include <Windows.h>
 #include <windowsx.h>
@@ -9,7 +7,7 @@
 
 #define FILE_PATH_LENGTH_MAX UINT16_MAX
 
-std::string PlatformMisc::GetErrorMessage(uint32_t ErrorCode)
+std::string System::GetErrorMessage(uint32_t ErrorCode)
 {
 	static char s_Buffer[FILE_PATH_LENGTH_MAX];
 	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
@@ -26,7 +24,7 @@ std::string PlatformMisc::GetErrorMessage(uint32_t ErrorCode)
 	return std::string(s_Buffer);
 }
 
-std::filesystem::path PlatformMisc::GetCurrentModuleDirectory()
+std::filesystem::path System::GetCurrentModuleDirectory()
 {
 	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
 	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
@@ -35,7 +33,7 @@ std::filesystem::path PlatformMisc::GetCurrentModuleDirectory()
 	return std::filesystem::path(s_Buffer).parent_path();
 }
 
-std::filesystem::path PlatformMisc::GetCurrentWorkingDirectory()
+std::filesystem::path System::GetCurrentWorkingDirectory()
 {
 	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
 	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
@@ -44,18 +42,18 @@ std::filesystem::path PlatformMisc::GetCurrentWorkingDirectory()
 	return std::filesystem::path(s_Buffer);
 }
 
-void PlatformMisc::SetCurrentWorkingDirectory(const std::filesystem::path& Directory)
+void System::SetCurrentWorkingDirectory(const std::filesystem::path& Directory)
 {
 	assert(std::filesystem::exists(Directory));
 	VERIFY_WITH_PLATFORM_MESSAGE(::SetCurrentDirectory(Directory.c_str()) != 0);
 }
 
-void PlatformMisc::Sleep(uint32_t Milliseconds)
+void System::Sleep(uint32_t Milliseconds)
 {
 	::Sleep(static_cast<::DWORD>(Milliseconds));
 }
 
-void PlatformMisc::ExecuteProcess(const char* Commandline, bool WaitDone)
+void System::ExecuteProcess(const char* Commandline, bool WaitDone)
 {
 	::SECURITY_ATTRIBUTES Security
 	{
@@ -124,7 +122,7 @@ void PlatformMisc::ExecuteProcess(const char* Commandline, bool WaitDone)
 	VERIFY_WITH_PLATFORM_MESSAGE(0);
 }
 
-std::string PlatformMisc::GetEnvironmentVariables(const char* Variable)
+std::string System::GetEnvironmentVariables(const char* Variable)
 {
 	static char s_Buffer[FILE_PATH_LENGTH_MAX];
 	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
@@ -133,21 +131,21 @@ std::string PlatformMisc::GetEnvironmentVariables(const char* Variable)
 	return std::string(s_Buffer);
 }
 
-void* PlatformMisc::GetCurrentModuleHandle()
+void* System::GetCurrentModuleHandle()
 {
 	::HMODULE Handle = ::GetModuleHandleA(nullptr);
 	VERIFY_WITH_PLATFORM_MESSAGE(Handle);
 	return reinterpret_cast<void*>(Handle);
 }
 
-Guid PlatformMisc::CreateGUID()
+Guid System::CreateGUID()
 {
 	Guid Ret;
 	VERIFY_WITH_PLATFORM_MESSAGE(::CoCreateGuid(reinterpret_cast<::GUID*>(&Ret)) == S_OK);
 	return Ret;
 }
 
-Math::Vector2 PlatformMisc::GetCurrentCursorPosition()
+Math::Vector2 System::GetCurrentCursorPosition()
 {
 	::POINT Pos;
 	::GetCursorPos(&Pos);
@@ -155,7 +153,7 @@ Math::Vector2 PlatformMisc::GetCurrentCursorPosition()
 	return Math::Vector2(static_cast<float>(Pos.x), static_cast<float>(Pos.y));
 }
 
-size_t PlatformMisc::GetHardwareConcurrencyThreadsCount(bool UseHyperThreading)
+size_t System::GetHardwareConcurrencyThreadsCount(bool UseHyperThreading)
 {
 	std::unique_ptr<uint8_t> Buffer;
 	::DWORD BufferSize = 0;
@@ -196,10 +194,10 @@ size_t PlatformMisc::GetHardwareConcurrencyThreadsCount(bool UseHyperThreading)
 
 Guid Guid::Create()
 {
-	return PlatformMisc::CreateGUID();
+	return System::CreateGUID();
 }
 
-void PlatformMisc::SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priority)
+void System::SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priority)
 {
 	static const char* s_ThreadPriorityNames[] =
 	{
@@ -234,42 +232,13 @@ void PlatformMisc::SetThreadPriority(std::thread::id ThreadID, Task::EPriority P
 	LOG_INFO("Set priority of thread {} to {}", DwordThreadID, s_ThreadPriorityNames[(size_t)Priority]);
 }
 
-PlatformMisc::ThreadPriorityGuard::ThreadPriorityGuard(std::thread::id ThreadID, Task::EPriority Priority)
-	: TargetPriority(Priority)
+void System::PumpMessages()
 {
-	if (Priority != Task::EPriority::Normal)
+	::MSG Message;
+	if (::PeekMessageA(&Message, nullptr, 0u, 0u, PM_REMOVE))
 	{
-		std::stringstream Stream;
-		Stream << ThreadID;
-
-		::DWORD DwordThreadID = std::stoul(Stream.str());
-		ThreadHandle = ::OpenThread(THREAD_ALL_ACCESS, false, DwordThreadID);
-		VERIFY_WITH_PLATFORM_MESSAGE(ThreadHandle);
-
-		int32_t ThreadPriority = THREAD_PRIORITY_NORMAL;
-		switch (Priority)
-		{
-		case Task::EPriority::Critical:
-			ThreadPriority = THREAD_PRIORITY_HIGHEST;
-			break;
-		case Task::EPriority::High:
-			ThreadPriority = THREAD_PRIORITY_ABOVE_NORMAL;
-			break;
-		case Task::EPriority::Low:
-			ThreadPriority = THREAD_PRIORITY_BELOW_NORMAL;
-			break;
-		}
-		VERIFY_WITH_PLATFORM_MESSAGE(::SetThreadPriority(ThreadHandle, ThreadPriority) != 0);
+		::TranslateMessage(&Message);
+		::DispatchMessageA(&Message);
 	}
 }
-
-PlatformMisc::ThreadPriorityGuard::~ThreadPriorityGuard()
-{
-	if (TargetPriority != Task::EPriority::Normal)
-	{
-		VERIFY_WITH_PLATFORM_MESSAGE(::SetThreadPriority(ThreadHandle, THREAD_PRIORITY_NORMAL) != 0);
-	}
-}
-
-#endif
 

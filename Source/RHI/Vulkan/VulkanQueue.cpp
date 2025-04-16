@@ -183,7 +183,6 @@ NAMESPACE_END(RHI)
 #include "RHI/Vulkan/VulkanQueue.h"
 #include "RHI/Vulkan/VulkanCommandBuffer.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "Engine/Services/SpdLogService.h"
 
 VulkanQueue::VulkanQueue(const VulkanDevice& Device, ERHIDeviceQueue QueueType, uint32_t FamilyIndex)
 	: VkDeviceResource(Device)

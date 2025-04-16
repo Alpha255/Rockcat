@@ -2,7 +2,6 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 #include "RHI/Vulkan/VulkanEnvConfiguration.h"
-#include "Engine/Services/SpdLogService.h"
 
 #if USE_DYNAMIC_VK_LOADER
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE

@@ -2,7 +2,6 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
-#include "Engine/Services/SpdLogService.h"
 #include "Engine/RHI/RHIUploadManager.h"
 
 VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo& RHICreateInfo)

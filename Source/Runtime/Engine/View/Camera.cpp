@@ -1,5 +1,5 @@
 #include "Engine/View/Camera.h"
-#include "Core/PlatformMisc.h"
+#include "Core/System.h"
 
 void Camera::SetLookAt(const Math::Vector3& Eye, const Math::Vector3& LookAt)
 {
@@ -69,7 +69,7 @@ void Camera::UpdateMouseDelta()
 {
 	if (m_MouseMovements.IsButtonDown(EMouseButton::LButton))
 	{
-		Math::Vector2 CursorPos = PlatformMisc::GetCurrentCursorPosition();
+		Math::Vector2 CursorPos = System::GetCurrentCursorPosition();
 
 		auto Delta = CursorPos - m_MouseMovements.LastPos;
 		m_MouseMovements.LastPos = CursorPos;
@@ -116,7 +116,7 @@ void Camera::OnMouseEvent(const MouseEvent& Mouse)
 	case EMouseButton::LButton:
 		if (Mouse.State != EKeyState::Up)
 		{
-			m_MouseMovements.LastPos = PlatformMisc::GetCurrentCursorPosition();
+			m_MouseMovements.LastPos = System::GetCurrentCursorPosition();
 			m_LastPos = ScaleToScreenPosition(Mouse.Position.x, Mouse.Position.y);
 			m_QuatLast = m_QuatCurrent;
 		}
@@ -124,13 +124,13 @@ void Camera::OnMouseEvent(const MouseEvent& Mouse)
 	case EMouseButton::RButton:
 		if (Mouse.State != EKeyState::Up)
 		{
-			m_MouseMovements.LastPos = PlatformMisc::GetCurrentCursorPosition();
+			m_MouseMovements.LastPos = System::GetCurrentCursorPosition();
 		}
 		break;
 	case EMouseButton::MButton:
 		if (Mouse.State != EKeyState::Up)
 		{
-			m_MouseMovements.LastPos = PlatformMisc::GetCurrentCursorPosition();
+			m_MouseMovements.LastPos = System::GetCurrentCursorPosition();
 		}
 		break;
 	}

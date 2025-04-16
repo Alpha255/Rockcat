@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/RHI/RHICommandBuffer.h"
+#include "Engine/Services/SpdLogService.h"
 
 enum class ERHIDeviceQueue : uint8_t
 {

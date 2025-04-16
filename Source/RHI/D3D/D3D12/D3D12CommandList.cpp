@@ -2,7 +2,6 @@
 #include "RHI/D3D/D3D12/D3D12Device.h"
 #include "RHI/D3D/D3D12/D3D12Pipeline.h"
 #include "RHI/D3D/D3D12/D3D12Buffer.h"
-#include "Engine/Services/SpdLogService.h"
 
 #include <pix.h>
 

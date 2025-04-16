@@ -1,6 +1,5 @@
 #include "RHI/Vulkan/VulkanRenderPass.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "Engine/Services/SpdLogService.h"
 
 VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIRenderPassCreateInfo& CreateInfo)
 	: VkHwResource(Device)

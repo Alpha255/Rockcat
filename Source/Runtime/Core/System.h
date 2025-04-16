@@ -4,7 +4,7 @@
 #include "Core/Math/Vector2.h"
 #include "Engine/Async/Task.h"
 
-class PlatformMisc
+class System
 {
 public:
 	static std::string GetErrorMessage(uint32_t ErrorCode = ~0u);
@@ -29,14 +29,6 @@ public:
 
 	static void SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priority);
 
-	struct ThreadPriorityGuard
-	{
-		ThreadPriorityGuard(std::thread::id ThreadID, Task::EPriority Priority);
-
-		~ThreadPriorityGuard();
-	private:
-		void* ThreadHandle = nullptr;
-		Task::EPriority TargetPriority;
-	};
+	static void PumpMessages();
 };
 

@@ -2,7 +2,6 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
-#include "Engine/Services/SpdLogService.h"
 
 #if !defined(VULKAN_HPP_CPLUSPLUS)
 

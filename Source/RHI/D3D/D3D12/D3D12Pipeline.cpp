@@ -1,7 +1,6 @@
 #include "RHI/D3D/D3D12/D3D12Pipeline.h"
 #include "RHI/D3D/D3D12/D3D12Device.h"
 #include "RHI/D3D/D3D12/D3D12Shader.h"
-#include "Engine/Services/SpdLogService.h"
 
 D3D12RootSignature::D3D12RootSignature(const D3D12Device& Device, const RHIGraphicsPipelineCreateInfo& RHICreateInfo)
 {

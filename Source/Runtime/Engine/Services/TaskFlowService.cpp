@@ -1,6 +1,6 @@
 #include "Engine/Services/TaskFlowService.h"
 #include "Engine/Services/SpdLogService.h"
-#include "Core/PlatformMisc.h"
+#include "Core/System.h"
 
 TaskFlowService::TaskFlowService()
 	: m_UseHyperThreading(false)
@@ -17,7 +17,7 @@ void TaskFlowService::OnStartup()
 {
 	m_Executors.resize(static_cast<size_t>(EThread::Num) + 1u);
 
-	auto NumTotalThreads = PlatformMisc::GetHardwareConcurrencyThreadsCount(m_UseHyperThreading);
+	auto NumTotalThreads = System::GetHardwareConcurrencyThreadsCount(m_UseHyperThreading);
 
 	if (m_SeparateGameThread)
 	{
@@ -45,7 +45,7 @@ void TaskFlowService::OnStartup()
 		for (auto& SubFlow : SubFlows)
 		{
 			SubFlow.emplace([]() {
-				PlatformMisc::SetThreadPriority(std::this_thread::get_id(), Task::EPriority::High);
+				System::SetThreadPriority(std::this_thread::get_id(), Task::EPriority::High);
 				});
 		}
 		for (uint32_t Index = 0u; Index < SubFlows.size(); ++Index)

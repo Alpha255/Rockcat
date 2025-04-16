@@ -2,7 +2,7 @@
 
 #include "Engine/Asset/Asset.h"
 #include "Engine/Services/SpdLogService.h"
-#include "Core/PlatformMisc.h"
+#include "Core/System.h"
 #include "Core/Cereal.h"
 
 ///#define SERIALIZABLE_MEMORY_BLOCK_SIZE 128u
@@ -76,7 +76,7 @@ public:
 			}
 			else
 			{
-				LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath.generic_string(), PlatformMisc::GetErrorMessage());
+				LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath.generic_string(), System::GetErrorMessage());
 			}
 			FileStream.close();
 		}

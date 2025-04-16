@@ -9,8 +9,6 @@ public:
 
 	void Initialize() override final;
 
-	void Tick(float ElapsedSeconds) override final;
-
 	void RenderFrame() override final;
 protected:
 	void RenderGUI(class Canvas&) override final {}

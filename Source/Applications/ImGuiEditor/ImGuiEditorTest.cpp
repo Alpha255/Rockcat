@@ -136,7 +136,7 @@ static ImGuiKey ImGui_ImplWin32_VirtualKeyToImGuiKey(WPARAM wParam)
 
 void ImGuiEditorTest::Initialize()
 {
-    auto& Window = GetRenderViewport().GetWindow();
+    auto& Window = GetWindow();
     m_Editor = std::make_shared<ImGuiEditor>(Window.GetWidth(), Window.GetHeight());
 
 	auto WindowHandle = const_cast<void*>(Window.GetHandle());

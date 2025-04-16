@@ -1,5 +1,4 @@
 #include "RHI/D3D/D3D11/D3D11Device.h"
-#include "Engine/Services/SpdLogService.h"
 
 D3D11Device::D3D11Device(const DxgiFactory& Factory)
 	: m_Adapter(std::move(std::make_unique<DxgiAdapter>(Factory)))

@@ -246,8 +246,6 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 	m_PipelineCache = std::make_shared<VulkanPipelineCache>(*this);
 	
 	VulkanMemoryAllocator::Create(*this);
-	RHIUploadManager::Create(*this);
-	ShaderLibrary::Create(ERHIBackend::Vulkan, *this);
 }
 
 RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& CreateInfo)

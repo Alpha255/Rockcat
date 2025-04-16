@@ -72,13 +72,13 @@
 }
 
 #if defined(PLATFORM_WIN32)
-#define VERIFY_WITH_PLATFORM_MESSAGE(Condition)                                          \
-{                                                                                        \
-	if (!(Condition))                                                                    \
-	{                                                                                    \
-		LOG_ERROR("Failed to invoke platform API, {}", PlatformMisc::GetErrorMessage()); \
-		assert(0);                                                                       \
-	}                                                                                    \
+#define VERIFY_WITH_PLATFORM_MESSAGE(Condition)                                    \
+{                                                                                  \
+	if (!(Condition))                                                              \
+	{                                                                              \
+		LOG_ERROR("Failed to invoke platform API, {}", System::GetErrorMessage()); \
+		assert(0);                                                                 \
+	}                                                                              \
 }
 
 #define DLL_EXTENSION ".dll"
@@ -88,9 +88,9 @@
 
 #define RENDERER_POSTFIX "Renderer"
 
-#define SPDLOG_LEVEL_NAMES                                                                                                                 \
-    {                                                                                                                                      \
-        "Trace", "Debug", "Info", "Warning", "Error", "Critical", "Off"                                                                    \
+#define SPDLOG_LEVEL_NAMES                                              \
+    {                                                                   \
+        "Trace", "Debug", "Info", "Warning", "Error", "Critical", "Off" \
     }
 
 #define DECLARE_SMART_PTR(ClassName) class ClassName;        \

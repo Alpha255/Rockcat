@@ -6,9 +6,9 @@
 class RenderGraph : public MessageHandler
 {
 public:
-	static std::shared_ptr<RenderGraph> Create(class RHIDevice& Device, const struct RenderSettings& GraphicsSettings, const class Viewport& RenderViewport);
+	static std::shared_ptr<RenderGraph> Create(const struct RenderSettings& GraphicsSettings, const class Viewport& RenderViewport);
 
-	RenderGraph(class RHIDevice& Device, const struct RenderSettings& GraphicsSettings, const class Viewport& RenderViewport);
+	RenderGraph(const struct RenderSettings& GraphicsSettings, const class Viewport& RenderViewport);
 
 	template<class TPass>
 	RenderGraph& AddPass()

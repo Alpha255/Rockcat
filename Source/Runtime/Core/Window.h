@@ -35,7 +35,7 @@ enum class EWindowMode : uint8_t
 class Window
 {
 public:
-	Window(const WindowCreateInfo& CreateInfo);
+	Window(const WindowCreateInfo& CreateInfo, class BaseApplication* Owner);
 
 	const uint32_t GetWidth() const { return m_Width; }
 	const uint32_t GetHeight() const { return m_Height; }
@@ -44,11 +44,9 @@ public:
 	const bool IsDestroyed() const { return m_Status == EWindowStatus::Destroyed; }
 
 	void SetMode(EWindowMode Mode);
-
-	static void PumpMessages();
-
-	void ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam);
 protected:
+	friend class BaseApplication;
+
 	void UpdateSize();
 private:
 	uint32_t m_MinWidth = 0u;

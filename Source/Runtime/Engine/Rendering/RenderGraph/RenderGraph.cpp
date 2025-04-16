@@ -3,15 +3,17 @@
 #include "Engine/Rendering/RenderGraph/ForwardRenderingPath.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Application/Viewport.h"
+#include "Engine/RHI/RHIBackend.h"
+#include "Engine/Services/RenderService.h"
 
-std::shared_ptr<RenderGraph> RenderGraph::Create(RHIDevice& Device, const RenderSettings& GraphicsSettings, const Viewport& RenderViewport)
+std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& GraphicsSettings, const Viewport& RenderViewport)
 {
 	std::shared_ptr<RenderGraph> Graph;
 
 	switch (GraphicsSettings.RenderingPath)
 	{
 	case ERenderingPath::ForwardRendering:
-		Graph.reset(new ForwardRenderingPath(Device, GraphicsSettings, RenderViewport));
+		Graph.reset(new ForwardRenderingPath(GraphicsSettings, RenderViewport));
 		break;
 	case ERenderingPath::DeferredShading:
 		assert(false);
@@ -25,8 +27,8 @@ std::shared_ptr<RenderGraph> RenderGraph::Create(RHIDevice& Device, const Render
 	return Graph;
 }
 
-RenderGraph::RenderGraph(RHIDevice& Device, const RenderSettings& GraphicsSettings, const Viewport& RenderViewport)
-	: m_RenderDevice(Device)
+RenderGraph::RenderGraph(const RenderSettings& GraphicsSettings, const Viewport& RenderViewport)
+	: m_RenderDevice(RenderService::Get().GetBackend().GetDevice())
 	, m_RenderSettings(GraphicsSettings)
 	, m_RenderViewport(RenderViewport)
 	, m_ResourceMgr(new ResourceManager())

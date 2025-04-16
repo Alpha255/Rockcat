@@ -1,6 +1,5 @@
 #include "RHI/D3D/D3D12/D3D12Texture.h"
 #include "RHI/D3D/D3D12/D3D12Device.h"
-#include "Engine/Services/SpdLogService.h"
 #include "Core/Math/Color.h"
 
 D3D12Texture::D3D12Texture(const D3D12Device& Device, const RHITextureCreateInfo& RHICreateInfo)

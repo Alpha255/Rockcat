@@ -1,8 +1,6 @@
 #include "Core/DynamicLinkLibrary.h"
-#include "Core/PlatformMisc.h"
+#include "Core/System.h"
 #include "Engine/Services/SpdLogService.h"
-
-#if PLATFORM_WIN32
 
 #include <Windows.h>
 #include <windowsx.h>
@@ -37,5 +35,3 @@ struct ComponentObjectModelLibrary
 		::CoUninitialize();
 	}
 };
-
-#endif
