@@ -45,7 +45,7 @@ public:
 		Target.Transforms.insert(Target.Transforms.end(), Other.Transforms.begin(), Other.Transforms.end());
 
 		auto MeshIt = Target.StaticMeshes.end();
-		MaterialID::IndexType StartIndex = static_cast<MaterialID::IndexType>(Target.MaterialProperties.size());
+		MaterialID StartIndex = static_cast<MaterialID>(Target.MaterialProperties.size());
 		if (StartIndex > 0u)
 		{
 			for (; MeshIt < Target.StaticMeshes.end(); ++MeshIt)
@@ -99,5 +99,11 @@ void SceneAsset::PostLoad()
 	{
 		auto SceneAssetPath = Paths::GltfSampleModelPath() / Path;
 		AssetDatabase::Get().GetOrReimportAsset<AssimpSceneAsset>(SceneAssetPath, AssetLoadCallbacks);
+	}
+
+	if (m_Data->Cameras.empty())
+	{
+		GetGraph().AddNode(SceneGraph::NodeID(), "MainCamera", SceneGraph::Node::ENodeMasks::Camera);
+		m_Data->Cameras.emplace_back(std::make_shared<Camera>(Camera::EMode::FirstPerson));
 	}
 }

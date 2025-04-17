@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Math/Matrix.h"
+#include "Core/Math/Transform.h"
 #include "Engine/Asset/SerializableAsset.h"
 #include "Engine/Asset/TextureAsset.h"
 #include "Engine/RHI/RHIShader.h"
@@ -144,6 +145,7 @@ public:
 	const std::map<std::string, ShaderVariable>& GetVariables() const { return m_Variables; }
 	RHIBuffer* GetUniformBuffer(class RHIDevice& Device);
 
+	virtual void SetupTransform(const Math::Transform&) {}
 	virtual void SetupViewParams(const class SceneView&) {}
 	virtual void SetupMaterialProperty(const struct MaterialProperty&) {}
 	
@@ -165,7 +167,7 @@ protected:
 
 	void RegisterVariable(const char* Name, ShaderVariable&& Variable);
 	virtual ShaderMetaData& GetMetaData() = 0;
-	virtual const RHIShader* GetRHIFallback() const;
+	virtual const RHIShader* GetFallback() const;
 private:
 	size_t ComputeUniformBufferSize();
 

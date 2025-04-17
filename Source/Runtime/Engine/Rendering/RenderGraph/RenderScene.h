@@ -25,13 +25,6 @@ struct VertexStream
 
 struct MeshDrawCommand
 {
-	enum class ECullFlags
-	{
-		None,
-		CulledByFrustum,
-		CulledByOcclusion
-	};
-
 	RHIVertexStream VertexStream;
 	const RHIBuffer* IndexBuffer = nullptr;
 
@@ -40,8 +33,6 @@ struct MeshDrawCommand
 	uint32_t NumIndex = 0u;
 	uint32_t NumInstances = 1u;
 	ERHIIndexFormat IndexFormat = ERHIIndexFormat::UInt16;
-
-	std::string_view DebugName;
 	
 	const MaterialProperty* Material = nullptr;
 	RHIGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
@@ -63,6 +54,8 @@ struct MeshDrawCommand
 
 	MeshDrawCommand() = default;
 	MeshDrawCommand(const class StaticMesh& Mesh);
+
+	const char* GetDebugName() const { return Material ? Material->Name.c_str() : "Unknown"; }
 };
 
 class RenderScene
@@ -86,6 +79,8 @@ private:
 	void UpdateScenePrimitives();
 	void RemoveInvalidCommands();
 
+	void UpdateMeshBatch(uint32_t MeshIndex, int32_t Add);
+
 	const class Scene& m_Scene;
 
 	struct PrimitiveCollection
@@ -105,7 +100,9 @@ private:
 	std::unordered_map<SceneGraph::NodeID, size_t> m_NodeIDCommandMap;
 	Array<std::vector<std::shared_ptr<MeshDrawCommand>>, EGeometryPass> m_Commands;
 
-	std::mutex m_CommandsMutex;
+	std::vector<std::unordered_map<MaterialID, uint32_t>> m_MeshBatch;
+
+	std::mutex m_CommandsLock;
 	TaskEventPtr m_CommandsEvent;
 
 	static Array<std::unique_ptr<struct MeshDrawCommandBuilder>, EGeometryPass> s_Builders;

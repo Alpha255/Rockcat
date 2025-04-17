@@ -154,7 +154,6 @@ void Camera::OnWindowResized(uint32_t Width, uint32_t Height)
 	m_Center.y = Height / 2.0f;
 }
 
-#if 0
 void Camera::Tick(float ElapsedSeconds)
 {
 	/// Normalize vector so if moving 2 dirs (left & forward), 
@@ -191,7 +190,7 @@ void Camera::Tick(float ElapsedSeconds)
 			m_Yaw += m_RotVelocity.x;
 			m_Pitch += m_RotVelocity.y;
 
-			m_Pitch = std::min(PI_Div2, std::max(-PI_Div2, m_Pitch));
+			m_Pitch = std::min(Math::PI_Div2, std::max(-Math::PI_Div2, m_Pitch));
 		}
 
 		Math::Matrix Rot = Math::Matrix::RotationRollPitchYaw(m_Pitch, m_Yaw, 0.0f);
@@ -219,7 +218,7 @@ void Camera::Tick(float ElapsedSeconds)
 		if (m_MouseMovements.WheelMove)
 		{
 			m_Radius -= m_MouseMovements.WheelDelta * m_Radius * 0.1f;
-			m_Radius = Clamp(m_Radius, m_MinRadius, m_MaxRadius);
+			m_Radius = Math::Clamp(m_Radius, m_MinRadius, m_MaxRadius);
 			m_MouseMovements.WheelDelta = 0;
 		}
 
@@ -243,7 +242,6 @@ void Camera::Tick(float ElapsedSeconds)
 		m_InverseView = Math::Matrix::Inverse(m_View);
 	}
 }
-#endif
 
 void Camera::FocusToBounds(const Math::AABB& Bounds)
 {

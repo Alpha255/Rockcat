@@ -62,6 +62,11 @@ void RenderGraph::OnWindowResized(uint32_t Width, uint32_t Height)
 
 void RenderGraph::Execute(const Scene& InScene)
 {
+	if (!InScene.IsReady())
+	{
+		return;
+	}
+
 	if (!m_RenderScene || (&m_RenderScene->GetScene() != &InScene))
 	{
 		m_RenderScene = std::make_shared<RenderScene>(InScene);

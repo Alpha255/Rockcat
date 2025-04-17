@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/ObjectID.h"
+#include "Engine/Scene/Components/Components.h"
 
 struct SceneGraph
 {
@@ -100,6 +101,8 @@ struct SceneGraph
 		bool m_Selected = false;
 
 		std::string m_Name;
+
+		//std::vector<ComponentBase*> m_Components;
 	};
 	using NodeList = std::vector<Node>;
 

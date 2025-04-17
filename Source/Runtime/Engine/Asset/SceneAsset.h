@@ -54,25 +54,31 @@ public:
 		return nullptr;
 	}
 
-	const Math::Transform* GetTransform(uint32_t Index) const
+	const Math::Transform& GetTransform(uint32_t Index) const
 	{
 		assert(Index < m_Data->StaticMeshes.size());
-		return &m_Data->Transforms[Index];
+		return m_Data->Transforms[Index];
 	}
 
-	const MaterialProperty* GetMaterialProperty(uint32_t Index) const
+	const MaterialProperty& GetMaterialProperty(uint32_t Index) const
 	{
 		assert(Index < m_Data->MaterialProperties.size());
-		return m_Data->MaterialProperties[Index].get();
+		return *m_Data->MaterialProperties[Index];
 	}
 
-	const Camera* GetCamera(uint32_t Index) const
+	Camera& GetCamera(uint32_t Index) const
 	{
 		assert(Index < m_Data->Cameras.size());
-		return m_Data->Cameras[Index].get();
+		return *m_Data->Cameras[Index];
 	}
 
-	const std::vector<std::shared_ptr<Camera>>& GetCameras() const
+	Camera& GetMainCamera() const
+	{
+		assert(m_Data->Cameras.size() > 0u);
+		return *m_Data->Cameras[0];
+	}
+
+	std::vector<std::shared_ptr<Camera>>& GetCameras() const
 	{
 		return m_Data->Cameras;
 	}

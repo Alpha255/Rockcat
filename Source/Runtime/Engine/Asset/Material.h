@@ -101,4 +101,4 @@ struct MaterialProperty : public SerializableAsset<MaterialProperty>
 	}
 };
 
-using MaterialID = ObjectID<MaterialProperty, uint32_t>;
+using MaterialID = uint32_t;

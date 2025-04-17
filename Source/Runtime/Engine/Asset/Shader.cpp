@@ -75,10 +75,10 @@ const RHIShader* Shader::TryGetRHI()
 		m_ShaderModule = ShaderLibrary::Get().GetShaderModule(*this);
 	}
 
-	return m_ShaderModule ? m_ShaderModule : GetRHIFallback();
+	return m_ShaderModule ? m_ShaderModule : GetFallback();
 }
 
-const RHIShader* Shader::GetRHIFallback() const
+const RHIShader* Shader::GetFallback() const
 {
 	switch (GetStage())
 	{

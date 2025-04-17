@@ -2,8 +2,9 @@
 
 #include "Core/MessageRouter.h"
 #include "Core/Math/Matrix.h"
+#include "Engine/Tickable.h"
 
-class Camera : public MessageHandler
+class Camera : public MessageHandler, public ITickable
 {
 public:
 	enum class EMode : uint8_t
@@ -81,7 +82,7 @@ public:
 
 	void OnWindowResized(uint32_t Width, uint32_t Height) override;
 
-	///void Tick(float ElapsedSeconds) override final;
+	void Tick(float ElapsedSeconds) override final;
 
 	void FocusToBounds(const Math::AABB& Bounds);
 

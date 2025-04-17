@@ -7,7 +7,6 @@
 
 MeshDrawCommand::MeshDrawCommand(const StaticMesh& Mesh)
 	: IndexBuffer(Mesh.GetIndexBuffer())
-	, DebugName(Mesh.GetName())
 	, Material(&Mesh.GetMaterialProperty())
 	, FirstIndex(0u)
 	, NumPrimitives(Mesh.GetNumPrimitive())
@@ -37,12 +36,26 @@ void RenderScene::RegisterMeshDrawCommandBuilder(EGeometryPass Filter, MeshDrawC
 	s_Builders[Filter].reset(Builder);
 }
 
+void RenderScene::UpdateMeshBatch(uint32_t MeshIndex, int32_t Add)
+{
+	if (auto Mesh = m_Scene.GetStaticMesh(MeshIndex))
+	{
+		auto It = m_MeshBatch[MeshIndex].find(Mesh->GetMaterialID());
+		if (It == m_MeshBatch[MeshIndex].end())
+		{
+			It = m_MeshBatch[MeshIndex].emplace(Mesh->GetMaterialID(), 0u).first;
+		}
+		It->second += Add;
+	}
+}
+
 void RenderScene::GetScenePrimitives()
 {
 	if (m_Scene.GetNumPrimitives() > 0u)
 	{
 		m_Primitives.Add.reserve(m_Scene.GetNumPrimitives());
 		m_Primitives.Remove.reserve(m_Scene.GetNumPrimitives());
+		m_MeshBatch.resize(m_Scene.GetNumPrimitives());
 
 		SceneVisitor<BreadthFirst> Traverser(m_Scene);
 		auto It = Traverser.Get();
@@ -51,6 +64,7 @@ void RenderScene::GetScenePrimitives()
 			if (Node->IsPrimitive())
 			{
 				m_Primitives.Add.push_back(Node->GetID());
+				UpdateMeshBatch(Node->GetDataIndex(), 1);
 			}
 
 			It = Traverser.Next();
@@ -67,6 +81,7 @@ void RenderScene::UpdateScenePrimitives()
 			if (Node->IsPrimitive())
 			{
 				m_Primitives.Add.push_back(ID);
+				UpdateMeshBatch(Node->GetDataIndex(), 1);
 			}
 		}
 	}
@@ -76,6 +91,7 @@ void RenderScene::UpdateScenePrimitives()
 		if (Node.IsPrimitive())
 		{
 			m_Primitives.Remove.push_back(Node.GetID());
+			UpdateMeshBatch(Node.GetDataIndex(), -1);
 		}
 	}
 }
@@ -107,13 +123,13 @@ void RenderScene::BuildMeshDrawCommands(RHIDevice& Device, const RenderSettings&
 	UpdateScenePrimitives();
 	RemoveInvalidCommands();
 
+	if (m_Primitives.Add.empty())
+	{
+		return;
+	}
+
 	if (Device.SupportsAsyncMeshDrawCommandsBuilding())
 	{
-		if (m_Primitives.Add.empty())
-		{
-			return;
-		}
-
 		m_CommandsEvent = tf::ParallelFor(m_Primitives.Add.begin(), m_Primitives.Add.end(), [this, &GraphicsSettings, &Device](const SceneGraph::NodeID& ID) {
 			if (auto Mesh = m_Scene.GetStaticMesh(ID))
 			{
@@ -125,7 +141,7 @@ void RenderScene::BuildMeshDrawCommands(RHIDevice& Device, const RenderSettings&
 					{
 						auto Command = Builder->Build(*Mesh, GraphicsSettings);
 
-						std::lock_guard<std::mutex> Lock(m_CommandsMutex);
+						std::lock_guard<std::mutex> Lock(m_CommandsLock);
 						m_NodeIDCommandMap[ID] = m_Commands[Index].size();
 						m_Commands[Index].emplace_back(std::move(Command));
 					}
