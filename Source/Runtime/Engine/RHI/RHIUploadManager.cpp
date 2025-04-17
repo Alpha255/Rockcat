@@ -49,7 +49,7 @@ RHIUploadManager::StagingBuffer RHIUploadManager::AcquireStagingBuffer(RHIComman
 					CommandBuffer,
 					&t_StagingBlock,
 					AlignedSize,
-					AlignedSize,
+					0u,
 					Version
 				};
 			}
@@ -75,7 +75,7 @@ RHIUploadManager::StagingBuffer RHIUploadManager::AcquireStagingBuffer(RHIComman
 		CommandBuffer,
 		&t_StagingBlock,
 		AlignedSize,
-		AlignedSize,
+		0u,
 		Version
 	};
 }

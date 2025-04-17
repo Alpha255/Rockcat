@@ -574,7 +574,7 @@ void VulkanCommandBuffer::ClearDepthStencilTexture(const RHITexture* Texture, bo
 
 void VulkanCommandBuffer::WriteBuffer(const RHIBuffer* Buffer, const RHIBuffer* StagingBuffer, size_t Size, size_t SrcOffset, size_t DstOffset)
 {
-	assert(Buffer && StagingBuffer && Size && SrcOffset < Size && Size < Buffer->GetSize() && DstOffset < Size);
+	assert(Buffer && StagingBuffer && Size && Size <= Buffer->GetSize() && DstOffset < Size);
 	assert(!IsInsideRenderPass());
 
 	auto SrcBuffer = Cast<VulkanBuffer>(StagingBuffer);

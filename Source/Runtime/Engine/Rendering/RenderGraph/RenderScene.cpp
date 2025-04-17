@@ -64,7 +64,7 @@ void RenderScene::GetScenePrimitives()
 			if (Node->IsPrimitive())
 			{
 				m_Primitives.Add.push_back(Node->GetID());
-				UpdateMeshBatch(Node->GetDataIndex(), 1);
+				//UpdateMeshBatch(Node->GetDataIndex(), 1);
 			}
 
 			It = Traverser.Next();
@@ -81,7 +81,7 @@ void RenderScene::UpdateScenePrimitives()
 			if (Node->IsPrimitive())
 			{
 				m_Primitives.Add.push_back(ID);
-				UpdateMeshBatch(Node->GetDataIndex(), 1);
+				//UpdateMeshBatch(Node->GetDataIndex(), 1);
 			}
 		}
 	}
@@ -91,7 +91,7 @@ void RenderScene::UpdateScenePrimitives()
 		if (Node.IsPrimitive())
 		{
 			m_Primitives.Remove.push_back(Node.GetID());
-			UpdateMeshBatch(Node.GetDataIndex(), -1);
+			//UpdateMeshBatch(Node.GetDataIndex(), -1);
 		}
 	}
 }

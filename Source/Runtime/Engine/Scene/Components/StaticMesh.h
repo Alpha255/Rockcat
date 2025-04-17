@@ -207,7 +207,7 @@ public:
 	inline const Math::Sphere& GetBoundingSphere() const { return BoundingSphere; }
 	inline ERHIPrimitiveTopology GetPrimitiveTopology() const { return PrimitiveTopology; }
 	inline ERHIIndexFormat GetIndexFormat() const { return IndexFormat; }
-	inline const char* const GetName() const { return Name.c_str(); }
+	inline const char* const GetName() const { return Name.empty() ? (Material->Name.empty() ? Material->GetName().string().c_str() : Material->Name.c_str()) : Name.c_str(); }
 
 	inline MaterialID GetMaterialID() const { return m_MaterialID; }
 	inline const MaterialProperty& GetMaterialProperty() const { assert(Material); return *Material; }
