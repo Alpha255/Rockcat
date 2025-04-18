@@ -3,6 +3,8 @@
 #include "Engine/Asset/TextureAsset.h"
 #include "Engine/RHI/RHITexture.h"
 #include "Engine/Services/SpdLogService.h"
+#include "Engine/Services/RenderService.h"
+#include "Engine/RHI/RHIBackend.h"
 #pragma warning(disable:4244)
 #include <Submodules/stb/stb_image.h>
 #pragma warning(default:4244)
@@ -30,7 +32,7 @@ public:
 		auto& Image = Cast<TextureAsset>(InAsset);
 		auto& RawData = Image.GetRawData(InAssetType.ContentsType);
 
-		auto DataSize = static_cast<int32_t>(RawData.Size);
+		auto const DataSize = static_cast<int32_t>(RawData.Size);
 		auto Data = reinterpret_cast<const stbi_uc*>(RawData.Data.get());
 
 		int32_t Width = 0, Height = 0, Channels = 0, OriginalChannels = STBI_default;
@@ -63,7 +65,8 @@ public:
 			return false;
 		}
 
-		Image.m_CreateInfo.SetWidth(Width)
+		RHITextureCreateInfo CreateInfo;
+		CreateInfo.SetWidth(Width)
 			.SetHeight(Height)
 			.SetDimension(ERHITextureDimension::T_2D)
 			.SetFormat(Image.IsLinear() ? ERHIFormat::RGBA8_UNorm : ERHIFormat::RGBA8_UNorm_SRGB)
@@ -71,6 +74,8 @@ public:
 			.SetName(InAsset.GetPath().filename().string())
 			.SetPermanentState(ERHIResourceState::ShaderResource)
 			.SetInitialData(DataBlock(Channels * Width * Height, Bitmap));
+
+		Image.CreateRHI(RenderService::Get().GetBackend().GetDevice(), CreateInfo);		
 
 		return true;
 	}

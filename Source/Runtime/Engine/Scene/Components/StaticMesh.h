@@ -216,11 +216,11 @@ public:
 	inline const RHIBuffer* GetIndexBuffer() const { assert(RHIIndexBuffer);  return RHIIndexBuffer.get(); }
 	std::vector<const RHIBuffer*> GetVertexBuffers(EVertexAttributes Attributes) const;
 	const RHIBuffer* GetVertexBuffer(EVertexAttributes Attributes) const;
-
-	void CreateRHI(class RHIDevice& Device) override;
 protected:
 	friend class SceneBuilder;
 	friend class AssimpSceneImporter;
+
+	void CreateRHI(class RHIDevice& Device) override;
 
 	void SetMaterialID(MaterialID ID) { m_MaterialID = ID; }
 	void SetMaterialProperty(const MaterialProperty* InMaterial) { Material = InMaterial; }

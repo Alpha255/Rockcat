@@ -133,8 +133,6 @@ void RenderScene::BuildMeshDrawCommands(RHIDevice& Device, const RenderSettings&
 		m_CommandsEvent = tf::ParallelFor(m_Primitives.Add.begin(), m_Primitives.Add.end(), [this, &GraphicsSettings, &Device](const SceneGraph::NodeID& ID) {
 			if (auto Mesh = m_Scene.GetStaticMesh(ID))
 			{
-				const_cast<StaticMesh*>(Mesh)->CreateRHI(Device);
-
 				for (size_t Index = 0u; Index < (size_t)EGeometryPass::Num; ++Index)
 				{
 					if (auto Builder = GetBuilder(Index))
@@ -155,8 +153,6 @@ void RenderScene::BuildMeshDrawCommands(RHIDevice& Device, const RenderSettings&
 		{
 			if (auto Mesh = m_Scene.GetStaticMesh(ID))
 			{
-				const_cast<StaticMesh*>(Mesh)->CreateRHI(Device);
-
 				for (size_t Index = 0u; Index < (size_t)EGeometryPass::Num; ++Index)
 				{
 					if (auto Builder = GetBuilder(Index))

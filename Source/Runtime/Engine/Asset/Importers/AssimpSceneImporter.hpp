@@ -3,6 +3,8 @@
 #include "Engine/Asset/SceneAsset.h"
 #include "Engine/Asset/AssetDatabase.h"
 #include "Engine/Paths.h"
+#include "Engine/Services/RenderService.h"
+#include "Engine/RHI/RHIBackend.h"
 #include <assimp/version.h>
 #include <Submodules/assimp/include/assimp/Importer.hpp>
 #include <Submodules/assimp/include/assimp/ProgressHandler.hpp>
@@ -62,9 +64,6 @@ public:
 					AssimpScene.Graph.Root = AssimpScene.Graph.AddNode(SceneGraph::NodeID(), AiScene->mRootNode->mName.C_Str());
 					if (ProcessNode(AiScene, AiScene->mRootNode, AssimpScene.Graph.Root, AssimpScene))
 					{
-#if !ENABLE_MULTI_RENDERER
-						assert(false);
-#endif
 						return true;
 					}
 				}
@@ -94,13 +93,13 @@ private:
 		{
 			if (Percentage >= 1.0f)
 			{
-				LOG_CAT_DEBUG(LogAssimpImporter, "Loading model \"{}\" succeeded", m_AssetPath.generic_string());
+				LOG_CAT_DEBUG(LogAssimpImporter, "Loading assimp scene \"{}\" completed", m_AssetPath.generic_string());
 				return true;
 			}
 
 			if (static_cast<int32_t>(Percentage * 100) % 10 == 0)
 			{
-				LOG_CAT_DEBUG(LogAssimpImporter, "Loading model: \"{}\" in progress {:.2f}%", m_AssetPath.generic_string(), Percentage * 100);
+				LOG_CAT_DEBUG(LogAssimpImporter, "Loading assimp scene: \"{}\" in progress {:.2f}%", m_AssetPath.generic_string(), Percentage * 100);
 			}
 			return false;
 		}
@@ -244,102 +243,103 @@ private:
 	{
 		for (uint32_t Index = 0u; Index < AiScene->mNumMeshes; ++Index)
 		{
-			const auto Mesh = AiScene->mMeshes[Index];
+			const auto AiMesh = AiScene->mMeshes[Index];
 
-			if (!Mesh)
+			if (!AiMesh)
 			{
 				LOG_CAT_ERROR(LogAssimpImporter, "Detected invalid mesh!");
 				continue;
 			}
-			if (!Mesh->HasPositions())
+			if (!AiMesh->HasPositions())
 			{
 				LOG_CAT_ERROR(LogAssimpImporter, "The mesh has no vertices data!");
 				continue;
 			}
-			if (!Mesh->HasNormals())
+			if (!AiMesh->HasNormals())
 			{
 				LOG_CAT_WARNING(LogAssimpImporter, "The mesh has no normals!");
 				continue;
 			}
-			if (!Mesh->HasFaces())
+			if (!AiMesh->HasFaces())
 			{
 				LOG_CAT_ERROR(LogAssimpImporter, "The mesh has no indices data!");
 				continue;
 			}
-			if (Mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
+			if (AiMesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
 			{
 				LOG_CAT_ERROR(LogAssimpImporter, "Detected others primitive type, should never be happen!");
 				continue;
 			}
 
 			Math::AABB BoundingBox = Math::AABB(
-				Math::Vector3(Mesh->mAABB.mMin.x, Mesh->mAABB.mMin.y, Mesh->mAABB.mMin.z),
-				Math::Vector3(Mesh->mAABB.mMax.x, Mesh->mAABB.mMax.y, Mesh->mAABB.mMax.z));
+				Math::Vector3(AiMesh->mAABB.mMin.x, AiMesh->mAABB.mMin.y, AiMesh->mAABB.mMin.z),
+				Math::Vector3(AiMesh->mAABB.mMax.x, AiMesh->mAABB.mMax.y, AiMesh->mAABB.mMax.z));
 
 			MeshData MeshDataBlock(
-				Mesh->mNumVertices,
-				Mesh->mNumFaces * 3u,
-				Mesh->mNumFaces,
-				Mesh->HasNormals(),
-				Mesh->HasTangentsAndBitangents(),
-				Mesh->HasTextureCoords(0u),
-				Mesh->HasTextureCoords(1u),
-				Mesh->HasVertexColors(0u),
+				AiMesh->mNumVertices,
+				AiMesh->mNumFaces * 3u,
+				AiMesh->mNumFaces,
+				AiMesh->HasNormals(),
+				AiMesh->HasTangentsAndBitangents(),
+				AiMesh->HasTextureCoords(0u),
+				AiMesh->HasTextureCoords(1u),
+				AiMesh->HasVertexColors(0u),
 				ERHIPrimitiveTopology::TriangleList,
 				BoundingBox);
 
-			for (uint32_t FaceIndex = 0u; FaceIndex < Mesh->mNumFaces; ++FaceIndex)
+			for (uint32_t FaceIndex = 0u; FaceIndex < AiMesh->mNumFaces; ++FaceIndex)
 			{
-				const auto& Face = Mesh->mFaces[FaceIndex];
+				const auto& Face = AiMesh->mFaces[FaceIndex];
 				assert(Face.mNumIndices == 3u);
 				MeshDataBlock.SetFace(FaceIndex, Face.mIndices[0], Face.mIndices[1], Face.mIndices[2]);
 			}
 
-			for (uint32_t VertexIndex = 0u; VertexIndex < Mesh->mNumVertices; ++VertexIndex)
+			for (uint32_t VertexIndex = 0u; VertexIndex < AiMesh->mNumVertices; ++VertexIndex)
 			{
-				const auto& Position = Mesh->mVertices[VertexIndex];
+				const auto& Position = AiMesh->mVertices[VertexIndex];
 				MeshDataBlock.SetPosition(VertexIndex, Math::Vector3(Position.x, Position.y, Position.z));
 
-				if (Mesh->HasNormals())
+				if (AiMesh->HasNormals())
 				{
-					const auto& Normal = Mesh->mNormals[VertexIndex];
+					const auto& Normal = AiMesh->mNormals[VertexIndex];
 					MeshDataBlock.SetNormal(VertexIndex, Math::Vector3(Normal.x, Normal.y, Normal.z));
 				}
-				if (Mesh->HasTangentsAndBitangents())
+				if (AiMesh->HasTangentsAndBitangents())
 				{
-					const auto& Tangent = Mesh->mTangents[VertexIndex];
+					const auto& Tangent = AiMesh->mTangents[VertexIndex];
 					MeshDataBlock.SetTangent(VertexIndex, Math::Vector3(Tangent.x, Tangent.y, Tangent.z));
 
-					const auto& Bitangent = Mesh->mBitangents[VertexIndex];
+					const auto& Bitangent = AiMesh->mBitangents[VertexIndex];
 					MeshDataBlock.SetBitangent(VertexIndex, Math::Vector3(Bitangent.x, Bitangent.y, Bitangent.z));
 				}
 
-				if (Mesh->HasTextureCoords(0u))
+				if (AiMesh->HasTextureCoords(0u))
 				{
-					const auto& UV = Mesh->mTextureCoords[0u][VertexIndex];
+					const auto& UV = AiMesh->mTextureCoords[0u][VertexIndex];
 					MeshDataBlock.SetUV0(VertexIndex, Math::Vector3(UV.x, UV.y, UV.z));
 				}
-				if (Mesh->HasTextureCoords(1))
+				if (AiMesh->HasTextureCoords(1))
 				{
-					const auto& UV = Mesh->mTextureCoords[1u][VertexIndex];
+					const auto& UV = AiMesh->mTextureCoords[1u][VertexIndex];
 					MeshDataBlock.SetUV0(VertexIndex, Math::Vector3(UV.x, UV.y, UV.z));
 				}
 
-				if (Mesh->HasVertexColors(0u))
+				if (AiMesh->HasVertexColors(0u))
 				{
-					const auto& Color = Mesh->mColors[0u][VertexIndex];
+					const auto& Color = AiMesh->mColors[0u][VertexIndex];
 					MeshDataBlock.SetColor(VertexIndex, Math::Color(Color.r, Color.g, Color.b, Color.a));
 				}
 			}
 
-			if (Mesh->HasBones())
+			if (AiMesh->HasBones())
 			{
 				assert(false);
 			}
 			else
 			{
-				AssimpScene.Data.StaticMeshes.emplace_back(std::make_shared<StaticMesh>(MeshDataBlock, Mesh->mMaterialIndex))
-					->SetMaterialProperty(AssimpScene.Data.MaterialProperties.at(Index).get());
+				auto& Mesh = AssimpScene.Data.StaticMeshes.emplace_back(std::make_shared<StaticMesh>(MeshDataBlock, AiMesh->mMaterialIndex));
+				Mesh->SetMaterialProperty(AssimpScene.Data.MaterialProperties.at(Index).get());
+				Mesh->CreateRHI(RenderService::Get().GetBackend().GetDevice());
 			}
 		}
 	}

@@ -11,7 +11,6 @@ public:
 	bool IsLinear() const { return m_Linear; }
 
 	const RHITexture* GetRHI() const { assert(m_Texture); return m_Texture.get(); }
-	void CreateRHI(class RHIDevice& Device);
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -31,10 +30,11 @@ protected:
 	friend class StbImageImporter;
 	friend class DDSImageImporter;
 
+	void CreateRHI(class RHIDevice& Device, const RHITextureCreateInfo& CreateInfo);
+
 	void SetLinear(bool Linear) { m_Linear = Linear; }
 
 	bool m_Linear = false;
-	RHITextureCreateInfo m_CreateInfo;
 	RHITexturePtr m_Texture;
 };
 

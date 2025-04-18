@@ -241,16 +241,5 @@ void StaticMesh::CreateRHI(RHIDevice& Device)
 		}
 	}
 
-	if (Material)
-	{
-		for (auto& Texture : Material->Textures) /// If texture asset is ready???
-		{
-			if (Texture)
-			{
-				Texture->CreateRHI(Device);
-			}
-		}
-	}
-
 	ClearData();
 }

@@ -1,8 +1,12 @@
 #pragma once
 
 #include "Engine/Asset/TextureAsset.h"
+#include "Engine/Services/RenderService.h"
+#include "Engine/RHI/RHIBackend.h"
+
 #include <dxgiformat.h>
 #include <External/DDS.h>
+
 
 class DDSImageImporter : public IAssetImporter
 {
@@ -17,9 +21,12 @@ public:
 	bool Reimport(Asset& InAsset, const AssetType& InAssetType) override final
 	{
 		auto& Image = Cast<TextureAsset>(InAsset);
-#if 0
-		assert(Data && Size);
-		assert(Size >= (sizeof(uint32_t) + sizeof(DirectX::DDS_HEADER)));
+		auto& RawData = Image.GetRawData(InAssetType.ContentsType);
+
+		auto const DataSize = static_cast<int32_t>(RawData.Size);
+		auto Data = reinterpret_cast<const uint8_t*>(RawData.Data.get());
+
+		assert(DataSize >= (sizeof(uint32_t) + sizeof(DirectX::DDS_HEADER)));
 		assert(*reinterpret_cast<const uint32_t*>(Data) == DirectX::DDS_MAGIC);
 
 		bool DXT10Header = false;
@@ -27,157 +34,122 @@ public:
 		assert(Header->size == sizeof(DirectX::DDS_HEADER) && Header->ddspf.size == sizeof(DirectX::DDS_PIXELFORMAT));
 		if ((Header->ddspf.flags & DDS_FOURCC) && (Header->ddspf.fourCC == MAKEFOURCC('D', 'X', '1', '0')))
 		{
-			assert(Size >= (sizeof(DirectX::DDS_HEADER) + sizeof(uint32_t) + sizeof(DirectX::DDS_HEADER_DXT10)));
+			assert(DataSize >= (sizeof(DirectX::DDS_HEADER) + sizeof(uint32_t) + sizeof(DirectX::DDS_HEADER_DXT10)));
 			DXT10Header = true;
 		}
 
 		auto Offset = sizeof(uint32_t) + sizeof(DirectX::DDS_HEADER) + (DXT10Header ? sizeof(DirectX::DDS_HEADER_DXT10) : 0u);
-		auto BitSize = Size - Offset;
+		auto BitSize = DataSize - Offset;
 		auto BitData = Data + Offset;
 
 		bool Cubemap = false;
-
-		RHI::ImageDesc Desc;
-		Desc.Width = Header->width;
-		Desc.Height = Header->height;
-		Desc.Depth = Header->depth == 0u ? 1u : Header->depth;
-		Desc.MipLevels = Header->mipMapCount == 0u ? 1u : Header->mipMapCount;
-		assert(Desc.MipLevels <= D3D11_REQ_MIP_LEVELS);
+		RHITextureCreateInfo CreateInfo;
+		CreateInfo.SetWidth(Header->width)
+			.SetHeight(Header->height)
+			.SetDepth(Header->depth == 0u ? 1u : Header->depth)
+			.SetNumMipLevel(Header->mipMapCount == 0u ? 1u : Header->mipMapCount)
+			.SetUsages(ERHIBufferUsageFlags::ShaderResource)
+			.SetPermanentState(ERHIResourceState::ShaderResource);
+		assert(CreateInfo.NumMipLevel <= D3D11_REQ_MIP_LEVELS);
 
 		if (DXT10Header)
 		{
 			auto DXTHeader = reinterpret_cast<const DirectX::DDS_HEADER_DXT10*>(reinterpret_cast<const uint8_t*>(Header) + sizeof(DirectX::DDS_HEADER));
 			assert(DXTHeader && DXTHeader->arraySize);
 
-			Desc.ArrayLayers = DXTHeader->arraySize;
+			CreateInfo.SetNumArrayLayer(DXTHeader->arraySize);
 			assert(DXTHeader->dxgiFormat != DXGI_FORMAT_AI44 &&
 				DXTHeader->dxgiFormat != DXGI_FORMAT_IA44 &&
 				DXTHeader->dxgiFormat != DXGI_FORMAT_P8 &&
 				DXTHeader->dxgiFormat != DXGI_FORMAT_A8P8);
-			auto FormatAttr = RHI::FormatAttribute::Attribute_DXGI(DXTHeader->dxgiFormat);
-			assert(FormatAttr.BytesPerPixel);
 
-			Desc.Format = FormatAttr.Format;
+			CreateInfo.SetFormat(RHI::GetRHIFormat(DXTHeader->dxgiFormat));
 			switch (DXTHeader->resourceDimension)
 			{
 			case D3D11_RESOURCE_DIMENSION_TEXTURE1D:
 				if (Header->flags & DDS_HEIGHT)
 				{
-					assert(Desc.Height == 1u);
+					assert(CreateInfo.Height == 1u);
 				}
-				Desc.Height = Desc.Depth = 1u;
-				Desc.Type = Desc.ArrayLayers > 1u ? RHI::EImageType::T_1D_Array : RHI::EImageType::T_1D;
+				CreateInfo.SetHeight(1u)
+					.SetDepth(1u)
+					.SetDimension(CreateInfo.NumArrayLayer > 1u ? ERHITextureDimension::T_1D_Array : ERHITextureDimension::T_1D);
 				break;
 			case D3D11_RESOURCE_DIMENSION_TEXTURE2D:
 				if (DXTHeader->miscFlag & D3D11_RESOURCE_MISC_TEXTURECUBE)
 				{
-					Desc.Type = Desc.ArrayLayers > 1u ? RHI::EImageType::T_Cube_Array : RHI::EImageType::T_Cube;
-					Desc.ArrayLayers *= 6u;
+					CreateInfo.SetDimension(CreateInfo.NumArrayLayer > 1u ? ERHITextureDimension::T_Cube_Array : ERHITextureDimension::T_Cube)
+						.SetNumArrayLayer(CreateInfo.NumArrayLayer * 6u);
 					Cubemap = true;
 				}
 				else
 				{
-					Desc.Type = Desc.ArrayLayers > 1u ? RHI::EImageType::T_2D_Array : RHI::EImageType::T_2D;
+					CreateInfo.SetDimension(CreateInfo.NumArrayLayer > 1u ? ERHITextureDimension::T_2D_Array : ERHITextureDimension::T_2D);
 				}
-				Desc.Depth = 1u;
+				CreateInfo.SetDepth(1u);
 				break;
 			case D3D11_RESOURCE_DIMENSION_TEXTURE3D:
 				assert(Header->flags & DDS_HEADER_FLAGS_VOLUME);
-				Desc.Type = RHI::EImageType::T_3D;
+				CreateInfo.SetDimension(ERHITextureDimension::T_3D);
 				break;
 			case D3D11_RESOURCE_DIMENSION_BUFFER:
-				Desc.Type = RHI::EImageType::Buffer;
+				CreateInfo.SetDimension(ERHITextureDimension::Buffer);
 				break;
 			}
 		}
 		else
 		{
-			auto FormatAttr = RHI::FormatAttribute::Attribute_DXGI(PixelFormatToDXGIFormat(Header->ddspf));
-			assert(FormatAttr.Format != RHI::EFormat::Unknown && FormatAttr.BytesPerPixel);
-			Desc.Format = FormatAttr.Format;
+			CreateInfo.SetFormat(RHI::GetRHIFormat(GetDXGIFormat(Header->ddspf)));
 
 			if (Header->flags & DDS_HEADER_FLAGS_VOLUME)
 			{
-				Desc.Type = RHI::EImageType::T_3D;
+				CreateInfo.SetDimension(ERHITextureDimension::T_3D);
 			}
 			else
 			{
 				if (Header->caps2 & DDS_CUBEMAP)
 				{
 					assert((Header->caps2 & DDS_CUBEMAP_ALLFACES) == DDS_CUBEMAP_ALLFACES);
-					Desc.ArrayLayers = 6u;
 					Cubemap = true;
-					Desc.Type = RHI::EImageType::T_Cube;
+					CreateInfo.SetDimension(ERHITextureDimension::T_Cube)
+						.SetNumArrayLayer(CreateInfo.NumArrayLayer * 6u);
 				}
 				else
 				{
-					Desc.Type = Desc.ArrayLayers > 1u ? RHI::EImageType::T_2D_Array : RHI::EImageType::T_2D;
+					CreateInfo.SetDimension(CreateInfo.NumArrayLayer > 1u ? ERHITextureDimension::T_2D_Array : ERHITextureDimension::T_2D);
 				}
 			}
 		}
 
-		switch (Desc.Type)
+		switch (CreateInfo.Dimension)
 		{
-		case RHI::EImageType::T_2D:
-		case RHI::EImageType::T_2D_Array:
+		case ERHITextureDimension::T_2D:
+		case ERHITextureDimension::T_2D_Array:
 			assert(
-				Desc.ArrayLayers <= D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION &&
-				Desc.Width <= D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION &&
-				Desc.Height <= D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION);
+				CreateInfo.NumArrayLayer <= D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION &&
+				CreateInfo.Width <= D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION &&
+				CreateInfo.Height <= D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION);
 			break;
-		case RHI::EImageType::T_Cube:
-		case RHI::EImageType::T_Cube_Array:
+		case ERHITextureDimension::T_Cube:
+		case ERHITextureDimension::T_Cube_Array:
 			assert(
-				Desc.ArrayLayers <= D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION &&
-				Desc.Width <= D3D11_REQ_TEXTURECUBE_DIMENSION &&
-				Desc.Height <= D3D11_REQ_TEXTURECUBE_DIMENSION);
+				CreateInfo.NumArrayLayer <= D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION &&
+				CreateInfo.Width <= D3D11_REQ_TEXTURECUBE_DIMENSION &&
+				CreateInfo.Height <= D3D11_REQ_TEXTURECUBE_DIMENSION);
 			break;
-		case RHI::EImageType::T_3D:
+		case ERHITextureDimension::T_3D:
 			assert(
-				Desc.ArrayLayers == 1u &&
-				Desc.Width <= D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION &&
-				Desc.Height <= D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION &&
-				Desc.Depth <= D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION);
+				CreateInfo.NumArrayLayer == 1u &&
+				CreateInfo.Width <= D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION &&
+				CreateInfo.Height <= D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION &&
+				CreateInfo.Depth <= D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION);
 			break;
 		}
 
-		/// gen mipmaps
-		Desc.Asset.Data = BitData;
-		Desc.Asset.Size = static_cast<uint32_t>(BitSize);
-		Desc.Subresources.resize(static_cast<size_t>(Desc.MipLevels) * static_cast<size_t>(Desc.ArrayLayers));
-		uint32_t Index = 0u;
-		for (uint32_t ArrayIndex = 0u; ArrayIndex < Desc.ArrayLayers; ++ArrayIndex)
-		{
-			uint32_t Width = Desc.Width;
-			uint32_t Height = Desc.Height;
-			uint32_t Depth = Desc.Depth;
-			for (uint32_t MipIndex = 0u; MipIndex < Desc.MipLevels; ++MipIndex)
-			{
-				Desc.Subresources[Index].Width = Width;
-				Desc.Subresources[Index].Height = Height;
-				Desc.Subresources[Index].Depth = Depth;
-				Desc.Subresources[Index].MipLevel = MipIndex;
-				Desc.Subresources[Index].ArrayLayer = ArrayIndex;
+		CreateInfo.SetInitialData(DataBlock(BitSize, BitData));
+		Image.CreateRHI(RenderService::Get().GetBackend().GetDevice(), CreateInfo);
 
-				RHI::FormatAttribute::CalculateFormatBytes(Width, Height, Desc.Format, Desc.Subresources[Index].SliceBytes, Desc.Subresources[Index].RowBytes);
-				assert((BitData + static_cast<size_t>(Desc.Subresources[Index].SliceBytes) * static_cast<size_t>(Depth)) <= (BitData + BitSize));
-				Desc.Subresources[Index].Offset = Index == 0u ? 0u : Desc.Subresources[Index].Offset + Desc.Subresources[Index].SliceBytes * Depth;
-
-				Width = Width >> 1;
-				Height = Height >> 1;
-				Depth = Depth >> 1;
-				Width = Width == 0u ? 1u : Width;
-				Height = Height == 0u ? 1u : Height;
-				Depth = Depth == 0u ? 1u : Depth;
-
-				++Index;
-			}
-		}
-
-		return Desc;
-#endif
-
-		return false;
+		return true;
 	}
 private:
 	static DXGI_FORMAT GetDXGIFormat(const DirectX::DDS_PIXELFORMAT& PixelFormat)
