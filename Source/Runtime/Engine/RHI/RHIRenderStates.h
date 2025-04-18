@@ -310,6 +310,9 @@ struct RHIScissorRect
 		assert(Width > 0.0f && Height > 0.0f);
 	}
 
+	uint32_t GetWidth() const { return Extent.x; }
+	uint32_t GetHeight() const { return Extent.y; }
+
 	inline bool operator==(const RHIScissorRect& Other) const { return LeftTop == Other.LeftTop && Extent == Other.Extent; }
 	inline bool operator!=(const RHIScissorRect& Other) const { return LeftTop != Other.LeftTop || Extent != Other.Extent; }
 

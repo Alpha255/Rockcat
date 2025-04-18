@@ -1,49 +1,107 @@
 #pragma once
 
 #include "Core/Definitions.h"
+#include "Core/Math/Frustum.h"
 #include "Engine/RHI/RHIRenderStates.h"
 
-class SceneView
+class IView
 {
 public:
-	SceneView();
+	virtual ~IView() = default;
+	
+	virtual bool IsStereoView() const { return false; }
+	virtual bool IsCubemapView() const { return false; }
 
-	virtual bool IsStereo() const { return false; }
+	virtual void SetViewport(const RHIViewport& Viewport) = 0;
+	virtual void SetScissorRect(const RHIScissorRect& ScissorRect) = 0;
 
+	virtual void SetCamera(const class Camera* Camera);
+	
 	inline bool IsInverseDepth() const { return m_InverseDepth; }
 	inline void SetInverseDepth(bool InverseDepth) { m_InverseDepth = InverseDepth; }
 
-	inline void SetViewport(const RHIViewport& Viewport) { m_Viewport = Viewport; }
-	inline const RHIViewport& GetViewport() const { return m_Viewport; }
+	inline bool IsMirrored() const { return m_Mirrored; }
+	inline void SetMirrored(bool Mirrored) { m_Mirrored = Mirrored; }
 
-	inline const RHIScissorRect& GetScissorRect() const { return m_ScissorRect; }
-	inline void SetScissorRect(const RHIScissorRect& ScissorRect) { m_ScissorRect = ScissorRect; }
+	inline const std::vector<RHIViewport>& GetViewports() const { return m_Viewports; }
+	inline const std::vector<RHIScissorRect>& GetScissorRects() const { return m_ScissorRects; }
 
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(m_InverseDepth),
-			CEREAL_NVP(m_Viewport),
-			CEREAL_NVP(m_ScissorRect)
-		);
-	}
-private:
+	const Math::Matrix& GetWorldMartix() const;
+	const Math::Matrix& GetViewMatrix() const;
+	const Math::Matrix& GetProjectionMatrix() const;
+	const Math::Vector3& GetViewOriginPosition() const;
+	Math::Frustum GetFrustum() const;
+protected:
 	bool m_InverseDepth = false;
-	RHIViewport m_Viewport;
-	RHIScissorRect m_ScissorRect;
+	bool m_Mirrored = false;
+
+	const class Camera* m_Camera = nullptr;
+
+	std::vector<RHIViewport> m_Viewports;
+	std::vector<RHIScissorRect> m_ScissorRects;
 };
 
-class PlanarSceneView : public SceneView
+class PlanarView : public IView
 {
 public:
-	using SceneView::SceneView;
+	using IView::IView;
+
+	PlanarView()
+	{
+		m_Viewports.resize(1u);
+		m_ScissorRects.resize(1u);
+	}
+
+	void SetViewport(const RHIViewport& Viewport) override final;
+	void SetScissorRect(const RHIScissorRect& ScissorRect) override final;
 };
 
-class StereoSceneView : public SceneView
+class StereoView : public IView
 {
 public:
-	using SceneView::SceneView;
+	using IView::IView;
 
-	bool IsStereo() const override final { return true; }
+	enum class EView
+	{
+		Left,
+		Right
+	};
+
+	StereoView()
+	{
+		m_Viewports.resize(2u);
+		m_ScissorRects.resize(2u);
+	}
+
+	void SetViewport(const RHIViewport& Viewport) override final;
+	void SetScissorRect(const RHIScissorRect& ScissorRect) override final;
+
+	bool IsStereoView() const override final { return true; }
+};
+
+class CubemapView : public IView
+{
+public:
+	using IView::IView;
+
+	enum class EView
+	{
+		Up,
+		Down,
+		Left,
+		Right,
+		Front,
+		Back
+	};
+
+	CubemapView()
+	{
+		m_Viewports.resize(6u);
+		m_ScissorRects.resize(6u);
+	}
+
+	bool IsCubemapView() const override final { return true; }
+
+	void SetViewport(const RHIViewport& Viewport) override final;
+	void SetScissorRect(const RHIScissorRect& ScissorRect) override final;
 };

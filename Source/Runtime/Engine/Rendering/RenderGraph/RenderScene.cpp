@@ -28,6 +28,7 @@ RenderScene::RenderScene(const Scene& InScene)
 	}
 
 	GetScenePrimitives();
+	GetSceneViews();
 }
 
 void RenderScene::RegisterMeshDrawCommandBuilder(EGeometryPass Filter, MeshDrawCommandBuilder* Builder)
@@ -70,6 +71,12 @@ void RenderScene::GetScenePrimitives()
 			It = Traverser.Next();
 		}
 	}
+}
+
+void RenderScene::GetSceneViews()
+{
+	auto& View = m_Views.emplace_back(std::make_shared<PlanarView>());
+	View->SetCamera(&m_Scene.GetMainCamera());
 }
 
 void RenderScene::UpdateScenePrimitives()

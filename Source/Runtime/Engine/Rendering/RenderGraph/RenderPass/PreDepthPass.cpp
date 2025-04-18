@@ -20,8 +20,6 @@ struct PreDepthMeshDrawCommandBuilder : public MeshDrawCommandBuilder
 			.SetEnableDepthWrite(true)
 			.SetDepthCompareFunc(GraphicsSettings.InverseDepth ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
 
-		GfxPipelineCreateInfo.RenderPassCreateInfo.SetDepthStencilAttachment(ERHIFormat::D32_Float_S8_UInt);
-
 		uint16_t Location = 0u;
 
 		if (auto Buffer = Mesh.GetVertexBuffer(EVertexAttributes::Position))

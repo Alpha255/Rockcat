@@ -2,6 +2,7 @@
 
 #include "Core/Math/Plane.h"
 #include "Core/Math/Matrix.h"
+#include "Core/Math/AABB.h"
 
 NAMESPACE_START(Math)
 

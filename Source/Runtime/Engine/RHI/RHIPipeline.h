@@ -39,15 +39,12 @@ struct RHIGraphicsPipelineCreateInfo
 	std::vector<RHIScissorRect> ScissorRects;
 	RHIGraphicsShaderPipeline ShaderPipeline;
 
-	RHIRenderPassCreateInfo RenderPassCreateInfo;
-
 	inline RHIGraphicsPipelineCreateInfo& SetPrimitiveTopology(ERHIPrimitiveTopology InTopology) { PrimitiveTopology = InTopology; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetRasterizationState(const RHIRasterizationStateCreateInfo& InRasterizationState) { RasterizationState = InRasterizationState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetBlendState(const RHIBlendStateCreateInfo& InBlendState) { BlendState = InBlendState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetDepthStencilState(const RHIDepthStencilStateCreateInfo& InDepthStencilState) { DepthStencilState = InDepthStencilState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetMultisampleState(const RHIMultisampleStateCreateInfo& InMultisampleState) { MultisampleState = InMultisampleState; return *this; }
 	inline RHIGraphicsPipelineCreateInfo& SetShader(const std::shared_ptr<Shader>& InShader) { ShaderPipeline[InShader->GetStage()] = InShader; return *this; }
-	inline RHIGraphicsPipelineCreateInfo& SetRenderPassCreateInfo(const RHIRenderPassCreateInfo& InRenderPassCreateInfo) { RenderPassCreateInfo = InRenderPassCreateInfo; return *this; }
 	
 	inline RHIGraphicsPipelineCreateInfo& SetViewport(const RHIViewport& Viewport)
 	{
