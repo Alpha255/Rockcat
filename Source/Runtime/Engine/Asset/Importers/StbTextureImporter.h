@@ -67,28 +67,11 @@ public:
 			.SetHeight(Height)
 			.SetDimension(ERHITextureDimension::T_2D)
 			.SetFormat(Image.IsLinear() ? ERHIFormat::RGBA8_UNorm : ERHIFormat::RGBA8_UNorm_SRGB)
+			.SetUsages(ERHIBufferUsageFlags::ShaderResource)
 			.SetName(InAsset.GetPath().filename().string())
+			.SetPermanentState(ERHIResourceState::ShaderResource)
 			.SetInitialData(DataBlock(Channels * Width * Height, Bitmap));
 
 		return true;
-#if 0
-		RHI::ImageDesc Desc;
-		Desc.Width = Width;
-		Desc.Height = Height;
-		Desc.Format = RHI::EFormat::RGBA8_UNorm;
-		Desc.Type = RHI::EImageType::T_2D;
-		Desc.ArrayLayers = 1u;
-		Desc.MipLevels = 1u;
-		Desc.Subresources.resize(1u);
-		Desc.Subresources[0].Width = Width;
-		Desc.Subresources[0].Height = Height;
-		RHI::FormatAttribute::CalculateFormatBytes(Width, Height, RHI::EFormat::RGBA8_UNorm, Desc.Subresources[0].SliceBytes, Desc.Subresources[0].RowBytes);
-		uint32_t Bytes = Width * RHI::FormatAttribute::Attribute(RHI::EFormat::RGBA8_UNorm).BytesPerPixel * Height;
-		assert(Bytes == Desc.Subresources[0].SliceBytes);
-		Desc.Asset.Data = Pixels;
-		Desc.Asset.Size = Bytes;
-
-		return Desc;
-#endif
 	}
 };

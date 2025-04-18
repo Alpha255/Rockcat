@@ -253,6 +253,7 @@ inline auto Invoke(Function&& Func, Args&&... ArgList) -> decltype(std::forward<
 }
 
 size_t PopulationCount(size_t Value);
+size_t GetPowerOfTwo(uint32_t Value);
 
 std::string TrimEnumString(const std::string& Name);
 

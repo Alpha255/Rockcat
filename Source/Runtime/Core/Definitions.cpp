@@ -45,3 +45,23 @@ size_t PopulationCount(size_t Value)
 #endif
 }
 
+size_t GetPowerOfTwo(uint32_t Value)
+{
+	if (Value == 0u)
+	{
+		return 0u;
+	}
+
+	if (!IsPowerOfTwo(Value))
+	{
+		return 0u;
+	}
+
+	size_t Count = 0u;
+
+	while (Value >>= 1u)
+	{
+		++Count;
+	}
+	return Count;
+}

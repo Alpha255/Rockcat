@@ -125,7 +125,7 @@ std::vector<const RHIBuffer*> StaticMesh::GetVertexBuffers(EVertexAttributes Att
 	auto AddBuffer = [this, Attributes, &Buffers](EVertexAttributes Attribute) {
 		if ((Attributes & Attribute) == Attribute)
 		{
-			const size_t Index = PopulationCount(static_cast<size_t>(Attribute));
+			const size_t Index = GetPowerOfTwo(static_cast<size_t>(Attribute));
 			assert(Index < RHIVertexBuffers.size() && RHIVertexBuffers[Index]);
 			Buffers.emplace_back(RHIVertexBuffers[Index].get());
 		}
@@ -144,7 +144,7 @@ std::vector<const RHIBuffer*> StaticMesh::GetVertexBuffers(EVertexAttributes Att
 const RHIBuffer* StaticMesh::GetVertexBuffer(EVertexAttributes Attributes) const
 {
 	/// TODO: Pack all buffer into one ???
-	const size_t Index = PopulationCount(static_cast<size_t>(Attributes));
+	const size_t Index = GetPowerOfTwo(static_cast<size_t>(Attributes));
 	switch (Attributes)
 	{
 	case EVertexAttributes::Position:
@@ -161,7 +161,7 @@ const RHIBuffer* StaticMesh::GetVertexBuffer(EVertexAttributes Attributes) const
 
 void StaticMesh::SetVertexBuffer(EVertexAttributes Attributes, RHIBufferPtr&& Buffer)
 {
-	const size_t Index = PopulationCount(static_cast<size_t>(Attributes));
+	const size_t Index = GetPowerOfTwo(static_cast<size_t>(Attributes));
 	switch (Attributes)
 	{
 	case EVertexAttributes::Position:
@@ -243,7 +243,7 @@ void StaticMesh::CreateRHI(RHIDevice& Device)
 
 	if (Material)
 	{
-		for (auto& Texture : Material->Textures)
+		for (auto& Texture : Material->Textures) /// If texture asset is ready???
 		{
 			if (Texture)
 			{

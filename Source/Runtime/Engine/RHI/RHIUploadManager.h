@@ -42,7 +42,7 @@ private:
 	};
 
 	virtual size_t GetDefaultBlockSize() const { return 64u * Kilobyte; }
-	virtual size_t GetDefaultAlignment() const { return 4u * Kilobyte; }
+	virtual size_t GetDefaultAlignment() const { return 256u; }
 
 	inline void OnStagingBufferAllocated(size_t UsedSize)
 	{

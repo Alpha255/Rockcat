@@ -387,6 +387,8 @@ private:
 
 	void ProcessTextures(const aiMaterial* AiMaterial, MaterialProperty& Material, const std::filesystem::path& RootPath)
 	{
+		std::unordered_map<std::filesystem::path, std::shared_ptr<TextureAsset>> Textures;
+
 		for (uint32_t Index = aiTextureType_DIFFUSE; Index < aiTextureType_TRANSMISSION; ++Index)
 		{
 			auto TextureType = static_cast<aiTextureType>(Index);
@@ -401,19 +403,29 @@ private:
 				std::filesystem::path TexturePath = RootPath / URL.C_Str();
 				if (std::filesystem::exists(TexturePath))
 				{
-					auto AssetLoadCallbacks = std::make_optional(Asset::Callbacks{});
-					AssetLoadCallbacks.value().PreLoadCallback = [this, &TextureType](Asset& InAsset) {
-						Cast<TextureAsset>(InAsset).SetLinear(TextureType != aiTextureType_DIFFUSE && TextureType != aiTextureType_BASE_COLOR);
-					};
-
 					auto TextureIndex = GetTextureType(TextureType);
 					if (TextureIndex != MaterialProperty::ETextureType::Num)
 					{
-						auto& Texture = Material.Textures[TextureIndex];
-						Texture.reset(new TextureAsset(TexturePath));
+						auto It = Textures.find(TexturePath);
+						if (It == Textures.end())
+						{
+							auto& Texture = Material.Textures[TextureIndex];
+							Texture.reset(new TextureAsset(TexturePath));
 
-						auto TextureAsset = Cast<Asset>(Texture);
-						AssetDatabase::Get().GetOrReimportAsset(TextureAsset, AssetLoadCallbacks);
+							It = Textures.emplace(TexturePath, Texture).first;
+
+							auto AssetLoadCallbacks = std::make_optional(Asset::Callbacks{});
+							AssetLoadCallbacks.value().PreLoadCallback = [this, &TextureType](Asset& InAsset) {
+								Cast<TextureAsset>(InAsset).SetLinear(TextureType != aiTextureType_DIFFUSE && TextureType != aiTextureType_BASE_COLOR);
+								};
+
+							auto TextureAsset = Cast<Asset>(Texture);
+							AssetDatabase::Get().GetOrReimportAsset(TextureAsset, AssetLoadCallbacks);
+						}
+						else
+						{
+							Material.Textures[TextureIndex] = It->second;
+						}
 					}
 				}
 			}

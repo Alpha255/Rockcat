@@ -15,7 +15,7 @@ RHIUploadManager::StagingBuffer RHIUploadManager::AcquireStagingBuffer(RHIComman
 	if (t_StagingBlock.Buffer)
 	{
 		size_t AlignedOffset = Align(t_StagingBlock.Offset, Alignment);
-		if (AlignedOffset <= t_StagingBlock.Buffer->GetSize())
+		if ((AlignedOffset + Size) <= t_StagingBlock.Buffer->GetSize())
 		{
 			t_StagingBlock.Offset = AlignedOffset + Size;
 			std::atomic_ref<uint32_t>(t_StagingBlock.NumAlloc).fetch_add(1u);
