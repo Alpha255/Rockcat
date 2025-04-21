@@ -4,54 +4,44 @@
 #include "Engine/RHI/RHISwapchain.h"
 #include "Runtime/Core/Window.h"
 
-Viewport::Viewport(const Window& ViewWindow, bool Fullscreen, bool VSync)
-	: m_Window(ViewWindow)
+RenderViewport::RenderViewport(Window& RenderWindow, bool Fullscreen, bool VSync)
+	: m_Window(RenderWindow)
 {
-	RHISwapchainCreateInfo CreateInfo;
-	CreateInfo.SetWindowHandle(m_Window.GetHandle())
-		.SetWidth(m_Window.GetWidth())
-		.SetHeight(m_Window.GetHeight())
-		.SetFullscreen(Fullscreen)
-		.SetVSync(VSync);
-	m_Swapchain = RenderService::Get().GetBackend().GetDevice().CreateSwapchain(CreateInfo);
-
-	MessageRouter::Get().RegisterMessageHandler(this);
 }
 
-uint32_t Viewport::GetWidth() const
+uint32_t RenderViewport::GetWidth() const
 {
 	return m_Window.GetWidth();
 }
 
-uint32_t Viewport::GetHeight() const
+uint32_t RenderViewport::GetHeight() const
 {
 	return m_Window.GetHeight();
 }
 
-bool Viewport::IsFullscreen() const
+bool RenderViewport::IsFullscreen() const
 {
-	return m_Swapchain->IsFullscreen();
+	return false;
 }
 
-bool Viewport::IsVSync() const
+bool RenderViewport::IsVSync() const
 {
-	return m_Swapchain->IsVSync();
+	return false;
 }
 
-void Viewport::OnWindowResized(uint32_t Width, uint32_t Height)
+void RenderViewport::OnWindowResized(uint32_t Width, uint32_t Height)
 {
-	m_Swapchain->Resize(Width, Height);
 }
 
-void Viewport::SetFullscreen(bool Fullscreen)
+void RenderViewport::SetFullscreen(bool Fullscreen)
 {
 	if (Fullscreen != IsFullscreen())
 	{
-
+		m_Window.SetMode(Fullscreen ? EWindowMode::ExclusiveFullscreen : EWindowMode::Windowed);
 	}
 }
 
-void Viewport::SetVSync(bool VSync)
+void RenderViewport::SetVSync(bool VSync)
 {
 	if (VSync != IsVSync())
 	{

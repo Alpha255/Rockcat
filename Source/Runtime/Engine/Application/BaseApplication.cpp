@@ -11,13 +11,14 @@ BaseApplication::BaseApplication(const char* ConfigurationPath)
 	m_Configs = ApplicationConfiguration::Load(ConfigurationPath ? ConfigurationPath : "Defalut.json");
 }
 
-void BaseApplication::CreateWindowAndViewport()
+void BaseApplication::Initialize()
 {
 	if (m_Configs->EnableRendering)
 	{
 		m_Window = std::make_unique<Window>(m_Configs->WindowDesc, this);
-		m_Viewport = std::make_unique<Viewport>(*m_Window, m_Configs->GraphicsSettings.FullScreen, m_Configs->GraphicsSettings.VSync);
 	}
+
+	InitializeImpl();
 }
 
 const RenderSettings& BaseApplication::GetRenderSettings() const

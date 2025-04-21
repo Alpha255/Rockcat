@@ -107,7 +107,8 @@ struct RenderSettings
 	};
 
 	bool VSync = false;
-	bool FullScreen = false;;
+	bool FullScreen = false;
+	bool HDR = false;
 	bool MotionVectors = false;
 	bool FrustumCulling = true;
 	bool EnableTiledBasedLightCulling = false;
@@ -128,6 +129,7 @@ struct RenderSettings
 		Ar(
 			CEREAL_NVP(VSync),
 			CEREAL_NVP(FullScreen),
+			CEREAL_NVP(HDR),
 			CEREAL_NVP(MotionVectors),
 			CEREAL_NVP(FrustumCulling),
 			CEREAL_NVP(EnableTiledBasedLightCulling),

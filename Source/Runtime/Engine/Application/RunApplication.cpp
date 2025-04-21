@@ -7,13 +7,15 @@
 #include "Engine/Services/RenderService.h"
 #include "Engine/Asset/AssetDatabase.h"
 #include "Engine/Paths.h"
+#include "Engine/RHI/RHIBackend.h"
 #include "Core/System.h"
 
 void ApplicationRunner::Run()
 {
 	Initialize();
-	GApplication->CreateWindowAndViewport();
 	GApplication->Initialize();
+
+	auto& GRHIBackend = RenderService::Get().GetBackend();
 
 	GTimer.reset(new CpuTimer());
 
@@ -26,16 +28,24 @@ void ApplicationRunner::Run()
 
 		if (GApplication->IsActivate())
 		{
+			GTimer->Start();
+			
 			GApplication->PumpMessages();
 
 			TickManager::Get().TickObjects(GTimer->GetElapsedSeconds());
 
 			if (GApplication->GetConfigs().EnableRendering)
 			{
-				GApplication->RenderFrame();
+				GApplication->RenderFrame(GRHIBackend.GetBackBuffer());
+
+				GRHIBackend.AdvanceFrame();
 			}
 
 			TaskFlowService::Get().FrameSync(true);
+		}
+		else
+		{
+			GTimer->Pause();
 		}
 	}
 

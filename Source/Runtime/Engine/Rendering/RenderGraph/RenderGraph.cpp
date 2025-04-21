@@ -6,14 +6,14 @@
 #include "Engine/RHI/RHIBackend.h"
 #include "Engine/Services/RenderService.h"
 
-std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& GraphicsSettings, const Viewport& RenderViewport)
+std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& GraphicsSettings, const RenderViewport& InRenderViewport)
 {
 	std::shared_ptr<RenderGraph> Graph;
 
 	switch (GraphicsSettings.RenderingPath)
 	{
 	case ERenderingPath::ForwardRendering:
-		Graph.reset(new ForwardRenderingPath(GraphicsSettings, RenderViewport));
+		Graph.reset(new ForwardRenderingPath(GraphicsSettings, InRenderViewport));
 		break;
 	case ERenderingPath::DeferredShading:
 		assert(false);
@@ -27,13 +27,12 @@ std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& GraphicsS
 	return Graph;
 }
 
-RenderGraph::RenderGraph(const RenderSettings& GraphicsSettings, const Viewport& RenderViewport)
+RenderGraph::RenderGraph(const RenderSettings& GraphicsSettings, const RenderViewport& InRenderViewport)
 	: m_RenderDevice(RenderService::Get().GetBackend().GetDevice())
 	, m_RenderSettings(GraphicsSettings)
-	, m_RenderViewport(RenderViewport)
+	, m_RenderViewport(InRenderViewport)
 	, m_ResourceMgr(new ResourceManager())
 {
-	MessageRouter::Get().RegisterMessageHandler(this);
 }
 
 void RenderGraph::Compile()
@@ -52,12 +51,6 @@ void RenderGraph::Compile()
 Math::UInt2 RenderGraph::GetDisplaySize() const
 {
 	return Math::UInt2(m_RenderViewport.GetWidth(), m_RenderViewport.GetHeight());
-}
-
-void RenderGraph::OnWindowResized(uint32_t Width, uint32_t Height)
-{
-	(void)Width;
-	(void)Height;
 }
 
 void RenderGraph::Execute(const Scene& InScene)

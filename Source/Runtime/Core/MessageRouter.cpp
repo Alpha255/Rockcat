@@ -1,6 +1,11 @@
 #include "Core/MessageRouter.h"
 #include "Core/Window.h"
 
+MessageHandler::MessageHandler()
+{
+	MessageRouter::Get().RegisterMessageHandler(this);
+}
+
 void MessageRouter::RegisterMessageHandler(MessageHandler* Handler)
 {
 	if (Handler && std::find(m_Handlers.cbegin(), m_Handlers.cend(), Handler) == m_Handlers.cend())

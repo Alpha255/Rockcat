@@ -134,7 +134,7 @@ static ImGuiKey ImGui_ImplWin32_VirtualKeyToImGuiKey(WPARAM wParam)
     }
 }
 
-void ImGuiEditorTest::Initialize()
+void ImGuiEditorTest::InitializeImpl()
 {
     auto& Window = GetWindow();
     m_Editor = std::make_shared<ImGuiEditor>(Window.GetWidth(), Window.GetHeight());
@@ -162,7 +162,7 @@ void ImGuiEditorTest::RenderGUI(Canvas&)
     m_Editor->Draw();
 }
 
-void ImGuiEditorTest::RenderFrame()
+void ImGuiEditorTest::RenderFrame(RHITexture* /*BackBuffer*/)
 {
     ImGui_ImplDX12_NewFrame();
     ImGui_ImplWin32_NewFrame();

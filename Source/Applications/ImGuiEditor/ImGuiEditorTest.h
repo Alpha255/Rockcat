@@ -9,7 +9,6 @@ class ImGuiEditorTest final : public BaseApplication, public MessageHandler
 public:
 	using BaseApplication::BaseApplication;
 
-	void Initialize() override final;
 	void Finalize() override final;
 	void Tick(float ElapsedSeconds) override final;
 
@@ -17,8 +16,9 @@ public:
 	void OnKeyboardEvent(const KeyboardEvent& Keyboard) override final;
 	void OnWindowResized(uint32_t Width, uint32_t Height) override final;
 
-	void RenderFrame() override final;
+	void RenderFrame(class RHITexture* BackBuffer) override final;
 protected:
+	void InitializeImpl() override final;
 	void RenderGUI(class Canvas&) override final;
 private:
 	std::shared_ptr<class ImGuiEditor> m_Editor;

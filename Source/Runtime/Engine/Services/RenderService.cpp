@@ -9,8 +9,9 @@
 void RenderService::OnStartup()
 {
 	extern ApplicationRunner GApplicationRunner;
+	auto& GApplication = GApplicationRunner.GetApplication();
 
-	switch (GApplicationRunner.GetApplication().GetRenderSettings().Backend)
+	switch (GApplication.GetRenderSettings().Backend)
 	{
 	case ERHIBackend::Software:
 		break;
@@ -27,11 +28,11 @@ void RenderService::OnStartup()
 
 	if (!m_Backend)
 	{
-		LOG_CRITICAL("Render backend \"{}\" is not support yet!", RHIBackend::GetName(GApplicationRunner.GetApplication().GetRenderSettings().Backend));
+		LOG_CRITICAL("Render backend \"{}\" is not support yet!", RHIBackend::GetName(GApplication.GetRenderSettings().Backend));
 	}
 	else
 	{
-		m_Backend->InitializeGraphicsDevice();
+		m_Backend->Initialize(GApplication.GetWindow(), GApplication.GetRenderSettings());
 		ShaderLibrary::Create(m_Backend->GetType(), m_Backend->GetDevice());
 		RHIUploadManager::Create(m_Backend->GetDevice());
 		

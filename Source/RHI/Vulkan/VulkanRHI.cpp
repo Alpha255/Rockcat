@@ -1,7 +1,9 @@
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanSwapchain.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 #include "RHI/Vulkan/VulkanEnvConfiguration.h"
+#include "Core/Window.h"
 
 #if USE_DYNAMIC_VK_LOADER
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
@@ -14,7 +16,7 @@ VulkanRHI::VulkanRHI()
 	REGISTER_LOG_CATEGORY(LogVulkanRHI);
 }
 
-void VulkanRHI::InitializeGraphicsDevice()
+void VulkanRHI::Initialize(const Window& RenderWindow, const RenderSettings& GraphicsSettings)
 {
 #if USE_DYNAMIC_VK_LOADER
 	const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = m_DynamicLoader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
@@ -24,6 +26,15 @@ void VulkanRHI::InitializeGraphicsDevice()
 	s_EnvConfigs = VulkanEnvConfiguration::Load(VK_ENV_CONFIG_PATH);
 	m_Device = std::make_unique<VulkanDevice>(s_EnvConfigs->ExtensionConfigs);
 	s_EnvConfigs->Save(true);
+
+	RHISwapchainCreateInfo SwapchainCreateInfo;
+	SwapchainCreateInfo.SetWindowHandle(RenderWindow.GetHandle())
+		.SetWidth(RenderWindow.GetWidth())
+		.SetHeight(RenderWindow.GetHeight())
+		.SetFullscreen(GraphicsSettings.FullScreen)
+		.SetVSync(GraphicsSettings.VSync)
+		.SetHDR(GraphicsSettings.HDR);
+	m_Swapchain = std::make_unique<VulkanSwapchain>(*m_Device, SwapchainCreateInfo);
 }
 
 VulkanRHI::~VulkanRHI()
@@ -36,6 +47,16 @@ VulkanRHI::~VulkanRHI()
 RHIDevice& VulkanRHI::GetDevice()
 {
 	return *m_Device;
+}
+
+void VulkanRHI::AdvanceFrame()
+{
+	m_Swapchain->AdvanceFrame();
+}
+
+RHITexture* VulkanRHI::GetBackBuffer()
+{
+	return m_Swapchain->GetBackBuffer();
 }
 
 const VulkanExtensionConfiguration& VulkanRHI::GetExtConfigs()

@@ -444,4 +444,5 @@ struct RHISwapchainCreateInfo
 	inline RHISwapchainCreateInfo& SetHeight(uint32_t InHeight) { Height = InHeight; return *this; }
 	inline RHISwapchainCreateInfo& SetFullscreen(bool InFullscreen) { Fullscreen = InFullscreen; return *this; }
 	inline RHISwapchainCreateInfo& SetVSync(bool InVSync) { VSync = InVSync; return *this; }
+	inline RHISwapchainCreateInfo& SetHDR(bool InHDR) { HDR = InHDR; return *this; }
 };

@@ -4,13 +4,13 @@
 #include "Engine/RHI/RHIBackend.h"
 #include "Engine/Services/RenderService.h"
 
-void RenderTest::Initialize()
+void RenderTest::InitializeImpl()
 {
 	m_Scene = Scene::Load<Scene>("RenderTest.scene");
-	m_RenderGraph = RenderGraph::Create(GetRenderSettings(), GetViewport());
+	m_RenderGraph = RenderGraph::Create(GetRenderSettings(), GetRenderViewport());
 }
 
-void RenderTest::RenderFrame()
+void RenderTest::RenderFrame(RHITexture* BackBuffer)
 {
 	m_RenderGraph->Execute(*m_Scene);
 }

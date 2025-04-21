@@ -10,10 +10,8 @@ public:
 
 	virtual ~BaseApplication();
 
-	virtual void CreateWindowAndViewport();
-
-	virtual void Initialize() {}
-	virtual void RenderFrame() {}
+	virtual void Initialize();
+	virtual void RenderFrame(class RHITexture* /*BackBuffer*/) {}
 	virtual void Finalize() {}
 	
 	void Tick(float) override {}
@@ -23,7 +21,7 @@ public:
 	inline bool IsActivate() const { return m_Activate; }
 	inline bool IsRequestQuit() const { return m_RequestQuit; }
 
-	const class Viewport& GetViewport() { return *m_Viewport; }
+	const class RenderViewport& GetRenderViewport() { return *m_Viewport; }
 	const class Window& GetWindow() const { return *m_Window; }
 	const struct RenderSettings& GetRenderSettings() const;
 	const struct ApplicationConfiguration& GetConfigs() const { return *m_Configs; }
@@ -31,9 +29,10 @@ public:
 	void ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam);
 protected:
 	virtual void RenderGUI(class Canvas&) {}
+	virtual void InitializeImpl() {}
 private:
 	std::shared_ptr<struct ApplicationConfiguration> m_Configs;
-	std::unique_ptr<class Viewport> m_Viewport;
+	std::unique_ptr<class RenderViewport> m_Viewport;
 	std::unique_ptr<class Window> m_Window;
 	bool m_Activate = true;
 	bool m_RequestQuit = false;

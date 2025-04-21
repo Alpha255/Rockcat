@@ -120,6 +120,7 @@ enum class EMessageMasks
 class MessageHandler
 {
 public:
+	MessageHandler();
 	virtual ~MessageHandler() = default;
 
 	virtual void OnMouseEvent(const MouseEvent&) {}

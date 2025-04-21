@@ -3,12 +3,12 @@
 #include "Engine/Rendering/RenderGraph/RenderPass.h"
 #include "Core/MessageRouter.h"
 
-class RenderGraph : public MessageHandler
+class RenderGraph
 {
 public:
-	static std::shared_ptr<RenderGraph> Create(const struct RenderSettings& GraphicsSettings, const class Viewport& RenderViewport);
+	static std::shared_ptr<RenderGraph> Create(const struct RenderSettings& GraphicsSettings, const class RenderViewport& InRenderViewport);
 
-	RenderGraph(const struct RenderSettings& GraphicsSettings, const class Viewport& RenderViewport);
+	RenderGraph(const struct RenderSettings& GraphicsSettings, const class RenderViewport& RenderViewport);
 
 	template<class TPass>
 	RenderGraph& AddPass()
@@ -28,8 +28,6 @@ public:
 	class ResourceManager& GetResourceManager() { return *m_ResourceMgr; }
 
 	Math::UInt2 GetDisplaySize() const;
-
-	void OnWindowResized(uint32_t Width, uint32_t Height) override final;
 protected:
 	virtual void SetupRenderPasses() = 0;
 private:
@@ -43,5 +41,5 @@ private:
 	std::vector<std::shared_ptr<RenderPass>> m_RenderPasses;
 	class RHIDevice& m_RenderDevice;
 	const struct RenderSettings& m_RenderSettings;
-	const class Viewport& m_RenderViewport;
+	const class RenderViewport& m_RenderViewport;
 };

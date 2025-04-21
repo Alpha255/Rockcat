@@ -12,7 +12,7 @@ public:
 
 	RHIDevice& GetDevice() override final;
 protected:
-	void InitializeGraphicsDevice() override final;
+	void Initialize(const class Window& RenderWindow, const RenderSettings& GraphicsSettings) override final;
 private:
 	std::unique_ptr<DxgiFactory> m_DxgiFactory;
 	std::unique_ptr<class D3D12Device> m_Device;

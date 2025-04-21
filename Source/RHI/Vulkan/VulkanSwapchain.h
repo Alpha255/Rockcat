@@ -24,11 +24,6 @@ public:
 	{
 		return m_PresentComplete->Get();
 	}
-
-	class VulkanFramebuffer* CurrentFrameBuffer() const
-	{
-		return m_BackBuffers[m_CurImageIndex].get();
-	}
 #endif
 
 	void AdvanceFrame() override final;
@@ -42,5 +37,4 @@ private:
 	vk::Format m_ColorFormat = vk::Format::eUndefined;
 	std::unique_ptr<VulkanSurface> m_Surface;
 	//std::unique_ptr<VulkanSemaphore> m_PresentComplete;
-	//std::vector<std::shared_ptr<class VulkanFramebuffer>> m_BackBuffers;
 };
