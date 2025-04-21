@@ -72,11 +72,30 @@ public:
 	bool IsEnabled() const { return m_Enabled; }
 	void SetEnabled(bool Enable) { m_Enabled = Enable; }
 
+	inline float GetMomentaryFrameTime() const { return m_MomentaryFrameTime; }
+	inline float GetAverageFrameTime() const { return m_AverageFrameTime; }
+	inline float GetMomentaryFPS() const { return m_MomentaryFPS; }
+	inline float GetAverageFPS() const { return m_AverageFPS; }
+	inline uint64_t GetFrameIndex() const { return m_TotalFrameCounter; }
+
 	void Tick(float ElapsedSeconds) override final;
 private:
+	void CalculateFrameTimeAndFPS(float ElapsedSeconds);
+
 	std::unordered_map<std::string_view, std::shared_ptr<Event>> m_Events;
 	bool m_Enabled = true;
 	class RHIDevice& m_Device;
+
+	float m_MomentaryFrameTime = 0.0f;
+	float m_AverageFrameTime = 0.0f;
+
+	float m_MomentaryFPS = 0.0f;
+	float m_AverageFPS = 0.0f;
+
+	float m_FrameTimeCounter = 0.0f;
+	uint32_t m_FrameCounter = 0;
+
+	uint64_t m_TotalFrameCounter = 0;
 };
 
 ENUM_FLAG_OPERATORS(Profiler::EEventFlags)

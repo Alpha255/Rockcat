@@ -7,11 +7,19 @@ Profiler::Event::Event(const char* Name, EEventFlags Flags)
 {
 }
 
-void Profiler::Event::Start(RHIDevice& Device)
+void Profiler::Event::Start(RHIDevice& /*Device*/)
 {
+	if (EnumHasAnyFlags(m_Flags, EEventFlags::Cpu))
+	{
+		m_CpuTime.MomentaryTime = 0.0f; // TODO: Get CPU time
+	}
+	if (EnumHasAnyFlags(m_Flags, EEventFlags::Gpu))
+	{
+		m_GpuTime.MomentaryTime = 0.0f; // TODO: Get GPU time
+	}
 }
 
-void Profiler::Event::Stop(RHIDevice& Device)
+void Profiler::Event::Stop(RHIDevice& /*Device*/)
 {
 }
 
@@ -32,6 +40,30 @@ void Profiler::Event::SetFlags(EEventFlags Flags)
 
 void Profiler::Tick(float ElapsedSeconds)
 {
+	CalculateFrameTimeAndFPS(ElapsedSeconds);
+}
+
+void Profiler::CalculateFrameTimeAndFPS(float ElapsedSeconds)
+{
+	static float s_LastFrameTime = 0.0f;
+
+	if (m_FrameCounter)
+	{
+		m_MomentaryFrameTime = ElapsedSeconds - s_LastFrameTime;
+		s_LastFrameTime = ElapsedSeconds;
+		m_MomentaryFPS = m_MomentaryFrameTime / m_FrameCounter;
+	}
+
+	m_FrameTimeCounter += ElapsedSeconds;
+	++m_FrameCounter;
+	++m_TotalFrameCounter;
+
+	if (m_FrameTimeCounter > 1.0f)
+	{
+		m_AverageFrameTime = m_FrameTimeCounter / m_FrameCounter;
+		m_FrameTimeCounter = 0.0f;
+		m_FrameCounter = 0;
+	}
 }
 
 Profiler::ScopedEvent Profiler::ScopeEvent(const char* Name, EEventFlags Flags)

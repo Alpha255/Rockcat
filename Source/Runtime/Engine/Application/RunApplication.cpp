@@ -1,7 +1,6 @@
 #include "Engine/Application/RunApplication.h"
 #include "Engine/Application/BaseApplication.h"
 #include "Engine/Application/ApplicationConfiguration.h"
-#include "Engine/Profile/Profiler.h"
 #include "Engine/Services/SpdLogService.h"
 #include "Engine/Services/TaskFlowService.h"
 #include "Engine/Services/RenderService.h"
