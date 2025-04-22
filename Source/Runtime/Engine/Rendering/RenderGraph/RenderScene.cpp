@@ -19,8 +19,9 @@ MeshDrawCommand::MeshDrawCommand(const StaticMesh& Mesh)
 
 Array<std::unique_ptr<MeshDrawCommandBuilder>, EGeometryPass> RenderScene::s_Builders;
 
-RenderScene::RenderScene(const Scene& InScene)
+RenderScene::RenderScene(const Scene& InScene, bool AsyncMeshDrawCommandsBuilding)
 	: m_Scene(InScene)
+	, m_AsyncMeshDrawCommandsBuilding(AsyncMeshDrawCommandsBuilding)
 {
 	for (auto& Commands : m_Commands)
 	{
@@ -28,7 +29,6 @@ RenderScene::RenderScene(const Scene& InScene)
 	}
 
 	GetScenePrimitives();
-	GetSceneViews();
 }
 
 void RenderScene::RegisterMeshDrawCommandBuilder(EGeometryPass Filter, MeshDrawCommandBuilder* Builder)
@@ -71,12 +71,6 @@ void RenderScene::GetScenePrimitives()
 			It = Traverser.Next();
 		}
 	}
-}
-
-void RenderScene::GetSceneViews()
-{
-	auto& View = m_Views.emplace_back(std::make_shared<PlanarView>());
-	View->SetCamera(&m_Scene.GetMainCamera());
 }
 
 void RenderScene::UpdateScenePrimitives()
@@ -125,7 +119,7 @@ void RenderScene::WaitCommandsBuilding()
 	}
 }
 
-void RenderScene::BuildMeshDrawCommands(RHIDevice& Device, const RenderSettings& GraphicsSettings)
+void RenderScene::BuildMeshDrawCommands(const RenderSettings& GraphicsSettings)
 {
 	UpdateScenePrimitives();
 	RemoveInvalidCommands();
@@ -135,9 +129,9 @@ void RenderScene::BuildMeshDrawCommands(RHIDevice& Device, const RenderSettings&
 		return;
 	}
 
-	if (Device.SupportsAsyncMeshDrawCommandsBuilding())
+	if (m_AsyncMeshDrawCommandsBuilding)
 	{
-		m_CommandsEvent = tf::ParallelFor(m_Primitives.Add.begin(), m_Primitives.Add.end(), [this, &GraphicsSettings, &Device](const SceneGraph::NodeID& ID) {
+		m_CommandsEvent = tf::ParallelFor(m_Primitives.Add.begin(), m_Primitives.Add.end(), [this, &GraphicsSettings](const SceneGraph::NodeID& ID) {
 			if (auto Mesh = m_Scene.GetStaticMesh(ID))
 			{
 				for (size_t Index = 0u; Index < (size_t)EGeometryPass::Num; ++Index)

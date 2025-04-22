@@ -61,13 +61,12 @@ struct MeshDrawCommand
 class RenderScene
 {
 public:
-	RenderScene(const class Scene& InScene);
+	RenderScene(const class Scene& InScene, bool AsyncMeshDrawCommandsBuilding);
 
 	const class Scene& GetScene() const { return m_Scene; }
-	const std::vector<std::shared_ptr<IView>>& GetViews() const { return m_Views; }
 	const std::vector<std::shared_ptr<MeshDrawCommand>>& GetCommands(EGeometryPass Filter) const { return m_Commands[Filter]; }
 
-	void BuildMeshDrawCommands(class RHIDevice& Device, const struct RenderSettings& GraphicsSettings);
+	void BuildMeshDrawCommands(const struct RenderSettings& GraphicsSettings);
 	void WaitCommandsBuilding();
 
 	static void RegisterMeshDrawCommandBuilder(EGeometryPass Filter, struct MeshDrawCommandBuilder* Builder);
@@ -76,7 +75,6 @@ protected:
 	inline struct MeshDrawCommandBuilder* GetBuilder(Index Filter) { return s_Builders[Filter].get(); }
 private:
 	void GetScenePrimitives();
-	void GetSceneViews();
 	void UpdateScenePrimitives();
 	void RemoveInvalidCommands();
 
@@ -96,8 +94,6 @@ private:
 		}
 	} m_Primitives;
 
-	std::vector<std::shared_ptr<IView>> m_Views;
-
 	std::unordered_map<SceneGraph::NodeID, size_t> m_NodeIDCommandMap;
 	Array<std::vector<std::shared_ptr<MeshDrawCommand>>, EGeometryPass> m_Commands;
 
@@ -105,6 +101,7 @@ private:
 
 	std::mutex m_CommandsLock;
 	TaskEventPtr m_CommandsEvent;
+	bool m_AsyncMeshDrawCommandsBuilding;
 
 	static Array<std::unique_ptr<struct MeshDrawCommandBuilder>, EGeometryPass> s_Builders;
 };

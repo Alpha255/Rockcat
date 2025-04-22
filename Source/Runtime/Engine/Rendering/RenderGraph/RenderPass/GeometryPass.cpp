@@ -67,38 +67,38 @@ struct MeshDrawTask : public Task
 
 RHIFrameBuffer* GeometryPass::GetFrameBuffer()
 {
-	if (!m_FrameBuffer)
-	{
-		RHIFrameBufferCreateInfo CreateInfo;
-		for (auto Resource : GetOutputs())
-		{
-			if (Resource && Resource->GetType() == RDGResource::EType::Texture)
-			{
-				CreateInfo.AddAttachment(Resource->GetRHI<RHITexture>());
-			}
-		}
+	//if (!m_FrameBuffer)
+	//{
+	//	RHIFrameBufferCreateInfo CreateInfo;
+	//	for (auto Resource : GetOutputs())
+	//	{
+	//		if (Resource && Resource->GetType() == RDGResource::EType::Texture)
+	//		{
+	//			CreateInfo.AddAttachment(Resource->GetRHI<RHITexture>());
+	//		}
+	//	}
 
-		m_FrameBuffer = GetRenderDevice().GetOrCreateFrameBuffer(CreateInfo);
-	}
+	//	m_FrameBuffer = GetRenderDevice().GetOrCreateFrameBuffer(CreateInfo);
+	//}
 	
 	return m_FrameBuffer;
 }
 
 void GeometryPass::Execute(const RenderScene& Scene)
 {
-	for (auto& View : Scene.GetViews())
-	{
-		if (GetRenderDevice().SupportsAsyncCommandlistSubmission())
-		{
-			assert(false);
-		}
-		else
-		{
-			//auto CommandListContext = GetDevice().GetImmediateCommandListContext(ERHIDeviceQueue::Graphics);
-			//for (auto& DrawCommand : Scene.GetCommands())
-			//{
-			//	MeshDrawTask(DrawCommand, CommandListContext).Execute();
-			//}
-		}
-	}
+	//for (auto& View : Scene.GetViews())
+	//{
+	//	if (GetRenderDevice().SupportsAsyncCommandlistSubmission())
+	//	{
+	//		assert(false);
+	//	}
+	//	else
+	//	{
+	//		//auto CommandListContext = GetDevice().GetImmediateCommandListContext(ERHIDeviceQueue::Graphics);
+	//		//for (auto& DrawCommand : Scene.GetCommands())
+	//		//{
+	//		//	MeshDrawTask(DrawCommand, CommandListContext).Execute();
+	//		//}
+	//	}
+	//}
 }

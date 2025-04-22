@@ -6,14 +6,14 @@
 #include "Engine/RHI/RHIBackend.h"
 #include "Engine/Services/RenderService.h"
 
-std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& GraphicsSettings, const RenderViewport& InRenderViewport)
+std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& InRenderSettings)
 {
 	std::shared_ptr<RenderGraph> Graph;
 
-	switch (GraphicsSettings.RenderingPath)
+	switch (InRenderSettings.RenderingPath)
 	{
 	case ERenderingPath::ForwardRendering:
-		Graph.reset(new ForwardRenderingPath(GraphicsSettings, InRenderViewport));
+		Graph.reset(new ForwardRenderingPath(InRenderSettings));
 		break;
 	case ERenderingPath::DeferredShading:
 		assert(false);
@@ -27,11 +27,11 @@ std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& GraphicsS
 	return Graph;
 }
 
-RenderGraph::RenderGraph(const RenderSettings& GraphicsSettings, const RenderViewport& InRenderViewport)
-	: m_RenderDevice(RenderService::Get().GetBackend().GetDevice())
-	, m_RenderSettings(GraphicsSettings)
-	, m_RenderViewport(InRenderViewport)
-	, m_ResourceMgr(new ResourceManager())
+RenderGraph::RenderGraph(const RenderSettings& InRenderSettings)
+	: m_Device(RenderService::Get().GetBackend().GetDevice())
+	, m_RenderSettings(InRenderSettings)
+	, m_ResourceMgr(new ResourceManager(m_Device))
+	, m_DisplaySize(0u, 0u)
 {
 }
 
@@ -48,9 +48,12 @@ void RenderGraph::Compile()
 	}
 }
 
-Math::UInt2 RenderGraph::GetDisplaySize() const
+void RenderGraph::SetDisplaySize(uint32_t Width, uint32_t Height)
 {
-	return Math::UInt2(m_RenderViewport.GetWidth(), m_RenderViewport.GetHeight());
+	if (Width != m_DisplaySize.x || Height != m_DisplaySize.y)
+	{
+		m_DisplaySize = Math::UInt2(Width, Height);
+	}
 }
 
 void RenderGraph::Execute(const Scene& InScene)
@@ -62,13 +65,13 @@ void RenderGraph::Execute(const Scene& InScene)
 
 	if (!m_RenderScene || (&m_RenderScene->GetScene() != &InScene))
 	{
-		m_RenderScene = std::make_shared<RenderScene>(InScene);
+		m_RenderScene = std::make_shared<RenderScene>(InScene, m_RenderSettings.EnableAsyncMeshDrawCommandsBuilding);
 	}
-	m_RenderScene->BuildMeshDrawCommands(GetRenderDevice(), GetRenderSettings());
+	m_RenderScene->BuildMeshDrawCommands(GetRenderSettings());
 
 	Compile();
 
-	m_ResourceMgr->ResolveResources(GetRenderDevice());
+	m_ResourceMgr->ResolveResources();
 
 	for (auto& Pass : m_RenderPasses)
 	{

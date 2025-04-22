@@ -14,7 +14,8 @@ public:
 		None = 0x0,
 		Input = 0x1,
 		Output = 0x2,
-		Internal = 0x4
+		Internal = 0x4,
+		External = 0x8
 	};
 
 	enum class EType

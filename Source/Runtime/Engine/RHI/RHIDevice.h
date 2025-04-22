@@ -71,25 +71,19 @@ public:
 
 	const char* const GetAdapterName() const { return m_AdapterName.c_str(); }
 
-	inline bool SupportsAsyncCompute() const { return m_AsyncCompute; }
-	inline bool SupportsTransferQueue() const { return m_TransferQueue; }
-	inline bool SupportsAsyncCommandlistSubmission() const { return m_AsyncCommandlistSubmission; }
-	inline bool SupportsAsyncMeshDrawCommandsBuilding() const { return m_AsyncMeshDrawCommandsBuilding; }
+	inline bool SupportsAsyncCompute() const { return m_SupportsAsyncCompute; }
+	inline bool SupportsTransferQueue() const { return m_SupportsTransferQueue; }
 protected:
 	std::mutex m_CmdListContextLock;
 
-	inline void SetSupportsAsyncCompute(bool Value) { m_AsyncCompute = Value; }
-	inline void SetSupportsTransferQueue(bool Value) { m_TransferQueue = Value; }
-	inline void SetSupportsAsyncCommandlistSubmission(bool Value) { m_AsyncCommandlistSubmission = Value; }
-	inline void SetSupportsAsyncMeshDrawCommandsBuilding(bool Value) { m_AsyncMeshDrawCommandsBuilding = Value; }
+	inline void SetSupportsAsyncCompute(bool Value) { m_SupportsAsyncCompute = Value; }
+	inline void SetSupportsTransferQueue(bool Value) { m_SupportsTransferQueue = Value; }
 private:
 	std::string m_AdapterName;
 
 	std::unordered_map<size_t, RHIGraphicsPipelinePtr> m_GraphicsPipelineCache;
 	std::unordered_map<size_t, RHIFrameBufferPtr> m_FrameBufferCache;
 
-	bool m_AsyncCompute = false;
-	bool m_TransferQueue = false;
-	bool m_AsyncCommandlistSubmission = false;
-	bool m_AsyncMeshDrawCommandsBuilding = false;
+	bool m_SupportsAsyncCompute = false;
+	bool m_SupportsTransferQueue = false;
 };

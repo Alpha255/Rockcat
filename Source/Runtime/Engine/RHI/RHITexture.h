@@ -207,3 +207,11 @@ public:
 	{
 	}
 };
+
+class RHIBackBuffer
+{
+public:
+protected:
+private:
+	std::vector<RHITexture*> m_BackBuffers;
+};

@@ -114,6 +114,8 @@ struct RenderSettings
 	bool EnableTiledBasedLightCulling = false;
 	bool EnableClusteredBasedLightCulling = false;
 	bool EnableStencilBasedLightCulling = false;
+	bool EnableAsyncCommandlistSubmission = false;
+	bool EnableAsyncMeshDrawCommandsBuilding = false;
 	bool InverseDepth = false;
 	ERenderingPath RenderingPath = ERenderingPath::ForwardRendering;
 	ELightingPolicy LightingPolicy = ELightingPolicy::Default;
@@ -135,6 +137,8 @@ struct RenderSettings
 			CEREAL_NVP(EnableTiledBasedLightCulling),
 			CEREAL_NVP(EnableClusteredBasedLightCulling),
 			CEREAL_NVP(EnableStencilBasedLightCulling),
+			CEREAL_NVP(EnableAsyncCommandlistSubmission),
+			CEREAL_NVP(EnableAsyncMeshDrawCommandsBuilding),
 			CEREAL_NVP(InverseDepth),
 			CEREAL_NVP(RenderingPath),
 			CEREAL_NVP(LightingPolicy),

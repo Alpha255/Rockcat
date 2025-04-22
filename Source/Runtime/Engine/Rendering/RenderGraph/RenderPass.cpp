@@ -21,11 +21,6 @@ const RenderSettings& RenderPass::GetRenderSettings() const
 	return m_Graph.GetRenderSettings();
 }
 
-RHIDevice& RenderPass::GetRenderDevice()
-{
-	return m_Graph.GetRenderDevice();
-}
-
 void RenderPass::AddField(RDGResourceID ID, RDGResource::EVisibility Visibility)
 {
 	for (auto& Field : m_Fields)

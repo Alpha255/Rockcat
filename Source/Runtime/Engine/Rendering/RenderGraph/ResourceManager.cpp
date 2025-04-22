@@ -1,6 +1,11 @@
 #include "Engine/Rendering/RenderGraph/ResourceManager.h"
 #include "Engine/RHI/RHIDevice.h"
 
+ResourceManager::ResourceManager(RHIDevice& Device)
+	: m_Device(Device)
+{
+}
+
 ResourceManager::~ResourceManager()
 {
 }
@@ -20,10 +25,10 @@ RDGResource& ResourceManager::GetOrAllocateResource(RDGResource::EType Type, con
 	return *Resource;
 }
 
-void ResourceManager::ResolveResources(RHIDevice& Device)
+void ResourceManager::ResolveResources()
 {
 	for (auto& [Name, Resource] : m_Resources)
 	{
-		Resource->CreateRHI(Device);
+		Resource->CreateRHI(m_Device);
 	}
 }
