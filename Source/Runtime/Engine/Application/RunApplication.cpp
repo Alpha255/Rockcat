@@ -14,8 +14,6 @@ void ApplicationRunner::Run()
 	Initialize();
 	GApplication->Initialize();
 
-	auto& GRHIBackend = RenderService::Get().GetBackend();
-
 	GTimer.reset(new CpuTimer());
 
 	while (true)
@@ -35,9 +33,9 @@ void ApplicationRunner::Run()
 
 			if (GApplication->GetConfigs().EnableRendering)
 			{
-				GApplication->RenderFrame(GRHIBackend.GetBackBuffer());
+				GApplication->RenderFrame();
 
-				GRHIBackend.AdvanceFrame();
+				RenderService::Get().GetBackend().AdvanceFrame();
 			}
 
 			TaskFlowService::Get().FrameSync(true);

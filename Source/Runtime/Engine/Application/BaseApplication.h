@@ -11,7 +11,7 @@ public:
 	virtual ~BaseApplication();
 
 	virtual void Initialize();
-	virtual void RenderFrame(class RHITexture* /*BackBuffer*/) {}
+	virtual void RenderFrame() {}
 	virtual void Finalize() {}
 	
 	void Tick(float) override {}
@@ -21,7 +21,6 @@ public:
 	inline bool IsActivate() const { return m_Activate; }
 	inline bool IsRequestQuit() const { return m_RequestQuit; }
 
-	const class RenderViewport& GetRenderViewport() { return *m_Viewport; }
 	const class Window& GetWindow() const { return *m_Window; }
 	const struct RenderSettings& GetRenderSettings() const;
 	const struct ApplicationConfiguration& GetConfigs() const { return *m_Configs; }
@@ -32,7 +31,6 @@ protected:
 	virtual void InitializeImpl() {}
 private:
 	std::shared_ptr<struct ApplicationConfiguration> m_Configs;
-	std::unique_ptr<class RenderViewport> m_Viewport;
 	std::unique_ptr<class Window> m_Window;
 	bool m_Activate = true;
 	bool m_RequestQuit = false;

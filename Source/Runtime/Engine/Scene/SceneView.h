@@ -4,6 +4,16 @@
 #include "Core/Math/Frustum.h"
 #include "Engine/RHI/RHIRenderStates.h"
 
+enum class EViewMode
+{
+	Lit,
+	UnLit,
+	Wireframe,
+	VisualizeDepth,
+	VisualizeGBuffer,
+	VisualizeShadowMap,
+};
+
 class IView
 {
 public:
@@ -23,6 +33,9 @@ public:
 	inline bool IsMirrored() const { return m_Mirrored; }
 	inline void SetMirrored(bool Mirrored) { m_Mirrored = Mirrored; }
 
+	inline RHITexture* GetRenderTexture() const { return m_RenderTexture; }
+	void SetRenderTexture(RHITexture* Texture) { m_RenderTexture = Texture; }
+
 	inline const std::vector<RHIViewport>& GetViewports() const { return m_Viewports; }
 	inline const std::vector<RHIScissorRect>& GetScissorRects() const { return m_ScissorRects; }
 
@@ -39,6 +52,8 @@ protected:
 
 	std::vector<RHIViewport> m_Viewports;
 	std::vector<RHIScissorRect> m_ScissorRects;
+
+	RHITexture* m_RenderTexture = nullptr;
 };
 
 class PlanarView : public IView

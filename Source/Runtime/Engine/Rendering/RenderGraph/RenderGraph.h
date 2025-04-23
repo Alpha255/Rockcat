@@ -6,9 +6,9 @@
 class RenderGraph
 {
 public:
-	static std::shared_ptr<RenderGraph> Create(const struct RenderSettings& InRenderSettings);
+	static std::shared_ptr<RenderGraph> Create(const struct RenderSettings& InRenderSettings, const class IView& InView);
 
-	RenderGraph(const struct RenderSettings& InRenderSettings);
+	RenderGraph(const struct RenderSettings& InRenderSettings, const class IView& InView);
 
 	template<class TPass>
 	RenderGraph& AddPass()
@@ -21,8 +21,6 @@ public:
 
 	const struct RenderSettings& GetRenderSettings() const { return m_RenderSettings; }
 	class ResourceManager& GetResourceManager() { return *m_ResourceMgr; }
-
-	const Math::UInt2& GetDisplaySize() const { return m_DisplaySize; }
 protected:
 	virtual void SetupRenderPasses() = 0;
 private:
@@ -38,6 +36,6 @@ private:
 	std::shared_ptr<RenderScene> m_RenderScene;
 	std::vector<std::shared_ptr<RenderPass>> m_RenderPasses;
 	class RHIDevice& m_Device;
+	const class IView& m_SceneView;
 	const struct RenderSettings& m_RenderSettings;
-	Math::UInt2 m_DisplaySize;
 };

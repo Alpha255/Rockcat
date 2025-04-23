@@ -7,7 +7,7 @@ class RenderTest final : public BaseApplication
 public:
 	using BaseApplication::BaseApplication;
 
-	void RenderFrame(RHITexture* BackBuffer) override final;
+	void RenderFrame() override final;
 protected:
 	void InitializeImpl() override final;
 	void RenderGUI(class Canvas&) override final {}

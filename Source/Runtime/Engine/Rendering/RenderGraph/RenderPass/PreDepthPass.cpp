@@ -52,12 +52,12 @@ PreDepthPass::PreDepthPass(DAGNodeID ID, RenderGraph& Graph)
 
 void PreDepthPass::Compile()
 {
-	auto Resulotion = GetGraph().GetDisplaySize();
+	//auto Resulotion = GetGraph().GetDisplaySize();
 
-	AddOutput(RDGResource::EType::Texture, SceneTextures::SceneDepth).GetTextureCreateInfo()
-		.SetWidth(Resulotion.x)
-		.SetHeight(Resulotion.y)
-		.SetDimension(ERHITextureDimension::T_2D)
-		.SetFormat(ERHIFormat::D32_Float_S8_UInt)
-		.SetUsages(ERHIBufferUsageFlags::DepthStencil);
+	//AddOutput(RDGResource::EType::Texture, SceneTextures::SceneDepth).GetTextureCreateInfo()
+	//	.SetWidth(Resulotion.x)
+	//	.SetHeight(Resulotion.y)
+	//	.SetDimension(ERHITextureDimension::T_2D)
+	//	.SetFormat(ERHIFormat::D32_Float_S8_UInt)
+	//	.SetUsages(ERHIBufferUsageFlags::DepthStencil);
 }

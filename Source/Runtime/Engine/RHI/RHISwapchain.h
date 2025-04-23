@@ -21,14 +21,8 @@ public:
 	inline uint32_t GetNumBackBuffer() const { return m_NumBackBuffer; }
 	inline bool IsVSync() const { return m_VSync; }
 	inline bool IsFullscreen() const { return m_Fullscreen; }
-	
-	RHITexture* GetBackBuffer(uint32_t Index) const 
-	{
-		assert(Index < m_NumBackBuffer && Index < m_BackBuffers.size());
-		return m_BackBuffers[Index].get();
-	}
 
-	RHITexture* GetBackBuffer() const
+	inline RHITexture* GetBackBuffer() const
 	{
 		assert(m_BackBuffers.size() == m_NumBackBuffer);
 		return m_BackBuffers[m_BackBufferIndex].get();

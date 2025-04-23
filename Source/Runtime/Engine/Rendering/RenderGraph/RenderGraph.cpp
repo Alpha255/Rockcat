@@ -2,18 +2,18 @@
 #include "Engine/Rendering/RenderGraph/ResourceManager.h"
 #include "Engine/Rendering/RenderGraph/ForwardRenderingPath.h"
 #include "Engine/Scene/Scene.h"
-#include "Engine/Application/Viewport.h"
+#include "Engine/Scene/SceneView.h"
 #include "Engine/RHI/RHIBackend.h"
 #include "Engine/Services/RenderService.h"
 
-std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& InRenderSettings)
+std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& InRenderSettings, const IView& InView)
 {
 	std::shared_ptr<RenderGraph> Graph;
 
 	switch (InRenderSettings.RenderingPath)
 	{
 	case ERenderingPath::ForwardRendering:
-		Graph.reset(new ForwardRenderingPath(InRenderSettings));
+		Graph.reset(new ForwardRenderingPath(InRenderSettings, InView));
 		break;
 	case ERenderingPath::DeferredShading:
 		assert(false);
@@ -27,11 +27,11 @@ std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& InRenderS
 	return Graph;
 }
 
-RenderGraph::RenderGraph(const RenderSettings& InRenderSettings)
+RenderGraph::RenderGraph(const RenderSettings& InRenderSettings, const IView& InView)
 	: m_Device(RenderService::Get().GetBackend().GetDevice())
+	, m_SceneView(InView)
 	, m_RenderSettings(InRenderSettings)
 	, m_ResourceMgr(new ResourceManager(m_Device))
-	, m_DisplaySize(0u, 0u)
 {
 }
 
@@ -45,14 +45,6 @@ void RenderGraph::Compile()
 		}
 
 		SetDirty(false);
-	}
-}
-
-void RenderGraph::SetDisplaySize(uint32_t Width, uint32_t Height)
-{
-	if (Width != m_DisplaySize.x || Height != m_DisplaySize.y)
-	{
-		m_DisplaySize = Math::UInt2(Width, Height);
 	}
 }
 

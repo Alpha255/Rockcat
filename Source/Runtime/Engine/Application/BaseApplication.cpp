@@ -1,6 +1,5 @@
 #include "Engine/Application/BaseApplication.h"
 #include "Engine/Application/ApplicationConfiguration.h"
-#include "Engine/Application/Viewport.h"
 #include "Core/Window.h"
 #include "Core/System.h"
 
