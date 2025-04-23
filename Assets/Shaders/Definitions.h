@@ -4,7 +4,7 @@
 #ifdef __cplusplus
 
 #include "Runtime/Core/Math/Matrix.h"
-#include "Runtime/Engine/Asset/TextureAsset.h"
+#include "Runtime/Asset/TextureAsset.h"
 
 using uint = uint32_t;
 using float2 = Math::Vector2;

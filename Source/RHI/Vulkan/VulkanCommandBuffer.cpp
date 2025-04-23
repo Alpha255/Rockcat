@@ -6,7 +6,7 @@
 #include "RHI/Vulkan/VulkanPipeline.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 #include "RHI/Vulkan/VulkanBarrier.h"
-#include "Engine/RHI/RHICommandListContext.h"
+#include "RHI/RHICommandListContext.h"
 
 VulkanCommandBuffer::VulkanCommandBuffer(const VulkanDevice& Device, VulkanCommandPool& Pool, ERHICommandBufferLevel Level)
 	: VkDeviceResource(Device)

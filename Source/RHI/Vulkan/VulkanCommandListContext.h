@@ -2,7 +2,7 @@
 
 #include "RHI/Vulkan/VulkanCommandPool.h"
 #include "RHI/Vulkan/VulkanDescriptor.h"
-#include "Engine/RHI/RHICommandListContext.h"
+#include "RHI/RHICommandListContext.h"
 
 class VulkanCommandListContext : public RHICommandListContext
 {

@@ -1,11 +1,5 @@
 #include "Core/StringUtils.h"
-#if defined(PLATFORM_WIN32)
-	#include <Windows.h>
-	#include <windowsx.h>
-	#include <shlobj.h>
-#else
-	#error Unknown platform!
-#endif
+#include <stdarg.h>
 
 namespace StringUtils
 {

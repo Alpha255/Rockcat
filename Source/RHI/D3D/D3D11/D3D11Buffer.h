@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RHI/D3D/D3D11/D3D11Types.h"
-#include "Engine/RHI/RHIBuffer.h"
+#include "RHI/RHIBuffer.h"
 
 class D3D11Buffer final : public D3DHwResource<ID3D11Buffer>, public RHIBuffer
 {

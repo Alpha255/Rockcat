@@ -2,7 +2,7 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
-#include "Engine/RHI/RHIUploadManager.h"
+#include "RHI/RHIUploadManager.h"
 
 VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferCreateInfo& RHICreateInfo)
 	: VkHwResource(Device)

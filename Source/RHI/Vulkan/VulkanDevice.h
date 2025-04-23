@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RHI/Vulkan/VulkanTypes.h"
-#include "Engine/RHI/RHIDevice.h"
+#include "RHI/RHIDevice.h"
 
 class VulkanDevice final : public RHIDevice
 {

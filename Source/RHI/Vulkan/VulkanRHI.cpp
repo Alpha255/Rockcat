@@ -3,7 +3,7 @@
 #include "RHI/Vulkan/VulkanSwapchain.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 #include "RHI/Vulkan/VulkanEnvConfiguration.h"
-#include "Core/Window.h"
+#include "Window.h"
 
 #if USE_DYNAMIC_VK_LOADER
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE

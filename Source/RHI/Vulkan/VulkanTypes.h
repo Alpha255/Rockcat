@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/RHI/RHIDevice.h"
+#include "RHI/RHIDevice.h"
 #include "RHI/Vulkan/VulkanLoader.h"
 
 vk::PolygonMode GetPolygonMode(ERHIPolygonMode Mode);

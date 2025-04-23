@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Engine/RHI/RHIBackend.h"
-#include "Engine/RHI/RHIFormat.h"
+#include "RHI/RHIBackend.h"
+#include "RHI/RHIFormat.h"
 
 class VulkanRHI final : public RHIBackend
 {

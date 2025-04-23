@@ -1,5 +1,5 @@
 #include "ImGuiEditorTest.h"
-#include "Core/Window.h"
+#include "Window.h"
 #include "DX12Impl.h"
 #include "Editor/ImGuiEditor.h"
 
@@ -162,7 +162,7 @@ void ImGuiEditorTest::RenderGUI(Canvas&)
     m_Editor->Draw();
 }
 
-void ImGuiEditorTest::RenderFrame(RHITexture* /*BackBuffer*/)
+void ImGuiEditorTest::RenderFrame()
 {
     ImGui_ImplDX12_NewFrame();
     ImGui_ImplWin32_NewFrame();

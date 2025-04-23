@@ -1,7 +1,7 @@
 #include "Editor/ImGuiConfiguration.h"
-#include "Engine/Services/SpdLogService.h"
+#include "Services/SpdLogService.h"
 #include "Editor/Icons/Icons.h"
-#include "Engine/Paths.h"
+#include "Paths.h"
 
 const std::map<std::string, ImGuiFont>* ImGuiScopedFont::AllFonts = nullptr;
 

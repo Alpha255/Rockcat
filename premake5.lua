@@ -264,7 +264,7 @@ workspace "Rockcat"
 		targetname "$(ProjectName)_$(Configuration)"
 		files {
 			"./Source/Applications/RenderTest/**",
-			"./Source/Runtime/Engine/Application/Win32/Resource.rc"
+			"./Source/Runtime/Application/Win32/Resource.rc"
 		}
 		includedirs { 
 			"$(SolutionDir)",
@@ -290,7 +290,7 @@ workspace "Rockcat"
 		}
 		vpaths {
 			["Resource"] = {
-				"./Source/Runtime/Engine/Application/Win32/Resource.rc"
+				"./Source/Runtime/Application/Win32/Resource.rc"
 			},
 			[""] = {
 				"./Source/Applications/RenderTest/**",
@@ -304,7 +304,7 @@ workspace "Rockcat"
 		targetname "$(ProjectName)_$(Configuration)"
 		files {
 			"./Source/Applications/ImGuiEditor/**",
-			"./Source/Runtime/Engine/Application/Win32/Resource.rc",
+			"./Source/Runtime/Application/Win32/Resource.rc",
 			"./Submodules/imgui/backends/imgui_impl_vulkan.h",
 			"./Submodules/imgui/backends/imgui_impl_vulkan.cpp",
 			"./Submodules/imgui/backends/imgui_impl_Win32.h",
@@ -338,7 +338,7 @@ workspace "Rockcat"
 		}
 		vpaths {
 			["Resource"] = {
-				"./Source/Runtime/Engine/Application/Win32/Resource.rc"
+				"./Source/Runtime/Application/Win32/Resource.rc"
 			},
 			[""] = {
 				"./Source/Applications/ImGuiEditor/**",

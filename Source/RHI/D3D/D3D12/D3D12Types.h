@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Engine/RHI/RHIBuffer.h"
-#include "Engine/RHI/RHIShader.h"
-#include "Engine/RHI/RHIRenderStates.h"
+#include "RHI/RHIBuffer.h"
+#include "RHI/RHIShader.h"
+#include "RHI/RHIRenderStates.h"
 #include "RHI/D3D/DXGIInterface.h"
 #include <d3d12.h>
 

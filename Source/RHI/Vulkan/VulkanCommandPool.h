@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RHI/Vulkan/VulkanCommandBuffer.h"
-#include "Engine/RHI/RHIDevice.h"
+#include "RHI/RHIDevice.h"
 
 class VulkanCommandPool final : public VkHwResource<vk::CommandPool>
 {

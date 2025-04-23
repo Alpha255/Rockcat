@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/StringUtils.h"
-#include "Engine/RHI/RHIResource.h"
+#include "RHI/RHIResource.h"
 #include <d3d11.h>
 #include <d3d11_1.h>
 #include <d3d11_2.h>

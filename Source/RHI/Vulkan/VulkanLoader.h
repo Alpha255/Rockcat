@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Core/DynamicLinkLibrary.h"
-#include "Engine/RHI/RHIResource.h"
+#include "DynamicLinkLibrary.h"
+#include "RHI/RHIResource.h"
 #include "RHI/Vulkan/VulkanExtensionDefines.h"
 
 #define VK_ALLOCATION_CALLBACKS nullptr

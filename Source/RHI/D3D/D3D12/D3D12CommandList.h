@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Engine/RHI/RHICommandBuffer.h"
-#include "Engine/RHI/RHIDevice.h"
+#include "RHI/RHICommandBuffer.h"
+#include "RHI/RHIDevice.h"
 #include "RHI/D3D/D3D12/D3D12Types.h"
 
 DECLARE_D3D_HWOBJECT(D3D12CommandList1, ID3D12GraphicsCommandList1)

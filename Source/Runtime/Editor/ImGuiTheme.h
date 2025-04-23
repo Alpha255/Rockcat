@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Editor/ImGuiExtensions.h"
-#include "Engine/Asset/SerializableAsset.h"
+#include "Asset/SerializableAsset.h"
 
 struct ImGuiTheme : public ImGuiStyle, public SerializableAsset<ImGuiTheme>
 {

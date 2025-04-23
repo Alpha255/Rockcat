@@ -2,7 +2,6 @@
 
 #include "RHI/Vulkan/VulkanTypes.h"
 #include "RHI/Vulkan/VulkanEnvConfiguration.h"
-#include "Engine/Asset/SerializableAsset.h"
 
 #define VK_ENV_CONFIG_PATH "Configs\\VkEnvConfigs.json"
 #define VK_LAYER_KHRONOS_VALIDATION_NAME "VK_LAYER_KHRONOS_validation"

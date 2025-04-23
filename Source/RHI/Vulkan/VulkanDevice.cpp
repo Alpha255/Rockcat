@@ -11,9 +11,7 @@
 #include "RHI/Vulkan/VulkanEnvConfiguration.h"
 #include "RHI/Vulkan/VulkanSwapchain.h"
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
-#include "Engine/Services/TaskFlowService.h"
-#include "Engine/Services/ShaderLibrary.h"
-#include "Engine/RHI/RHIUploadManager.h"
+#include "Services/TaskFlowService.h"
 
 VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 {

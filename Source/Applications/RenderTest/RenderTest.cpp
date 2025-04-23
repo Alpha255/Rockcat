@@ -1,9 +1,8 @@
 #include "Applications/RenderTest/RenderTest.h"
-#include "Engine/Scene/Scene.h"
-#include "Engine/Scene/SceneView.h"
-#include "Engine/Rendering/RenderGraph/RenderGraph.h"
-#include "Engine/RHI/RHIBackend.h"
-#include "Core/Window.h"
+#include "Scene/Scene.h"
+#include "Scene/SceneView.h"
+#include "Rendering/RenderGraph/RenderGraph.h"
+#include "Window.h"
 
 void RenderTest::InitializeImpl()
 {

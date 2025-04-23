@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Engine/Asset/SerializableAsset.h"
-#include "Engine/RHI/RHIResource.h"
+#include "Asset/SerializableAsset.h"
+#include "RHI/RHIResource.h"
 
 struct VulkanExtensionConfiguration
 {
