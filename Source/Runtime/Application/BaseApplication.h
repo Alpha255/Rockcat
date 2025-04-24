@@ -21,9 +21,9 @@ public:
 	inline bool IsActivate() const { return m_Activate; }
 	inline bool IsRequestQuit() const { return m_RequestQuit; }
 
-	const class Window& GetWindow() const { return *m_Window; }
+	inline const class Window& GetWindow() const { return *m_Window; }
+	inline const struct ApplicationConfiguration& GetConfigs() const { return *m_Configs; }
 	const struct RenderSettings& GetRenderSettings() const;
-	const struct ApplicationConfiguration& GetConfigs() const { return *m_Configs; }
 
 	void ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam);
 protected:

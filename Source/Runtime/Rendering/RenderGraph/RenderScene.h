@@ -66,13 +66,13 @@ public:
 	const class Scene& GetScene() const { return m_Scene; }
 	const std::vector<std::shared_ptr<MeshDrawCommand>>& GetCommands(EGeometryPass Filter) const { return m_Commands[Filter]; }
 
-	void BuildMeshDrawCommands(const struct RenderSettings& GraphicsSettings);
+	void BuildMeshDrawCommands(const class IView& SceneView);
 	void WaitCommandsBuilding();
 
 	static void RegisterMeshDrawCommandBuilder(EGeometryPass Filter, struct MeshDrawCommandBuilder* Builder);
 protected:
-	template<class Index>
-	inline struct MeshDrawCommandBuilder* GetBuilder(Index Filter) { return s_Builders[Filter].get(); }
+	template<class GeometryPass>
+	inline struct MeshDrawCommandBuilder* GetBuilder(GeometryPass Filter) { return s_Builders[Filter].get(); }
 private:
 	void GetScenePrimitives();
 	void UpdateScenePrimitives();

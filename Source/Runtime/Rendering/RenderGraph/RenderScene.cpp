@@ -119,7 +119,7 @@ void RenderScene::WaitCommandsBuilding()
 	}
 }
 
-void RenderScene::BuildMeshDrawCommands(const RenderSettings& GraphicsSettings)
+void RenderScene::BuildMeshDrawCommands(const IView& SceneView)
 {
 	UpdateScenePrimitives();
 	RemoveInvalidCommands();
@@ -131,14 +131,14 @@ void RenderScene::BuildMeshDrawCommands(const RenderSettings& GraphicsSettings)
 
 	if (m_AsyncMeshDrawCommandsBuilding)
 	{
-		m_CommandsEvent = tf::ParallelFor(m_Primitives.Add.begin(), m_Primitives.Add.end(), [this, &GraphicsSettings](const SceneGraph::NodeID& ID) {
+		m_CommandsEvent = tf::ParallelFor(m_Primitives.Add.begin(), m_Primitives.Add.end(), [this, &SceneView](const SceneGraph::NodeID& ID) {
 			if (auto Mesh = m_Scene.GetStaticMesh(ID))
 			{
 				for (size_t Index = 0u; Index < (size_t)EGeometryPass::Num; ++Index)
 				{
 					if (auto Builder = GetBuilder(Index))
 					{
-						auto Command = Builder->Build(*Mesh, GraphicsSettings);
+						auto Command = Builder->Build(*Mesh, SceneView);
 
 						std::lock_guard<std::mutex> Lock(m_CommandsLock);
 						m_NodeIDCommandMap[ID] = m_Commands[Index].size();
@@ -159,7 +159,7 @@ void RenderScene::BuildMeshDrawCommands(const RenderSettings& GraphicsSettings)
 					if (auto Builder = GetBuilder(Index))
 					{
 						m_NodeIDCommandMap[ID] = m_Commands[Index].size();
-						m_Commands[Index].emplace_back(Builder->Build(*Mesh, GraphicsSettings));
+						m_Commands[Index].emplace_back(Builder->Build(*Mesh, SceneView));
 					}
 				}
 			}

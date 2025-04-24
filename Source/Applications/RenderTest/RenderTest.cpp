@@ -2,6 +2,7 @@
 #include "Scene/Scene.h"
 #include "Scene/SceneView.h"
 #include "Rendering/RenderGraph/RenderGraph.h"
+#include "Services/RenderService.h"
 #include "Window.h"
 
 void RenderTest::InitializeImpl()

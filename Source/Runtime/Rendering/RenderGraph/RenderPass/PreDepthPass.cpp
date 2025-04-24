@@ -7,7 +7,7 @@
 
 struct PreDepthMeshDrawCommandBuilder : public MeshDrawCommandBuilder
 {
-	std::shared_ptr<MeshDrawCommand> Build(const StaticMesh& Mesh, const RenderSettings& GraphicsSettings) override final
+	std::shared_ptr<MeshDrawCommand> Build(const StaticMesh& Mesh, const IView& SceneView) override final
 	{
 		auto Command = std::make_shared<MeshDrawCommand>(Mesh);
 		auto VertexShader = std::make_shared<GenericVS>();
@@ -18,7 +18,7 @@ struct PreDepthMeshDrawCommandBuilder : public MeshDrawCommandBuilder
 
 		GfxPipelineCreateInfo.DepthStencilState.SetEnableDepth(true)
 			.SetEnableDepthWrite(true)
-			.SetDepthCompareFunc(GraphicsSettings.InverseDepth ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
+			.SetDepthCompareFunc(SceneView.IsInverseDepth() ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
 
 		uint16_t Location = 0u;
 
@@ -37,6 +37,8 @@ struct PreDepthMeshDrawCommandBuilder : public MeshDrawCommandBuilder
 		GfxPipelineCreateInfo.SetShader(VertexShader)
 			.SetShader(FragmentShader);
 
+		VertexShader->SetupViewParams(SceneView);
+		FragmentShader->SetupViewParams(SceneView);
 		VertexShader->SetupMaterialProperty(Mesh.GetMaterialProperty());
 		FragmentShader->SetupMaterialProperty(Mesh.GetMaterialProperty());
 

@@ -4,7 +4,7 @@
 
 struct MeshDrawCommandBuilder
 {
-	virtual std::shared_ptr<MeshDrawCommand> Build(const class StaticMesh& Mesh, const struct RenderSettings& GraphicsSettings) = 0;
+	virtual std::shared_ptr<MeshDrawCommand> Build(const class StaticMesh& Mesh, const class IView& SceneView) = 0;
 };
 
 class GeometryPass : public RenderPass
