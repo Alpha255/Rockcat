@@ -65,6 +65,22 @@ struct MeshDrawTask : public Task
 	RHICommandBuffer* CommandBuffer;
 };
 
+void MeshDrawCommandBuilder::SetupShaderParameters(RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo,
+	const IView& InView,
+	const Math::Transform& InTransform,
+	const MaterialProperty& InMaterial)
+{
+	for (auto& Shader : GfxPipelineCreateInfo.ShaderPipeline)
+	{
+		if (Shader)
+		{
+			Shader->SetupTransform(InTransform);
+			Shader->SetupViewParams(InView);
+			Shader->SetupMaterialProperty(InMaterial);
+		}
+	}
+}
+
 RHIFrameBuffer* GeometryPass::GetFrameBuffer()
 {
 	//if (!m_FrameBuffer)

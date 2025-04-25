@@ -339,6 +339,7 @@ private:
 			{
 				auto& Mesh = AssimpScene.Data.StaticMeshes.emplace_back(std::make_shared<StaticMesh>(MeshDataBlock, AiMesh->mMaterialIndex));
 				Mesh->SetMaterialProperty(AssimpScene.Data.MaterialProperties.at(Index).get());
+				Mesh->SetTransform(&AssimpScene.Data.Transforms.at(Index));
 				Mesh->CreateRHI(RenderService::Get().GetBackend().GetDevice());
 			}
 		}

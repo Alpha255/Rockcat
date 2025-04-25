@@ -5,6 +5,7 @@
 #include "Core/Math/AABB.h"
 #include "Core/Math/Sphere.h"
 #include "Core/Math/Color.h"
+#include "Core/Math/Transform.h"
 #include "Asset/Material.h"
 
 enum class EVertexAttributes : uint8_t
@@ -190,6 +191,7 @@ struct MeshData : public MeshProperty
 	std::array<RHIBufferPtr, (size_t)EVertexAttributes::Num> RHIVertexBuffers;
 
 	const MaterialProperty* Material = nullptr;
+	const Math::Transform* Transform = nullptr;
 
 	std::string Name;
 };
@@ -211,6 +213,7 @@ public:
 
 	inline MaterialID GetMaterialID() const { return m_MaterialID; }
 	inline const MaterialProperty& GetMaterialProperty() const { assert(Material); return *Material; }
+	inline const Math::Transform& GetTransform() const { assert(Transform); return *Transform; }
 
 	inline const RHIBuffer* GetPackedVertexBuffer() const { assert(RHIPackedVertexBuffer);  return RHIPackedVertexBuffer.get(); }
 	inline const RHIBuffer* GetIndexBuffer() const { assert(RHIIndexBuffer);  return RHIIndexBuffer.get(); }
@@ -224,6 +227,7 @@ protected:
 
 	void SetMaterialID(MaterialID ID) { m_MaterialID = ID; }
 	void SetMaterialProperty(const MaterialProperty* InMaterial) { Material = InMaterial; }
+	void SetTransform(const Math::Transform* InTransform) { Transform = InTransform; }
 	void SetVertexBuffer(EVertexAttributes Attributes, RHIBufferPtr&& Buffer);
 
 	MaterialID m_MaterialID;

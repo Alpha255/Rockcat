@@ -5,6 +5,11 @@
 struct MeshDrawCommandBuilder
 {
 	virtual std::shared_ptr<MeshDrawCommand> Build(const class StaticMesh& Mesh, const class IView& SceneView) = 0;
+
+	void SetupShaderParameters(RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo,
+		const class IView& InView,
+		const Math::Transform& InTransform,
+		const MaterialProperty& InMaterial);
 };
 
 class GeometryPass : public RenderPass
