@@ -406,32 +406,32 @@ vk::VertexInputRate GetInputRate(ERHIVertexInputRate InputRate)
 	}
 }
 
-vk::AttachmentLoadOp GetAttachmentLoadOp(ERHIAttachmentLoadOp LoadOp)
+vk::AttachmentLoadOp GetAttachmentLoadOp(ERHILoadOp LoadOp)
 {
 	switch (LoadOp)
 	{
 	default:
-	case ERHIAttachmentLoadOp::None:
+	case ERHILoadOp::None:
 		return vk::AttachmentLoadOp::eNoneEXT;
-	case ERHIAttachmentLoadOp::Load:
+	case ERHILoadOp::Load:
 		return vk::AttachmentLoadOp::eLoad;
-	case ERHIAttachmentLoadOp::Clear:
+	case ERHILoadOp::Clear:
 		return vk::AttachmentLoadOp::eClear;
-	case ERHIAttachmentLoadOp::DontCare:
+	case ERHILoadOp::DontCare:
 		return vk::AttachmentLoadOp::eDontCare;
 	}
 }
 
-vk::AttachmentStoreOp GetAttachmentStoreOp(ERHIAttachmentStoreOp StoreOp)
+vk::AttachmentStoreOp GetAttachmentStoreOp(ERHIStoreOp StoreOp)
 {
 	switch (StoreOp)
 	{
 	default:
-	case ERHIAttachmentStoreOp::None:
+	case ERHIStoreOp::None:
 		return vk::AttachmentStoreOp::eNone;
-	case ERHIAttachmentStoreOp::Store:
+	case ERHIStoreOp::Store:
 		return vk::AttachmentStoreOp::eStore;
-	case ERHIAttachmentStoreOp::DontCare:
+	case ERHIStoreOp::DontCare:
 		return vk::AttachmentStoreOp::eDontCare;
 	}
 }

@@ -16,6 +16,13 @@ public:
 		return *this;
 	}
 
+	template<class Setup, class Execute>
+	RenderPass& AddPass(const char* Name)
+	{
+		auto Pass = m_RenderPasses.emplace_back(std::make_shared<RenderPass>(m_Graph.AddNode(), Name, *this));
+		return *Pass;
+	}
+
 	void Execute(const class Scene& InScene);
 
 	const struct RenderSettings& GetRenderSettings() const { return m_RenderSettings; }
