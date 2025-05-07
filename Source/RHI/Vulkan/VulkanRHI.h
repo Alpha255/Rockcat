@@ -13,13 +13,14 @@ public:
 	RHIDevice& GetDevice() override final;
 
 	void AdvanceFrame() override final;
+	void CreateSwapchain(const class Window& InWindow, const RenderSettings& InRenderSettings) override final;
 	RHITexture* GetBackBuffer() override final;
 
 	static const struct VulkanEnvConfiguration& GetEnvConfigs() { return *s_EnvConfigs; }
 	static const struct VulkanExtensionConfiguration& GetExtConfigs();
 	static const struct VulkanDescriptorLimitationConfiguration& GetDescriptorLimitationConfigs();
 protected:
-	void Initialize(const class Window& RenderWindow, const RenderSettings& GraphicsSettings) override final;
+	void Initialize() override final;
 private:
 	std::unique_ptr<class VulkanDevice> m_Device;
 	std::unique_ptr<class VulkanSwapchain> m_Swapchain;

@@ -19,6 +19,7 @@ public:
 	virtual ~RHIBackend() = default;
 	virtual ERHIBackend GetType() const { return ERHIBackend::Num; }
 	virtual RHIDevice& GetDevice() = 0;
+	virtual void CreateSwapchain(const class Window& InWindow, const RenderSettings& InRenderSettings) = 0;
 	virtual RHITexture* GetBackBuffer() { return nullptr; }
 	virtual void AdvanceFrame() {}
 
@@ -38,6 +39,6 @@ public:
 protected:
 	friend class RenderService;
 
-	virtual void Initialize(const class Window& RenderWindow, const RenderSettings& GraphicsSettings) = 0;
-	void PrepareGlobalResources() {}
+	virtual void Initialize() = 0;
+	void CreateGlobalResources() {}
 };

@@ -1,5 +1,7 @@
 #include "Application/BaseApplication.h"
 #include "Application/ApplicationConfiguration.h"
+#include "Services/RenderService.h"
+#include "RHI/RHIBackend.h"
 #include "Window.h"
 #include "System.h"
 
@@ -15,6 +17,7 @@ void BaseApplication::Initialize()
 	if (m_Configs->EnableRendering)
 	{
 		m_Window = std::make_unique<Window>(m_Configs->WindowDesc, this);
+		RenderService::Get().GetBackend().CreateSwapchain(*m_Window, m_Configs->GraphicsSettings);
 	}
 
 	InitializeImpl();

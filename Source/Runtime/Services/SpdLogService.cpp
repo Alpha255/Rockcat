@@ -22,6 +22,7 @@ SpdLogService::SpdLogService()
 		ELogLevel::Info
 #endif
 	);
+	m_DefaultLogger->info("Use spdlog at version: {}", SPDLOG_VERSION);
 }
 
 std::shared_ptr<spdlog::logger> SpdLogService::CreateLogger(const char* Name, ELogLevel Level)

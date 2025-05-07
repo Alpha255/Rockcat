@@ -32,11 +32,11 @@ void RenderService::OnStartup()
 	}
 	else
 	{
-		m_Backend->Initialize(GApplication.GetWindow(), GApplication.GetRenderSettings());
+		m_Backend->Initialize();
 		ShaderLibrary::Create(m_Backend->GetType(), m_Backend->GetDevice());
 		RHIUploadManager::Create(m_Backend->GetDevice());
 		
-		m_Backend->PrepareGlobalResources();
+		m_Backend->CreateGlobalResources();
 	}
 }
 

@@ -15,7 +15,7 @@ RHIDevice& D3D12RHI::GetDevice()
 	return *m_Device;
 }
 
-void D3D12RHI::Initialize(const Window& /*RenderWindow*/, const RenderSettings& /*GraphicsSettings*/)
+void D3D12RHI::Initialize()
 {
 #if defined(_DEBUG)
 	D3D12Debug0 DebugLayer0;

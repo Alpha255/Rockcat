@@ -10,6 +10,6 @@ RHIDevice& D3D11RHI::GetDevice()
 	return *m_Device;
 }
 
-void D3D11RHI::Initialize(const Window& /*RenderWindow*/, const RenderSettings& /*GraphicsSettings*/)
+void D3D11RHI::Initialize()
 {
 }
