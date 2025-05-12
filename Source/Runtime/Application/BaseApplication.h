@@ -9,7 +9,8 @@ public:
 	virtual ~BaseApplication() = default;
 
 	virtual void Initialize() {}
-	virtual void Render() {}
+	virtual void Render(class RHITexture*) {}
+	virtual void RenderGUI() {}
 	virtual void Finalize() {}
 	
 	virtual void PumpMessages();
@@ -22,9 +23,7 @@ public:
 	bool IsRequestQuit() const;
 protected:
 	bool InitializeRHI();
-
-	virtual void RenderGUI() {}
-	virtual void InitializeImpl() {}
+	void Present();
 private:
 	std::unique_ptr<class Window> m_Window;
 	std::shared_ptr<struct ApplicationConfiguration> m_Configs;

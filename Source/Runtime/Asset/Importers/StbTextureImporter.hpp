@@ -3,7 +3,6 @@
 #include "Asset/TextureAsset.h"
 #include "RHI/RHITexture.h"
 #include "Services/SpdLogService.h"
-#include "Services/RenderService.h"
 #include "RHI/RHIBackend.h"
 #pragma warning(disable:4244)
 #include <Submodules/stb/stb_image.h>
@@ -75,7 +74,7 @@ public:
 			.SetPermanentState(ERHIResourceState::ShaderResource)
 			.SetInitialData(DataBlock(Channels * Width * Height, Bitmap));
 
-		Image.CreateRHI(RenderService::Get().GetBackend().GetDevice(), CreateInfo);		
+		//Image.CreateRHI(RenderService::Get().GetBackend().GetDevice(), CreateInfo);		
 
 		return true;
 	}

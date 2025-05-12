@@ -13,8 +13,10 @@ TaskFlowService::TaskFlowService()
 {
 }
 
-void TaskFlowService::OnStartup()
+void TaskFlowService::Initialize()
 {
+	Task::InitializeThreadTags();
+
 	m_Executors.resize(static_cast<size_t>(EThread::Num) + 1u);
 
 	auto NumTotalThreads = System::GetHardwareConcurrencyThreadsCount(m_UseHyperThreading);
@@ -99,7 +101,8 @@ void TaskFlowService::FrameSync(bool AllowOneFrameLag)
 	{
 		struct FrameSyncTask : public Task
 		{
-			virtual void Execute() {}
+		protected:
+			virtual void ExecuteImpl() {}
 		};
 		static FrameSyncTask s_FrameSyncTask;
 
@@ -126,7 +129,7 @@ void TaskFlowService::FrameSync(bool AllowOneFrameLag)
 	}
 }
 
-void TaskFlowService::OnShutdown()
+void TaskFlowService::Finalize()
 {
 	for (auto& Executor : m_Executors)
 	{

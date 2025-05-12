@@ -160,6 +160,7 @@ public:
 	static bool IsInWorkerThread();
 protected:
 	friend class TaskFlow;
+	friend class TaskFlowService;
 
 	static void InitializeThreadTags();
 

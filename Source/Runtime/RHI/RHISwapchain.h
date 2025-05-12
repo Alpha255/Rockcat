@@ -30,6 +30,7 @@ public:
 
 	virtual void Resize(uint32_t Width, uint32_t Height) = 0;
 	virtual void AdvanceFrame() = 0;
+	virtual void Present() = 0;
 protected:
 	void SetNumBackBuffer(uint32_t Num) { m_NumBackBuffer = Num; }
 

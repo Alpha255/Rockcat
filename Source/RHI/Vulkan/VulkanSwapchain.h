@@ -27,7 +27,7 @@ public:
 #endif
 
 	void AdvanceFrame() override final;
-	void Present();
+	void Present() override final;
 
 	inline vk::Format GetColorFormat() const { return m_ColorFormat; }
 protected:

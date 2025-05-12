@@ -43,7 +43,11 @@ struct MeshDrawTask : public Task
 		assert(CommandBuffer);
 	}
 
-	void Execute() override final
+	const MeshDrawCommand& DrawCommand;
+	RHICommandBuffer* CommandBuffer;
+
+protected:
+	void ExecuteImpl() override final
 	{
 		/// How to update shader resources ??? 
 		/// How to update uniform buffer ???
@@ -55,14 +59,11 @@ struct MeshDrawTask : public Task
 		//CommandBuffer->SetGraphicsPipeline(DrawCommand.GraphicsPipeline);
 		CommandBuffer->SetVertexStream(0u, DrawCommand.VertexStream);
 		CommandBuffer->SetIndexBuffer(
-			DrawCommand.IndexBuffer, 
-			DrawCommand.FirstIndex * static_cast<size_t>(DrawCommand.IndexFormat), 
+			DrawCommand.IndexBuffer,
+			DrawCommand.FirstIndex * static_cast<size_t>(DrawCommand.IndexFormat),
 			DrawCommand.IndexFormat);
 		CommandBuffer->DrawIndexedInstanced(DrawCommand.NumIndex, DrawCommand.NumInstances, DrawCommand.FirstIndex, DrawCommand.VertexArgs.BaseIndex);
 	}
-
-	const MeshDrawCommand& DrawCommand;
-	RHICommandBuffer* CommandBuffer;
 };
 
 void MeshDrawCommandBuilder::SetupShaderParameters(RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo,

@@ -8,9 +8,8 @@ class TaskFlowService : public IService<TaskFlowService>
 public:
 	TaskFlowService();
 
-	void OnStartup() override final;
-
-	void OnShutdown() override final;
+	void Initialize() override final;
+	void Finalize() override final;
 
 	template<class Iterator, class Callable>
 	TaskEventPtr ParallelFor(Iterator&& Begin, Iterator&& End, Callable&& Function, EThread Thread, Task::EPriority Priority = Task::EPriority::Normal)

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Asset/TextureAsset.h"
-#include "Services/RenderService.h"
 #include "RHI/RHIBackend.h"
 
 #include <dxgiformat.h>
@@ -147,7 +146,7 @@ public:
 		}
 
 		CreateInfo.SetInitialData(DataBlock(BitSize, BitData));
-		Image.CreateRHI(RenderService::Get().GetBackend().GetDevice(), CreateInfo);
+		//Image.CreateRHI(RenderService::Get().GetBackend().GetDevice(), CreateInfo);
 
 		return true;
 	}

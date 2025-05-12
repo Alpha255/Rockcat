@@ -26,11 +26,11 @@ void Camera::SetLookAt(const Math::Vector3& Eye, const Math::Vector3& LookAt)
 	}
 }
 
-void Camera::OnKeyboardEvent(const KeyboardEvent& Keyboard)
+void Camera::OnKeyEvent(const KeyEvent& Event)
 {
-	if (Keyboard.State == EKeyState::Down)
+	if (Event.State == EKeyState::Down)
 	{
-		switch (Keyboard.Key)
+		switch (Event.Key)
 		{
 		case EKeyboardKey::A:
 		case EKeyboardKey::Left:
@@ -101,50 +101,50 @@ Math::Vector3 Camera::ScaleToScreenPosition(float X, float Y)
 	return Math::Vector3(Sx, Sy, std::sqrtf(1.0f - Magnitude));
 }
 
-void Camera::OnMouseEvent(const MouseEvent& Mouse)
-{
-	static uint32_t Counter = 0u;
-
-	if (Mouse.Button != EMouseButton::None)
-	{
-		m_MouseMovements.SetButton(Mouse.Button, Mouse.State == EKeyState::Down);
-		m_MouseMovements.SetButtonDoubleClicked(Mouse.Button, Mouse.State == EKeyState::DoubleClick);
-	}
-
-	switch (Mouse.Button)
-	{
-	case EMouseButton::LButton:
-		if (Mouse.State != EKeyState::Up)
-		{
-			m_MouseMovements.LastPos = System::GetCurrentCursorPosition();
-			m_LastPos = ScaleToScreenPosition(Mouse.Position.x, Mouse.Position.y);
-			m_QuatLast = m_QuatCurrent;
-		}
-		break;
-	case EMouseButton::RButton:
-		if (Mouse.State != EKeyState::Up)
-		{
-			m_MouseMovements.LastPos = System::GetCurrentCursorPosition();
-		}
-		break;
-	case EMouseButton::MButton:
-		if (Mouse.State != EKeyState::Up)
-		{
-			m_MouseMovements.LastPos = System::GetCurrentCursorPosition();
-		}
-		break;
-	}
-
-	m_MouseMovements.WheelMove = Mouse.WheelDelta != 0;
-	m_MouseMovements.WheelDelta += Mouse.WheelDelta;
-
-	if (m_MouseMovements.IsButtonDown(EMouseButton::LButton) && Mouse.IsMoving)
-	{
-		Math::Vector3 currentPos = ScaleToScreenPosition(Mouse.Position.x, Mouse.Position.y);
-		Math::Vector3 corss = m_LastPos.Cross(currentPos);
-		m_QuatCurrent = m_QuatLast * Math::Quaternion(corss.x, corss.y, corss.z, m_LastPos.Dot(currentPos));
-	}
-}
+//void Camera::OnMouseEvent(const MouseEvent& Mouse)
+//{
+//	static uint32_t Counter = 0u;
+//
+//	if (Mouse.Button != EMouseButton::None)
+//	{
+//		m_MouseMovements.SetButton(Mouse.Button, Mouse.State == EKeyState::Down);
+//		m_MouseMovements.SetButtonDoubleClicked(Mouse.Button, Mouse.State == EKeyState::DoubleClick);
+//	}
+//
+//	switch (Mouse.Button)
+//	{
+//	case EMouseButton::LButton:
+//		if (Mouse.State != EKeyState::Up)
+//		{
+//			m_MouseMovements.LastPos = System::GetCurrentCursorPosition();
+//			m_LastPos = ScaleToScreenPosition(Mouse.Position.x, Mouse.Position.y);
+//			m_QuatLast = m_QuatCurrent;
+//		}
+//		break;
+//	case EMouseButton::RButton:
+//		if (Mouse.State != EKeyState::Up)
+//		{
+//			m_MouseMovements.LastPos = System::GetCurrentCursorPosition();
+//		}
+//		break;
+//	case EMouseButton::MButton:
+//		if (Mouse.State != EKeyState::Up)
+//		{
+//			m_MouseMovements.LastPos = System::GetCurrentCursorPosition();
+//		}
+//		break;
+//	}
+//
+//	m_MouseMovements.WheelMove = Mouse.WheelDelta != 0;
+//	m_MouseMovements.WheelDelta += Mouse.WheelDelta;
+//
+//	if (m_MouseMovements.IsButtonDown(EMouseButton::LButton) && Mouse.IsMoving)
+//	{
+//		Math::Vector3 currentPos = ScaleToScreenPosition(Mouse.Position.x, Mouse.Position.y);
+//		Math::Vector3 corss = m_LastPos.Cross(currentPos);
+//		m_QuatCurrent = m_QuatLast * Math::Quaternion(corss.x, corss.y, corss.z, m_LastPos.Dot(currentPos));
+//	}
+//}
 
 void Camera::OnWindowResized(uint32_t Width, uint32_t Height)
 {

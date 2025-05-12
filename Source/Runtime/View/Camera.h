@@ -4,7 +4,7 @@
 #include "Core/Tickable.h"
 #include "EventRouter.h"
 
-class Camera : public MessageHandler, public ITickable
+class Camera : public EventHandler, public ITickable
 {
 public:
 	enum class EMode : uint8_t
@@ -76,9 +76,9 @@ public:
 
 	void SetLookAt(const Math::Vector3& Eye, const Math::Vector3& LookAt);
 
-	void OnMouseEvent(const MouseEvent& Mouse) override;
+	//void OnMouseEvent(const MouseEvent& Mouse) override;
 
-	void OnKeyboardEvent(const KeyboardEvent& Keyboard) override;
+	void OnKeyEvent(const KeyEvent& Keyboard) override;
 
 	void OnWindowResized(uint32_t Width, uint32_t Height) override;
 

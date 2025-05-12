@@ -5,9 +5,9 @@
 class RenderGraph
 {
 public:
-	static std::shared_ptr<RenderGraph> Create(const struct RenderSettings& InRenderSettings, const class IView& InView);
+	static std::shared_ptr<RenderGraph> Create(const struct RenderSettings& InRenderSettings, class RHIDevice& Device, const class IView& InView);
 
-	RenderGraph(const struct RenderSettings& InRenderSettings, const class IView& InView);
+	RenderGraph(const struct RenderSettings& InRenderSettings, class RHIDevice& Device, const class IView& InView);
 
 	template<class TPass>
 	RenderGraph& AddPass()

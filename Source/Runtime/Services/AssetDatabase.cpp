@@ -1,4 +1,4 @@
-#include "Asset/AssetDatabase.h"
+#include "Services/AssetDatabase.h"
 #include "Services/SpdLogService.h"
 #include "Services/TaskFlowService.h"
 #include "Asset/Importers/DDSTextureImporter.hpp"
@@ -6,48 +6,40 @@
 #include "Asset/Importers/AssimpSceneImporter.hpp"
 #include "Async/Task.h"
 
-struct AssetImportTask : public Task
+AssetImportTask::AssetImportTask(std::shared_ptr<::Asset>& InAsset,
+	const std::filesystem::path& InPath,
+	IAssetImporter& InImporter,
+	const AssetType& InType,
+	std::optional<Asset::Callbacks>& InCallbacks)
+	: Task(std::move(StringUtils::Format("AssetImportTask|%s", InPath.string().c_str())))
+	, Importer(InImporter)
+	, Asset(InAsset ? InAsset : InImporter.CreateAsset(InPath))
+	, Type(InType)
 {
-	AssetImportTask(std::shared_ptr<::Asset>& InAsset,
-		const std::filesystem::path& InPath,
-		IAssetImporter& InImporter,
-		const AssetType& InType,
-		std::optional<Asset::Callbacks>& InCallbacks)
-		: Task(std::move(StringUtils::Format("AssetImportTask|%s", InPath.string().c_str())))
-		, Importer(InImporter)
-		, Asset(InAsset ? InAsset : InImporter.CreateAsset(InPath))
-		, Type(InType)
+	Asset->SetCallbacks(InCallbacks);
+}
+
+void AssetImportTask::ExecuteImpl()
+{
+	Asset->OnPreLoad();
+
+	Asset->SetStatus(Asset::EStatus::Loading);
+
+	Importer.LoadAssetData(Asset, Type.ContentsType);
+
+	if (Importer.Reimport(*Asset, Type))
 	{
-		Asset->SetCallbacks(InCallbacks);
+		Asset->SetStatus(Asset::EStatus::Ready);
+		Asset->OnReady();
+	}
+	else
+	{
+		Asset->SetStatus(Asset::EStatus::Error);
+		Asset->OnLoadFailed();
 	}
 
-	IAssetImporter& Importer;
-	std::shared_ptr<Asset> Asset;
-	const AssetType& Type;
-
-protected:
-	void ExecuteImpl() override final
-	{
-		Asset->OnPreLoad();
-
-		Asset->SetStatus(Asset::EStatus::Loading);
-
-		Importer.LoadAssetData(Asset, Type.ContentsType);
-
-		if (Importer.Reimport(*Asset, Type))
-		{
-			Asset->SetStatus(Asset::EStatus::Ready);
-			Asset->OnReady();
-		}
-		else
-		{
-			Asset->SetStatus(Asset::EStatus::Error);
-			Asset->OnLoadFailed();
-		}
-
-		Asset->FreeRawData();
-	}
-};
+	Asset->FreeRawData();
+}
 
 void AssetDatabase::Initialize()
 { 

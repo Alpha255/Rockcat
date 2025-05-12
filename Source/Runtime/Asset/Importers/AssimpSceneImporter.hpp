@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Asset/SceneAsset.h"
-#include "Asset/AssetDatabase.h"
+#include "Services/AssetDatabase.h"
 #include "Paths.h"
-#include "Services/RenderService.h"
 #include "RHI/RHIBackend.h"
 #include <assimp/version.h>
 #include <Submodules/assimp/include/assimp/Importer.hpp>
@@ -340,7 +339,7 @@ private:
 				auto& Mesh = AssimpScene.Data.StaticMeshes.emplace_back(std::make_shared<StaticMesh>(MeshDataBlock, AiMesh->mMaterialIndex));
 				Mesh->SetMaterialProperty(AssimpScene.Data.MaterialProperties.at(Index).get());
 				Mesh->SetTransform(&AssimpScene.Data.Transforms.at(Index));
-				Mesh->CreateRHI(RenderService::Get().GetBackend().GetDevice());
+				//Mesh->CreateRHI(RenderService::Get().GetBackend().GetDevice());
 			}
 		}
 	}

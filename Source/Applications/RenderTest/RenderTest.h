@@ -7,10 +7,10 @@ class RenderTest final : public BaseApplication
 public:
 	using BaseApplication::BaseApplication;
 
-	void RenderFrame() override final;
+	void Initialize() override final;
+	void Render(class RHITexture* RenderSurface) override final;
 protected:
-	void InitializeImpl() override final;
-	void RenderGUI(class Canvas&) override final {}
+	void RenderGUI() override final {}
 private:
 	std::shared_ptr<class Scene> m_Scene;
 	std::shared_ptr<class RenderGraph> m_RenderGraph;
