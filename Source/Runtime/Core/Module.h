@@ -53,6 +53,6 @@ class IService : public Singleton<T>
 public:
 	virtual ~IService() = default;
 
-	virtual void OnStartup() {}
-	virtual void OnShutdown() {}
+	virtual void Initialize() {}
+	virtual void Finalize() {}
 };

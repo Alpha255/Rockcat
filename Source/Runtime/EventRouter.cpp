@@ -1,12 +1,13 @@
-#include "MessageRouter.h"
+#include "EventRouter.h"
 #include "Window.h"
 
-MessageHandler::MessageHandler()
+EventHandler::EventHandler(EEventMask Mask)
+	: m_MessageMask(Mask)
 {
-	MessageRouter::Get().RegisterMessageHandler(this);
+	EventRouter::Get().RegisterEventHandler(this);
 }
 
-void MessageRouter::RegisterMessageHandler(MessageHandler* Handler)
+void EventRouter::RegisterEventHandler(EventHandler* Handler)
 {
 	if (Handler && std::find(m_Handlers.cbegin(), m_Handlers.cend(), Handler) == m_Handlers.cend())
 	{
@@ -14,7 +15,7 @@ void MessageRouter::RegisterMessageHandler(MessageHandler* Handler)
 	}
 }
 
-void MessageRouter::DeregisterMessageHandler(MessageHandler* Handler)
+void EventRouter::DeregisterEventHandler(EventHandler* Handler)
 {
 	if (Handler)
 	{

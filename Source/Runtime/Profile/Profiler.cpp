@@ -29,7 +29,7 @@ Profiler::Profiler(RHIDevice& Device, bool Enabled)
 {
 }
 
-void Profiler::OnStartup()
+void Profiler::Initialize()
 {
 }
 

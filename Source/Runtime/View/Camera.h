@@ -2,7 +2,7 @@
 
 #include "Core/Math/Matrix.h"
 #include "Core/Tickable.h"
-#include "MessageRouter.h"
+#include "EventRouter.h"
 
 class Camera : public MessageHandler, public ITickable
 {

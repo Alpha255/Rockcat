@@ -65,7 +65,7 @@ public:
 
 	Profiler(class RHIDevice& Device, bool Enabled = true);
 
-	void OnStartup() override final;
+	void Initialize() override final;
 
 	ScopedEvent ScopeEvent(const char* Name, EEventFlags Flags);
 

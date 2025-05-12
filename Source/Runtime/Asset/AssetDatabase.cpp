@@ -6,43 +6,50 @@
 #include "Asset/Importers/AssimpSceneImporter.hpp"
 #include "Async/Task.h"
 
-AssetImportTask::AssetImportTask(std::shared_ptr<::Asset>& InAsset,
-	const std::filesystem::path& InPath,
-	IAssetImporter& InImporter,
-	const AssetType& InType,
-	std::optional<Asset::Callbacks>& InCallbacks)
-	: Task(std::move(StringUtils::Format("AssetImportTask|%s", InPath.string().c_str())))
-	, Importer(InImporter)
-	, Asset(InAsset ? InAsset : InImporter.CreateAsset(InPath))
-	, Type(InType)
+struct AssetImportTask : public Task
 {
-	Asset->SetCallbacks(InCallbacks);
-}
-
-void AssetImportTask::Execute()
-{
-	Asset->OnPreLoad();
-
-	Asset->SetStatus(Asset::EStatus::Loading);
-
-	Importer.LoadAssetData(Asset, Type.ContentsType);
-
-	if (Importer.Reimport(*Asset, Type))
+	AssetImportTask(std::shared_ptr<::Asset>& InAsset,
+		const std::filesystem::path& InPath,
+		IAssetImporter& InImporter,
+		const AssetType& InType,
+		std::optional<Asset::Callbacks>& InCallbacks)
+		: Task(std::move(StringUtils::Format("AssetImportTask|%s", InPath.string().c_str())))
+		, Importer(InImporter)
+		, Asset(InAsset ? InAsset : InImporter.CreateAsset(InPath))
+		, Type(InType)
 	{
-		Asset->SetStatus(Asset::EStatus::Ready);
-		Asset->OnReady();
-	}
-	else
-	{
-		Asset->SetStatus(Asset::EStatus::Error);
-		Asset->OnLoadFailed();
+		Asset->SetCallbacks(InCallbacks);
 	}
 
-	Asset->FreeRawData();
-}
+	IAssetImporter& Importer;
+	std::shared_ptr<Asset> Asset;
+	const AssetType& Type;
 
-AssetDatabase::AssetDatabase()
-	: m_EnableAsyncImport(false)
+protected:
+	void ExecuteImpl() override final
+	{
+		Asset->OnPreLoad();
+
+		Asset->SetStatus(Asset::EStatus::Loading);
+
+		Importer.LoadAssetData(Asset, Type.ContentsType);
+
+		if (Importer.Reimport(*Asset, Type))
+		{
+			Asset->SetStatus(Asset::EStatus::Ready);
+			Asset->OnReady();
+		}
+		else
+		{
+			Asset->SetStatus(Asset::EStatus::Error);
+			Asset->OnLoadFailed();
+		}
+
+		Asset->FreeRawData();
+	}
+};
+
+void AssetDatabase::Initialize()
 { 
 	CreateAssetImporters();
 }
@@ -71,22 +78,22 @@ std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(
 
 	AssetImportTask* Task = nullptr;
 
-	auto AssetTaskIt = m_AssetLoadTasks.find(AssetPath);
-	if (AssetTaskIt != m_AssetLoadTasks.end())
+	auto It = m_AssetLoadTasks.find(AssetPath);
+	if (It != m_AssetLoadTasks.end())
 	{
-		Task = AssetTaskIt->second.get();
+		Task = It->second.get();
 		Task->Asset->SetCallbacks(AssetLoadCallbacks);
 	}
 	else
 	{
-		for (auto& AssetImporter : m_AssetImporters)
+		for (auto& Importer : m_AssetImporters)
 		{
-			if (auto AssetType = AssetImporter->FindValidAssetType(AssetPath))
+			if (auto AssetType = Importer->FindValidAssetType(AssetPath))
 			{
 				Task = m_AssetLoadTasks.insert(std::make_pair(AssetPath,
 					std::make_shared<AssetImportTask>(TargetAsset,
 						AssetPath,
-						*AssetImporter,
+						*Importer,
 						*AssetType,
 						AssetLoadCallbacks))).first->second.get();
 			}
@@ -99,9 +106,9 @@ std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(
 		return nullptr;
 	}
 
-	if (Async && m_EnableAsyncImport)
+	if (Async)
 	{
-		tf::DispatchTask(*Task);
+		Task->Dispatch();
 	}
 	else
 	{
@@ -111,8 +118,17 @@ std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(
 	return Task->Asset;
 }
 
-void AssetDatabase::OnShutdown()
+void AssetDatabase::Finalize()
 {
+	for (auto& It : m_AssetLoadTasks)
+	{
+		auto& Task = It.second;
+		if (!Task->IsCompleted())
+		{
+			Task->Wait();
+		}
+	}
+
 	m_AssetLoadTasks.clear();
 	m_AssetImporters.clear();
 }

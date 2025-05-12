@@ -1,37 +1,36 @@
 #pragma once
 
-#include "Application/RunApplication.h"
 #include "Core/Tickable.h"
 
 class BaseApplication : public NoneCopyable, public ITickable
 {
 public:
-	BaseApplication(const char* ConfigurationPath);
+	BaseApplication(const char* ConfigPath);
+	virtual ~BaseApplication() = default;
 
-	virtual ~BaseApplication();
-
-	virtual void Initialize();
-	virtual void RenderFrame() {}
+	virtual void Initialize() {}
+	virtual void Render() {}
 	virtual void Finalize() {}
-	
-	void Tick(float) override {}
 	
 	virtual void PumpMessages();
 
-	inline bool IsActivate() const { return m_Activate; }
-	inline bool IsRequestQuit() const { return m_RequestQuit; }
+	virtual void Run();
+	
+	void Tick(float) override {}
 
-	inline const class Window& GetWindow() const { return *m_Window; }
-	inline const struct ApplicationConfiguration& GetConfigs() const { return *m_Configs; }
-	const struct RenderSettings& GetRenderSettings() const;
-
-	void ProcessMessage(uint32_t Message, size_t WParam, intptr_t LParam);
+	bool IsActivate() const;
+	bool IsRequestQuit() const;
 protected:
-	virtual void RenderGUI(class Canvas&) {}
+	bool InitializeRHI();
+
+	virtual void RenderGUI() {}
 	virtual void InitializeImpl() {}
 private:
-	std::shared_ptr<struct ApplicationConfiguration> m_Configs;
 	std::unique_ptr<class Window> m_Window;
-	bool m_Activate = true;
-	bool m_RequestQuit = false;
+	std::shared_ptr<struct ApplicationConfiguration> m_Configs;
+
+	std::unique_ptr<class RHIBackend> m_RenderBackend;
+	std::shared_ptr<class RHISwapchain> m_RenderSwapchain;
+
+	std::unique_ptr<class CpuTimer> m_Timer;
 };

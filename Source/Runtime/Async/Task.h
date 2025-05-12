@@ -69,7 +69,7 @@ using TaskEventPtr = std::shared_ptr<TaskEvent>;
 class Task : public tf::Task
 {
 public:
-	enum class EPriority
+	enum class EPriority : uint8_t
 	{
 		Low,
 		Normal,
@@ -123,9 +123,47 @@ public:
 
 	EPriority GetPriority() const { return m_Priority; }
 
-	virtual void Execute() = 0;
+	void Execute();
+
+	void Dispatch(EThread Thread = EThread::WorkerThread);
+
+	inline bool IsDispatched() const { return m_Event && m_Event->IsDispatched(); }
+	inline bool IsCompleted() const { return IsDispatched() ? m_Event->IsCompleted() : !m_Executing; }
+
+	inline void Wait()
+	{
+		if (m_Event)
+		{
+			m_Event->Wait();
+		}
+	}
+
+	inline void WaitForSeconds(size_t Seconds)
+	{
+		if (m_Event)
+		{
+			m_Event->WaitForSeconds(Seconds);
+		}
+	}
+
+	inline void WaitForMilliseconds(size_t Milliseconds)
+	{
+		if (m_Event)
+		{
+			m_Event->WaitForMilliseconds(Milliseconds);
+		}
+	}
+
+	static bool IsInMainThread();
+	static bool IsInGameThread();
+	static bool IsInRenderThread();
+	static bool IsInWorkerThread();
 protected:
 	friend class TaskFlow;
+
+	static void InitializeThreadTags();
+
+	virtual void ExecuteImpl() = 0;
 
 	void SetBaseTask(tf::Task&& Task)
 	{
@@ -144,5 +182,8 @@ private:
 	}
 
 	EPriority m_Priority = EPriority::Normal;
+	bool m_Executing = false;
 	std::string m_Name;
+
+	TaskEventPtr m_Event;
 };

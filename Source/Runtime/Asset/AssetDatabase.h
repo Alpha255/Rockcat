@@ -5,27 +5,11 @@
 #include "Asset/Asset.h"
 #include "Async/Task.h"
 
-struct AssetImportTask : public Task
-{
-	AssetImportTask(std::shared_ptr<Asset>& InAsset,
-		const std::filesystem::path& InPath,
-		IAssetImporter& InImporter,
-		const AssetType& InType,
-		std::optional<Asset::Callbacks>& InCallbacks);
-
-	void Execute() override final;
-
-	IAssetImporter& Importer;
-	std::shared_ptr<Asset> Asset;
-	const AssetType& Type;
-};
-
 class AssetDatabase : public IService<AssetDatabase>
 {
 public:
-	AssetDatabase();
-
-	void OnShutdown() override final;
+	void Initialize() override final;
+	void Finalize() override final;
 
 	template<class TAsset>
 	std::shared_ptr<TAsset> GetOrReimportAsset(const std::filesystem::path& Path, std::optional<Asset::Callbacks>& AssetLoadCallbacks = Asset::s_DefaultNullCallbacks, bool Async = true)
@@ -72,7 +56,7 @@ public:
 		ReimportAssetImpl(TargetAsset, GetUnifyAssetPath(TargetAsset->GetPath()), AssetLoadCallbacks, Async);
 	}
 private:
-	static std::filesystem::path GetUnifyAssetPath(const std::filesystem::path& Path, bool Lowercase = false)
+	inline static std::filesystem::path GetUnifyAssetPath(const std::filesystem::path& Path, bool Lowercase = false)
 	{
 		auto UnifyPath = std::filesystem::path(std::move(std::filesystem::path(Path).make_preferred()));
 		return Lowercase ? std::filesystem::path(StringUtils::Lowercase(UnifyPath.string())) : UnifyPath;
@@ -86,8 +70,7 @@ private:
 		std::optional<Asset::Callbacks>& AssetLoadCallbacks, 
 		bool Async);
 
-	std::unordered_map<std::filesystem::path, std::shared_ptr<AssetImportTask>> m_AssetLoadTasks;
+	std::unordered_map<std::filesystem::path, std::shared_ptr<struct AssetImportTask>> m_AssetLoadTasks;
 	std::vector<std::unique_ptr<IAssetImporter>> m_AssetImporters;
-	bool m_EnableAsyncImport;
 };
 

@@ -37,7 +37,7 @@ public:
 		}
 	}
 protected:
-	friend class RenderService;
+	friend class BaseApplication;
 
 	virtual void Initialize() = 0;
 	void CreateGlobalResources() {}

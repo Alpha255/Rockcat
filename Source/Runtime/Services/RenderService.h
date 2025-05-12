@@ -5,8 +5,8 @@
 class RenderService : public IService<RenderService>
 {
 public:
-	void OnStartup() override final;
-	void OnShutdown() override final;
+	void Initialize() override final;
+	void Finalize() override final;
 
 	inline class RHIBackend& GetBackend() { return *m_Backend; }
 private:
