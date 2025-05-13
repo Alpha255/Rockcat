@@ -8,10 +8,13 @@
 #include "Services/TaskFlowService.h"
 #include "Services/AssetDatabase.h"
 #include "Profile/CpuTimer.h"
+#include "Profile/Stats.h"
 #include "Window.h"
 #include "System.h"
 
 BaseApplication::BaseApplication(const char* ConfigPath)
+	: ITickable(false)
+	, EventHandler(EEventMask::WindowStatus)
 { 
 	m_Configs = ApplicationConfiguration::Load(ConfigPath ? ConfigPath : "Defalut.json");
 }
@@ -69,6 +72,13 @@ void BaseApplication::Present()
 	}
 }
 
+void BaseApplication::Tick(float ElapsedSeconds)
+{
+	TickManager::Get().TickObjects(ElapsedSeconds);
+
+	Stats::Get().Tick(ElapsedSeconds);
+}
+
 void BaseApplication::Run()
 {
 	if (!std::filesystem::exists(Paths::AssetPath()))
@@ -116,11 +126,9 @@ void BaseApplication::Run()
 
 		if (IsActivate())
 		{
-			m_Timer->Start();
-
 			PumpMessages();
 
-			TickManager::Get().TickObjects(m_Timer->GetElapsedSeconds());
+			Tick(m_Timer->GetElapsedSeconds());
 
 			if (m_Configs->EnableRendering)
 			{
@@ -130,10 +138,6 @@ void BaseApplication::Run()
 			}
 
 			TaskFlowService::Get().FrameSync(true);
-		}
-		else
-		{
-			m_Timer->Pause();
 		}
 	}
 
@@ -145,6 +149,27 @@ void BaseApplication::Run()
 	m_RenderBackend.reset();
 }
 
+void BaseApplication::OnWindowStatusChanged(EWindowStatus Status)
+{
+	switch (Status)
+	{
+	case EWindowStatus::Activate:
+		if (m_Timer)
+		{
+			m_Timer->Start();
+		}
+		break;
+	case EWindowStatus::Inactivate:
+		if (m_Timer)
+		{
+			m_Timer->Pause();
+		}
+		break;
+	}
+}
+
+BaseApplication::~BaseApplication() = default;
+
 #if PLATFORM_WIN32
 #include "Win32/Win32DynamicLinkLibrary.hpp"
 #include "Win32/Win32System.hpp"
@@ -152,7 +177,21 @@ void BaseApplication::Run()
 
 int32_t WINAPI WinMain(_In_ HINSTANCE /*hInstance*/, _In_opt_ HINSTANCE /*hPrevInstance*/, _In_ LPSTR /*Commandline*/, _In_ int32_t /*ShowCmd*/)
 {
-	return 0;
+	extern RunApplication g_RunApplication;
+
+	if (g_RunApplication.CreateApplication)
+	{
+		auto Application = g_RunApplication.CreateApplication();
+		assert(Application);
+		Application->Run();
+		delete Application;
+		return 0;
+	}
+	else
+	{
+		LOG_CRITICAL("Failed to create application!");
+		return -1;
+	}
 }
 #else
 	#error "Unknown platform"

@@ -19,9 +19,6 @@ public:
 	virtual ~RHIBackend() = default;
 	virtual ERHIBackend GetType() const { return ERHIBackend::Num; }
 	virtual RHIDevice& GetDevice() = 0;
-	virtual void CreateSwapchain(const class Window& InWindow, const RenderSettings& InRenderSettings) = 0;
-	virtual RHITexture* GetBackBuffer() { return nullptr; }
-	virtual void AdvanceFrame() {}
 
 	const char* GetName() const { return GetName(GetType()); }
 

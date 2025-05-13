@@ -28,21 +28,6 @@ void VulkanRHI::Initialize()
 	s_EnvConfigs->Save(true);
 }
 
-void VulkanRHI::CreateSwapchain(const Window& InWindow, const RenderSettings& InRenderSettings)
-{
-	if (!m_Swapchain)
-	{
-		RHISwapchainCreateInfo CreateInfo;
-		CreateInfo.SetWindowHandle(InWindow.GetHandle())
-			.SetWidth(InWindow.GetWidth())
-			.SetHeight(InWindow.GetHeight())
-			.SetFullscreen(InRenderSettings.FullScreen)
-			.SetVSync(InRenderSettings.VSync)
-			.SetHDR(InRenderSettings.HDR);
-		m_Swapchain = std::make_unique<VulkanSwapchain>(*m_Device, CreateInfo);
-	}
-}
-
 VulkanRHI::~VulkanRHI()
 {
 	m_Device.reset();
@@ -53,19 +38,6 @@ VulkanRHI::~VulkanRHI()
 RHIDevice& VulkanRHI::GetDevice()
 {
 	return *m_Device;
-}
-
-void VulkanRHI::AdvanceFrame()
-{
-	if (m_Swapchain)
-	{
-		m_Swapchain->AdvanceFrame();
-	}
-}
-
-RHITexture* VulkanRHI::GetBackBuffer()
-{
-	return m_Swapchain ? m_Swapchain->GetBackBuffer() : nullptr;
 }
 
 const VulkanExtensionConfiguration& VulkanRHI::GetExtConfigs()

@@ -374,4 +374,6 @@ void VulkanSwapchain::Present()
 			assert(false);
 		}
 	}
+
+	AdvanceFrame();
 }

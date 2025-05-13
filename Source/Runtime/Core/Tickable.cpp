@@ -1,8 +1,11 @@
 #include "Tickable.h"
 
-ITickable::ITickable()
+ITickable::ITickable(bool AutoTick)
 {
-	TickManager::Get().AddTickableObject(this);
+	if (AutoTick)
+	{
+		TickManager::Get().AddTickableObject(this);
+	}
 }
 
 void TickManager::TickObjects(float ElapsedSeconds)

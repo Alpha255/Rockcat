@@ -12,7 +12,7 @@ public:
 		Never
 	};
 
-	ITickable();
+	ITickable(bool AutoTick = true);
 
 	virtual ~ITickable() = default;
 

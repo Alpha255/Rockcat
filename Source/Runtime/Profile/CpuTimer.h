@@ -43,6 +43,9 @@ public:
 	{
 		if (m_State == EState::Paused)
 		{
+			auto CurrentTime = std::chrono::high_resolution_clock::now();
+			m_PausedTime = std::chrono::duration_cast<Seconds>(CurrentTime - m_LastTime).count();
+
 			m_LastTime = std::chrono::high_resolution_clock::now();
 			m_State = EState::Tick;
 		}
@@ -53,6 +56,7 @@ public:
 		if (m_State == EState::Tick)
 		{
 			m_State = EState::Paused;
+			m_LastTime = std::chrono::high_resolution_clock::now();
 		}
 	}
 
@@ -67,7 +71,7 @@ protected:
 private:
 	std::chrono::high_resolution_clock::time_point m_LastTime;
 	float m_Speed = 1.0f;
-	float m_ElapsedTime = 0.0f;
+	float m_PausedTime = 0.0f;
 	EState m_State = EState::Tick;
 };
 
