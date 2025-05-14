@@ -24,13 +24,8 @@ class TaskEvent
 public:
 	TaskEvent() = default;
 
-	TaskEvent(tf::Future<void>&& Future) noexcept
-		: m_Future(std::move(Future))
-	{
-	}
-
 	TaskEvent(std::future<void>&& Future) noexcept
-		: m_Future(std::move(Future))
+		: m_Future(std::move((Future)))
 	{
 	}
 
@@ -66,7 +61,7 @@ private:
 
 using TaskEventPtr = std::shared_ptr<TaskEvent>;
 
-class Task : public tf::Task
+class ITask
 {
 public:
 	enum class EPriority : uint8_t
@@ -77,58 +72,50 @@ public:
 		Critical
 	};
 
-	using tf::Task::Task;
-
-	template<class T>
-	Task(T&& Name, EPriority Priority = EPriority::Normal) // Without graph
-		: tf::Task()
-		, m_Priority(Priority)
-		, m_Name(std::forward<T>(Name))
+	ITask() = default;
+	
+	ITask(const std::string& Name, EPriority Priority = EPriority::Normal)
+		: m_Priority(Priority)
+		, m_Name(Name)
 	{
 	}
 
-	Task(const Task& Other)
-		: tf::Task(Other)
+	ITask(const ITask& Other)
+		: m_Executing(Other.m_Executing)
 		, m_Priority(Other.m_Priority)
 		, m_Name(Other.m_Name)
+		, m_Event(Other.m_Event)
 	{
-		ResetNodeName();
 	}
 
-	Task(Task&& Other) noexcept
-		: tf::Task(std::move(static_cast<tf::Task&&>(Other)))
-		, m_Priority(Other.m_Priority)
-		, m_Name(std::move(Other.m_Name))
+	ITask& operator=(const ITask& Other)
 	{
-		ResetNodeName();
-	}
-
-	Task& operator=(const Task& Other)
-	{
+		m_Executing = Other.m_Executing;
 		m_Priority = Other.m_Priority;
 		m_Name = Other.m_Name;
-		ResetNodeName();
+		m_Event = Other.m_Event;
 		return *this;
 	}
 
-	const char* GetName() const { return m_Name.c_str(); }
-
-	template<class T>
-	Task& SetName(T&& Name)
+	ITask(ITask&& Other) noexcept
+		: m_Executing(Other.m_Executing)
+		, m_Priority(Other.m_Priority)
+		, m_Name(std::move(Other.m_Name))
+		, m_Event(std::move(Other.m_Event))
 	{
-		m_Name = std::move(std::string(std::forward<T>(Name)));
-		ResetNodeName();
-		return *this;
 	}
 
-	EPriority GetPriority() const { return m_Priority; }
+	~ITask() = default;
 
-	void Execute();
+	virtual void Dispatch(EThread Thread = EThread::WorkerThread) = 0;
 
-	void Dispatch(EThread Thread = EThread::WorkerThread);
-
+	inline const char* GetName() const { return m_Name.c_str(); }
+	inline EPriority GetPriority() const { return m_Priority; }
 	inline bool IsDispatched() const { return m_Event && m_Event->IsDispatched(); }
 	inline bool IsCompleted() const { return IsDispatched() ? m_Event->IsCompleted() : !m_Executing; }
+	inline TaskEventPtr GetEvent() const { return m_Event; }
+	
+	virtual void SetName(const char* Name) { m_Name = Name; }
 
 	inline void Wait()
 	{
@@ -154,25 +141,73 @@ public:
 		}
 	}
 
+	static void InitializeThreadTags();
 	static bool IsInMainThread();
 	static bool IsInGameThread();
 	static bool IsInRenderThread();
 	static bool IsInWorkerThread();
 protected:
+	friend class TaskFlowService;
+
+	bool m_Executing = false;
+	EPriority m_Priority = EPriority::Normal;
+
+	std::string m_Name;
+
+	TaskEventPtr m_Event;
+};
+
+class Task : public tf::Task, public ITask
+{
+public:
+	using tf::Task::Task;
+	using ITask::ITask;
+
+	Task() = default;
+
+	Task(const Task& Other)
+		: tf::Task(Other)
+		, ITask(Other)
+	{
+		SetBaseName();
+	}
+
+	Task(Task&& Other) noexcept
+		: tf::Task(std::move(static_cast<tf::Task&&>(Other)))
+		, ITask(std::move(Other))
+	{
+		SetBaseName();
+	}
+
+	Task& operator=(const Task& Other)
+	{
+		ITask::operator=(Other);
+		SetBaseName();
+		return *this;
+	}
+
+	void SetName(const char* Name) override final
+	{
+		ITask::SetName(Name);
+		SetBaseName();
+	}
+
+	void Execute();
+
+	void Dispatch(EThread Thread = EThread::WorkerThread) override final;
+protected:
 	friend class TaskFlow;
 	friend class TaskFlowService;
 
-	static void InitializeThreadTags();
-
 	virtual void ExecuteImpl() = 0;
 
-	void SetBaseTask(tf::Task&& Task)
+	inline void SetBaseTask(tf::Task&& Task)
 	{
 		Cast<tf::Task>(*this) = Task;
-		ResetNodeName();
+		SetBaseName();
 	}
 private:
-	void ResetNodeName()
+	void SetBaseName()
 	{
 #if _DEBUG
 		if (!empty())
@@ -181,10 +216,28 @@ private:
 		}
 #endif
 	}
+};
 
-	EPriority m_Priority = EPriority::Normal;
-	bool m_Executing = false;
-	std::string m_Name;
+class TaskFlow : public tf::Taskflow, public ITask
+{
+public:
+	using tf::Taskflow::Taskflow;
+	using ITask::ITask;
 
-	TaskEventPtr m_Event;
+	template<class TTask, class... Arg>
+	TTask& Emplace(Arg&&... Args)
+	{
+		TTask* NewTask = Cast<TTask>(m_Tasks.emplace_back(std::make_shared<TTask>(std::forward<Arg>(Args)...)).get());
+
+		NewTask->SetBaseTask(tf::Taskflow::emplace([NewTask]() {
+			NewTask->Execute();
+			}));
+		return *NewTask;
+	}
+
+	void Dispatch(EThread Thread = EThread::WorkerThread) override final;
+protected:
+	friend class TaskFlowService;
+private:
+	std::vector<std::shared_ptr<tf::Task>> m_Tasks;
 };

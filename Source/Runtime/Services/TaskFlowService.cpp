@@ -15,7 +15,7 @@ TaskFlowService::TaskFlowService()
 
 void TaskFlowService::Initialize()
 {
-	Task::InitializeThreadTags();
+	ITask::InitializeThreadTags();
 
 	m_Executors.resize(static_cast<size_t>(EThread::Num) + 1u);
 

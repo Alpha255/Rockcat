@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Module.h"
-#include "Async/TaskFlow.h"
+#include "Async/Task.h"
 
 class TaskFlowService : public IService<TaskFlowService>
 {
@@ -107,7 +107,7 @@ public:
 	{
 		assert(Thread < EThread::Num && Thread != EThread::GameThread && Thread != EThread::RenderThread);
 
-		Flow.Dispatch(*GetExecutor(Thread, Priority));
+		GetExecutor(Thread, Priority)->run(Flow);
 		return Flow.GetEvent();
 	}
 

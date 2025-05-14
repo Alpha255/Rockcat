@@ -3,6 +3,39 @@
 
 thread_local EThread t_ThreadTag = EThread::WorkerThread;
 
+void ITask::InitializeThreadTags()
+{
+	t_ThreadTag = EThread::MainThread;
+
+	tf::Async_WaitDone([]() {
+		t_ThreadTag = EThread::GameThread;
+		}, EThread::GameThread);
+
+	tf::Async_WaitDone([]() {
+		t_ThreadTag = EThread::RenderThread;
+		}, EThread::RenderThread);
+}
+
+bool ITask::IsInMainThread()
+{
+	return t_ThreadTag == EThread::MainThread;
+}
+
+bool ITask::IsInGameThread()
+{
+	return t_ThreadTag == EThread::GameThread;
+}
+
+bool ITask::IsInRenderThread()
+{
+	return t_ThreadTag == EThread::RenderThread;
+}
+
+bool ITask::IsInWorkerThread()
+{
+	return t_ThreadTag == EThread::WorkerThread;
+}
+
 void Task::Dispatch(EThread Thread)
 {
 	if (!m_Event || m_Event->IsCompleted())
@@ -21,35 +54,10 @@ void Task::Execute()
 	}
 }
 
-void Task::InitializeThreadTags()
+void TaskFlow::Dispatch(EThread Thread)
 {
-	t_ThreadTag = EThread::MainThread;
-
-	tf::Async_WaitDone([]() {
-		t_ThreadTag = EThread::GameThread;
-		}, EThread::GameThread);
-
-	tf::Async_WaitDone([]() {
-		t_ThreadTag = EThread::RenderThread;
-		}, EThread::RenderThread);
-}
-
-bool Task::IsInMainThread()
-{
-	return t_ThreadTag == EThread::MainThread;
-}
-
-bool Task::IsInGameThread()
-{
-	return t_ThreadTag == EThread::GameThread;
-}
-
-bool Task::IsInRenderThread()
-{
-	return t_ThreadTag == EThread::RenderThread;
-}
-
-bool Task::IsInWorkerThread()
-{
-	return t_ThreadTag == EThread::WorkerThread;
+	if (!m_Event || m_Event->IsCompleted())
+	{
+		m_Event = TaskFlowService::Get().DispatchTaskFlow(*this, Thread, m_Priority);
+	}
 }
