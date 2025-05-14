@@ -11,6 +11,30 @@ enum class ERHIDeviceQueue : uint8_t
 	Num
 };
 
+struct RHIDeviceCaps
+{
+	uint32_t MaxTextureDimension1D = 0u;
+	uint32_t MaxTextureDimension2D = 0u;
+	uint32_t MaxTextureDimension3D = 0u;
+	uint32_t MaxTextureDimensionCube = 0u;
+	uint32_t MaxTextureArrayLayers = 0u;
+	uint32_t MaxInputBindings = 0u;
+	uint32_t MaxInputAttributes = 0u;
+	uint32_t MaxComputeWorkGroupCountX = 0u;
+	uint32_t MaxComputeWorkGroupCountY = 0u;
+	uint32_t MaxComputeWorkGroupCountZ = 0u;
+	uint32_t MaxViewports = 0u;
+	uint32_t MaxFrameBufferWidth = 0u;
+	uint32_t MaxFrameBufferHeight = 0u;
+	uint32_t MaxFrameBufferLayers = 0u;
+	uint32_t MaxColorAttachments = 0u;
+	uint32_t MaxDrawIndexedIndexValue = 0;
+	uint32_t MaxDrawIndirectNum = 0u;
+	uint32_t MaxSamplers = 0u;
+	uint32_t MaxDescriptorSets = 0u;
+	float MaxSamplerAnisotropy = 0.0f;
+};
+
 class RHIDevice
 {
 public:

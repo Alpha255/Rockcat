@@ -52,6 +52,8 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 					{
 						PresentQueueIndex = Index;
 					}
+#else
+	#error "Not implemented"
 #endif
 				}
 			}

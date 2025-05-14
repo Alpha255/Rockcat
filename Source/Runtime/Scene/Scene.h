@@ -54,3 +54,32 @@ private:
 	NodeCollection m_NodeCollection;
 };
 
+class Scene2 : public ITickable, public SerializableAsset<Scene2>
+{
+public:
+	Scene2(std::filesystem::path&& SubPath)
+		: BaseClass(Paths::ScenePath() / SubPath)
+	{
+	}
+
+	~Scene2();
+
+	static const char* GetExtension() { return ".scene"; }
+
+	void Tick(float EleapsedSeconds) override final;
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(m_AssimpScenes),
+			CEREAL_NVP(m_Graph)
+		);
+	}
+protected:
+	void PostLoad() override final;
+private:
+	std::vector<std::string> m_AssimpScenes;
+	std::shared_ptr<SceneGraph> m_Graph;
+};
+
