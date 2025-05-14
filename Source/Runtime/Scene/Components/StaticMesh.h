@@ -245,3 +245,7 @@ protected:
 class SkeletalMesh : public StaticMesh
 {
 };
+
+class MeshData2 : public MeshProperty
+{
+};

@@ -187,3 +187,112 @@ struct SceneGraph
 };
 
 ENUM_FLAG_OPERATORS(SceneGraph::Node::ENodeMasks)
+
+using EntityID = ObjectID<class Entity>;
+
+class Entity
+{
+public:
+	Entity() = default;
+
+	Entity(const char* Name, EntityID ID, EntityID ParentID = EntityID())
+		: m_ID(ID)
+		, m_Parent(ParentID)
+		, m_Name(Name ? Name : "")
+	{
+	}
+
+	Entity(const Entity&) = default;
+	Entity(Entity&&) = default;
+	Entity& operator=(const Entity&) = default;
+
+	inline EntityID GetID() const { return m_ID; }
+
+	inline bool HasParent() const { return m_Parent.IsValid(); }
+	inline EntityID GetParent() const { return m_Parent; }
+	inline Entity& SetParent(EntityID ParentID) { m_Parent = ParentID; return *this; }
+
+	inline bool HasChild() const { return m_Child.IsValid(); }
+	inline EntityID GetChild() const { return m_Child; }
+	inline Entity& SetChild(EntityID ChildID) { m_Child = ChildID; return *this; }
+
+	inline bool HasSibling() const { return m_Sibling.IsValid(); }
+	inline EntityID GetSibling() const { return m_Sibling; }
+	inline Entity& SetSibling(EntityID SiblingID) { m_Sibling = SiblingID; return *this; }
+
+	inline bool IsVisible() const { return m_Visible; }
+	inline Entity& SetVisible(bool Visible) { m_Visible = Visible; return *this; }
+
+	inline bool IsSelected() const { return m_Selected; }
+	inline Entity& SetSelected(bool Selected) { m_Selected = Selected; return *this; }
+
+	inline const char* GetName() const { return m_Name.c_str(); }
+	inline Entity& SetName(const char* Name) { m_Name = Name; return *this; }
+
+	template<class T>
+	bool HasComponent()
+	{
+		return false;
+	}
+
+	template<class T>
+	T* GetComponent()
+	{
+		return nullptr;
+	}
+
+	template<class T>
+	T* AddComponent()
+	{
+		return nullptr;
+	}
+
+	template<class T>
+	void AddComponent(T* Component)
+	{
+	}
+
+	template<class T>
+	void RemoveComponent(T* Component)
+	{
+	}
+
+	template<class T>
+	void RemoveComponent()
+	{
+	}
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(m_ID),
+			CEREAL_NVP(m_Parent),
+			CEREAL_NVP(m_Child),
+			CEREAL_NVP(m_Sibling),
+			CEREAL_NVP(m_Alive),
+			CEREAL_NVP(m_Visible),
+			CEREAL_NVP(m_Selected),
+			CEREAL_NVP(m_Name),
+			CEREAL_NVP(m_ComponentHashes)
+		);
+	}
+private:
+	EntityID m_ID;
+	EntityID m_Parent;
+	EntityID m_Child;
+	EntityID m_Sibling;
+
+	bool m_Alive = true;
+	bool m_Visible = true;
+	bool m_Selected = false;
+
+	std::string m_Name;
+
+	std::vector<ComponentBase*> m_Components;
+	std::unordered_set<size_t> m_ComponentHashes;
+};
+
+class SceneGraph2
+{
+};
