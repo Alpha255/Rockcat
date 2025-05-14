@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Application/BaseApplication.h"
-#include "MessageRouter.h"
+#include "EventRouter.h"
 #include <Submodules/imgui/imgui.h>
 
-class ImGuiEditorTest final : public BaseApplication, public MessageHandler
+class ImGuiEditorTest final : public BaseApplication
 {
 public:
 	using BaseApplication::BaseApplication;
@@ -12,14 +12,16 @@ public:
 	void Finalize() override final;
 	void Tick(float ElapsedSeconds) override final;
 
-	void OnMouseEvent(const MouseEvent& Mouse) override final;
-	void OnKeyboardEvent(const KeyboardEvent& Keyboard) override final;
+	void OnMouseMoveEvent(const MouseMoveEvent& Event) override final;
+	void OnMouseButtonEvent(const MouseButtonEvent& Event) override final;
+	void OnMouseWheelEvent(const MouseWheelEvent& Event) override final;
+	void OnKeyEvent(const KeyEvent& Event) override final;
 	void OnWindowResized(uint32_t Width, uint32_t Height) override final;
 
-	void RenderFrame() override final;
+	void Initialize() override final;
+	void Render(RHITexture* RenderSurface) override final;
 protected:
-	void InitializeImpl() override final;
-	void RenderGUI(class Canvas&) override final;
+	void RenderGUI() override final;
 private:
 	std::shared_ptr<class ImGuiEditor> m_Editor;
 };

@@ -28,7 +28,7 @@ void Camera::SetLookAt(const Math::Vector3& Eye, const Math::Vector3& LookAt)
 
 void Camera::OnKeyEvent(const KeyEvent& Event)
 {
-	if (Event.State == EKeyState::Down)
+	if (Event.KeyState == EKeyState::Down)
 	{
 		switch (Event.Key)
 		{

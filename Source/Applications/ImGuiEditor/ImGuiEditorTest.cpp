@@ -134,12 +134,11 @@ static ImGuiKey ImGui_ImplWin32_VirtualKeyToImGuiKey(WPARAM wParam)
     }
 }
 
-void ImGuiEditorTest::InitializeImpl()
+void ImGuiEditorTest::Initialize()
 {
-    auto& Window = GetWindow();
-    m_Editor = std::make_shared<ImGuiEditor>(Window.GetWidth(), Window.GetHeight());
+    m_Editor = std::make_shared<ImGuiEditor>(m_Window->GetWidth(), m_Window->GetHeight());
 
-	auto WindowHandle = const_cast<void*>(Window.GetHandle());
+	auto WindowHandle = const_cast<void*>(m_Window->GetHandle());
 	VERIFY(CreateDeviceD3D(reinterpret_cast<::HWND>(WindowHandle)));
 
     // Setup Platform/Renderer backends
@@ -148,8 +147,6 @@ void ImGuiEditorTest::InitializeImpl()
         DXGI_FORMAT_R8G8B8A8_UNORM, g_pd3dSrvDescHeap,
         g_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
         g_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
-
-    MessageRouter::Get().RegisterMessageHandler(this);
 }
 
 void ImGuiEditorTest::Tick(float ElapsedSeconds)
@@ -157,12 +154,12 @@ void ImGuiEditorTest::Tick(float ElapsedSeconds)
     (void)ElapsedSeconds;
 }
 
-void ImGuiEditorTest::RenderGUI(Canvas&)
+void ImGuiEditorTest::RenderGUI()
 {
     m_Editor->Draw();
 }
 
-void ImGuiEditorTest::RenderFrame()
+void ImGuiEditorTest::Render(RHITexture*)
 {
     ImGui_ImplDX12_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -172,8 +169,7 @@ void ImGuiEditorTest::RenderFrame()
 
     //ImGui::ShowDemoWindow(&show_demo_window);
 
-    Canvas GCanvas;
-    RenderGUI(GCanvas);
+    RenderGUI();
 
     ImGui::Render();
 
@@ -218,42 +214,46 @@ void ImGuiEditorTest::RenderFrame()
     frameCtx->FenceValue = fenceValue;
 }
 
-void ImGuiEditorTest::OnMouseEvent(const MouseEvent& Mouse)
+void ImGuiEditorTest::OnMouseMoveEvent(const MouseMoveEvent& Event)
 {
     if (ImGui::GetCurrentContext() != nullptr)
     {
-        ImGuiIO& io = ImGui::GetIO();
-        if (Mouse.IsMoving)
-        {
-            io.AddMousePosEvent(Mouse.Position.x, Mouse.Position.y);
-        }
-        if (Mouse.Button == EMouseButton::LButton)
-        {
-            io.AddMouseButtonEvent(0, Mouse.State == EKeyState::Down);
-        }
-        else if (Mouse.Button == EMouseButton::RButton)
-        {
-            io.AddMouseButtonEvent(1, Mouse.State == EKeyState::Down);
-        }
-        else if (Mouse.Button == EMouseButton::MButton)
-        {
-            io.AddMouseButtonEvent(2, Mouse.State == EKeyState::Down);
-        }
+        ImGui::GetIO().AddMousePosEvent(Event.x, Event.y);
+    }
+}
 
-        if (Mouse.WheelDelta != 0)
+void ImGuiEditorTest::OnMouseButtonEvent(const MouseButtonEvent& Event)
+{
+    if (ImGui::GetCurrentContext() != nullptr)
+    {
+        if (Event.Button == EMouseButton::LButton)
         {
-            io.AddMouseWheelEvent(0.0f, (float)Mouse.WheelDelta / WHEEL_DELTA);
+            ImGui::GetIO().AddMouseButtonEvent(0, Event.KeyState == EKeyState::Down);
+        }
+        else if (Event.Button == EMouseButton::RButton)
+        {
+            ImGui::GetIO().AddMouseButtonEvent(1, Event.KeyState == EKeyState::Down);
+        }
+        else if (Event.Button == EMouseButton::MButton)
+        {
+            ImGui::GetIO().AddMouseButtonEvent(2, Event.KeyState == EKeyState::Down);
         }
     }
 }
 
-void ImGuiEditorTest::OnKeyboardEvent(const KeyboardEvent& Keyboard)
+void ImGuiEditorTest::OnMouseWheelEvent(const MouseWheelEvent& Event)
 {
     if (ImGui::GetCurrentContext() != nullptr)
     {
-        ImGuiIO& io = ImGui::GetIO();
+        ImGui::GetIO().AddMouseWheelEvent(0.0f, Event.Delta);
+    }
+}
 
-        io.AddKeyEvent(ImGui_ImplWin32_VirtualKeyToImGuiKey((WPARAM)Keyboard.Key), Keyboard.State == EKeyState::Down);
+void ImGuiEditorTest::OnKeyEvent(const KeyEvent& Event)
+{
+    if (ImGui::GetCurrentContext() != nullptr)
+    {
+        ImGui::GetIO().AddKeyEvent(ImGui_ImplWin32_VirtualKeyToImGuiKey((WPARAM)Event.Key), Event.KeyState == EKeyState::Down);
     }
 }
 

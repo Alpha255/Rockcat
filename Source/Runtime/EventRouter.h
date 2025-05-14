@@ -115,7 +115,7 @@ struct MouseWheelEvent
 struct KeyEvent
 {
 	EKeyboardKey Key = EKeyboardKey::None;
-	EKeyState State = EKeyState::Up;
+	EKeyState KeyState = EKeyState::Up;
 	KeyModifiers Modifiers;
 };
 
