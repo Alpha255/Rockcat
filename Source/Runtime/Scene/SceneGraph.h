@@ -278,6 +278,8 @@ public:
 		);
 	}
 private:
+	inline const std::unordered_set<size_t>& GetComponentHashes() const { return m_ComponentHashes; }
+
 	EntityID m_ID;
 	EntityID m_Parent;
 	EntityID m_Child;
@@ -295,4 +297,16 @@ private:
 
 class SceneGraph2
 {
+public:
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(m_Root),
+			CEREAL_NVP(m_Entities)
+		);
+	}
+private:
+	EntityID m_Root;
+	std::vector<Entity> m_Entities;
 };

@@ -26,7 +26,6 @@ public:
 	template<class Type = T>
 	void Reload()
 	{
-		SetStatus(Asset::EStatus::Loading);
 		PreLoad();
 
 		std::ifstream FileStream(GetPath());
@@ -45,7 +44,6 @@ public:
 		FileStream.close();
 
 		PostLoad();
-		SetStatus(Asset::EStatus::Ready);
 	}
 
 	template<class Type = T>
@@ -92,7 +90,14 @@ public:
 		);
 	}
 protected:
-	virtual void PreLoad() {}
-	virtual void PostLoad() {}
+	virtual void PreLoad()
+	{
+		SetStatus(EStatus::Loading);
+	}
+
+	virtual void PostLoad()
+	{
+		SetStatus(EStatus::Ready);
+	}
 };
 

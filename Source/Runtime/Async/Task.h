@@ -80,6 +80,12 @@ public:
 	{
 	}
 
+	ITask(std::string&& Name, EPriority Priority = EPriority::Normal)
+		: m_Priority(Priority)
+		, m_Name(std::move(Name))
+	{
+	}
+
 	ITask(const ITask& Other)
 		: m_Executing(Other.m_Executing)
 		, m_Priority(Other.m_Priority)

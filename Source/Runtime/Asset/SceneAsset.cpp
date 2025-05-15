@@ -60,13 +60,13 @@ void SceneAsset::PostLoad()
 {
 	std::vector<const AssimpSceneAsset*> AssimpScenes;
 
-	auto AssetLoadCallbacks = std::make_optional(Asset::Callbacks{});
+	auto Callbacks = std::make_optional(Asset::AssetLoadCallbacks{});
 
-	AssetLoadCallbacks.value().PreLoadCallback = [this, &AssimpScenes](Asset& InAsset) {
+	Callbacks.value().PreLoadCallback = [this, &AssimpScenes](Asset& InAsset) {
 		AssimpScenes.push_back(Cast<AssimpSceneAsset>(&InAsset));
 	};
 
-	AssetLoadCallbacks.value().ReadyCallback = [this, &AssimpScenes](Asset&) {
+	Callbacks.value().ReadyCallback = [this, &AssimpScenes](Asset&) {
 		for (auto AssimpScene : AssimpScenes)
 		{
 			if (!AssimpScene->IsReady())
@@ -98,7 +98,7 @@ void SceneAsset::PostLoad()
 	for (const auto& Path : m_AssimpScenes)
 	{
 		auto SceneAssetPath = Paths::GltfSampleModelPath() / Path;
-		AssetDatabase::Get().GetOrReimportAsset<AssimpSceneAsset>(SceneAssetPath, AssetLoadCallbacks);
+		AssetDatabase::Get().GetOrReimportAsset<AssimpSceneAsset>(SceneAssetPath, Callbacks);
 	}
 
 	if (m_Data->Cameras.empty())

@@ -17,13 +17,13 @@ public:
 
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<TextureAsset>(AssetPath); }
 
-	bool Reimport(Asset& InAsset, const AssetType& InAssetType) override final
+	bool Reimport(Asset& InAsset, const AssetType& InType) override final
 	{
-		auto& Image = Cast<TextureAsset>(InAsset);
-		auto& RawData = Image.GetRawData(InAssetType.ContentsType);
+		auto& DDSImage = Cast<TextureAsset>(InAsset);
 
-		auto const DataSize = static_cast<int32_t>(RawData.Size);
-		auto Data = reinterpret_cast<const uint8_t*>(RawData.Data.get());
+		auto AssetData = DDSImage.LoadData(InType.ContentsType);
+		auto const DataSize = static_cast<int32_t>(AssetData->Size);
+		auto Data = reinterpret_cast<const uint8_t*>(AssetData->Data.get());
 
 		assert(DataSize >= (sizeof(uint32_t) + sizeof(DirectX::DDS_HEADER)));
 		assert(*reinterpret_cast<const uint32_t*>(Data) == DirectX::DDS_MAGIC);
@@ -146,7 +146,7 @@ public:
 		}
 
 		CreateInfo.SetInitialData(DataBlock(BitSize, BitData));
-		//Image.CreateRHI(RenderService::Get().GetBackend().GetDevice(), CreateInfo);
+		//DDSImage.CreateRHI(RenderService::Get().GetBackend().GetDevice(), CreateInfo);
 
 		return true;
 	}

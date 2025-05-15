@@ -30,11 +30,9 @@ public:
 		LOG_INFO("Create Assimp scene importer, assimp version: {}.{}.{}", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionPatch());
 	}
 
-	void LoadAssetData(std::shared_ptr<Asset>&, AssetType::EContentsType) override final {} /// Just load from file to avoid base path of texture broken
-
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<AssimpSceneAsset>(AssetPath); }
 
-	bool Reimport(Asset& InAsset, const AssetType& /*InAssetType*/) override final
+	bool Reimport(Asset& InAsset, const AssetType&) override final
 	{
 		auto& AssimpScene = Cast<AssimpSceneAsset>(InAsset);
 
@@ -75,7 +73,7 @@ public:
 			}
 		}
 
-		LOG_CAT_ERROR(LogAssimpImporter, "Failed to load assimp scene: {}, error message: {}", AssimpScene.GetPath().generic_string(), AssimpImporter.GetErrorString());
+		LOG_CAT_ERROR(LogAssimpImporter, "Failed to load assimp scene: {}: \"{}\"", AssimpScene.GetName().generic_string(), AssimpImporter.GetErrorString());
 		return false;
 	}
 
@@ -414,13 +412,12 @@ private:
 
 							It = Textures.emplace(TexturePath, Texture).first;
 
-							auto AssetLoadCallbacks = std::make_optional(Asset::Callbacks{});
+							auto AssetLoadCallbacks = std::make_optional<Asset::AssetLoadCallbacks>();
 							AssetLoadCallbacks.value().PreLoadCallback = [this, &TextureType](Asset& InAsset) {
 								Cast<TextureAsset>(InAsset).SetLinear(TextureType != aiTextureType_DIFFUSE && TextureType != aiTextureType_BASE_COLOR);
 								};
 
-							auto TextureAsset = Cast<Asset>(Texture);
-							AssetDatabase::Get().GetOrReimportAsset(TextureAsset, AssetLoadCallbacks);
+							AssetDatabase::Get().GetOrReimportAsset<TextureAsset>(Texture->GetPath(), AssetLoadCallbacks);
 						}
 						else
 						{

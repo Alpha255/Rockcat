@@ -134,7 +134,7 @@ void BaseApplication::Run()
 			{
 				Render(m_RenderSwapchain ? m_RenderSwapchain->GetBackBuffer() : nullptr);
 				RenderGUI();
-				Present();
+				//Present();
 			}
 
 			TaskFlowService::Get().FrameSync(true);

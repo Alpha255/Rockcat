@@ -169,12 +169,12 @@ void ShaderLibrary::QueueCompile(const Shader& InShader, size_t BaseHash, size_t
 		if (RegisterCompileTask(TimestampHash))
 		{
 			auto& MetaData = InShader.GetMetaData();
-			auto& RawData = MetaData.GetRawData(AssetType::EContentsType::Text);
+			auto RawData = MetaData.LoadData(AssetType::EContentsType::Text);
 
 			const time_t Timestamp = MetaData.GetLastWriteTime();
 			const auto FileName = InShader.GetName().string();
-			const auto SourceCode = reinterpret_cast<char*>(RawData.Data.get());
-			const auto Size = RawData.Size;
+			const auto SourceCode = reinterpret_cast<char*>(RawData->Data.get());
+			const auto Size = RawData->Size;
 
 			auto Blob = m_Compiler->Compile(FileName.c_str(), SourceCode, Size, InShader.GetEntryPoint(), InShader.GetStage(), InShader);
 			auto Binary = std::make_shared<ShaderBinary>(FileName, m_Backend, InShader.GetStage(), Timestamp, BaseHash, std::move(Blob));

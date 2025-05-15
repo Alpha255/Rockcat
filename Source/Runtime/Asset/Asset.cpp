@@ -1,19 +1,16 @@
 #include "Asset/Asset.h"
 #include "Core/IO/FileIOStream.h"
 
-std::optional<Asset::Callbacks> Asset::s_DefaultNullCallbacks(std::nullopt);
+std::optional<Asset::AssetLoadCallbacks> Asset::s_DefaultLoadCallbacks(std::nullopt);
 
-const DataBlock& Asset::GetRawData(AssetType::EContentsType ContentsType) const
+std::shared_ptr<DataBlock> Asset::LoadData(AssetType::EContentsType ContentsType) const
 {
-	if (!m_RawData || !m_RawData->IsValid())
-	{
-		m_RawData = std::make_unique<DataBlock>(std::filesystem::file_size(m_Path));
+	auto Block = std::make_shared<DataBlock>(std::filesystem::file_size(m_Path));
 
-		StdFileIOStream FileStream(m_Path, ContentsType == AssetType::EContentsType::Binary ?
-			IO::EOpenMode::Read |
-			IO::EOpenMode::Binary : IO::EOpenMode::Read);
-		VERIFY(FileStream.Read(m_RawData->Size, reinterpret_cast<char*>(m_RawData->Data.get())) <= m_RawData->Size);
-	}
+	StdFileIOStream FileStream(m_Path, ContentsType == AssetType::EContentsType::Binary ?
+		IO::EOpenMode::Read |
+		IO::EOpenMode::Binary : IO::EOpenMode::Read);
+	VERIFY(FileStream.Read(Block->Size, reinterpret_cast<char*>(Block->Data.get())) <= Block->Size);
 
-	return *m_RawData;
+	return Block;
 }

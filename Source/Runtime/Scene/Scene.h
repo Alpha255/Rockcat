@@ -80,6 +80,6 @@ protected:
 	void PostLoad() override final;
 private:
 	std::vector<std::string> m_AssimpScenes;
-	std::shared_ptr<SceneGraph> m_Graph;
+	std::shared_ptr<SceneGraph2> m_Graph;
 };
 
