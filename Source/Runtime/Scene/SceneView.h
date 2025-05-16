@@ -14,10 +14,10 @@ enum class EViewMode
 	VisualizeShadowMap,
 };
 
-class IView
+class ISceneView
 {
 public:
-	virtual ~IView() = default;
+	virtual ~ISceneView() = default;
 	
 	virtual bool IsStereoView() const { return false; }
 	virtual bool IsCubemapView() const { return false; }
@@ -51,12 +51,12 @@ protected:
 	std::vector<RHIScissorRect> m_ScissorRects;
 };
 
-class PlanarView : public IView
+class PlanarSceneView : public ISceneView
 {
 public:
-	using IView::IView;
+	using ISceneView::ISceneView;
 
-	PlanarView()
+	PlanarSceneView()
 	{
 		m_Viewports.resize(1u);
 		m_ScissorRects.resize(1u);
@@ -66,10 +66,10 @@ public:
 	void SetScissorRect(const RHIScissorRect& ScissorRect) override final;
 };
 
-class StereoView : public IView
+class StereoSceneView : public ISceneView
 {
 public:
-	using IView::IView;
+	using ISceneView::ISceneView;
 
 	enum class EView
 	{
@@ -77,7 +77,7 @@ public:
 		Right
 	};
 
-	StereoView()
+	StereoSceneView()
 	{
 		m_Viewports.resize(2u);
 		m_ScissorRects.resize(2u);
@@ -89,10 +89,10 @@ public:
 	bool IsStereoView() const override final { return true; }
 };
 
-class CubemapView : public IView
+class CubemapSceneView : public ISceneView
 {
 public:
-	using IView::IView;
+	using ISceneView::ISceneView;
 
 	enum class EView
 	{
@@ -104,7 +104,7 @@ public:
 		Back
 	};
 
-	CubemapView()
+	CubemapSceneView()
 	{
 		m_Viewports.resize(6u);
 		m_ScissorRects.resize(6u);

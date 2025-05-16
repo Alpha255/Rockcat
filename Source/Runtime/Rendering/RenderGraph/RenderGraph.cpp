@@ -5,7 +5,7 @@
 #include "Scene/SceneView.h"
 #include "RHI/RHIBackend.h"
 
-std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& InRenderSettings, RHIDevice& Device, const IView& InView)
+std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& InRenderSettings, RHIDevice& Device, const ISceneView& InView)
 {
 	std::shared_ptr<RenderGraph> Graph;
 
@@ -26,7 +26,7 @@ std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& InRenderS
 	return Graph;
 }
 
-RenderGraph::RenderGraph(const RenderSettings& InRenderSettings, RHIDevice& Device, const IView& InView)
+RenderGraph::RenderGraph(const RenderSettings& InRenderSettings, RHIDevice& Device, const ISceneView& InView)
 	: m_Device(Device)
 	, m_SceneView(InView)
 	, m_RenderSettings(InRenderSettings)

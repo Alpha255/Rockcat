@@ -119,7 +119,7 @@ void RenderScene::WaitCommandsBuilding()
 	}
 }
 
-void RenderScene::BuildMeshDrawCommands(const IView& SceneView)
+void RenderScene::BuildMeshDrawCommands(const ISceneView& SceneView)
 {
 	UpdateScenePrimitives();
 	RemoveInvalidCommands();

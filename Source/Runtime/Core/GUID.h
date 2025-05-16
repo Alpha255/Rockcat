@@ -2,8 +2,9 @@
 
 #include "Core/StringUtils.h"
 
-struct Guid
+class Guid
 {
+public:
 	enum class EFormat
 	{
 		Digits,
@@ -12,60 +13,45 @@ struct Guid
 
 	static const char Hyphen = '-';
 
-	uint32_t A = 0u;
-	uint32_t B = 0u;
-	uint32_t C = 0u;
-	uint32_t D = 0u;
+	friend bool operator==(const Guid& Left, const Guid& Right) { return ((Left.m_A ^ Right.m_A) | (Left.m_B ^ Right.m_B) | (Left.m_C ^ Right.m_B) | (Left.m_D ^ Right.m_D)) == 0; }
+	friend bool operator!=(const Guid& Left, const Guid& Right) { return ((Left.m_A ^ Right.m_A) | (Left.m_B ^ Right.m_B) | (Left.m_C ^ Right.m_B) | (Left.m_D ^ Right.m_D)) != 0; }
 
-	friend bool operator==(const Guid& Left, const Guid& Right)
-	{
-		return ((Left.A ^ Right.A) | (Left.B ^ Right.B) | (Left.C ^ Right.B) | (Left.D ^ Right.D)) == 0;
-	}
-
-	friend bool operator!=(const Guid& Left, const Guid& Right)
-	{
-		return ((Left.A ^ Right.A) | (Left.B ^ Right.B) | (Left.C ^ Right.B) | (Left.D ^ Right.D)) != 0;
-	}
-
-	bool IsValid() const
-	{
-		return (A | B | C | D) != 0;
-	}
+	inline bool IsValid() const { return (m_A | m_B | m_C | m_D) != 0; }
 
 	std::string ToString(EFormat Format = EFormat::Digits) const
 	{
 		if (Format == EFormat::DigitsWithHyphens)
 		{
-			return StringUtils::Format("%08X-%04X-%04X-%04X-%04X%08X", A, B >> 16, B & 0xFFFF, C >> 16, C & 0xFFFF, D);
+			return StringUtils::Format("%08X-%04X-%04X-%04X-%04X%08X", m_A, m_B >> 16, m_B & 0xFFFF, m_C >> 16, m_C & 0xFFFF, m_D);
 		}
 
-		return StringUtils::Format("%08X%08X%08X%08X", A, B, C, D);
+		return StringUtils::Format("%08X%08X%08X%08X", m_A, m_B, m_C, m_D);
 	}
 
-	static Guid FromString(const std::string& GuidStr)
+	static Guid FromString(std::string_view Str)
 	{
 		Guid ret;
 
 		std::string Normalized;
-		if (GuidStr.length() == 32u)
+		if (Str.length() == 32u)
 		{
-			Normalized = GuidStr;
+			Normalized = Str.data();
 		}
-		else if (GuidStr.length() == 36u)
+		else if (Str.length() == 36u)
 		{
-			if (GuidStr[8] != Hyphen ||
-				GuidStr[13] != Hyphen ||
-				GuidStr[18] != Hyphen ||
-				GuidStr[23] != Hyphen)
+			if (Str[8] != Hyphen ||
+				Str[13] != Hyphen ||
+				Str[18] != Hyphen ||
+				Str[23] != Hyphen)
 			{
 				return ret;
 			}
 
-			Normalized += GuidStr.substr(0u, 8u);
-			Normalized += GuidStr.substr(9u, 4u);
-			Normalized += GuidStr.substr(14u, 4u);
-			Normalized += GuidStr.substr(19u, 4u);
-			Normalized += GuidStr.substr(24u, 12u);
+			Normalized += Str.substr(0u, 8u);
+			Normalized += Str.substr(9u, 4u);
+			Normalized += Str.substr(14u, 4u);
+			Normalized += Str.substr(19u, 4u);
+			Normalized += Str.substr(24u, 12u);
 		}
 
 		for (uint32_t i = 0u; i < Normalized.length(); ++i)
@@ -89,23 +75,15 @@ struct Guid
 
 	Guid() = default;
 
-	Guid(uint32_t PA, uint32_t PB, uint32_t PC, uint32_t PD)
-		: A(PA)
-		, B(PB)
-		, C(PC)
-		, D(PD)
+	Guid(uint32_t A, uint32_t B, uint32_t C, uint32_t D)
+		: m_A(A)
+		, m_B(B)
+		, m_C(C)
+		, m_D(D)
 	{
 	}
 
-	Guid(const char* GuidStr)
-	{
-		*this = FromString(GuidStr);
-	}
-
-	Guid(const std::string& GuidStr)
-	{
-		*this = FromString(GuidStr);
-	}
+	Guid(std::string_view Str) { *this = FromString(Str); }
 
 	template<class Archive>
 	void save(Archive& Ar) const
@@ -126,5 +104,10 @@ struct Guid
 
 		*this = FromString(Value);
 	}
+private:
+	uint32_t m_A = 0u;
+	uint32_t m_B = 0u;
+	uint32_t m_C = 0u;
+	uint32_t m_D = 0u;
 };
 

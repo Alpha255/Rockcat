@@ -12,14 +12,16 @@ class StbImageImporter : public IAssetImporter
 {
 public:
 	StbImageImporter()
-		: IAssetImporter({
-				AssetType("Joint Photographic Experts Group", ".jpeg"),
-				AssetType("Joint Photographic Experts Group", ".jpg"),
-				AssetType("Portable Network Graphics", ".png"), 
-				AssetType("Bitmap", ".bmp"), 
-				AssetType("Targa", ".tga"), 
-				AssetType("Photoshop Document", ".psd"),
-				AssetType("High-Dynamic Range", ".hdr")})
+		: IAssetImporter(
+			{
+				AssetType{ "Joint Photographic Experts Group", ".jpeg" },
+				AssetType{ "Joint Photographic Experts Group", ".jpg" },
+				AssetType{ "Portable Network Graphics", ".png" },
+				AssetType{ "Bitmap", ".bmp" },
+				AssetType{ "Targa", ".tga" },
+				AssetType{ "Photoshop Document", ".psd" },
+				AssetType{ "High-Dynamic Range", ".hdr" }
+			})
 	{
 		LOG_INFO("Create STB image importer, stb_image version: 2.3");
 	}

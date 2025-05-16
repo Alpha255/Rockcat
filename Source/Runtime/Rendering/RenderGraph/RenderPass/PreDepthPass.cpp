@@ -7,7 +7,7 @@
 
 struct PreDepthMeshDrawCommandBuilder : public MeshDrawCommandBuilder
 {
-	std::shared_ptr<MeshDrawCommand> Build(const StaticMesh& Mesh, const IView& SceneView) override final
+	std::shared_ptr<MeshDrawCommand> Build(const StaticMesh& Mesh, const ISceneView& SceneView) override final
 	{
 		auto Command = std::make_shared<MeshDrawCommand>(Mesh);
 		auto VertexShader = std::make_shared<GenericVS>();

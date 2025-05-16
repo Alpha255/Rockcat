@@ -1,25 +1,8 @@
 #pragma once
 
-#include "Core/Singleton.h"
+#include "Scene/Components/ComponentBase.h"
 
-using ComponentID = uint64_t;
-
-#define COMPONENT_HASH(ComponentType) FnvHash(#ComponentType)
-
-#define COMPONENT_TYPE_DECLARE(ComponentType) \
-	enum class EComponentType : ComponentID { \
- 		ID = COMPONENT_HASH(ComponentType) \
-	}; \
-	static inline constexpr ComponentID GetID() { return static_cast<ComponentID>(EComponentType::ID); }
-
-struct ComponentBase
-{
-private:
-	friend class ComponentPool;
-	uint32_t Index = ~0u;
-};
-
-class ComponentPool : public Singleton<ComponentPool>
+class ComponentPool
 {
 public:
 	template<class T, class... Args>
@@ -56,26 +39,8 @@ private:
 	std::list<uint32_t> m_FreedComponents;
 };
 
-class TransformComponent : public ComponentBase
-{
-public:
-	COMPONENT_TYPE_DECLARE(TransformComponent)
-};
-
-class StaticMeshComponent : public ComponentBase
-{
-public:
-	COMPONENT_TYPE_DECLARE(StaticMeshComponent)
-};
-
 class SkeletalMeshComponent : public ComponentBase
 {
 public:
-	COMPONENT_TYPE_DECLARE(SkeletalMeshComponent)
-};
-
-class CameraComponent : public ComponentBase
-{
-public:
-	COMPONENT_TYPE_DECLARE(CameraComponent)
+	DECLARE_COMPONENT_ID(SkeletalMeshComponent)
 };

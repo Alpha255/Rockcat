@@ -146,7 +146,7 @@ public:
 	RHIBuffer* GetUniformBuffer(class RHIDevice& Device);
 
 	virtual void SetupTransform(const Math::Transform&) {}
-	virtual void SetupViewParams(const class IView&) {}
+	virtual void SetupViewParams(const class ISceneView&) {}
 	virtual void SetupMaterialProperty(const struct MaterialProperty&) {}
 	
 	virtual const ShaderMetaData& GetMetaData() const = 0;

@@ -1,192 +1,7 @@
 #pragma once
 
 #include "Core/ObjectID.h"
-#include "Scene/Components/Components.h"
-
-struct SceneGraph
-{
-	using NodeID = ObjectID<class Node>;
-
-	class Node
-	{
-	public:
-		enum class ENodeMasks
-		{
-			None,
-			Primitive = 1 << 0,
-			Light = 1 << 1,
-			Camera = 1 << 2
-		};
-
-		Node() = default;
-
-		Node(const char* Name, NodeID ID, NodeID ParentID = NodeID(), ENodeMasks Masks = ENodeMasks::None)
-			: m_ID(ID)
-			, m_Parent(ParentID)
-			, m_Masks(Masks)
-			, m_Name(Name ? Name : "")
-		{
-		}
-
-		Node(const Node&) = default;
-		Node(Node&&) = default;
-		Node& operator=(const Node&) = default;
-
-		inline NodeID GetID() const { return m_ID; }
-
-		inline bool HasParent() const { return m_Parent.IsValid(); }
-		inline NodeID GetParent() const { return m_Parent; }
-		inline Node& SetParent(NodeID ParentID) { m_Parent = ParentID; return *this; }
-
-		inline bool HasChild() const { return m_Child.IsValid(); }
-		inline NodeID GetChild() const { return m_Child; }
-		inline Node& SetChild(NodeID ChildID) { m_Child = ChildID; return *this; }
-
-		inline bool HasSibling() const { return m_Sibling.IsValid(); }
-		inline NodeID GetSibling() const { return m_Sibling; }
-		inline Node& SetSibling(NodeID SiblingID) { m_Sibling = SiblingID; return *this; }
-
-		inline bool IsVisible() const { return m_Visible; }
-		inline Node& SetVisible(bool Visible) { m_Visible = Visible; return *this; }
-
-		inline bool IsSelected() const { return m_Selected; }
-		inline Node& SetSelected(bool Selected) { m_Selected = Selected; return *this; }
-
-		inline const char* GetName() const { return m_Name.c_str(); }
-		inline Node& SetName(const char* Name) { m_Name = Name; return *this; }
-
-		inline ENodeMasks GetMasks() const { return m_Masks; }
-
-		inline uint32_t GetDataIndex() const { return m_DataIndex; }
-
-		bool IsPrimitive() const;
-		bool IsLight() const;
-		bool IsCamera() const;
-
-		template<class Archive>
-		void serialize(Archive& Ar)
-		{
-			Ar(
-				CEREAL_NVP(m_ID),
-				CEREAL_NVP(m_Parent),
-				CEREAL_NVP(m_Child),
-				CEREAL_NVP(m_Sibling),
-				CEREAL_NVP(m_Masks),
-				CEREAL_NVP(m_Visible),
-				CEREAL_NVP(m_Selected),
-				CEREAL_NVP(m_Name)
-			);
-		}
-	protected:
-		friend class AssimpSceneImporter;
-		friend struct SceneGraph;
-		friend class SceneBuilder;
-
-		inline void SetDataIndex(uint32_t Index) { m_DataIndex = Index; }
-		inline void SetID(NodeID ID) { m_ID = ID; }
-
-		inline bool IsAlive() const { return m_Alive; }
-		inline Node& SetAlive(bool Alive) { m_Alive = Alive; return *this; }
-	private:
-		NodeID m_ID;
-		NodeID m_Parent;
-		NodeID m_Child;
-		NodeID m_Sibling;
-
-		ENodeMasks m_Masks = ENodeMasks::None;
-		uint32_t m_DataIndex = 0u;
-
-		bool m_Alive = true;
-		bool m_Visible = true;
-		bool m_Selected = false;
-
-		std::string m_Name;
-
-		//std::vector<ComponentBase*> m_Components;
-	};
-	using NodeList = std::vector<Node>;
-
-	uint32_t NumPrimitives = 0u;
-	NodeID Root;
-	NodeList Nodes;
-
-	NodeID AddSibling(NodeID Sibling, const char* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
-	{
-		assert(Sibling.IsValid() && Sibling.GetIndex() < Nodes.size());
-		NodeID::IndexType SiblingIndex = Sibling.GetIndex();
-		while (Nodes[SiblingIndex].HasSibling())
-		{
-			SiblingIndex = Nodes[SiblingIndex].GetSibling().GetIndex();
-		}
-
-		NodeID SiblingNode = AddNode(Nodes[SiblingIndex].GetParent(), Name, Masks);
-		Nodes[Sibling.GetIndex()].SetSibling(SiblingNode);
-		return SiblingNode;
-	}
-
-	NodeID AddChild(NodeID Parent, const char* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
-	{
-		assert(Parent.IsValid() && Parent.GetIndex() < Nodes.size());
-		if (Nodes[Parent.GetIndex()].HasChild())
-		{
-			return AddSibling(Nodes[Parent.GetIndex()].GetChild(), Name, Masks);
-		}
-		else
-		{
-			auto NextID = AddNode(Parent, Name, Masks);
-			Nodes[Parent.GetIndex()].SetChild(NextID);
-			return NextID;
-		}
-	}
-
-	NodeID AddNode(NodeID Parent, const char* Name, Node::ENodeMasks Masks = Node::ENodeMasks::None)
-	{
-		NodeID ID = NodeID(static_cast<NodeID::IndexType>(Nodes.size()));
-		if (Nodes.emplace_back(Node(Name, ID, Parent, Masks)).IsPrimitive())
-		{
-			++NumPrimitives;
-		}
-		return ID;
-	}
-
-	Node RemoveNode(NodeID ID);
-	void PuregeDeadNodes();
-
-	const Node* GetNodeByName(const char* NodeName) const
-	{
-		for (auto& Node : Nodes)
-		{
-			if (strcmp(Node.GetName(), NodeName) == 0)
-			{
-				return &Node;
-			}
-		}
-		return nullptr;
-	}
-
-	const Node* GetNode(const NodeID& ID) const
-	{ 
-		assert(ID.IsValid() && ID.GetIndex() < Nodes.size());
-
-		if (Nodes[ID.GetIndex()].IsAlive())
-		{
-			return &Nodes[ID.GetIndex()];
-		}
-
-		return nullptr; 
-	}
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(Root),
-			CEREAL_NVP(Nodes)
-		);
-	}
-};
-
-ENUM_FLAG_OPERATORS(SceneGraph::Node::ENodeMasks)
+#include "Scene/Components/ComponentBase.h"
 
 using EntityID = ObjectID<class Entity>;
 
@@ -229,15 +44,33 @@ public:
 	inline const char* GetName() const { return m_Name.c_str(); }
 	inline Entity& SetName(const char* Name) { m_Name = Name; return *this; }
 
+	inline const std::unordered_set<ComponentBase*>& GetAllComponents() const { return m_Components; }
+
 	template<class T>
 	bool HasComponent()
 	{
+		for (auto Comp : m_Components)
+		{
+			if (Comp && Comp->GetID() == T::GetID())
+			{
+				return true;
+			}
+		}
+
 		return false;
 	}
 
 	template<class T>
 	T* GetComponent()
 	{
+		for (auto Comp : m_Components)
+		{
+			if (Comp && Comp->GetID() == T::GetID())
+			{
+				return static_cast<T*>(Comp);
+			}
+		}
+
 		return nullptr;
 	}
 
@@ -247,19 +80,34 @@ public:
 		return nullptr;
 	}
 
-	template<class T>
-	void AddComponent(T* Component)
+	void AddComponent(ComponentBase* Component)
 	{
+		assert(Component);
+		m_Components.insert(Component);
 	}
 
-	template<class T>
-	void RemoveComponent(T* Component)
+	void RemoveComponent(ComponentBase* Component)
 	{
+		m_Components.erase(Component);
 	}
 
 	template<class T>
 	void RemoveComponent()
 	{
+		for (auto It = m_Components.begin(); It != m_Components.end(); ++It)
+		{
+			if ((*It)->GetID() == T::GetID())
+			{
+				m_Components.erase(It);
+				break;
+			}
+		}
+	}
+
+	void RemoveAllComponents()
+	{
+		m_Components.clear();
+		m_ComponentHashes.clear();
 	}
 
 	template<class Archive>
@@ -270,13 +118,19 @@ public:
 			CEREAL_NVP(m_Parent),
 			CEREAL_NVP(m_Child),
 			CEREAL_NVP(m_Sibling),
-			CEREAL_NVP(m_Alive),
 			CEREAL_NVP(m_Visible),
 			CEREAL_NVP(m_Selected),
 			CEREAL_NVP(m_Name),
-			CEREAL_NVP(m_ComponentHashes)
+			CEREAL_NVP(m_ComponentHashes),
 		);
 	}
+protected:
+	friend class SceneGraph;
+
+	inline void SetID(EntityID ID) { m_ID = ID; }
+	
+	inline bool IsAlive() const { return m_Alive; }
+	inline Entity& SetAlive(bool Alive) { m_Alive = Alive; return *this; }
 private:
 	inline const std::unordered_set<size_t>& GetComponentHashes() const { return m_ComponentHashes; }
 
@@ -291,22 +145,102 @@ private:
 
 	std::string m_Name;
 
-	std::vector<ComponentBase*> m_Components;
+	std::unordered_set<ComponentBase*> m_Components;
 	std::unordered_set<size_t> m_ComponentHashes;
 };
 
-class SceneGraph2
+class SceneGraph
 {
 public:
+	using EntityList = std::vector<Entity>;
+
+	EntityID AddSibling(EntityID Sibling, const char* Name)
+	{
+		assert(Sibling.IsValid() && Sibling.GetIndex() < m_Entities.size());
+		EntityID::IndexType SiblingIndex = Sibling.GetIndex();
+		while (m_Entities[SiblingIndex].HasSibling())
+		{
+			SiblingIndex = m_Entities[SiblingIndex].GetSibling().GetIndex();
+		}
+
+		EntityID SiblingNode = AddEntity(m_Entities[SiblingIndex].GetParent(), Name);
+		m_Entities[Sibling.GetIndex()].SetSibling(SiblingNode);
+		return SiblingNode;
+	}
+
+	EntityID AddChild(EntityID Parent, const char* Name)
+	{
+		assert(Parent.IsValid() && Parent.GetIndex() < m_Entities.size());
+		if (m_Entities[Parent.GetIndex()].HasChild())
+		{
+			return AddSibling(m_Entities[Parent.GetIndex()].GetChild(), Name);
+		}
+		else
+		{
+			auto NextID = AddEntity(Parent, Name);
+			m_Entities[Parent.GetIndex()].SetChild(NextID);
+			return NextID;
+		}
+	}
+
+	EntityID AddEntity(EntityID Parent, const char* Name)
+	{
+		EntityID ID = EntityID(static_cast<EntityID::IndexType>(m_Entities.size()));
+		m_Entities.emplace_back(Entity(Name, ID, Parent));
+		return ID;
+	}
+
+	void RemoveEntity(EntityID ID)
+	{
+		assert(ID.IsValid() && ID.GetIndex() < m_Entities.size());
+		m_Entities[ID.GetIndex()].RemoveAllComponents();
+		m_Entities[ID.GetIndex()].SetAlive(false);
+	}
+
+	void RemoveDyingEntities()
+	{
+		std::vector<Entity> AliveEntities;
+		AliveEntities.reserve(m_Entities.size());
+		for (auto It = m_Entities.begin(); It != m_Entities.end(); ++It)
+		{
+			if (It->IsAlive())
+			{
+				AliveEntities.emplace_back(std::move(*It));
+			}
+		}
+		std::swap(m_Entities, AliveEntities);
+	}
+
+	const Entity* FindEntityByName(const char* Name) const
+	{
+		for (auto& Entity : m_Entities)
+		{
+			if (strcmp(Entity.GetName(), Name) == 0)
+			{
+				return &Entity;
+			}
+		}
+		return nullptr;
+	}
+
+	const Entity* GetEntity(const EntityID& ID) const
+	{ 
+		assert(ID.IsValid() && ID.GetIndex() < m_Entities.size());
+		return m_Entities[ID.GetIndex()].IsAlive() ? &m_Entities[ID.GetIndex()] : nullptr;
+	}
+
+	inline EntityID GetRoot() const { return m_Root; }
+	inline const EntityList& GetAllEntities() const { return m_Entities; }
+
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_NVP(m_Root),
+			CEREAL_NVP(Root),
 			CEREAL_NVP(m_Entities)
 		);
 	}
 private:
 	EntityID m_Root;
-	std::vector<Entity> m_Entities;
+	EntityList m_Entities;
 };

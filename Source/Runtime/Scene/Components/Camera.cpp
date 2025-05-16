@@ -1,4 +1,4 @@
-#include "View/Camera.h"
+#include "Scene/Components/Camera.h"
 #include "System.h"
 
 void Camera::SetLookAt(const Math::Vector3& Eye, const Math::Vector3& LookAt)

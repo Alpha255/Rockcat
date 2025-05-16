@@ -16,16 +16,18 @@ class AssimpSceneImporter : public IAssetImporter
 {
 public:
 	AssimpSceneImporter()
-		: IAssetImporter({
-			AssetType("Autodesk 3dsMax", ".3ds"), 
-			AssetType("Blender 3D", ".blend"), 
-			AssetType("OpenCOLLADA", ".dae", AssetType::EContentsType::Text),
-			AssetType("Autodesk FBX", ".fbx"), 
-			AssetType("Graphics Language Transmission Format", ".gltf", AssetType::EContentsType::Text),
-			AssetType("Wavefront", ".obj", AssetType::EContentsType::Text),
-			AssetType("Polygon File Format", ".ply", AssetType::EContentsType::Text),
-			AssetType("Stereolithography", ".stl", AssetType::EContentsType::Text),
-			AssetType("XFile", ".x", AssetType::EContentsType::Text)})
+		: IAssetImporter(
+			{
+				AssetType{ "Autodesk 3dsMax", ".3ds" },
+				AssetType{ "Blender 3D", ".blend" },
+				AssetType{ "OpenCOLLADA", ".dae", AssetType::EContentsType::Text },
+				AssetType{ "Autodesk FBX", ".fbx"},
+				AssetType{ "Graphics Language Transmission Format", ".gltf", AssetType::EContentsType::Text },
+				AssetType{ "Wavefront", ".obj", AssetType::EContentsType::Text },
+				AssetType{ "Polygon File Format", ".ply", AssetType::EContentsType::Text },
+				AssetType{ "Stereolithography", ".stl", AssetType::EContentsType::Text },
+				AssetType{ "XFile", ".x", AssetType::EContentsType::Text} 
+			})
 	{
 		LOG_INFO("Create Assimp scene importer, assimp version: {}.{}.{}", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionPatch());
 	}

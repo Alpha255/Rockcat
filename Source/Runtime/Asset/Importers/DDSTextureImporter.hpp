@@ -2,16 +2,14 @@
 
 #include "Asset/TextureAsset.h"
 #include "RHI/RHIBackend.h"
-
 #include <dxgiformat.h>
 #include <External/DDS.h>
-
 
 class DDSImageImporter : public IAssetImporter
 {
 public:
 	DDSImageImporter()
-		: IAssetImporter({ AssetType("DirectDraw Surface", ".dds")})
+		: IAssetImporter({ AssetType{"DirectDraw Surface", ".dds"} })
 	{
 	}
 

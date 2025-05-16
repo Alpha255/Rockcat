@@ -66,7 +66,7 @@ public:
 	const class Scene& GetScene() const { return m_Scene; }
 	const std::vector<std::shared_ptr<MeshDrawCommand>>& GetCommands(EGeometryPass Filter) const { return m_Commands[Filter]; }
 
-	void BuildMeshDrawCommands(const class IView& SceneView);
+	void BuildMeshDrawCommands(const class ISceneView& SceneView);
 	void WaitCommandsBuilding();
 
 	static void RegisterMeshDrawCommandBuilder(EGeometryPass Filter, struct MeshDrawCommandBuilder* Builder);

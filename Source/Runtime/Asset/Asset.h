@@ -60,7 +60,7 @@ struct AssetType
 
 	std::string_view Name;
 	std::filesystem::path Extension;
-	EContentsType ContentsType;
+	EContentsType ContentsType = EContentsType::Binary;
 };
 
 class Asset
@@ -111,7 +111,7 @@ public:
 
 	std::shared_ptr<DataBlock> LoadData(AssetType::EContentsType ContentsType) const;
 
-	bool IsDirty() const
+	virtual bool IsDirty() const
 	{
 		std::time_t LastWriteTime = m_LastWriteTime;
 		m_LastWriteTime = GetLastWriteTime(m_Path);

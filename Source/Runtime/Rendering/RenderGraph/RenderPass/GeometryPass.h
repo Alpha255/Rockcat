@@ -4,10 +4,10 @@
 
 struct MeshDrawCommandBuilder
 {
-	virtual std::shared_ptr<MeshDrawCommand> Build(const class StaticMesh& Mesh, const class IView& SceneView) = 0;
+	virtual std::shared_ptr<MeshDrawCommand> Build(const class StaticMesh& Mesh, const class ISceneView& SceneView) = 0;
 
 	void SetupShaderParameters(RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo,
-		const class IView& InView,
+		const class ISceneView& InView,
 		const Math::Transform& InTransform,
 		const MaterialProperty& InMaterial);
 };

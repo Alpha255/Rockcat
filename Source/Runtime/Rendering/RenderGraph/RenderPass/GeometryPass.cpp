@@ -67,7 +67,7 @@ protected:
 };
 
 void MeshDrawCommandBuilder::SetupShaderParameters(RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo,
-	const IView& InView,
+	const ISceneView& InView,
 	const Math::Transform& InTransform,
 	const MaterialProperty& InMaterial)
 {
