@@ -125,7 +125,7 @@ VulkanInstance::VulkanInstance(VulkanExtensionConfiguration& Configs)
 	std::vector<const char*> EnabledExtensions;
 
 	auto LayerProperties = vk::enumerateInstanceLayerProperties();
-	std::string LogValidInstanceLayers("VulkanRHI: Found available instance layers:\n");
+	std::string LogValidInstanceLayers("Found available instance layers:\n");
 
 	for (const auto& LayerProperty : LayerProperties)
 	{

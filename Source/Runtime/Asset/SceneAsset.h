@@ -42,7 +42,7 @@ public:
 		return m_Data->StaticMeshes[Index].get(); 
 	}
 
-	const StaticMesh* GetStaticMesh(const SceneGraph::NodeID& ID) const
+	const StaticMesh* GetStaticMesh(const EntityID& ID) const
 	{
 		if (auto Node = m_Graph->GetNode(ID))
 		{

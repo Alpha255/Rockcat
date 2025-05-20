@@ -131,7 +131,7 @@ void RenderScene::BuildMeshDrawCommands(const ISceneView& SceneView)
 
 	if (m_AsyncMeshDrawCommandsBuilding)
 	{
-		m_CommandsEvent = tf::ParallelFor(m_Primitives.Add.begin(), m_Primitives.Add.end(), [this, &SceneView](const SceneGraph::NodeID& ID) {
+		m_CommandsEvent = tf::ParallelFor(m_Primitives.Add.begin(), m_Primitives.Add.end(), [this, &SceneView](const EntityID& ID) {
 			if (auto Mesh = m_Scene.GetStaticMesh(ID))
 			{
 				for (size_t Index = 0u; Index < (size_t)EGeometryPass::Num; ++Index)

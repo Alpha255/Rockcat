@@ -60,8 +60,8 @@ public:
 
 				if (AiScene->mRootNode)
 				{
-					AssimpScene.Graph.Root = AssimpScene.Graph.AddNode(SceneGraph::NodeID(), AiScene->mRootNode->mName.C_Str());
-					if (ProcessNode(AiScene, AiScene->mRootNode, AssimpScene.Graph.Root, AssimpScene))
+					AssimpScene.Graph.SetRoot(AssimpScene.Graph.AddEntity(EntityID(), AiScene->mRootNode->mName.C_Str()));
+					if (ProcessNode(AiScene, AiScene->mRootNode, AssimpScene.Graph.GetRoot(), AssimpScene))
 					{
 						return true;
 					}
@@ -118,7 +118,7 @@ private:
 		bool detachStream(Assimp::LogStream*, uint32_t) override final { return true; }
 	};
 
-	bool ProcessNode(const aiScene* AiScene, const aiNode* AiNode, SceneGraph::NodeID GraphNode, AssimpSceneAsset& AssimpScene)
+	bool ProcessNode(const aiScene* AiScene, const aiNode* AiNode, EntityID GraphNode, AssimpSceneAsset& AssimpScene)
 	{
 		if (!AiNode)
 		{
@@ -131,7 +131,7 @@ private:
 			const auto MeshIndex = AiNode->mMeshes[Index];
 			const auto Mesh = AiScene->mMeshes[MeshIndex];
 
-			auto GraphNodeID = AssimpScene.Graph.AddChild(GraphNode, Mesh->mName.C_Str(), SceneGraph::Node::ENodeMasks::Primitive);
+			auto GraphNodeID = AssimpScene.Graph.AddChild(GraphNode, Mesh->mName.C_Str());
 
 			if (Mesh->HasBones())
 			{
@@ -139,10 +139,6 @@ private:
 			}
 			else
 			{
-				if (auto SceneNode = const_cast<SceneGraph::Node*>(AssimpScene.Graph.GetNode(GraphNodeID)))
-				{
-					SceneNode->SetDataIndex(MeshIndex);
-				}
 			}
 		}
 

@@ -84,8 +84,8 @@ private:
 
 	struct PrimitiveCollection
 	{
-		std::vector<SceneGraph::NodeID> Add;
-		std::vector<SceneGraph::NodeID> Remove;
+		std::vector<EntityID> Add;
+		std::vector<EntityID> Remove;
 
 		inline void Clear()
 		{
@@ -94,7 +94,7 @@ private:
 		}
 	} m_Primitives;
 
-	std::unordered_map<SceneGraph::NodeID, size_t> m_NodeIDCommandMap;
+	std::unordered_map<EntityID, size_t> m_NodeIDCommandMap;
 	Array<std::vector<std::shared_ptr<MeshDrawCommand>>, EGeometryPass> m_Commands;
 
 	std::vector<std::unordered_map<MaterialID, uint32_t>> m_MeshBatch;

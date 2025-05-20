@@ -20,14 +20,14 @@ public:
 		}
 		else
 		{
-			auto const StartIndex = static_cast<SceneGraph::NodeID::IndexType>(Target.Nodes.size());
+			auto const StartIndex = static_cast<EntityID::IndexType>(Target.Nodes.size());
 			for (auto& Node : Other.Nodes)
 			{
-				auto GraphNodeID = Target.AddNode(SceneGraph::NodeID(), Node.GetName(), Node.GetMasks());
+				auto GraphNodeID = Target.AddNode(EntityID(), Node.GetName(), Node.GetMasks());
 				auto GraphNode = const_cast<SceneGraph::Node*>(Target.GetNode(GraphNodeID));
 				auto Parent = Node.HasParent() ? Node.GetParent() + StartIndex : Target.Root;
-				auto Child = Node.HasChild() ? Node.GetChild() + StartIndex : SceneGraph::NodeID();
-				auto Sibling = Node.HasSibling() ? Node.GetSibling() + StartIndex : SceneGraph::NodeID();
+				auto Child = Node.HasChild() ? Node.GetChild() + StartIndex : EntityID();
+				auto Sibling = Node.HasSibling() ? Node.GetSibling() + StartIndex : EntityID();
 				
 				GraphNode->SetVisible(Node.IsVisible())
 					.SetAlive(Node.IsAlive())
@@ -103,7 +103,7 @@ void SceneAsset::PostLoad()
 
 	if (m_Data->Cameras.empty())
 	{
-		GetGraph().AddNode(SceneGraph::NodeID(), "MainCamera", SceneGraph::Node::ENodeMasks::Camera);
+		GetGraph().AddNode(EntityID(), "MainCamera", SceneGraph::Node::ENodeMasks::Camera);
 		m_Data->Cameras.emplace_back(std::make_shared<Camera>(Camera::EMode::FirstPerson));
 	}
 }

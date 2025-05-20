@@ -241,6 +241,10 @@ public:
 		);
 	}
 private:
+	friend class AssimpSceneImporter;
+
+	void SetRoot(EntityID ID) { m_Root = ID; }
+
 	EntityID m_Root;
 	EntityList m_Entities;
 };
