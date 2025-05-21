@@ -206,14 +206,34 @@ struct MeshData : public MeshProperty
 	DataBlock IndicesData;
 };
 
-class StaticMesh : public MeshProperty
+class StaticMeshBuffers
+{
+public:
+	const RHIBuffer* GetIndexBuffer() const { return m_IndexBuffer.get(); }
+	const RHIBuffer* GetPositionBuffer() const { return GetVertexBuffer(EVertexAttributes::Position); }
+	const RHIBuffer* GetNormalBuffer() const { return GetVertexBuffer(EVertexAttributes::Normal); }
+	const RHIBuffer* GetTangentBuffer() const { return GetVertexBuffer(EVertexAttributes::Tangent); }
+	const RHIBuffer* GetUV0Buffer() const { return GetVertexBuffer(EVertexAttributes::UV0); }
+	const RHIBuffer* GetUV1Buffer() const { return GetVertexBuffer(EVertexAttributes::UV1); }
+	const RHIBuffer* GetColorBuffer() const { return GetVertexBuffer(EVertexAttributes::Color); }
+	const RHIBuffer* GetVertexBuffer(EVertexAttributes Attributes) const;
+private:
+	virtual void CreateRHI(const MeshData& Data, class RHIDevice& Device);
+
+	Array<RHIBufferPtr, EVertexAttributes> m_VertexBuffers;
+	RHIBufferPtr m_IndexBuffer;
+};
+
+class StaticMesh : public MeshProperty, public StaticMeshBuffers
 {
 protected:
 	friend class AssimpSceneImporter;
 
-	StaticMesh(const MeshData& Data, class RHIDevice& Device);
+	StaticMesh(const MeshProperty& Properties);
+};
 
-	virtual void CreateRHI(class RHIDevice& Device);
+class SkinnedMeshBuffers : public StaticMeshBuffers
+{
 };
 
 class SkinnedMesh : public StaticMesh

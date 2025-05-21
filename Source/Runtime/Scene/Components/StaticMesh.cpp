@@ -67,71 +67,34 @@ RHIInputLayoutCreateInfo MeshProperty::GetInputLayout(EVertexAttributes Attribut
 	return CreateInfo;
 }
 
-StaticMesh::StaticMesh(const MeshData& Data, RHIDevice& Device)
-	: MeshProperty(Data)
+StaticMesh::StaticMesh(const MeshProperty& Properties)
+	: MeshProperty(Properties)
 {
-	CreateRHI(Device);
 }
 
-std::vector<const RHIBuffer*> StaticMesh::GetVertexBuffers(EVertexAttributes Attributes) const
+const RHIBuffer* StaticMeshBuffers::GetVertexBuffer(EVertexAttributes Attributes) const
 {
-	std::vector<const RHIBuffer*> Buffers;
-	Buffers.reserve(static_cast<size_t>(EVertexAttributes::Num));
-
-	auto AddBuffer = [this, Attributes, &Buffers](EVertexAttributes Attribute) {
-		if ((Attributes & Attribute) == Attribute)
-		{
-			const size_t Index = GetPowerOfTwo(static_cast<size_t>(Attribute));
-			assert(Index < RHIVertexBuffers.size() && RHIVertexBuffers[Index]);
-			Buffers.emplace_back(RHIVertexBuffers[Index].get());
-		}
-	};
-
-	AddBuffer(EVertexAttributes::Position);
-	AddBuffer(EVertexAttributes::Normal);
-	AddBuffer(EVertexAttributes::Tangent);
-	AddBuffer(EVertexAttributes::UV0);
-	AddBuffer(EVertexAttributes::UV1);
-	AddBuffer(EVertexAttributes::Color);
-
-	return Buffers;
-}
-
-const RHIBuffer* StaticMesh::GetVertexBuffer(EVertexAttributes Attributes) const
-{
-	/// TODO: Pack all buffer into one ???
-	const size_t Index = GetPowerOfTwo(static_cast<size_t>(Attributes));
 	switch (Attributes)
 	{
 	case EVertexAttributes::Position:
+		return m_VertexBuffers[0u].get();
 	case EVertexAttributes::Normal:
+		return m_VertexBuffers[1u].get();
 	case EVertexAttributes::Tangent:
+		return m_VertexBuffers[2u].get();
 	case EVertexAttributes::UV0:
+		return m_VertexBuffers[3u].get();
 	case EVertexAttributes::UV1:
+		return m_VertexBuffers[4u].get();
 	case EVertexAttributes::Color:
-		return RHIVertexBuffers[Index].get();
+		return m_VertexBuffers[5u].get();
 	}
-
 	return nullptr;
 }
 
-void StaticMesh::SetVertexBuffer(EVertexAttributes Attributes, RHIBufferPtr&& Buffer)
+void StaticMeshBuffers::CreateRHI(const MeshData& Data, RHIDevice& Device)
 {
-	const size_t Index = GetPowerOfTwo(static_cast<size_t>(Attributes));
-	switch (Attributes)
-	{
-	case EVertexAttributes::Position:
-	case EVertexAttributes::Normal:
-	case EVertexAttributes::Tangent:
-	case EVertexAttributes::UV0:
-	case EVertexAttributes::UV1:
-	case EVertexAttributes::Color:
-		RHIVertexBuffers[Index] = std::move(Buffer);
-	}
-}
-
-void StaticMesh::CreateRHI(RHIDevice& Device)
-{
+#if 0
 	if (RHIIndexBuffer || RHIPackedVertexBuffer)
 	{
 		return;
@@ -198,4 +161,5 @@ void StaticMesh::CreateRHI(RHIDevice& Device)
 	}
 
 	ClearData();
+#endif
 }
