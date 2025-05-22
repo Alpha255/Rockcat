@@ -187,6 +187,8 @@ struct MeshData : public MeshProperty
 		*(reinterpret_cast<Vector*>(VerticesData.Data.get() + Offset + Index * Stride)) = Value;
 	}
 
+	inline constexpr size_t GetIndexDataSize() const { return GetNumIndex() * static_cast<size_t>(GetIndexFormat()); }
+
 	inline constexpr size_t GetPositionDataSize() const { return PositionStride * GetNumVertex(); }
 	inline constexpr size_t GetNormalDataSize() const { return HasNormal() ? (NormalStride * GetNumVertex()) : 0u; }
 	inline constexpr size_t GetTangentDataSize() const { return HasTangent() ? (TangentStride * GetNumVertex()) : 0u; }

@@ -94,72 +94,54 @@ const RHIBuffer* StaticMeshBuffers::GetVertexBuffer(EVertexAttributes Attributes
 
 void StaticMeshBuffers::CreateRHI(const MeshData& Data, RHIDevice& Device)
 {
-#if 0
-	if (RHIIndexBuffer || RHIPackedVertexBuffer)
-	{
-		return;
-	}
-
 	RHIBufferCreateInfo CreateInfo;
-	if (NumIndex)
+	if (Data.GetNumIndex())
 	{
-		assert(IndicesData);
+		assert(Data.IndicesData.Data);
+
 		CreateInfo.SetUsages(ERHIBufferUsageFlags::IndexBuffer)
 			.SetAccessFlags(ERHIDeviceAccessFlags::GpuRead)
 			.SetPermanentStates(ERHIResourceState::IndexBuffer)
-			.SetSize(NumIndex * static_cast<size_t>(IndexFormat))
-			.SetInitialData(IndicesData.get())
-			.SetName(StringUtils::Format("%s-IndexBuffer", GetName()));
-		RHIIndexBuffer = Device.CreateBuffer(CreateInfo);
+			.SetSize(Data.GetIndexDataSize())
+			.SetInitialData(Data.IndicesData.Data.get())
+			.SetName(StringUtils::Format("%s-IndexBuffer", Data.GetName()));
+		m_IndexBuffer = Device.CreateBuffer(CreateInfo);
 	}
 
-	if (NumVertex)
+	if (Data.GetNumVertex())
 	{
-		assert(PositionData);
+		assert(Data.VerticesData.Data);
+
 		CreateInfo.SetUsages(ERHIBufferUsageFlags::VertexBuffer)
 			.SetPermanentStates(ERHIResourceState::VertexBuffer)
-			.SetSize(PositionStride * NumVertex)
-			.SetInitialData(PositionData.get())
-			.SetName(StringUtils::Format("%s-PositionBuffer", GetName()));
-		SetVertexBuffer(EVertexAttributes::Position, Device.CreateBuffer(CreateInfo));
+			.SetSize(Data.GetPositionDataSize())
+			.SetInitialData(Data.VerticesData.Data.get() + Data.GetPositionOffset())
+			.SetName(StringUtils::Format("%s-PositionBuffer", Data.GetName()));
+		m_VertexBuffers[0u] = Device.CreateBuffer(CreateInfo);
 
-		if (HasNormal())
-		{
-			assert(NormalData);
-			CreateInfo.SetSize(NormalStride * NumVertex)
-				.SetInitialData(NormalData.get())
-				.SetName(StringUtils::Format("%s-NormalBuffer", GetName()));
-			SetVertexBuffer(EVertexAttributes::Normal, Device.CreateBuffer(CreateInfo));
-		}
+		auto CreateVerteBuffer = [&Data, &Device, &CreateInfo, this](bool ShouldCreate, size_t Size, size_t Offset, size_t Index, std::string&& Name) {
+			if (ShouldCreate)
+			{
+				CreateInfo.SetSize(Size)
+					.SetInitialData(Data.VerticesData.Data.get() + Offset)
+					.SetName(std::move(Name));
+				m_VertexBuffers[Index] = Device.CreateBuffer(CreateInfo);
+			}
+		};
 
-		if (HasTangent())
-		{
-			assert(TangentData);
-			CreateInfo.SetSize(TangentAndBiTangentStride * NumVertex)
-				.SetInitialData(TangentData.get())
-				.SetName(StringUtils::Format("%s-TangentBuffer", GetName()));
-			SetVertexBuffer(EVertexAttributes::Tangent, Device.CreateBuffer(CreateInfo));
-		}
+		CreateVerteBuffer(Data.HasNormal(), Data.GetNormalDataSize(), Data.GetNormalOffset(), 1u, 
+			StringUtils::Format("%s-NormalBuffer", Data.GetName()));
 
-		if (HasUV0())
-		{
-			assert(UV0Data);
-			CreateInfo.SetSize(UVStride * NumVertex)
-				.SetInitialData(UV0Data.get())
-				.SetName(StringUtils::Format("%s-UV0Buffer", GetName()));
-			SetVertexBuffer(EVertexAttributes::UV0, Device.CreateBuffer(CreateInfo));
-		}
+		CreateVerteBuffer(Data.HasTangent(), Data.GetTangentDataSize(), Data.GetTangentOffset(), 2u,
+			StringUtils::Format("%s-TangentBuffer", Data.GetName()));
 
-		if (HasUV1())
-		{
-			assert(UV1Data);
-			CreateInfo.SetSize(UVStride * NumVertex)
-				.SetInitialData(UV1Data.get())
-				.SetName(StringUtils::Format("%s-UV1Buffer", GetName()));
-			SetVertexBuffer(EVertexAttributes::UV1, Device.CreateBuffer(CreateInfo));
-		}
+		CreateVerteBuffer(Data.HasUV0(), Data.GetUV0DataSize(), Data.GetUV0Offset(), 3u,
+			StringUtils::Format("%s-UV0Buffer", Data.GetName()));
+
+		CreateVerteBuffer(Data.HasUV1(), Data.GetUV1DataSize(), Data.GetUV1Offset(), 4u,
+			StringUtils::Format("%s-UV1Buffer", Data.GetName()));
+
+		CreateVerteBuffer(Data.HasColor(), Data.GetColorDataSize(), Data.GetColorOffset(), 5u,
+			StringUtils::Format("%s-TangentBuffer", Data.GetName()));
 	}
-
-	ClearData();
-#endif
 }

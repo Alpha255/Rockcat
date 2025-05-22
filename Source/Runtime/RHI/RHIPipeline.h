@@ -10,6 +10,7 @@ struct RHIShaderResourceBinding
 	uint32_t Binding = 0u;
 	uint32_t DescriptorIndex = 0u;
 	ERHIResourceType Type = ERHIResourceType::Unknown;
+	ERHIShaderStage Stage = ERHIShaderStage::Num;
 
 	union
 	{

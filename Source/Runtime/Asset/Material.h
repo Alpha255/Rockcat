@@ -14,6 +14,13 @@ enum class EShadingMode : uint8_t
 	Toon
 };
 
+enum class EBlendMode : uint8_t
+{
+	Opaque,
+	Masked,
+	Translucent,
+};
+
 struct MaterialProperty : public SerializableAsset<MaterialProperty>
 {
 	using BaseClass::BaseClass;
