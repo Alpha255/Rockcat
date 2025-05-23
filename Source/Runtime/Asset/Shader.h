@@ -104,7 +104,9 @@ struct ShaderVariable
 		Math::Vector3,
 		Math::Vector4,
 		Math::Matrix,
-		std::shared_ptr<TextureAsset>>;
+		const RHITexture*,
+		const RHISampler*,
+		const RHIBuffer*>;
 
 	using Setter = std::function<void(const Variant&)>;
 	using Getter = std::function<Variant(void)>;
@@ -119,7 +121,7 @@ struct ShaderVariable
 
 	Variant Value;
 
-	bool IsValid() const { return Value.index() != 0u; }
+	inline bool IsValid() const { return Value.index() != 0u; }
 };
 
 class ShaderMetaData : public Asset

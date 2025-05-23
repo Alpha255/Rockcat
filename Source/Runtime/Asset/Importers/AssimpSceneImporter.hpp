@@ -176,7 +176,21 @@ private:
 				if (NeedReload)
 				{
 					aiString AlphaMode;
-					AiMaterial->Get(AI_MATKEY_GLTF_ALPHAMODE, AlphaMode);
+					if (AiMaterial->Get(AI_MATKEY_GLTF_ALPHAMODE, AlphaMode) == AI_SUCCESS)
+					{
+						if (AlphaMode == aiString("OPAQUE"))
+						{
+							Property->BlendMode = EBlendMode::Opaque;
+						}
+						else if (AlphaMode == aiString("MASK"))
+						{
+							Property->BlendMode = EBlendMode::Masked;
+						}
+						else if (AlphaMode == aiString("BLEND"))
+						{
+							Property->BlendMode = EBlendMode::Translucent;
+						}
+					}
 
 					aiShadingMode ShadingMode = aiShadingMode_Unlit;
 					AiMaterial->Get(AI_MATKEY_SHADING_MODEL, ShadingMode);

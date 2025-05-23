@@ -65,25 +65,27 @@ private: \
 	inline const Type& Get##Name() const { return Name; } \
 	inline OwnerClass& Set##Name(const Type&& Value) { Name = Value; return *this; } \
 
-#define DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name) \
-	inline const RHITexture* Get##Name() const { return Name->GetRHI(); } \
+#define DECLARE_SV_SETER_GETTER_RESOURCE(Type, Name) \
+	inline const Type* Get##Name() const { return Name; } \
 	template<class T> \
-	OwnerClass& Set##Name(T&& Path) { Name = std::make_shared<TextureAsset>(std::forward<T>(Path)); return *this; }
+	OwnerClass& Set##Name(const Type* Resource) { Name = Resource; return *this; }
 
 #define DECLARE_SV_UNIFORM_BUFFER(Type, Name) DECLARE_SHADER_VARIABLE(Type, Name, UniformBuffer, GetUniformBufferBinding(), DECLARE_SV_SETER_GETTER_DEFAULT(Type, Name))
 
-#define DECLARE_SV_TEXTURE_1D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
-#define DECLARE_SV_TEXTURE_ARRAY_1D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
+#define DECLARE_SV_TEXTURE_1D(Name, Binding) DECLARE_SHADER_VARIABLE(const RHITexture*, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_RESOURCE(RHITexture, Name))
+#define DECLARE_SV_TEXTURE_ARRAY_1D(Name, Binding) DECLARE_SHADER_VARIABLE(const RHITexture*, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_RESOURCE(RHITexture, Name))
 
-#define DECLARE_SV_TEXTURE_2D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
-#define DECLARE_SV_TEXTURE_ARRAY_2D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
+#define DECLARE_SV_TEXTURE_2D(Name, Binding) DECLARE_SHADER_VARIABLE(const RHITexture*, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_RESOURCE(RHITexture, Name))
+#define DECLARE_SV_TEXTURE_ARRAY_2D(Name, Binding) DECLARE_SHADER_VARIABLE(const RHITexture*, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_RESOURCE(RHITexture, Name))
 
-#define DECLARE_SV_TEXTURE_CUBE(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
-#define DECLARE_SV_TEXTURE_ARRAY_CUBE(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
+#define DECLARE_SV_TEXTURE_CUBE(Name, Binding) DECLARE_SHADER_VARIABLE(const RHITexture*, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_RESOURCE(RHITexture, Name))
+#define DECLARE_SV_TEXTURE_ARRAY_CUBE(Name, Binding) DECLARE_SHADER_VARIABLE(const RHITexture*, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_RESOURCE(RHITexture, Name))
 
-#define DECLARE_SV_TEXTURE_3D(Name, Binding) DECLARE_SHADER_VARIABLE(std::shared_ptr<TextureAsset>, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_IMAGE_ASSET(Name))
+#define DECLARE_SV_TEXTURE_3D(Name, Binding) DECLARE_SHADER_VARIABLE(const RHITexture*, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_RESOURCE(RHITexture, Name))
 
-#define DECLARE_SV_SAMPLER(Name, Binding)
+#define DECLARE_SV_SAMPLER(Name, Binding) DECLARE_SHADER_VARIABLE(const RHISampler*, Name, Sampler, Binding, DECLARE_SV_SETER_GETTER_RESOURCE(RHISampler, Name))
+
+#define DECLARE_SV_STORAGE_BUFFER(Name, Binding) DECLARE_SHADER_VARIABLE(const RHIBuffer*, Name, StorageBuffer, Binding, DECLARE_SV_SETER_GETTER_RESOURCE(RHIBuffer, Name)))
 
 #else  // __cplusplus
 
@@ -117,19 +119,14 @@ private: \
 
 #define DECLARE_SHADER_VARIABLES_END
 
-#define DECLARE_SV_TEXTURE_1D(Name, Binding) \
-	Texture1D Name : register(t##Binding); \
-	SamplerState Name##_Sampler : register(s##Binding);
+#define DECLARE_SV_TEXTURE_1D(Name, Binding) Texture1D Name : register(t##Binding);
+#define DECLARE_SV_TEXTURE_2D(Name, Binding) Texture2D Name : register(t##Binding);
+#define DECLARE_SV_TEXTURE_3D(Name, Binding) Texture3D Name : register(t##Binding);
+#define DECLARE_SV_TEXTURE_CUBE(Name, Binding) Texture2D Name : register(t##Binding);
 
-#define DECLARE_SV_TEXTURE_2D(Name, Binding) \
-	Texture2D Name : register(t##Binding); \
-	SamplerState Name##_Sampler : register(s##Binding);
+#define DECLARE_SV_SAMPLER(Name, Binding) SamplerState Name##_Sampler : register(s##Binding);
 
-#define DECLARE_SV_TEXTURE_CUBE(Name, Binding) \
-	Texture2D Name : register(t##Binding); \
-	SamplerState Name##_Sampler : register(s##Binding);
-
-#define SAMPLE_TEXTURE2D(Texture, UV) Texture.Sample(Texture##_Sampler, UV.xy)
+#define DECLARE_SV_STORAGE_BUFFER(Name, Binding) RWBuffer Name : register(u##Binding);
 
 struct VSInput
 {

@@ -50,6 +50,7 @@ struct MaterialProperty : public SerializableAsset<MaterialProperty>
 
 	ERHICullMode CullMode = ERHICullMode::BackFace;
 	EShadingMode ShadingMode = EShadingMode::BlinnPhong;
+	EBlendMode BlendMode = EBlendMode::Opaque;
 	bool DoubleSided = false;
 	bool Wireframe = false;
 
