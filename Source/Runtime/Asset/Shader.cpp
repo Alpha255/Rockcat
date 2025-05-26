@@ -48,7 +48,7 @@ void Shader::RegisterVariable(const char* Name, ShaderVariable&& Variable)
 	}
 	else
 	{
-		m_Variables.insert(std::make_pair(std::string(Name), std::forward<ShaderVariable>(Variable)));
+		m_Variables.insert(std::make_pair(std::string_view(Name), std::forward<ShaderVariable>(Variable)));
 	}
 }
 

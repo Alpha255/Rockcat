@@ -14,7 +14,16 @@ public: \
 
 class ComponentBase
 {
+public:
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(m_Hash)
+		);
+	}
 private:
+	inline void SetHash(size_t Hash) { m_Hash = Hash; }
 	friend class ComponentPool;
-	uint32_t Index = ~0u;
+	size_t m_Hash = 0u;
 };

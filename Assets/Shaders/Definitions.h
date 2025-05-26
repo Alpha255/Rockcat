@@ -15,6 +15,7 @@ using float4x4 = Math::Matrix;
 #define DECLARE_SHADER_VARIABLES_BEGIN(Owner) \
 protected: \
 	using OwnerClass = Owner; \
+	struct UniformBufferBinding { inline static uint32_t Slot = 0u; }; \
 private: \
 	struct FirstVariableID{}; \
 	typedef void* FuncPtr; \
@@ -54,10 +55,18 @@ private: \
 				Func = reinterpret_cast<RegisterShaderVariableFunc>(Func)(FirstVariableID(), Owner); \
 			} while(Func); }
 
-#define DECLARE_SV_UNIFORM_BUFFER_BEGIN(Binding) \
-	NextVariableID_UniformBuffer; \
-	static uint32_t GetUniformBufferBinding() { return Binding; } \
-	typedef NextVariableID_UniformBuffer \
+#define DECLARE_SV_UNIFORM_BUFFER_BEGIN(Name, Binding) \
+	VariableID##Name; \
+	private: \
+		struct NextVariableID_##Name{}; \
+		static FuncPtr RegisterShaderVariable(NextVariableID_##Name, OwnerClass& Owner) \
+		{ \
+			UniformBufferBinding::Slot = Binding; \
+			FuncPtr(*LastShaderVariableRegisterFunc)(VariableID##Name, OwnerClass&); \
+			LastShaderVariableRegisterFunc = RegisterShaderVariable; \
+			return reinterpret_cast<FuncPtr>(LastShaderVariableRegisterFunc); \
+		} \
+		typedef NextVariableID_##Name
 
 #define DECLARE_SV_UNIFORM_BUFFER_END
 
@@ -70,7 +79,7 @@ private: \
 	template<class T> \
 	OwnerClass& Set##Name(const Type* Resource) { Name = Resource; return *this; }
 
-#define DECLARE_SV_UNIFORM_BUFFER(Type, Name) DECLARE_SHADER_VARIABLE(Type, Name, UniformBuffer, GetUniformBufferBinding(), DECLARE_SV_SETER_GETTER_DEFAULT(Type, Name))
+#define DECLARE_SV_UNIFORM_BUFFER(Type, Name) DECLARE_SHADER_VARIABLE(Type, Name, UniformBuffer, UniformBufferBinding::Slot, DECLARE_SV_SETER_GETTER_DEFAULT(Type, Name))
 
 #define DECLARE_SV_TEXTURE_1D(Name, Binding) DECLARE_SHADER_VARIABLE(const RHITexture*, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_RESOURCE(RHITexture, Name))
 #define DECLARE_SV_TEXTURE_ARRAY_1D(Name, Binding) DECLARE_SHADER_VARIABLE(const RHITexture*, Name, SampledImage, Binding, DECLARE_SV_SETER_GETTER_RESOURCE(RHITexture, Name))
@@ -113,7 +122,7 @@ private: \
 #define DECLARE_SHADER_VARIABLES_BEGIN(ShaderType)
 #define DECLARE_SHADER_VARIABLE
 
-#define DECLARE_SV_UNIFORM_BUFFER_BEGIN(Binding) cbuffer UniformBuffer : register(b##Binding) {
+#define DECLARE_SV_UNIFORM_BUFFER_BEGIN(Name, Binding) cbuffer Name : register(b##Binding) {
 #define DECLARE_SV_UNIFORM_BUFFER_END }
 #define DECLARE_SV_UNIFORM_BUFFER(Type, Name) Type Name;
 
@@ -295,7 +304,7 @@ struct VSOutput
 
 #define DEFINITION_GENERIC_VS_SHADER_VARIABLES \
 	DECLARE_SHADER_VARIABLES_BEGIN(GenericVS) \
-		DECLARE_SV_UNIFORM_BUFFER_BEGIN(0) \
+		DECLARE_SV_UNIFORM_BUFFER_BEGIN(WVP, 0) \
 			DECLARE_SV_UNIFORM_BUFFER(float4x4, WorldMatrix) \
 			DECLARE_SV_UNIFORM_BUFFER(float4x4, ViewMatrix) \
 			DECLARE_SV_UNIFORM_BUFFER(float4x4, ProjectionMatrix) \
@@ -321,7 +330,7 @@ struct VSOutput
 
 #define DEFINITION_DEPTH_ONLY_FS_SHADER_VARIABLES \
 	DECLARE_SHADER_VARIABLES_BEGIN(DepthOnlyFS) \
-		DECLARE_SV_UNIFORM_BUFFER_BEGIN(1) \
+		DECLARE_SV_UNIFORM_BUFFER_BEGIN(MaterialProperty, 1) \
 			DECLARE_SV_UNIFORM_BUFFER(float, AlphaCutoff) \
 		DECLARE_SV_UNIFORM_BUFFER_END \
 		DECLARE_SV_TEXTURE_2D(BaseColorMap, 2) \

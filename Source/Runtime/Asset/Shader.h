@@ -93,6 +93,10 @@ private:
 	ShaderBlob m_Blob;
 };
 
+struct UniformBuffer
+{
+};
+
 struct ShaderVariable
 {
 	using Variant = std::variant<
@@ -144,7 +148,7 @@ private:
 class Shader : public ShaderDefines
 {
 public:
-	const std::map<std::string, ShaderVariable>& GetVariables() const { return m_Variables; }
+	const std::map<std::string_view, ShaderVariable>& GetVariables() const { return m_Variables; }
 	RHIBuffer* GetUniformBuffer(class RHIDevice& Device);
 
 	virtual void SetupTransform(const Math::Transform&) {}
@@ -173,7 +177,7 @@ protected:
 private:
 	size_t ComputeUniformBufferSize();
 
-	std::map<std::string, ShaderVariable> m_Variables;
+	std::map<std::string_view, ShaderVariable> m_Variables;
 	RHIBufferPtr m_UniformBuffer;
 
 	const RHIShader* m_ShaderModule = nullptr;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/Cereal.h"
 #include "Scene/Components/ComponentBase.h"
 
 class ComponentPool
@@ -22,7 +23,8 @@ public:
 			m_Components.emplace_back(std::make_shared<T>(std::forward<Args>(ArgList)...));
 		}
 
-		return static_cast<T*>(m_Components[Index].get());
+		auto Comp = static_cast<T*>(m_Components[Index].get());
+		Comp->SetHash(ComputeHash(T::GetID(), Index));
 	}
 
 	template<class T>
@@ -33,6 +35,15 @@ public:
 		m_FreedComponents.push_back(Index);
 		m_Components[Index].reset();
 		Component = nullptr;
+	}
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(m_Components),
+			CEREAL_NVP(m_FreedComponents)
+		);
 	}
 private:
 	std::vector<std::shared_ptr<ComponentBase>> m_Components;

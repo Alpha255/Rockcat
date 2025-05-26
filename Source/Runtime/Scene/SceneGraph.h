@@ -75,15 +75,11 @@ public:
 	}
 
 	template<class T>
-	T* AddComponent()
-	{
-		return nullptr;
-	}
-
-	void AddComponent(ComponentBase* Component)
+	T* AddComponent(T* Component)
 	{
 		assert(Component);
 		m_Components.insert(Component);
+		return Component;
 	}
 
 	void RemoveComponent(ComponentBase* Component)
