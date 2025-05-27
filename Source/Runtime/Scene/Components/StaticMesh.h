@@ -220,6 +220,8 @@ public:
 	const RHIBuffer* GetColorBuffer() const { return GetVertexBuffer(EVertexAttributes::Color); }
 	const RHIBuffer* GetVertexBuffer(EVertexAttributes Attributes) const;
 private:
+	friend class AssimpSceneImporter;
+
 	virtual void CreateRHI(const MeshData& Data, class RHIDevice& Device);
 
 	Array<RHIBufferPtr, EVertexAttributes> m_VertexBuffers;
@@ -229,8 +231,6 @@ private:
 class StaticMesh : public MeshProperty, public StaticMeshBuffers
 {
 protected:
-	friend class AssimpSceneImporter;
-
 	StaticMesh(const MeshProperty& Properties);
 };
 

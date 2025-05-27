@@ -19,6 +19,11 @@ public:
 	{
 	}
 
+	Quaternion(const float* Array)
+		: Float4(Array)
+	{
+	}
+
 	inline void Identity()
 	{
 		VECTOR_STORE(4, this, DirectX::XMQuaternionIdentity());

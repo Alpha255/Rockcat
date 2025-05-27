@@ -52,20 +52,17 @@ public:
 #endif
 		if (auto AiScene = AssimpImporter.ReadFile(AssimpScene.GetPath().string(), ProcessFlags))
 		{
-			if (AiScene->HasMeshes())
+			if (AiScene->HasMeshes() && AiScene->mRootNode)
 			{
-				ProcessMaterials(AiScene, AssimpScene);
-
-				ProcessMeshes(AiScene, AssimpScene);
-
-				if (AiScene->mRootNode)
+				AssimpScene.Graph.SetRoot(AssimpScene.Graph.AddEntity(EntityID(), AiScene->mRootNode->mName.C_Str()));
+				if (ProcessNode(AiScene, AiScene->mRootNode, AssimpScene.Graph.GetRoot(), AssimpScene))
 				{
-					AssimpScene.Graph.SetRoot(AssimpScene.Graph.AddEntity(EntityID(), AiScene->mRootNode->mName.C_Str()));
-					if (ProcessNode(AiScene, AiScene->mRootNode, AssimpScene.Graph.GetRoot(), AssimpScene))
-					{
-						return true;
-					}
+					ProcessMaterials(AiScene, AssimpScene);
+					ProcessMeshes(AiScene, AssimpScene);
+
+					return true;
 				}
+
 				return false;
 			}
 			else
@@ -118,6 +115,35 @@ private:
 		bool detachStream(Assimp::LogStream*, uint32_t) override final { return true; }
 	};
 
+	void ProcessTransform(const aiNode* AiNode, AssimpSceneAsset& AssimpScene)
+	{
+		std::stack<const aiMatrix4x4*> RelativeTransforms;
+		auto Node = AiNode;
+		while (Node)
+		{
+			RelativeTransforms.push(&Node->mTransformation);
+			Node = Node->mParent;
+		}
+
+		aiMatrix4x4 FinalTransform = *RelativeTransforms.top();
+		RelativeTransforms.pop();
+		while (!RelativeTransforms.empty())
+		{
+			FinalTransform *= *RelativeTransforms.top();
+			RelativeTransforms.pop();
+		}
+
+		aiVector3D Translation;
+		aiVector3D Scalling;
+		aiQuaternion Rotation;
+		FinalTransform.Decompose(Scalling, Rotation, Translation);
+		AssimpScene.Transforms.emplace_back(
+			Math::Transform(
+				Math::Vector3(Translation.x, Translation.y, Translation.z),
+				Math::Vector3(Scalling.x, Scalling.y, Scalling.z),
+				Math::Quaternion(Rotation.x, Rotation.y, Rotation.z, Rotation.w)));
+	}
+
 	bool ProcessNode(const aiScene* AiScene, const aiNode* AiNode, EntityID GraphNode, AssimpSceneAsset& AssimpScene)
 	{
 		if (!AiNode)
@@ -129,17 +155,21 @@ private:
 		for (uint32_t Index = 0u; Index < AiNode->mNumMeshes; ++Index)
 		{
 			const auto MeshIndex = AiNode->mMeshes[Index];
-			const auto Mesh = AiScene->mMeshes[MeshIndex];
+			const auto AiMesh = AiScene->mMeshes[MeshIndex];
 
-			auto GraphNodeID = AssimpScene.Graph.AddChild(GraphNode, Mesh->mName.C_Str());
-
-			if (Mesh->HasBones())
+			if (AiMesh->HasBones())
 			{
+				LOG_CAT_ERROR(LogAssimpImporter, "Not supported yet!");
 				assert(false);
 			}
-			else
-			{
-			}
+
+			auto NodeID = AssimpScene.Graph.AddChild(GraphNode, AiMesh->mName.C_Str());
+			auto& DataIndices = AssimpScene.EntityDataIndices.insert(std::make_pair(NodeID, AssimpSceneAsset::DataIndex{})).first->second;
+			DataIndices.Mesh = MeshIndex;
+			DataIndices.Material = AiMesh->mMaterialIndex;
+			DataIndices.Transfrom = static_cast<uint32_t>(AssimpScene.Transforms.size());
+
+			ProcessTransform(AiNode, AssimpScene);
 		}
 
 		for (uint32_t NodeIndex = 0u; NodeIndex < AiNode->mNumChildren; ++NodeIndex)
@@ -160,7 +190,7 @@ private:
 			return;
 		}
 
-		AssimpScene.Data.MaterialProperties.resize(AiScene->mNumMaterials);
+		AssimpScene.MaterialProperties.resize(AiScene->mNumMaterials);
 		for (uint32_t Index = 0u; Index < AiScene->mNumMaterials; ++Index)
 		{
 			if (auto AiMaterial = AiScene->mMaterials[Index])
@@ -170,7 +200,7 @@ private:
 
 				auto MaterialPath = (Paths::MaterialPath() / AssimpScene.GetStem() / Name.C_Str()).replace_extension(MaterialProperty::GetExtension());
 				auto NeedReload = std::filesystem::exists(MaterialPath);
-				auto& Property = AssimpScene.Data.MaterialProperties.at(Index);
+				auto& Property = AssimpScene.MaterialProperties.at(Index);
 				Property = MaterialProperty::Load(MaterialPath);
 
 				if (NeedReload)
@@ -294,7 +324,8 @@ private:
 				AiMesh->HasTextureCoords(1u),
 				AiMesh->HasVertexColors(0u),
 				ERHIPrimitiveTopology::TriangleList,
-				BoundingBox);
+				BoundingBox,
+				AiMesh->mName.C_Str());
 
 			for (uint32_t FaceIndex = 0u; FaceIndex < AiMesh->mNumFaces; ++FaceIndex)
 			{
@@ -346,10 +377,8 @@ private:
 			}
 			else
 			{
-				auto& Mesh = AssimpScene.Data.StaticMeshes.emplace_back(std::make_shared<StaticMesh>(MeshDataBlock, AiMesh->mMaterialIndex));
-				Mesh->SetMaterialProperty(AssimpScene.Data.MaterialProperties.at(Index).get());
-				Mesh->SetTransform(&AssimpScene.Data.Transforms.at(Index));
-				//Mesh->CreateRHI(RenderService::Get().GetBackend().GetDevice());
+				auto& Mesh = AssimpScene.StaticMeshes.emplace_back(std::make_shared<StaticMesh>(MeshDataBlock));
+				//Mesh->CreateRHI(MeshDataBlock, );
 			}
 		}
 	}
