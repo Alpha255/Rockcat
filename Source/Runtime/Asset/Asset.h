@@ -159,11 +159,51 @@ protected:
 
 	void SetStatus(EStatus Status) { m_Status.store(Status, std::memory_order_release); }
 
-	virtual void OnPreLoad() { if (m_LoadCallbacks.PreLoadCallback) { m_LoadCallbacks.PreLoadCallback(*this); } SetStatus(EStatus::Loading); }
-	virtual void OnReady() { if (m_LoadCallbacks.ReadyCallback) { m_LoadCallbacks.ReadyCallback(*this); } SetStatus(EStatus::Ready); }
-	virtual void OnLoadFailed() { if (m_LoadCallbacks.LoadFailedCallback) { m_LoadCallbacks.LoadFailedCallback(*this); } SetStatus(EStatus::LoadFailed); }
-	virtual void OnLoadCanceled() { if (m_LoadCallbacks.CanceledCallback) { m_LoadCallbacks.CanceledCallback(*this); } SetStatus(EStatus::NotLoaded); }
-	virtual void OnUnloaded() { if (m_LoadCallbacks.UnloadedCallback) { m_LoadCallbacks.UnloadedCallback(*this); } SetStatus(EStatus::NotLoaded); }
+	virtual void OnPreLoad()
+	{
+		SetStatus(EStatus::Loading);
+
+		if (m_LoadCallbacks.PreLoadCallback)
+		{
+			m_LoadCallbacks.PreLoadCallback(*this);
+		}
+	}
+	virtual void OnReady()
+	{
+		SetStatus(EStatus::Ready);
+
+		if (m_LoadCallbacks.ReadyCallback)
+		{
+			m_LoadCallbacks.ReadyCallback(*this);
+		}
+	}
+	virtual void OnLoadFailed()
+	{
+		SetStatus(EStatus::LoadFailed);
+
+		if (m_LoadCallbacks.LoadFailedCallback)
+		{
+			m_LoadCallbacks.LoadFailedCallback(*this);
+		}
+	}
+	virtual void OnLoadCanceled()
+	{
+		SetStatus(EStatus::NotLoaded);
+
+		if (m_LoadCallbacks.CanceledCallback)
+		{
+			m_LoadCallbacks.CanceledCallback(*this);
+		}
+	}
+	virtual void OnUnloaded()
+	{
+		SetStatus(EStatus::NotLoaded);
+
+		if (m_LoadCallbacks.UnloadedCallback)
+		{
+			m_LoadCallbacks.UnloadedCallback(*this);
+		}
+	}
 
 	std::atomic<EStatus> m_Status = EStatus::NotLoaded;
 

@@ -13,9 +13,9 @@ struct AssimpSceneAsset : public Asset
 
 	struct DataIndex
 	{
-		uint32_t Mesh = 0u;
-		uint32_t Material = 0u;
-		uint32_t Transfrom = 0u;
+		uint32_t Mesh = ~0u;
+		uint32_t Material = ~0u;
+		uint32_t Transfrom = ~0u;
 	};
 
 	SceneGraph Graph;

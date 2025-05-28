@@ -21,7 +21,7 @@ public:
 	template<class T>
 	T* AddComponent(Entity& InEntity)
 	{
-		return InEntity.AddComponent(m_ComponentPool->Allocate<T>());
+		return InEntity.AddComponent(m_ComponentPool.Allocate<T>());
 	}
 
 	template<class Archive>
@@ -36,6 +36,8 @@ public:
 protected:
 	void PostLoad() override;
 private:
+	void MergeFromAssimpScene(const AssimpSceneAsset& AssimpScene);
+
 	std::vector<std::string> m_AssimpScenes;
 	ComponentPool m_ComponentPool;
 };

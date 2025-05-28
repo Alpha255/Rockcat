@@ -183,7 +183,7 @@ public:
 		VECTOR_STORE(4, this, DirectX::XMQuaternionRotationMatrix(MATRIX_LOAD(&Matrix)));
 	}
 
-	inline Matrix GetRotationMatrix()
+	inline Matrix GetRotationMatrix() const
 	{
 		Matrix Ret;
 		MATRIX_STORE(&Ret, DirectX::XMMatrixRotationQuaternion(VECTOR_LOAD(4, this)));

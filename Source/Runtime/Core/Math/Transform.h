@@ -88,6 +88,11 @@ public:
 
 	inline Quaternion GetRotation() const { return m_Rotation; }
 
+	inline Matrix GetMatrix() const
+	{
+		return Matrix::Scaling(m_Scalling) * m_Rotation.GetRotationMatrix() * Matrix::Translation(m_Translation);
+	}
+
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{

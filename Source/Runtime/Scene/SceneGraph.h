@@ -227,6 +227,8 @@ public:
 
 	inline EntityID GetRoot() const { return m_Root; }
 	inline const EntityList& GetAllEntities() const { return m_Entities; }
+	inline size_t GetNumEntity() const { return static_cast<uint32_t>(m_Entities.size()); }
+	inline bool HasEntity() const { return !m_Entities.empty(); }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -236,11 +238,13 @@ public:
 			CEREAL_NVP(m_Entities)
 		);
 	}
-private:
+
+protected:
 	friend class AssimpSceneImporter;
 
-	void SetRoot(EntityID ID) { m_Root = ID; }
-
+	inline void SetRoot(EntityID ID) { m_Root = ID; }
+	inline EntityList& GetAllEntities() { return m_Entities; }
+private:
 	EntityID m_Root;
 	EntityList m_Entities;
 };

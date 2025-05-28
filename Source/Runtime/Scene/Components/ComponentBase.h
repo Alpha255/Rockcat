@@ -15,6 +15,8 @@ public: \
 class ComponentBase
 {
 public:
+	class Entity* GetOwner() const { return m_Owner; }
+
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
@@ -23,7 +25,11 @@ public:
 		);
 	}
 private:
-	inline void SetHash(size_t Hash) { m_Hash = Hash; }
 	friend class ComponentPool;
+
+	inline void SetHash(size_t Hash) { m_Hash = Hash; }
+	inline void SetOwner(class Entity* Owner) { m_Owner = Owner; }
+	
 	size_t m_Hash = 0u;
+	class Entity* m_Owner = nullptr;
 };
