@@ -4,7 +4,7 @@
 #include "Core/Math/Frustum.h"
 #include "RHI/RHIRenderStates.h"
 
-enum class EViewMode
+enum class EViewMode : uint8_t
 {
 	Lit,
 	UnLit,
@@ -36,16 +36,26 @@ public:
 	inline const std::vector<RHIViewport>& GetViewports() const { return m_Viewports; }
 	inline const std::vector<RHIScissorRect>& GetScissorRects() const { return m_ScissorRects; }
 
+	inline RHITexture* GetRenderSurface() const { return m_RenderSurface.get(); }
+
+	inline EViewMode GetViewMode() const { return m_ViewMode; }
+
 	const Math::Matrix& GetWorldMartix() const;
 	const Math::Matrix& GetViewMatrix() const;
 	const Math::Matrix& GetProjectionMatrix() const;
 	const Math::Vector3& GetViewOriginPosition() const;
 	Math::Frustum GetFrustum() const;
+
+	void SetViewMode(EViewMode ViewMode);
 protected:
 	bool m_InverseDepth = false;
 	bool m_Mirrored = false;
 
+	EViewMode m_ViewMode = EViewMode::Lit;
+
 	const class Camera* m_Camera = nullptr;
+
+	RHITexturePtr m_RenderSurface;
 
 	std::vector<RHIViewport> m_Viewports;
 	std::vector<RHIScissorRect> m_ScissorRects;

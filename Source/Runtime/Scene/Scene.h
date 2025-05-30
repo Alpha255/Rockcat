@@ -24,6 +24,8 @@ public:
 		return InEntity.AddComponent(m_ComponentPool.Allocate<T>());
 	}
 
+	const std::vector<std::shared_ptr<class ISceneView>>& GetViews() const { return m_Views; }
+
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
@@ -39,6 +41,7 @@ private:
 	void MergeFromAssimpScene(const AssimpSceneAsset& AssimpScene);
 
 	std::vector<std::string> m_AssimpScenes;
+	std::vector<std::shared_ptr<class ISceneView>> m_Views;
 	ComponentPool m_ComponentPool;
 };
 

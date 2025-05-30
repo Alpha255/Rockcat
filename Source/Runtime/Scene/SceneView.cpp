@@ -35,6 +35,15 @@ Math::Frustum ISceneView::GetFrustum() const
 	return Math::Frustum();
 }
 
+void ISceneView::SetViewMode(EViewMode ViewMode)
+{
+	m_ViewMode = ViewMode;
+
+	switch (ViewMode)
+	{
+	}
+}
+
 void PlanarSceneView::SetViewport(const RHIViewport& Viewport)
 {
 	m_Viewports[0] = Viewport;
