@@ -37,7 +37,7 @@ struct PreDepthMeshDrawCommandBuilder : public MeshDrawCommandBuilder
 		GfxPipelineCreateInfo.SetShader(VertexShader)
 			.SetShader(FragmentShader);
 
-		SetupShaderParameters(GfxPipelineCreateInfo, SceneView, Mesh.GetTransform(), Mesh.GetMaterialProperty());
+		//SetupShaderParameters(GfxPipelineCreateInfo, SceneView, Mesh.GetTransform(), Mesh.GetMaterialProperty());
 
 		return Command;
 	}

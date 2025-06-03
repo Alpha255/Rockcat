@@ -92,7 +92,7 @@ public:
 	{
 		for (auto It = m_Components.begin(); It != m_Components.end(); ++It)
 		{
-			if ((*It)->GetID() == T::GetID())
+			if ((*It)->GetComponentID() == T::GetID())
 			{
 				m_Components.erase(It);
 				break;
@@ -117,7 +117,7 @@ public:
 			CEREAL_NVP(m_Visible),
 			CEREAL_NVP(m_Selected),
 			CEREAL_NVP(m_Name),
-			CEREAL_NVP(m_ComponentHashes),
+			CEREAL_NVP(m_ComponentHashes)
 		);
 	}
 protected:
@@ -234,7 +234,7 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_NVP(Root),
+			CEREAL_NVP(m_Root),
 			CEREAL_NVP(m_Entities)
 		);
 	}

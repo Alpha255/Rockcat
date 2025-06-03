@@ -25,6 +25,7 @@ public:
 
 		auto Comp = static_cast<T*>(m_Components[Index].get());
 		Comp->SetHash(ComputeHash(T::GetID(), Index));
+		return Comp;
 	}
 
 	template<class T>

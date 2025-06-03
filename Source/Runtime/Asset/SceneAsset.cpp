@@ -2,6 +2,7 @@
 #include "Scene/Scene.h"
 #include "Services/AssetDatabase.h"
 
+#if 0
 class SceneBuilder
 {
 public:
@@ -55,3 +56,4 @@ public:
 		}
 	}
 };
+#endif

@@ -7,7 +7,7 @@
 
 MeshDrawCommand::MeshDrawCommand(const StaticMesh& Mesh)
 	: IndexBuffer(Mesh.GetIndexBuffer())
-	, Material(&Mesh.GetMaterialProperty())
+	//, Material(&Mesh.GetMaterialProperty())
 	, FirstIndex(0u)
 	, NumPrimitives(Mesh.GetNumPrimitive())
 	, NumIndex(Mesh.GetNumIndex())
@@ -39,6 +39,7 @@ void RenderScene::RegisterMeshDrawCommandBuilder(EGeometryPass Filter, MeshDrawC
 
 void RenderScene::UpdateMeshBatch(uint32_t MeshIndex, int32_t Add)
 {
+#if 0
 	if (auto Mesh = m_Scene.GetStaticMesh(MeshIndex))
 	{
 		auto It = m_MeshBatch[MeshIndex].find(Mesh->GetMaterialID());
@@ -48,10 +49,12 @@ void RenderScene::UpdateMeshBatch(uint32_t MeshIndex, int32_t Add)
 		}
 		It->second += Add;
 	}
+#endif
 }
 
 void RenderScene::GetScenePrimitives()
 {
+#if 0
 	if (m_Scene.GetNumPrimitives() > 0u)
 	{
 		m_Primitives.Add.reserve(m_Scene.GetNumPrimitives());
@@ -71,10 +74,12 @@ void RenderScene::GetScenePrimitives()
 			It = Traverser.Next();
 		}
 	}
+#endif
 }
 
 void RenderScene::UpdateScenePrimitives()
 {
+#if 0
 	for (auto& ID : m_Scene.GetAddNodes())
 	{
 		if (auto Node = m_Scene.GetNode(ID))
@@ -95,6 +100,7 @@ void RenderScene::UpdateScenePrimitives()
 			//UpdateMeshBatch(Node.GetDataIndex(), -1);
 		}
 	}
+#endif
 }
 
 void RenderScene::RemoveInvalidCommands()
@@ -121,6 +127,7 @@ void RenderScene::WaitCommandsBuilding()
 
 void RenderScene::BuildMeshDrawCommands(const ISceneView& SceneView)
 {
+#if 0
 	UpdateScenePrimitives();
 	RemoveInvalidCommands();
 
@@ -167,4 +174,5 @@ void RenderScene::BuildMeshDrawCommands(const ISceneView& SceneView)
 	}
 
 	m_Primitives.Clear();
+#endif
 }

@@ -10,12 +10,15 @@ private: \
  		ID = FnvHash(#ComponentType) \
 	}; \
 public: \
-	static inline constexpr ComponentID GetID() { return static_cast<ComponentID>(EComponentType::ID); }
+	static inline constexpr ComponentID GetID() { return static_cast<ComponentID>(EComponentType::ID); } \
+	ComponentID GetComponentID() const override final { return static_cast<ComponentID>(EComponentType::ID); }
 
 class ComponentBase
 {
 public:
 	class Entity* GetOwner() const { return m_Owner; }
+
+	virtual ComponentID GetComponentID() const { return 0u; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)

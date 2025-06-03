@@ -187,22 +187,22 @@ struct MeshData : public MeshProperty
 		*(reinterpret_cast<Vector*>(VerticesData.Data.get() + Offset + Index * Stride)) = Value;
 	}
 
-	inline constexpr size_t GetIndexDataSize() const { return GetNumIndex() * static_cast<size_t>(GetIndexFormat()); }
+	inline size_t GetIndexDataSize() const { return GetNumIndex() * static_cast<size_t>(GetIndexFormat()); }
 
-	inline constexpr size_t GetPositionDataSize() const { return PositionStride * GetNumVertex(); }
-	inline constexpr size_t GetNormalDataSize() const { return HasNormal() ? (NormalStride * GetNumVertex()) : 0u; }
-	inline constexpr size_t GetTangentDataSize() const { return HasTangent() ? (TangentStride * GetNumVertex()) : 0u; }
-	inline constexpr size_t GetUV0DataSize() const { return HasUV0() ? (UVStride * GetNumVertex()) : 0u; }
-	inline constexpr size_t GetUV1DataSize() const { return HasUV1() ? (UVStride * GetNumVertex()) : 0u; }
-	inline constexpr size_t GetColorDataSize() const { return HasColor() ? (ColorStride * GetNumVertex()) : 0u; }
+	inline size_t GetPositionDataSize() const { return PositionStride * GetNumVertex(); }
+	inline size_t GetNormalDataSize() const { return HasNormal() ? (NormalStride * GetNumVertex()) : 0u; }
+	inline size_t GetTangentDataSize() const { return HasTangent() ? (TangentStride * GetNumVertex()) : 0u; }
+	inline size_t GetUV0DataSize() const { return HasUV0() ? (UVStride * GetNumVertex()) : 0u; }
+	inline size_t GetUV1DataSize() const { return HasUV1() ? (UVStride * GetNumVertex()) : 0u; }
+	inline size_t GetColorDataSize() const { return HasColor() ? (ColorStride * GetNumVertex()) : 0u; }
 
-	inline constexpr size_t GetPositionOffset() const { return 0u; }
-	inline constexpr size_t GetNormalOffset() const { return GetPositionOffset() + GetPositionDataSize(); }
-	inline constexpr size_t GetTangentOffset() const { return GetNormalOffset() + GetNormalDataSize(); }
-	inline constexpr size_t GetBiTangentOffset() const { return GetTangentOffset() + GetTangentDataSize(); }
-	inline constexpr size_t GetUV0Offset() const { return GetBiTangentOffset() + GetTangentDataSize(); }
-	inline constexpr size_t GetUV1Offset() const { return GetUV0Offset() + GetUV0DataSize(); }
-	inline constexpr size_t GetColorOffset() const { return GetUV1Offset() + GetUV1DataSize(); }
+	inline size_t GetPositionOffset() const { return 0u; }
+	inline size_t GetNormalOffset() const { return GetPositionOffset() + GetPositionDataSize(); }
+	inline size_t GetTangentOffset() const { return GetNormalOffset() + GetNormalDataSize(); }
+	inline size_t GetBiTangentOffset() const { return GetTangentOffset() + GetTangentDataSize(); }
+	inline size_t GetUV0Offset() const { return GetBiTangentOffset() + GetTangentDataSize(); }
+	inline size_t GetUV1Offset() const { return GetUV0Offset() + GetUV0DataSize(); }
+	inline size_t GetColorOffset() const { return GetUV1Offset() + GetUV1DataSize(); }
 
 	DataBlock VerticesData;
 	DataBlock IndicesData;
@@ -230,7 +230,7 @@ private:
 
 class StaticMesh : public MeshProperty, public StaticMeshBuffers
 {
-protected:
+public:
 	StaticMesh(const MeshProperty& Properties);
 };
 

@@ -66,7 +66,7 @@ public:
 	virtual void WriteTexture(const RHITexture* Texture, const RHIBuffer* StagingBuffer, size_t Size, size_t SrcOffset = 0u) = 0;
 
 	virtual void SetViewport(const RHIViewport& Viewport) = 0;
-	virtual void SetViewports(const RHIViewport* Viewports, uint32_t NumViewports) = 0u;
+	virtual void SetViewports(const RHIViewport* Viewports, uint32_t NumViewports) = 0;
 
 	virtual void SetScissorRect(const RHIScissorRect& ScissorRect) = 0;
 	virtual void SetScissorRects(const RHIScissorRect* ScissorRects, uint32_t NumScissorRects) = 0;
