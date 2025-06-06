@@ -14,5 +14,4 @@ protected:
 private:
 	std::shared_ptr<class Scene> m_Scene;
 	std::shared_ptr<class RenderGraph> m_RenderGraph;
-	std::shared_ptr<class IView> m_View;
 };

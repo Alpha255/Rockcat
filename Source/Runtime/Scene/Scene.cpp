@@ -9,14 +9,14 @@ void Scene::Tick(float ElapsedSeconds)
 	(void)ElapsedSeconds;
 }
 
-void Scene::MergeFromAssimpScene(const AssimpSceneAsset& AssimpScene)
+void Scene::MergeWithAssimpScene(const AssimpSceneAsset& AssimpScene)
 {
 	if (!HasEntity())
 	{
 		SetRoot(AssimpScene.Graph.GetRoot());
 
 		auto& Entities = GetAllEntities();
-		auto& const AssimpSceneEntities = AssimpScene.Graph.GetAllEntities();
+		auto& AssimpSceneEntities = AssimpScene.Graph.GetAllEntities();
 		Entities.insert(Entities.end(), AssimpSceneEntities.begin(), AssimpSceneEntities.end());
 
 		for (auto& Entity : Entities)
@@ -72,7 +72,7 @@ void Scene::PostLoad()
 
 		for (auto AssimpScene : AssimpScenes)
 		{
-			MergeFromAssimpScene(*AssimpScene);
+			MergeWithAssimpScene(*AssimpScene);
 		}
 
 		BaseClass::PostLoad();

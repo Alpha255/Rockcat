@@ -1,7 +1,7 @@
 #include "Scene/SceneView.h"
 #include "Scene/Components/Camera.h"
 
-void ISceneView::SetCamera(const Camera* Camera)
+void ISceneView::SetCamera(Camera* Camera)
 {
 	m_Camera = Camera;
 }

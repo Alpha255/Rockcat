@@ -26,6 +26,15 @@ public:
 
 	const std::vector<std::shared_ptr<class ISceneView>>& GetViews() const { return m_Views; }
 
+	template<class T>
+	std::shared_ptr<class T> AddView()
+	{
+		auto View = m_Views.emplace_back(std::make_shared<T>());
+		auto BindCamera = m_Cameras.emplace_back(std::make_shared<class Camera>());
+		View->SetCamera(BindCamera.get());
+		return View;
+	}
+
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
@@ -38,10 +47,11 @@ public:
 protected:
 	void PostLoad() override;
 private:
-	void MergeFromAssimpScene(const AssimpSceneAsset& AssimpScene);
+	void MergeWithAssimpScene(const AssimpSceneAsset& AssimpScene);
 
 	std::vector<std::string> m_AssimpScenes;
 	std::vector<std::shared_ptr<class ISceneView>> m_Views;
+	std::vector<std::shared_ptr<class Camera>> m_Cameras;
 	ComponentPool m_ComponentPool;
 };
 

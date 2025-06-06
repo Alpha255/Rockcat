@@ -13,6 +13,8 @@ public:
 		ModelViewer
 	};
 
+	Camera() = default;
+
 	Camera(EMode Mode)
 		: Camera(Mode, Math::Vector3(0.0f, 0.0f, 0.0f), Math::Vector3(0.0f, 0.0f, 1.0f), Math::PI_Div4, 1.0, 1.0f, 1000.0f)
 	{
@@ -110,10 +112,6 @@ public:
 		);
 	}
 protected:
-	friend class cereal::access;
-
-	Camera() = default;
-
 	enum EMovement
 	{
 		StrafeLeft,

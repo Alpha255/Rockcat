@@ -25,7 +25,8 @@ public:
 	virtual void SetViewport(const RHIViewport& Viewport) = 0;
 	virtual void SetScissorRect(const RHIScissorRect& ScissorRect) = 0;
 
-	virtual void SetCamera(const class Camera* Camera);
+	virtual void SetCamera(class Camera* Camera);
+	inline class Camera* GetCamera() { return m_Camera; }
 	
 	inline bool IsInverseDepth() const { return m_InverseDepth; }
 	inline void SetInverseDepth(bool InverseDepth) { m_InverseDepth = InverseDepth; }
@@ -53,7 +54,7 @@ protected:
 
 	EViewMode m_ViewMode = EViewMode::Lit;
 
-	const class Camera* m_Camera = nullptr;
+	class Camera* m_Camera = nullptr;
 
 	RHITexturePtr m_RenderSurface;
 
