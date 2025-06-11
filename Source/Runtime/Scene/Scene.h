@@ -27,11 +27,11 @@ public:
 	const std::vector<std::shared_ptr<class ISceneView>>& GetViews() const { return m_Views; }
 
 	template<class T>
-	std::shared_ptr<class T> AddView()
+	std::shared_ptr<T> AddView()
 	{
-		auto View = m_Views.emplace_back(std::make_shared<T>());
-		auto BindCamera = m_Cameras.emplace_back(std::make_shared<class Camera>());
-		View->SetCamera(BindCamera.get());
+		auto View = std::static_pointer_cast<T>(m_Views.emplace_back(std::make_shared<T>()));
+		auto Cam = m_Cameras.emplace_back(std::make_shared<class Camera>());
+		View->SetCamera(Cam.get());
 		return View;
 	}
 

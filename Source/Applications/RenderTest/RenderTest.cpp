@@ -6,7 +6,8 @@
 
 void RenderTest::Initialize()
 {
-	m_Scene = Scene::Load<Scene>("RenderTest.scene");
+	m_Scene = Scene::Load("RenderTest.scene");
+	m_Scene->AddView<PlanarSceneView>();
 	//m_View = std::make_shared<PlanarView>();
 	//m_View->SetCamera(&m_Scene->GetMainCamera());
 	//m_View->SetViewport(RHIViewport(m_Window->GetWidth(), m_Window->GetHeight()));
