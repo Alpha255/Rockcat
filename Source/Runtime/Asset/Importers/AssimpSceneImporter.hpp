@@ -42,10 +42,13 @@ public:
 			aiProcessPreset_TargetRealtime_MaxQuality | 
 			aiProcess_ConvertToLeftHanded |  /// Use DirectX's left-hand coordinate system
 			aiProcess_GenBoundingBoxes |
-			aiProcess_TransformUVCoords);
+			aiProcess_TransformUVCoords |
+			aiProcess_RemoveComponent);
 
 		Assimp::Importer AssimpImporter;
 
+		int32_t RemoveFlags = aiComponent::aiComponent_CAMERAS | aiComponent::aiComponent_LIGHTS;
+		AssimpImporter.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, RemoveFlags);
 #if _DEBUG
 		Assimp::DefaultLogger::set(new AssimpLogger());
 		AssimpImporter.SetProgressHandler(new AssimpProgressHandler(AssimpScene.GetPath()));
