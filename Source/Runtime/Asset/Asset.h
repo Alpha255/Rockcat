@@ -74,16 +74,16 @@ public:
 		LoadFailed
 	};
 
-	using AssetActionCallback = std::function<void(Asset&)>;
+	using AssetLoadCallback = std::function<void(Asset&)>;
 
 	struct AssetLoadCallbacks
 	{
-		AssetActionCallback PreLoadCallback;
-		AssetActionCallback ReadyCallback;
-		AssetActionCallback ReloadCallback;
-		AssetActionCallback LoadFailedCallback;
-		AssetActionCallback CanceledCallback;
-		AssetActionCallback UnloadedCallback;
+		AssetLoadCallback PreLoadCallback;
+		AssetLoadCallback ReadyCallback;
+		AssetLoadCallback ReloadCallback;
+		AssetLoadCallback LoadFailedCallback;
+		AssetLoadCallback CanceledCallback;
+		AssetLoadCallback UnloadedCallback;
 	};
 
 	Asset(const std::filesystem::path& Path)
@@ -234,4 +234,21 @@ public:
 protected:
 private:
 	std::vector<AssetType> m_ValidAssetTypes;
+};
+
+template<class T>
+struct LoadAssetRequest
+{
+	Asset::AssetLoadCallback PreLoadCallback;
+	Asset::AssetLoadCallback ReadyCallback;
+	Asset::AssetLoadCallback ReloadCallback;
+	Asset::AssetLoadCallback LoadFailedCallback;
+	Asset::AssetLoadCallback CanceledCallback;
+	Asset::AssetLoadCallback UnloadedCallback;
+
+	std::shared_ptr<T> Asset;
+
+	std::string Message;
+
+	inline bool IsDone() const { return Asset && Asset->IsReady(); }
 };
