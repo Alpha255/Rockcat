@@ -40,14 +40,13 @@ public:
 	inline RHITexture* GetRenderSurface() const { return m_RenderSurface.get(); }
 
 	inline EViewMode GetViewMode() const { return m_ViewMode; }
+	void SetViewMode(EViewMode ViewMode);
 
 	const Math::Matrix& GetWorldMartix() const;
 	const Math::Matrix& GetViewMatrix() const;
 	const Math::Matrix& GetProjectionMatrix() const;
 	const Math::Vector3& GetViewOriginPosition() const;
 	Math::Frustum GetFrustum() const;
-
-	void SetViewMode(EViewMode ViewMode);
 protected:
 	bool m_InverseDepth = false;
 	bool m_Mirrored = false;
