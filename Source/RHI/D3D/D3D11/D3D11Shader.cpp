@@ -1,76 +1,76 @@
 #include "RHI/D3D/D3D11/D3D11Shader.h"
 #include "RHI/D3D/D3D11/D3D11Device.h"
 
-D3D11VertexShader::D3D11VertexShader(const D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo)
-	: RHIShader(RHICreateInfo)
+D3D11VertexShader::D3D11VertexShader(const D3D11Device& Device, const RHIShaderDesc& Desc)
+	: RHIShader(Desc)
 {
 	VERIFY_D3D(Device->CreateVertexShader(
-		RHICreateInfo.Binary->GetBinary(),
-		RHICreateInfo.Binary->GetSize(),
+		Desc.Binary->GetBinary(),
+		Desc.Binary->GetSize(),
 		nullptr,
 		Reference()));
 }
 
-D3D11HullShader::D3D11HullShader(const D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo)
-	: RHIShader(RHICreateInfo)
+D3D11HullShader::D3D11HullShader(const D3D11Device& Device, const RHIShaderDesc& Desc)
+	: RHIShader(Desc)
 {
 	VERIFY_D3D(Device->CreateHullShader(
-		RHICreateInfo.Binary->GetBinary(),
-		RHICreateInfo.Binary->GetSize(),
+		Desc.Binary->GetBinary(),
+		Desc.Binary->GetSize(),
 		nullptr,
 		Reference()));
 }
 
-D3D11DomainShader::D3D11DomainShader(const D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo)
-	: RHIShader(RHICreateInfo)
+D3D11DomainShader::D3D11DomainShader(const D3D11Device& Device, const RHIShaderDesc& Desc)
+	: RHIShader(Desc)
 {
 	VERIFY_D3D(Device->CreateDomainShader(
-		RHICreateInfo.Binary->GetBinary(),
-		RHICreateInfo.Binary->GetSize(),
+		Desc.Binary->GetBinary(),
+		Desc.Binary->GetSize(),
 		nullptr,
 		Reference()));
 }
 
-D3D11GeometryShader::D3D11GeometryShader(const D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo)
-	: RHIShader(RHICreateInfo)
+D3D11GeometryShader::D3D11GeometryShader(const D3D11Device& Device, const RHIShaderDesc& Desc)
+	: RHIShader(Desc)
 {
 	VERIFY_D3D(Device->CreateGeometryShader(
-		RHICreateInfo.Binary->GetBinary(),
-		RHICreateInfo.Binary->GetSize(),
+		Desc.Binary->GetBinary(),
+		Desc.Binary->GetSize(),
 		nullptr,
 		Reference()));
 }
 
-D3D11ComputeShader::D3D11ComputeShader(const D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo)
-	: RHIShader(RHICreateInfo)
+D3D11ComputeShader::D3D11ComputeShader(const D3D11Device& Device, const RHIShaderDesc& Desc)
+	: RHIShader(Desc)
 {
 	VERIFY_D3D(Device->CreateComputeShader(
-		RHICreateInfo.Binary->GetBinary(),
-		RHICreateInfo.Binary->GetSize(),
+		Desc.Binary->GetBinary(),
+		Desc.Binary->GetSize(),
 		nullptr,
 		Reference()));
 }
 
-D3D11FragmentShader::D3D11FragmentShader(const D3D11Device& Device, const RHIShaderCreateInfo& RHICreateInfo)
-	: RHIShader(RHICreateInfo)
+D3D11FragmentShader::D3D11FragmentShader(const D3D11Device& Device, const RHIShaderDesc& Desc)
+	: RHIShader(Desc)
 {
 	VERIFY_D3D(Device->CreatePixelShader(
-		RHICreateInfo.Binary->GetBinary(),
-		RHICreateInfo.Binary->GetSize(),
+		Desc.Binary->GetBinary(),
+		Desc.Binary->GetSize(),
 		nullptr,
 		Reference()));
 }
 
-D3D11InputLayout::D3D11InputLayout(const D3D11Device& Device, const RHIInputLayoutCreateInfo& RHICreateInfo)
+D3D11InputLayout::D3D11InputLayout(const D3D11Device& Device, const RHIInputLayoutDesc& Desc)
 {
 	std::vector<D3D11_INPUT_ELEMENT_DESC> InputElements;
-	for (uint32_t i = 0u; i < RHICreateInfo.Bindings.size(); ++i)
+	for (uint32_t i = 0u; i < Desc.Bindings.size(); ++i)
 	{
-		for (uint32_t j = 0u; j < RHICreateInfo.Bindings[i].Attributes.size(); ++j)
+		for (uint32_t j = 0u; j < Desc.Bindings[i].Attributes.size(); ++j)
 		{
-			assert(RHICreateInfo.Bindings[i].Binding < ERHILimitations::MaxVertexStreams);
+			assert(Desc.Bindings[i].Binding < ERHILimitations::MaxVertexStreams);
 
-			auto& Layout = RHICreateInfo.Bindings[i].Attributes[j];
+			auto& Layout = Desc.Bindings[i].Attributes[j];
 			D3D11_INPUT_ELEMENT_DESC InputElement
 			{
 #if 0

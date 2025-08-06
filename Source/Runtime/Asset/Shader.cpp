@@ -22,13 +22,13 @@ RHIBuffer* Shader::GetUniformBuffer(RHIDevice& Device)
 {
 	if (!m_UniformBuffer)
 	{
-		RHIBufferCreateInfo CreateInfo;
-		CreateInfo.SetUsages(ERHIBufferUsageFlags::UniformBuffer)
+		RHIBufferDesc Desc;
+		Desc.SetUsages(ERHIBufferUsageFlags::UniformBuffer)
 			.SetAccessFlags(ERHIDeviceAccessFlags::GpuReadCpuWrite)
 			.SetSize(ComputeUniformBufferSize())
 			.SetPermanentStates(ERHIResourceState::UniformBuffer);
 
-		m_UniformBuffer = Device.CreateBuffer(CreateInfo);
+		m_UniformBuffer = Device.CreateBuffer(Desc);
 	}
 
 	return m_UniformBuffer.get();

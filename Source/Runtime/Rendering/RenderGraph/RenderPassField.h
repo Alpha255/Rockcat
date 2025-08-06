@@ -41,29 +41,29 @@ public:
 	template<class T>
 	inline T* GetRHI() const { return Cast<T>(m_RHIResource.get()); }
 
-	const RHITextureCreateInfo& GetTextureCreateInfo() const
+	const RHITextureDesc& GetTextureDesc() const
 	{
-		assert(m_Type == EType::Texture && m_ResourceCreateInfo.has_value());
-		return std::get<RHITextureCreateInfo>(m_ResourceCreateInfo.value());
+		assert(m_Type == EType::Texture && m_ResourceDesc.has_value());
+		return std::get<RHITextureDesc>(m_ResourceDesc.value());
 	}
-	RHITextureCreateInfo& GetTextureCreateInfo()
+	RHITextureDesc& GetTextureDesc()
 	{
-		assert(m_Type == EType::Texture && m_ResourceCreateInfo.has_value());
-		return std::get<RHITextureCreateInfo>(m_ResourceCreateInfo.value());
+		assert(m_Type == EType::Texture && m_ResourceDesc.has_value());
+		return std::get<RHITextureDesc>(m_ResourceDesc.value());
 	}
 
-	const RHIBufferCreateInfo& GetBufferCreateInfo() const
+	const RHIBufferDesc& GetBufferDesc() const
 	{
-		assert(m_Type == EType::Buffer && m_ResourceCreateInfo.has_value());
-		return std::get<RHIBufferCreateInfo>(m_ResourceCreateInfo.value());
+		assert(m_Type == EType::Buffer && m_ResourceDesc.has_value());
+		return std::get<RHIBufferDesc>(m_ResourceDesc.value());
 	}
-	RHIBufferCreateInfo& GetBufferCreateInfo()
+	RHIBufferDesc& GetBufferDesc()
 	{
-		assert(m_Type == EType::Buffer && m_ResourceCreateInfo.has_value());
-		return std::get<RHIBufferCreateInfo>(m_ResourceCreateInfo.value());
+		assert(m_Type == EType::Buffer && m_ResourceDesc.has_value());
+		return std::get<RHIBufferDesc>(m_ResourceDesc.value());
 	}
 protected:
-	using ResourceCreateInfo = std::variant<RHIBufferCreateInfo, RHITextureCreateInfo>;
+	using ResourceDesc = std::variant<RHIBufferDesc, RHITextureDesc>;
 private:
 	void CreateAsTexture();
 	void CreateAsBuffer();
@@ -76,7 +76,7 @@ private:
 	std::string_view m_Name;
 
 	RHIResourcePtr m_RHIResource;
-	std::optional<ResourceCreateInfo> m_ResourceCreateInfo;
+	std::optional<ResourceDesc> m_ResourceDesc;
 };
 
 ENUM_FLAG_OPERATORS(RDGResource::EVisibility)

@@ -10,8 +10,8 @@ public:
 	{
 	}
 
-	const RHIGraphicsPipeline* GetGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo);
-	const RHIComputePipeline* GetComputePipeline(const RHIComputePipelineCreateInfo& CreateInfo);
+	const RHIGraphicsPipeline* GetGraphicsPipeline(const RHIGraphicsPipelineDesc& Desc);
+	const RHIComputePipeline* GetComputePipeline(const RHIComputePipelineDesc& Desc);
 protected:
 	template<class TDescription, class TPipeline>
 	struct RHIPipelineProxy
@@ -26,8 +26,8 @@ protected:
 		}
 	};
 
-	using RHIGraphicsPipelineProxy = RHIPipelineProxy<RHIGraphicsPipelineCreateInfo, RHIGraphicsPipeline>;
-	using RHIComputePipelineProxy = RHIPipelineProxy<RHIComputePipelineCreateInfo, RHIComputePipeline>;
+	using RHIGraphicsPipelineProxy = RHIPipelineProxy<RHIGraphicsPipelineDesc, RHIGraphicsPipeline>;
+	using RHIComputePipelineProxy = RHIPipelineProxy<RHIComputePipelineDesc, RHIComputePipeline>;
 
 	void RegisterShaderPipelineMap(std::string_view ShaderFile, RHIGraphicsPipelineProxy* Proxy);
 private:

@@ -6,25 +6,25 @@
 class D3D11RasterizerState : public D3DHwResource<ID3D11RasterizerState>
 {
 public:
-	D3D11RasterizerState(const class D3D11Device& Device, const RHIRasterizationStateCreateInfo& RHICreateInfo, const RHIMultisampleStateCreateInfo& MultisampleStateDesc);
+	D3D11RasterizerState(const class D3D11Device& Device, const RHIRasterizationStateDesc& Desc, const RHIMultisampleStateDesc& MultisampleStateDesc);
 };
 
 class D3D11BlendState : public D3DHwResource<ID3D11BlendState>
 {
 public:
-	D3D11BlendState(const class D3D11Device& Device, const RHIRasterizationStateCreateInfo& RHICreateInfo, const RHIMultisampleStateCreateInfo& MultisampleStateDesc);
+	D3D11BlendState(const class D3D11Device& Device, const RHIRasterizationStateDesc& Desc, const RHIMultisampleStateDesc& MultisampleStateDesc);
 };
 
 class D3D11DepthStencilState : public D3DHwResource<ID3D11DepthStencilState>
 {
 public:
-	D3D11DepthStencilState(const class D3D11Device& Device, const RHIDepthStencilStateCreateInfo& RHICreateInfo);
+	D3D11DepthStencilState(const class D3D11Device& Device, const RHIDepthStencilStateDesc& Desc);
 };
 
 class D3D11GraphicsPipeline
 {
 public:
-	D3D11GraphicsPipeline(const class D3D11Device& Device, RHIGraphicsPipelineCreateInfo& RHICreateInfo);
+	D3D11GraphicsPipeline(const class D3D11Device& Device, RHIGraphicsPipelineDesc& Desc);
 protected:
 private:
 	std::unique_ptr<D3D11RasterizerState> m_RasterizerState = nullptr;

@@ -248,49 +248,49 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 	VulkanMemoryAllocator::Create(*this);
 }
 
-RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderCreateInfo& CreateInfo)
+RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderDesc& Desc)
 {
-	return std::make_shared<VulkanShader>(*this, CreateInfo);
+	return std::make_shared<VulkanShader>(*this, Desc);
 }
 
-RHITexturePtr VulkanDevice::CreateTexture(const RHITextureCreateInfo& CreateInfo)
+RHITexturePtr VulkanDevice::CreateTexture(const RHITextureDesc& Desc)
 {
-	return std::make_shared<VulkanTexture>(*this, CreateInfo);
+	return std::make_shared<VulkanTexture>(*this, Desc);
 }
 
-RHIInputLayoutPtr VulkanDevice::CreateInputLayout(const RHIInputLayoutCreateInfo& CreateInfo)
+RHIInputLayoutPtr VulkanDevice::CreateInputLayout(const RHIInputLayoutDesc& Desc)
 {
-	return std::make_shared<VulkanInputLayout>(CreateInfo);
+	return std::make_shared<VulkanInputLayout>(Desc);
 }
 
-RHIFrameBufferPtr VulkanDevice::CreateFrameBuffer(const RHIFrameBufferCreateInfo& /*CreateInfo*/)
+RHIFrameBufferPtr VulkanDevice::CreateFrameBuffer(const RHIFrameBufferDesc& /*Desc*/)
 {
 	return RHIFrameBufferPtr();
 }
 
-RHIGraphicsPipelinePtr VulkanDevice::CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo)
+RHIGraphicsPipelinePtr VulkanDevice::CreateGraphicsPipeline(const RHIGraphicsPipelineDesc& Desc)
 {
-	return std::make_shared<VulkanGraphicsPipeline>(*this, m_PipelineCache->GetNative(), CreateInfo);
+	return std::make_shared<VulkanGraphicsPipeline>(*this, m_PipelineCache->GetNative(), Desc);
 }
 
-RHIPipelineStatePtr VulkanDevice::CreatePipelineState(const RHIGraphicsPipelineCreateInfo& CreateInfo)
+RHIPipelineStatePtr VulkanDevice::CreatePipelineState(const RHIGraphicsPipelineDesc& Desc)
 {
-	return std::make_shared<VulkanPipelineState>(*this, CreateInfo);
+	return std::make_shared<VulkanPipelineState>(*this, Desc);
 }
 
-RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferCreateInfo& CreateInfo)
+RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferDesc& Desc)
 {
-	return std::make_shared<VulkanBuffer>(*this, CreateInfo);
+	return std::make_shared<VulkanBuffer>(*this, Desc);
 }
 
-RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerCreateInfo& CreateInfo)
+RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerDesc& Desc)
 {
-	return std::make_shared<VulkanSampler>(*this, CreateInfo);
+	return std::make_shared<VulkanSampler>(*this, Desc);
 }
 
-RHISwapchainPtr VulkanDevice::CreateSwapchain(const RHISwapchainCreateInfo& CreateInfo)
+RHISwapchainPtr VulkanDevice::CreateSwapchain(const RHISwapchainDesc& Desc)
 {
-	return std::make_shared<VulkanSwapchain>(*this, CreateInfo);
+	return std::make_shared<VulkanSwapchain>(*this, Desc);
 }
 
 RHICommandListContext* VulkanDevice::GetImmediateCommandListContext(ERHIDeviceQueue Queue)

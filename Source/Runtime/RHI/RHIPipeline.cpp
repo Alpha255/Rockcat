@@ -1,9 +1,9 @@
 #include "Asset/Shader.h"
 #include "RHI/RHIPipeline.h"
 
-RHIPipelineState::RHIPipelineState(const RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo)
+RHIPipelineState::RHIPipelineState(const RHIGraphicsPipelineDesc& Desc)
 {
-	for (auto& Shader : GfxPipelineCreateInfo.ShaderPipeline)
+	for (auto& Shader : Desc.ShaderPipeline)
 	{
 		if (!Shader)
 		{

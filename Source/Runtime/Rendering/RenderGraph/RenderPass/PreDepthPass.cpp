@@ -12,11 +12,11 @@ struct PreDepthMeshDrawCommandBuilder : public MeshDrawCommandBuilder
 		auto Command = std::make_shared<MeshDrawCommand>(Mesh);
 		auto VertexShader = std::make_shared<GenericVS>();
 		auto FragmentShader = std::make_shared<DepthOnlyFS>();
-		auto& GfxPipelineCreateInfo = Command->GraphicsPipelineCreateInfo;
+		auto& Desc = Command->PipelineDesc;
 		
-		GfxPipelineCreateInfo.SetPrimitiveTopology(Mesh.GetPrimitiveTopology());
+		Desc.SetPrimitiveTopology(Mesh.GetPrimitiveTopology());
 
-		GfxPipelineCreateInfo.DepthStencilState.SetEnableDepth(true)
+		Desc.DepthStencilState.SetEnableDepth(true)
 			.SetEnableDepthWrite(true)
 			.SetDepthCompareFunc(SceneView.IsInverseDepth() ? ERHICompareFunc::LessOrEqual : ERHICompareFunc::GreaterOrEqual);
 
@@ -34,10 +34,10 @@ struct PreDepthMeshDrawCommandBuilder : public MeshDrawCommandBuilder
 
 		VertexShader->SetDefine("_HAS_NORMAL_", false);
 
-		GfxPipelineCreateInfo.SetShader(VertexShader)
+		Desc.SetShader(VertexShader)
 			.SetShader(FragmentShader);
 
-		//SetupShaderParameters(GfxPipelineCreateInfo, SceneView, Mesh.GetTransform(), Mesh.GetMaterialProperty());
+		//SetupShaderParameters(Desc, SceneView, Mesh.GetTransform(), Mesh.GetMaterialProperty());
 
 		return Command;
 	}

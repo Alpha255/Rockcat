@@ -61,10 +61,10 @@ RHIUploadManager::StagingBuffer RHIUploadManager::AcquireStagingBuffer(RHIComman
 		}
 	}
 
-	RHIBufferCreateInfo CreateInfo;
-	CreateInfo.SetSize(std::max(AlignedSize, GetDefaultBlockSize()))
+	RHIBufferDesc Desc;
+	Desc.SetSize(std::max(AlignedSize, GetDefaultBlockSize()))
 		.SetAccessFlags(ERHIDeviceAccessFlags::GpuReadCpuWrite);
-	t_StagingBlock.Buffer = m_Device.CreateBuffer(CreateInfo);
+	t_StagingBlock.Buffer = m_Device.CreateBuffer(Desc);
 	t_StagingBlock.Offset = AlignedSize;
 	std::atomic_ref<uint32_t>(t_StagingBlock.NumAlloc).fetch_add(1u);
 

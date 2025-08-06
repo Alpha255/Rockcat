@@ -1,7 +1,7 @@
 #include "RHI/Vulkan/VulkanRenderPass.h"
 #include "RHI/Vulkan/VulkanDevice.h"
 
-VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIRenderPassCreateInfo& CreateInfo)
+VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIRenderPassDesc& Desc)
 	: VkHwResource(Device)
 {
 	/*********************************************************************************************************************
@@ -31,17 +31,17 @@ VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIRenderPa
 		For attachments with a color format, this uses the access type VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT.
 	*********************************************************************************************************************/
 
-	assert(CreateInfo.ColorAttachments.size() > 0u);
+	assert(Desc.ColorAttachments.size() > 0u);
 
-	std::vector<vk::AttachmentReference> ColorAttachmentReferences(CreateInfo.ColorAttachments.size());
-	std::vector<vk::AttachmentDescription> AttachmentDescriptions(CreateInfo.ColorAttachments.size());
+	std::vector<vk::AttachmentReference> ColorAttachmentReferences(Desc.ColorAttachments.size());
+	std::vector<vk::AttachmentDescription> AttachmentDescriptions(Desc.ColorAttachments.size());
 
 	vk::AttachmentReference DepthAttachmentReference;
 
-	auto SampleCount = GetSampleCount(CreateInfo.SampleCount);
-	for (uint32_t Index = 0u; Index < CreateInfo.ColorAttachments.size(); ++Index)
+	auto SampleCount = GetSampleCount(Desc.SampleCount);
+	for (uint32_t Index = 0u; Index < Desc.ColorAttachments.size(); ++Index)
 	{
-		auto& Attachment = CreateInfo.ColorAttachments[Index];
+		auto& Attachment = Desc.ColorAttachments[Index];
 
 		AttachmentDescriptions[Index]
 			.setFormat(GetFormat(Attachment.Format))
@@ -58,9 +58,9 @@ VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIRenderPa
 			.setLayout(vk::ImageLayout::eAttachmentOptimal);
 	}
 
-	if (CreateInfo.HasDepthStencil())
+	if (Desc.HasDepthStencil())
 	{
-		auto& Attachment = CreateInfo.DepthStencilAttachment;
+		auto& Attachment = Desc.DepthStencilAttachment;
 
 		AttachmentDescriptions.emplace_back(vk::AttachmentDescription())
 			.setFormat(GetFormat(Attachment.Format))
@@ -108,50 +108,50 @@ VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIRenderPa
 	VERIFY_VK(GetNativeDevice().createRenderPass(&RenderPassCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
-VulkanFramebuffer::VulkanFramebuffer(const VulkanDevice& Device, vk::RenderPass CompatibleRenderPass, const RHIFrameBufferCreateInfo& CreateInfo)
+VulkanFramebuffer::VulkanFramebuffer(const VulkanDevice& Device, vk::RenderPass CompatibleRenderPass, const RHIFrameBufferDesc& Desc)
 	: VkHwResource(Device)
-	, RHIFrameBuffer(CreateInfo)
+	, RHIFrameBuffer(Desc)
 {
 	std::vector<vk::ImageView> Attachments;
-	for (auto& Color : CreateInfo.ColorAttachments)
+	for (auto& Color : Desc.ColorAttachments)
 	{
 		assert(Color.Texture && 
-			Color.GetWidth() == CreateInfo.Width &&
-			Color.GetHeight() == CreateInfo.Height && 
-			Color.GetArrayLayers() == CreateInfo.ArrayLayers);
+			Color.GetWidth() == Desc.Width &&
+			Color.GetHeight() == Desc.Height && 
+			Color.GetArrayLayers() == Desc.ArrayLayers);
 
 	//	if (ColorAttachment.Image)
 	//	{
 	//		auto Image = Cast<VulkanImage>(ColorAttachment.Image);
 	//		assert(Image &&
-	//			Image->GetWidth() == CreateInfo.Width &&
-	//			Image->GetHeight() == CreateInfo.Height &&
-	//			Image->GetArrayLayers() == CreateInfo.ArrayLayers);
+	//			Image->GetWidth() == Desc.Width &&
+	//			Image->GetHeight() == Desc.Height &&
+	//			Image->GetArrayLayers() == Desc.ArrayLayers);
 
 	//		//Attachments.push_back(Image->GetOrCrateImageView(AllSubresource));
 	//	}
 	//}
-	//if (CreateInfo.DepthStencilAttachment.Image)
+	//if (Desc.DepthStencilAttachment.Image)
 	//{
-	//	auto Image = Cast<VulkanImage>(CreateInfo.DepthStencilAttachment.Image);
+	//	auto Image = Cast<VulkanImage>(Desc.DepthStencilAttachment.Image);
 	//	assert(Image);
 
 	//	//Attachments.push_back(Image->GetOrCrateImageView(AllSubresource));
 	}
 
-	if (CreateInfo.HasDepthStencil())
+	if (Desc.HasDepthStencil())
 	{
-		assert(CreateInfo.DepthStencilAttachment.GetWidth() == CreateInfo.Width && 
-			CreateInfo.DepthStencilAttachment.GetHeight() == CreateInfo.Height && 
-			CreateInfo.DepthStencilAttachment.GetArrayLayers() == CreateInfo.ArrayLayers);
+		assert(Desc.DepthStencilAttachment.GetWidth() == Desc.Width && 
+			Desc.DepthStencilAttachment.GetHeight() == Desc.Height && 
+			Desc.DepthStencilAttachment.GetArrayLayers() == Desc.ArrayLayers);
 	}
 
 	vk::FramebufferCreateInfo FrameBufferCreateInfo;
 	FrameBufferCreateInfo.setRenderPass(CompatibleRenderPass)
 		.setAttachments(Attachments)
-		.setWidth(CreateInfo.Width)
-		.setHeight(CreateInfo.Height)
-		.setLayers(CreateInfo.ArrayLayers);
+		.setWidth(Desc.Width)
+		.setHeight(Desc.Height)
+		.setLayers(Desc.ArrayLayers);
 
 	VERIFY_VK(GetNativeDevice().createFramebuffer(&FrameBufferCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }

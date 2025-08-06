@@ -13,11 +13,11 @@ const RHIShader* ShaderLibrary::ShaderPermutation::GetOrCreateRHI(RHIDevice& Dev
 {
 	if (!Module && Binary->IsValid())
 	{
-		RHIShaderCreateInfo ShaderCreateInfo;
-		ShaderCreateInfo.SetStage(Binary->GetStage())
+		RHIShaderDesc Desc;
+		Desc.SetStage(Binary->GetStage())
 			.SetShaderBinary(Binary.get())
 			.SetName(Binary->GetName().string());
-		Module = Device.CreateShader(ShaderCreateInfo);
+		Module = Device.CreateShader(Desc);
 	}
 
 	return Module.get();

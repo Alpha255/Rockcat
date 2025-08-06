@@ -6,7 +6,7 @@
 class D3D12InputLayout : public RHIInputLayout
 {
 public:
-	D3D12InputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo);
+	D3D12InputLayout(const RHIInputLayoutDesc& Desc);
 
 	const std::vector<D3D12_INPUT_ELEMENT_DESC>& GetInputElements() const { return m_Elements; }
 protected:
@@ -17,5 +17,5 @@ private:
 class D3D12Shader : public RHIShader
 {
 public:
-	D3D12Shader(const RHIShaderCreateInfo& RHICreateInfo);
+	D3D12Shader(const RHIShaderDesc& Desc);
 };

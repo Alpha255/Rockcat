@@ -30,8 +30,8 @@ public:
 	{
 		if (!s_Resource)
 		{
-			RHISamplerCreateInfo RHICreateInfo;
-			RHICreateInfo.SetMinMagFilter(MinMagFilter)
+			RHISamplerDesc Desc;
+			Desc.SetMinMagFilter(MinMagFilter)
 				.SetMipmapMode(MipmapMode)
 				.SetSamplerReduction(Reduction)
 				.SetAddressModeU(AddressModeU)
@@ -43,7 +43,7 @@ public:
 				.SetMipLODBias(0.0f)
 				.SetMinLOD(0.0f)
 				.SetMaxLOD(0.0f);
-			s_Resource = Device.CreateSampler(RHICreateInfo);
+			s_Resource = Device.CreateSampler(Desc);
 		}
 		return s_Resource;
 	}
@@ -71,8 +71,8 @@ class RHIRasterizationStateStatic : public RHIStaticResource<RHIRasterizationSta
 public:
 	static std::shared_ptr<RHIRasterizationState> Get(const RHIDevice& Device)
 	{
-		RHIRasterizationStateCreateInfo RHICreateInfo;
-		RHICreateInfo.SetPolygonMode(PolygonMode)
+		RHIRasterizationStateDesc Desc;
+		Desc.SetPolygonMode(PolygonMode)
 			.SetCullMode(CullMode)
 			.SetFrontFace(FrontFace)
 			.SetEnableDepthClamp(EnableDepthClamp);
@@ -102,8 +102,8 @@ class RHIDepthStencilStateStatic : public RHIStaticState<RHIDepthStencilState>
 public:
 	static std::shared_ptr<RHIDepthStencilState> Get(RHIDevice* Device)
 	{
-		RHIDepthStencilStateCreateInfo CreateInfo;
-		CreateInfo.SetEnableDepth(EnableDepth)
+		RHIDepthStencilStateDesc Desc;
+		Desc.SetEnableDepth(EnableDepth)
 			.SetEnableDepthWrite(EnableDepthWrite)
 			.SetEnableDepthBoundsTest(EnableDepthBoundsTest)
 			.SetEnableStencil(EnableStencil)

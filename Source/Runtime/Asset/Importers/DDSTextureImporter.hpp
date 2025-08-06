@@ -40,67 +40,67 @@ public:
 		auto BitData = Data + Offset;
 
 		bool Cubemap = false;
-		RHITextureCreateInfo CreateInfo;
-		CreateInfo.SetWidth(Header->width)
+		RHITextureDesc Desc;
+		Desc.SetWidth(Header->width)
 			.SetHeight(Header->height)
 			.SetDepth(Header->depth == 0u ? 1u : Header->depth)
 			.SetNumMipLevel(Header->mipMapCount == 0u ? 1u : Header->mipMapCount)
 			.SetUsages(ERHIBufferUsageFlags::ShaderResource)
 			.SetPermanentState(ERHIResourceState::ShaderResource);
-		assert(CreateInfo.NumMipLevel <= D3D11_REQ_MIP_LEVELS);
+		assert(Desc.NumMipLevel <= D3D11_REQ_MIP_LEVELS);
 
 		if (DXT10Header)
 		{
 			auto DXTHeader = reinterpret_cast<const DirectX::DDS_HEADER_DXT10*>(reinterpret_cast<const uint8_t*>(Header) + sizeof(DirectX::DDS_HEADER));
 			assert(DXTHeader && DXTHeader->arraySize);
 
-			CreateInfo.SetNumArrayLayer(DXTHeader->arraySize);
+			Desc.SetNumArrayLayer(DXTHeader->arraySize);
 			assert(DXTHeader->dxgiFormat != DXGI_FORMAT_AI44 &&
 				DXTHeader->dxgiFormat != DXGI_FORMAT_IA44 &&
 				DXTHeader->dxgiFormat != DXGI_FORMAT_P8 &&
 				DXTHeader->dxgiFormat != DXGI_FORMAT_A8P8);
 
-			CreateInfo.SetFormat(RHI::GetRHIFormat(DXTHeader->dxgiFormat));
+			Desc.SetFormat(RHI::GetRHIFormat(DXTHeader->dxgiFormat));
 			switch (DXTHeader->resourceDimension)
 			{
 			case D3D11_RESOURCE_DIMENSION_TEXTURE1D:
 				if (Header->flags & DDS_HEIGHT)
 				{
-					assert(CreateInfo.Height == 1u);
+					assert(Desc.Height == 1u);
 				}
-				CreateInfo.SetHeight(1u)
+				Desc.SetHeight(1u)
 					.SetDepth(1u)
-					.SetDimension(CreateInfo.NumArrayLayer > 1u ? ERHITextureDimension::T_1D_Array : ERHITextureDimension::T_1D);
+					.SetDimension(Desc.NumArrayLayer > 1u ? ERHITextureDimension::T_1D_Array : ERHITextureDimension::T_1D);
 				break;
 			case D3D11_RESOURCE_DIMENSION_TEXTURE2D:
 				if (DXTHeader->miscFlag & D3D11_RESOURCE_MISC_TEXTURECUBE)
 				{
-					CreateInfo.SetDimension(CreateInfo.NumArrayLayer > 1u ? ERHITextureDimension::T_Cube_Array : ERHITextureDimension::T_Cube)
-						.SetNumArrayLayer(CreateInfo.NumArrayLayer * 6u);
+					Desc.SetDimension(Desc.NumArrayLayer > 1u ? ERHITextureDimension::T_Cube_Array : ERHITextureDimension::T_Cube)
+						.SetNumArrayLayer(Desc.NumArrayLayer * 6u);
 					Cubemap = true;
 				}
 				else
 				{
-					CreateInfo.SetDimension(CreateInfo.NumArrayLayer > 1u ? ERHITextureDimension::T_2D_Array : ERHITextureDimension::T_2D);
+					Desc.SetDimension(Desc.NumArrayLayer > 1u ? ERHITextureDimension::T_2D_Array : ERHITextureDimension::T_2D);
 				}
-				CreateInfo.SetDepth(1u);
+				Desc.SetDepth(1u);
 				break;
 			case D3D11_RESOURCE_DIMENSION_TEXTURE3D:
 				assert(Header->flags & DDS_HEADER_FLAGS_VOLUME);
-				CreateInfo.SetDimension(ERHITextureDimension::T_3D);
+				Desc.SetDimension(ERHITextureDimension::T_3D);
 				break;
 			case D3D11_RESOURCE_DIMENSION_BUFFER:
-				CreateInfo.SetDimension(ERHITextureDimension::Buffer);
+				Desc.SetDimension(ERHITextureDimension::Buffer);
 				break;
 			}
 		}
 		else
 		{
-			CreateInfo.SetFormat(RHI::GetRHIFormat(GetDXGIFormat(Header->ddspf)));
+			Desc.SetFormat(RHI::GetRHIFormat(GetDXGIFormat(Header->ddspf)));
 
 			if (Header->flags & DDS_HEADER_FLAGS_VOLUME)
 			{
-				CreateInfo.SetDimension(ERHITextureDimension::T_3D);
+				Desc.SetDimension(ERHITextureDimension::T_3D);
 			}
 			else
 			{
@@ -108,43 +108,43 @@ public:
 				{
 					assert((Header->caps2 & DDS_CUBEMAP_ALLFACES) == DDS_CUBEMAP_ALLFACES);
 					Cubemap = true;
-					CreateInfo.SetDimension(ERHITextureDimension::T_Cube)
-						.SetNumArrayLayer(CreateInfo.NumArrayLayer * 6u);
+					Desc.SetDimension(ERHITextureDimension::T_Cube)
+						.SetNumArrayLayer(Desc.NumArrayLayer * 6u);
 				}
 				else
 				{
-					CreateInfo.SetDimension(CreateInfo.NumArrayLayer > 1u ? ERHITextureDimension::T_2D_Array : ERHITextureDimension::T_2D);
+					Desc.SetDimension(Desc.NumArrayLayer > 1u ? ERHITextureDimension::T_2D_Array : ERHITextureDimension::T_2D);
 				}
 			}
 		}
 
-		switch (CreateInfo.Dimension)
+		switch (Desc.Dimension)
 		{
 		case ERHITextureDimension::T_2D:
 		case ERHITextureDimension::T_2D_Array:
 			assert(
-				CreateInfo.NumArrayLayer <= D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION &&
-				CreateInfo.Width <= D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION &&
-				CreateInfo.Height <= D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION);
+				Desc.NumArrayLayer <= D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION &&
+				Desc.Width <= D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION &&
+				Desc.Height <= D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION);
 			break;
 		case ERHITextureDimension::T_Cube:
 		case ERHITextureDimension::T_Cube_Array:
 			assert(
-				CreateInfo.NumArrayLayer <= D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION &&
-				CreateInfo.Width <= D3D11_REQ_TEXTURECUBE_DIMENSION &&
-				CreateInfo.Height <= D3D11_REQ_TEXTURECUBE_DIMENSION);
+				Desc.NumArrayLayer <= D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION &&
+				Desc.Width <= D3D11_REQ_TEXTURECUBE_DIMENSION &&
+				Desc.Height <= D3D11_REQ_TEXTURECUBE_DIMENSION);
 			break;
 		case ERHITextureDimension::T_3D:
 			assert(
-				CreateInfo.NumArrayLayer == 1u &&
-				CreateInfo.Width <= D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION &&
-				CreateInfo.Height <= D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION &&
-				CreateInfo.Depth <= D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION);
+				Desc.NumArrayLayer == 1u &&
+				Desc.Width <= D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION &&
+				Desc.Height <= D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION &&
+				Desc.Depth <= D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION);
 			break;
 		}
 
-		CreateInfo.SetInitialData(DataBlock(BitSize, BitData));
-		//DDSImage.CreateRHI(RenderService::Get().GetBackend().GetDevice(), CreateInfo);
+		Desc.SetInitialData(DataBlock(BitSize, BitData));
+		//DDSImage.CreateRHI(RenderService::Get().GetBackend().GetDevice(), Desc);
 
 		return true;
 	}

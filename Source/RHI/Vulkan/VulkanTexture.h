@@ -5,7 +5,7 @@
 class VulkanTexture final : public VkHwResource<vk::Image>, public RHITexture
 {
 public:
-	VulkanTexture(const class VulkanDevice& Device, const RHITextureCreateInfo& CreateInfo, vk::Image Image = vk::Image());
+	VulkanTexture(const class VulkanDevice& Device, const RHITextureDesc& Desc, vk::Image Image = vk::Image());
 
 	~VulkanTexture();
 
@@ -38,7 +38,7 @@ private:
 class VulkanSampler final : public VkHwResource<vk::Sampler>, public RHISampler
 {
 public:
-	VulkanSampler(const class VulkanDevice& Device, const RHISamplerCreateInfo& CreateInfo);
+	VulkanSampler(const class VulkanDevice& Device, const RHISamplerDesc& Desc);
 
 	~VulkanSampler() = default;
 };

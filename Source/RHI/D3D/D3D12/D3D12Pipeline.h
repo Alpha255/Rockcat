@@ -6,8 +6,8 @@
 class D3D12FrameBuffer : public RHIFrameBuffer
 {
 public:
-	D3D12FrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo)
-		: RHIFrameBuffer(RHICreateInfo)
+	D3D12FrameBuffer(const RHIFrameBufferDesc& Desc)
+		: RHIFrameBuffer(Desc)
 	{
 	}
 };
@@ -15,16 +15,16 @@ public:
 class D3D12RootSignature : public D3DHwResource<ID3D12RootSignature>
 {
 public:
-	D3D12RootSignature(const class D3D12Device& Device, const RHIGraphicsPipelineCreateInfo& RHICreateInfo);
+	D3D12RootSignature(const class D3D12Device& Device, const RHIGraphicsPipelineDesc& Desc);
 protected:
-	void Create(const class D3D12Device& Device, const std::vector<D3D12_ROOT_PARAMETER1>& Params, const RHIGraphicsPipelineCreateInfo& RHICreateInfo);
+	void Create(const class D3D12Device& Device, const std::vector<D3D12_ROOT_PARAMETER1>& Params, const RHIGraphicsPipelineDesc& Desc);
 private:
 };
 
 class D3D12GraphicsPipelineState : public D3DHwResource<ID3D12PipelineState>
 {
 public:
-	D3D12GraphicsPipelineState(const class D3D12Device& Device, const RHIGraphicsPipelineCreateInfo& RHICreateInfo);
+	D3D12GraphicsPipelineState(const class D3D12Device& Device, const RHIGraphicsPipelineDesc& Desc);
 protected:
 #if 0
 	void WriteImage(EShaderStage Stage, uint32_t Binding, IImage* Image) override final;
@@ -38,7 +38,7 @@ private:
 class D3D12GraphicsPipeline : public RHIPipeline
 {
 public:
-	D3D12GraphicsPipeline(const class D3D12Device& Device, const RHIGraphicsPipelineCreateInfo& RHICreateInfo);
+	D3D12GraphicsPipeline(const class D3D12Device& Device, const RHIGraphicsPipelineDesc& Desc);
 protected:
 private:
 };

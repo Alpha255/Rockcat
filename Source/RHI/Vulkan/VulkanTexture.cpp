@@ -4,33 +4,33 @@
 #include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/RHIUploadManager.h"
 
-VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateInfo& CreateInfo, vk::Image Image)
+VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureDesc& Desc, vk::Image Image)
 	: VkHwResource(Device)
-	, RHITexture(CreateInfo)
+	, RHITexture(Desc)
 {
-	assert(CreateInfo.Format != ERHIFormat::Unknown && CreateInfo.Dimension != ERHITextureDimension::Unknown);
-	assert(CreateInfo.NumArrayLayer <= GetDevice().GetPhysicalDeviceLimits().maxImageArrayLayers);
+	assert(Desc.Format != ERHIFormat::Unknown && Desc.Dimension != ERHITextureDimension::Unknown);
+	assert(Desc.NumArrayLayer <= GetDevice().GetPhysicalDeviceLimits().maxImageArrayLayers);
 	assert(
-		(CreateInfo.Dimension == ERHITextureDimension::T_1D && CreateInfo.Width <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension1D) ||
-		((CreateInfo.Dimension == ERHITextureDimension::T_2D || CreateInfo.Dimension == ERHITextureDimension::T_2D_Array) &&
-			CreateInfo.Width <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension2D &&
-			CreateInfo.Height <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension2D) ||
-		((CreateInfo.Dimension == ERHITextureDimension::T_Cube || CreateInfo.Dimension == ERHITextureDimension::T_Cube_Array) &&
-			CreateInfo.Width <= GetDevice().GetPhysicalDeviceLimits().maxImageDimensionCube &&
-			CreateInfo.Height <= GetDevice().GetPhysicalDeviceLimits().maxImageDimensionCube) ||
-		(CreateInfo.Dimension == ERHITextureDimension::T_3D && CreateInfo.Height <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension3D));
+		(Desc.Dimension == ERHITextureDimension::T_1D && Desc.Width <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension1D) ||
+		((Desc.Dimension == ERHITextureDimension::T_2D || Desc.Dimension == ERHITextureDimension::T_2D_Array) &&
+			Desc.Width <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension2D &&
+			Desc.Height <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension2D) ||
+		((Desc.Dimension == ERHITextureDimension::T_Cube || Desc.Dimension == ERHITextureDimension::T_Cube_Array) &&
+			Desc.Width <= GetDevice().GetPhysicalDeviceLimits().maxImageDimensionCube &&
+			Desc.Height <= GetDevice().GetPhysicalDeviceLimits().maxImageDimensionCube) ||
+		(Desc.Dimension == ERHITextureDimension::T_3D && Desc.Height <= GetDevice().GetPhysicalDeviceLimits().maxImageDimension3D));
 
 	///VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME
 
-	if (RHI::IsColor(CreateInfo.Format))
+	if (RHI::IsColor(Desc.Format))
 	{
 		//m_VkAttributes.Aspect = VK_IMAGE_ASPECT_COLOR_BIT;
 	}
-	else if (RHI::IsDepthStencil(CreateInfo.Format))
+	else if (RHI::IsDepthStencil(Desc.Format))
 	{
 		//m_VkAttributes.Aspect = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
 	}
-	else if (RHI::IsDepth(CreateInfo.Format))
+	else if (RHI::IsDepth(Desc.Format))
 	{
 		//m_VkAttributes.Aspect = VK_IMAGE_ASPECT_DEPTH_BIT;
 	}
@@ -41,27 +41,27 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 
 	ERHIDeviceAccessFlags AccessFlags = ERHIDeviceAccessFlags::None;
 	vk::ImageUsageFlags UsageFlags(vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst);
-	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::RenderTarget))
+	if (EnumHasAnyFlags(Desc.BufferUsageFlags, ERHIBufferUsageFlags::RenderTarget))
 	{
 		UsageFlags |= vk::ImageUsageFlagBits::eColorAttachment;
 		AccessFlags = AccessFlags | ERHIDeviceAccessFlags::GpuReadWrite;
 	}
-	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::DepthStencil))
+	if (EnumHasAnyFlags(Desc.BufferUsageFlags, ERHIBufferUsageFlags::DepthStencil))
 	{
 		UsageFlags |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
 		AccessFlags = AccessFlags | ERHIDeviceAccessFlags::GpuReadWrite;
 	}
-	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UnorderedAccess))
+	if (EnumHasAnyFlags(Desc.BufferUsageFlags, ERHIBufferUsageFlags::UnorderedAccess))
 	{
 		UsageFlags |= vk::ImageUsageFlagBits::eStorage;
 		AccessFlags = AccessFlags | ERHIDeviceAccessFlags::GpuReadWrite;
 	}
-	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::ShaderResource))
+	if (EnumHasAnyFlags(Desc.BufferUsageFlags, ERHIBufferUsageFlags::ShaderResource))
 	{
 		UsageFlags |= vk::ImageUsageFlagBits::eSampled;
 		AccessFlags = AccessFlags | ERHIDeviceAccessFlags::GpuRead;
 	}
-	if (EnumHasAnyFlags(CreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::InputAttachment))
+	if (EnumHasAnyFlags(Desc.BufferUsageFlags, ERHIBufferUsageFlags::InputAttachment))
 	{
 		/// VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT specifies that the image can be used to create a VkImageView suitable for occupying VkDescriptorSet slot of type VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT; 
 		/// be read from a shader as an input attachment; and be used as an input attachment in a framebuffer.
@@ -76,17 +76,17 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 	else
 	{
 		vk::ImageCreateInfo ImageCreateInfo;
-		ImageCreateInfo.setFlags((CreateInfo.Dimension == ERHITextureDimension::T_Cube || CreateInfo.Dimension == ERHITextureDimension::T_Cube_Array) ?
+		ImageCreateInfo.setFlags((Desc.Dimension == ERHITextureDimension::T_Cube || Desc.Dimension == ERHITextureDimension::T_Cube_Array) ?
 				vk::ImageCreateFlagBits::eCubeCompatible : vk::ImageCreateFlags())
-			.setImageType(::GetDimension(CreateInfo.Dimension))
-			.setFormat(::GetFormat(CreateInfo.Format))
+			.setImageType(::GetDimension(Desc.Dimension))
+			.setFormat(::GetFormat(Desc.Format))
 			.setExtent(vk::Extent3D(
-				CreateInfo.Width,
-				CreateInfo.Dimension == ERHITextureDimension::T_1D || CreateInfo.Dimension == ERHITextureDimension::T_1D_Array ? 1u : CreateInfo.Height,
-				CreateInfo.Dimension == ERHITextureDimension::T_3D ? CreateInfo.Depth : 1u))
-			.setMipLevels(CreateInfo.NumMipLevel)
-			.setArrayLayers(CreateInfo.NumArrayLayer)
-			.setSamples(::GetSampleCount(CreateInfo.SampleCount))
+				Desc.Width,
+				Desc.Dimension == ERHITextureDimension::T_1D || Desc.Dimension == ERHITextureDimension::T_1D_Array ? 1u : Desc.Height,
+				Desc.Dimension == ERHITextureDimension::T_3D ? Desc.Depth : 1u))
+			.setMipLevels(Desc.NumMipLevel)
+			.setArrayLayers(Desc.NumArrayLayer)
+			.setSamples(::GetSampleCount(Desc.SampleCount))
 			.setTiling(vk::ImageTiling::eOptimal)
 			.setUsage(UsageFlags)
 			.setSharingMode(vk::SharingMode::eExclusive)
@@ -96,13 +96,13 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureCreateI
 
 		AllocateAndBindMemory(AccessFlags);
 
-		if (CreateInfo.InitialData.IsValid())
+		if (Desc.InitialData.IsValid())
 		{
-			RHIUploadManager::Get().QueueUploadTexture(this, CreateInfo.InitialData.Data.get(), CreateInfo.InitialData.Size, CreateInfo.InitialData.Offset);
+			RHIUploadManager::Get().QueueUploadTexture(this, Desc.InitialData.Data.get(), Desc.InitialData.Size, Desc.InitialData.Offset);
 		}
 	}
 
-	VkHwResource::SetObjectName(CreateInfo.Name.c_str());
+	VkHwResource::SetObjectName(Desc.Name.c_str());
 }
 
 void VulkanTexture::AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags)
@@ -132,7 +132,7 @@ void VulkanTexture::AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags)
 //			/// 6 * ArraySize for cubemap
 //		};
 //
-//		VkImageViewCreateInfo CreateInfo
+//		VkImageViewCreateInfo Desc
 //		{
 //			VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 //			nullptr,
@@ -149,7 +149,7 @@ void VulkanTexture::AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags)
 //			VkSubresourceRange
 //		};
 //
-//		VERIFY_VK(vkCreateImageView(m_Device->Get(), &CreateInfo, VK_ALLOCATION_CALLBACKS, &ImageView));
+//		VERIFY_VK(vkCreateImageView(m_Device->Get(), &Desc, VK_ALLOCATION_CALLBACKS, &ImageView));
 //	}
 //
 //	return ImageView;
@@ -177,9 +177,9 @@ VulkanTexture::~VulkanTexture()
 #endif
 }
 
-VulkanSampler::VulkanSampler(const VulkanDevice& Device, const RHISamplerCreateInfo& CreateInfo)
+VulkanSampler::VulkanSampler(const VulkanDevice& Device, const RHISamplerDesc& Desc)
 	: VkHwResource(Device)
-	, RHISampler(CreateInfo)
+	, RHISampler(Desc)
 {
 	/*
 	  If the image view has a depth/stencil format, the depth component is selected by the aspectMask,
@@ -189,20 +189,20 @@ VulkanSampler::VulkanSampler(const VulkanDevice& Device, const RHISamplerCreateI
 	  The reference value from the SPIR-V operand Dref and the texel depth value Dtex are used as the reference and test values, respectively, in that operation.
 	*/
 	vk::SamplerCreateInfo SamplerCreateInfo;
-	SamplerCreateInfo.setMinFilter(GetFilter(CreateInfo.MinMagFilter))
-		.setMagFilter(GetFilter(CreateInfo.MinMagFilter))
-		.setMipmapMode(CreateInfo.MinMagFilter == ERHIFilter::Nearest ? vk::SamplerMipmapMode::eNearest : vk::SamplerMipmapMode::eLinear)
-		.setAddressModeU(GetSamplerAddressMode(CreateInfo.AddressModeU))
-		.setAddressModeV(GetSamplerAddressMode(CreateInfo.AddressModeV))
-		.setAddressModeW(GetSamplerAddressMode(CreateInfo.AddressModeW))
-		.setMipLodBias(CreateInfo.MipLODBias)
-		.setAnisotropyEnable(CreateInfo.MaxAnisotropy > 0.0f ? true : false)
-		.setMaxAnisotropy(CreateInfo.MaxAnisotropy)
-		.setCompareOp(GetCompareFunc(CreateInfo.CompareOp))
-		.setCompareEnable(!(CreateInfo.CompareOp == ERHICompareFunc::Never || CreateInfo.CompareOp == ERHICompareFunc::Always))
-		.setMinLod(CreateInfo.MinLOD)
-		.setMaxLod(CreateInfo.MaxLOD)
-		.setBorderColor(GetBorderColor(CreateInfo.BorderColor))
+	SamplerCreateInfo.setMinFilter(GetFilter(Desc.MinMagFilter))
+		.setMagFilter(GetFilter(Desc.MinMagFilter))
+		.setMipmapMode(Desc.MinMagFilter == ERHIFilter::Nearest ? vk::SamplerMipmapMode::eNearest : vk::SamplerMipmapMode::eLinear)
+		.setAddressModeU(GetSamplerAddressMode(Desc.AddressModeU))
+		.setAddressModeV(GetSamplerAddressMode(Desc.AddressModeV))
+		.setAddressModeW(GetSamplerAddressMode(Desc.AddressModeW))
+		.setMipLodBias(Desc.MipLODBias)
+		.setAnisotropyEnable(Desc.MaxAnisotropy > 0.0f ? true : false)
+		.setMaxAnisotropy(Desc.MaxAnisotropy)
+		.setCompareOp(GetCompareFunc(Desc.CompareOp))
+		.setCompareEnable(!(Desc.CompareOp == ERHICompareFunc::Never || Desc.CompareOp == ERHICompareFunc::Always))
+		.setMinLod(Desc.MinLOD)
+		.setMaxLod(Desc.MaxLOD)
+		.setBorderColor(GetBorderColor(Desc.BorderColor))
 		.setUnnormalizedCoordinates(false);
 
 	VERIFY_VK(GetNativeDevice().createSampler(&SamplerCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));

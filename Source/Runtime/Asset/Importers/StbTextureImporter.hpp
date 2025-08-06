@@ -65,8 +65,8 @@ public:
 			return false;
 		}
 
-		RHITextureCreateInfo CreateInfo;
-		CreateInfo.SetWidth(Width)
+		RHITextureDesc Desc;
+		Desc.SetWidth(Width)
 			.SetHeight(Height)
 			.SetDimension(ERHITextureDimension::T_2D)
 			.SetFormat(StbImage.IsLinear() ? ERHIFormat::RGBA8_UNorm : ERHIFormat::RGBA8_UNorm_SRGB)
@@ -75,7 +75,7 @@ public:
 			.SetPermanentState(ERHIResourceState::ShaderResource)
 			.SetInitialData(DataBlock(Channels * Width * Height, Bitmap));
 
-		//StbImage.CreateRHI(RenderService::Get().GetBackend().GetDevice(), CreateInfo);		
+		//StbImage.CreateRHI(RenderService::Get().GetBackend().GetDevice(), Desc);		
 
 		return true;
 	}

@@ -26,18 +26,18 @@ RDGResource& RDGResource::SetVisibility(EVisibility Visibility)
 
 void RDGResource::CreateAsTexture()
 {
-	assert(!m_ResourceCreateInfo);
+	assert(!m_ResourceDesc);
 	SetType(EType::Texture);
-	m_ResourceCreateInfo = std::make_optional(RHITextureCreateInfo());
-	GetTextureCreateInfo().SetName(m_Name.data());
+	m_ResourceDesc = std::make_optional(RHITextureDesc());
+	GetTextureDesc().SetName(m_Name.data());
 }
 
 void RDGResource::CreateAsBuffer()
 {
-	assert(!m_ResourceCreateInfo);
+	assert(!m_ResourceDesc);
 	SetType(EType::Buffer);
-	m_ResourceCreateInfo = std::make_optional(RHIBufferCreateInfo());
-	GetBufferCreateInfo().SetName(m_Name.data());
+	m_ResourceDesc = std::make_optional(RHIBufferDesc());
+	GetBufferDesc().SetName(m_Name.data());
 }
 
 void RDGResource::CreateRHI(RHIDevice& Device)
@@ -47,10 +47,10 @@ void RDGResource::CreateRHI(RHIDevice& Device)
 	switch (m_Type)
 	{
 	case EType::Buffer:
-		m_RHIResource = Device.CreateBuffer(GetBufferCreateInfo());
+		m_RHIResource = Device.CreateBuffer(GetBufferDesc());
 		break;
 	case EType::Texture:
-		m_RHIResource = Device.CreateTexture(GetTextureCreateInfo());
+		m_RHIResource = Device.CreateTexture(GetTextureDesc());
 		break;
 	}
 }

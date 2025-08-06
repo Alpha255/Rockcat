@@ -6,7 +6,7 @@
 class D3D12Texture : public D3DHwResource<ID3D12Resource>, public RHITexture
 {
 public:
-	D3D12Texture(const class D3D12Device& Device, const RHITextureCreateInfo& RHICreateInfo);
+	D3D12Texture(const class D3D12Device& Device, const RHITextureDesc& Desc);
 protected:
 private:
 };
@@ -14,7 +14,7 @@ private:
 class D3D12Sampler : public RHISampler
 {
 public:
-	D3D12Sampler(const class D3D12Device& Device, const RHISamplerCreateInfo& RHICreateInfo);
+	D3D12Sampler(const class D3D12Device& Device, const RHISamplerDesc& Desc);
 protected:
 private:
 	D3D12_CPU_DESCRIPTOR_HANDLE m_Descriptor{};

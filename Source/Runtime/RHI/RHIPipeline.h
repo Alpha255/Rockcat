@@ -28,26 +28,26 @@ public:
 	size_t ComputeHash() const;
 };
 
-struct RHIGraphicsPipelineCreateInfo
+struct RHIGraphicsPipelineDesc
 {
 	ERHIPrimitiveTopology PrimitiveTopology = ERHIPrimitiveTopology::TriangleList;
-	RHIRasterizationStateCreateInfo RasterizationState;
-	RHIBlendStateCreateInfo BlendState;
-	RHIDepthStencilStateCreateInfo DepthStencilState;
-	RHIMultisampleStateCreateInfo MultisampleState;
-	RHIInputLayoutCreateInfo InputLayout;
+	RHIRasterizationStateDesc RasterizationState;
+	RHIBlendStateDesc BlendState;
+	RHIDepthStencilStateDesc DepthStencilState;
+	RHIMultisampleStateDesc MultisampleState;
+	RHIInputLayoutDesc InputLayout;
 	std::vector<RHIViewport> Viewports;
 	std::vector<RHIScissorRect> ScissorRects;
 	RHIGraphicsShaderPipeline ShaderPipeline;
 
-	inline RHIGraphicsPipelineCreateInfo& SetPrimitiveTopology(ERHIPrimitiveTopology InTopology) { PrimitiveTopology = InTopology; return *this; }
-	inline RHIGraphicsPipelineCreateInfo& SetRasterizationState(const RHIRasterizationStateCreateInfo& InRasterizationState) { RasterizationState = InRasterizationState; return *this; }
-	inline RHIGraphicsPipelineCreateInfo& SetBlendState(const RHIBlendStateCreateInfo& InBlendState) { BlendState = InBlendState; return *this; }
-	inline RHIGraphicsPipelineCreateInfo& SetDepthStencilState(const RHIDepthStencilStateCreateInfo& InDepthStencilState) { DepthStencilState = InDepthStencilState; return *this; }
-	inline RHIGraphicsPipelineCreateInfo& SetMultisampleState(const RHIMultisampleStateCreateInfo& InMultisampleState) { MultisampleState = InMultisampleState; return *this; }
-	inline RHIGraphicsPipelineCreateInfo& SetShader(const std::shared_ptr<Shader>& InShader) { ShaderPipeline[InShader->GetStage()] = InShader; return *this; }
+	inline RHIGraphicsPipelineDesc& SetPrimitiveTopology(ERHIPrimitiveTopology InTopology) { PrimitiveTopology = InTopology; return *this; }
+	inline RHIGraphicsPipelineDesc& SetRasterizationState(const RHIRasterizationStateDesc& InRasterizationState) { RasterizationState = InRasterizationState; return *this; }
+	inline RHIGraphicsPipelineDesc& SetBlendState(const RHIBlendStateDesc& InBlendState) { BlendState = InBlendState; return *this; }
+	inline RHIGraphicsPipelineDesc& SetDepthStencilState(const RHIDepthStencilStateDesc& InDepthStencilState) { DepthStencilState = InDepthStencilState; return *this; }
+	inline RHIGraphicsPipelineDesc& SetMultisampleState(const RHIMultisampleStateDesc& InMultisampleState) { MultisampleState = InMultisampleState; return *this; }
+	inline RHIGraphicsPipelineDesc& SetShader(const std::shared_ptr<Shader>& InShader) { ShaderPipeline[InShader->GetStage()] = InShader; return *this; }
 	
-	inline RHIGraphicsPipelineCreateInfo& SetViewport(const RHIViewport& Viewport)
+	inline RHIGraphicsPipelineDesc& SetViewport(const RHIViewport& Viewport)
 	{
 		if (Viewports.empty())
 		{
@@ -58,14 +58,14 @@ struct RHIGraphicsPipelineCreateInfo
 		return *this;
 	}
 
-	inline RHIGraphicsPipelineCreateInfo& AddViewport(const RHIViewport& Viewport) 
+	inline RHIGraphicsPipelineDesc& AddViewport(const RHIViewport& Viewport) 
 	{
 		assert(Viewports.size() < ERHILimitations::MaxViewports);
 		Viewports.emplace_back(Viewport);
 		return *this;
 	}
 
-	inline RHIGraphicsPipelineCreateInfo& SetScissorRect(const RHIScissorRect& ScissorRect)
+	inline RHIGraphicsPipelineDesc& SetScissorRect(const RHIScissorRect& ScissorRect)
 	{
 		if (ScissorRects.empty())
 		{
@@ -76,7 +76,7 @@ struct RHIGraphicsPipelineCreateInfo
 		return *this;
 	}
 
-	inline RHIGraphicsPipelineCreateInfo& AddScissorRect(const RHIScissorRect& ScissorRect)
+	inline RHIGraphicsPipelineDesc& AddScissorRect(const RHIScissorRect& ScissorRect)
 	{
 		assert(ScissorRects.size() < ERHILimitations::MaxScissorRects);
 		ScissorRects.emplace_back(ScissorRect);
@@ -84,14 +84,14 @@ struct RHIGraphicsPipelineCreateInfo
 	}
 };
 
-struct RHIComputePipelineCreateInfo
+struct RHIComputePipelineDesc
 {
 };
 
 class RHIPipelineState
 {
 public:
-	RHIPipelineState(const RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo);
+	RHIPipelineState(const RHIGraphicsPipelineDesc& Desc);
 
 	bool IsDirty() const { return m_PipelineStatesDirtyFlags.any() || m_ShaderResourceDirty; }
 
@@ -165,12 +165,12 @@ class RHIGraphicsPipeline : public RHIPipeline
 {
 #if SHADER_HOT_RELOAD
 public:
-	RHIGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo)
-		: m_CreateInfo(CreateInfo)
+	RHIGraphicsPipeline(const RHIGraphicsPipelineDesc& Desc)
+		: m_Desc(Desc)
 	{
 	}
 private:
-	RHIGraphicsPipelineCreateInfo m_CreateInfo;
+	RHIGraphicsPipelineDesc m_Desc;
 #endif
 };
 
@@ -195,7 +195,7 @@ template<class RHIDescription>
 inline size_t ComputeHash(const RHIDescription&) { return 0ull; }
 
 template<>
-inline size_t ComputeHash(const RHIRasterizationStateCreateInfo& Desc)
+inline size_t ComputeHash(const RHIRasterizationStateDesc& Desc)
 {
 	return ComputeHash(
 		Desc.PolygonMode,
@@ -207,10 +207,10 @@ inline size_t ComputeHash(const RHIRasterizationStateCreateInfo& Desc)
 		Desc.DepthBiasSlope,
 		Desc.LineWidth);
 }
-STD_HASHER(RHIRasterizationStateCreateInfo);
+STD_HASHER(RHIRasterizationStateDesc);
 
 template<>
-inline size_t ComputeHash(const RHIBlendStateCreateInfo& Desc)
+inline size_t ComputeHash(const RHIBlendStateDesc& Desc)
 {
 	auto Hash = ComputeHash(
 		Desc.EnableLogicOp,
@@ -230,7 +230,7 @@ inline size_t ComputeHash(const RHIBlendStateCreateInfo& Desc)
 	}
 	return Hash;
 }
-STD_HASHER(RHIBlendStateCreateInfo);
+STD_HASHER(RHIBlendStateDesc);
 
 template<>
 inline size_t ComputeHash(const RHIStencilStateDesc& Desc)
@@ -245,7 +245,7 @@ inline size_t ComputeHash(const RHIStencilStateDesc& Desc)
 STD_HASHER(RHIStencilStateDesc);
 
 template<>
-inline size_t ComputeHash(const RHIDepthStencilStateCreateInfo& Desc)
+inline size_t ComputeHash(const RHIDepthStencilStateDesc& Desc)
 {
 	return ComputeHash(
 		Desc.EnableDepth,
@@ -260,10 +260,10 @@ inline size_t ComputeHash(const RHIDepthStencilStateCreateInfo& Desc)
 		ComputeHash(Desc.FrontFaceStencil),
 		ComputeHash(Desc.BackFaceStencil));
 }
-STD_HASHER(RHIDepthStencilStateCreateInfo);
+STD_HASHER(RHIDepthStencilStateDesc);
 
 template<>
-inline size_t ComputeHash(const RHIMultisampleStateCreateInfo& Desc)
+inline size_t ComputeHash(const RHIMultisampleStateDesc& Desc)
 {
 	return ComputeHash(
 		Desc.SampleCount,
@@ -272,10 +272,10 @@ inline size_t ComputeHash(const RHIMultisampleStateCreateInfo& Desc)
 		Desc.EnableAlphaToOne,
 		Desc.MinSampleShading);
 }
-STD_HASHER(RHIMultisampleStateCreateInfo);
+STD_HASHER(RHIMultisampleStateDesc);
 
 template<>
-inline size_t ComputeHash(const RHIRenderPassCreateInfo& Desc)
+inline size_t ComputeHash(const RHIRenderPassDesc& Desc)
 {
 	size_t Hash = ComputeHash(
 		Desc.GetNumColorAttachments(),
@@ -291,10 +291,10 @@ inline size_t ComputeHash(const RHIRenderPassCreateInfo& Desc)
 
 	return Hash;
 }
-STD_HASHER(RHIRenderPassCreateInfo);
+STD_HASHER(RHIRenderPassDesc);
 
 template<>
-inline size_t ComputeHash(const RHIGraphicsPipelineCreateInfo& Desc)
+inline size_t ComputeHash(const RHIGraphicsPipelineDesc& Desc)
 {
 	auto Hash = ComputeHash(
 		ComputeHash(Desc.PrimitiveTopology),
@@ -308,10 +308,10 @@ inline size_t ComputeHash(const RHIGraphicsPipelineCreateInfo& Desc)
 
 	return Hash;
 }
-STD_HASHER(RHIGraphicsPipelineCreateInfo);
+STD_HASHER(RHIGraphicsPipelineDesc);
 
 template<>
-inline size_t ComputeHash(const RHIFrameBufferCreateInfo& Desc)
+inline size_t ComputeHash(const RHIFrameBufferDesc& Desc)
 {
 	auto Hash = ComputeHash(Desc.Width, Desc.Height, Desc.ArrayLayers);
 
@@ -327,4 +327,4 @@ inline size_t ComputeHash(const RHIFrameBufferCreateInfo& Desc)
 
 	return Hash;
 }
-STD_HASHER(RHIFrameBufferCreateInfo);
+STD_HASHER(RHIFrameBufferDesc);

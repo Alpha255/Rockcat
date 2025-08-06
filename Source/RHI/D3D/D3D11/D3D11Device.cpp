@@ -120,47 +120,47 @@ D3D11Device::D3D11Device(const DxgiFactory& Factory)
 	}
 }
 
-RHIShaderPtr D3D11Device::CreateShader(const RHIShaderCreateInfo& RHICreateInfo)
+RHIShaderPtr D3D11Device::CreateShader(const RHIShaderDesc& Desc)
 {
 	return RHIShaderPtr();
 }
 
-RHITexturePtr D3D11Device::CreateTexture(const RHITextureCreateInfo& RHICreateInfo)
+RHITexturePtr D3D11Device::CreateTexture(const RHITextureDesc& Desc)
 {
 	return RHITexturePtr();
 }
 
-RHIInputLayoutPtr D3D11Device::CreateInputLayout(const RHIInputLayoutCreateInfo& RHICreateInfo)
+RHIInputLayoutPtr D3D11Device::CreateInputLayout(const RHIInputLayoutDesc& Desc)
 {
 	return RHIInputLayoutPtr();
 }
 
-RHIFrameBufferPtr D3D11Device::CreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo)
+RHIFrameBufferPtr D3D11Device::CreateFrameBuffer(const RHIFrameBufferDesc& Desc)
 {
 	return RHIFrameBufferPtr();
 }
 
-RHIGraphicsPipelinePtr D3D11Device::CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo)
+RHIGraphicsPipelinePtr D3D11Device::CreateGraphicsPipeline(const RHIGraphicsPipelineDesc& Desc)
 {
 	return RHIGraphicsPipelinePtr();
 }
 
-RHIPipelineStatePtr D3D11Device::CreatePipelineState(const RHIGraphicsPipelineCreateInfo& RHICreateInfo)
+RHIPipelineStatePtr D3D11Device::CreatePipelineState(const RHIGraphicsPipelineDesc& Desc)
 {
 	return RHIPipelineStatePtr();
 }
 
-RHIBufferPtr D3D11Device::CreateBuffer(const RHIBufferCreateInfo& RHICreateInfo)
+RHIBufferPtr D3D11Device::CreateBuffer(const RHIBufferDesc& Desc)
 {
 	return RHIBufferPtr();
 }
 
-RHISamplerPtr D3D11Device::CreateSampler(const RHISamplerCreateInfo& RHICreateInfo)
+RHISamplerPtr D3D11Device::CreateSampler(const RHISamplerDesc& Desc)
 {
 	return RHISamplerPtr();
 }
 
-RHISwapchainPtr D3D11Device::CreateSwapchain(const RHISwapchainCreateInfo& CreateInfo)
+RHISwapchainPtr D3D11Device::CreateSwapchain(const RHISwapchainDesc& Desc)
 {
 	return nullptr;
 }

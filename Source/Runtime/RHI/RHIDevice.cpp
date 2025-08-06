@@ -1,13 +1,13 @@
 #include "RHI/RHIDevice.h"
 
-RHIGraphicsPipeline* RHIDevice::GetOrCreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& RHICreateInfo)
+RHIGraphicsPipeline* RHIDevice::GetOrCreateGraphicsPipeline(const RHIGraphicsPipelineDesc& Desc)
 {
-	size_t Hash = ComputeHash<RHIGraphicsPipelineCreateInfo>(RHICreateInfo);
+	size_t Hash = ComputeHash<RHIGraphicsPipelineDesc>(Desc);
 
 	auto It = m_GraphicsPipelineCache.find(Hash);
 	if (It == m_GraphicsPipelineCache.end())
 	{
-		auto Result = m_GraphicsPipelineCache.emplace(std::make_pair(Hash, CreateGraphicsPipeline(RHICreateInfo)));
+		auto Result = m_GraphicsPipelineCache.emplace(std::make_pair(Hash, CreateGraphicsPipeline(Desc)));
 		if (Result.second)
 		{
 			return Result.first->second.get();
@@ -23,14 +23,14 @@ RHIGraphicsPipeline* RHIDevice::GetOrCreateGraphicsPipeline(const RHIGraphicsPip
 	}
 }
 
-RHIFrameBuffer* RHIDevice::GetOrCreateFrameBuffer(const RHIFrameBufferCreateInfo& RHICreateInfo)
+RHIFrameBuffer* RHIDevice::GetOrCreateFrameBuffer(const RHIFrameBufferDesc& Desc)
 {
-	size_t Hash = ComputeHash<RHIFrameBufferCreateInfo>(RHICreateInfo);
+	size_t Hash = ComputeHash<RHIFrameBufferDesc>(Desc);
 
 	auto It = m_FrameBufferCache.find(Hash);
 	if (It == m_FrameBufferCache.end())
 	{
-		auto Result = m_FrameBufferCache.emplace(std::make_pair(Hash, CreateFrameBuffer(RHICreateInfo)));
+		auto Result = m_FrameBufferCache.emplace(std::make_pair(Hash, CreateFrameBuffer(Desc)));
 		if (Result.second)
 		{
 			return Result.first->second.get();

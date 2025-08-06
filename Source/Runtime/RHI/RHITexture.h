@@ -57,7 +57,7 @@ namespace RHI
 	const static RHISubresource AllSubresource{0u, RHISubresource::AllMipLevels, 0u, RHISubresource::AllArrayLayers};
 }
 
-struct RHITextureCreateInfo
+struct RHITextureDesc
 {
 	uint32_t Width = 1u;
 	uint32_t Height = 1u;
@@ -77,36 +77,36 @@ struct RHITextureCreateInfo
 
 	std::string Name;
 
-	inline RHITextureCreateInfo& SetWidth(uint32_t Value) { Width = Value; return *this; }
-	inline RHITextureCreateInfo& SetHeight(uint32_t Value) { Height = Value; return *this; }
-	inline RHITextureCreateInfo& SetDepth(uint32_t Value) { Depth = Value; return *this; }
-	inline RHITextureCreateInfo& SetNumMipLevel(uint32_t Value) { NumMipLevel = static_cast<uint16_t>(Value); return *this; }
-	inline RHITextureCreateInfo& SetNumArrayLayer(uint32_t Value) { NumArrayLayer = static_cast<uint16_t>(Value); return *this; }
-	inline RHITextureCreateInfo& SetFormat(ERHIFormat Value) { Format = Value; return *this; }
-	inline RHITextureCreateInfo& SetDimension(ERHITextureDimension Value) { Dimension = Value; return *this; }
-	inline RHITextureCreateInfo& SetSampleCount(ERHISampleCount Count) { SampleCount = Count; return *this; }
-	inline RHITextureCreateInfo& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; };
-	inline RHITextureCreateInfo& SetPermanentState(ERHIResourceState States) { PermanentState = States; return *this; }
-	inline RHITextureCreateInfo& SetInitialData(const DataBlock& Data) { InitialData = Data; return *this; }
-	inline RHITextureCreateInfo& SetInitialData(size_t Size, const std::shared_ptr<std::byte>& Data) { InitialData.Size = Size; InitialData.Data = Data; return *this; }
+	inline RHITextureDesc& SetWidth(uint32_t Value) { Width = Value; return *this; }
+	inline RHITextureDesc& SetHeight(uint32_t Value) { Height = Value; return *this; }
+	inline RHITextureDesc& SetDepth(uint32_t Value) { Depth = Value; return *this; }
+	inline RHITextureDesc& SetNumMipLevel(uint32_t Value) { NumMipLevel = static_cast<uint16_t>(Value); return *this; }
+	inline RHITextureDesc& SetNumArrayLayer(uint32_t Value) { NumArrayLayer = static_cast<uint16_t>(Value); return *this; }
+	inline RHITextureDesc& SetFormat(ERHIFormat Value) { Format = Value; return *this; }
+	inline RHITextureDesc& SetDimension(ERHITextureDimension Value) { Dimension = Value; return *this; }
+	inline RHITextureDesc& SetSampleCount(ERHISampleCount Count) { SampleCount = Count; return *this; }
+	inline RHITextureDesc& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; };
+	inline RHITextureDesc& SetPermanentState(ERHIResourceState States) { PermanentState = States; return *this; }
+	inline RHITextureDesc& SetInitialData(const DataBlock& Data) { InitialData = Data; return *this; }
+	inline RHITextureDesc& SetInitialData(size_t Size, const std::shared_ptr<std::byte>& Data) { InitialData.Size = Size; InitialData.Data = Data; return *this; }
 
 	template<class T>
-	inline RHITextureCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
+	inline RHITextureDesc& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 };
 
 class RHITexture : public RHIResource
 {
 public:
-	RHITexture(const RHITextureCreateInfo& CreateInfo)
-		: m_Width(CreateInfo.Width)
-		, m_Height(CreateInfo.Height)
-		, m_Depth(CreateInfo.Depth)
-		, m_NumArrayLayer(CreateInfo.NumArrayLayer)
-		, m_NumMipLevel(CreateInfo.NumMipLevel)
-		, m_Dimension(CreateInfo.Dimension)
-		, m_Format(CreateInfo.Format)
-		, m_State(CreateInfo.PermanentState)
-		, RHIResource(CreateInfo.Name.c_str())
+	RHITexture(const RHITextureDesc& Desc)
+		: m_Width(Desc.Width)
+		, m_Height(Desc.Height)
+		, m_Depth(Desc.Depth)
+		, m_NumArrayLayer(Desc.NumArrayLayer)
+		, m_NumMipLevel(Desc.NumMipLevel)
+		, m_Dimension(Desc.Dimension)
+		, m_Format(Desc.Format)
+		, m_State(Desc.PermanentState)
+		, RHIResource(Desc.Name.c_str())
 	{
 	}
 
@@ -164,7 +164,7 @@ enum class ESamplerReduction : uint8_t
 	Maximum
 };
 
-struct RHISamplerCreateInfo
+struct RHISamplerDesc
 {
 	ERHIFilter MinMagFilter = ERHIFilter::Nearest;
 	ERHIFilter MipmapMode = ERHIFilter::Nearest;
@@ -182,28 +182,28 @@ struct RHISamplerCreateInfo
 
 	std::string Name;
 	
-	inline RHISamplerCreateInfo& SetMinMagFilter(ERHIFilter Filter) { MinMagFilter = Filter; return *this; }
-	inline RHISamplerCreateInfo& SetMipmapMode(ERHIFilter Mode) { MipmapMode = Mode; return *this; }
-	inline RHISamplerCreateInfo& SetSamplerReduction(ESamplerReduction SamplerReduction) { Reduction = SamplerReduction; return *this; }
-	inline RHISamplerCreateInfo& SetAddressModeU(ERHISamplerAddressMode SamplerAddressMode) { AddressModeU = SamplerAddressMode; return *this; };
-	inline RHISamplerCreateInfo& SetAddressModeV(ERHISamplerAddressMode SamplerAddressMode) { AddressModeV = SamplerAddressMode; return *this; };
-	inline RHISamplerCreateInfo& SetAddressModeW(ERHISamplerAddressMode SamplerAddressMode) { AddressModeW = SamplerAddressMode; return *this; };
-	inline RHISamplerCreateInfo& SetCompareOp(ERHICompareFunc CompareFunc) { CompareOp = CompareFunc; return *this; }
-	inline RHISamplerCreateInfo& SetBorderColor(ERHIBorderColor BorderColorMode) { BorderColor = BorderColorMode; return *this; }
-	inline RHISamplerCreateInfo& SetMaxAnisotropy(float Anisotropy) { MaxAnisotropy = Anisotropy; return *this; }
-	inline RHISamplerCreateInfo& SetMipLODBias(float MipLODBiasValue) { MipLODBias = MipLODBiasValue; return *this; }
-	inline RHISamplerCreateInfo& SetMinLOD(float MinLODValue) { MinLOD = MinLODValue; return *this; }
-	inline RHISamplerCreateInfo& SetMaxLOD(float MaxLODValue) { MaxLOD = MaxLODValue; return *this; }
+	inline RHISamplerDesc& SetMinMagFilter(ERHIFilter Filter) { MinMagFilter = Filter; return *this; }
+	inline RHISamplerDesc& SetMipmapMode(ERHIFilter Mode) { MipmapMode = Mode; return *this; }
+	inline RHISamplerDesc& SetSamplerReduction(ESamplerReduction SamplerReduction) { Reduction = SamplerReduction; return *this; }
+	inline RHISamplerDesc& SetAddressModeU(ERHISamplerAddressMode SamplerAddressMode) { AddressModeU = SamplerAddressMode; return *this; };
+	inline RHISamplerDesc& SetAddressModeV(ERHISamplerAddressMode SamplerAddressMode) { AddressModeV = SamplerAddressMode; return *this; };
+	inline RHISamplerDesc& SetAddressModeW(ERHISamplerAddressMode SamplerAddressMode) { AddressModeW = SamplerAddressMode; return *this; };
+	inline RHISamplerDesc& SetCompareOp(ERHICompareFunc CompareFunc) { CompareOp = CompareFunc; return *this; }
+	inline RHISamplerDesc& SetBorderColor(ERHIBorderColor BorderColorMode) { BorderColor = BorderColorMode; return *this; }
+	inline RHISamplerDesc& SetMaxAnisotropy(float Anisotropy) { MaxAnisotropy = Anisotropy; return *this; }
+	inline RHISamplerDesc& SetMipLODBias(float MipLODBiasValue) { MipLODBias = MipLODBiasValue; return *this; }
+	inline RHISamplerDesc& SetMinLOD(float MinLODValue) { MinLOD = MinLODValue; return *this; }
+	inline RHISamplerDesc& SetMaxLOD(float MaxLODValue) { MaxLOD = MaxLODValue; return *this; }
 
 	template<class T>
-	inline RHISamplerCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
+	inline RHISamplerDesc& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 };
 
 class RHISampler : public RHIResource
 {
 public:
-	RHISampler(const RHISamplerCreateInfo& RHICreateInfo)
-		: RHIResource(RHICreateInfo.Name.c_str())
+	RHISampler(const RHISamplerDesc& Desc)
+		: RHIResource(Desc.Name.c_str())
 	{
 	}
 };

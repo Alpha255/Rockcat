@@ -26,7 +26,7 @@ public:
 class VulkanGraphicsPipeline final : public VulkanPipeline, public RHIGraphicsPipeline
 {
 public:
-	VulkanGraphicsPipeline(const class VulkanDevice& Device, vk::PipelineCache PipelineCache, const RHIGraphicsPipelineCreateInfo& CreateInfo);
+	VulkanGraphicsPipeline(const class VulkanDevice& Device, vk::PipelineCache PipelineCache, const RHIGraphicsPipelineDesc& Desc);
 };
 
 class VulkanComputePipeline final : public VulkanPipeline
@@ -40,7 +40,7 @@ class VulkanRayTracingPipeline final : public VulkanPipeline
 class VulkanPipelineState : public RHIPipelineState, public VkBaseDeviceResource
 {
 public:
-	VulkanPipelineState(const class VulkanDevice& Device, const RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo);
+	VulkanPipelineState(const class VulkanDevice& Device, const RHIGraphicsPipelineDesc& Desc);
 
 	vk::DescriptorSetLayout GetDescriptorSetLayout() const { return m_DescriptorSetLayout->GetNative(); }
 	vk::PipelineLayout GetPipelineLayout() const { return m_PipelineLayout->GetNative(); }

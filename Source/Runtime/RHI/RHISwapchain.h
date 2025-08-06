@@ -5,14 +5,14 @@
 class RHISwapchain
 {
 public:
-	RHISwapchain(const RHISwapchainCreateInfo& CreateInfo)
-		: m_VSync(CreateInfo.VSync)
-		, m_Fullscreen(CreateInfo.Fullscreen)
-		, m_Width(CreateInfo.Width)
-		, m_Height(CreateInfo.Height)
+	RHISwapchain(const RHISwapchainDesc& Desc)
+		: m_VSync(Desc.VSync)
+		, m_Fullscreen(Desc.Fullscreen)
+		, m_Width(Desc.Width)
+		, m_Height(Desc.Height)
 		, m_NumBackBuffer(1u)
 		, m_BackBufferIndex(0u)
-		, m_WindowHandle(CreateInfo.WindowHandle)
+		, m_WindowHandle(Desc.WindowHandle)
 	{
 	}
 

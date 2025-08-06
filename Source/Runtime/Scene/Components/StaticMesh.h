@@ -79,9 +79,9 @@ public:
 
 	inline const char* GetName() const { return m_Name.c_str(); }
 
-	inline RHIInputLayoutCreateInfo GetInputLayout() const { return GetInputLayout(m_VertexAttributes); }
+	inline RHIInputLayoutDesc GetInputLayout() const { return GetInputLayout(m_VertexAttributes); }
 
-	static RHIInputLayoutCreateInfo GetInputLayout(EVertexAttributes Attributes, ERHIVertexInputRate InputRate = ERHIVertexInputRate::Vertex);
+	static RHIInputLayoutDesc GetInputLayout(EVertexAttributes Attributes, ERHIVertexInputRate InputRate = ERHIVertexInputRate::Vertex);
 
 	static const size_t PositionStride = sizeof(Math::Vector3);
 	static const size_t NormalStride = sizeof(Math::Vector3);

@@ -2,26 +2,26 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "Asset/Shader.h"
 
-VulkanShader::VulkanShader(const VulkanDevice& Device, const RHIShaderCreateInfo& CreateInfo)
+VulkanShader::VulkanShader(const VulkanDevice& Device, const RHIShaderDesc& Desc)
 	: VkHwResource(Device)
-	, RHIShader(CreateInfo)
+	, RHIShader(Desc)
 {
-	assert(CreateInfo.Binary && CreateInfo.Binary->IsValid() && CreateInfo.Binary->GetSize() % sizeof(uint32_t) == 0);
+	assert(Desc.Binary && Desc.Binary->IsValid() && Desc.Binary->GetSize() % sizeof(uint32_t) == 0);
 
 	vk::ShaderModuleCreateInfo ShaderCreateInfo;
-	ShaderCreateInfo.setCodeSize(CreateInfo.Binary->GetSize())
-		.setPCode(reinterpret_cast<const uint32_t*>(CreateInfo.Binary->GetData()));
+	ShaderCreateInfo.setCodeSize(Desc.Binary->GetSize())
+		.setPCode(reinterpret_cast<const uint32_t*>(Desc.Binary->GetData()));
 
 	VERIFY_VK(GetNativeDevice().createShaderModule(&ShaderCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
-	VkHwResource::SetObjectName(CreateInfo.Name.c_str());
+	VkHwResource::SetObjectName(Desc.Name.c_str());
 }
 
-VulkanInputLayout::VulkanInputLayout(const RHIInputLayoutCreateInfo& CreateInfo)
+VulkanInputLayout::VulkanInputLayout(const RHIInputLayoutDesc& Desc)
 {
-	for (uint32_t Index = 0u; Index < CreateInfo.Bindings.size(); ++Index)
+	for (uint32_t Index = 0u; Index < Desc.Bindings.size(); ++Index)
 	{
-		auto& BindingInfo = CreateInfo.Bindings[Index];
+		auto& BindingInfo = Desc.Bindings[Index];
 
 		m_InputBindings.emplace_back(vk::VertexInputBindingDescription())
 			.setBinding(BindingInfo.Binding)

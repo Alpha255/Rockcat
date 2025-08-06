@@ -42,16 +42,16 @@ MeshData::MeshData(
 	IndicesData.Data.reset(new std::byte[IndicesData.Size]());
 }
 
-RHIInputLayoutCreateInfo MeshProperty::GetInputLayout(EVertexAttributes Attributes, ERHIVertexInputRate InputRate)
+RHIInputLayoutDesc MeshProperty::GetInputLayout(EVertexAttributes Attributes, ERHIVertexInputRate InputRate)
 {
-	RHIInputLayoutCreateInfo CreateInfo;
+	RHIInputLayoutDesc Desc;
 	uint32_t Binding = 0u;
 	uint32_t Location = 0u;
 
-	auto AddAttribute = [&CreateInfo, &Binding, &Location, Attributes, InputRate](EVertexAttributes Attribute, size_t Stride, ERHIFormat Format, const char* Usage) {
+	auto AddAttribute = [&Desc, &Binding, &Location, Attributes, InputRate](EVertexAttributes Attribute, size_t Stride, ERHIFormat Format, const char* Usage) {
 		if ((Attributes & Attribute) == Attribute)
 		{
-			CreateInfo.AddBinding(Binding++, Stride, InputRate)
+			Desc.AddBinding(Binding++, Stride, InputRate)
 				.AddAttribute(Location++, Stride, Format, Usage);
 		}
 	};
@@ -64,7 +64,7 @@ RHIInputLayoutCreateInfo MeshProperty::GetInputLayout(EVertexAttributes Attribut
 	AddAttribute(EVertexAttributes::UV1, UVStride, ERHIFormat::RGB32_Float, "TEXCOORD1");
 	AddAttribute(EVertexAttributes::Color, ColorStride, ERHIFormat::RGBA32_Float, "COLOR");
 
-	return CreateInfo;
+	return Desc;
 }
 
 StaticMesh::StaticMesh(const MeshProperty& Properties)
@@ -94,38 +94,38 @@ const RHIBuffer* StaticMeshBuffers::GetVertexBuffer(EVertexAttributes Attributes
 
 void StaticMeshBuffers::CreateRHI(const MeshData& Data, RHIDevice& Device)
 {
-	RHIBufferCreateInfo CreateInfo;
+	RHIBufferDesc Desc;
 	if (Data.GetNumIndex())
 	{
 		assert(Data.IndicesData.Data);
 
-		CreateInfo.SetUsages(ERHIBufferUsageFlags::IndexBuffer)
+		Desc.SetUsages(ERHIBufferUsageFlags::IndexBuffer)
 			.SetAccessFlags(ERHIDeviceAccessFlags::GpuRead)
 			.SetPermanentStates(ERHIResourceState::IndexBuffer)
 			.SetSize(Data.GetIndexDataSize())
 			.SetInitialData(Data.IndicesData.Data.get())
 			.SetName(StringUtils::Format("%s-IndexBuffer", Data.GetName()));
-		m_IndexBuffer = Device.CreateBuffer(CreateInfo);
+		m_IndexBuffer = Device.CreateBuffer(Desc);
 	}
 
 	if (Data.GetNumVertex())
 	{
 		assert(Data.VerticesData.Data);
 
-		CreateInfo.SetUsages(ERHIBufferUsageFlags::VertexBuffer)
+		Desc.SetUsages(ERHIBufferUsageFlags::VertexBuffer)
 			.SetPermanentStates(ERHIResourceState::VertexBuffer)
 			.SetSize(Data.GetPositionDataSize())
 			.SetInitialData(Data.VerticesData.Data.get() + Data.GetPositionOffset())
 			.SetName(StringUtils::Format("%s-PositionBuffer", Data.GetName()));
-		m_VertexBuffers[0u] = Device.CreateBuffer(CreateInfo);
+		m_VertexBuffers[0u] = Device.CreateBuffer(Desc);
 
-		auto CreateVerteBuffer = [&Data, &Device, &CreateInfo, this](bool ShouldCreate, size_t Size, size_t Offset, size_t Index, std::string&& Name) {
+		auto CreateVerteBuffer = [&Data, &Device, &Desc, this](bool ShouldCreate, size_t Size, size_t Offset, size_t Index, std::string&& Name) {
 			if (ShouldCreate)
 			{
-				CreateInfo.SetSize(Size)
+				Desc.SetSize(Size)
 					.SetInitialData(Data.VerticesData.Data.get() + Offset)
 					.SetName(std::move(Name));
-				m_VertexBuffers[Index] = Device.CreateBuffer(CreateInfo);
+				m_VertexBuffers[Index] = Device.CreateBuffer(Desc);
 			}
 		};
 

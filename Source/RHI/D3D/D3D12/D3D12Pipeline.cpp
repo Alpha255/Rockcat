@@ -2,7 +2,7 @@
 #include "RHI/D3D/D3D12/D3D12Device.h"
 #include "RHI/D3D/D3D12/D3D12Shader.h"
 
-D3D12RootSignature::D3D12RootSignature(const D3D12Device& Device, const RHIGraphicsPipelineCreateInfo& RHICreateInfo)
+D3D12RootSignature::D3D12RootSignature(const D3D12Device& Device, const RHIGraphicsPipelineDesc& Desc)
 {
 	/// https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_descriptor_range_flags
 	std::vector<D3D12_ROOT_PARAMETER1> RootParams;
@@ -13,7 +13,7 @@ D3D12RootSignature::D3D12RootSignature(const D3D12Device& Device, const RHIGraph
 #if 0
 	size_t NumSamplers = 0u;
 	size_t NumSRVs = 0u;
-	RHICreateInfo.Shaders.ForEach([
+	Desc.Shaders.ForEach([
 		this, 
 		&RootParams, 
 		&DescriptorRangesSamplers, 
@@ -128,10 +128,10 @@ D3D12RootSignature::D3D12RootSignature(const D3D12Device& Device, const RHIGraph
 	});
 #endif
 
-	Create(Device, RootParams, RHICreateInfo);
+	Create(Device, RootParams, Desc);
 }
 
-void D3D12RootSignature::Create(const D3D12Device& Device, const std::vector<D3D12_ROOT_PARAMETER1>& Params, const RHIGraphicsPipelineCreateInfo& RHICreateInfo)
+void D3D12RootSignature::Create(const D3D12Device& Device, const std::vector<D3D12_ROOT_PARAMETER1>& Params, const RHIGraphicsPipelineDesc& Desc)
 {
 	D3DBlob Signature;
 	D3DBlob Error;
@@ -148,7 +148,7 @@ void D3D12RootSignature::Create(const D3D12Device& Device, const std::vector<D3D
 		CreateDesc.Desc_1_1.NumStaticSamplers = 0u;
 		CreateDesc.Desc_1_1.pStaticSamplers = nullptr;
 		CreateDesc.Desc_1_1.Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE;
-		//if (RHICreateInfo.InputLayout)
+		//if (Desc.InputLayout)
 		//{
 		//	CreateDesc.Desc_1_1.Flags |= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 		//}
@@ -167,14 +167,14 @@ void D3D12RootSignature::Create(const D3D12Device& Device, const std::vector<D3D
 	VERIFY_D3D(Device->CreateRootSignature(0u, Signature->GetBufferPointer(), Signature->GetBufferSize(), IID_PPV_ARGS(Reference())));
 }
 
-D3D12GraphicsPipelineState::D3D12GraphicsPipelineState(const D3D12Device& Device, const RHIGraphicsPipelineCreateInfo& RHICreateInfo)
+D3D12GraphicsPipelineState::D3D12GraphicsPipelineState(const D3D12Device& Device, const RHIGraphicsPipelineDesc& Desc)
 {
-	m_RootSignature = std::make_unique<D3D12RootSignature>(Device, RHICreateInfo);
+	m_RootSignature = std::make_unique<D3D12RootSignature>(Device, Desc);
 
 	Array<D3D12_SHADER_BYTECODE, ERHIShaderStage> ShaderByteCodes;
 	//for (uint32_t Stage = ERHIShaderStage::Vertex; Stage < ERHIShaderStage::Compute; ++Stage)
 	//{
-	//	//if (auto Shader = RHICreateInfo.Shaders.Get(static_cast<ERHIShaderStage>(Stage)))
+	//	//if (auto Shader = Desc.Shaders.Get(static_cast<ERHIShaderStage>(Stage)))
 	//	//{
 	//	//	Shaders[Stage].BytecodeLength = Shader->Desc()->BinarySize;
 	//	//	Shaders[Stage].pShaderBytecode = Shader->Desc()->Binary.data();
@@ -198,73 +198,73 @@ D3D12GraphicsPipelineState::D3D12GraphicsPipelineState(const D3D12Device& Device
 		Set to TRUE to enable independent blending. 
 		If set to FALSE, only the RenderTarget[0] members are used; RenderTarget[1..7] are ignored.
 	***********************************************************************************************/
-	CreateDesc.BlendState.AlphaToCoverageEnable = RHICreateInfo.MultisampleState.EnableAlphaToCoverage;
+	CreateDesc.BlendState.AlphaToCoverageEnable = Desc.MultisampleState.EnableAlphaToCoverage;
 	CreateDesc.BlendState.IndependentBlendEnable = true;
 	for (uint32_t Index = 0u; Index < ERHILimitations::MaxRenderTargets; ++Index)
 	{
-		if (RHICreateInfo.BlendState.RenderTargetBlends[Index].Enable)
+		if (Desc.BlendState.RenderTargetBlends[Index].Enable)
 		{
 			CreateDesc.BlendState.RenderTarget[Index] = D3D12_RENDER_TARGET_BLEND_DESC
 			{
-				.BlendEnable = RHICreateInfo.BlendState.RenderTargetBlends[Index].Enable,
-				.LogicOpEnable = RHICreateInfo.BlendState.EnableLogicOp,
-				.SrcBlend = GetBlendFactor(RHICreateInfo.BlendState.RenderTargetBlends[Index].SrcColor),
-				.DestBlend = GetBlendFactor(RHICreateInfo.BlendState.RenderTargetBlends[Index].DstColor),
-				.BlendOp = GetBlendOp(RHICreateInfo.BlendState.RenderTargetBlends[Index].ColorOp),
-				.SrcBlendAlpha = GetBlendFactor(RHICreateInfo.BlendState.RenderTargetBlends[Index].SrcAlpha),
-				.DestBlendAlpha = GetBlendFactor(RHICreateInfo.BlendState.RenderTargetBlends[Index].DstAlpha),
-				.BlendOpAlpha = GetBlendOp(RHICreateInfo.BlendState.RenderTargetBlends[Index].AlphaOp),
-				.LogicOp = GetLogicOp(RHICreateInfo.BlendState.LogicOp),
-				.RenderTargetWriteMask = GetColorComponentMask(RHICreateInfo.BlendState.RenderTargetBlends[Index].ColorMask)
+				.BlendEnable = Desc.BlendState.RenderTargetBlends[Index].Enable,
+				.LogicOpEnable = Desc.BlendState.EnableLogicOp,
+				.SrcBlend = GetBlendFactor(Desc.BlendState.RenderTargetBlends[Index].SrcColor),
+				.DestBlend = GetBlendFactor(Desc.BlendState.RenderTargetBlends[Index].DstColor),
+				.BlendOp = GetBlendOp(Desc.BlendState.RenderTargetBlends[Index].ColorOp),
+				.SrcBlendAlpha = GetBlendFactor(Desc.BlendState.RenderTargetBlends[Index].SrcAlpha),
+				.DestBlendAlpha = GetBlendFactor(Desc.BlendState.RenderTargetBlends[Index].DstAlpha),
+				.BlendOpAlpha = GetBlendOp(Desc.BlendState.RenderTargetBlends[Index].AlphaOp),
+				.LogicOp = GetLogicOp(Desc.BlendState.LogicOp),
+				.RenderTargetWriteMask = GetColorComponentMask(Desc.BlendState.RenderTargetBlends[Index].ColorMask)
 			};
 		}
 	}
 
-	CreateDesc.SampleMask = *RHICreateInfo.MultisampleState.SampleMask; /// #TODO
+	CreateDesc.SampleMask = *Desc.MultisampleState.SampleMask; /// #TODO
 
 	CreateDesc.RasterizerState = D3D12_RASTERIZER_DESC
 	{
-		.FillMode = GetPolygonMode(RHICreateInfo.RasterizationState.PolygonMode),
-		.CullMode = GetCullMode(RHICreateInfo.RasterizationState.CullMode),
-		.FrontCounterClockwise = RHICreateInfo.RasterizationState.FrontFace == ERHIFrontFace::Counterclockwise,
-		.DepthBias = static_cast<int32_t>(RHICreateInfo.RasterizationState.DepthBias),
-		.DepthBiasClamp = RHICreateInfo.RasterizationState.DepthBiasClamp,
-		.SlopeScaledDepthBias = RHICreateInfo.RasterizationState.DepthBiasSlope,
-		.DepthClipEnable = RHICreateInfo.RasterizationState.EnableDepthClamp,
-		.MultisampleEnable = RHICreateInfo.MultisampleState.SampleCount > ERHISampleCount::Sample_1_Bit,
+		.FillMode = GetPolygonMode(Desc.RasterizationState.PolygonMode),
+		.CullMode = GetCullMode(Desc.RasterizationState.CullMode),
+		.FrontCounterClockwise = Desc.RasterizationState.FrontFace == ERHIFrontFace::Counterclockwise,
+		.DepthBias = static_cast<int32_t>(Desc.RasterizationState.DepthBias),
+		.DepthBiasClamp = Desc.RasterizationState.DepthBiasClamp,
+		.SlopeScaledDepthBias = Desc.RasterizationState.DepthBiasSlope,
+		.DepthClipEnable = Desc.RasterizationState.EnableDepthClamp,
+		.MultisampleEnable = Desc.MultisampleState.SampleCount > ERHISampleCount::Sample_1_Bit,
 		.AntialiasedLineEnable = false,
-		.ForcedSampleCount = static_cast<uint32_t>(RHICreateInfo.MultisampleState.SampleCount),
+		.ForcedSampleCount = static_cast<uint32_t>(Desc.MultisampleState.SampleCount),
 		.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF
 	};
 
 	D3D12_DEPTH_STENCILOP_DESC FrontFace
 	{
-		.StencilFailOp = GetStencilOp(RHICreateInfo.DepthStencilState.FrontFaceStencil.FailOp),
-		.StencilDepthFailOp = GetStencilOp(RHICreateInfo.DepthStencilState.FrontFaceStencil.DepthFailOp),
-		.StencilPassOp = GetStencilOp(RHICreateInfo.DepthStencilState.FrontFaceStencil.PassOp),
-		.StencilFunc = GetCompareFunc(RHICreateInfo.DepthStencilState.FrontFaceStencil.CompareFunc)
+		.StencilFailOp = GetStencilOp(Desc.DepthStencilState.FrontFaceStencil.FailOp),
+		.StencilDepthFailOp = GetStencilOp(Desc.DepthStencilState.FrontFaceStencil.DepthFailOp),
+		.StencilPassOp = GetStencilOp(Desc.DepthStencilState.FrontFaceStencil.PassOp),
+		.StencilFunc = GetCompareFunc(Desc.DepthStencilState.FrontFaceStencil.CompareFunc)
 	};
 	D3D12_DEPTH_STENCILOP_DESC BackFace
 	{
-		.StencilFailOp = GetStencilOp(RHICreateInfo.DepthStencilState.BackFaceStencil.FailOp),
-		.StencilDepthFailOp = GetStencilOp(RHICreateInfo.DepthStencilState.BackFaceStencil.DepthFailOp),
-		.StencilPassOp = GetStencilOp(RHICreateInfo.DepthStencilState.BackFaceStencil.PassOp),
-		.StencilFunc = GetCompareFunc(RHICreateInfo.DepthStencilState.BackFaceStencil.CompareFunc)
+		.StencilFailOp = GetStencilOp(Desc.DepthStencilState.BackFaceStencil.FailOp),
+		.StencilDepthFailOp = GetStencilOp(Desc.DepthStencilState.BackFaceStencil.DepthFailOp),
+		.StencilPassOp = GetStencilOp(Desc.DepthStencilState.BackFaceStencil.PassOp),
+		.StencilFunc = GetCompareFunc(Desc.DepthStencilState.BackFaceStencil.CompareFunc)
 	};
 
 	CreateDesc.DepthStencilState = D3D12_DEPTH_STENCIL_DESC
 	{
-		.DepthEnable = RHICreateInfo.DepthStencilState.EnableDepth,
-		.DepthWriteMask = RHICreateInfo.DepthStencilState.EnableDepth ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO,
-		.DepthFunc = GetCompareFunc(RHICreateInfo.DepthStencilState.DepthCompareFunc),
-		.StencilEnable = RHICreateInfo.DepthStencilState.EnableStencil,
-		.StencilReadMask = RHICreateInfo.DepthStencilState.StencilReadMask,
-		.StencilWriteMask = RHICreateInfo.DepthStencilState.StencilWriteMask,
+		.DepthEnable = Desc.DepthStencilState.EnableDepth,
+		.DepthWriteMask = Desc.DepthStencilState.EnableDepth ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO,
+		.DepthFunc = GetCompareFunc(Desc.DepthStencilState.DepthCompareFunc),
+		.StencilEnable = Desc.DepthStencilState.EnableStencil,
+		.StencilReadMask = Desc.DepthStencilState.StencilReadMask,
+		.StencilWriteMask = Desc.DepthStencilState.StencilWriteMask,
 		.FrontFace = FrontFace,
 		.BackFace = BackFace
 	};
 
-	//const auto& InputElements = (Cast<D3D12InputLayout>(RHICreateInfo.InputLayout))->InputElementDescs();
+	//const auto& InputElements = (Cast<D3D12InputLayout>(Desc.InputLayout))->InputElementDescs();
 	//CreateDesc.InputLayout = D3D12_INPUT_LAYOUT_DESC
 	//{
 	//	InputElements.data(),
@@ -273,10 +273,10 @@ D3D12GraphicsPipelineState::D3D12GraphicsPipelineState(const D3D12Device& Device
 
 	CreateDesc.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
 
-	CreateDesc.PrimitiveTopologyType = GetPrimitiveTopologyType(RHICreateInfo.PrimitiveTopology);
+	CreateDesc.PrimitiveTopologyType = GetPrimitiveTopologyType(Desc.PrimitiveTopology);
 
 #if 0
-	const RHIFrameBufferCreateInfo& FrameBufferDesc = RHICreateInfo.FrameBuffer->Description();
+	const RHIFrameBufferDesc& FrameBufferDesc = Desc.FrameBuffer->Description();
 	CreateDesc.NumRenderTargets = static_cast<uint32_t>(FBDesc.ColorAttachments.size());
 	for (uint32_t i = 0u; i < FBDesc.ColorAttachments.size(); ++i)
 	{
@@ -291,7 +291,7 @@ D3D12GraphicsPipelineState::D3D12GraphicsPipelineState(const D3D12Device& Device
 
 	CreateDesc.SampleDesc = DXGI_SAMPLE_DESC
 	{
-		static_cast<uint32_t>(RHICreateInfo.MultisampleState.SampleCount),
+		static_cast<uint32_t>(Desc.MultisampleState.SampleCount),
 		0u
 	};
 
@@ -304,9 +304,9 @@ D3D12GraphicsPipelineState::D3D12GraphicsPipelineState(const D3D12Device& Device
 	VERIFY_D3D(Device->CreateGraphicsPipelineState(&CreateDesc, IID_PPV_ARGS(Reference())));
 }
 
-D3D12GraphicsPipeline::D3D12GraphicsPipeline(const D3D12Device& Device, const RHIGraphicsPipelineCreateInfo& RHICreateInfo)
+D3D12GraphicsPipeline::D3D12GraphicsPipeline(const D3D12Device& Device, const RHIGraphicsPipelineDesc& Desc)
 {
-	//m_State = std::make_shared<D3D12GraphicsPipelineState>(Device, RHICreateInfo);
+	//m_State = std::make_shared<D3D12GraphicsPipelineState>(Device, Desc);
 }
 
 #if 0

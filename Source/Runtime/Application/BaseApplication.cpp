@@ -103,14 +103,14 @@ void BaseApplication::Run()
 		m_Window = std::make_unique<Window>(m_Configs->WindowDesc);
 		assert(m_Window);
 
-		RHISwapchainCreateInfo CreateInfo;
-		CreateInfo.SetWindowHandle(m_Window->GetHandle())
+		RHISwapchainDesc Desc;
+		Desc.SetWindowHandle(m_Window->GetHandle())
 			.SetWidth(m_Window->GetWidth())
 			.SetHeight(m_Window->GetHeight())
 			.SetFullscreen(m_Configs->GraphicsSettings.FullScreen)
 			.SetVSync(m_Configs->GraphicsSettings.VSync)
 			.SetHDR(m_Configs->GraphicsSettings.HDR);
-		m_RenderSwapchain = m_RenderBackend->GetDevice().CreateSwapchain(CreateInfo);
+		m_RenderSwapchain = m_RenderBackend->GetDevice().CreateSwapchain(Desc);
 	}
 
 	Initialize();

@@ -5,19 +5,19 @@
 class D3D11ShaderResourceView : public D3DHwResource<ID3D11ShaderResourceView>
 {
 public:
-	D3D11ShaderResourceView(const class D3D11Device& Device, const RHITextureCreateInfo& RHICreateInfo);
+	D3D11ShaderResourceView(const class D3D11Device& Device, const RHITextureDesc& Desc);
 };
 
 class D3D11RenderTargetView : public D3DHwResource<ID3D11RenderTargetView>
 {
 public:
-	D3D11RenderTargetView(const class D3D11Device& Device, const RHITextureCreateInfo& RHICreateInfo);
+	D3D11RenderTargetView(const class D3D11Device& Device, const RHITextureDesc& Desc);
 };
 
 class D3D11DepthStencilView : public D3DHwResource<ID3D11DepthStencilView>
 {
 public:
-	D3D11DepthStencilView(const class D3D11Device& Device, const RHITextureCreateInfo& RHICreateInfo);
+	D3D11DepthStencilView(const class D3D11Device& Device, const RHITextureDesc& Desc);
 };
 
 class D3D11UnorderedAccessView : public D3DHwResource<ID3D11UnorderedAccessView>

@@ -5,13 +5,13 @@
 class VulkanShader final : public VkHwResource<vk::ShaderModule>, public RHIShader
 {
 public:
-	VulkanShader(const class VulkanDevice& Device, const RHIShaderCreateInfo& CreateInfo);
+	VulkanShader(const class VulkanDevice& Device, const RHIShaderDesc& Desc);
 };
 
 class VulkanInputLayout final : public RHIInputLayout, public vk::PipelineVertexInputStateCreateInfo
 {
 public:
-	VulkanInputLayout(const RHIInputLayoutCreateInfo& CreateInfo);
+	VulkanInputLayout(const RHIInputLayoutDesc& Desc);
 
 private:
 	std::vector<vk::VertexInputBindingDescription> m_InputBindings;

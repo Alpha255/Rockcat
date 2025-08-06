@@ -6,7 +6,7 @@ struct MeshDrawCommandBuilder
 {
 	virtual std::shared_ptr<MeshDrawCommand> Build(const class StaticMesh& Mesh, const class ISceneView& SceneView) = 0;
 
-	void SetupShaderParameters(RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo,
+	void SetupShaderParameters(RHIGraphicsPipelineDesc& Desc,
 		const class ISceneView& InView,
 		const Math::Transform& InTransform,
 		const MaterialProperty& InMaterial);

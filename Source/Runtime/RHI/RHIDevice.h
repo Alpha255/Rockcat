@@ -76,22 +76,22 @@ public:
 
 	virtual void WaitIdle() const = 0;
 
-	virtual RHIShaderPtr CreateShader(const RHIShaderCreateInfo& CreateInfo) = 0;
-	virtual RHITexturePtr CreateTexture(const RHITextureCreateInfo& CreateInfo) = 0;
-	virtual RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutCreateInfo& CreateInfo) = 0;
-	virtual RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferCreateInfo& CreateInfo) = 0;
-	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo) = 0;
-	virtual RHIPipelineStatePtr CreatePipelineState(const RHIGraphicsPipelineCreateInfo& CreateInfo) = 0;
-	virtual RHIBufferPtr CreateBuffer(const RHIBufferCreateInfo& CreateInfo) = 0;
-	virtual RHISamplerPtr CreateSampler(const RHISamplerCreateInfo& CreateInfo) = 0;
-	virtual RHISwapchainPtr CreateSwapchain(const RHISwapchainCreateInfo& CreateInfo) = 0;
+	virtual RHIShaderPtr CreateShader(const RHIShaderDesc& Desc) = 0;
+	virtual RHITexturePtr CreateTexture(const RHITextureDesc& Desc) = 0;
+	virtual RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutDesc& Desc) = 0;
+	virtual RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferDesc& Desc) = 0;
+	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineDesc& Desc) = 0;
+	virtual RHIPipelineStatePtr CreatePipelineState(const RHIGraphicsPipelineDesc& Desc) = 0;
+	virtual RHIBufferPtr CreateBuffer(const RHIBufferDesc& Desc) = 0;
+	virtual RHISamplerPtr CreateSampler(const RHISamplerDesc& Desc) = 0;
+	virtual RHISwapchainPtr CreateSwapchain(const RHISwapchainDesc& Desc) = 0;
 
 	virtual RHICommandListContext* GetImmediateCommandListContext(ERHIDeviceQueue Queue) = 0;
 	virtual RHICommandListContextPtr AcquireDeferredCommandListContext() = 0;
 	virtual void ReleaseDeferredCommandListContext(RHICommandListContextPtr& CmdListContext) = 0;
 
-	RHIGraphicsPipeline* GetOrCreateGraphicsPipeline(const RHIGraphicsPipelineCreateInfo& CreateInfo);
-	RHIFrameBuffer* GetOrCreateFrameBuffer(const RHIFrameBufferCreateInfo& CreateInfo);
+	RHIGraphicsPipeline* GetOrCreateGraphicsPipeline(const RHIGraphicsPipelineDesc& Desc);
+	RHIFrameBuffer* GetOrCreateFrameBuffer(const RHIFrameBufferDesc& Desc);
 
 	const char* const GetAdapterName() const { return m_AdapterName.c_str(); }
 

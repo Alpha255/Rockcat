@@ -26,10 +26,10 @@ VulkanSurface::~VulkanSurface()
 	m_Native = nullptr;
 }
 
-VulkanSwapchain::VulkanSwapchain(const VulkanDevice& Device, const RHISwapchainCreateInfo& CreateInfo)
+VulkanSwapchain::VulkanSwapchain(const VulkanDevice& Device, const RHISwapchainDesc& Desc)
 	: VkHwResource(Device)
-	, RHISwapchain(CreateInfo)
-	, m_ColorFormat(CreateInfo.HDR ? vk::Format::eA2R10G10B10UnormPack32 : vk::Format::eR8G8B8A8Unorm)
+	, RHISwapchain(Desc)
+	, m_ColorFormat(Desc.HDR ? vk::Format::eA2R10G10B10UnormPack32 : vk::Format::eR8G8B8A8Unorm)
 	//, m_PresentComplete(std::move(std::make_unique<VulkanSemaphore>(Device)))
 {
 	Create(true);
@@ -253,9 +253,8 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 	m_BackBuffers.resize(Images.size());
 	for (uint32_t Index = 0u; Index < Images.size(); ++Index)
 	{
-		RHITextureCreateInfo TextureCreateInfo;
-		
-		TextureCreateInfo.SetWidth(m_Width)
+		RHITextureDesc Desc;
+		Desc.SetWidth(m_Width)
 			.SetHeight(m_Height)
 			.SetDepth(1u)
 			.SetNumArrayLayer(1u)
@@ -265,7 +264,7 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 			.SetSampleCount(ERHISampleCount::Sample_1_Bit)
 			.SetUsages(ERHIBufferUsageFlags::None)
 			.SetName(StringUtils::Format("SwapchainImage-%d", Index));
-		m_BackBuffers[Index] = std::make_shared<VulkanTexture>(GetDevice(), TextureCreateInfo, Images[Index]);
+		m_BackBuffers[Index] = std::make_shared<VulkanTexture>(GetDevice(), Desc, Images[Index]);
 	}
 
 	SetNumBackBuffer(CreateInfo.minImageCount);

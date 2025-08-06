@@ -66,12 +66,12 @@ protected:
 	}
 };
 
-void MeshDrawCommandBuilder::SetupShaderParameters(RHIGraphicsPipelineCreateInfo& GfxPipelineCreateInfo,
+void MeshDrawCommandBuilder::SetupShaderParameters(RHIGraphicsPipelineDesc& Desc,
 	const ISceneView& InView,
 	const Math::Transform& InTransform,
 	const MaterialProperty& InMaterial)
 {
-	for (auto& Shader : GfxPipelineCreateInfo.ShaderPipeline)
+	for (auto& Shader : Desc.ShaderPipeline)
 	{
 		if (Shader)
 		{
@@ -86,7 +86,7 @@ RHIFrameBuffer* GeometryPass::GetFrameBuffer()
 {
 	//if (!m_FrameBuffer)
 	//{
-	//	RHIFrameBufferCreateInfo CreateInfo;
+	//	RHIFrameBufferDesc CreateInfo;
 	//	for (auto Resource : GetOutputs())
 	//	{
 	//		if (Resource && Resource->GetType() == RDGResource::EType::Texture)

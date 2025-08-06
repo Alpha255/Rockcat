@@ -5,7 +5,7 @@
 class D3D12Buffer : public D3DHwResource<ID3D12Resource>, public RHIBuffer
 {
 public:
-	D3D12Buffer(const class D3D12Device& Device, const RHIBufferCreateInfo& RHICreateInfo);
+	D3D12Buffer(const class D3D12Device& Device, const RHIBufferDesc& Desc);
 
 	~D3D12Buffer();
 

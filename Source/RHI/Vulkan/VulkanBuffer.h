@@ -13,7 +13,7 @@ struct VulkanDeviceMemory
 class VulkanBuffer final : public VkHwResource<vk::Buffer>, public RHIBuffer
 {
 public:
-	VulkanBuffer(const class VulkanDevice& Device, const RHIBufferCreateInfo& CreateInfo);
+	VulkanBuffer(const class VulkanDevice& Device, const RHIBufferDesc& Desc);
 
 	~VulkanBuffer();
 

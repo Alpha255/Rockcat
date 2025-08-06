@@ -5,7 +5,7 @@
 
 #define RHI_WHOLE_SIZE ~0u
 
-struct RHIBufferCreateInfo
+struct RHIBufferDesc
 {
 	ERHIBufferUsageFlags BufferUsageFlags = ERHIBufferUsageFlags::None;
 	ERHIDeviceAccessFlags AccessFlags = ERHIDeviceAccessFlags::None;
@@ -16,14 +16,14 @@ struct RHIBufferCreateInfo
 
 	std::string Name;
 
-	inline RHIBufferCreateInfo& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; }
-	inline RHIBufferCreateInfo& SetAccessFlags(ERHIDeviceAccessFlags Flags) { AccessFlags = Flags | AccessFlags; return *this; }
-	inline RHIBufferCreateInfo& SetPermanentStates(ERHIResourceState States) { PermanentStates = States; return *this; }
-	inline RHIBufferCreateInfo& SetSize(size_t InSize) { Size = InSize; return *this; }
-	inline RHIBufferCreateInfo& SetInitialData(const void* Data) { InitialData = Data; return *this; }
+	inline RHIBufferDesc& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; }
+	inline RHIBufferDesc& SetAccessFlags(ERHIDeviceAccessFlags Flags) { AccessFlags = Flags | AccessFlags; return *this; }
+	inline RHIBufferDesc& SetPermanentStates(ERHIResourceState States) { PermanentStates = States; return *this; }
+	inline RHIBufferDesc& SetSize(size_t InSize) { Size = InSize; return *this; }
+	inline RHIBufferDesc& SetInitialData(const void* Data) { InitialData = Data; return *this; }
 
 	template<class T>
-	inline RHIBufferCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
+	inline RHIBufferDesc& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 };
 
 enum class ERHIMapMode
@@ -43,9 +43,9 @@ struct RHIMappedMemory
 class RHIBuffer : public RHIResource
 {
 public:
-	RHIBuffer(const RHIBufferCreateInfo& RHICreateInfo)
-		: RHIResource(RHICreateInfo.Name.c_str())
-		, m_Size(RHICreateInfo.Size)
+	RHIBuffer(const RHIBufferDesc& Desc)
+		: RHIResource(Desc.Name.c_str())
+		, m_Size(Desc.Size)
 	{
 	}
 
@@ -53,7 +53,7 @@ public:
 	virtual void Unmap() = 0;
 	virtual void FlushMappedRange(size_t Size = RHI_WHOLE_SIZE, size_t Offset = 0u) = 0;
 	virtual void InvalidateMappedRange(size_t Size = RHI_WHOLE_SIZE, size_t Offset = 0u) = 0;
-	virtual RHIBufferPtr Suballocate(const RHIBufferCreateInfo&) { return nullptr; }
+	virtual RHIBufferPtr Suballocate(const RHIBufferDesc&) { return nullptr; }
 	
 	inline void* GetMapped() const { return m_MappedMemory.Memory; }
 	inline size_t GetSize() const { return m_Size; }
@@ -62,7 +62,7 @@ protected:
 	RHIMappedMemory m_MappedMemory;
 };
 
-struct RHIFrameBufferCreateInfo
+struct RHIFrameBufferDesc
 {
 	struct RHIAttachment
 	{
@@ -87,7 +87,7 @@ struct RHIFrameBufferCreateInfo
 
 	inline bool HasDepthStencil() const { return DepthStencilAttachment.Texture != nullptr && (RHI::IsDepth(DepthStencilAttachment.Texture->GetFormat()) || RHI::IsDepthStencil(DepthStencilAttachment.Texture->GetFormat())); }
 
-	inline RHIFrameBufferCreateInfo& AddColorAttachment(const RHITexture* Texture, RHISubresource Subresource = RHI::AllSubresource)
+	inline RHIFrameBufferDesc& AddColorAttachment(const RHITexture* Texture, RHISubresource Subresource = RHI::AllSubresource)
 	{
 		assert(Texture && ColorAttachments.size() < (ERHILimitations::MaxRenderTargets - 1u) && RHI::IsColor(Texture->GetFormat()));
 
@@ -104,7 +104,7 @@ struct RHIFrameBufferCreateInfo
 		return *this;
 	}
 
-	inline RHIFrameBufferCreateInfo& SetColorAttachment(uint32_t Index, const RHITexture* Texture, RHISubresource Subresource = RHI::AllSubresource)
+	inline RHIFrameBufferDesc& SetColorAttachment(uint32_t Index, const RHITexture* Texture, RHISubresource Subresource = RHI::AllSubresource)
 	{
 		assert(Texture && Index < ColorAttachments.size() && Index < ERHILimitations::MaxRenderTargets && RHI::IsColor(Texture->GetFormat()));
 
@@ -119,7 +119,7 @@ struct RHIFrameBufferCreateInfo
 		return *this;
 	}
 
-	inline RHIFrameBufferCreateInfo& SetDepthStencilAttachment(const RHITexture* Texture, RHISubresource Subresource = RHI::AllSubresource)
+	inline RHIFrameBufferDesc& SetDepthStencilAttachment(const RHITexture* Texture, RHISubresource Subresource = RHI::AllSubresource)
 	{
 		assert(Texture && (RHI::IsDepth(Texture->GetFormat()) || RHI::IsDepthStencil(Texture->GetFormat())));
 
@@ -133,7 +133,7 @@ struct RHIFrameBufferCreateInfo
 		return *this;
 	}
 
-	inline RHIFrameBufferCreateInfo& AddAttachment(const RHITexture* Texture, RHISubresource Subresource = RHI::AllSubresource)
+	inline RHIFrameBufferDesc& AddAttachment(const RHITexture* Texture, RHISubresource Subresource = RHI::AllSubresource)
 	{
 		assert(Texture);
 
@@ -151,7 +151,7 @@ struct RHIFrameBufferCreateInfo
 	}
 
 	template<class T>
-	inline RHIFrameBufferCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
+	inline RHIFrameBufferDesc& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 private:
 	uint32_t NumColorAttachments = 0u;
 
@@ -175,8 +175,8 @@ private:
 class RHIFrameBuffer : public RHIResource
 {
 public:
-	RHIFrameBuffer(const RHIFrameBufferCreateInfo& CreateInfo)
-		: RHIResource(CreateInfo.Name.c_str())
+	RHIFrameBuffer(const RHIFrameBufferDesc& Desc)
+		: RHIResource(Desc.Name.c_str())
 	{
 	}
 

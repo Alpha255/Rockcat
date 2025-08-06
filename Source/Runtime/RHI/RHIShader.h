@@ -26,7 +26,7 @@ enum class ERHIVertexInputRate : uint8_t
 	Instance,
 };
 
-struct RHIInputLayoutCreateInfo
+struct RHIInputLayoutDesc
 {
 	struct RHIVertexAttribute
 	{
@@ -68,7 +68,7 @@ struct RHIInputLayoutCreateInfo
 		}
 	};
 
-	inline RHIInputLayoutCreateInfo& AddBinding(const RHIVertexInputBinding& InputBinding)
+	inline RHIInputLayoutDesc& AddBinding(const RHIVertexInputBinding& InputBinding)
 	{
 		assert(InputBinding.Binding < ERHILimitations::MaxVertexStreams);
 		Bindings.emplace_back(InputBinding);
@@ -94,7 +94,7 @@ class RHIInputLayout : public RHIResource
 {
 };
 
-struct RHIShaderCreateInfo
+struct RHIShaderDesc
 {
 	ERHIShaderStage Stage = ERHIShaderStage::Num;
 	ERHIShaderLanguage Language = ERHIShaderLanguage::HLSL;
@@ -102,19 +102,19 @@ struct RHIShaderCreateInfo
 	const class ShaderBinary* Binary = nullptr;
 	std::string Name;
 
-	inline RHIShaderCreateInfo& SetStage(ERHIShaderStage InStage) { Stage = InStage; return *this; }
-	inline RHIShaderCreateInfo& SetLanguage(ERHIShaderLanguage InLanguage) { Language = InLanguage; return *this; }
-	inline RHIShaderCreateInfo& SetShaderBinary(const class ShaderBinary* const InBinary) { Binary = InBinary; return *this; }
+	inline RHIShaderDesc& SetStage(ERHIShaderStage InStage) { Stage = InStage; return *this; }
+	inline RHIShaderDesc& SetLanguage(ERHIShaderLanguage InLanguage) { Language = InLanguage; return *this; }
+	inline RHIShaderDesc& SetShaderBinary(const class ShaderBinary* const InBinary) { Binary = InBinary; return *this; }
 
 	template<class T>
-	inline RHIShaderCreateInfo& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
+	inline RHIShaderDesc& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
 };
 
 class RHIShader
 {
 public:
-	RHIShader(const RHIShaderCreateInfo& CreateInfo)
-		: m_Stage(CreateInfo.Stage)
+	RHIShader(const RHIShaderDesc& Desc)
+		: m_Stage(Desc.Stage)
 	{
 	}
 

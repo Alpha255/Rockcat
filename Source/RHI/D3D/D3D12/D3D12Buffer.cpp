@@ -1,10 +1,10 @@
 #include "RHI/D3D/D3D12/D3D12Buffer.h"
 #include "RHI/D3D/D3D12/D3D12Device.h"
 
-D3D12Buffer::D3D12Buffer(const D3D12Device& Device, const RHIBufferCreateInfo& RHICreateInfo)
-	: RHIBuffer(RHICreateInfo)
+D3D12Buffer::D3D12Buffer(const D3D12Device& Device, const RHIBufferDesc& Desc)
+	: RHIBuffer(Desc)
 {
-	assert(RHICreateInfo.AccessFlags != ERHIDeviceAccessFlags::None);
+	assert(Desc.AccessFlags != ERHIDeviceAccessFlags::None);
 
 	static const size_t ConstantsBufferAlignment = 256ull;
 	
@@ -18,7 +18,7 @@ D3D12Buffer::D3D12Buffer(const D3D12Device& Device, const RHIBufferCreateInfo& R
 	{
 		.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
 		.Alignment = 0u,
-		.Width = RHICreateInfo.Size,
+		.Width = Desc.Size,
 		.Height = 1u,
 		.DepthOrArraySize = 1u,
 		.MipLevels = 1u,
@@ -28,11 +28,11 @@ D3D12Buffer::D3D12Buffer(const D3D12Device& Device, const RHIBufferCreateInfo& R
 		.Flags = D3D12_RESOURCE_FLAG_NONE
 	};
 
-	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UniformBuffer))
+	if (EnumHasAnyFlags(Desc.BufferUsageFlags, ERHIBufferUsageFlags::UniformBuffer))
 	{
 		CreateDesc.Width = Align(CreateDesc.Width, ConstantsBufferAlignment); /// TODO ???
 	}
-	if (EnumHasAnyFlags(RHICreateInfo.BufferUsageFlags, ERHIBufferUsageFlags::UnorderedAccess))
+	if (EnumHasAnyFlags(Desc.BufferUsageFlags, ERHIBufferUsageFlags::UnorderedAccess))
 	{
 		CreateDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 	}
@@ -48,13 +48,13 @@ D3D12Buffer::D3D12Buffer(const D3D12Device& Device, const RHIBufferCreateInfo& R
 
 	D3D12_RESOURCE_STATES States = D3D12_RESOURCE_STATE_COMMON;
 
-	if (EnumHasAnyFlags(RHICreateInfo.AccessFlags, ERHIDeviceAccessFlags::CpuRead))
+	if (EnumHasAnyFlags(Desc.AccessFlags, ERHIDeviceAccessFlags::CpuRead))
 	{
 		HeapProperties.Type = D3D12_HEAP_TYPE_READBACK;
 		States = D3D12_RESOURCE_STATE_COPY_DEST;
 		m_HostVisible = true;
 	}
-	if (EnumHasAnyFlags(RHICreateInfo.AccessFlags, ERHIDeviceAccessFlags::CpuWrite) || EnumHasAnyFlags(RHICreateInfo.AccessFlags, ERHIDeviceAccessFlags::GpuReadCpuWrite))
+	if (EnumHasAnyFlags(Desc.AccessFlags, ERHIDeviceAccessFlags::CpuWrite) || EnumHasAnyFlags(Desc.AccessFlags, ERHIDeviceAccessFlags::GpuReadCpuWrite))
 	{
 		HeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
 		States = D3D12_RESOURCE_STATE_GENERIC_READ;

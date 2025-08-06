@@ -30,7 +30,7 @@ protected:
 	friend class StbImageImporter;
 	friend class DDSImageImporter;
 
-	void CreateRHI(class RHIDevice& Device, const RHITextureCreateInfo& CreateInfo);
+	void CreateRHI(class RHIDevice& Device, const RHITextureDesc& Desc);
 
 	void SetLinear(bool Linear) { m_Linear = Linear; }
 

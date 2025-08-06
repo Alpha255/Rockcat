@@ -1,9 +1,9 @@
 #include "RHI/D3D/D3D12/D3D12Shader.h"
 
-D3D12InputLayout::D3D12InputLayout(const RHIInputLayoutCreateInfo& CreateInfo)
+D3D12InputLayout::D3D12InputLayout(const RHIInputLayoutDesc& Desc)
 {
 	uint32_t Offset = 0u;
-	for (auto& Binding : CreateInfo.Bindings)
+	for (auto& Binding : Desc.Bindings)
 	{
 		for (auto& Attr : Binding.Attributes)
 		{
@@ -23,7 +23,7 @@ D3D12InputLayout::D3D12InputLayout(const RHIInputLayoutCreateInfo& CreateInfo)
 	}
 }
 
-D3D12Shader::D3D12Shader(const RHIShaderCreateInfo& CreateInfo)
-	: RHIShader(CreateInfo)
+D3D12Shader::D3D12Shader(const RHIShaderDesc& Desc)
+	: RHIShader(Desc)
 {
 }

@@ -35,7 +35,7 @@ struct MeshDrawCommand
 	ERHIIndexFormat IndexFormat = ERHIIndexFormat::UInt16;
 	
 	const MaterialProperty* Material = nullptr;
-	RHIGraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
+	RHIGraphicsPipelineDesc PipelineDesc;
 
 	union
 	{
