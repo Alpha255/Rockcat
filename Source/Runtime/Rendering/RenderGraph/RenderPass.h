@@ -48,3 +48,44 @@ private:
 	std::vector<RenderPassField> m_Fields;
 	class RenderGraph& m_Graph;
 };
+
+struct RDGResourceDesc
+{
+	enum class EVisibility
+	{
+		None = 0x0,
+		Input = 0x1,
+		Output = 0x2,
+		Internal = 0x4,
+		External = 0x8
+	};
+
+	enum class EType
+	{
+		Buffer,
+		Texture,
+	};
+
+	EVisibility Visibility = EVisibility::None;
+	EType Type = EType::Buffer;
+
+	std::string_view Name;
+};
+
+class RenderPass2
+{
+public:
+	RenderPass2(const char* Name)
+		: m_Name(Name)
+	{
+	}
+
+	const char* GetName() const { return m_Name.data(); }
+	void SetName(const char* Name) { m_Name = Name; }
+
+	virtual void Setup(class ResourceManager& ResourceMgr) = 0;
+	virtual void Compile() {}
+	virtual void Execute(class RenderContext& Context) = 0;
+private:
+	std::string_view m_Name;
+};
