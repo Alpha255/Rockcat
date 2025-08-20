@@ -1,6 +1,6 @@
 #include "RHI/RHIUploadManager.h"
 #include "RHI/RHICommandListContext.h"
-#include "RHI/RHIBackend.h"
+#include "RHI/RHIDevice.h"
 
 thread_local std::shared_ptr<RHICommandListContext> t_CommandListContext;
 
@@ -103,7 +103,7 @@ void RHIUploadManager::QueueUploadBuffer(const RHIBuffer* Buffer, const void* Da
 
 void RHIUploadManager::QueueSubmitUploadCommandBuffer(RHICommandBuffer* UploadCommandBuffer)
 {
-	if (m_Device.SupportsTransferQueue())
+	if (m_Device.GetCapabilities().SupportsTransferQueue)
 	{
 		auto CommandListContext = m_Device.GetImmediateCommandListContext(ERHIDeviceQueue::Transfer);
 		CommandListContext->SubmitUploadCommandBuffer(UploadCommandBuffer);
@@ -189,7 +189,7 @@ RHICommandBuffer* RHIUploadManager::GetUploadCommandBuffer()
 {
 	RHICommandListContext* CommandListContext = nullptr;
 
-	if (m_Device.SupportsTransferQueue())
+	if (m_Device.GetCapabilities().SupportsTransferQueue)
 	{
 		CommandListContext = m_Device.GetImmediateCommandListContext(ERHIDeviceQueue::Transfer);
 		assert(CommandListContext);

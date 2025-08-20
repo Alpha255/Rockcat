@@ -12,6 +12,10 @@
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
 #include "Services/TaskFlowService.h"
 
+#if USE_DYNAMIC_VK_LOADER
+	VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
+#endif
+
 VulkanDevice::VulkanDevice()
 {
 	REGISTER_LOG_CATEGORY(LogVulkanRHI);

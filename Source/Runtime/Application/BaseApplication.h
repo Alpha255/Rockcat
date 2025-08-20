@@ -25,14 +25,12 @@ public:
 	bool IsActivate() const;
 	bool IsRequestQuit() const;
 protected:
-	bool InitializeRHI();
-	void Present();
+	bool CreateRenderDevice();
 
 	std::unique_ptr<class Window> m_Window;
 	std::shared_ptr<struct ApplicationSettings> m_Settings;
 
-	std::unique_ptr<class RHIBackend> m_RenderBackend;
-	std::shared_ptr<class RHISwapchain> m_RenderSwapchain;
+	std::unique_ptr<class RHIDevice> m_RenderDevice;
 
 	std::unique_ptr<class CpuTimer> m_Timer;
 };

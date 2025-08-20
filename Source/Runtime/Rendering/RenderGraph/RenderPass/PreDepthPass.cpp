@@ -2,7 +2,6 @@
 #include "Rendering/RenderGraph/RenderGraph.h"
 #include "Asset/GlobalShaders.h"
 #include "Scene/Components/StaticMesh.h"
-#include "RHI/RHIBackend.h"
 #include "RHI/RHIDevice.h"
 
 struct PreDepthMeshDrawCommandBuilder : public MeshDrawCommandBuilder

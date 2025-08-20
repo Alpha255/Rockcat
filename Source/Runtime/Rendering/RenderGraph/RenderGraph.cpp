@@ -3,7 +3,6 @@
 #include "Rendering/RenderGraph/ForwardRenderingPath.h"
 #include "Scene/Scene.h"
 #include "Scene/SceneView.h"
-#include "RHI/RHIBackend.h"
 
 std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& InRenderSettings, RHIDevice& Device, const ISceneView& InView)
 {

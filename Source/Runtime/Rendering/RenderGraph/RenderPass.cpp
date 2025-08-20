@@ -1,7 +1,6 @@
 #include "Rendering/RenderGraph/RenderPass.h"
 #include "Rendering/RenderGraph/RenderGraph.h"
 #include "Rendering/RenderGraph/ResourceManager.h"
-#include "RHI/RHIBackend.h"
 
 RenderPass::RenderPass(DAGNodeID ID, const char* Name, RenderGraph& Graph)
 	: m_NodeID(ID)

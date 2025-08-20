@@ -11,7 +11,6 @@ public:
 	~VulkanDevice();
 
 	ERHIDeviceType GetType() const override final { return ERHIDeviceType::Vulkan; }
-	const char* GetName() const override final { return "Vulkan"; }
 
 	void WaitIdle() const override final;
 

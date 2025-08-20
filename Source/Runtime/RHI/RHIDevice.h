@@ -86,8 +86,22 @@ public:
 			static_cast<EVendorID>(VendorID) == EVendorID::Intel;
 	}
 
+	static const char* const GetDeviceName(ERHIDeviceType Type)
+	{
+		switch (Type)
+		{
+		case ERHIDeviceType::Software: return "Software";
+		case ERHIDeviceType::Vulkan: return "Vulkan";
+		case ERHIDeviceType::D3D12: return "D3D12";
+		case ERHIDeviceType::D3D11: return "D3D11";
+		case ERHIDeviceType::OpenGL: return "OpenGL";
+		default: return "Unknown";
+		}
+	}
+
+	const char* GetName() const { return GetDeviceName(GetType()); }
+
 	virtual ERHIDeviceType GetType() const = 0;
-	virtual const char* GetName() const = 0;
 
 	virtual void WaitIdle() const = 0;
 

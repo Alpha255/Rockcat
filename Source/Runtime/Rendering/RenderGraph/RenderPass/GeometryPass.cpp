@@ -1,5 +1,4 @@
 #include "Rendering/RenderGraph/RenderPass/GeometryPass.h"
-#include "RHI/RHIBackend.h"
 #include "RHI/RHIDevice.h"
 #include "RHI/RHICommandListContext.h"
 #include "Scene/Components/StaticMesh.h"

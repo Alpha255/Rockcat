@@ -1,9 +1,8 @@
 #include "Application/BaseApplication.h"
 #include "Application/ApplicationSettings.h"
-#include "RHI/RHIBackend.h"
 #include "RHI/RHISwapchain.h"
 #include "RHI/RHIUploadManager.h"
-#include "RHI/Vulkan/VulkanRHI.h"
+#include "RHI/Vulkan/VulkanDevice.h"
 #include "Services/ShaderLibrary.h"
 #include "Services/TaskFlowService.h"
 #include "Services/AssetDatabase.h"
@@ -19,33 +18,34 @@ BaseApplication::BaseApplication(const char* ConfigPath)
 	m_Settings = ApplicationSettings::Load(ConfigPath ? ConfigPath : "Defalut.json");
 }
 
-bool BaseApplication::InitializeRHI()
+bool BaseApplication::CreateRenderDevice()
 {
 	switch (m_Settings->GraphicsSettings.DeviceType)
 	{
 	case ERHIDeviceType::Software:
 		break;
 	case ERHIDeviceType::Vulkan:
-		m_RenderBackend = std::make_unique<VulkanRHI>();
+		m_RenderDevice = std::make_unique<VulkanDevice>();
+		break;
+	case ERHIDeviceType::D3D12:
 		break;
 	case ERHIDeviceType::D3D11:
 		break;
-	case ERHIDeviceType::D3D12:
+	case ERHIDeviceType::OpenGL:
 		break;
 	default:
 		break;
 	}
 
-	if (!m_RenderBackend)
+	if (!m_RenderDevice)
 	{
-		LOG_CRITICAL("Render backend \"{}\" is not support yet!", RHIBackend::GetName(m_Settings->GraphicsSettings.Backend));
+		LOG_CRITICAL("Render backend \"{}\" is not support yet!", RHIDevice::GetDeviceName(m_Settings->GraphicsSettings.DeviceType));
 		return false;
 	}
 
-	m_RenderBackend->Initialize();
-	ShaderLibrary::Create(m_RenderBackend->GetType(), m_RenderBackend->GetDevice());
-	RHIUploadManager::Create(m_RenderBackend->GetDevice());
-	m_RenderBackend->CreateGlobalResources();
+	ShaderLibrary::Create(*m_RenderDevice);
+	RHIUploadManager::Create(*m_RenderDevice);
+
 	return true;
 }
 
@@ -62,14 +62,6 @@ bool BaseApplication::IsActivate() const
 bool BaseApplication::IsRequestQuit() const
 {
 	return m_Window ? m_Window->IsDestroyed() : false;
-}
-
-void BaseApplication::Present()
-{
-	if (m_RenderSwapchain)
-	{
-		m_RenderSwapchain->Present();
-	}
 }
 
 void BaseApplication::Tick(float ElapsedSeconds)
@@ -90,7 +82,7 @@ void BaseApplication::Run()
 	System::SetCurrentWorkingDirectory(Paths::AssetPath());
 	LOG_INFO("Mount working directory to \"{}\".", System::GetCurrentWorkingDirectory().string());
 
-	if (!InitializeRHI())
+	if (!CreateRenderDevice())
 	{
 		return;
 	}
@@ -102,15 +94,6 @@ void BaseApplication::Run()
 	{
 		m_Window = std::make_unique<Window>(m_Settings->WindowDesc);
 		assert(m_Window);
-
-		RHISwapchainDesc Desc;
-		Desc.SetWindowHandle(m_Window->GetHandle())
-			.SetWidth(m_Window->GetWidth())
-			.SetHeight(m_Window->GetHeight())
-			.SetFullscreen(m_Settings->GraphicsSettings.FullScreen)
-			.SetVSync(m_Settings->GraphicsSettings.VSync)
-			.SetHDR(m_Settings->GraphicsSettings.HDR);
-		m_RenderSwapchain = m_RenderBackend->GetDevice().CreateSwapchain(Desc);
 	}
 
 	Initialize();
@@ -132,7 +115,7 @@ void BaseApplication::Run()
 
 			if (m_Settings->EnableRendering)
 			{
-				Render(m_RenderSwapchain ? m_RenderSwapchain->GetBackBuffer() : nullptr);
+				//Render(m_RenderSwapchain ? m_RenderSwapchain->GetBackBuffer() : nullptr);
 				RenderGUI();
 				//Present();
 			}
@@ -146,7 +129,7 @@ void BaseApplication::Run()
 	AssetDatabase::Get().Finalize();
 	TaskFlowService::Get().Finalize();
 
-	m_RenderBackend.reset();
+	m_RenderDevice.reset();
 }
 
 void BaseApplication::OnWindowStatusChanged(EWindowStatus Status)
