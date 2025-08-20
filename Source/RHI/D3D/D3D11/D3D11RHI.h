@@ -8,7 +8,7 @@ class D3D11RHI final : public RHIBackend
 public:
 	~D3D11RHI();
 
-	ERHIBackend GetType() const override final { return ERHIBackend::D3D11; }
+	ERHIDeviceType GetType() const override final { return ERHIDeviceType::D3D11; }
 
 	RHIDevice& GetDevice() override final;
 protected:

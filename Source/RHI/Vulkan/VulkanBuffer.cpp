@@ -1,6 +1,5 @@
 #include "RHI/Vulkan/VulkanBuffer.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
 #include "RHI/RHIUploadManager.h"
 

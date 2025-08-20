@@ -1,7 +1,6 @@
 #include "RHI/Vulkan/VulkanInstance.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
-#include "RHI/Vulkan/VulkanEnvConfiguration.h"
-#include "RHI/Vulkan/VulkanRHI.h"
+#include "RHI/Vulkan/VulkanDevelopSettings.h"
 
 #if !USE_DYNAMIC_VK_LOADER
 PFN_vkCreateDebugUtilsMessengerEXT PFN_CreateDebugUtilsMessengerEXT;
@@ -116,10 +115,10 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugReportCallback(
 	return VK_FALSE;
 }
 
-VulkanInstance::VulkanInstance(VulkanExtensionConfiguration& Configs)
+VulkanInstance::VulkanInstance(VulkanExtensionSettings& Settings, ERHIDebugLayerLevel DebugLayerLevel)
 {
-	auto WantedLayers = VulkanLayer::GetWantedInstanceLayers(Configs);
-	auto WantedExtensions = VulkanExtension::GetWantedInstanceExtensions(Configs);
+	auto WantedLayers = VulkanLayer::GetWantedInstanceLayers(Settings);
+	auto WantedExtensions = VulkanExtension::GetWantedInstanceExtensions(Settings);
 
 	std::vector<const char*> EnabledLayers;
 	std::vector<const char*> EnabledExtensions;
@@ -215,7 +214,7 @@ VulkanInstance::VulkanInstance(VulkanExtensionConfiguration& Configs)
 	{
 		if (Extension->IsEnabled() && Extension->GetOnInstanceCreation())
 		{
-			Extension->GetOnInstanceCreation()(Configs, CreateInfo);
+			Extension->GetOnInstanceCreation()(Settings, CreateInfo);
 		}
 	}
 
@@ -225,13 +224,11 @@ VulkanInstance::VulkanInstance(VulkanExtensionConfiguration& Configs)
 	VULKAN_HPP_DEFAULT_DISPATCHER.init(m_Instance);
 #endif
 
-	SetupRuntimeDebug(DebugUtilExt ? DebugUtilExt->IsEnabled() : false, DebugReportExt ? DebugReportExt->IsEnabled() : false);
+	SetupRuntimeDebug(DebugLayerLevel, DebugUtilExt ? DebugUtilExt->IsEnabled() : false, DebugReportExt ? DebugReportExt->IsEnabled() : false);
 }
 
-void VulkanInstance::SetupRuntimeDebug(bool EnableDebugUtils, bool EnableDebugReports)
+void VulkanInstance::SetupRuntimeDebug(ERHIDebugLayerLevel DebugLayerLevel, bool EnableDebugUtils, bool EnableDebugReports)
 {
-	auto DebugLayerLevel = VulkanRHI::GetEnvConfigs().DebugLayerLevel;
-
 	if (DebugLayerLevel > ERHIDebugLayerLevel::None)
 	{
 		if (EnableDebugUtils)

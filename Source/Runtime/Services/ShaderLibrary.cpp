@@ -4,7 +4,7 @@
 #include "Services/TaskFlowService.h"
 #include "Paths.h"
 #include "RHI/RHIPipeline.h"
-#include "RHI/RHIBackend.h"
+#include "RHI/RHIDevice.h"
 #pragma warning(disable:4068)
 #include <Submodules/filewatch/FileWatch.hpp>
 #pragma warning(default:4068)
@@ -23,22 +23,22 @@ const RHIShader* ShaderLibrary::ShaderPermutation::GetOrCreateRHI(RHIDevice& Dev
 	return Module.get();
 }
 
-ShaderLibrary::ShaderLibrary(ERHIBackend Backend, RHIDevice& Device)
+ShaderLibrary::ShaderLibrary(RHIDevice& Device)
 	: m_Device(Device)
-	, m_Backend(Backend)
+	, m_DeviceName(Device.GetName())
 {
 	REGISTER_LOG_CATEGORY(LogShaderCompile);
 
-	switch (Backend)
+	switch (Device.GetType())
 	{
-	case ERHIBackend::Vulkan:
-		m_Compiler = std::make_unique<DxcShaderCompiler>(ERHIBackend::Vulkan, true);
+	case ERHIDeviceType::Vulkan:
+		m_Compiler = std::make_unique<DxcShaderCompiler>(true);
 		break;
-	case ERHIBackend::D3D11:
-		m_Compiler = std::make_unique<D3DShaderCompiler>(ERHIBackend::D3D11);
+	case ERHIDeviceType::D3D11:
+		m_Compiler = std::make_unique<D3DShaderCompiler>();
 		break;
-	case ERHIBackend::D3D12:
-		m_Compiler = std::make_unique<DxcShaderCompiler>(ERHIBackend::Vulkan, false);
+	case ERHIDeviceType::D3D12:
+		m_Compiler = std::make_unique<DxcShaderCompiler>(false);
 		break;
 	}
 
@@ -177,7 +177,7 @@ void ShaderLibrary::QueueCompile(const Shader& InShader, size_t BaseHash, size_t
 			const auto Size = RawData->Size;
 
 			auto Blob = m_Compiler->Compile(FileName.c_str(), SourceCode, Size, InShader.GetEntryPoint(), InShader.GetStage(), InShader);
-			auto Binary = std::make_shared<ShaderBinary>(FileName, m_Backend, InShader.GetStage(), Timestamp, BaseHash, std::move(Blob));
+			auto Binary = std::make_shared<ShaderBinary>(FileName, m_DeviceName.data(), InShader.GetStage(), Timestamp, BaseHash, std::move(Blob));
 			Binary->Save(true);
 			AddBinary(InShader, Binary);
 
@@ -222,7 +222,7 @@ const RHIShader* ShaderLibrary::GetShaderModule(const Shader& InShader)
 #endif
 
 	{
-		auto CacheBinaryPath = ShaderBinary::GetUniquePath(InShader.GetName().string(), m_Backend, BaseHash);
+		auto CacheBinaryPath = ShaderBinary::GetUniquePath(InShader.GetName().string(), m_DeviceName.data(), BaseHash);
 		if (std::filesystem::exists(CacheBinaryPath))
 		{
 			auto Binary = ShaderBinary::Load(CacheBinaryPath);

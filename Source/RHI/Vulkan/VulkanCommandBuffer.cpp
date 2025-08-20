@@ -1,7 +1,6 @@
 #include "RHI/Vulkan/VulkanCommandBuffer.h"
 #include "RHI/Vulkan/VulkanCommandPool.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanBuffer.h"
 #include "RHI/Vulkan/VulkanPipeline.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
@@ -158,7 +157,7 @@ void VulkanCommandBuffer::BeginDebugMarker(const char* Name, const Math::Color& 
 {
 	assert(IsRecording() && Name);
 
-	if (VulkanRHI::GetExtConfigs().DebugUtils)
+	if (GetDevice().GetExtensionSettings().DebugUtils)
 	{
 		vk::DebugUtilsLabelEXT DebugUtilsLabel;
 		DebugUtilsLabel.setColor({ MarkerColor.x, MarkerColor.y, MarkerColor.z, MarkerColor.w })
@@ -166,7 +165,7 @@ void VulkanCommandBuffer::BeginDebugMarker(const char* Name, const Math::Color& 
 
 		GetNative().beginDebugUtilsLabelEXT(&DebugUtilsLabel);
 	}
-	else if (VulkanRHI::GetExtConfigs().DebugMarker)
+	else if (GetDevice().GetExtensionSettings().DebugMarker)
 	{
 		vk::DebugMarkerMarkerInfoEXT DebugMarkerInfo;
 		DebugMarkerInfo.setColor({ MarkerColor.x, MarkerColor.y, MarkerColor.z, MarkerColor.w })
@@ -180,11 +179,11 @@ void VulkanCommandBuffer::EndDebugMarker()
 {
 	assert(IsRecording());
 
-	if (VulkanRHI::GetExtConfigs().DebugUtils)
+	if (GetDevice().GetExtensionSettings().DebugUtils)
 	{
 		GetNative().endDebugUtilsLabelEXT();
 	}
-	else if (VulkanRHI::GetExtConfigs().DebugMarker)
+	else if (GetDevice().GetExtensionSettings().DebugMarker)
 	{
 		GetNative().debugMarkerEndEXT();
 	}
@@ -227,7 +226,7 @@ void VulkanCommandBuffer::SetPrimitiveTopology(ERHIPrimitiveTopology Topology)
 {
 	assert(IsRecording());
 
-	if (VulkanRHI::GetExtConfigs().DynamicState)
+	if (GetDevice().GetExtensionSettings().DynamicState)
 	{
 		GetNative().setPrimitiveTopologyEXT(GetPrimitiveTopology(Topology));
 	}
@@ -604,7 +603,7 @@ void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const RHIBuffe
 	auto FormatAttributes = RHI::GetFormatAttributes(MipWidth, MipHeight, Texture->GetFormat());
 
 	vk::ImageSubresourceRange SubresourceRange(vk::ImageAspectFlagBits::eColor, MipLevel, 1u, ArrayLayer, 1u);
-	ERHIDeviceQueue DstQueue = GetDevice().SupportsTransferQueue() ? ERHIDeviceQueue::Transfer : ERHIDeviceQueue::Graphics;
+	ERHIDeviceQueue DstQueue = GetDevice().GetCapabilities().SupportsTransferQueue ? ERHIDeviceQueue::Transfer : ERHIDeviceQueue::Graphics;
 
 	VulkanPipelineBarrier Barrier(GetDevice());
 	Barrier.AddImageLayoutTransition(ERHIDeviceQueue::Graphics, DstQueue, DstImage->GetNative(), vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, SubresourceRange)
@@ -657,7 +656,7 @@ void VulkanCommandBuffer::WriteTexture(const RHITexture* Texture, const RHIBuffe
 	}
 
 	vk::ImageSubresourceRange SubresourceRange(vk::ImageAspectFlagBits::eColor, 0u, VK_REMAINING_MIP_LEVELS, 0u, VK_REMAINING_ARRAY_LAYERS);
-	ERHIDeviceQueue DstQueue = GetDevice().SupportsTransferQueue() ? ERHIDeviceQueue::Transfer : ERHIDeviceQueue::Graphics;
+	ERHIDeviceQueue DstQueue = GetDevice().GetCapabilities().SupportsTransferQueue ? ERHIDeviceQueue::Transfer : ERHIDeviceQueue::Graphics;
 
 	VulkanPipelineBarrier Barrier(GetDevice());
 	Barrier.AddImageLayoutTransition(ERHIDeviceQueue::Graphics, DstQueue, DstImage->GetNative(), vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, SubresourceRange)

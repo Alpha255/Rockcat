@@ -1,6 +1,5 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanInstance.h"
-#include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanQueue.h"
 #include "RHI/Vulkan/VulkanCommandPool.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
@@ -8,14 +7,24 @@
 #include "RHI/Vulkan/VulkanPipeline.h"
 #include "RHI/Vulkan/VulkanCommandListContext.h"
 #include "RHI/Vulkan/VulkanDescriptor.h"
-#include "RHI/Vulkan/VulkanEnvConfiguration.h"
+#include "RHI/Vulkan/VulkanDevelopSettings.h"
 #include "RHI/Vulkan/VulkanSwapchain.h"
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
 #include "Services/TaskFlowService.h"
 
-VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
+VulkanDevice::VulkanDevice()
 {
-	m_Instance = std::make_unique<VulkanInstance>(Configs);
+	REGISTER_LOG_CATEGORY(LogVulkanRHI);
+
+#if USE_DYNAMIC_VK_LOADER
+	const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = m_DynamicLoader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
+	assert(vkGetInstanceProcAddr);
+	VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);
+#endif
+
+	m_DevelopSettings = VulkanDevelopSettings::Load("Configs\\VkDevelopSettings.json");
+
+	m_Instance = std::make_unique<VulkanInstance>(m_DevelopSettings->ExtensionSettings, m_DevelopSettings->DebugLayerLevel);
 
 	auto GetQueueFamilyIndex = [](
 		const vk::PhysicalDevice& PhysicalDevice, 
@@ -94,8 +103,8 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 
 	GetQueueFamilyIndex(m_PhysicalDevice, GraphicsQueueIndex, ComputeQueueIndex, TransferQueueIndex, PresentQueueIndex);
 
-	auto WantedLayers = VulkanLayer::GetWantedDeviceLayers(Configs);
-	auto WantedExtensions = VulkanExtension::GetWantedDeviceExtensions(Configs);
+	auto WantedLayers = VulkanLayer::GetWantedDeviceLayers(m_DevelopSettings->ExtensionSettings);
+	auto WantedExtensions = VulkanExtension::GetWantedDeviceExtensions(m_DevelopSettings->ExtensionSettings);
 
 	std::vector<const char*> EnabledLayers;
 	std::vector<const char*> EnabledExtensions;
@@ -160,13 +169,13 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 	if (ComputeQueueIndex != GraphicsQueueIndex)
 	{
 		QueueFamilyIndices.insert(ComputeQueueIndex);
-		SetSupportsAsyncCompute(true);
+		m_Capabilities.SupportsAsyncCompute = true;
 	}
 
 	if (TransferQueueIndex != GraphicsQueueIndex)
 	{
 		QueueFamilyIndices.insert(TransferQueueIndex);
-		//SetSupportsTransferQueue(true);
+		m_Capabilities.SupportsTransferQueue = true;
 	}
 
 	const float Priority = 1.0f;
@@ -191,7 +200,7 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 	{
 		if (Extension->IsEnabled() && Extension->GetOnDeviceCreation())
 		{
-			Extension->GetOnDeviceCreation()(Configs, CreateInfo);
+			Extension->GetOnDeviceCreation()(m_DevelopSettings->ExtensionSettings, CreateInfo);
 		}
 	}
 
@@ -209,7 +218,8 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 		VK_VERSION_MINOR(PhysicalDeviceProperties.driverVersion),
 		VK_VERSION_PATCH(PhysicalDeviceProperties.driverVersion));
 
-	m_Limits = PhysicalDeviceProperties.limits;
+	m_PhysicalDeviceLimits = PhysicalDeviceProperties.limits;
+	SetupCapabilities();
 
 #if USE_DYNAMIC_VK_LOADER
 	VULKAN_HPP_DEFAULT_DISPATCHER.init(m_LogicalDevice);
@@ -230,8 +240,8 @@ VulkanDevice::VulkanDevice(VulkanExtensionConfiguration& Configs)
 	};
 
 	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Graphics, GraphicsQueueIndex, true);
-	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Transfer, TransferQueueIndex, SupportsTransferQueue());
-	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Compute, ComputeQueueIndex, SupportsAsyncCompute());
+	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Transfer, TransferQueueIndex, m_Capabilities.SupportsTransferQueue);
+	CreateQueueAndImmdiateCmdListContext(ERHIDeviceQueue::Compute, ComputeQueueIndex, m_Capabilities.SupportsAsyncCompute);
 	
 	assert(PresentQueueIndex == GraphicsQueueIndex);
 
@@ -328,6 +338,30 @@ const VulkanQueue& VulkanDevice::GetQueue(ERHIDeviceQueue Queue) const
 {
 	assert(Queue < ERHIDeviceQueue::Num);
 	return *m_Queues[Queue];
+}
+
+void VulkanDevice::SetupCapabilities()
+{
+	m_Capabilities.MaxTextureDimension1D = m_PhysicalDeviceLimits.maxImageDimension1D;
+	m_Capabilities.MaxTextureDimension2D = m_PhysicalDeviceLimits.maxImageDimension2D;
+	m_Capabilities.MaxTextureDimension3D = m_PhysicalDeviceLimits.maxImageDimension3D;
+	m_Capabilities.MaxTextureArrayLayers = m_PhysicalDeviceLimits.maxImageArrayLayers;
+	m_Capabilities.MaxInputBindings = m_PhysicalDeviceLimits.maxVertexInputBindings;
+	m_Capabilities.MaxInputAttributes = m_PhysicalDeviceLimits.maxVertexInputAttributes;
+	m_Capabilities.MaxComputeWorkGroupCountX = m_PhysicalDeviceLimits.maxComputeWorkGroupSize[0];
+	m_Capabilities.MaxComputeWorkGroupCountY = m_PhysicalDeviceLimits.maxComputeWorkGroupSize[1];
+	m_Capabilities.MaxComputeWorkGroupCountZ = m_PhysicalDeviceLimits.maxComputeWorkGroupSize[2];
+	m_Capabilities.MaxViewports = m_PhysicalDeviceLimits.maxViewports;
+	m_Capabilities.MaxFrameBufferWidth = m_PhysicalDeviceLimits.maxFramebufferWidth;
+	m_Capabilities.MaxFrameBufferHeight = m_PhysicalDeviceLimits.maxFramebufferHeight;
+	m_Capabilities.MaxFrameBufferLayers = m_PhysicalDeviceLimits.maxFramebufferLayers;
+	m_Capabilities.MaxColorAttachments = m_PhysicalDeviceLimits.maxColorAttachments;
+	m_Capabilities.MaxDrawIndexedIndexValue = m_PhysicalDeviceLimits.maxDrawIndexedIndexValue;
+	m_Capabilities.MaxDrawIndirectNum = m_PhysicalDeviceLimits.maxDrawIndirectCount;
+	m_Capabilities.MaxSamplersPerStage = m_PhysicalDeviceLimits.maxPerStageDescriptorSamplers;
+	m_Capabilities.MaxResourcesPerStage = m_PhysicalDeviceLimits.maxPerStageResources;
+	m_Capabilities.MaxDescriptorSets = m_PhysicalDeviceLimits.maxBoundDescriptorSets;
+	m_Capabilities.MaxSamplerAnisotropy = m_PhysicalDeviceLimits.maxSamplerAnisotropy;
 }
 
 void VulkanDevice::WaitIdle() const

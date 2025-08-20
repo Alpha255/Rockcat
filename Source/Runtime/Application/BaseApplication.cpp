@@ -21,16 +21,16 @@ BaseApplication::BaseApplication(const char* ConfigPath)
 
 bool BaseApplication::InitializeRHI()
 {
-	switch (m_Settings->GraphicsSettings.Backend)
+	switch (m_Settings->GraphicsSettings.DeviceType)
 	{
-	case ERHIBackend::Software:
+	case ERHIDeviceType::Software:
 		break;
-	case ERHIBackend::Vulkan:
+	case ERHIDeviceType::Vulkan:
 		m_RenderBackend = std::make_unique<VulkanRHI>();
 		break;
-	case ERHIBackend::D3D11:
+	case ERHIDeviceType::D3D11:
 		break;
-	case ERHIBackend::D3D12:
+	case ERHIDeviceType::D3D12:
 		break;
 	default:
 		break;

@@ -47,6 +47,18 @@ public:
 	const Math::Matrix& GetProjectionMatrix() const;
 	const Math::Vector3& GetViewOriginPosition() const;
 	Math::Frustum GetFrustum() const;
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(m_InverseDepth),
+			CEREAL_NVP(m_Mirrored),
+			CEREAL_NVP(m_ViewMode),
+			CEREAL_NVP(m_Viewports),
+			CEREAL_NVP(m_ScissorRects)
+		);
+	}
 protected:
 	bool m_InverseDepth = false;
 	bool m_Mirrored = false;

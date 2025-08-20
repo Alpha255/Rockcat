@@ -1,7 +1,6 @@
 #include "RHI/Vulkan/VulkanDescriptor.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "RHI/Vulkan/VulkanEnvConfiguration.h"
-#include "RHI/Vulkan/VulkanRHI.h"
+#include "RHI/Vulkan/VulkanDevelopSettings.h"
 
 VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(const VulkanDevice& Device, const RHIShaderResourceLayout& LayoutDesc)
 	: VkHwResource(Device)
@@ -42,44 +41,47 @@ VulkanDescriptorPool::VulkanDescriptorPool(const VulkanDevice& Device)
 	: VkHwResource(Device)
 {
 #if _DEBUG
-	auto& DeviceLimits = Device.GetPhysicalDeviceLimits();
-	auto ConfigLimits = VulkanRHI::GetEnvConfigs().GetDescriptorLimitationList();
+	auto& PhysicalDeviceLimits = Device.GetPhysicalDeviceLimits();
+	auto& DevelopSettings = Device.GetDevelopSettings();
 
-	const std::vector<uint32_t> DeviceDescriptorLimits = 
-	{
-		DeviceLimits.maxDescriptorSetSamplers,
-		DeviceLimits.maxDescriptorSetSampledImages,
-		DeviceLimits.maxDescriptorSetSampledImages,
-		DeviceLimits.maxDescriptorSetStorageImages,
-		DeviceLimits.maxDescriptorSetUniformBuffers,
-		DeviceLimits.maxDescriptorSetStorageBuffers,
-		DeviceLimits.maxDescriptorSetUniformBuffers,
-		DeviceLimits.maxDescriptorSetStorageBuffers,
-		DeviceLimits.maxDescriptorSetUniformBuffersDynamic,
-		DeviceLimits.maxDescriptorSetStorageBuffersDynamic,
-		DeviceLimits.maxDescriptorSetInputAttachments
+	auto GetPhysicalDeviceMaxNumDescriptor = [&PhysicalDeviceLimits](vk::DescriptorType DescriptorType) -> uint32_t {
+		switch (DescriptorType)
+		{
+			case vk::DescriptorType::eSampler: return PhysicalDeviceLimits.maxPerStageDescriptorSamplers;
+			case vk::DescriptorType::eCombinedImageSampler: return PhysicalDeviceLimits.maxDescriptorSetSampledImages;
+			case vk::DescriptorType::eSampledImage: return PhysicalDeviceLimits.maxDescriptorSetSampledImages;
+			case vk::DescriptorType::eStorageImage: return PhysicalDeviceLimits.maxDescriptorSetStorageImages;
+			case vk::DescriptorType::eUniformTexelBuffer: return PhysicalDeviceLimits.maxDescriptorSetUniformBuffers;
+			case vk::DescriptorType::eStorageTexelBuffer: return PhysicalDeviceLimits.maxDescriptorSetStorageBuffers;
+			case vk::DescriptorType::eUniformBuffer: return PhysicalDeviceLimits.maxDescriptorSetUniformBuffers;
+			case vk::DescriptorType::eStorageBuffer: return PhysicalDeviceLimits.maxDescriptorSetStorageBuffers;
+			case vk::DescriptorType::eUniformBufferDynamic: return PhysicalDeviceLimits.maxDescriptorSetUniformBuffersDynamic;
+			case vk::DescriptorType::eStorageBufferDynamic: return PhysicalDeviceLimits.maxDescriptorSetStorageBuffersDynamic;
+			case vk::DescriptorType::eInputAttachment: return PhysicalDeviceLimits.maxDescriptorSetInputAttachments;
+			default: return 0u; // Unsupported descriptor type
+		}
 	};
 
-	for (auto DescriptorIndex = vk::DescriptorType::eSampler; DescriptorIndex <= vk::DescriptorType::eInputAttachment;)
+	for (auto DescriptorType = vk::DescriptorType::eSampler; DescriptorType <= vk::DescriptorType::eInputAttachment;)
 	{
-		assert(ConfigLimits[static_cast<size_t>(DescriptorIndex)] <= DeviceDescriptorLimits[static_cast<size_t>(DescriptorIndex)]);
-		DescriptorIndex = static_cast<vk::DescriptorType>(static_cast<size_t>(DescriptorIndex) + 1u);
+		assert(DevelopSettings.GetMaxNumDescriptor(DescriptorType) <= GetPhysicalDeviceMaxNumDescriptor(DescriptorType));
+		DescriptorType = static_cast<vk::DescriptorType>(static_cast<size_t>(DescriptorType) + 1u);
 	}
 #endif
 
 	std::vector<vk::DescriptorPoolSize> DescriptorPoolSizes(static_cast<size_t>(vk::DescriptorType::eInputAttachment) + 1u);
-	for (auto DescriptorIndex = vk::DescriptorType::eSampler; DescriptorIndex <= vk::DescriptorType::eInputAttachment;)
+	for (auto DescriptorType = vk::DescriptorType::eSampler; DescriptorType <= vk::DescriptorType::eInputAttachment;)
 	{
-		DescriptorPoolSizes[static_cast<size_t>(DescriptorIndex)]
-			.setDescriptorCount(ConfigLimits[static_cast<size_t>(DescriptorIndex)])
-			.setType(DescriptorIndex);
+		DescriptorPoolSizes[static_cast<size_t>(DescriptorType)]
+			.setDescriptorCount(DevelopSettings.GetMaxNumDescriptor(DescriptorType))
+			.setType(DescriptorType);
 
-		DescriptorIndex = static_cast<vk::DescriptorType>(static_cast<size_t>(DescriptorIndex) + 1u);
+		DescriptorType = static_cast<vk::DescriptorType>(static_cast<size_t>(DescriptorType) + 1u);
 	}
 
 	vk::DescriptorPoolCreateInfo CreateInfo;
 	CreateInfo.setPoolSizes(DescriptorPoolSizes)
-		.setMaxSets(VulkanRHI::GetDescriptorLimitationConfigs().MaxDescriptorSetsPerPool);
+		.setMaxSets(DevelopSettings.DescriptorLimits.MaxDescriptorSetsPerPool);
 	
 	VERIFY_VK(GetNativeDevice().createDescriptorPool(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
@@ -119,5 +121,5 @@ void VulkanDescriptorPool::Free(vk::DescriptorSet Set)
 
 bool VulkanDescriptorPool::IsFull() const
 {
-	return m_AllocatedCount >= VulkanRHI::GetDescriptorLimitationConfigs().MaxDescriptorSetsPerPool;
+	return m_AllocatedCount >= GetDevice().GetDevelopSettings().DescriptorLimits.MaxDescriptorSetsPerPool;
 }

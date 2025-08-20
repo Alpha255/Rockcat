@@ -121,7 +121,7 @@ DxgiAdapter::DxgiAdapter(const DxgiFactory& Factory)
 				DXGI_ADAPTER_DESC Desc;
 				VERIFY_D3D(Adapter0->GetDesc(&Desc));
 
-				if (RHIDevice::IsDedicatedDevice(Desc.VendorId))
+				if (RHIDevice::IsDedicated(Desc.VendorId))
 				{
 					break;
 				}

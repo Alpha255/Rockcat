@@ -5,13 +5,13 @@
 class VulkanInstance final
 {
 public:
-	VulkanInstance(struct VulkanExtensionConfiguration& Configs);
+	VulkanInstance(struct VulkanExtensionSettings& Settings, ERHIDebugLayerLevel DebugLayerLevel);
 
 	~VulkanInstance();
 
 	inline const vk::Instance& GetNative() const { assert(m_Instance); return m_Instance; }
 private:
-	void SetupRuntimeDebug(bool EnableDebugUtils, bool EnableDebugReports);
+	void SetupRuntimeDebug(ERHIDebugLayerLevel DebugLayerLevel, bool EnableDebugUtils, bool EnableDebugReports);
 
 	vk::Instance m_Instance;
 	vk::DebugReportCallbackEXT m_DebugReportCallback;

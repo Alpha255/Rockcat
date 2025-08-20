@@ -1,8 +1,7 @@
 #include "Asset/ShaderCompiler.h"
 
-DxcShaderCompiler::DxcShaderCompiler(ERHIBackend Backend, bool GenerateSpirv)
-	: IShaderCompiler(Backend)
-	, m_GenSpirv(GenerateSpirv)
+DxcShaderCompiler::DxcShaderCompiler(bool GenerateSpirv)
+	: m_GenSpirv(GenerateSpirv)
 {
 	VERIFY(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(m_Utils.Reference())) == S_OK);
 	VERIFY(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(m_Compiler.Reference())) == S_OK);

@@ -1,7 +1,6 @@
 #include "RHI/Vulkan/VulkanTexture.h"
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
-#include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/RHIUploadManager.h"
 
 VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureDesc& Desc, vk::Image Image)

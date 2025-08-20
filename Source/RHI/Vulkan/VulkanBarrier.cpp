@@ -1,6 +1,5 @@
 #include "RHI/Vulkan/VulkanBarrier.h"
 #include "RHI/Vulkan/VulkanCommandBuffer.h"
-#include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanQueue.h"
 

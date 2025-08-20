@@ -1,11 +1,9 @@
 #include "Asset/Shader.h"
 #include "RHI/RHIDevice.h"
-#include "RHI/RHIBackend.h"
 #include "Services/ShaderLibrary.h"
 
-ShaderBinary::ShaderBinary(const std::string& ShaderName, ERHIBackend Backend, ERHIShaderStage Stage, std::time_t Timestamp, size_t Hash, ShaderBlob&& Blob)
-	: BaseClass(GetUniquePath(ShaderName, Backend, Hash))
-	, m_Backend(Backend)
+ShaderBinary::ShaderBinary(const std::string& ShaderName, const char* DeviceName, ERHIShaderStage Stage, std::time_t Timestamp, size_t Hash, ShaderBlob&& Blob)
+	: BaseClass(GetUniquePath(ShaderName, DeviceName, Hash))
 	, m_Stage(Stage)
 	, m_Timestamp(Timestamp)
 	, m_Hash(Hash)
@@ -13,9 +11,9 @@ ShaderBinary::ShaderBinary(const std::string& ShaderName, ERHIBackend Backend, E
 {
 }
 
-std::filesystem::path ShaderBinary::GetUniquePath(const std::string& ShaderName, ERHIBackend Backend, size_t Hash)
+std::filesystem::path ShaderBinary::GetUniquePath(const std::string& ShaderName, const char* DeviceName, size_t Hash)
 {
-	return Paths::ShaderBinaryCachePath() / RHIBackend::GetName(Backend) / StringUtils::Format("%s_%lld", ShaderName.c_str(), Hash);
+	return Paths::ShaderBinaryCachePath() / DeviceName / StringUtils::Format("%s_%lld", ShaderName.c_str(), Hash);
 }
 
 RHIBuffer* Shader::GetUniformBuffer(RHIDevice& Device)

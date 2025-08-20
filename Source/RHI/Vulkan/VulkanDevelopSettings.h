@@ -3,7 +3,7 @@
 #include "Asset/SerializableAsset.h"
 #include "RHI/RHIResource.h"
 
-struct VulkanExtensionConfiguration
+struct VulkanExtensionSettings
 {
 	bool KhronosValidationLayer = true;
 	bool KHRSurface = true;
@@ -76,10 +76,9 @@ struct VulkanExtensionConfiguration
 	}
 };
 
-struct VulkanDescriptorLimitationConfiguration
+struct VulkanDescriptorLimits
 {
 	uint32_t MaxDescriptorSetsPerPool;
-
 	uint32_t MaxSampler;
 	uint32_t MaxCombinedImageSampler;
 	uint32_t MaxSampledImage;
@@ -112,24 +111,42 @@ struct VulkanDescriptorLimitationConfiguration
 	}
 };
 
-struct VulkanEnvConfiguration : public SerializableAsset<VulkanEnvConfiguration>
+struct VulkanDevelopSettings : public SerializableAsset<VulkanDevelopSettings>
 {
 	using BaseClass::BaseClass;
 
 	ERHIDebugLayerLevel DebugLayerLevel = ERHIDebugLayerLevel::Error;
 
-	VulkanExtensionConfiguration ExtensionConfigs;
-	VulkanDescriptorLimitationConfiguration DescriptorLimitationConfigs;
+	VulkanExtensionSettings ExtensionSettings;
+	VulkanDescriptorLimits DescriptorLimits;
 
-	std::vector<uint32_t> GetDescriptorLimitationList() const;
+	uint32_t GetMaxNumDescriptor(vk::DescriptorType DescriptorType) const
+	{
+		switch (DescriptorType)
+		{
+		case vk::DescriptorType::eSampler: return DescriptorLimits.MaxSampler;
+		case vk::DescriptorType::eCombinedImageSampler: return DescriptorLimits.MaxCombinedImageSampler;
+		case vk::DescriptorType::eSampledImage: return DescriptorLimits.MaxSampledImage;
+		case vk::DescriptorType::eStorageImage: return DescriptorLimits.MaxStorageImage;
+		case vk::DescriptorType::eUniformTexelBuffer: return DescriptorLimits.MaxUniformTexelBuffer;
+		case vk::DescriptorType::eStorageTexelBuffer: return DescriptorLimits.MaxStorageTexelBuffer;
+		case vk::DescriptorType::eUniformBuffer: return DescriptorLimits.MaxUniformBuffer;
+		case vk::DescriptorType::eStorageBuffer: return DescriptorLimits.MaxStorageBuffer;
+		case vk::DescriptorType::eUniformBufferDynamic: return DescriptorLimits.MaxUniformBufferDynamic;
+		case vk::DescriptorType::eStorageBufferDynamic: return DescriptorLimits.MaxStorageBufferDynamic;
+		case vk::DescriptorType::eInputAttachment: return DescriptorLimits.MaxInputAttachment;
+		default:
+			return 0u; // Invalid descriptor type
+		}
+	}
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
 			CEREAL_NVP(DebugLayerLevel),
-			CEREAL_NVP(ExtensionConfigs),
-			CEREAL_NVP(DescriptorLimitationConfigs)
+			CEREAL_NVP(ExtensionSettings),
+			CEREAL_NVP(DescriptorLimits)
 		);
 	}
 };

@@ -1,6 +1,5 @@
 #include "RHI/Vulkan/VulkanAsync.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 
 VulkanFence::VulkanFence(const VulkanDevice& Device, bool Signaled)
@@ -55,7 +54,7 @@ VulkanSemaphore::VulkanSemaphore(const VulkanDevice& Device)
 	vk::SemaphoreCreateInfo CreateInfo;
 	vk::SemaphoreTypeCreateInfo SemaphoreTypeCreateInfo;
 
-	if (VulkanRHI::GetExtConfigs().TimelineSemaphore)
+	if (Device.GetExtensionSettings().TimelineSemaphore)
 	{
 		SemaphoreTypeCreateInfo.setInitialValue(0u)
 			.setSemaphoreType(vk::SemaphoreType::eTimeline);
@@ -80,7 +79,7 @@ VulkanSemaphore::VulkanSemaphore(const VulkanDevice& Device)
 uint64_t VulkanSemaphore::GetCounterValue() const
 {
 	uint64_t Value = std::numeric_limits<uint64_t>::max();
-	if (VulkanRHI::GetExtConfigs().TimelineSemaphore)
+	if (GetDevice().GetExtensionSettings().TimelineSemaphore)
 	{
 		VERIFY_VK(GetNativeDevice().getSemaphoreCounterValue(m_Native, &Value));
 	}
@@ -89,7 +88,7 @@ uint64_t VulkanSemaphore::GetCounterValue() const
 
 void VulkanSemaphore::Wait(uint64_t Value, uint64_t Nanoseconds) const
 {
-	if (VulkanRHI::GetExtConfigs().TimelineSemaphore)
+	if (GetDevice().GetExtensionSettings().TimelineSemaphore)
 	{
 		vk::SemaphoreWaitInfo WaitInfo;
 		WaitInfo.setSemaphoreCount(1u)
@@ -102,7 +101,7 @@ void VulkanSemaphore::Wait(uint64_t Value, uint64_t Nanoseconds) const
 
 void VulkanSemaphore::Signal(uint64_t Value) const
 {
-	if (VulkanRHI::GetExtConfigs().TimelineSemaphore)
+	if (GetDevice().GetExtensionSettings().TimelineSemaphore)
 	{
 		vk::SemaphoreSignalInfo SignalInfo;
 		SignalInfo.setSemaphore(m_Native)

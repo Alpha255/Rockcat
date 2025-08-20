@@ -3,6 +3,15 @@
 #include "RHI/RHICommandBuffer.h"
 #include "Services/SpdLogService.h"
 
+/// <summary>
+/// ****  Front face CCW
+/// ****  Matrix is in row major in Cpp
+/// ****  Matrix is in row major in shader
+/// ****  Cull back face
+/// ****  Left-hand coordinate
+/// ****  Depth range [0-1]
+/// </summary>
+
 enum class ERHIDeviceQueue : uint8_t
 {
 	Graphics,
@@ -11,7 +20,7 @@ enum class ERHIDeviceQueue : uint8_t
 	Num
 };
 
-struct RHIDeviceCaps
+struct RHIDeviceCapabilities
 {
 	uint32_t MaxTextureDimension1D = 0u;
 	uint32_t MaxTextureDimension2D = 0u;
@@ -30,9 +39,13 @@ struct RHIDeviceCaps
 	uint32_t MaxColorAttachments = 0u;
 	uint32_t MaxDrawIndexedIndexValue = 0;
 	uint32_t MaxDrawIndirectNum = 0u;
-	uint32_t MaxSamplers = 0u;
+	uint32_t MaxSamplersPerStage = 0u;
+	uint32_t MaxResourcesPerStage = 0u;
 	uint32_t MaxDescriptorSets = 0u;
 	float MaxSamplerAnisotropy = 0.0f;
+
+	bool SupportsAsyncCompute = false;
+	bool SupportsTransferQueue = false;
 };
 
 class RHIDevice
@@ -42,21 +55,21 @@ public:
 	{
 		AMD = 0x1002,
 		ImgTec = 0x1010,
-		NVIDIA = 0x10DE,
+		Nvidia = 0x10DE,
 		ARM = 0x13B5,
 		Qualcomm = 0x5143,
 		Intel = 0x8086,
 		MiscrosoftWrap = 0x1414
 	};
 
-	template<class IDType>
-	static const char* const GetVendorName(IDType VendorID)
+	template<class TID>
+	static const char* const GetVendorName(TID VendorID)
 	{
 		switch (static_cast<EVendorID>(VendorID))
 		{
 		case EVendorID::AMD: return "AMD";
 		case EVendorID::ImgTec: return "ImgTec";
-		case EVendorID::NVIDIA: return "NVIDIA";
+		case EVendorID::Nvidia: return "Nvidia";
 		case EVendorID::ARM: return "ARM";
 		case EVendorID::Qualcomm: return "Qualcomm";
 		case EVendorID::Intel: return "Intel";
@@ -65,14 +78,16 @@ public:
 		}
 	}
 
-	template<class IDType>
-	static bool IsDedicatedDevice(IDType VendorID)
+	template<class TID>
+	static bool IsDedicated(TID VendorID)
 	{
-		return 
-			static_cast<EVendorID>(VendorID) == EVendorID::AMD ||
-			static_cast<EVendorID>(VendorID) == EVendorID::NVIDIA ||
+		return static_cast<EVendorID>(VendorID) == EVendorID::AMD ||
+			static_cast<EVendorID>(VendorID) == EVendorID::Nvidia ||
 			static_cast<EVendorID>(VendorID) == EVendorID::Intel;
 	}
+
+	virtual ERHIDeviceType GetType() const = 0;
+	virtual const char* GetName() const = 0;
 
 	virtual void WaitIdle() const = 0;
 
@@ -90,24 +105,16 @@ public:
 	virtual RHICommandListContextPtr AcquireDeferredCommandListContext() = 0;
 	virtual void ReleaseDeferredCommandListContext(RHICommandListContextPtr& CmdListContext) = 0;
 
+	const RHIDeviceCapabilities& GetCapabilities() const { return m_Capabilities; }
+
 	RHIGraphicsPipeline* GetOrCreateGraphicsPipeline(const RHIGraphicsPipelineDesc& Desc);
 	RHIFrameBuffer* GetOrCreateFrameBuffer(const RHIFrameBufferDesc& Desc);
-
-	const char* const GetAdapterName() const { return m_AdapterName.c_str(); }
-
-	inline bool SupportsAsyncCompute() const { return m_SupportsAsyncCompute; }
-	inline bool SupportsTransferQueue() const { return m_SupportsTransferQueue; }
 protected:
+	virtual void SetupCapabilities() = 0;
+
 	std::mutex m_CmdListContextLock;
-
-	inline void SetSupportsAsyncCompute(bool Value) { m_SupportsAsyncCompute = Value; }
-	inline void SetSupportsTransferQueue(bool Value) { m_SupportsTransferQueue = Value; }
+	RHIDeviceCapabilities m_Capabilities;
 private:
-	std::string m_AdapterName;
-
 	std::unordered_map<size_t, RHIGraphicsPipelinePtr> m_GraphicsPipelineCache;
 	std::unordered_map<size_t, RHIFrameBufferPtr> m_FrameBufferCache;
-
-	bool m_SupportsAsyncCompute = false;
-	bool m_SupportsTransferQueue = false;
 };

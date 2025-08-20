@@ -1,6 +1,5 @@
 #include "RHI/Vulkan/VulkanPipeline.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 #include "RHI/Vulkan/VulkanShader.h"
 #include "RHI/Vulkan/VulkanCommandListContext.h"
@@ -115,7 +114,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 	vk::PipelineViewportStateCreateInfo ViewportStateCreateInfo;
 	
 	vk::PipelineDynamicStateCreateInfo DynamicStateCreateInfo;
-	if (VulkanRHI::GetExtConfigs().DynamicState)
+	if (Device.GetExtensionSettings().DynamicState)
 	{
 		std::vector<vk::DynamicState> DynamicStates
 		{

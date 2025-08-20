@@ -1,6 +1,5 @@
 #include "RHI/Vulkan/VulkanLoader.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "RHI/Vulkan/VulkanRHI.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 
 #if !defined(VULKAN_HPP_CPLUSPLUS)
@@ -157,7 +156,7 @@ void VkBaseDeviceResource::SetObjectName(vk::ObjectType Type, uint64_t Object, c
 {
 	assert(Object && Name && Type != vk::ObjectType::eUnknown);
 
-	if (VulkanRHI::GetExtConfigs().DebugUtils)
+	if (GetDevice().GetExtensionSettings().DebugUtils)
 	{
 		vk::DebugUtilsObjectNameInfoEXT DebugUtilsObjectNameInfo;
 		DebugUtilsObjectNameInfo.setObjectType(Type)
@@ -166,7 +165,7 @@ void VkBaseDeviceResource::SetObjectName(vk::ObjectType Type, uint64_t Object, c
 
 		VERIFY_VK(GetNativeDevice().setDebugUtilsObjectNameEXT(&DebugUtilsObjectNameInfo));
 	}
-	else if (VulkanRHI::GetExtConfigs().DebugMarker)
+	else if (GetDevice().GetExtensionSettings().DebugMarker)
 	{
 		vk::DebugMarkerObjectNameInfoEXT DebugMarkerObjectNameInfo;
 		DebugMarkerObjectNameInfo.setObjectType(GetDebugReportObjectType(Type))

@@ -1,9 +1,8 @@
 #pragma once
 
 #include "RHI/Vulkan/VulkanTypes.h"
-#include "RHI/Vulkan/VulkanEnvConfiguration.h"
+#include "RHI/Vulkan/VulkanDevelopSettings.h"
 
-#define VK_ENV_CONFIG_PATH "Configs\\VkEnvConfigs.json"
 #define VK_LAYER_KHRONOS_VALIDATION_NAME "VK_LAYER_KHRONOS_validation"
 
 using VulkanLayerArray = std::vector<std::unique_ptr<class VulkanLayer>>;
@@ -19,8 +18,8 @@ inline void SetPNext(LastStruct& Last, NextStruct& Next)
 class VulkanLayer
 {
 public:
-	using OnInstanceCreation = std::function<void(const VulkanExtensionConfiguration&, vk::InstanceCreateInfo&)>;
-	using OnDeviceCreation = std::function<void(const VulkanExtensionConfiguration&, vk::DeviceCreateInfo&)>;
+	using OnInstanceCreation = std::function<void(const VulkanExtensionSettings&, vk::InstanceCreateInfo&)>;
+	using OnDeviceCreation = std::function<void(const VulkanExtensionSettings&, vk::DeviceCreateInfo&)>;
 
 	VulkanLayer(const char* Name, bool Supported, bool Needed, bool* EnabledInConfig)
 		: m_Name(Name)
@@ -41,8 +40,8 @@ public:
 	inline void SetOnInstanceCreation(OnInstanceCreation&& Func) { m_OnInstanceCreation = std::move(Func); }
 	inline void SetOnDeviceCreation(OnDeviceCreation&& Func) { m_OnDeviceCreation = std::move(Func); }
 
-	static VulkanLayerArray GetWantedInstanceLayers(VulkanExtensionConfiguration& Configs);
-	static VulkanLayerArray GetWantedDeviceLayers(VulkanExtensionConfiguration& Configs);
+	static VulkanLayerArray GetWantedInstanceLayers(VulkanExtensionSettings& Configs);
+	static VulkanLayerArray GetWantedDeviceLayers(VulkanExtensionSettings& Configs);
 protected:
 	friend class VulkanInstance;
 	friend class VulkanDevice;
@@ -64,8 +63,8 @@ class VulkanExtension : public VulkanLayer
 public:
 	using VulkanLayer::VulkanLayer;
 
-	static VulkanExtensionArray GetWantedInstanceExtensions(VulkanExtensionConfiguration& Configs);
-	static VulkanExtensionArray GetWantedDeviceExtensions(VulkanExtensionConfiguration& Configs);
+	static VulkanExtensionArray GetWantedInstanceExtensions(VulkanExtensionSettings& Configs);
+	static VulkanExtensionArray GetWantedDeviceExtensions(VulkanExtensionSettings& Configs);
 };
 
 void LogEnabledLayerAndExtensions(const VulkanLayerArray& Layers, const VulkanExtensionArray& Extensions, const char* Category);

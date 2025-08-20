@@ -19,7 +19,7 @@ protected:
 
 	friend struct ShaderCompileTask;
 
-	ShaderLibrary(ERHIBackend Backend, RHIDevice& Device);
+	ShaderLibrary(RHIDevice& Device);
 
 	bool RegisterCompileTask(size_t Hash);
 	void DeregisterCompileTask(size_t Hash);
@@ -56,7 +56,6 @@ private:
 	std::unordered_set<std::filesystem::path> ParseIncludeFiles(const std::filesystem::path& ShaderFilePath);
 
 	RHIDevice& m_Device;
-	ERHIBackend m_Backend;
 
 	std::set<size_t> m_CompilingTasks;
 	std::unique_ptr<IShaderCompiler> m_Compiler;
@@ -68,4 +67,5 @@ private:
 	std::mutex m_CompileTaskLock;
 	std::mutex m_ShaderFileWatchLock;
 	std::atomic<size_t> m_MemorySize = 0u;
+	std::string_view m_DeviceName;
 };

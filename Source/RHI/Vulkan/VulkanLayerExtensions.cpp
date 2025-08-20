@@ -4,12 +4,12 @@
 #define APPEND_EXT(Type) WantedExts.emplace_back(std::make_unique<Type>())
 
 #define ADD_LAYER(Name, Supported, Needed, EnabledInConfig) \
-	WantedLayers.emplace_back(std::make_unique<VulkanLayer>(Name, Supported, Needed, &Configs.EnabledInConfig))
+	WantedLayers.emplace_back(std::make_unique<VulkanLayer>(Name, Supported, Needed, &Settings.EnabledInConfig))
 
 #define ADD_EXTENSION(Name, Supported, Needed, EnabledInConfig) \
-	WantedExts.emplace_back(std::make_unique<VulkanExtension>(Name, Supported, Needed, &Configs.EnabledInConfig))
+	WantedExts.emplace_back(std::make_unique<VulkanExtension>(Name, Supported, Needed, &Settings.EnabledInConfig))
 
-VulkanLayerArray VulkanLayer::GetWantedInstanceLayers(VulkanExtensionConfiguration& Configs)
+VulkanLayerArray VulkanLayer::GetWantedInstanceLayers(VulkanExtensionSettings& Settings)
 {
 	VulkanLayerArray WantedLayers;
 
@@ -18,12 +18,12 @@ VulkanLayerArray VulkanLayer::GetWantedInstanceLayers(VulkanExtensionConfigurati
 	return WantedLayers;
 }
 
-VulkanLayerArray VulkanLayer::GetWantedDeviceLayers(VulkanExtensionConfiguration&)
+VulkanLayerArray VulkanLayer::GetWantedDeviceLayers(VulkanExtensionSettings&)
 {
 	return VulkanLayerArray();
 }
 
-VulkanExtensionArray VulkanExtension::GetWantedInstanceExtensions(VulkanExtensionConfiguration& Configs)
+VulkanExtensionArray VulkanExtension::GetWantedInstanceExtensions(VulkanExtensionSettings& Settings)
 {
 	VulkanExtensionArray WantedExts;
 
@@ -37,25 +37,25 @@ VulkanExtensionArray VulkanExtension::GetWantedInstanceExtensions(VulkanExtensio
 	ADD_EXTENSION(VK_EXT_DEBUG_UTILS_EXTENSION_NAME, VK_EXT_debug_utils, false, DebugUtils);
 	ADD_EXTENSION(VK_EXT_DEBUG_REPORT_EXTENSION_NAME, VK_EXT_debug_report, false, DebugReport);
 	ADD_EXTENSION(VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME, VK_EXT_validation_features, false, ValidationFeatures)
-		->SetOnInstanceCreation([](const VulkanExtensionConfiguration& Configs, vk::InstanceCreateInfo& CreateInfo) {
+		->SetOnInstanceCreation([](const VulkanExtensionSettings& Settings, vk::InstanceCreateInfo& CreateInfo) {
 				std::vector<vk::ValidationFeatureEnableEXT> EnabledFeatures;
-				if (Configs.ValidationFeatures_GPUAssisted)
+				if (Settings.ValidationFeatures_GPUAssisted)
 				{
 					EnabledFeatures.push_back(vk::ValidationFeatureEnableEXT::eGpuAssisted);
 				}
-				if (Configs.ValidationFeatures_GPUAssistedReserveBindingSlot)
+				if (Settings.ValidationFeatures_GPUAssistedReserveBindingSlot)
 				{
 					EnabledFeatures.push_back(vk::ValidationFeatureEnableEXT::eGpuAssistedReserveBindingSlot);
 				}
-				if (Configs.ValidationFeatures_BestPractices)
+				if (Settings.ValidationFeatures_BestPractices)
 				{
 					EnabledFeatures.push_back(vk::ValidationFeatureEnableEXT::eBestPractices);
 				}
-				if (Configs.ValidationFeatures_DebugPrintf)
+				if (Settings.ValidationFeatures_DebugPrintf)
 				{
 					EnabledFeatures.push_back(vk::ValidationFeatureEnableEXT::eDebugPrintf);
 				}
-				if (Configs.ValidationFeatures_Synchronization)
+				if (Settings.ValidationFeatures_Synchronization)
 				{
 					EnabledFeatures.push_back(vk::ValidationFeatureEnableEXT::eSynchronizationValidation);
 				}
@@ -70,7 +70,7 @@ VulkanExtensionArray VulkanExtension::GetWantedInstanceExtensions(VulkanExtensio
 	return WantedExts;
 }
 
-VulkanExtensionArray VulkanExtension::GetWantedDeviceExtensions(VulkanExtensionConfiguration& Configs)
+VulkanExtensionArray VulkanExtension::GetWantedDeviceExtensions(VulkanExtensionSettings& Settings)
 {
 	VulkanExtensionArray WantedExts;
 

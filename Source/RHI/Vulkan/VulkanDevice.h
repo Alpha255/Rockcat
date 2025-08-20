@@ -1,14 +1,17 @@
 #pragma once
 
 #include "RHI/Vulkan/VulkanTypes.h"
+#include "RHI/Vulkan/VulkanDevelopSettings.h"
 #include "RHI/RHIDevice.h"
 
 class VulkanDevice final : public RHIDevice
 {
 public:
-	VulkanDevice(struct VulkanExtensionConfiguration& Configs);
-
+	VulkanDevice();
 	~VulkanDevice();
+
+	ERHIDeviceType GetType() const override final { return ERHIDeviceType::Vulkan; }
+	const char* GetName() const override final { return "Vulkan"; }
 
 	void WaitIdle() const override final;
 
@@ -28,11 +31,16 @@ public:
 
 	inline const vk::Device& GetNative() const { return m_LogicalDevice; }
 	inline const vk::PhysicalDevice& GetPhysicalDevice() const { return m_PhysicalDevice; }
-	
-	const class VulkanQueue& GetQueue(ERHIDeviceQueue Queue) const;
 
 	const vk::Instance& GetInstance() const;
-	const vk::PhysicalDeviceLimits& GetPhysicalDeviceLimits() const { return m_Limits; }
+	const vk::PhysicalDeviceLimits& GetPhysicalDeviceLimits() const { return m_PhysicalDeviceLimits; }
+
+	const class VulkanQueue& GetQueue(ERHIDeviceQueue Queue) const;
+
+	void SetupCapabilities() override final;
+
+	inline const VulkanDevelopSettings& GetDevelopSettings() const { return *m_DevelopSettings; }
+	inline const VulkanExtensionSettings& GetExtensionSettings() const { return m_DevelopSettings->ExtensionSettings; }
 private:
 	std::unique_ptr<class VulkanInstance> m_Instance;
 	Array<std::unique_ptr<class VulkanQueue>, ERHIDeviceQueue> m_Queues;
@@ -40,10 +48,15 @@ private:
 	Array<std::shared_ptr<class VulkanCommandListContext>, ERHIDeviceQueue> m_ImmediateCmdListContexts;
 	std::queue<std::shared_ptr<class VulkanCommandListContext>> m_ThreadedCmdListContexts;
 
-	vk::PhysicalDeviceLimits m_Limits;
+	vk::PhysicalDeviceLimits m_PhysicalDeviceLimits;
 
 	vk::PhysicalDevice m_PhysicalDevice;
 	vk::Device m_LogicalDevice;
 
 	std::shared_ptr<class VulkanPipelineCache> m_PipelineCache;
+	std::shared_ptr<VulkanDevelopSettings> m_DevelopSettings;
+
+#if USE_DYNAMIC_VK_LOADER
+	const vk::detail::DynamicLoader m_DynamicLoader;
+#endif
 };
