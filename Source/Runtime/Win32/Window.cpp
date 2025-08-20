@@ -4,6 +4,8 @@
 #include "Application/BaseApplication.h"
 #include "Services/SpdLogService.h"
 
+#if PLATFORM_WIN32
+
 #include <Windows.h>
 #include <windowsx.h>
 #include <shlobj.h>
@@ -14,7 +16,6 @@ public:
 	MessageProcessor(Window& InWindow)
 		: m_Window(InWindow)
 	{
-
 	}
 
 	void ProcessMessage(uint32_t Message, ::WPARAM WParam, ::LPARAM LParam)
@@ -289,12 +290,12 @@ static ::LRESULT MessageProc(::HWND HWnd, uint32_t Message, ::WPARAM WParam, ::L
 	return ::DefWindowProcA(HWnd, Message, WParam, LParam);
 }
 
-Window::Window(const WindowCreateInfo& CreateInfo)
-	: m_MinWidth(std::max<uint32_t>(CreateInfo.MinWidth, MINIMAL_WINDOW_SIZE))
-	, m_MinHeight(std::max<uint32_t>(CreateInfo.MinHeight, MINIMAL_WINDOW_SIZE))
-	, m_Width(std::max<uint32_t>(CreateInfo.Width, m_MinWidth))
-	, m_Height(std::max<uint32_t>(CreateInfo.Height, m_MinHeight))
-	, m_Mode(CreateInfo.Mode)
+Window::Window(const WindowDesc& Desc)
+	: m_MinWidth(std::max<uint32_t>(Desc.MinWidth, MINIMAL_WINDOW_SIZE))
+	, m_MinHeight(std::max<uint32_t>(Desc.MinHeight, MINIMAL_WINDOW_SIZE))
+	, m_Width(std::max<uint32_t>(Desc.Width, m_MinWidth))
+	, m_Height(std::max<uint32_t>(Desc.Height, m_MinHeight))
+	, m_Mode(Desc.Mode)
 	, m_Status(EWindowStatus::Activate)
 	, m_Handle(nullptr)
 {
@@ -316,7 +317,7 @@ Window::Window(const WindowCreateInfo& CreateInfo)
 		::LoadCursor(0, IDC_ARROW),
 		static_cast<::HBRUSH>(::GetStockObject(BLACK_BRUSH)),
 		nullptr,
-		CreateInfo.Title.c_str(),
+		Desc.Title.c_str(),
 		Icon
 	};
 	VERIFY_WITH_PLATFORM_MESSAGE(::RegisterClassExA(&WndClassEx) != 0);
@@ -330,13 +331,13 @@ Window::Window(const WindowCreateInfo& CreateInfo)
 	};
 	VERIFY_WITH_PLATFORM_MESSAGE(::AdjustWindowRect(&Rect, WS_OVERLAPPEDWINDOW, false) != 0);
 
-	m_MessageProcessor = std::make_unique<MessageProcessor>(*this);
+	m_MessageProcessor = std::make_shared<MessageProcessor>(*this);
 
 	uint32_t ExtraWindowStyle = 0u;
 	::HWND Handle = ::CreateWindowExA(
 		0,
-		CreateInfo.Title.c_str(),
-		CreateInfo.Title.c_str(),
+		Desc.Title.c_str(),
+		Desc.Title.c_str(),
 		WS_OVERLAPPEDWINDOW ^ ExtraWindowStyle,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
@@ -353,7 +354,7 @@ Window::Window(const WindowCreateInfo& CreateInfo)
 
 	m_Handle = reinterpret_cast<void*>(Handle);
 
-	SetMode(CreateInfo.Mode);
+	SetMode(Desc.Mode);
 }
 
 void Window::UpdateSize()
@@ -421,3 +422,4 @@ void Window::SetMode(EWindowMode Mode)
 	UpdateSize();
 }
 
+#endif // PLATFORM_WIN32

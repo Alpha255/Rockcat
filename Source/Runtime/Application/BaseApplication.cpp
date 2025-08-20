@@ -1,5 +1,5 @@
 #include "Application/BaseApplication.h"
-#include "Application/ApplicationConfiguration.h"
+#include "Application/ApplicationSettings.h"
 #include "RHI/RHIBackend.h"
 #include "RHI/RHISwapchain.h"
 #include "RHI/RHIUploadManager.h"
@@ -16,12 +16,12 @@ BaseApplication::BaseApplication(const char* ConfigPath)
 	: ITickable(false)
 	, EventHandler(EEventMask::WindowStatus)
 { 
-	m_Configs = ApplicationConfiguration::Load(ConfigPath ? ConfigPath : "Defalut.json");
+	m_Settings = ApplicationSettings::Load(ConfigPath ? ConfigPath : "Defalut.json");
 }
 
 bool BaseApplication::InitializeRHI()
 {
-	switch (m_Configs->GraphicsSettings.Backend)
+	switch (m_Settings->GraphicsSettings.Backend)
 	{
 	case ERHIBackend::Software:
 		break;
@@ -38,7 +38,7 @@ bool BaseApplication::InitializeRHI()
 
 	if (!m_RenderBackend)
 	{
-		LOG_CRITICAL("Render backend \"{}\" is not support yet!", RHIBackend::GetName(m_Configs->GraphicsSettings.Backend));
+		LOG_CRITICAL("Render backend \"{}\" is not support yet!", RHIBackend::GetName(m_Settings->GraphicsSettings.Backend));
 		return false;
 	}
 
@@ -98,18 +98,18 @@ void BaseApplication::Run()
 	TaskFlowService::Get().Initialize();
 	AssetDatabase::Get().Initialize();
 
-	if (m_Configs->EnableRendering)
+	if (m_Settings->EnableRendering)
 	{
-		m_Window = std::make_unique<Window>(m_Configs->WindowDesc);
+		m_Window = std::make_unique<Window>(m_Settings->WindowDesc);
 		assert(m_Window);
 
 		RHISwapchainDesc Desc;
 		Desc.SetWindowHandle(m_Window->GetHandle())
 			.SetWidth(m_Window->GetWidth())
 			.SetHeight(m_Window->GetHeight())
-			.SetFullscreen(m_Configs->GraphicsSettings.FullScreen)
-			.SetVSync(m_Configs->GraphicsSettings.VSync)
-			.SetHDR(m_Configs->GraphicsSettings.HDR);
+			.SetFullscreen(m_Settings->GraphicsSettings.FullScreen)
+			.SetVSync(m_Settings->GraphicsSettings.VSync)
+			.SetHDR(m_Settings->GraphicsSettings.HDR);
 		m_RenderSwapchain = m_RenderBackend->GetDevice().CreateSwapchain(Desc);
 	}
 
@@ -130,7 +130,7 @@ void BaseApplication::Run()
 
 			Tick(m_Timer->GetElapsedSeconds());
 
-			if (m_Configs->EnableRendering)
+			if (m_Settings->EnableRendering)
 			{
 				Render(m_RenderSwapchain ? m_RenderSwapchain->GetBackBuffer() : nullptr);
 				RenderGUI();
@@ -171,10 +171,6 @@ void BaseApplication::OnWindowStatusChanged(EWindowStatus Status)
 BaseApplication::~BaseApplication() = default;
 
 #if PLATFORM_WIN32
-#include "Win32/Win32DynamicLinkLibrary.hpp"
-#include "Win32/Win32System.hpp"
-#include "Win32/Win32Window.hpp"
-
 int32_t WINAPI WinMain(_In_ HINSTANCE /*hInstance*/, _In_opt_ HINSTANCE /*hPrevInstance*/, _In_ LPSTR /*Commandline*/, _In_ int32_t /*ShowCmd*/)
 {
 	extern RunApplication g_RunApplication;

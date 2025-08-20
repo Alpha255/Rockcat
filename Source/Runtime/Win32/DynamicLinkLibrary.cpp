@@ -2,6 +2,8 @@
 #include "System.h"
 #include "Services/SpdLogService.h"
 
+#if PLATFORM_WIN32
+
 #include <Windows.h>
 #include <windowsx.h>
 #include <shlobj.h>
@@ -35,3 +37,5 @@ struct ComponentObjectModelLibrary
 		::CoUninitialize();
 	}
 };
+
+#endif // PLATFORM_WIN32

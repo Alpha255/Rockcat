@@ -29,7 +29,7 @@ protected:
 	void Present();
 
 	std::unique_ptr<class Window> m_Window;
-	std::shared_ptr<struct ApplicationConfiguration> m_Configs;
+	std::shared_ptr<struct ApplicationSettings> m_Settings;
 
 	std::unique_ptr<class RHIBackend> m_RenderBackend;
 	std::shared_ptr<class RHISwapchain> m_RenderSwapchain;

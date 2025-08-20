@@ -11,7 +11,7 @@ enum class EWindowMode
 	ExclusiveFullscreen
 };
 
-struct WindowCreateInfo
+struct WindowDesc
 {
 	uint32_t Width = 1280u;
 	uint32_t Height = 720u;
@@ -37,7 +37,7 @@ struct WindowCreateInfo
 class Window
 {
 public:
-	Window(const WindowCreateInfo& CreateInfo);
+	Window(const WindowDesc& Desc);
 
 	const uint32_t GetWidth() const { return m_Width; }
 	const uint32_t GetHeight() const { return m_Height; }
@@ -62,6 +62,6 @@ private:
 	EWindowMode m_Mode;
 	EWindowStatus m_Status;
 	void* m_Handle;
-	std::unique_ptr<MessageProcessor> m_MessageProcessor;
+	std::shared_ptr<MessageProcessor> m_MessageProcessor;
 };
 

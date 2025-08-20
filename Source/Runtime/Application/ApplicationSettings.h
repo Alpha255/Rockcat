@@ -4,13 +4,13 @@
 #include "Rendering/RenderSettings.h"
 #include "Asset/SerializableAsset.h"
 
-struct ApplicationConfiguration : public SerializableAsset<ApplicationConfiguration>
+struct ApplicationSettings : public SerializableAsset<ApplicationSettings>
 {
 	using BaseClass::BaseClass;
 
 	bool EnableRendering = true;
 
-	WindowCreateInfo WindowDesc;
+	WindowDesc WindowDesc;
 	RenderSettings GraphicsSettings;
 
 	template<class Archive>
