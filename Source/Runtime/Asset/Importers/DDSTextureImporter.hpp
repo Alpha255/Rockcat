@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Asset/TextureAsset.h"
-#include "RHI/RHIBackend.h"
+#include "RHI/RHIDevice.h"
 #include <dxgiformat.h>
 #include <External/DDS.h>
 

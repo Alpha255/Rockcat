@@ -153,7 +153,7 @@ public:
 	static bool IsInRenderThread();
 	static bool IsInWorkerThread();
 protected:
-	friend class TaskFlowService;
+	friend class TaskFlow;
 
 	bool m_Executing = false;
 	EPriority m_Priority = EPriority::Normal;
@@ -203,7 +203,7 @@ public:
 	void Dispatch(EThread Thread = EThread::WorkerThread) override final;
 protected:
 	friend class TaskFlow;
-	friend class TaskFlowService;
+	friend class TaskFlow;
 
 	virtual void ExecuteImpl() = 0;
 
@@ -224,7 +224,7 @@ private:
 	}
 };
 
-class TaskFlow : public tf::Taskflow, public ITask
+class TaskSet : public tf::Taskflow, public ITask
 {
 public:
 	using tf::Taskflow::Taskflow;
@@ -243,7 +243,7 @@ public:
 
 	void Dispatch(EThread Thread = EThread::WorkerThread) override final;
 protected:
-	friend class TaskFlowService;
+	friend class TaskFlow;
 private:
 	std::vector<std::shared_ptr<tf::Task>> m_Tasks;
 };

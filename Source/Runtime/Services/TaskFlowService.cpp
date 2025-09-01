@@ -2,7 +2,7 @@
 #include "Services/SpdLogService.h"
 #include "System.h"
 
-TaskFlowService::TaskFlowService()
+TaskFlow::TaskFlow()
 	: m_UseHyperThreading(false)
 	, m_SeparateGameThread(false)
 	, m_SeparateRenderThread(false)
@@ -13,7 +13,7 @@ TaskFlowService::TaskFlowService()
 {
 }
 
-void TaskFlowService::Initialize()
+void TaskFlow::Initialize()
 {
 	ITask::InitializeThreadTags();
 
@@ -71,7 +71,7 @@ void TaskFlowService::Initialize()
 		tf::version());
 }
 
-tf::Executor* TaskFlowService::GetExecutor(EThread Thread, Task::EPriority Priority)
+tf::Executor* TaskFlow::GetExecutor(EThread Thread, Task::EPriority Priority)
 {
 	assert(Thread < EThread::Num);
 
@@ -95,7 +95,7 @@ tf::Executor* TaskFlowService::GetExecutor(EThread Thread, Task::EPriority Prior
 	return m_Executors[ExecutorIndex].get();
 }
 
-void TaskFlowService::FrameSync(bool AllowOneFrameLag)
+void TaskFlow::FrameSync(bool AllowOneFrameLag)
 {
 	if (m_SeparateRenderThread)
 	{
@@ -129,7 +129,7 @@ void TaskFlowService::FrameSync(bool AllowOneFrameLag)
 	}
 }
 
-void TaskFlowService::Finalize()
+void TaskFlow::Finalize()
 {
 	for (auto& Executor : m_Executors)
 	{

@@ -40,7 +40,7 @@ void Task::Dispatch(EThread Thread)
 {
 	if (!m_Event || m_Event->IsCompleted())
 	{
-		m_Event = TaskFlowService::Get().DispatchTask(*this, Thread, m_Priority);
+		m_Event = TaskFlow::Get().DispatchTask(*this, Thread, m_Priority);
 	}
 }
 
@@ -54,10 +54,10 @@ void Task::Execute()
 	}
 }
 
-void TaskFlow::Dispatch(EThread Thread)
+void TaskSet::Dispatch(EThread Thread)
 {
 	if (!m_Event || m_Event->IsCompleted())
 	{
-		m_Event = TaskFlowService::Get().DispatchTaskFlow(*this, Thread, m_Priority);
+		m_Event = TaskFlow::Get().DispatchTaskSet(*this, Thread, m_Priority);
 	}
 }

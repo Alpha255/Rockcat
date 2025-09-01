@@ -86,7 +86,7 @@ void BaseApplication::Run()
 		return;
 	}
 
-	TaskFlowService::Get().Initialize();
+	TaskFlow::Get().Initialize();
 	AssetDatabase::Get().Initialize();
 
 	if (m_Settings->Rendering.Enable)
@@ -119,16 +119,16 @@ void BaseApplication::Run()
 				//Present();
 			}
 
-			TaskFlowService::Get().FrameSync(true);
+			TaskFlow::Get().FrameSync(true);
 		}
 	}
 
 	Finalize();
 
 	AssetDatabase::Get().Finalize();
-	TaskFlowService::Get().Finalize();
+	TaskFlow::Get().Finalize();
 
-	m_RenderDevice.reset();
+	FinalizeRHI();
 }
 
 void BaseApplication::OnWindowStatusChanged(EWindowStatus Status)
@@ -148,6 +148,14 @@ void BaseApplication::OnWindowStatusChanged(EWindowStatus Status)
 		}
 		break;
 	}
+}
+
+void BaseApplication::FinalizeRHI()
+{
+	ShaderLibrary::Destroy();
+	RHIUploadManager::Destroy();
+
+	m_RenderDevice.reset();
 }
 
 BaseApplication::~BaseApplication() = default;

@@ -26,6 +26,7 @@ public:
 	bool IsRequestQuit() const;
 protected:
 	bool InitializeRHI();
+	void FinalizeRHI();
 
 	std::shared_ptr<struct ApplicationSettings> m_Settings;
 

@@ -3,7 +3,7 @@
 #include "Asset/TextureAsset.h"
 #include "RHI/RHITexture.h"
 #include "Services/SpdLogService.h"
-#include "RHI/RHIBackend.h"
+#include "RHI/RHIDevice.h"
 #pragma warning(disable:4244)
 #include <Submodules/stb/stb_image.h>
 #pragma warning(default:4244)

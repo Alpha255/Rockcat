@@ -3,7 +3,7 @@
 #include "Asset/SceneAsset.h"
 #include "Services/AssetDatabase.h"
 #include "Paths.h"
-#include "RHI/RHIBackend.h"
+#include "RHI/RHIDevice.h"
 #include <assimp/version.h>
 #include <Submodules/assimp/include/assimp/Importer.hpp>
 #include <Submodules/assimp/include/assimp/ProgressHandler.hpp>

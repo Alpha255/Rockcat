@@ -252,7 +252,7 @@ VulkanDevice::VulkanDevice()
 	//SetSupportsAsyncCommandlistSubmission(TaskFlowService::Get().GetNumWorkThreads() > 1u);
 	//SetSupportsAsyncMeshDrawCommandsBuilding(TaskFlowService::Get().GetNumWorkThreads() > 1u);
 
-	for (uint8_t Index = 0u; Index < TaskFlowService::Get().GetNumWorkerThreads(); ++Index)
+	for (uint8_t Index = 0u; Index < TaskFlow::Get().GetNumWorkerThreads(); ++Index)
 	{
 		m_ThreadedCmdListContexts.emplace(std::make_shared<VulkanCommandListContext>(*this, *m_Queues[ERHIDeviceQueue::Graphics]));
 	}
