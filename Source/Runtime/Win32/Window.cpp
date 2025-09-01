@@ -290,16 +290,16 @@ static ::LRESULT MessageProc(::HWND HWnd, uint32_t Message, ::WPARAM WParam, ::L
 	return ::DefWindowProcA(HWnd, Message, WParam, LParam);
 }
 
-Window::Window(const WindowDesc& Desc)
-	: m_MinWidth(std::max<uint32_t>(Desc.MinWidth, MINIMAL_WINDOW_SIZE))
-	, m_MinHeight(std::max<uint32_t>(Desc.MinHeight, MINIMAL_WINDOW_SIZE))
-	, m_Width(std::max<uint32_t>(Desc.Width, m_MinWidth))
-	, m_Height(std::max<uint32_t>(Desc.Height, m_MinHeight))
-	, m_Mode(Desc.Mode)
+Window::Window(const WindowSettings& Settings)
+	: m_MinWidth(std::max<uint32_t>(Settings.MinWidth, MINIMAL_WINDOW_SIZE))
+	, m_MinHeight(std::max<uint32_t>(Settings.MinHeight, MINIMAL_WINDOW_SIZE))
+	, m_Width(std::max<uint32_t>(Settings.Width, m_MinWidth))
+	, m_Height(std::max<uint32_t>(Settings.Height, m_MinHeight))
+	, m_Mode(Settings.Mode)
 	, m_Status(EWindowStatus::Activate)
 	, m_Handle(nullptr)
 {
-	::HINSTANCE HInstance = reinterpret_cast<::HINSTANCE>(System::GetCurrentModuleHandle());
+	::HINSTANCE HInstance = reinterpret_cast<::HINSTANCE>(System::GetApplicationInstance());
 	assert(HInstance);
 
 	::HICON Icon = ::LoadIcon(HInstance, MAKEINTRESOURCE(ICON_NVIDIA));
@@ -317,7 +317,7 @@ Window::Window(const WindowDesc& Desc)
 		::LoadCursor(0, IDC_ARROW),
 		static_cast<::HBRUSH>(::GetStockObject(BLACK_BRUSH)),
 		nullptr,
-		Desc.Title.c_str(),
+		Settings.Title.c_str(),
 		Icon
 	};
 	VERIFY_WITH_PLATFORM_MESSAGE(::RegisterClassExA(&WndClassEx) != 0);
@@ -336,8 +336,8 @@ Window::Window(const WindowDesc& Desc)
 	uint32_t ExtraWindowStyle = 0u;
 	::HWND Handle = ::CreateWindowExA(
 		0,
-		Desc.Title.c_str(),
-		Desc.Title.c_str(),
+		Settings.Title.c_str(),
+		Settings.Title.c_str(),
 		WS_OVERLAPPEDWINDOW ^ ExtraWindowStyle,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
@@ -354,7 +354,7 @@ Window::Window(const WindowDesc& Desc)
 
 	m_Handle = reinterpret_cast<void*>(Handle);
 
-	SetMode(Desc.Mode);
+	SetMode(Settings.Mode);
 }
 
 void Window::UpdateSize()

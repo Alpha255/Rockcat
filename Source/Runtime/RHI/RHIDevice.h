@@ -86,7 +86,7 @@ public:
 			static_cast<EVendorID>(VendorID) == EVendorID::Intel;
 	}
 
-	static const char* const GetDeviceName(ERHIDeviceType Type)
+	static const char* const GetName(ERHIDeviceType Type)
 	{
 		switch (Type)
 		{
@@ -99,7 +99,7 @@ public:
 		}
 	}
 
-	const char* GetName() const { return GetDeviceName(GetType()); }
+	const char* GetName() const { return GetName(GetType()); }
 
 	virtual ERHIDeviceType GetType() const = 0;
 

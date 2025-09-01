@@ -6,7 +6,7 @@ const std::filesystem::path& Paths::RootPath()
 	static std::filesystem::path Path;
 	if (Path.empty())
 	{
-		Path = System::GetCurrentModuleDirectory().parent_path();
+		Path = System::GetApplicationDirectory().parent_path();
 	}
 
 	return Path;

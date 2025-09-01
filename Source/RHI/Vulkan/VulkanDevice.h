@@ -39,7 +39,7 @@ public:
 	void SetupCapabilities() override final;
 
 	inline const VulkanDevelopSettings& GetDevelopSettings() const { return *m_DevelopSettings; }
-	inline const VulkanExtensionSettings& GetExtensionSettings() const { return m_DevelopSettings->ExtensionSettings; }
+	inline const VulkanExtensionSettings& GetExtensionSettings() const { return m_DevelopSettings->Extensions; }
 private:
 	std::unique_ptr<class VulkanInstance> m_Instance;
 	Array<std::unique_ptr<class VulkanQueue>, ERHIDeviceQueue> m_Queues;

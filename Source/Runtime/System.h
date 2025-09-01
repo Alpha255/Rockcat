@@ -16,8 +16,8 @@ public:
 
 	static std::string GetEnvironmentVariables(const char* Variable);
 
-	static std::filesystem::path GetCurrentModuleDirectory();
-	static void* GetCurrentModuleHandle();
+	static std::filesystem::path GetApplicationDirectory();
+	static void* GetApplicationInstance();
 
 	static void ExecuteProcess(const char* Commandline, bool WaitDone = true);
 

@@ -1,19 +1,19 @@
 {
-    "struct VulkanEnvConfiguration": {
+    "struct VulkanDevelopSettings": {
         "DebugLayerLevel": 3,
-        "ExtensionConfigs": {
+        "Extensions": {
             "KhronosValidationLayer": true,
             "KHRSurface": true,
             "DebugUtils": true,
-            "DebugReport": false,
-            "ValidationFeatures": false,
+            "DebugReport": true,
+            "ValidationFeatures": true,
             "ValidationFeatures_GPUAssisted": false,
             "ValidationFeatures_GPUAssistedReserveBindingSlot": false,
             "ValidationFeatures_BestPractices": true,
             "ValidationFeatures_DebugPrintf": false,
             "ValidationFeatures_Synchronization": true,
             "GetPhysicalDeviceProperties2": false,
-            "DebugMarker": false,
+            "DebugMarker": true,
             "TimelineSemaphore": false,
             "FullscreenExclusive": false,
             "DynamicState": false,
@@ -34,7 +34,7 @@
             "Maintenance5": false,
             "Maintenance6": false
         },
-        "DescriptorLimitationConfigs": {
+        "DescriptorLimits": {
             "MaxDescriptorSetsPerPool": 2048,
             "MaxSampler": 256,
             "MaxCombinedImageSampler": 2048,

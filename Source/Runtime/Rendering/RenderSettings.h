@@ -107,22 +107,28 @@ struct RenderSettings
 		}
 	};
 
+	bool Enable = true;
 	bool VSync = false;
 	bool FullScreen = false;
 	bool HDR = false;
+	
 	bool MotionVectors = false;
 	bool FrustumCulling = true;
 	bool EnableTiledBasedLightCulling = false;
 	bool EnableClusteredBasedLightCulling = false;
+
 	bool EnableStencilBasedLightCulling = false;
 	bool EnableAsyncCommandlistSubmission = false;
 	bool EnableAsyncMeshDrawCommandsBuilding = false;
 	bool InverseDepth = false;
+
 	ERenderingPath RenderingPath = ERenderingPath::ForwardRendering;
 	ELightingPolicy LightingPolicy = ELightingPolicy::Default;
 	EShadowTechnique ShadowTechnique = EShadowTechnique::None;
 	EAntiAliasingTechnique AntiAliasingTechnique = EAntiAliasingTechnique::None;
+
 	ERHIDeviceType DeviceType = ERHIDeviceType::Num;
+	
 	PostProcessingSettings PostProcessing;
 	DebugDrawSettings DebugDraw;
 
@@ -130,6 +136,7 @@ struct RenderSettings
 	void serialize(Archive& Ar)
 	{
 		Ar(
+			CEREAL_NVP(Enable),
 			CEREAL_NVP(VSync),
 			CEREAL_NVP(FullScreen),
 			CEREAL_NVP(HDR),

@@ -26,7 +26,7 @@ std::string System::GetErrorMessage(uint32_t ErrorCode)
 	return std::string(s_Buffer);
 }
 
-std::filesystem::path System::GetCurrentModuleDirectory()
+std::filesystem::path System::GetApplicationDirectory()
 {
 	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
 	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
@@ -133,7 +133,7 @@ std::string System::GetEnvironmentVariables(const char* Variable)
 	return std::string(s_Buffer);
 }
 
-void* System::GetCurrentModuleHandle()
+void* System::GetApplicationInstance()
 {
 	::HMODULE Handle = ::GetModuleHandleA(nullptr);
 	VERIFY_WITH_PLATFORM_MESSAGE(Handle);

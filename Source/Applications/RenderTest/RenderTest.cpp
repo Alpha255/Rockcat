@@ -16,7 +16,7 @@ void RenderTest::Initialize()
 	//m_RenderGraph = RenderGraph::Create(GetRenderSettings(), *m_View);
 }
 
-void RenderTest::Render(RHITexture* RenderSurface)
+void RenderTest::Render()
 {
 	//m_RenderGraph->Execute(*m_Scene);
 }

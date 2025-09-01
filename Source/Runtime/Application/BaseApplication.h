@@ -6,11 +6,11 @@
 class BaseApplication : public NoneCopyable, public ITickable, public EventHandler
 {
 public:
-	BaseApplication(const char* ConfigPath);
+	BaseApplication(const char* SettingsFile = nullptr);
 	virtual ~BaseApplication();
 
 	virtual void Initialize() {}
-	virtual void Render(class RHITexture*) {}
+	virtual void Render() {}
 	virtual void RenderGUI() {}
 	virtual void Finalize() {}
 	
@@ -25,11 +25,11 @@ public:
 	bool IsActivate() const;
 	bool IsRequestQuit() const;
 protected:
-	bool CreateRenderDevice();
+	bool InitializeRHI();
 
-	std::unique_ptr<class Window> m_Window;
 	std::shared_ptr<struct ApplicationSettings> m_Settings;
 
+	std::unique_ptr<class Window> m_Window;
 	std::unique_ptr<class RHIDevice> m_RenderDevice;
 
 	std::unique_ptr<class CpuTimer> m_Timer;
@@ -47,4 +47,4 @@ struct RunApplication
 	}
 };
 
-#define RUN_APPLICATION(Application, ConfigPath) RunApplication g_RunApplication([](){ return new Application(ConfigPath); });
+#define RUN_APPLICATION(Application, SettingsFile) RunApplication g_RunApplication([](){ return new Application(SettingsFile); });

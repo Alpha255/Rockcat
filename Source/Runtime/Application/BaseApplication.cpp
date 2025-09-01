@@ -11,16 +11,16 @@
 #include "Window.h"
 #include "System.h"
 
-BaseApplication::BaseApplication(const char* ConfigPath)
+BaseApplication::BaseApplication(const char* SettingsFile)
 	: ITickable(false)
 	, EventHandler(EEventMask::WindowStatus)
 { 
-	m_Settings = ApplicationSettings::Load(ConfigPath ? ConfigPath : "Defalut.json");
+	m_Settings = ApplicationSettings::Load(SettingsFile ? SettingsFile : "Defalut.json");
 }
 
-bool BaseApplication::CreateRenderDevice()
+bool BaseApplication::InitializeRHI()
 {
-	switch (m_Settings->GraphicsSettings.DeviceType)
+	switch (m_Settings->Rendering.DeviceType)
 	{
 	case ERHIDeviceType::Software:
 		break;
@@ -39,7 +39,7 @@ bool BaseApplication::CreateRenderDevice()
 
 	if (!m_RenderDevice)
 	{
-		LOG_CRITICAL("Render backend \"{}\" is not support yet!", RHIDevice::GetDeviceName(m_Settings->GraphicsSettings.DeviceType));
+		LOG_CRITICAL("Render backend \"{}\" is not support yet!", RHIDevice::GetName(m_Settings->Rendering.DeviceType));
 		return false;
 	}
 
@@ -67,7 +67,6 @@ bool BaseApplication::IsRequestQuit() const
 void BaseApplication::Tick(float ElapsedSeconds)
 {
 	TickManager::Get().TickObjects(ElapsedSeconds);
-
 	Stats::Get().Tick(ElapsedSeconds);
 }
 
@@ -82,7 +81,7 @@ void BaseApplication::Run()
 	System::SetCurrentWorkingDirectory(Paths::AssetPath());
 	LOG_INFO("Mount working directory to \"{}\".", System::GetCurrentWorkingDirectory().string());
 
-	if (!CreateRenderDevice())
+	if (!InitializeRHI())
 	{
 		return;
 	}
@@ -90,9 +89,9 @@ void BaseApplication::Run()
 	TaskFlowService::Get().Initialize();
 	AssetDatabase::Get().Initialize();
 
-	if (m_Settings->EnableRendering)
+	if (m_Settings->Rendering.Enable)
 	{
-		m_Window = std::make_unique<Window>(m_Settings->WindowDesc);
+		m_Window = std::make_unique<Window>(m_Settings->Window);
 		assert(m_Window);
 	}
 
@@ -113,7 +112,7 @@ void BaseApplication::Run()
 
 			Tick(m_Timer->GetElapsedSeconds());
 
-			if (m_Settings->EnableRendering)
+			if (m_Settings->Rendering.Enable)
 			{
 				//Render(m_RenderSwapchain ? m_RenderSwapchain->GetBackBuffer() : nullptr);
 				RenderGUI();

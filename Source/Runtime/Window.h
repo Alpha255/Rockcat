@@ -11,14 +11,14 @@ enum class EWindowMode
 	ExclusiveFullscreen
 };
 
-struct WindowDesc
+struct WindowSettings
 {
 	uint32_t Width = 1280u;
 	uint32_t Height = 720u;
 	uint32_t MinWidth = MINIMAL_WINDOW_SIZE;
 	uint32_t MinHeight = MINIMAL_WINDOW_SIZE;
 	EWindowMode Mode = EWindowMode::Windowed;
-	std::string Title = "UnnamedApplication";
+	std::string Title = "Default";
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -37,7 +37,7 @@ struct WindowDesc
 class Window
 {
 public:
-	Window(const WindowDesc& Desc);
+	Window(const WindowSettings& Settings);
 
 	const uint32_t GetWidth() const { return m_Width; }
 	const uint32_t GetHeight() const { return m_Height; }

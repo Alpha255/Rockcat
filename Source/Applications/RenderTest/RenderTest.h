@@ -8,7 +8,7 @@ public:
 	using BaseApplication::BaseApplication;
 
 	void Initialize() override final;
-	void Render(class RHITexture* RenderSurface) override final;
+	void Render() override final;
 protected:
 	void RenderGUI() override final {}
 private:

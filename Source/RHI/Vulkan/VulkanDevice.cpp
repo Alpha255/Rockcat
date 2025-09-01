@@ -28,7 +28,7 @@ VulkanDevice::VulkanDevice()
 
 	m_DevelopSettings = VulkanDevelopSettings::Load("Configs\\VkDevelopSettings.json");
 
-	m_Instance = std::make_unique<VulkanInstance>(m_DevelopSettings->ExtensionSettings, m_DevelopSettings->DebugLayerLevel);
+	m_Instance = std::make_unique<VulkanInstance>(m_DevelopSettings->Extensions, m_DevelopSettings->DebugLayerLevel);
 
 	auto GetQueueFamilyIndex = [](
 		const vk::PhysicalDevice& PhysicalDevice, 
@@ -107,8 +107,8 @@ VulkanDevice::VulkanDevice()
 
 	GetQueueFamilyIndex(m_PhysicalDevice, GraphicsQueueIndex, ComputeQueueIndex, TransferQueueIndex, PresentQueueIndex);
 
-	auto WantedLayers = VulkanLayer::GetWantedDeviceLayers(m_DevelopSettings->ExtensionSettings);
-	auto WantedExtensions = VulkanExtension::GetWantedDeviceExtensions(m_DevelopSettings->ExtensionSettings);
+	auto WantedLayers = VulkanLayer::GetWantedDeviceLayers(m_DevelopSettings->Extensions);
+	auto WantedExtensions = VulkanExtension::GetWantedDeviceExtensions(m_DevelopSettings->Extensions);
 
 	std::vector<const char*> EnabledLayers;
 	std::vector<const char*> EnabledExtensions;
@@ -204,7 +204,7 @@ VulkanDevice::VulkanDevice()
 	{
 		if (Extension->IsEnabled() && Extension->GetOnDeviceCreation())
 		{
-			Extension->GetOnDeviceCreation()(m_DevelopSettings->ExtensionSettings, CreateInfo);
+			Extension->GetOnDeviceCreation()(m_DevelopSettings->Extensions, CreateInfo);
 		}
 	}
 

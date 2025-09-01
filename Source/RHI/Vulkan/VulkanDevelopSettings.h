@@ -117,7 +117,7 @@ struct VulkanDevelopSettings : public SerializableAsset<VulkanDevelopSettings>
 
 	ERHIDebugLayerLevel DebugLayerLevel = ERHIDebugLayerLevel::Error;
 
-	VulkanExtensionSettings ExtensionSettings;
+	VulkanExtensionSettings Extensions;
 	VulkanDescriptorLimits DescriptorLimits;
 
 	uint32_t GetMaxNumDescriptor(vk::DescriptorType DescriptorType) const
@@ -145,7 +145,7 @@ struct VulkanDevelopSettings : public SerializableAsset<VulkanDevelopSettings>
 	{
 		Ar(
 			CEREAL_NVP(DebugLayerLevel),
-			CEREAL_NVP(ExtensionSettings),
+			CEREAL_NVP(Extensions),
 			CEREAL_NVP(DescriptorLimits)
 		);
 	}

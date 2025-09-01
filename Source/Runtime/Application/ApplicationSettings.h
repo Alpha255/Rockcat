@@ -8,18 +8,15 @@ struct ApplicationSettings : public SerializableAsset<ApplicationSettings>
 {
 	using BaseClass::BaseClass;
 
-	bool EnableRendering = true;
-
-	WindowDesc WindowDesc;
-	RenderSettings GraphicsSettings;
+	WindowSettings Window;
+	RenderSettings Rendering;
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_NVP(EnableRendering),
-			CEREAL_NVP(WindowDesc),
-			CEREAL_NVP(GraphicsSettings)
+			CEREAL_NVP(Window),
+			CEREAL_NVP(Rendering)
 		);
 	}
 };
