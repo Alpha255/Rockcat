@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/ObjectID.h"
+#include "Runtime/Asset/File.h"
 
 struct DataBlock
 {
@@ -63,7 +63,7 @@ struct AssetType
 	EContentsType ContentsType = EContentsType::Binary;
 };
 
-class Asset
+class Asset : public File
 {
 public:
 	enum class EStatus : uint8_t
@@ -86,37 +86,12 @@ public:
 		AssetLoadCallback UnloadedCallback;
 	};
 
-	Asset(const std::filesystem::path& Path)
-		: m_Path(Path)
-		, m_LastWriteTime(GetLastWriteTime(m_Path))
-	{
-	}
-
-	Asset(std::filesystem::path&& Path)
-		: m_Path(std::move(Path))
-		, m_LastWriteTime(GetLastWriteTime(m_Path))
-	{
-	}
-
-	virtual ~Asset() = default;
+	using File::File;
 
 	EStatus GetStatus() const { return m_Status.load(std::memory_order_relaxed); }
 	bool IsReady() const { return GetStatus() == EStatus::Ready; }
 
-	const std::filesystem::path& GetPath() const { return m_Path; }
-	std::filesystem::path GetName() const { return m_Path.filename(); }
-	std::filesystem::path GetStem() const { return m_Path.stem(); }
-	std::filesystem::path GetExtension() const { return m_Path.extension(); }
-	std::time_t GetLastWriteTime() const { return m_LastWriteTime; }
-
 	std::shared_ptr<DataBlock> LoadData(AssetType::EContentsType ContentsType) const;
-
-	virtual bool IsDirty() const
-	{
-		std::time_t LastWriteTime = m_LastWriteTime;
-		m_LastWriteTime = GetLastWriteTime(m_Path);
-		return m_LastWriteTime != LastWriteTime;
-	}
 
 	void SetLoadCallbacks(std::optional<AssetLoadCallbacks>& Callbacks)
 	{ 
@@ -130,30 +105,11 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_NVP(m_LastWriteTime)
+			CEREAL_BASE(File)
 		);
 	}
 
 	static std::optional<AssetLoadCallbacks> s_DefaultLoadCallbacks;
-
-	static std::time_t GetLastWriteTime(const std::filesystem::path& Path)
-	{
-		if (std::filesystem::exists(Path))
-		{
-			return std::chrono::duration_cast<std::filesystem::file_time_type::duration>(
-				std::filesystem::last_write_time(Path).time_since_epoch()).count();
-		}
-		return 0;
-	}
-
-	static size_t GetSize(const std::filesystem::path& Path)
-	{
-		if (std::filesystem::exists(Path))
-		{
-			return std::filesystem::file_size(Path);
-		}
-		return 0u;
-	}
 protected:
 	friend class AssetImportTask;
 
