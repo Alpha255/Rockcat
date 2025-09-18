@@ -44,7 +44,7 @@ public:
 	const uint32_t GetMinWidth() const { return m_MinWidth; }
 	const uint32_t GetMinHeight() const { return m_MinHeight; }
 	const void* GetHandle() const { return m_Handle; }
-	const bool IsActivate() const { return m_Status == EWindowStatus::Activate; }
+	const bool IsActive() const { return m_Status == EWindowStatus::Active; }
 	const bool IsDestroyed() const { return m_Status == EWindowStatus::Destroyed; }
 
 	void SetMode(EWindowMode Mode);

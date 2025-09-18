@@ -60,6 +60,8 @@ public:
 		}
 	}
 
+	inline bool IsPaused() const { return m_State == EState::Paused; }
+
 	using Seconds = std::chrono::duration<float, std::ratio<1, 1>>;
 	using Milliseconds = std::chrono::duration<float, std::milli>;
 protected:

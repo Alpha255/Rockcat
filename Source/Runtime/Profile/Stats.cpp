@@ -39,33 +39,53 @@ void StatEvent::SetFlags(EEventFlags Flags)
 	m_Flags = m_Flags | Flags;
 }
 
-void Stats::Tick(float ElapsedSeconds)
+void Stats::NotifyFrameBegin(bool Active)
 {
-	CalcFrameTime(ElapsedSeconds);
+	if (!m_FrameCpuTimer)
+	{
+		m_FrameCpuTimer = std::make_unique<CpuTimer>();
+	}
+
+	if (Active)
+	{
+		m_FrameCpuTimer->Start();
+	}
+	else
+	{
+		m_FrameCpuTimer->Pause();
+	}
+}
+
+void Stats::NotifyFrameEnd()
+{
+	CalculateFrameTime();
 
 	m_NumPrimitives.store(0u, std::memory_order_relaxed);
 	m_NumDraw.store(0u, std::memory_order_relaxed);
 }
 
-void Stats::CalcFrameTime(float ElapsedSeconds)
+void Stats::CalculateFrameTime()
 {
-	m_FrameTime = ElapsedSeconds;
-	m_FPS = 1.0f / m_FrameTime;
-
-	m_AccumFrameTime += m_FrameTime;
-	m_AccumFPS += m_FPS;
-
-	++m_AccumFrameNum;
-	++m_NumFrame;
-
-	if (m_AccumFrameTime > 1.0f)
+	if (!m_FrameCpuTimer->IsPaused())
 	{
-		m_AverageFrameTime = m_AccumFrameTime / m_AccumFrameNum;
-		m_AverageFPS = m_AccumFPS / m_AccumFrameNum;
+		m_FrameTime = m_FrameCpuTimer->GetElapsedSeconds();
+		m_FPS = 1.0f / m_FrameTime;
 
-		m_AccumFrameTime = 0.0f;
-		m_AccumFPS = 0.0f;
-		m_AccumFrameNum = 0u;
+		m_AccumFrameTime += m_FrameTime;
+		m_AccumFPS += m_FPS;
+
+		++m_AccumFrameNum;
+		++m_NumFrame;
+
+		if (m_AccumFrameTime > 1.0f)
+		{
+			m_AverageFrameTime = m_AccumFrameTime / m_AccumFrameNum;
+			m_AverageFPS = m_AccumFPS / m_AccumFrameNum;
+
+			m_AccumFrameTime = 0.0f;
+			m_AccumFPS = 0.0f;
+			m_AccumFrameNum = 0u;
+		}
 	}
 }
 

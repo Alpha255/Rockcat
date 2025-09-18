@@ -23,29 +23,29 @@ public:
 		switch (Message)
 		{
 		case WM_ACTIVATE:
-			m_Window.SetStatus(WParam == WA_INACTIVE ? EWindowStatus::Inactivate : EWindowStatus::Activate);
-			EventRouter::Get().DispatchWindowStatusChanged((LOWORD(WParam) == WA_INACTIVE) ? EWindowStatus::Inactivate : EWindowStatus::Activate);
+			m_Window.SetStatus(WParam == WA_INACTIVE ? EWindowStatus::Inactive : EWindowStatus::Active);
+			EventRouter::Get().DispatchWindowStatusChanged((LOWORD(WParam) == WA_INACTIVE) ? EWindowStatus::Inactive : EWindowStatus::Active);
 			break;
 		case WM_SIZE:
 			if (SIZE_RESTORED == WParam)
 			{
-				m_Window.SetStatus(EWindowStatus::Activate);
-				EventRouter::Get().DispatchWindowStatusChanged(EWindowStatus::Activate);
+				m_Window.SetStatus(EWindowStatus::Active);
+				EventRouter::Get().DispatchWindowStatusChanged(EWindowStatus::Active);
 			}
 			else if (SIZE_MINIMIZED == WParam)
 			{
-				m_Window.SetStatus(EWindowStatus::Inactivate);
-				EventRouter::Get().DispatchWindowStatusChanged(EWindowStatus::Inactivate);
+				m_Window.SetStatus(EWindowStatus::Inactive);
+				EventRouter::Get().DispatchWindowStatusChanged(EWindowStatus::Inactive);
 			}
 			break;
 		case WM_ENTERSIZEMOVE:
-			m_Window.SetStatus(EWindowStatus::Inactivate);
-			EventRouter::Get().DispatchWindowStatusChanged(EWindowStatus::Inactivate);
+			m_Window.SetStatus(EWindowStatus::Inactive);
+			EventRouter::Get().DispatchWindowStatusChanged(EWindowStatus::Inactive);
 			break;
 		case WM_EXITSIZEMOVE:
-			m_Window.SetStatus(EWindowStatus::Activate);
+			m_Window.SetStatus(EWindowStatus::Active);
 			m_Window.UpdateSize();
-			EventRouter::Get().DispatchWindowStatusChanged(EWindowStatus::Activate);
+			EventRouter::Get().DispatchWindowStatusChanged(EWindowStatus::Active);
 			break;
 		case WM_QUIT:
 		case WM_DESTROY:
@@ -277,7 +277,7 @@ static ::LRESULT MessageProc(::HWND HWnd, uint32_t Message, ::WPARAM WParam, ::L
 	{
 		::CREATESTRUCTA* CreateStruct = reinterpret_cast<::CREATESTRUCTA*>(LParam);
 		assert(CreateStruct);
-		VERIFY_WITH_PLATFORM_MESSAGE(::SetWindowLongPtrA(HWnd, 0, reinterpret_cast<LONG_PTR>(CreateStruct->lpCreateParams)) == 0);
+		VERIFY_WITH_SYSTEM_MESSAGE(::SetWindowLongPtrA(HWnd, 0, reinterpret_cast<LONG_PTR>(CreateStruct->lpCreateParams)) == 0);
 	}
 	else
 	{
@@ -296,14 +296,14 @@ Window::Window(const WindowSettings& Settings)
 	, m_Width(std::max<uint32_t>(Settings.Width, m_MinWidth))
 	, m_Height(std::max<uint32_t>(Settings.Height, m_MinHeight))
 	, m_Mode(Settings.Mode)
-	, m_Status(EWindowStatus::Activate)
+	, m_Status(EWindowStatus::Active)
 	, m_Handle(nullptr)
 {
 	::HINSTANCE HInstance = reinterpret_cast<::HINSTANCE>(System::GetApplicationInstance());
 	assert(HInstance);
 
-	::HICON Icon = ::LoadIcon(HInstance, MAKEINTRESOURCE(ICON_NVIDIA));
-	VERIFY_WITH_PLATFORM_MESSAGE(Icon);
+	::HICON Icon = ::LoadIconA(HInstance, MAKEINTRESOURCEA(ICON_NVIDIA));
+	VERIFY_WITH_SYSTEM_MESSAGE(Icon);
 
 	::WNDCLASSEXA WndClassEx
 	{
@@ -320,7 +320,7 @@ Window::Window(const WindowSettings& Settings)
 		Settings.Title.c_str(),
 		Icon
 	};
-	VERIFY_WITH_PLATFORM_MESSAGE(::RegisterClassExA(&WndClassEx) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::RegisterClassExA(&WndClassEx) != 0);
 
 	::RECT Rect
 	{ 
@@ -329,7 +329,7 @@ Window::Window(const WindowSettings& Settings)
 		static_cast<long>(m_Width), 
 		static_cast<long>(m_Height) 
 	};
-	VERIFY_WITH_PLATFORM_MESSAGE(::AdjustWindowRect(&Rect, WS_OVERLAPPEDWINDOW, false) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::AdjustWindowRect(&Rect, WS_OVERLAPPEDWINDOW, false) != 0);
 
 	m_MessageProcessor = std::make_shared<MessageProcessor>(*this);
 
@@ -347,10 +347,10 @@ Window::Window(const WindowSettings& Settings)
 		nullptr,
 		HInstance,
 		reinterpret_cast<void*>(m_MessageProcessor.get()));
-	VERIFY_WITH_PLATFORM_MESSAGE(Handle);
+	VERIFY_WITH_SYSTEM_MESSAGE(Handle);
 
 	::ShowWindow(Handle, SW_SHOWDEFAULT);
-	VERIFY_WITH_PLATFORM_MESSAGE(::UpdateWindow(Handle) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::UpdateWindow(Handle) != 0);
 
 	m_Handle = reinterpret_cast<void*>(Handle);
 
@@ -360,7 +360,7 @@ Window::Window(const WindowSettings& Settings)
 void Window::UpdateSize()
 {
 	::RECT Rect;
-	VERIFY_WITH_PLATFORM_MESSAGE(::GetClientRect(reinterpret_cast<::HWND>(m_Handle), &Rect) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::GetClientRect(reinterpret_cast<::HWND>(m_Handle), &Rect) != 0);
 	uint32_t Width = static_cast<uint32_t>(Rect.right - Rect.left);
 	uint32_t Height = static_cast<uint32_t>(Rect.bottom - Rect.top);
 

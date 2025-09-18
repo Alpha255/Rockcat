@@ -72,7 +72,7 @@
 }
 
 #if defined(PLATFORM_WIN32)
-#define VERIFY_WITH_PLATFORM_MESSAGE(Condition)                                    \
+#define VERIFY_WITH_SYSTEM_MESSAGE(Condition)                                      \
 {                                                                                  \
 	if (!(Condition))                                                              \
 	{                                                                              \

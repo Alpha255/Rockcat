@@ -126,8 +126,8 @@ struct CharEvent
 
 enum class EWindowStatus : uint8_t
 {
-	Activate,
-	Inactivate,
+	Active,
+	Inactive,
 	Destroyed,
 };
 

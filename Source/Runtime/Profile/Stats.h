@@ -62,13 +62,11 @@ private:
 //	Event& m_Event;
 //};
 
-class Stats : public ITickable, public IService<Stats>
+class Stats : public IService<Stats>
 {
 public:
-	Stats()
-		: ITickable(false)
-	{
-	}
+	void NotifyFrameBegin(bool Active);
+	void NotifyFrameEnd();
 
 	inline bool IsEnabled() const { return m_Enabled; }
 	inline void SetEnable(bool Enable) { m_Enabled = Enable; }
@@ -89,11 +87,9 @@ public:
 		m_NumPrimitives.fetch_add(NumPrimitives, std::memory_order_relaxed);
 		m_NumDraw.fetch_add(NumDraws, std::memory_order_relaxed);
 	}
-
-	void Tick(float ElapsedSeconds) override final;
 protected:
 private:
-	void CalcFrameTime(float ElapsedSeconds);
+	void CalculateFrameTime();
 
 	std::unordered_map<std::string_view, std::unique_ptr<StatEvent>> m_Events;
 	bool m_Enabled = true;
@@ -112,6 +108,8 @@ private:
 
 	std::atomic<uint32_t> m_NumPrimitives = 0u;
 	std::atomic<uint32_t> m_NumDraw = 0u;
+
+	std::unique_ptr<CpuTimer> m_FrameCpuTimer;
 };
 
 ENUM_FLAG_OPERATORS(StatEvent::EEventFlags)

@@ -31,7 +31,7 @@ std::filesystem::path System::GetApplicationDirectory()
 	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
 	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
 
-	VERIFY_WITH_PLATFORM_MESSAGE(::GetModuleFileName(nullptr, s_Buffer, FILE_PATH_LENGTH_MAX) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::GetModuleFileName(nullptr, s_Buffer, FILE_PATH_LENGTH_MAX) != 0);
 	return std::filesystem::path(s_Buffer).parent_path();
 }
 
@@ -40,14 +40,14 @@ std::filesystem::path System::GetCurrentWorkingDirectory()
 	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
 	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
 
-	VERIFY_WITH_PLATFORM_MESSAGE(::GetCurrentDirectory(FILE_PATH_LENGTH_MAX, s_Buffer) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::GetCurrentDirectory(FILE_PATH_LENGTH_MAX, s_Buffer) != 0);
 	return std::filesystem::path(s_Buffer);
 }
 
 void System::SetCurrentWorkingDirectory(const std::filesystem::path& Directory)
 {
 	assert(std::filesystem::exists(Directory));
-	VERIFY_WITH_PLATFORM_MESSAGE(::SetCurrentDirectory(Directory.c_str()) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::SetCurrentDirectory(Directory.c_str()) != 0);
 }
 
 void System::Sleep(uint32_t Milliseconds)
@@ -65,8 +65,8 @@ void System::ExecuteProcess(const char* Commandline, bool WaitDone)
 	};
 
 	::HANDLE Read = nullptr, Write = nullptr;
-	VERIFY_WITH_PLATFORM_MESSAGE(::CreatePipe(&Read, &Write, &Security, INT16_MAX) != 0);
-	VERIFY_WITH_PLATFORM_MESSAGE(::SetStdHandle(STD_OUTPUT_HANDLE, Write) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::CreatePipe(&Read, &Write, &Security, INT16_MAX) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::SetStdHandle(STD_OUTPUT_HANDLE, Write) != 0);
 
 	/// If an error occurs, the ANSI version of this function (GetStartupInfoA) can raise an exception. 
 	/// The Unicode version (GetStartupInfoW) does not fail
@@ -100,13 +100,13 @@ void System::ExecuteProcess(const char* Commandline, bool WaitDone)
 			if (::GetExitCodeProcess(ProcessInfo.hProcess, &Exit) && Exit != 0u)
 			{
 				::DWORD Bytes = 0u;
-				VERIFY_WITH_PLATFORM_MESSAGE(::ReadFile(Read, s_Buffer, FILE_PATH_LENGTH_MAX, &Bytes, nullptr) != 0);
+				VERIFY_WITH_SYSTEM_MESSAGE(::ReadFile(Read, s_Buffer, FILE_PATH_LENGTH_MAX, &Bytes, nullptr) != 0);
 				//buffer[bytes] = '\0';
 				LOG_ERROR("Failed to executing process \"%s\"", s_Buffer);
 			}
 			else
 			{
-				VERIFY_WITH_PLATFORM_MESSAGE(0);
+				VERIFY_WITH_SYSTEM_MESSAGE(0);
 			}
 
 			/// STILL_ACTIVE
@@ -121,7 +121,7 @@ void System::ExecuteProcess(const char* Commandline, bool WaitDone)
 		return;
 	}
 
-	VERIFY_WITH_PLATFORM_MESSAGE(0);
+	VERIFY_WITH_SYSTEM_MESSAGE(0);
 }
 
 std::string System::GetEnvironmentVariables(const char* Variable)
@@ -129,21 +129,21 @@ std::string System::GetEnvironmentVariables(const char* Variable)
 	static char s_Buffer[FILE_PATH_LENGTH_MAX];
 	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
 
-	VERIFY_WITH_PLATFORM_MESSAGE(::GetEnvironmentVariableA(Variable, s_Buffer, FILE_PATH_LENGTH_MAX) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::GetEnvironmentVariableA(Variable, s_Buffer, FILE_PATH_LENGTH_MAX) != 0);
 	return std::string(s_Buffer);
 }
 
 void* System::GetApplicationInstance()
 {
 	::HMODULE Handle = ::GetModuleHandleA(nullptr);
-	VERIFY_WITH_PLATFORM_MESSAGE(Handle);
+	VERIFY_WITH_SYSTEM_MESSAGE(Handle);
 	return reinterpret_cast<void*>(Handle);
 }
 
 Guid System::CreateGUID()
 {
 	Guid Ret;
-	VERIFY_WITH_PLATFORM_MESSAGE(::CoCreateGuid(reinterpret_cast<::GUID*>(&Ret)) == S_OK);
+	VERIFY_WITH_SYSTEM_MESSAGE(::CoCreateGuid(reinterpret_cast<::GUID*>(&Ret)) == S_OK);
 	return Ret;
 }
 
@@ -214,7 +214,7 @@ void System::SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priorit
 
 	::DWORD DwordThreadID = std::stoul(Stream.str());
 	::HANDLE ThreadHandle = ::OpenThread(THREAD_ALL_ACCESS, false, DwordThreadID);
-	VERIFY_WITH_PLATFORM_MESSAGE(ThreadHandle);
+	VERIFY_WITH_SYSTEM_MESSAGE(ThreadHandle);
 
 	int32_t ThreadPriority = THREAD_PRIORITY_NORMAL;
 	switch (Priority)
@@ -229,7 +229,7 @@ void System::SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priorit
 		ThreadPriority = THREAD_PRIORITY_BELOW_NORMAL;
 		break;
 	}
-	VERIFY_WITH_PLATFORM_MESSAGE(::SetThreadPriority(ThreadHandle, ThreadPriority) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::SetThreadPriority(ThreadHandle, ThreadPriority) != 0);
 
 	LOG_INFO("Set priority of thread {} to {}", DwordThreadID, s_ThreadPriorityNames[(size_t)Priority]);
 }

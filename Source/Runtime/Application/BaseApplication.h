@@ -3,37 +3,36 @@
 #include "Core/Tickable.h"
 #include "EventRouter.h"
 
-class BaseApplication : public NoneCopyable, public ITickable, public EventHandler
+class BaseApplication : public NoneCopyable
 {
 public:
 	BaseApplication(const char* SettingsFile = nullptr);
 	virtual ~BaseApplication();
 
 	virtual void Initialize() {}
-	virtual void Render() {}
-	virtual void RenderGUI() {}
 	virtual void Finalize() {}
+
+	virtual void RenderFrame();
+
+	virtual void Tick();
+
+	virtual void Run();
 	
 	virtual void PumpMessages();
 
-	virtual void Run();
-
-	void OnWindowStatusChanged(EWindowStatus Status) override;
-	
-	void Tick(float ElapsedSeconds) override;
-
-	bool IsActivate() const;
-	bool IsRequestQuit() const;
+	virtual bool IsActive() const;
+	virtual bool IsRequestQuit() const;
 protected:
 	bool InitializeRHI();
 	void FinalizeRHI();
+
+	virtual void Render() {}
+	virtual void RenderGUI() {}
 
 	std::shared_ptr<struct ApplicationSettings> m_Settings;
 
 	std::unique_ptr<class Window> m_Window;
 	std::unique_ptr<class RHIDevice> m_RenderDevice;
-
-	std::unique_ptr<class CpuTimer> m_Timer;
 };
 
 struct RunApplication

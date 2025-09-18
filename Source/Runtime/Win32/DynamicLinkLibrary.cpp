@@ -11,7 +11,7 @@
 DynamicLinkLibrary::DynamicLinkLibrary(const char* ModuleName)
 {
 	m_Handle = reinterpret_cast<void*>(::LoadLibraryA(ModuleName));
-	VERIFY_WITH_PLATFORM_MESSAGE(m_Handle);
+	VERIFY_WITH_SYSTEM_MESSAGE(m_Handle);
 }
 
 void* DynamicLinkLibrary::GetProcAddress(const char* FunctionName)
@@ -22,14 +22,14 @@ void* DynamicLinkLibrary::GetProcAddress(const char* FunctionName)
 
 DynamicLinkLibrary::~DynamicLinkLibrary()
 {
-	VERIFY_WITH_PLATFORM_MESSAGE(::FreeLibrary(reinterpret_cast<::HMODULE>(m_Handle)) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::FreeLibrary(reinterpret_cast<::HMODULE>(m_Handle)) != 0);
 }
 
 struct ComponentObjectModelLibrary
 {
 	ComponentObjectModelLibrary()
 	{
-		VERIFY_WITH_PLATFORM_MESSAGE(::CoInitializeEx(nullptr, COINIT_MULTITHREADED) == S_OK);
+		VERIFY_WITH_SYSTEM_MESSAGE(::CoInitializeEx(nullptr, COINIT_MULTITHREADED) == S_OK);
 	}
 
 	~ComponentObjectModelLibrary()

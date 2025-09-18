@@ -12,8 +12,6 @@
 #include "System.h"
 
 BaseApplication::BaseApplication(const char* SettingsFile)
-	: ITickable(false)
-	, EventHandler(EEventMask::WindowStatus)
 { 
 	m_Settings = ApplicationSettings::Load(SettingsFile ? SettingsFile : "Defalut.json");
 }
@@ -54,9 +52,9 @@ void BaseApplication::PumpMessages()
 	System::PumpMessages();
 }
 
-bool BaseApplication::IsActivate() const
+bool BaseApplication::IsActive() const
 {
-	return m_Window ? m_Window->IsActivate() : true;
+	return m_Window ? m_Window->IsActive() : true;
 }
 
 bool BaseApplication::IsRequestQuit() const
@@ -64,10 +62,21 @@ bool BaseApplication::IsRequestQuit() const
 	return m_Window ? m_Window->IsDestroyed() : false;
 }
 
-void BaseApplication::Tick(float ElapsedSeconds)
+void BaseApplication::RenderFrame()
 {
-	TickManager::Get().TickObjects(ElapsedSeconds);
-	Stats::Get().Tick(ElapsedSeconds);
+	if (m_Settings->Rendering.Enable)
+	{
+		Render();
+		RenderGUI();
+
+		TaskFlow::Get().FrameSync(true);
+	}
+}
+
+void BaseApplication::Tick()
+{
+	auto FrameTime = Stats::Get().GetFrameTime();
+	TickManager::Get().TickObjects(FrameTime);
 }
 
 void BaseApplication::Run()
@@ -88,6 +97,7 @@ void BaseApplication::Run()
 
 	TaskFlow::Get().Initialize();
 	AssetDatabase::Get().Initialize();
+	Stats::Get().Initialize();
 
 	if (m_Settings->Rendering.Enable)
 	{
@@ -97,57 +107,31 @@ void BaseApplication::Run()
 
 	Initialize();
 
-	m_Timer = std::make_unique<CpuTimer>();
-
-	while (true)
+	while (!IsRequestQuit())
 	{
-		if (IsRequestQuit())
+		const bool Active = IsActive();
+
+		Stats::Get().NotifyFrameBegin(Active);
+
+		PumpMessages();
+
+		if (Active)
 		{
-			break;
+			Tick();
+
+			RenderFrame();
 		}
 
-		if (IsActivate())
-		{
-			PumpMessages();
-
-			Tick(m_Timer->GetElapsedSeconds());
-
-			if (m_Settings->Rendering.Enable)
-			{
-				//Render(m_RenderSwapchain ? m_RenderSwapchain->GetBackBuffer() : nullptr);
-				RenderGUI();
-				//Present();
-			}
-
-			TaskFlow::Get().FrameSync(true);
-		}
+		Stats::Get().NotifyFrameEnd();
 	}
 
 	Finalize();
 
 	AssetDatabase::Get().Finalize();
 	TaskFlow::Get().Finalize();
+	Stats::Get().Finalize();
 
 	FinalizeRHI();
-}
-
-void BaseApplication::OnWindowStatusChanged(EWindowStatus Status)
-{
-	switch (Status)
-	{
-	case EWindowStatus::Activate:
-		if (m_Timer)
-		{
-			m_Timer->Start();
-		}
-		break;
-	case EWindowStatus::Inactivate:
-		if (m_Timer)
-		{
-			m_Timer->Pause();
-		}
-		break;
-	}
 }
 
 void BaseApplication::FinalizeRHI()
