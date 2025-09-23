@@ -76,7 +76,6 @@ enum class EKeyboardKey : uint8_t
 	F10,
 	F11,
 	F12,
-	Other,
 	None = 0xFF
 };
 
@@ -93,9 +92,11 @@ struct KeyModifiers
 	bool LeftCtrl = false;
 	bool LeftShift = false;
 	bool LeftAlt = false;
+	bool LeftMenu = false;
 	bool RightCtrl = false;
 	bool RightShift = false;
 	bool RightAlt = false;
+	bool RightMenu = false;
 	bool CapsLock = false;
 };
 
@@ -248,4 +249,23 @@ public:
 	}
 private:
 	std::vector<EventHandler*> m_Handlers;
+};
+
+class MessageHandler
+{
+public:
+	virtual bool OnKeyUp(const KeyEvent&) { return false; }
+	virtual bool OnKeyDown(const KeyEvent&) { return false; }
+	virtual bool OnKeyChar(const char) { return false; }
+
+	virtual bool OnMouseButtonUp(const EMouseButton) { return false; }
+	virtual bool OnMouseButtonDown(const EMouseButton, const Math::Vector2&) { return false; }
+	virtual bool OnMouseButtonDoubleClick(const EMouseButton, const Math::Vector2&) { return false; }
+	virtual bool OnMouseMove(const Math::Vector2&) { return false; }
+	virtual bool OnMouseWheel(const float, const Math::Vector2&) { return false; }
+
+	virtual bool OnWindowResized(uint32_t, uint32_t) { return false; }
+	virtual bool OnWindowActive() { return false; }
+	virtual bool OnWindowInactive() { return false; }
+	virtual bool OnWindowDestroy() { return false; }
 };
