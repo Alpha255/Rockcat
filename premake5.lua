@@ -56,10 +56,13 @@ workspace "Rockcat"
 				"$(SolutionDir)Source",
 				"$(SolutionDir)Source/Runtime",
 				"$(SolutionDir)Assets",
+				"$(SolutionDir)Submodules",
+				"$(SolutionDir)Submodules/taskflow",
 				"$(SolutionDir)Submodules/cereal/include",
 				"$(SolutionDir)Submodules/spdlog/include",
 				"$(SolutionDir)Submodules/assimp/build/include",
 				"$(SolutionDir)Submodules/assimp/include",
+				"$(SolutionDir)Submodules/magic_enum/include",
 				"$(VK_SDK_PATH)/Include",
 			}
 			libdirs {
@@ -270,8 +273,13 @@ workspace "Rockcat"
 			"$(SolutionDir)",
 			"$(SolutionDir)Source",
 			"$(SolutionDir)Source/Runtime",
+			"$(SolutionDir)Submodules",
+			"$(SolutionDir)Submodules/taskflow",
 			"$(SolutionDir)Submodules/cereal/include",
 			"$(SolutionDir)Submodules/spdlog/include",
+			"$(SolutionDir)Submodules/assimp/build/include",
+			"$(SolutionDir)Submodules/assimp/include",
+			"$(SolutionDir)Submodules/magic_enum/include",
 			"$(VK_SDK_PATH)/Include",
 		}
 		libdirs {
@@ -316,9 +324,13 @@ workspace "Rockcat"
 			"$(SolutionDir)",
 			"$(SolutionDir)Source",
 			"$(SolutionDir)Source/Runtime",
+			"$(SolutionDir)Submodules",
+			"$(SolutionDir)Submodules/taskflow",
 			"$(SolutionDir)Submodules/cereal/include",
 			"$(SolutionDir)Submodules/spdlog/include",
-			"$(SolutionDir)Submodules/imgui",
+			"$(SolutionDir)Submodules/assimp/build/include",
+			"$(SolutionDir)Submodules/assimp/include",
+			"$(SolutionDir)Submodules/magic_enum/include",
 			"$(VK_SDK_PATH)/Include",
 		}
 		libdirs {

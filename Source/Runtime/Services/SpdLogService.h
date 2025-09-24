@@ -4,9 +4,9 @@
 #include "Core/Module.h"
 #pragma warning(push)
 #pragma warning(disable:4702)
-#include <Submodules/spdlog/include/spdlog/spdlog.h>
-#include <Submodules/spdlog/include/spdlog/async_logger.h>
-#include <Submodules/spdlog/include/spdlog/sinks/windebug_sink.h>
+#include <spdlog/spdlog.h>
+#include <spdlog/async_logger.h>
+#include <spdlog/sinks/windebug_sink.h>
 #pragma warning(pop)
 
 using SpdLogMessage = spdlog::details::log_msg;

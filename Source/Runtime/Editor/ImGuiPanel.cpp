@@ -1,5 +1,5 @@
 #include "Editor/ImGuiPanel.h"
-#include <Submodules/imgui/imgui.h>
+#include <imgui/imgui.h>
 
 ImGuiPanel::ImGuiPanel(const char* Title, const char* Icon, const ImGuiWidget* Parent, int32_t WindowsFlags)
 	: ImGuiWidget(Title, Parent)

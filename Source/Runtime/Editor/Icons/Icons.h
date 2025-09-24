@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Submodules/IconFontCppHeaders/IconsMaterialDesignIcons.h>
+#include <IconFontCppHeaders/IconsMaterialDesignIcons.h>
 #include "Editor/Icons/IconsBlenderIcons.h"
 #include "Editor/Icons/IconsUnrealIcons.h"
 

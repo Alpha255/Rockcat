@@ -2,8 +2,8 @@
 
 #include "Core/Math/Color.h"
 #include "Core/Cereal.h"
-#include <Submodules/imgui/imgui.h>
-#include <Submodules/imgui/imgui_internal.h>
+#include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
 
 static inline ImVec2 operator+(const ImVec2& Left, const float Value)
 {

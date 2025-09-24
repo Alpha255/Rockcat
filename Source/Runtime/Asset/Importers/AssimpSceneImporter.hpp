@@ -5,12 +5,12 @@
 #include "Paths.h"
 #include "RHI/RHIDevice.h"
 #include <assimp/version.h>
-#include <Submodules/assimp/include/assimp/Importer.hpp>
-#include <Submodules/assimp/include/assimp/ProgressHandler.hpp>
-#include <Submodules/assimp/include/assimp/scene.h>
-#include <Submodules/assimp/include/assimp/GltfMaterial.h>
-#include <Submodules/assimp/include/assimp/postprocess.h>
-#include <Submodules/assimp/include/assimp/DefaultLogger.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/ProgressHandler.hpp>
+#include <assimp/scene.h>
+#include <assimp/GltfMaterial.h>
+#include <assimp/postprocess.h>
+#include <assimp/DefaultLogger.hpp>
 
 class AssimpSceneImporter : public IAssetImporter
 {

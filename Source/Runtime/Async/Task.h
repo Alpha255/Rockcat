@@ -4,10 +4,10 @@
 
 #pragma warning(push)
 #pragma warning(disable:4456 4244 4127 4267 4324)
-#include <Submodules/taskflow/taskflow/taskflow.hpp>
-#include <Submodules/taskflow/taskflow/core/task.hpp>
-#include <Submodules/taskflow/taskflow/algorithm/for_each.hpp>
-#include <Submodules/taskflow/taskflow/algorithm/sort.hpp>
+#include <taskflow/taskflow.hpp>
+#include <taskflow/core/task.hpp>
+#include <taskflow/algorithm/for_each.hpp>
+#include <taskflow/algorithm/sort.hpp>
 #pragma warning(pop)
 
 enum class EThread

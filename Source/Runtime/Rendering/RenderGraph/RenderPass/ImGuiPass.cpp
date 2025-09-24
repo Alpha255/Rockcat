@@ -1,5 +1,5 @@
 #include "Rendering/RenderGraph/RenderPass/ImGuiPass.h"
-#include <Submodules/imgui/imgui.h>
+#include <imgui/imgui.h>
 
 ImGUIPass::~ImGUIPass()
 {

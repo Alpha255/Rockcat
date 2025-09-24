@@ -6,7 +6,7 @@
 #include "RHI/RHIPipeline.h"
 #include "RHI/RHIDevice.h"
 #pragma warning(disable:4068)
-#include <Submodules/filewatch/FileWatch.hpp>
+#include <filewatch/FileWatch.hpp>
 #pragma warning(default:4068)
 
 const RHIShader* ShaderLibrary::ShaderPermutation::GetOrCreateRHI(RHIDevice& Device)

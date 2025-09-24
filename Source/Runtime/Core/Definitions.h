@@ -31,6 +31,7 @@
 #include <filesystem>
 #include <variant>
 #include <span>
+#include <magic_enum/magic_enum.hpp>
 
 #if defined(_WIN32)
 	#if !defined(VK_USE_PLATFORM_WIN32_KHR)

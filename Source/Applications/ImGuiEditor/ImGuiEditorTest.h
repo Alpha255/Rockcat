@@ -2,7 +2,7 @@
 
 #include "Application/BaseApplication.h"
 #include "EventRouter.h"
-#include <Submodules/imgui/imgui.h>
+#include <imgui/imgui.h>
 
 class ImGuiEditorTest final : public BaseApplication
 {
