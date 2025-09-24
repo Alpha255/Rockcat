@@ -13,21 +13,42 @@ enum class EMouseButton : uint8_t
 
 enum class EKeyboardKey : uint8_t
 {
+	Esc,
 	Tab,
 	Enter,
-	Shift,
-	Ctrl,
-	Esc,
+	LeftShift,
+	RightShift,
+	LeftCtrl,
+	RightCtrl,
+	LeftAlt,
+	RightAlt,
 	CapsLock,
-	Alt,
-	Space = ' ',
+	Insert,
+	Delete,
+	Home,
+	End,
 	PageUp,
 	PageDown,
-	Home,
 	Left,
 	Up,
 	Right,
-	Down,	
+	Down,
+	F1,
+	F2,
+	F3,
+	F4,
+	F5,
+	F6,
+	F7,
+	F8,
+	F9,
+	F10,
+	F11,
+	F12,
+	Space = ' ',
+	LeftMenu,
+	RightMenu,
+	Backspace,
 	Num0 = '0',
 	Num1 = '1',
 	Num2 = '2',
@@ -64,18 +85,7 @@ enum class EKeyboardKey : uint8_t
 	X = 'X',
 	Y = 'Y',
 	Z = 'Z',
-	F1,
-	F2,
-	F3,
-	F4,
-	F5,
-	F6,
-	F7,
-	F8,
-	F9,
-	F10,
-	F11,
-	F12,
+	OEM,
 	None = 0xFF
 };
 
@@ -116,6 +126,7 @@ struct MouseWheelEvent
 struct KeyEvent
 {
 	EKeyboardKey Key = EKeyboardKey::None;
+	int32_t RawKeyCode = 0;
 	EKeyState KeyState = EKeyState::Up;
 	KeyModifiers Modifiers;
 };

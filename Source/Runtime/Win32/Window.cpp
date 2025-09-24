@@ -120,6 +120,7 @@ public:
 			KeyEvent Event
 			{
 				EKeyboardKey::None,
+				static_cast<int32_t>(WParam),
 				Message == WM_KEYDOWN ? EKeyState::Down : EKeyState::Up
 			};
 
@@ -141,34 +142,37 @@ public:
 					if (::MapVirtualKeyA((LParam & 0x00ff0000) >> 16, MAPVK_VK_TO_VSC) == VK_LSHIFT)
 					{
 						Event.Modifiers.LeftShift = true;
+						Event.Key = EKeyboardKey::LeftShift;
 					}
 					else
 					{
 						Event.Modifiers.RightShift = true;
+						Event.Key = EKeyboardKey::RightShift;
 					}
-					Event.Key = EKeyboardKey::Shift;
 					break;
 				case VK_CONTROL:
 					if ((LParam & 0x1000000) == 0)
 					{
 						Event.Modifiers.LeftCtrl = true;
+						Event.Key = EKeyboardKey::LeftCtrl;
 					}
 					else
 					{
 						Event.Modifiers.RightCtrl = true;
+						Event.Key = EKeyboardKey::RightCtrl;
 					}
-					Event.Key = EKeyboardKey::Ctrl;
 					break;
 				case VK_MENU:
 					if ((LParam & 0x1000000) == 0)
 					{
 						Event.Modifiers.LeftAlt = true;
+						Event.Key = EKeyboardKey::LeftAlt;
 					}
 					else
 					{
 						Event.Modifiers.RightAlt = true;
+						Event.Key = EKeyboardKey::RightAlt;
 					}
-					Event.Key = EKeyboardKey::Alt;
 					break;
 				case VK_CAPITAL:
 					Event.Key = EKeyboardKey::CapsLock;
@@ -238,7 +242,7 @@ public:
 					Event.Key = EKeyboardKey::F12;
 					break;
 				default:
-					Event.Key = EKeyboardKey::Other;
+					Event.Key = EKeyboardKey::None;
 					break;
 				}
 			}

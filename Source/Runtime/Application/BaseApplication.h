@@ -26,6 +26,8 @@ protected:
 	bool InitializeRHI();
 	void FinalizeRHI();
 
+	virtual EKeyboardKey MapKeyCode(int32_t KeyCode, int64_t Mask) = 0;
+
 	virtual void Render() {}
 	virtual void RenderGUI() {}
 
@@ -33,6 +35,8 @@ protected:
 
 	std::unique_ptr<class Window> m_Window;
 	std::unique_ptr<class RHIDevice> m_RenderDevice;
+
+	KeyModifiers m_KeyModifiers;
 };
 
 struct RunApplication
