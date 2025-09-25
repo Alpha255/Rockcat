@@ -11,10 +11,10 @@
 
 std::string System::GetErrorMessage(uint32_t ErrorCode)
 {
-	static char s_Buffer[FILE_PATH_LENGTH_MAX];
-	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
+	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
+	memset(s_Buffer, 0, sizeof(s_Buffer));
 
-	VERIFY(::FormatMessageA(
+	VERIFY(::FormatMessageW(
 		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 		nullptr,
 		ErrorCode == ~0u ? ::GetLastError() : ErrorCode,
@@ -23,31 +23,31 @@ std::string System::GetErrorMessage(uint32_t ErrorCode)
 		FILE_PATH_LENGTH_MAX,
 		nullptr) != 0);
 
-	return std::string(s_Buffer);
+	return StringUtils::ToMultiByte(s_Buffer);
 }
 
 std::filesystem::path System::GetApplicationDirectory()
 {
 	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
-	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
+	memset(s_Buffer, 0, sizeof(s_Buffer));
 
-	VERIFY_WITH_SYSTEM_MESSAGE(::GetModuleFileName(nullptr, s_Buffer, FILE_PATH_LENGTH_MAX) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::GetModuleFileNameW(nullptr, s_Buffer, sizeof(s_Buffer)) != 0);
 	return std::filesystem::path(s_Buffer).parent_path();
 }
 
-std::filesystem::path System::GetCurrentWorkingDirectory()
+std::filesystem::path System::GetWorkingDirectory()
 {
 	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
-	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
+	memset(s_Buffer, 0, sizeof(s_Buffer));
 
-	VERIFY_WITH_SYSTEM_MESSAGE(::GetCurrentDirectory(FILE_PATH_LENGTH_MAX, s_Buffer) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::GetCurrentDirectoryW(sizeof(s_Buffer), s_Buffer) != 0);
 	return std::filesystem::path(s_Buffer);
 }
 
-void System::SetCurrentWorkingDirectory(const std::filesystem::path& Directory)
+void System::SetWorkingDirectory(const std::filesystem::path& Directory)
 {
 	assert(std::filesystem::exists(Directory));
-	VERIFY_WITH_SYSTEM_MESSAGE(::SetCurrentDirectory(Directory.c_str()) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::SetCurrentDirectoryW(Directory.c_str()) != 0);
 }
 
 void System::Sleep(uint32_t Milliseconds)
@@ -70,20 +70,22 @@ void System::ExecuteProcess(const char* Commandline, bool WaitDone)
 
 	/// If an error occurs, the ANSI version of this function (GetStartupInfoA) can raise an exception. 
 	/// The Unicode version (GetStartupInfoW) does not fail
-	::STARTUPINFOA StartupInfo;
-	::GetStartupInfoA(&StartupInfo);
+	::STARTUPINFOW StartupInfo;
+	::GetStartupInfoW(&StartupInfo);
 	StartupInfo.cb = sizeof(::STARTUPINFOA);
 	StartupInfo.dwFlags = STARTF_USESTDHANDLES;
 	StartupInfo.hStdInput = Read;
 	StartupInfo.hStdOutput = Write;
 
-	static char s_Buffer[FILE_PATH_LENGTH_MAX];
-	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
+	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
+	memset(s_Buffer, 0, sizeof(s_Buffer));
+
+	std::wstring wComandline = StringUtils::ToWide(Commandline);
 
 	::PROCESS_INFORMATION ProcessInfo;
-	if (::CreateProcessA(
+	if (::CreateProcessW(
 		nullptr,
-		const_cast<::LPSTR>(Commandline),
+		const_cast<LPWSTR>(wComandline.c_str()),
 		nullptr,
 		nullptr,
 		true,
@@ -100,9 +102,10 @@ void System::ExecuteProcess(const char* Commandline, bool WaitDone)
 			if (::GetExitCodeProcess(ProcessInfo.hProcess, &Exit) && Exit != 0u)
 			{
 				::DWORD Bytes = 0u;
-				VERIFY_WITH_SYSTEM_MESSAGE(::ReadFile(Read, s_Buffer, FILE_PATH_LENGTH_MAX, &Bytes, nullptr) != 0);
+				VERIFY_WITH_SYSTEM_MESSAGE(::ReadFile(Read, s_Buffer, sizeof(s_Buffer), &Bytes, nullptr) != 0);
 				//buffer[bytes] = '\0';
-				LOG_ERROR("Failed to executing process \"%s\"", s_Buffer);
+				std::string ErrorMessage = StringUtils::ToMultiByte(s_Buffer);
+				LOG_ERROR("Failed to executing process \"%s\"", ErrorMessage);
 			}
 			else
 			{
@@ -126,16 +129,18 @@ void System::ExecuteProcess(const char* Commandline, bool WaitDone)
 
 std::string System::GetEnvironmentVariables(const char* Variable)
 {
-	static char s_Buffer[FILE_PATH_LENGTH_MAX];
-	memset(s_Buffer, 0, FILE_PATH_LENGTH_MAX);
+	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
+	memset(s_Buffer, 0, sizeof(s_Buffer));
 
-	VERIFY_WITH_SYSTEM_MESSAGE(::GetEnvironmentVariableA(Variable, s_Buffer, FILE_PATH_LENGTH_MAX) != 0);
-	return std::string(s_Buffer);
+	std::wstring wVariable = StringUtils::ToWide(Variable);
+
+	VERIFY_WITH_SYSTEM_MESSAGE(::GetEnvironmentVariableW(wVariable.c_str(), s_Buffer, sizeof(s_Buffer)) != 0);
+	return StringUtils::ToMultiByte(s_Buffer);
 }
 
 void* System::GetApplicationInstance()
 {
-	::HMODULE Handle = ::GetModuleHandleA(nullptr);
+	::HMODULE Handle = ::GetModuleHandleW(nullptr);
 	VERIFY_WITH_SYSTEM_MESSAGE(Handle);
 	return reinterpret_cast<void*>(Handle);
 }
@@ -147,7 +152,7 @@ Guid System::CreateGUID()
 	return Ret;
 }
 
-Math::Vector2 System::GetCurrentCursorPosition()
+Math::Vector2 System::GetCursorPosition()
 {
 	::POINT Pos;
 	::GetCursorPos(&Pos);
@@ -237,10 +242,10 @@ void System::SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priorit
 void System::PumpMessages()
 {
 	::MSG Message;
-	if (::PeekMessageA(&Message, nullptr, 0u, 0u, PM_REMOVE))
+	if (::PeekMessageW(&Message, nullptr, 0u, 0u, PM_REMOVE))
 	{
 		::TranslateMessage(&Message);
-		::DispatchMessageA(&Message);
+		::DispatchMessageW(&Message);
 	}
 }
 

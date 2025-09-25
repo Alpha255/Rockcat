@@ -1,7 +1,61 @@
-#include "Runtime/Application/Win32/WindowsApplication.h"
+#include "Application/Win32/WindowsApplication.h"
+#include "Application/Win32/Resource.h"
+#include "Application/ApplicationSettings.h"
+#include "Services/SpdLogService.h"
+#include "System.h"
+#include <windowsx.h>
+
+#if PLATFORM_WIN32
+
+WindowsApplication* WindowsApplication::s_WindowsApp = nullptr;
+
+WindowsApplication::WindowsApplication(const char* SettingsFile)
+	: BaseApplication(SettingsFile)
+{
+	s_WindowsApp = this;
+
+	HINSTANCE HInstance = reinterpret_cast<HINSTANCE>(System::GetApplicationInstance());
+	assert(HInstance);
+
+	HICON HIcon = ::LoadIconW(HInstance, MAKEINTRESOURCEW(ICON_NVIDIA));
+	VERIFY_WITH_SYSTEM_MESSAGE(HIcon);
+
+	WNDCLASSEXW WndClassEx
+	{
+		sizeof(WNDCLASSEXW),
+		CS_HREDRAW | CS_VREDRAW,
+		AppMessageProc,
+		0,
+		sizeof(void*),
+		HInstance,
+		HIcon,
+		::LoadCursorW(0, IDC_ARROW),
+		static_cast<HBRUSH>(::GetStockObject(DKGRAY_BRUSH)),
+		nullptr,
+		L"RockcatWindow",
+		HIcon
+	};
+	VERIFY_WITH_SYSTEM_MESSAGE(::RegisterClassExW(&WndClassEx) != 0);
+}
+
+LRESULT WindowsApplication::AppMessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	return s_WindowsApp->MessageProc(hWnd, Msg, wParam, lParam);
+}
 
 LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+	auto GetCursorPos = [this, &hWnd](LPARAM lParam) -> Math::Vector2 {
+		POINT CursorPos
+		{
+			GET_X_LPARAM(lParam),
+			GET_Y_LPARAM(lParam)
+		};
+		::ClientToScreen(hWnd, &CursorPos);
+
+		return Math::Vector2(CursorPos.x, CursorPos.y);
+	};
+
 	switch (Msg)
 	{
 	case WM_ACTIVATE:
@@ -15,53 +69,92 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	case WM_QUIT:
 	case WM_DESTROY:
 		::PostQuitMessage(0);
+		DispatchAppDestroyMessage();
 		break;
 	case WM_NCLBUTTONDBLCLK:
 		break;
 	case WM_LBUTTONDOWN:
+		DispatchMouseButtonDownMessage(EMouseButton::Left, GetCursorPos(lParam));
 		break;
 	case WM_LBUTTONUP:
+		DispatchMouseButtonUpMessage(EMouseButton::Left);
 		break;
 	case WM_LBUTTONDBLCLK:
+		DispatchMouseButtonDoubleClickMessage(EMouseButton::Left, GetCursorPos(lParam));
 		break;
 	case WM_RBUTTONDOWN:
+		DispatchMouseButtonDownMessage(EMouseButton::Right, GetCursorPos(lParam));
 		break;
 	case WM_RBUTTONUP:
+		DispatchMouseButtonUpMessage(EMouseButton::Right);
 		break;
 	case WM_RBUTTONDBLCLK:
+		DispatchMouseButtonDoubleClickMessage(EMouseButton::Right, GetCursorPos(lParam));
 		break;
 	case WM_MBUTTONDOWN:
+		DispatchMouseButtonDownMessage(EMouseButton::Middle, GetCursorPos(lParam));
 		break;
 	case WM_MBUTTONUP:
+		DispatchMouseButtonUpMessage(EMouseButton::Middle);
 		break;
 	case WM_MBUTTONDBLCLK:
+		DispatchMouseButtonDoubleClickMessage(EMouseButton::Middle, GetCursorPos(lParam));
 		break;
 	case WM_MOUSEWHEEL:
+	{
+		static const float s_SpinFactor = 1.0f / WHEEL_DELTA;
+		const short WheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+		DispatchMouseWheelMessage(WheelDelta * s_SpinFactor, GetCursorPos(lParam));
 		break;
+	}
 	case WM_MOUSEMOVE:
+	case WM_NCMOUSEMOVE:
+		DispatchMouseMoveMessage(GetCursorPos(lParam));
 		break;
 	case WM_KEYDOWN:
 	case WM_SYSKEYDOWN:
 	{
+		auto ActualKeyCode = MapKeyCode(wParam, lParam);
+		DispatchKeyDownMessage(KeyEvent{ ActualKeyCode, wParam });
+		LOG_DEBUG("Key \"{}\" down", magic_enum::enum_name(ActualKeyCode).data());
 		break;
 	}
 	case WM_KEYUP:
 	case WM_SYSKEYUP:
 	{
+		auto ActualKeyCode = MapKeyCode(wParam, lParam);
+		DispatchKeyUpMessage(KeyEvent{ ActualKeyCode, wParam });
+		LOG_DEBUG("Key \"{}\" up", magic_enum::enum_name(ActualKeyCode).data());
 		break;
 	}
 	case WM_GETMINMAXINFO:
-		break;
-	case WM_CHAR:
-		break;
-	case WM_INPUT:
+	{
+		::LPMINMAXINFO MinMaxInfo = reinterpret_cast<::LPMINMAXINFO>(lParam);
+		assert(MinMaxInfo);
+		MinMaxInfo->ptMinTrackSize =
+		{
+			static_cast<long>(m_Window->GetMinWidth()),
+			static_cast<long>(m_Window->GetMinHeight())
+		};
 		break;
 	}
+	case WM_CHAR:
+	{
+		const wchar_t wCharacter = static_cast<wchar_t>(wParam);
+		const auto Character = StringUtils::ToMultiByte(&wCharacter);
+		DispatchKeyCharMessage(Character[0]);
+		break;
+	}
+	case WM_INPUT:
+		break;
+	default:
+		return ::DefWindowProcW(hWnd, Msg, wParam, lParam);
+	}
 
-    return ::DefWindowProcA(hWnd, Msg, wParam, lParam);
+	return 0;
 }
 
-EKeyboardKey WindowsApplication::MapKeyCode(int32_t KeyCode, int64_t Mask)
+EKeyboardKey WindowsApplication::MapKeyCode(uint64_t KeyCode, int64_t Mask)
 {
 	EKeyboardKey ActualKeyCode = EKeyboardKey::None;
 
@@ -208,3 +301,5 @@ EKeyboardKey WindowsApplication::MapKeyCode(int32_t KeyCode, int64_t Mask)
 
 	return ActualKeyCode;
 }
+
+#endif

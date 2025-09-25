@@ -12,28 +12,34 @@ public:
 	{
 	}
 
-	inline Vector4(float X, float Y, float Z, float W)
-		: Float4(X, Y, Z, W)
+	template<class T1, class T2, class T3, class T4>
+	inline Vector4(T1 X, T2 Y, T3 Z, T4 W)
+		: Float4(static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Z), static_cast<float>(W))
 	{
 	}
 
-	inline Vector4(float Value)
-		: Float4(Value, Value, Value, Value)
+	template<class T>
+	inline Vector4(T Value)
+		: Float4(static_cast<float>(Value), static_cast<float>(Value), static_cast<float>(Value), static_cast<float>(Value))
 	{
 	}
 
-	inline Vector4(const float* Array)
-		: Float4(Array)
+	template<class T>
+	inline Vector4(const T* Array)
+		: Float4(static_cast<float*>(Array))
+	{
+		static_assert(sizeof(T) == sizeof(float), "Must match size with float");
+	}
+
+	template<class T1, class T2>
+	inline Vector4(const Vector2& XY, T1 Z = 0, T2 W = 0)
+		: Float4(XY.x, XY.y, static_cast<float>(Z), static_cast<float>(W))
 	{
 	}
 
-	inline Vector4(const Vector2& XY, float Z = 0.0f, float W = 0.0f)
-		: Float4(XY.x, XY.y, Z, W)
-	{
-	}
-
-	inline Vector4(const Vector3& XYZ, float W = 0.0f)
-		: Float4(XYZ.x, XYZ.y, XYZ.z, W)
+	template<class T>
+	inline Vector4(const Vector3& XYZ, T W = 0)
+		: Float4(XYZ.x, XYZ.y, XYZ.z, static_cast<float>(W))
 	{
 	}
 

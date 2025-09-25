@@ -43,6 +43,18 @@ enum class EAntiAliasingTechnique : uint8_t
 	FXAA, DESCRIPTION("Fast Approximate Anti-Aliasing")
 };
 
+enum class EGBufferDebugMode : uint8_t
+{
+	None,
+	BaseColor,
+	Normal,
+	Roughness,
+	Metalness,
+	Occlusion,
+	Specular,
+	Emissive
+};
+
 enum class ERHIDeviceType : uint8_t
 {
 	Software,
@@ -57,18 +69,6 @@ struct RenderSettings
 {
 	struct DebugDrawSettings
 	{
-		enum class EGBufferDebugMode : uint8_t
-		{
-			None,
-			BaseColor,
-			Normal,
-			Roughness,
-			Metalness,
-			Occlusion,
-			Specular,
-			Emissive
-		};
-
 		bool Wireframe = false;
 		EGBufferDebugMode GBufferDebugMode = EGBufferDebugMode::None;
 
@@ -77,7 +77,7 @@ struct RenderSettings
 		{
 			Ar(
 				CEREAL_NVP(Wireframe),
-				CEREAL_NVP(GBufferDebugMode)
+				CEREAL_NVP_ENUM(EGBufferDebugMode, GBufferDebugMode)
 			);
 		}
 	};
@@ -102,7 +102,7 @@ struct RenderSettings
 				CEREAL_NVP(Blur),
 				CEREAL_NVP(Bloom),
 				CEREAL_NVP(LensFlare),
-				CEREAL_NVP(ToneMappingTechnique)
+				CEREAL_NVP_ENUM(EToneMappingTechnique, ToneMappingTechnique)
 			);
 		}
 	};
@@ -148,11 +148,11 @@ struct RenderSettings
 			CEREAL_NVP(EnableAsyncCommandlistSubmission),
 			CEREAL_NVP(EnableAsyncMeshDrawCommandsBuilding),
 			CEREAL_NVP(InverseDepth),
-			CEREAL_NVP(RenderingPath),
-			CEREAL_NVP(LightingPolicy),
-			CEREAL_NVP(ShadowTechnique),
-			CEREAL_NVP(AntiAliasingTechnique),
-			CEREAL_NVP(DeviceType),
+			CEREAL_NVP_ENUM(ERenderingPath, RenderingPath),
+			CEREAL_NVP_ENUM(ELightingPolicy, LightingPolicy),
+			CEREAL_NVP_ENUM(EShadowTechnique, ShadowTechnique),
+			CEREAL_NVP_ENUM(EAntiAliasingTechnique, AntiAliasingTechnique),
+			CEREAL_NVP_ENUM(ERHIDeviceType, DeviceType),
 			CEREAL_NVP(PostProcessing),
 			CEREAL_NVP(DebugDraw)
 		);

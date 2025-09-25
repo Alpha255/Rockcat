@@ -38,7 +38,7 @@ public:
 		}
 		else
 		{
-			LOG_TRACE("Create serializable asset: \"{}\".", GetPath().generic_string());
+			LOG_TRACE("Create serializable asset: \"{}\".", GetPath().string());
 			Save<Type>(true);
 		}
 		FileStream.close();
@@ -74,7 +74,7 @@ public:
 			}
 			else
 			{
-				LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath.generic_string(), System::GetErrorMessage());
+				LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath.string(), System::GetErrorMessage());
 			}
 			FileStream.close();
 		}

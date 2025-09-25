@@ -28,7 +28,7 @@ struct WindowSettings
 			CEREAL_NVP(Height),
 			CEREAL_NVP(MinWidth),
 			CEREAL_NVP(MinHeight),
-			CEREAL_NVP(Mode),
+			CEREAL_NVP_ENUM(EWindowMode, Mode),
 			CEREAL_NVP(Title)
 		);
 	}

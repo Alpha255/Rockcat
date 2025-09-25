@@ -12,19 +12,23 @@ public:
 	{
 	}
 
-	inline Vector2(float Value)
-		: Float2(Value, Value)
+	template<class T>
+	inline Vector2(T Value)
+		: Float2(static_cast<float>(Value), static_cast<float>(Value))
 	{
 	}
 
-	inline Vector2(float X, float Y)
-		: Float2(X, Y)
+	template<class T1, class T2>
+	inline Vector2(T1 X, T2 Y)
+		: Float2(static_cast<float>(X), static_cast<float>(Y))
 	{
 	}
 
-	inline Vector2(const float* Array)
-		: Float2(Array)
-	{                               
+	template<class T>
+	inline Vector2(const T* Array)
+		: Float2(static_cast<float*>(Array))
+	{                     
+		static_assert(sizeof(T) == sizeof(float), "Must match size with float");
 	}
 
 #if defined(USE_SSE)

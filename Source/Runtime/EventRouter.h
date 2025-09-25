@@ -5,9 +5,9 @@
 
 enum class EMouseButton : uint8_t
 {
-	LButton,
-	RButton,
-	MButton,
+	Left,
+	Right,
+	Middle,
 	None = 0xFF,
 };
 
@@ -126,9 +126,7 @@ struct MouseWheelEvent
 struct KeyEvent
 {
 	EKeyboardKey Key = EKeyboardKey::None;
-	int32_t RawKeyCode = 0;
-	EKeyState KeyState = EKeyState::Up;
-	KeyModifiers Modifiers;
+	uint64_t RawKeyCode = 0;
 };
 
 struct CharEvent
@@ -265,8 +263,8 @@ private:
 class MessageHandler
 {
 public:
-	virtual bool OnKeyUp(const KeyEvent&) { return false; }
-	virtual bool OnKeyDown(const KeyEvent&) { return false; }
+	virtual bool OnKeyUp(const KeyEvent&, const KeyModifiers& Modifiers) { return false; }
+	virtual bool OnKeyDown(const KeyEvent&, const KeyModifiers& Modifiers) { return false; }
 	virtual bool OnKeyChar(const char) { return false; }
 
 	virtual bool OnMouseButtonUp(const EMouseButton) { return false; }
@@ -276,7 +274,7 @@ public:
 	virtual bool OnMouseWheel(const float, const Math::Vector2&) { return false; }
 
 	virtual bool OnWindowResized(uint32_t, uint32_t) { return false; }
-	virtual bool OnWindowActive() { return false; }
-	virtual bool OnWindowInactive() { return false; }
-	virtual bool OnWindowDestroy() { return false; }
+	virtual bool OnAppActive() { return false; }
+	virtual bool OnAppInactive() { return false; }
+	virtual bool OnAppDestroy() { return false; }
 };

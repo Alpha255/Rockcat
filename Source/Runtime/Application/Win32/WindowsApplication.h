@@ -8,11 +8,15 @@
 class WindowsApplication : public BaseApplication
 {
 public:
-	using BaseApplication::BaseApplication;
+	WindowsApplication(const char* SettingsFile);
 protected:
-	static LRESULT CALLBACK MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK AppMessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
-	virtual EKeyboardKey MapKeyCode(int32_t KeyCode, int64_t Mask) override final;
+	LRESULT MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+
+	virtual EKeyboardKey MapKeyCode(uint64_t KeyCode, int64_t Mask) override final;
+
+	static WindowsApplication* s_WindowsApp;
 };
 
 using PlatformApplication = WindowsApplication;

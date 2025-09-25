@@ -9,8 +9,8 @@ class System
 public:
 	static std::string GetErrorMessage(uint32_t ErrorCode = ~0u);
 
-	static std::filesystem::path GetCurrentWorkingDirectory();
-	static void SetCurrentWorkingDirectory(const std::filesystem::path& Directory);
+	static std::filesystem::path GetWorkingDirectory();
+	static void SetWorkingDirectory(const std::filesystem::path& Directory);
 
 	static void Sleep(uint32_t Milliseconds);
 
@@ -23,7 +23,7 @@ public:
 
 	static Guid CreateGUID();
 
-	static Math::Vector2 GetCurrentCursorPosition();
+	static Math::Vector2 GetCursorPosition();
 
 	static size_t GetHardwareConcurrencyThreadsCount(bool UseHyperThreading);
 

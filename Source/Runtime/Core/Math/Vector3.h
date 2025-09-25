@@ -12,23 +12,28 @@ public:
 	{
 	}
 
-	inline Vector3(float X, float Y, float Z)
-		: Float3(X, Y, Z)
+	template<class T1, class T2, class T3>
+	inline Vector3(T1 X, T2 Y, T3 Z)
+		: Float3(static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Z))
 	{
 	}
 
-	inline Vector3(float Value)
-		: Float3(Value, Value, Value)
+	template<class T>
+	inline Vector3(T Value)
+		: Float3(static_cast<float>(Value), static_cast<float>(Value), static_cast<float>(Value))
 	{
 	}
 
-	inline Vector3(const float* Array)
-		: Float3(Array)
+	template<class T>
+	inline Vector3(const T* Array)
+		: Float3(static_cast<float*>(Array))
 	{
+		static_assert(sizeof(T) == sizeof(float), "Must match size with float");
 	}
 
-	inline Vector3(const Vector2& Other, float Z = 0.0f)
-		: Float3(Other.x, Other.y, Z)
+	template<class T>
+	inline Vector3(const Vector2& Other, T Z = 0)
+		: Float3(Other.x, Other.y, static_cast<float>(Z))
 	{
 	}
 
