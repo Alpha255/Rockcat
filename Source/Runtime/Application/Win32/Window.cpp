@@ -12,7 +12,7 @@
 Window::Window(const WindowSettings& Settings)
 	: m_Width(std::max<uint32_t>(Settings.Width, MINIMAL_WINDOW_SIZE))
 	, m_Height(std::max<uint32_t>(Settings.Height, MINIMAL_WINDOW_SIZE))
-	, m_Mode(Settings.Mode)
+	, m_Mode(EWindowMode::Windowed)
 	, m_Handle(nullptr)
 {
 	::RECT Rect
