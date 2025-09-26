@@ -1,10 +1,12 @@
 #include "Applications/RenderTest/RenderTest.h"
+#include "Application/ApplicationManager.h"
 #include "Scene/Scene.h"
 #include "Scene/SceneView.h"
 #include "Rendering/RenderGraph/RenderGraph.h"
 
 void RenderTest::Initialize()
 {
+	return;
 	m_Scene = Scene::Load("RenderTest.scene");
 	m_Scene->AddView<PlanarSceneView>();
 	//m_View = std::make_shared<PlanarView>();
@@ -20,4 +22,4 @@ void RenderTest::Render()
 	//m_RenderGraph->Execute(*m_Scene);
 }
 
-//RUN_APPLICATION(RenderTest, "RenderTest.json")
+REGISTER_APPLICATION(RenderTest);

@@ -7,12 +7,12 @@
 
 #if PLATFORM_WIN32
 
-WindowsApplication* WindowsApplication::s_WindowsApp = nullptr;
+WindowsApplication* WindowsApplication::s_Application = nullptr;
 
 WindowsApplication::WindowsApplication(const char* SettingsFile)
 	: BaseApplication(SettingsFile)
 {
-	s_WindowsApp = this;
+	s_Application = this;
 
 	HINSTANCE HInstance = reinterpret_cast<HINSTANCE>(System::GetApplicationInstance());
 	VERIFY_WITH_SYSTEM_MESSAGE(HInstance);
@@ -32,7 +32,7 @@ WindowsApplication::WindowsApplication(const char* SettingsFile)
 		::LoadCursorW(0, IDC_ARROW),
 		static_cast<HBRUSH>(::GetStockObject(DKGRAY_BRUSH)),
 		nullptr,
-		L"RockcatWindow",
+		WINDOW_CLASS_NAME,
 		HIcon
 	};
 	VERIFY_WITH_SYSTEM_MESSAGE(::RegisterClassExW(&WndClassEx) != 0);
@@ -50,7 +50,7 @@ void WindowsApplication::PumpMessages()
 
 LRESULT WindowsApplication::AppMessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-	return s_WindowsApp->MessageProc(hWnd, Msg, wParam, lParam);
+	return s_Application->MessageProc(hWnd, Msg, wParam, lParam);
 }
 
 LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
@@ -79,7 +79,8 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	case WM_QUIT:
 	case WM_DESTROY:
 		::PostQuitMessage(0);
-		DispatchAppDestroyMessage();
+		DispatchAppQuitMessage();
+		SetStatus(EApplicationStatus::Quit);
 		break;
 	case WM_NCLBUTTONDBLCLK:
 		break;

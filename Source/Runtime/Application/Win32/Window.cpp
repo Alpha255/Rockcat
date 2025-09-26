@@ -28,10 +28,10 @@ Window::Window(const WindowSettings& Settings)
 	VERIFY_WITH_SYSTEM_MESSAGE(HInstance);
 
 	uint32_t ExtraWindowStyle = 0u;
-	::HWND Handle = ::CreateWindowExA(
+	::HWND Handle = ::CreateWindowExW(
 		0,
-		Settings.Title.c_str(),
-		Settings.Title.c_str(),
+		WINDOW_CLASS_NAME,
+		StringUtils::ToWide(Settings.Title).c_str(),
 		WS_OVERLAPPEDWINDOW ^ ExtraWindowStyle,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Application/BaseApplication.h"
+#include "Application/PlatformApplication.h"
 
-class RenderTest final : public BaseApplication
+class RenderTest final : public PlatformApplication
 {
 public:
-	using BaseApplication::BaseApplication;
+	using PlatformApplication::PlatformApplication;
 
 	void Initialize() override final;
 	void Render() override final;

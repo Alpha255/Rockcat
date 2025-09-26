@@ -1,7 +1,7 @@
 #include "RHI/Vulkan/VulkanSwapChain.h"
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
-#include "System.h"
+#include "System/System.h"
 
 VulkanSurface::VulkanSurface(const VulkanDevice& Device, const void* WindowHandle)
 	: VkDeviceResource(Device)

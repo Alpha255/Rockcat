@@ -124,5 +124,5 @@ public:
 	virtual bool OnWindowResized(uint32_t, uint32_t) { return false; }
 	virtual bool OnAppActive() { return false; }
 	virtual bool OnAppInactive() { return false; }
-	virtual bool OnAppDestroy() { return false; }
+	virtual bool OnAppQuit() { return false; }
 };

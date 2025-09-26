@@ -4,6 +4,7 @@
 #include "Core/Cereal.h"
 
 #define MINIMAL_WINDOW_SIZE 32
+#define WINDOW_CLASS_NAME L"RockcatWindowClass"
 
 enum class EWindowMode
 {

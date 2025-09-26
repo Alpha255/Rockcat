@@ -29,7 +29,7 @@ public:
 				AssetType{ "XFile", ".x", AssetType::EContentsType::Text} 
 			})
 	{
-		LOG_INFO("Create Assimp scene importer, assimp version: {}.{}.{}", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionPatch());
+		LOG_INFO("Create Assimp scene importer, assimp version @{}.{}.{}", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionPatch());
 	}
 
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<AssimpSceneAsset>(AssetPath); }

@@ -19,7 +19,7 @@ protected:
 
 	virtual EKeyboardKey MapKeyCode(uint64_t KeyCode, int64_t Mask) override final;
 
-	static WindowsApplication* s_WindowsApp;
+	static WindowsApplication* s_Application;
 };
 
 using PlatformApplication = WindowsApplication;

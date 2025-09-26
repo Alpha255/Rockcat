@@ -23,7 +23,7 @@ public:
 				AssetType{ "High-Dynamic Range", ".hdr" }
 			})
 	{
-		LOG_INFO("Create STB image importer, stb_image version: 2.3");
+		LOG_INFO("Create STB image importer, stb_image @2.3");
 	}
 
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<TextureAsset>(AssetPath); }

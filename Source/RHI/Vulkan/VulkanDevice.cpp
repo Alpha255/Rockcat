@@ -211,7 +211,7 @@ VulkanDevice::VulkanDevice()
 	VERIFY_VK(m_PhysicalDevice.createDevice(&CreateInfo, nullptr, &m_LogicalDevice));
 
 	auto PhysicalDeviceProperties = m_PhysicalDevice.getProperties();
-	LOG_CAT_INFO(LogVulkanRHI, "Created vulkan device on adapter: \"{}\", DeviceID = {}. DeviceType = {}. VulkanAPI Version: {}.{}.{}, Driver Version: {}.{}.{}",
+	LOG_CAT_INFO(LogVulkanRHI, "Created vulkan device on adapter: \"{}\", DeviceID = {}. DeviceType = {}. VulkanAPI @{}.{}.{}, Driver @{}.{}.{}",
 		PhysicalDeviceProperties.deviceName.data(),
 		PhysicalDeviceProperties.deviceID,
 		vk::to_string(PhysicalDeviceProperties.deviceType).c_str(),

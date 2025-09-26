@@ -10,7 +10,7 @@
 
 BaseApplication::BaseApplication(const char* SettingsFile)
 { 
-	m_Settings = ApplicationSettings::Load(SettingsFile ? SettingsFile : "Defalut.json");
+	m_Settings = ApplicationSettings::Load(SettingsFile ? SettingsFile : "DefalutAppSettings.json");
 }
 
 bool BaseApplication::InitializeRHI()
@@ -42,16 +42,6 @@ bool BaseApplication::InitializeRHI()
 	//RHIUploadManager::Create(*m_RenderDevice);
 
 	return true;
-}
-
-bool BaseApplication::IsActive() const
-{
-	return true;
-}
-
-bool BaseApplication::IsRequestQuit() const
-{
-	return false;
 }
 
 void BaseApplication::RenderFrame()
@@ -181,12 +171,12 @@ void BaseApplication::DispatchAppInactiveChangedMessage()
 	});
 }
 
-void BaseApplication::DispatchAppDestroyMessage()
+void BaseApplication::DispatchAppQuitMessage()
 {
 	std::for_each(m_MessageHandlers.begin(), m_MessageHandlers.end(), [](auto Handler) {
 		if (Handler)
 		{
-			Handler->OnAppDestroy();
+			Handler->OnAppQuit();
 		}
 	});
 }
@@ -202,11 +192,6 @@ void BaseApplication::Run()
 	System::SetWorkingDirectory(Paths::AssetPath());
 	LOG_INFO("Mount working directory to \"{}\".", System::GetWorkingDirectory().string());
 
-	if (!InitializeRHI())
-	{
-		return;
-	}
-
 	TaskFlow::Get().Initialize();
 	AssetDatabase::Get().Initialize();
 	Stats::Get().Initialize();
@@ -215,11 +200,16 @@ void BaseApplication::Run()
 	{
 		m_Window = std::make_unique<Window>(m_Settings->Window);
 		assert(m_Window);
+
+		//if (!InitializeRHI())
+		//{
+		//	return;
+		//}
 	}
 
 	Initialize();
 
-	while (!IsRequestQuit())
+	while (!IsQuit())
 	{
 		const bool Active = IsActive();
 
@@ -254,29 +244,4 @@ void BaseApplication::FinalizeRHI()
 	m_RenderDevice.reset();
 }
 
-BaseApplication::~BaseApplication() = default;
-
-#if PLATFORM_WIN32
-int32_t WINAPI WinMain(_In_ HINSTANCE /*hInstance*/, _In_opt_ HINSTANCE /*hPrevInstance*/, _In_ LPSTR /*Commandline*/, _In_ int32_t /*ShowCmd*/)
-{
-	//extern RunApplication g_RunApplication;
-
-	//if (g_RunApplication.CreateApplication)
-	//{
-	//	auto Application = g_RunApplication.CreateApplication();
-	//	assert(Application);
-	//	Application->Run();
-	//	delete Application;
-	//	return 0;
-	//}
-	//else
-	//{
-	//	LOG_CRITICAL("Failed to create application!");
-	//	return -1;
-	//}
-
-	return 0;
-}
-#else
-	#error "Unknown platform"
-#endif
+BaseApplication::~BaseApplication() = default; // Fix compile error C2027 (unique_ptr)

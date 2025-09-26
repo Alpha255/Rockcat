@@ -63,7 +63,7 @@ void TaskFlow::Initialize()
 		m_Executors[static_cast<size_t>(EThread::WorkerThread)].reset(new tf::Executor(m_NumWorkerThreads));
 	}
 
-	LOG_INFO("TaskFlow: Create taskflow executors with {} threads, {} seperate threads, {} worker threads, hyper threading is {}, taskflow version: {}",
+	LOG_INFO("TaskFlow: Create taskflow executors with {} threads, {} seperate threads, {} worker threads, hyper threading is {}, taskflow @{}",
 		NumTotalThreads,
 		m_NumSeperateThreads,
 		m_NumWorkerThreads,
@@ -133,7 +133,10 @@ void TaskFlow::Finalize()
 {
 	for (auto& Executor : m_Executors)
 	{
-		Executor->wait_for_all();
-		Executor.reset();
+		if (Executor)
+		{
+			Executor->wait_for_all();
+			Executor.reset();
+		}
 	}
 }

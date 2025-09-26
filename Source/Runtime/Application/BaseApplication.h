@@ -20,9 +20,18 @@ public:
 	
 	virtual void PumpMessages() {}
 
-	virtual bool IsActive() const;
-	virtual bool IsRequestQuit() const;
+	inline bool IsActive() const { return m_Status == EApplicationStatus::Active; }
+	inline bool IsQuit() const { return m_Status == EApplicationStatus::Quit; }
 protected:
+	enum class EApplicationStatus
+	{
+		Active,
+		Inactive,
+		Quit
+	};
+
+	inline void SetStatus(EApplicationStatus Status) { m_Status = Status; }
+
 	bool InitializeRHI();
 	void FinalizeRHI();
 
@@ -44,7 +53,7 @@ protected:
 	void DispatchWindowResizedMessage(uint32_t Width, uint32_t Height);
 	void DispatchAppActiveChangedMessage();
 	void DispatchAppInactiveChangedMessage();
-	void DispatchAppDestroyMessage();
+	void DispatchAppQuitMessage();
 
 	std::shared_ptr<struct ApplicationSettings> m_Settings;
 
@@ -53,4 +62,6 @@ protected:
 
 	KeyModifiers m_KeyModifiers;
 	std::vector<class MessageHandler*> m_MessageHandlers;
+
+	EApplicationStatus m_Status = EApplicationStatus::Active;
 };

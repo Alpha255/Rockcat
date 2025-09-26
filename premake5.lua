@@ -90,12 +90,15 @@ workspace "Rockcat"
 					"./Source/RHI/Vulkan/Documents/**"
 				}
 				includedirs {
-					"$(SolutionDir)",
-					"$(SolutionDir)Source",
-					"$(SolutionDir)Source/Runtime",
-					"$(SolutionDir)Submodules/cereal/include",
-					"$(SolutionDir)Submodules/spdlog/include",
-					"$(VK_SDK_PATH)/Include",
+				"$(SolutionDir)",
+				"$(SolutionDir)Source",
+				"$(SolutionDir)Source/Runtime",
+				"$(SolutionDir)Submodules",
+				"$(SolutionDir)Submodules/taskflow",
+				"$(SolutionDir)Submodules/cereal/include",
+				"$(SolutionDir)Submodules/spdlog/include",
+				"$(SolutionDir)Submodules/magic_enum/include",
+				"$(VK_SDK_PATH)/Include",
 				}
 				vpaths {
 					["Configs"] = {

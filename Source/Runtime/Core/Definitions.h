@@ -158,7 +158,7 @@ struct EnumSerializer
 		} \
 	}
 
-#define CEREAL_NVP_ENUM(EnumType, Value) ::cereal::make_nvp("EnumSerializer_" #EnumType, EnumSerializer<EnumType>(#Value, Value))
+#define CEREAL_NVP_ENUM(EnumType, Value) ::cereal::make_nvp(#EnumType, EnumSerializer<EnumType>(#Value, Value))
 
 #define ENUM_FLAG_OPERATORS(Enum) \
 	inline constexpr Enum    operator|(Enum Left, Enum Right) { return static_cast<Enum>(static_cast<std::underlying_type_t<Enum>>(Left) | static_cast<std::underlying_type_t<Enum>>(Right)); } \
