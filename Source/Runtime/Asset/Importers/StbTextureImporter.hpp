@@ -39,7 +39,7 @@ public:
 
 		if (!stbi_info_from_memory(Data, DataSize, &Width, &Height, &OriginalChannels))
 		{
-			LOG_CAT_ERROR(LogImageImporter, "Couldn't parse image header, image path: {}, fail reason: {}", StbImage.GetPath().generic_string(), stbi_failure_reason());
+			LOG_CAT_ERROR(LogImageImporter, "Couldn't parse image header, image path: {}, fail reason: {}", StbImage.GetPath().string(), stbi_failure_reason());
 			return false;
 		}
 
@@ -61,7 +61,7 @@ public:
 
 		if (!Bitmap)
 		{
-			LOG_CAT_ERROR(LogImageImporter, "Failed to load image: {}, fail reason: {}", StbImage.GetPath().generic_string(), stbi_failure_reason());
+			LOG_CAT_ERROR(LogImageImporter, "Failed to load image: {}, fail reason: {}", StbImage.GetPath().string(), stbi_failure_reason());
 			return false;
 		}
 

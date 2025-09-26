@@ -19,20 +19,6 @@ const Color Color::Purple(0.6f, 0.2f, 0.8f, 1.0f);
 
 const float Color::Scaler = 1.0f / 255.0f;
 
-Color::Color(uint32_t RGBA)
-	: Vector4(
-			static_cast<float>((RGBA >> 0) * 0xFF) * Scaler,
-			static_cast<float>((RGBA >> 8) * 0xFF) * Scaler,
-			static_cast<float>((RGBA >> 16) * 0xFF) * Scaler,
-			static_cast<float>((RGBA >> 24) * 0xFF) * Scaler)
-{
-}
-
-Color::Color(uint8_t R, uint8_t G, uint8_t B, uint8_t A)
-	: Vector4(R * Scaler, G * Scaler, B * Scaler, A * Scaler)
-{
-}
-
 Color Color::Random()
 {
 	static std::default_random_engine RandomEngine((uint32_t)std::time(nullptr));

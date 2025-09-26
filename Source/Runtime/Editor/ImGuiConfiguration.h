@@ -9,23 +9,25 @@ struct ImGuiFontConfigs : public ImFontConfig
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_NVP(FontNo),
-			CEREAL_NVP(SizePixels),
+			CEREAL_NVP(Name),
+			CEREAL_NVP(FontDataSize),
+			CEREAL_NVP(FontDataOwnedByAtlas),
+			CEREAL_NVP(MergeMode),
+			CEREAL_NVP(PixelSnapH),
+			CEREAL_NVP(PixelSnapV),
 			CEREAL_NVP(OversampleH),
 			CEREAL_NVP(OversampleV),
-			CEREAL_NVP(PixelSnapH),
-			CEREAL_NVP(GlyphExtraAdvanceX),
+			CEREAL_NVP(EllipsisChar),
+			CEREAL_NVP(SizePixels),
 			CEREAL_NVP(GlyphOffset),
 			CEREAL_NVP(GlyphMinAdvanceX),
 			CEREAL_NVP(GlyphMaxAdvanceX),
-			CEREAL_NVP(MergeMode),
-			CEREAL_NVP(FontBuilderFlags),
+			CEREAL_NVP(GlyphExtraAdvanceX),
+			CEREAL_NVP(FontNo),
+			CEREAL_NVP(FontLoaderFlags),
 			CEREAL_NVP(RasterizerMultiply),
 			CEREAL_NVP(RasterizerDensity),
-			CEREAL_NVP(EllipsisChar),
-			CEREAL_NVP(Name),
-			CEREAL_NVP(MergeIconFont),
-			CEREAL_NVP(FontSize),
+			CEREAL_NVP(Flags),
 			CEREAL_NVP(GlyphRangesPayload)
 		);
 

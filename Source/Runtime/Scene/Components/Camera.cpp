@@ -1,5 +1,5 @@
 #include "Scene/Components/Camera.h"
-#include "System.h"
+#include "System/System.h"
 
 void Camera::SetLookAt(const Math::Vector3& Eye, const Math::Vector3& LookAt)
 {
@@ -26,50 +26,50 @@ void Camera::SetLookAt(const Math::Vector3& Eye, const Math::Vector3& LookAt)
 	}
 }
 
-void Camera::OnKeyEvent(const KeyEvent& Event)
-{
-	if (Event.KeyState == EKeyState::Down)
-	{
-		switch (Event.Key)
-		{
-		case EKeyboardKey::A:
-		case EKeyboardKey::Left:
-			m_KeyboardMovements.Delta.x += 1.0f;  /// Strafe Left
-			break;
-		case EKeyboardKey::D:
-		case EKeyboardKey::Right:
-			m_KeyboardMovements.Delta.x -= 1.0f;  /// Strafe Right
-			break;
-		case EKeyboardKey::W:
-		case EKeyboardKey::Up:
-			m_KeyboardMovements.Delta.z += 1.0f;  /// Move Forward
-			break;
-		case EKeyboardKey::S:
-		case EKeyboardKey::Down:
-			m_KeyboardMovements.Delta.z -= 1.0f;  /// Move Backward
-			break;
-		case EKeyboardKey::Q:
-			m_KeyboardMovements.Delta.y += 1.0f;  /// Move Up
-			break;
-		case EKeyboardKey::E:
-			m_KeyboardMovements.Delta.y -= 1.0f;  /// Move Down
-			break;
-		case EKeyboardKey::Home:
-			Reset();
-			break;
-		}
-	}
-	else
-	{
-		m_KeyboardMovements.Delta = Math::Vector3();
-	}
-}
+//void Camera::OnKeyEvent(const KeyEvent& Event)
+//{
+//	if (Event.KeyState == EKeyState::Down)
+//	{
+//		switch (Event.Key)
+//		{
+//		case EKeyboardKey::A:
+//		case EKeyboardKey::Left:
+//			m_KeyboardMovements.Delta.x += 1.0f;  /// Strafe Left
+//			break;
+//		case EKeyboardKey::D:
+//		case EKeyboardKey::Right:
+//			m_KeyboardMovements.Delta.x -= 1.0f;  /// Strafe Right
+//			break;
+//		case EKeyboardKey::W:
+//		case EKeyboardKey::Up:
+//			m_KeyboardMovements.Delta.z += 1.0f;  /// Move Forward
+//			break;
+//		case EKeyboardKey::S:
+//		case EKeyboardKey::Down:
+//			m_KeyboardMovements.Delta.z -= 1.0f;  /// Move Backward
+//			break;
+//		case EKeyboardKey::Q:
+//			m_KeyboardMovements.Delta.y += 1.0f;  /// Move Up
+//			break;
+//		case EKeyboardKey::E:
+//			m_KeyboardMovements.Delta.y -= 1.0f;  /// Move Down
+//			break;
+//		case EKeyboardKey::Home:
+//			Reset();
+//			break;
+//		}
+//	}
+//	else
+//	{
+//		m_KeyboardMovements.Delta = Math::Vector3();
+//	}
+//}
 
 void Camera::UpdateMouseDelta()
 {
-	if (m_MouseMovements.IsButtonDown(EMouseButton::LButton))
+	if (m_MouseMovements.IsButtonDown(EMouseButton::Left))
 	{
-		Math::Vector2 CursorPos = System::GetCurrentCursorPosition();
+		Math::Vector2 CursorPos = System::GetCursorPosition();
 
 		auto Delta = CursorPos - m_MouseMovements.LastPos;
 		m_MouseMovements.LastPos = CursorPos;
@@ -146,13 +146,13 @@ Math::Vector3 Camera::ScaleToScreenPosition(float X, float Y)
 //	}
 //}
 
-void Camera::OnWindowResized(uint32_t Width, uint32_t Height)
-{
-	SetPerspective(m_Fov, static_cast<float>(Width) / Height, m_NearPlane, m_FarPlane);
-
-	m_Center.x = Width / 2.0f;
-	m_Center.y = Height / 2.0f;
-}
+//void Camera::OnWindowResized(uint32_t Width, uint32_t Height)
+//{
+//	SetPerspective(m_Fov, static_cast<float>(Width) / Height, m_NearPlane, m_FarPlane);
+//
+//	m_Center.x = Width / 2.0f;
+//	m_Center.y = Height / 2.0f;
+//}
 
 void Camera::Tick(float ElapsedSeconds)
 {
@@ -185,7 +185,7 @@ void Camera::Tick(float ElapsedSeconds)
 
 	if (m_Mode == EMode::FirstPerson)
 	{
-		if (m_MouseMovements.IsButtonDown(EMouseButton::LButton))
+		if (m_MouseMovements.IsButtonDown(EMouseButton::Left))
 		{
 			m_Yaw += m_RotVelocity.x;
 			m_Pitch += m_RotVelocity.y;

@@ -75,7 +75,7 @@ public:
 			}
 		}
 
-		LOG_CAT_ERROR(LogAssimpImporter, "Failed to load assimp scene: {}: \"{}\"", AssimpScene.GetName().generic_string(), AssimpImporter.GetErrorString());
+		LOG_CAT_ERROR(LogAssimpImporter, "Failed to load assimp scene: {}: \"{}\"", AssimpScene.GetName(), AssimpImporter.GetErrorString());
 		return false;
 	}
 
@@ -92,13 +92,13 @@ private:
 		{
 			if (Percentage >= 1.0f)
 			{
-				LOG_CAT_DEBUG(LogAssimpImporter, "Loading assimp scene \"{}\" completed", m_AssetPath.generic_string());
+				LOG_CAT_DEBUG(LogAssimpImporter, "Loading assimp scene \"{}\" completed", m_AssetPath.string());
 				return true;
 			}
 
 			if (static_cast<int32_t>(Percentage * 100) % 10 == 0)
 			{
-				LOG_CAT_DEBUG(LogAssimpImporter, "Loading assimp scene: \"{}\" in progress {:.2f}%", m_AssetPath.generic_string(), Percentage * 100);
+				LOG_CAT_DEBUG(LogAssimpImporter, "Loading assimp scene: \"{}\" in progress {:.2f}%", m_AssetPath.string(), Percentage * 100);
 			}
 			return false;
 		}

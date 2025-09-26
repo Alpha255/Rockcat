@@ -28,7 +28,5 @@ public:
 	static size_t GetHardwareConcurrencyThreadsCount(bool UseHyperThreading);
 
 	static void SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priority);
-
-	static void PumpMessages();
 };
 

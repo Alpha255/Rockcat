@@ -119,10 +119,10 @@ void RenderScene::RemoveInvalidCommands()
 
 void RenderScene::WaitCommandsBuilding()
 {
-	if (m_CommandsEvent)
-	{
-		m_CommandsEvent->Wait();
-	}
+	//if (m_CommandsEvent)
+	//{
+	//	m_CommandsEvent->Wait();
+	//}
 }
 
 void RenderScene::BuildMeshDrawCommands(const ISceneView& SceneView)

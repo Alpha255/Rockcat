@@ -3,9 +3,6 @@
 #include "Core/Cereal.h"
 #include "Asset/Asset.h"
 #include "Services/SpdLogService.h"
-#include "System.h"
-
-///#define SERIALIZABLE_MEMORY_BLOCK_SIZE 128u
 
 template<class T>
 class SerializableAsset : public Asset
@@ -74,7 +71,7 @@ public:
 			}
 			else
 			{
-				LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath.string(), System::GetErrorMessage());
+				LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath.string());
 			}
 			FileStream.close();
 		}

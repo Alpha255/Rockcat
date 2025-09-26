@@ -9,9 +9,21 @@ class Color : public Vector4
 public:
 	using Vector4::Vector4;
 
-	Color(uint32_t RGBA);
+	template<uint32_t>
+	Color(uint32_t RGBA)
+		: Vector4(
+			(RGBA >> 0) * 0xFF * Scaler,
+			(RGBA >> 8) * 0xFF * Scaler,
+			(RGBA >> 16) * 0xFF * Scaler,
+			(RGBA >> 24) * 0xFF * Scaler)
+	{
+	}
 
-	Color(uint8_t R, uint8_t G, uint8_t B, uint8_t A = 255u);
+	template<uint8_t, uint8_t, uint8_t, uint8_t>
+	Color(uint8_t R, uint8_t G, uint8_t B, uint8_t A)
+		: Vector4(R * Scaler, G * Scaler, B * Scaler, A * Scaler)
+	{
+	}
 
 	float R() const { return x; }
 	float G() const { return y; }

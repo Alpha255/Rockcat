@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Tickable.h"
-#include "EventRouter.h"
+#include "System/MessageHandler.h"
 
 class BaseApplication : public NoneCopyable
 {
@@ -18,7 +18,7 @@ public:
 
 	virtual void Run();
 	
-	virtual void PumpMessages();
+	virtual void PumpMessages() {}
 
 	virtual bool IsActive() const;
 	virtual bool IsRequestQuit() const;
@@ -54,21 +54,3 @@ protected:
 	KeyModifiers m_KeyModifiers;
 	std::vector<class MessageHandler*> m_MessageHandlers;
 };
-
-struct RunApplication
-{
-	using CreateAppFunc = std::function<BaseApplication*(void)>;
-
-	CreateAppFunc CreateApplication;
-
-	RunApplication(CreateAppFunc&& Func)
-		: CreateApplication(std::move(Func))
-	{
-	}
-};
-
-#define RUN_APPLICATION(Application, SettingsFile) RunApplication g_RunApplication([](){ return new Application(SettingsFile); });
-
-#define REGISTER_APPLICATION(ApplicationClass, SettingsFile)
-
-#define REGISTER_AND_RUN_APPLICATION(ApplicationClass, SettingsFile)

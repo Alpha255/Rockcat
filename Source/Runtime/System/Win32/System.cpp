@@ -1,4 +1,4 @@
-#include "System.h"
+#include "System/System.h"
 #include "Services/SpdLogService.h"
 
 #if PLATFORM_WIN32
@@ -7,11 +7,9 @@
 #include <windowsx.h>
 #include <shlobj.h>
 
-#define FILE_PATH_LENGTH_MAX UINT16_MAX
-
 std::string System::GetErrorMessage(uint32_t ErrorCode)
 {
-	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
+	static wchar_t s_Buffer[UINT16_MAX];
 	memset(s_Buffer, 0, sizeof(s_Buffer));
 
 	VERIFY(::FormatMessageW(
@@ -20,7 +18,7 @@ std::string System::GetErrorMessage(uint32_t ErrorCode)
 		ErrorCode == ~0u ? ::GetLastError() : ErrorCode,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		s_Buffer,
-		FILE_PATH_LENGTH_MAX,
+		UINT16_MAX,
 		nullptr) != 0);
 
 	return StringUtils::ToMultiByte(s_Buffer);
@@ -28,7 +26,7 @@ std::string System::GetErrorMessage(uint32_t ErrorCode)
 
 std::filesystem::path System::GetApplicationDirectory()
 {
-	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
+	static wchar_t s_Buffer[UINT16_MAX];
 	memset(s_Buffer, 0, sizeof(s_Buffer));
 
 	VERIFY_WITH_SYSTEM_MESSAGE(::GetModuleFileNameW(nullptr, s_Buffer, sizeof(s_Buffer)) != 0);
@@ -37,7 +35,7 @@ std::filesystem::path System::GetApplicationDirectory()
 
 std::filesystem::path System::GetWorkingDirectory()
 {
-	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
+	static wchar_t s_Buffer[UINT16_MAX];
 	memset(s_Buffer, 0, sizeof(s_Buffer));
 
 	VERIFY_WITH_SYSTEM_MESSAGE(::GetCurrentDirectoryW(sizeof(s_Buffer), s_Buffer) != 0);
@@ -77,7 +75,7 @@ void System::ExecuteProcess(const char* Commandline, bool WaitDone)
 	StartupInfo.hStdInput = Read;
 	StartupInfo.hStdOutput = Write;
 
-	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
+	static wchar_t s_Buffer[UINT16_MAX];
 	memset(s_Buffer, 0, sizeof(s_Buffer));
 
 	std::wstring wComandline = StringUtils::ToWide(Commandline);
@@ -129,7 +127,7 @@ void System::ExecuteProcess(const char* Commandline, bool WaitDone)
 
 std::string System::GetEnvironmentVariables(const char* Variable)
 {
-	static wchar_t s_Buffer[FILE_PATH_LENGTH_MAX];
+	static wchar_t s_Buffer[UINT16_MAX];
 	memset(s_Buffer, 0, sizeof(s_Buffer));
 
 	std::wstring wVariable = StringUtils::ToWide(Variable);
@@ -237,16 +235,6 @@ void System::SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priorit
 	VERIFY_WITH_SYSTEM_MESSAGE(::SetThreadPriority(ThreadHandle, ThreadPriority) != 0);
 
 	LOG_INFO("Set priority of thread {} to {}", DwordThreadID, s_ThreadPriorityNames[(size_t)Priority]);
-}
-
-void System::PumpMessages()
-{
-	::MSG Message;
-	if (::PeekMessageW(&Message, nullptr, 0u, 0u, PM_REMOVE))
-	{
-		::TranslateMessage(&Message);
-		::DispatchMessageW(&Message);
-	}
 }
 
 #endif // PLATFORM_WIN32

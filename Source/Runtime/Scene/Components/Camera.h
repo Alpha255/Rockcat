@@ -2,9 +2,9 @@
 
 #include "Core/Math/Matrix.h"
 #include "Core/Tickable.h"
-#include "EventRouter.h"
+#include "System/MessageHandler.h"
 
-class Camera : public EventHandler, public ITickable
+class Camera : public MessageHandler, public ITickable
 {
 public:
 	enum class EMode : uint8_t
@@ -80,9 +80,9 @@ public:
 
 	//void OnMouseEvent(const MouseEvent& Mouse) override;
 
-	void OnKeyEvent(const KeyEvent& Keyboard) override;
+	//void OnKeyEvent(const KeyEvent& Keyboard) override;
 
-	void OnWindowResized(uint32_t Width, uint32_t Height) override;
+	//void OnWindowResized(uint32_t Width, uint32_t Height) override;
 
 	void Tick(float ElapsedSeconds) override final;
 

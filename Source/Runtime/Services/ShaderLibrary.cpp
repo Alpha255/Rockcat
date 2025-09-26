@@ -16,7 +16,7 @@ const RHIShader* ShaderLibrary::ShaderPermutation::GetOrCreateRHI(RHIDevice& Dev
 		RHIShaderDesc Desc;
 		Desc.SetStage(Binary->GetStage())
 			.SetShaderBinary(Binary.get())
-			.SetName(Binary->GetName().string());
+			.SetName(Binary->GetName());
 		Module = Device.CreateShader(Desc);
 	}
 

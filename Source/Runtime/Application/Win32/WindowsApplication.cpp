@@ -2,7 +2,7 @@
 #include "Application/Win32/Resource.h"
 #include "Application/ApplicationSettings.h"
 #include "Services/SpdLogService.h"
-#include "System.h"
+#include "System/System.h"
 #include <windowsx.h>
 
 #if PLATFORM_WIN32
@@ -15,7 +15,7 @@ WindowsApplication::WindowsApplication(const char* SettingsFile)
 	s_WindowsApp = this;
 
 	HINSTANCE HInstance = reinterpret_cast<HINSTANCE>(System::GetApplicationInstance());
-	assert(HInstance);
+	VERIFY_WITH_SYSTEM_MESSAGE(HInstance);
 
 	HICON HIcon = ::LoadIconW(HInstance, MAKEINTRESOURCEW(ICON_NVIDIA));
 	VERIFY_WITH_SYSTEM_MESSAGE(HIcon);
@@ -36,6 +36,16 @@ WindowsApplication::WindowsApplication(const char* SettingsFile)
 		HIcon
 	};
 	VERIFY_WITH_SYSTEM_MESSAGE(::RegisterClassExW(&WndClassEx) != 0);
+}
+
+void WindowsApplication::PumpMessages()
+{
+	MSG Message;
+	if (::PeekMessageW(&Message, nullptr, 0u, 0u, PM_REMOVE))
+	{
+		::TranslateMessage(&Message);
+		::DispatchMessageW(&Message);
+	}
 }
 
 LRESULT WindowsApplication::AppMessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
@@ -133,8 +143,8 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 		assert(MinMaxInfo);
 		MinMaxInfo->ptMinTrackSize =
 		{
-			static_cast<long>(m_Window->GetMinWidth()),
-			static_cast<long>(m_Window->GetMinHeight())
+			MINIMAL_WINDOW_SIZE,
+			MINIMAL_WINDOW_SIZE
 		};
 		break;
 	}

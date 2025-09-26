@@ -1,15 +1,12 @@
 #include "Application/BaseApplication.h"
 #include "Application/ApplicationSettings.h"
-#include "RHI/RHISwapchain.h"
-#include "RHI/RHIUploadManager.h"
+#include "Application/Window.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "Services/ShaderLibrary.h"
 #include "Services/TaskFlowService.h"
 #include "Services/AssetDatabase.h"
 #include "Profile/CpuTimer.h"
 #include "Profile/Stats.h"
-#include "Window.h"
-#include "System.h"
+#include "System/System.h"
 
 BaseApplication::BaseApplication(const char* SettingsFile)
 { 
@@ -41,25 +38,20 @@ bool BaseApplication::InitializeRHI()
 		return false;
 	}
 
-	ShaderLibrary::Create(*m_RenderDevice);
-	RHIUploadManager::Create(*m_RenderDevice);
+	//ShaderLibrary::Create(*m_RenderDevice);
+	//RHIUploadManager::Create(*m_RenderDevice);
 
 	return true;
 }
 
-void BaseApplication::PumpMessages()
-{
-	System::PumpMessages();
-}
-
 bool BaseApplication::IsActive() const
 {
-	return m_Window ? m_Window->IsActive() : true;
+	return true;
 }
 
 bool BaseApplication::IsRequestQuit() const
 {
-	return m_Window ? m_Window->IsDestroyed() : false;
+	return false;
 }
 
 void BaseApplication::RenderFrame()
@@ -256,8 +248,8 @@ void BaseApplication::Run()
 
 void BaseApplication::FinalizeRHI()
 {
-	ShaderLibrary::Destroy();
-	RHIUploadManager::Destroy();
+	//ShaderLibrary::Destroy();
+	//RHIUploadManager::Destroy();
 
 	m_RenderDevice.reset();
 }
@@ -267,21 +259,23 @@ BaseApplication::~BaseApplication() = default;
 #if PLATFORM_WIN32
 int32_t WINAPI WinMain(_In_ HINSTANCE /*hInstance*/, _In_opt_ HINSTANCE /*hPrevInstance*/, _In_ LPSTR /*Commandline*/, _In_ int32_t /*ShowCmd*/)
 {
-	extern RunApplication g_RunApplication;
+	//extern RunApplication g_RunApplication;
 
-	if (g_RunApplication.CreateApplication)
-	{
-		auto Application = g_RunApplication.CreateApplication();
-		assert(Application);
-		Application->Run();
-		delete Application;
-		return 0;
-	}
-	else
-	{
-		LOG_CRITICAL("Failed to create application!");
-		return -1;
-	}
+	//if (g_RunApplication.CreateApplication)
+	//{
+	//	auto Application = g_RunApplication.CreateApplication();
+	//	assert(Application);
+	//	Application->Run();
+	//	delete Application;
+	//	return 0;
+	//}
+	//else
+	//{
+	//	LOG_CRITICAL("Failed to create application!");
+	//	return -1;
+	//}
+
+	return 0;
 }
 #else
 	#error "Unknown platform"

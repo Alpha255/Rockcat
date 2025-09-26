@@ -100,7 +100,7 @@ private:
 	std::vector<std::unordered_map<MaterialID, uint32_t>> m_MeshBatch;
 
 	std::mutex m_CommandsLock;
-	TaskEventPtr m_CommandsEvent;
+	//TaskEventPtr m_CommandsEvent;
 	bool m_AsyncMeshDrawCommandsBuilding;
 
 	static Array<std::unique_ptr<struct MeshDrawCommandBuilder>, EGeometryPass> s_Builders;

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Asset/TextureAsset.h"
-#include "RHI/RHIDevice.h"
+#include <Asset/DDS.h>
 #include <dxgiformat.h>
-#include <External/DDS.h>
+#include "RHI/RHIDevice.h"
 
 class DDSImageImporter : public IAssetImporter
 {

@@ -2,7 +2,6 @@
 #include "Scene/Scene.h"
 #include "Scene/SceneView.h"
 #include "Rendering/RenderGraph/RenderGraph.h"
-#include "Window.h"
 
 void RenderTest::Initialize()
 {
@@ -21,4 +20,4 @@ void RenderTest::Render()
 	//m_RenderGraph->Execute(*m_Scene);
 }
 
-RUN_APPLICATION(RenderTest, "RenderTest.json")
+//RUN_APPLICATION(RenderTest, "RenderTest.json")
