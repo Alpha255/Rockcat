@@ -3,35 +3,35 @@
 
 thread_local EThread t_ThreadTag = EThread::WorkerThread;
 
-void ITask::InitializeThreadTags()
+void TaskFlowTask::InitializeThreadTags()
 {
 	t_ThreadTag = EThread::MainThread;
 
 	tf::Async_WaitDone([]() {
 		t_ThreadTag = EThread::GameThread;
-		}, EThread::GameThread);
+	}, EThread::GameThread);
 
 	tf::Async_WaitDone([]() {
 		t_ThreadTag = EThread::RenderThread;
-		}, EThread::RenderThread);
+	}, EThread::RenderThread);
 }
 
-bool ITask::IsInMainThread()
+bool Task::IsMainThread()
 {
 	return t_ThreadTag == EThread::MainThread;
 }
 
-bool ITask::IsInGameThread()
+bool Task::IsGameThread()
 {
 	return t_ThreadTag == EThread::GameThread;
 }
 
-bool ITask::IsInRenderThread()
+bool Task::IsRenderThread()
 {
 	return t_ThreadTag == EThread::RenderThread;
 }
 
-bool ITask::IsInWorkerThread()
+bool Task::IsWorkerThread()
 {
 	return t_ThreadTag == EThread::WorkerThread;
 }

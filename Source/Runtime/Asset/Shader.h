@@ -58,7 +58,7 @@ private:
 
 using ShaderBlob = DataBlock;
 
-class ShaderBinary : public SerializableAsset<ShaderBinary>
+class ShaderBinary : public Serializable<ShaderBinary>
 {
 public:
 	using BaseClass::BaseClass;

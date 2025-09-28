@@ -111,7 +111,7 @@ struct VulkanDescriptorLimits
 	}
 };
 
-struct VulkanDevelopSettings : public SerializableAsset<VulkanDevelopSettings>
+struct VulkanDevelopSettings : public Serializable<VulkanDevelopSettings>
 {
 	using BaseClass::BaseClass;
 

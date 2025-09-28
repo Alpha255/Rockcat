@@ -3,7 +3,7 @@
 #include "Editor/ImGuiExtensions.h"
 #include "Asset/SerializableAsset.h"
 
-struct ImGuiTheme : public ImGuiStyle, public SerializableAsset<ImGuiTheme>
+struct ImGuiTheme : public ImGuiStyle, public Serializable<ImGuiTheme>
 {
     using BaseClass::BaseClass;
 

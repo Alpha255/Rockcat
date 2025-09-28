@@ -7,7 +7,7 @@
 #include "Scene/Components/StaticMesh.h"
 #include "Paths.h"
 
-struct AssimpSceneAsset : public Asset
+struct AssimpScene : public Asset
 {
 	using Asset::Asset;
 

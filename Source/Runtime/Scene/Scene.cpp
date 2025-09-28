@@ -51,7 +51,7 @@ void Scene::MergeWithAssimpScene(const AssimpSceneAsset& AssimpScene)
 	}
 }
 
-void Scene::PostLoad()
+void Scene::OnPostLoad()
 {
 	std::vector<const AssimpSceneAsset*> AssimpScenes;
 

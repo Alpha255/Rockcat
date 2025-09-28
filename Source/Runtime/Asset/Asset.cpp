@@ -1,16 +1,23 @@
 #include "Asset/Asset.h"
-#include "Core/IO/FileIOStream.h"
+#include "Services/SpdLogService.h"
 
-std::optional<Asset::AssetLoadCallbacks> Asset::s_DefaultLoadCallbacks(std::nullopt);
-
-std::shared_ptr<DataBlock> Asset::LoadData(AssetType::EContentsType ContentsType) const
+std::shared_ptr<DataBlock> Asset::LoadData(AssetType::EContentsFormat ContentsFormat) const
 {
-	auto Block = std::make_shared<DataBlock>(std::filesystem::file_size(m_Path));
+	if (!std::filesystem::exists(GetPath()))
+	{
+		return nullptr;
+	}
 
-	StdFileIOStream FileStream(m_Path, ContentsType == AssetType::EContentsType::Binary ?
-		IO::EOpenMode::Read |
-		IO::EOpenMode::Binary : IO::EOpenMode::Read);
-	VERIFY(FileStream.Read(Block->Size, reinterpret_cast<char*>(Block->Data.get())) <= Block->Size);
+	auto Block = std::make_shared<DataBlock>(std::filesystem::file_size(GetPath()));
+	std::ifstream FileStream(GetPath(), ContentsFormat == AssetType::EContentsFormat::Binary ? std::ios::in | std::ios::binary : std::ios::in);
+	FileStream.read(reinterpret_cast<char*>(Block->Data.get()), Block->Size);
+	FileStream.close();
 
 	return Block;
+}
+
+void Asset::OnLoadFailed(const std::string& ErrorMessage)
+{
+	SetStatus(EStatus::LoadFailed);
+	LOG_CAT_ERROR(LogAsset, "Failed to load \"{}\": {}", GetPath().string(), ErrorMessage);
 }

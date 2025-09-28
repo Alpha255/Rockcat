@@ -5,16 +5,30 @@
 #include "Services/SpdLogService.h"
 
 template<class T>
-class SerializableAsset : public Asset
+class Serializable : public Asset
 {
 public:
 	using Asset::Asset;
-	using BaseClass = SerializableAsset<T>;
+	using BaseClass = Serializable<T>;
 
-	template<class Type = T, class... TArgs>
-	static std::shared_ptr<Type> Load(TArgs&&... Args)
+	template<class Type = T, class... Args>
+	static std::shared_ptr<Type> Load(Args&&... InArgs)
 	{
-		auto NewAsset = std::make_shared<Type>(std::forward<TArgs>(Args)...);
+		static std::shared_ptr<T> s_Asset;
+
+		if (!s_Asset)
+		{
+			s_Asset = std::make_shared<Type>(std::forward<Args>(InArgs)...);
+			s_Asset->Reload<Type>();
+		}
+
+		return s_Asset;
+	}
+
+	template<class Type = T, class... Args>
+	static std::shared_ptr<Type> LoadInstance(Args&&... InArgs)
+	{
+		auto NewAsset = std::make_shared<Type>(std::forward<Args>(InArgs)...);
 		NewAsset->Reload<Type>();
 
 		return NewAsset;
@@ -23,7 +37,7 @@ public:
 	template<class Type = T>
 	void Reload()
 	{
-		PreLoad();
+		OnPreLoad();
 
 		std::ifstream FileStream(GetPath());
 		if (FileStream.is_open())
@@ -38,17 +52,18 @@ public:
 			LOG_TRACE("Create serializable asset: \"{}\".", GetPath().string());
 			Save<Type>(true);
 		}
+
 		FileStream.close();
 
-		PostLoad();
+		OnPostLoad();
 	}
 
 	template<class Type = T>
-	void Save(bool Force = false, const std::filesystem::path& CustomPath = std::filesystem::path())
+	void Save(bool Force = false, const std::filesystem::path& SaveTo = std::filesystem::path())
 	{
 		if (IsDirty() || Force)
 		{
-			std::filesystem::path SavePath = CustomPath.empty() ? GetPath() : CustomPath;
+			const std::filesystem::path& SavePath = SaveTo.empty() ? GetPath() : SaveTo;
 			
 			if (!SavePath.has_extension())
 			{
@@ -73,6 +88,7 @@ public:
 			{
 				LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath.string());
 			}
+
 			FileStream.close();
 		}
 	}
@@ -85,16 +101,6 @@ public:
 		Ar(
 			CEREAL_BASE(Asset)
 		);
-	}
-protected:
-	virtual void PreLoad()
-	{
-		SetStatus(EStatus::Loading);
-	}
-
-	virtual void PostLoad()
-	{
-		SetStatus(EStatus::Ready);
 	}
 };
 

@@ -52,15 +52,15 @@ struct DataBlock
 
 struct AssetType
 {
-	enum class EContentsType
+	enum class EContentsFormat
 	{
-		Text,
+		PlainText,
 		Binary
 	};
 
-	std::string_view Name;
-	std::filesystem::path Extension;
-	EContentsType ContentsType = EContentsType::Binary;
+	std::string_view Description;
+	std::string_view Extension;
+	EContentsFormat ContentsFormat = EContentsFormat::Binary;
 };
 
 class Asset : public File
@@ -74,32 +74,13 @@ public:
 		LoadFailed
 	};
 
-	using AssetLoadCallback = std::function<void(Asset&)>;
-
-	struct AssetLoadCallbacks
-	{
-		AssetLoadCallback PreLoadCallback;
-		AssetLoadCallback ReadyCallback;
-		AssetLoadCallback ReloadCallback;
-		AssetLoadCallback LoadFailedCallback;
-		AssetLoadCallback CanceledCallback;
-		AssetLoadCallback UnloadedCallback;
-	};
-
 	using File::File;
 
-	EStatus GetStatus() const { return m_Status.load(std::memory_order_relaxed); }
-	bool IsReady() const { return GetStatus() == EStatus::Ready; }
+	inline EStatus GetStatus() const { return m_Status.load(std::memory_order_relaxed); }
+	inline bool IsReady() const { return GetStatus() == EStatus::Ready; }
+	inline bool IsOnLoading() const { return GetStatus() == EStatus::Loading; }
 
-	std::shared_ptr<DataBlock> LoadData(AssetType::EContentsType ContentsType) const;
-
-	void SetLoadCallbacks(std::optional<AssetLoadCallbacks>& Callbacks)
-	{ 
-		if (Callbacks)
-		{ 
-			m_LoadCallbacks = std::move(Callbacks.value());
-		} 
-	}
+	std::shared_ptr<DataBlock> LoadData(AssetType::EContentsFormat ContentsFormat) const;
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -108,103 +89,45 @@ public:
 			CEREAL_BASE(File)
 		);
 	}
-
-	static std::optional<AssetLoadCallbacks> s_DefaultLoadCallbacks;
 protected:
-	friend class AssetImportTask;
+	friend class AssetLoadTask;
 
-	void SetStatus(EStatus Status) { m_Status.store(Status, std::memory_order_release); }
+	inline void SetStatus(EStatus Status) { m_Status.store(Status, std::memory_order_release); }
 
-	virtual void OnPreLoad()
-	{
-		SetStatus(EStatus::Loading);
-
-		if (m_LoadCallbacks.PreLoadCallback)
-		{
-			m_LoadCallbacks.PreLoadCallback(*this);
-		}
-	}
-	virtual void OnReady()
-	{
-		SetStatus(EStatus::Ready);
-
-		if (m_LoadCallbacks.ReadyCallback)
-		{
-			m_LoadCallbacks.ReadyCallback(*this);
-		}
-	}
-	virtual void OnLoadFailed()
-	{
-		SetStatus(EStatus::LoadFailed);
-
-		if (m_LoadCallbacks.LoadFailedCallback)
-		{
-			m_LoadCallbacks.LoadFailedCallback(*this);
-		}
-	}
-	virtual void OnLoadCanceled()
-	{
-		SetStatus(EStatus::NotLoaded);
-
-		if (m_LoadCallbacks.CanceledCallback)
-		{
-			m_LoadCallbacks.CanceledCallback(*this);
-		}
-	}
-	virtual void OnUnloaded()
-	{
-		SetStatus(EStatus::NotLoaded);
-
-		if (m_LoadCallbacks.UnloadedCallback)
-		{
-			m_LoadCallbacks.UnloadedCallback(*this);
-		}
-	}
+	virtual void OnPreLoad() { SetStatus(EStatus::Loading); }
+	virtual void OnReady() {}
+	virtual void OnCancel() { SetStatus(EStatus::NotLoaded); }
+	virtual void OnPostLoad() { SetStatus(EStatus::Ready); }
+	virtual void OnUnload() { SetStatus(EStatus::NotLoaded); }
+	virtual void OnReload() {}
+	virtual void OnLoadFailed(const std::string& ErrorMessage);
 
 	std::atomic<EStatus> m_Status = EStatus::NotLoaded;
-
-	AssetLoadCallbacks m_LoadCallbacks;
-
-	std::filesystem::path m_Path; /// Notice the order of the members
-	mutable std::time_t m_LastWriteTime = 0u;
 };
 
-class IAssetImporter
+class AssetLoader
 {
 public:
-	IAssetImporter(std::vector<AssetType>&& ValidAssetTypes)
-		: m_ValidAssetTypes(std::move(ValidAssetTypes))
+	AssetLoader(std::vector<AssetType>&& SupportedAssetTypes)
+		: m_SupportedTypes(std::move(SupportedAssetTypes))
 	{
 	}
 
-	const AssetType* FindValidAssetType(const std::filesystem::path& Path) const
+	inline bool IsSupportedAssetType(const std::filesystem::path& Path) const
 	{
-		auto It = std::find_if(m_ValidAssetTypes.begin(), m_ValidAssetTypes.end(), [&Path](const AssetType& Type) {
+		return TryFindAssetTypeByPath(Path) != nullptr;
+	}
+
+	const AssetType* TryFindAssetTypeByPath(const std::filesystem::path& Path) const
+	{
+		auto It = std::find_if(m_SupportedTypes.cbegin(), m_SupportedTypes.cend(), [&Path](const AssetType& Type) {
 			return Path.extension() == Type.Extension;
-		});
-		return It == m_ValidAssetTypes.cend() ? nullptr : &(*It);
+			});
+		return It == m_SupportedTypes.cend() ? nullptr : &(*It);
 	}
 
-	virtual std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& Path) = 0;
-	virtual bool Reimport(Asset& InAsset, const AssetType& InType) = 0;
+	virtual bool Load(Asset& InAsset, const AssetType& InType) = 0;
 protected:
 private:
-	std::vector<AssetType> m_ValidAssetTypes;
-};
-
-template<class T>
-struct LoadAssetRequest
-{
-	Asset::AssetLoadCallback PreLoadCallback;
-	Asset::AssetLoadCallback ReadyCallback;
-	Asset::AssetLoadCallback ReloadCallback;
-	Asset::AssetLoadCallback LoadFailedCallback;
-	Asset::AssetLoadCallback CanceledCallback;
-	Asset::AssetLoadCallback UnloadedCallback;
-
-	std::shared_ptr<T> Asset;
-
-	std::string Message;
-
-	inline bool IsDone() const { return Asset && Asset->IsReady(); }
+	std::vector<AssetType> m_SupportedTypes;
 };

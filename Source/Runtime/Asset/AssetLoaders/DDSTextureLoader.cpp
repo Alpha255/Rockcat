@@ -1,15 +1,14 @@
-#pragma once
-
+#include "Asset/AssetLoaders/DDSTextureLoader.h"
 #include "Asset/TextureAsset.h"
 #include <Asset/DDS.h>
 #include <dxgiformat.h>
 #include "RHI/RHIDevice.h"
 
-class DDSImageImporter : public IAssetImporter
+class DDSTextureLoader : public AssetLoader
 {
 public:
-	DDSImageImporter()
-		: IAssetImporter({ AssetType{"DirectDraw Surface", ".dds"} })
+	DDSTextureLoader()
+		: AssetLoader({ AssetType{"DirectDraw Surface", ".dds"} })
 	{
 	}
 
@@ -19,7 +18,7 @@ public:
 	{
 		auto& DDSImage = Cast<TextureAsset>(InAsset);
 
-		auto AssetData = DDSImage.LoadData(InType.ContentsType);
+		auto AssetData = DDSImage.LoadData(InType.ContentsFormat);
 		auto const DataSize = static_cast<int32_t>(AssetData->Size);
 		auto Data = reinterpret_cast<const uint8_t*>(AssetData->Data.get());
 

@@ -4,17 +4,12 @@
 #include "Components/ComponentPool.h"
 #include "Core/Tickable.h"
 
-class Scene : public ITickable, public SceneGraph, public SerializableAsset<Scene>
+class Scene : public ITickable, public SceneGraph, public Serializable<Scene>
 {
 public:
-	Scene(std::filesystem::path&& SubPath)
-		: BaseClass(Paths::ScenePath() / SubPath)
-	{
-	}
+	using BaseClass::BaseClass;
 
 	~Scene();
-
-	static const char* GetExtension() { return ".scene"; }
 
 	void Tick(float ElapsedSeconds) override final;
 
@@ -45,7 +40,7 @@ public:
 		);
 	}
 protected:
-	void PostLoad() override;
+	void OnPostLoad() override;
 private:
 	void MergeWithAssimpScene(const AssimpSceneAsset& AssimpScene);
 

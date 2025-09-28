@@ -1,9 +1,9 @@
-#pragma once
-
+#include "Asset/AssetLoaders/AssimpSceneLoader.h"
 #include "Asset/SceneAsset.h"
 #include "Services/AssetDatabase.h"
 #include "Paths.h"
 #include "RHI/RHIDevice.h"
+
 #include <assimp/version.h>
 #include <assimp/Importer.hpp>
 #include <assimp/ProgressHandler.hpp>
@@ -12,29 +12,29 @@
 #include <assimp/postprocess.h>
 #include <assimp/DefaultLogger.hpp>
 
-class AssimpSceneImporter : public IAssetImporter
+AssimpSceneLoader::AssimpSceneLoader()
+	: AssetLoader(
+		{
+			AssetType{"Autodesk 3dsMax", ".3ds"},
+			AssetType{"Blender 3D", ".blend"},
+			AssetType{"OpenCOLLADA", ".dae", AssetType::EContentsFormat::PlainText},
+			AssetType{"Autodesk FBX", ".fbx"},
+			AssetType{"Graphics Language Transmission Format", ".gltf", AssetType::EContentsFormat::PlainText},
+			AssetType{"Wavefront", ".obj", AssetType::EContentsFormat::PlainText},
+			AssetType{"Polygon File Format", ".ply", AssetType::EContentsFormat::PlainText},
+			AssetType{"Stereolithography", ".stl", AssetType::EContentsFormat::PlainText},
+			AssetType{"XFile", ".x", AssetType::EContentsFormat::PlainText}
+		})
+{
+	LOG_INFO("Create Assimp scene loader, assimp version @{}.{}.{}", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionPatch());
+}
+
+class AssimpSceneLoader : public AssetLoader
 {
 public:
-	AssimpSceneImporter()
-		: IAssetImporter(
-			{
-				AssetType{ "Autodesk 3dsMax", ".3ds" },
-				AssetType{ "Blender 3D", ".blend" },
-				AssetType{ "OpenCOLLADA", ".dae", AssetType::EContentsType::Text },
-				AssetType{ "Autodesk FBX", ".fbx"},
-				AssetType{ "Graphics Language Transmission Format", ".gltf", AssetType::EContentsType::Text },
-				AssetType{ "Wavefront", ".obj", AssetType::EContentsType::Text },
-				AssetType{ "Polygon File Format", ".ply", AssetType::EContentsType::Text },
-				AssetType{ "Stereolithography", ".stl", AssetType::EContentsType::Text },
-				AssetType{ "XFile", ".x", AssetType::EContentsType::Text} 
-			})
-	{
-		LOG_INFO("Create Assimp scene importer, assimp version @{}.{}.{}", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionPatch());
-	}
-
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<AssimpSceneAsset>(AssetPath); }
 
-	bool Reimport(Asset& InAsset, const AssetType&) override final
+	bool Reload(Asset& InAsset, const AssetType&) override final
 	{
 		auto& AssimpScene = Cast<AssimpSceneAsset>(InAsset);
 
@@ -70,12 +70,12 @@ public:
 			}
 			else
 			{
-				LOG_CAT_WARNING(LogAssimpImporter, "Assimp scene: \"{}\" has no meshes");
+				LOG_CAT_WARNING(LogAsset, "Assimp scene: \"{}\" has no meshes");
 				return true;
 			}
 		}
 
-		LOG_CAT_ERROR(LogAssimpImporter, "Failed to load assimp scene: {}: \"{}\"", AssimpScene.GetName(), AssimpImporter.GetErrorString());
+		LOG_CAT_ERROR(LogAsset, "Failed to load assimp scene: {}: \"{}\"", AssimpScene.GetName(), AssimpImporter.GetErrorString());
 		return false;
 	}
 
@@ -92,13 +92,13 @@ private:
 		{
 			if (Percentage >= 1.0f)
 			{
-				LOG_CAT_DEBUG(LogAssimpImporter, "Loading assimp scene \"{}\" completed", m_AssetPath.string());
+				LOG_CAT_DEBUG(LogAsset, "Loading assimp scene \"{}\" completed", m_AssetPath.string());
 				return true;
 			}
 
 			if (static_cast<int32_t>(Percentage * 100) % 10 == 0)
 			{
-				LOG_CAT_DEBUG(LogAssimpImporter, "Loading assimp scene: \"{}\" in progress {:.2f}%", m_AssetPath.string(), Percentage * 100);
+				LOG_CAT_DEBUG(LogAsset, "Loading assimp scene: \"{}\" in progress {:.2f}%", m_AssetPath.string(), Percentage * 100);
 			}
 			return false;
 		}
@@ -109,11 +109,11 @@ private:
 	class AssimpLogger : public Assimp::Logger
 	{
 	public:
-		void OnDebug(const char* Message) override final { LOG_CAT_DEBUG(LogAssimpImporter, Message); }
-		void OnVerboseDebug(const char* Message) override final { LOG_CAT_DEBUG(LogAssimpImporter, Message); }
-		void OnInfo(const char* Message) override final { LOG_CAT_INFO(LogAssimpImporter, Message); }
-		void OnWarn(const char* Message) override final { LOG_CAT_WARNING(LogAssimpImporter, Message); }
-		void OnError(const char* Message) override final { LOG_CAT_ERROR(LogAssimpImporter, Message); }
+		void OnDebug(const char* Message) override final { LOG_CAT_DEBUG(LogAsset, Message); }
+		void OnVerboseDebug(const char* Message) override final { LOG_CAT_DEBUG(LogAsset, Message); }
+		void OnInfo(const char* Message) override final { LOG_CAT_INFO(LogAsset, Message); }
+		void OnWarn(const char* Message) override final { LOG_CAT_WARNING(LogAsset, Message); }
+		void OnError(const char* Message) override final { LOG_CAT_ERROR(LogAsset, Message); }
 		bool attachStream(Assimp::LogStream*, uint32_t) override final { return true; }
 		bool detachStream(Assimp::LogStream*, uint32_t) override final { return true; }
 	};
@@ -162,7 +162,7 @@ private:
 
 			if (AiMesh->HasBones())
 			{
-				LOG_CAT_ERROR(LogAssimpImporter, "Not supported yet!");
+				LOG_CAT_ERROR(LogAsset, "Not supported yet!");
 				assert(false);
 			}
 
@@ -289,27 +289,27 @@ private:
 
 			if (!AiMesh)
 			{
-				LOG_CAT_ERROR(LogAssimpImporter, "Detected invalid mesh!");
+				LOG_CAT_ERROR(LogAsset, "Detected invalid mesh!");
 				continue;
 			}
 			if (!AiMesh->HasPositions())
 			{
-				LOG_CAT_ERROR(LogAssimpImporter, "The mesh has no vertices data!");
+				LOG_CAT_ERROR(LogAsset, "The mesh has no vertices data!");
 				continue;
 			}
 			if (!AiMesh->HasNormals())
 			{
-				LOG_CAT_WARNING(LogAssimpImporter, "The mesh has no normals!");
+				LOG_CAT_WARNING(LogAsset, "The mesh has no normals!");
 				continue;
 			}
 			if (!AiMesh->HasFaces())
 			{
-				LOG_CAT_ERROR(LogAssimpImporter, "The mesh has no indices data!");
+				LOG_CAT_ERROR(LogAsset, "The mesh has no indices data!");
 				continue;
 			}
 			if (AiMesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
 			{
-				LOG_CAT_ERROR(LogAssimpImporter, "Detected others primitive type, should never be happen!");
+				LOG_CAT_ERROR(LogAsset, "Detected others primitive type, should never be happen!");
 				continue;
 			}
 

@@ -21,7 +21,7 @@ enum class EBlendMode : uint8_t
 	Translucent,
 };
 
-struct MaterialProperty : public SerializableAsset<MaterialProperty>
+struct MaterialProperty : public Serializable<MaterialProperty>
 {
 	using BaseClass::BaseClass;
 

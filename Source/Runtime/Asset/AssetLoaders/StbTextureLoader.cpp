@@ -1,5 +1,4 @@
-#pragma once
-
+#include "Asset/AssetLoaders/StbTextureLoader.h"
 #include "Asset/TextureAsset.h"
 #include "RHI/RHITexture.h"
 #include "Services/SpdLogService.h"
@@ -8,24 +7,24 @@
 #include <Submodules/stb/stb_image.h>
 #pragma warning(default:4244)
 
-class StbImageImporter : public IAssetImporter
+StbTextureLoader::StbTextureLoader()
+	: AssetLoader(
+		{
+			AssetType{"Joint Photographic Experts Group", ".jpeg"},
+			AssetType{"Joint Photographic Experts Group", ".jpg"},
+			AssetType{"Portable Network Graphics", ".png"},
+			AssetType{"Bitmap", ".bmp"},
+			AssetType{"Targa", ".tga"},
+			AssetType{"Photoshop Document", ".psd"},
+			AssetType{"High-Dynamic Range", ".hdr"}
+		})
+{
+	LOG_INFO("Create STB texture loader, stb_image @2.3");
+}
+
+class StbTextureLoader : public AssetLoader
 {
 public:
-	StbImageImporter()
-		: IAssetImporter(
-			{
-				AssetType{ "Joint Photographic Experts Group", ".jpeg" },
-				AssetType{ "Joint Photographic Experts Group", ".jpg" },
-				AssetType{ "Portable Network Graphics", ".png" },
-				AssetType{ "Bitmap", ".bmp" },
-				AssetType{ "Targa", ".tga" },
-				AssetType{ "Photoshop Document", ".psd" },
-				AssetType{ "High-Dynamic Range", ".hdr" }
-			})
-	{
-		LOG_INFO("Create STB image importer, stb_image @2.3");
-	}
-
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<TextureAsset>(AssetPath); }
 
 	bool Reimport(Asset& InAsset, const AssetType& InType) override final
@@ -39,7 +38,7 @@ public:
 
 		if (!stbi_info_from_memory(Data, DataSize, &Width, &Height, &OriginalChannels))
 		{
-			LOG_CAT_ERROR(LogImageImporter, "Couldn't parse image header, image path: {}, fail reason: {}", StbImage.GetPath().string(), stbi_failure_reason());
+			LOG_CAT_ERROR(LogAsset, "Couldn't parse image header, image path: {}, fail reason: {}", StbImage.GetPath().string(), stbi_failure_reason());
 			return false;
 		}
 
@@ -61,7 +60,7 @@ public:
 
 		if (!Bitmap)
 		{
-			LOG_CAT_ERROR(LogImageImporter, "Failed to load image: {}, fail reason: {}", StbImage.GetPath().string(), stbi_failure_reason());
+			LOG_CAT_ERROR(LogAsset, "Failed to load image: {}, fail reason: {}", StbImage.GetPath().string(), stbi_failure_reason());
 			return false;
 		}
 

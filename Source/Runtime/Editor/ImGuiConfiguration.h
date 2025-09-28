@@ -153,13 +153,10 @@ struct ImGuiScopedID
 };
 #define IMGUI_SCOPED_ID(ID) ImGuiScopedID CAT(_ScopedID_, __LINE__)(ID)
 
-class ImGuiConfiguration : public SerializableAsset<ImGuiConfiguration>
+class ImGuiConfiguration : public Serializable<ImGuiConfiguration>
 {
 public:
-	ImGuiConfiguration()
-		: BaseClass("Configs\\ImGuiEditorConfigs.json")
-	{
-	}
+	using BaseClass::BaseClass;
 
 	~ImGuiConfiguration();
 

@@ -15,7 +15,7 @@ TaskFlow::TaskFlow()
 
 void TaskFlow::Initialize()
 {
-	ITask::InitializeThreadTags();
+	TaskFlowTask::InitializeThreadTags();
 
 	m_Executors.resize(static_cast<size_t>(EThread::Num) + 1u);
 
@@ -48,13 +48,18 @@ void TaskFlow::Initialize()
 		{
 			SubFlow.emplace([]() {
 				System::SetThreadPriority(std::this_thread::get_id(), Task::EPriority::High);
-				});
+
+				std::stringstream Stream;
+				Stream << std::this_thread::get_id();
+				uint32_t ThreadID = std::stoul(Stream.str());
+				LOG_INFO("Set foreground thread {} high priority", ThreadID);
+			});
 		}
 		for (uint32_t Index = 0u; Index < SubFlows.size(); ++Index)
 		{
 			Flow.emplace([ForegroundExecutor, &SubFlow = SubFlows[Index]]() {
 				ForegroundExecutor->corun(SubFlow);
-				});
+			});
 		}
 		ForegroundExecutor->run(Flow).wait();
 	}

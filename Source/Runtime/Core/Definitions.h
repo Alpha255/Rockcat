@@ -113,11 +113,9 @@ template<class Enum>
 struct EnumSerializer
 {
 	Enum& Value;
-	std::string_view Name;
 
-	EnumSerializer(const char* InName, Enum& InValue)
-		: Name(InName)
-		, Value(InValue)
+	EnumSerializer(Enum& InValue)
+		: Value(InValue)
 	{
 	}
 
@@ -128,11 +126,11 @@ struct EnumSerializer
 		if constexpr (Archive::is_saving::value)
 		{
 			EnumName = std::string(magic_enum::enum_name<Enum>(Value));
-			Ar(::cereal::make_nvp(Name.data(), EnumName));
+			Ar(EnumName);
 		}
 		else if constexpr (Archive::is_loading::value)
 		{
-			Ar(::cereal::make_nvp(Name.data(), EnumName));
+			Ar(EnumName);
 			auto OptValue = magic_enum::enum_cast<Enum>(EnumName);
 			if (OptValue.has_value())
 			{
@@ -158,7 +156,7 @@ struct EnumSerializer
 		} \
 	}
 
-#define CEREAL_NVP_ENUM(EnumType, Value) ::cereal::make_nvp(#EnumType, EnumSerializer<EnumType>(#Value, Value))
+#define CEREAL_NVP_ENUM(EnumType, Value) ::cereal::make_nvp(#Value, EnumSerializer<EnumType>(Value))
 
 #define ENUM_FLAG_OPERATORS(Enum) \
 	inline constexpr Enum    operator|(Enum Left, Enum Right) { return static_cast<Enum>(static_cast<std::underlying_type_t<Enum>>(Left) | static_cast<std::underlying_type_t<Enum>>(Right)); } \

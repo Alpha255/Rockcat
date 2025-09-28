@@ -1,27 +1,18 @@
 #include "Services/AssetDatabase.h"
 #include "Services/SpdLogService.h"
 #include "Services/TaskFlowService.h"
-#include "Asset/Importers/DDSTextureImporter.hpp"
-#include "Asset/Importers/StbTextureImporter.hpp"
-#include "Asset/Importers/AssimpSceneImporter.hpp"
+#include "Asset/AssetLoaders/DDSTextureLoader.h"
+#include "Asset/AssetLoaders/StbTextureLoader.h"
+#include "Asset/AssetLoaders/AssimpSceneLoader.h"
 #include "Async/Task.h"
 
-class AssetImportTask : public Task
+class AssetLoadTask : public Task
 {
 public:
-	AssetImportTask(const std::filesystem::path& Path, IAssetImporter& Importer, const AssetType& Type, std::optional<Asset::AssetLoadCallbacks>& Callbacks)
-		: Task(StringUtils::Format("AssetImportTask|%s", Path.string().c_str()))
-		, m_Importer(Importer)
-		, m_Type(Type)
+	AssetLoadTask(const std::filesystem::path& Path, AssetLoader& Loader)
+		: Task(StringUtils::Format("AssetLoadTask|%s", Path.string().c_str()))
+		, m_Loader(Loader)
 	{
-		m_Asset = Importer.CreateAsset(Path);
-		m_Asset->SetLoadCallbacks(Callbacks);
-	}
-
-	void ResetLoadCallbacks(std::optional<Asset::AssetLoadCallbacks>& Callbacks)
-	{
-		assert(m_Asset);
-		m_Asset->SetLoadCallbacks(Callbacks);
 	}
 
 	std::shared_ptr<Asset> GetAsset() const { return m_Asset; }
@@ -40,46 +31,43 @@ protected:
 		}
 	}
 private:
-	IAssetImporter& m_Importer;
+	AssetLoader& m_Loader;
 	std::shared_ptr<Asset> m_Asset;
-	const AssetType& m_Type;
 };
 
 void AssetDatabase::Initialize()
-{ 
-	CreateAssetImporters();
-}
-
-void AssetDatabase::CreateAssetImporters()
 {
-	REGISTER_LOG_CATEGORY(LogImageImporter);
-	REGISTER_LOG_CATEGORY(LogAssimpImporter);
+	REGISTER_LOG_CATEGORY(LogAsset);
 
-	m_AssetImporters.emplace_back(std::make_unique<DDSImageImporter>());
-	m_AssetImporters.emplace_back(std::make_unique<StbImageImporter>());
-	m_AssetImporters.emplace_back(std::make_unique<AssimpSceneImporter>());
+	CreateAssetLoaders();
 }
 
-std::shared_ptr<Asset> AssetDatabase::ReimportAssetImpl(const std::filesystem::path& Path, std::optional<Asset::AssetLoadCallbacks>& Callbacks, bool Async)
+void AssetDatabase::CreateAssetLoaders()
+{
+	m_AssetLoaders.emplace_back(std::make_unique<DDSTextureLoader>());
+	m_AssetLoaders.emplace_back(std::make_unique<StbTextureLoader>());
+	m_AssetLoaders.emplace_back(std::make_unique<AssimpSceneLoader>());
+}
+
+std::shared_ptr<Asset> AssetDatabase::LoadAssetImpl(const std::filesystem::path& Path, bool Async)
 {
 	if (!std::filesystem::exists(Path))
 	{
-		LOG_ERROR("AssetDatabase:: Asset \"{}\" do not exists.", Path.string());
+		LOG_CAT_ERROR(LogAsset, "Asset \"{}\" do not exists.", Path.string());
 		return nullptr;
 	}
 
-	AssetImportTask* Task = nullptr;
+	AssetLoadTask* LoadTask = nullptr;
 
 	auto It = m_AssetLoadTasks.find(Path);
 	if (It != m_AssetLoadTasks.end())
 	{
-		Task = It->second.get();
-		assert(Task);
-		Task->ResetLoadCallbacks(Callbacks);
+		LoadTask = It->second.get();
+		assert(LoadTask);
 	}
 	else
 	{
-		for (auto& Importer : m_AssetImporters)
+		for (auto& Loader : m_AssetLoaders)
 		{
 			if (auto AssetType = Importer->FindValidAssetType(Path))
 			{
@@ -121,5 +109,5 @@ void AssetDatabase::Finalize()
 	}
 
 	m_AssetLoadTasks.clear();
-	m_AssetImporters.clear();
+	m_AssetLoaders.clear();
 }

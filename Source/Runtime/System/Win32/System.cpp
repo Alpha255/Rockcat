@@ -233,8 +233,6 @@ void System::SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priorit
 		break;
 	}
 	VERIFY_WITH_SYSTEM_MESSAGE(::SetThreadPriority(ThreadHandle, ThreadPriority) != 0);
-
-	LOG_INFO("Set priority of thread {} to {}", DwordThreadID, s_ThreadPriorityNames[(size_t)Priority]);
 }
 
 #endif // PLATFORM_WIN32

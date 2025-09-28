@@ -2,7 +2,7 @@
 
 #include "Core/Definitions.h"
 
-struct IO
+struct FileIO
 {
 	enum class EOpenMode : uint8_t
 	{
@@ -22,19 +22,19 @@ struct IO
 		End = std::ios::end
 	};
 };
-ENUM_FLAG_OPERATORS(IO::EOpenMode)
+ENUM_FLAG_OPERATORS(FileIO::EOpenMode)
 
-class IFileIOStream : public IO
+class FileStream : public FileIO
 {
 public:
 	template<class T>
-	IFileIOStream(T&& FilePath, EOpenMode Mode)
+	FileStream(T&& FilePath, EOpenMode Mode)
 		: m_FilePath(std::forward<T>(FilePath))
 		, m_OpenMode(Mode)
 	{
 	}
 
-	virtual ~IFileIOStream() = default;
+	virtual ~FileStream() = default;
 
 	virtual bool Open(EOpenMode Mode) = 0;
 	virtual void Close() = 0;
@@ -43,26 +43,26 @@ public:
 	virtual void Write(size_t Bytes, const char* Buffer) = 0;
 	virtual bool IsOpen() const = 0;
 
-	bool CanRead() const { return IsOpen() && EnumHasAnyFlags(m_OpenMode, EOpenMode::Read); }
-	bool CanWrite() const { return IsOpen() && EnumHasAnyFlags(m_OpenMode, EOpenMode::Write); }
+	inline bool CanRead() const { return IsOpen() && EnumHasAnyFlags(m_OpenMode, EOpenMode::Read); }
+	inline bool CanWrite() const { return IsOpen() && EnumHasAnyFlags(m_OpenMode, EOpenMode::Write); }
 
-	const std::filesystem::path& GetFilePath() const { return m_FilePath; }
+	inline const std::filesystem::path& GetFilePath() const { return m_FilePath; }
 protected:
 	EOpenMode m_OpenMode = EOpenMode::Invalid;
 	std::filesystem::path m_FilePath;
 };
 
-class StdFileIOStream : public IFileIOStream
+class StdFileStream : public FileStream
 {
 public:
 	template<class T>
-	StdFileIOStream(T&& FilePath, EOpenMode Mode)
-		: IFileIOStream(std::forward<T>(FilePath), Mode)
+	StdFileStream(T&& FilePath, EOpenMode Mode)
+		: FileStream(std::forward<T>(FilePath), Mode)
 	{
 		Open(Mode);
 	}
 
-	~StdFileIOStream()
+	~StdFileStream()
 	{
 		if (IsOpen())
 		{

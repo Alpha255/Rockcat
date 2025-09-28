@@ -4,7 +4,7 @@
 #include "Rendering/RenderSettings.h"
 #include "Asset/SerializableAsset.h"
 
-struct ApplicationSettings : public SerializableAsset<ApplicationSettings>
+struct ApplicationSettings : public Serializable<ApplicationSettings>
 {
 	using BaseClass::BaseClass;
 

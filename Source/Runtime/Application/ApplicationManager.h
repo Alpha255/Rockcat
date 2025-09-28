@@ -12,12 +12,12 @@ public:
 	std::vector<class BaseApplication*> m_Applications;
 };
 
-template<class TApplication>
+template<class Application>
 struct ApplicationRegister
 {
 	ApplicationRegister(const char* SettingsFile)
 	{
-		ApplicationManager::Get().RegisterApplication(new TApplication(SettingsFile));
+		ApplicationManager::Get().RegisterApplication(new Application(SettingsFile));
 	}
 };
 
