@@ -91,7 +91,7 @@ struct MaterialProperty : public Serializable<MaterialProperty>
 		}
 	} Factors;
 
-	Array<std::shared_ptr<TextureAsset>, ETextureType> Textures;
+	Array<std::shared_ptr<Texture>, ETextureType> Textures;
 
 	template<class Archive>
 	void serialize(Archive& Ar)

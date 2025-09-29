@@ -63,7 +63,7 @@ public:
 	{
 		if (IsDirty() || Force)
 		{
-			const std::filesystem::path& SavePath = SaveTo.empty() ? GetPath() : SaveTo;
+			std::filesystem::path SavePath = SaveTo.empty() ? GetPath() : SaveTo;
 			
 			if (!SavePath.has_extension())
 			{

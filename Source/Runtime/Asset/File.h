@@ -65,6 +65,12 @@ public:
 		}
 		return 0u;
 	}
+protected:
+	template<class T>
+	inline void SetPath(T&& Path)
+	{
+		m_Path = std::forward<T>(Path);
+	}
 private:
 	std::filesystem::path m_Path; /// Notice the order of the members
 

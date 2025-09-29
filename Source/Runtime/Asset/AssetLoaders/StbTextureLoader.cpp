@@ -1,8 +1,9 @@
 #include "Asset/AssetLoaders/StbTextureLoader.h"
 #include "Asset/TextureAsset.h"
 #include "RHI/RHITexture.h"
-#include "Services/SpdLogService.h"
 #include "RHI/RHIDevice.h"
+#include "Services/SpdLogService.h"
+
 #pragma warning(disable:4244)
 #include <Submodules/stb/stb_image.h>
 #pragma warning(default:4244)
@@ -22,60 +23,61 @@ StbTextureLoader::StbTextureLoader()
 	LOG_INFO("Create STB texture loader, stb_image @2.3");
 }
 
-class StbTextureLoader : public AssetLoader
+std::shared_ptr<Asset> StbTextureLoader::CreateAsset(const std::filesystem::path& Path)
 {
-public:
-	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& AssetPath) override final { return std::make_shared<TextureAsset>(AssetPath); }
+	return std::make_shared<Texture>(Path);
+}
 
-	bool Reimport(Asset& InAsset, const AssetType& InType) override final
+bool StbTextureLoader::Load(Asset& InAsset, const AssetType& Type, std::string& ErrorMessage)
+{
+	auto& StbImage = Cast<Texture>(InAsset);
+	auto AssetData = StbImage.LoadData(Type.ContentsFormat);
+	auto const DataSize = static_cast<int32_t>(AssetData->Size);
+	auto Data = reinterpret_cast<const stbi_uc*>(AssetData->Data.get());
+
+	int32_t Width = 0, Height = 0, Channels = 0, OriginalChannels = STBI_default;
+
+	if (!stbi_info_from_memory(Data, DataSize, &Width, &Height, &OriginalChannels))
 	{
-		auto& StbImage = Cast<TextureAsset>(InAsset);
-		auto AssetData = StbImage.LoadData(InType.ContentsType);
-		auto const DataSize = static_cast<int32_t>(AssetData->Size);
-		auto Data = reinterpret_cast<const stbi_uc*>(AssetData->Data.get());
-
-		int32_t Width = 0, Height = 0, Channels = 0, OriginalChannels = STBI_default;
-
-		if (!stbi_info_from_memory(Data, DataSize, &Width, &Height, &OriginalChannels))
-		{
-			LOG_CAT_ERROR(LogAsset, "Couldn't parse image header, image path: {}, fail reason: {}", StbImage.GetPath().string(), stbi_failure_reason());
-			return false;
-		}
-
-		stbi_uc* Bitmap = nullptr;
-		bool IsHDR = stbi_is_hdr_from_memory(Data, DataSize);
-		Channels = OriginalChannels == STBI_rgb ? STBI_rgb_alpha : OriginalChannels;
-
-		if (IsHDR)
-		{
-			if (auto Pixels = stbi_loadf_from_memory(Data, DataSize, &Width, &Height, &OriginalChannels, Channels))
-			{
-				Bitmap = reinterpret_cast<stbi_uc*>(Pixels);
-			}
-		}
-		else
-		{
-			Bitmap = stbi_load_from_memory(Data, DataSize, &Width, &Height, &OriginalChannels, Channels);
-		}
-
-		if (!Bitmap)
-		{
-			LOG_CAT_ERROR(LogAsset, "Failed to load image: {}, fail reason: {}", StbImage.GetPath().string(), stbi_failure_reason());
-			return false;
-		}
-
-		RHITextureDesc Desc;
-		Desc.SetWidth(Width)
-			.SetHeight(Height)
-			.SetDimension(ERHITextureDimension::T_2D)
-			.SetFormat(StbImage.IsLinear() ? ERHIFormat::RGBA8_UNorm : ERHIFormat::RGBA8_UNorm_SRGB)
-			.SetUsages(ERHIBufferUsageFlags::ShaderResource)
-			.SetName(InAsset.GetPath().filename().string())
-			.SetPermanentState(ERHIResourceState::ShaderResource)
-			.SetInitialData(DataBlock(Channels * Width * Height, Bitmap));
-
-		//StbImage.CreateRHI(RenderService::Get().GetBackend().GetDevice(), Desc);		
-
-		return true;
+		ErrorMessage = stbi_failure_reason();
+		LOG_CAT_ERROR(LogAsset, "Couldn't parse image header, image path: {}, fail reason: {}", StbImage.GetPath().string(), ErrorMessage);
+		return false;
 	}
-};
+
+	stbi_uc* Bitmap = nullptr;
+	bool IsHDR = stbi_is_hdr_from_memory(Data, DataSize);
+	Channels = OriginalChannels == STBI_rgb ? STBI_rgb_alpha : OriginalChannels;
+
+	if (IsHDR)
+	{
+		if (auto Pixels = stbi_loadf_from_memory(Data, DataSize, &Width, &Height, &OriginalChannels, Channels))
+		{
+			Bitmap = reinterpret_cast<stbi_uc*>(Pixels);
+		}
+	}
+	else
+	{
+		Bitmap = stbi_load_from_memory(Data, DataSize, &Width, &Height, &OriginalChannels, Channels);
+	}
+
+	if (!Bitmap)
+	{
+		ErrorMessage = stbi_failure_reason();
+		LOG_CAT_ERROR(LogAsset, "Failed to load image: {}, fail reason: {}", StbImage.GetPath().string(), ErrorMessage);
+		return false;
+	}
+
+	RHITextureDesc Desc;
+	Desc.SetWidth(Width)
+		.SetHeight(Height)
+		.SetDimension(ERHITextureDimension::T_2D)
+		.SetFormat(StbImage.IsLinear() ? ERHIFormat::RGBA8_UNorm : ERHIFormat::RGBA8_UNorm_SRGB)
+		.SetUsages(ERHIBufferUsageFlags::ShaderResource)
+		.SetName(InAsset.GetPath().filename().string())
+		.SetPermanentState(ERHIResourceState::ShaderResource)
+		.SetInitialData(DataBlock(Channels * Width * Height, Bitmap));
+
+	//StbImage.CreateRHI(RenderService::Get().GetBackend().GetDevice(), Desc);		
+
+	return true;
+}

@@ -1,7 +1,7 @@
 #include "Asset/TextureAsset.h"
 #include "RHI/RHIDevice.h"
 
-void TextureAsset::CreateRHI(RHIDevice& Device, const RHITextureDesc& Desc)
+void Texture::CreateRHI(RHIDevice& Device, const RHITextureDesc& Desc)
 {
 	if (m_Texture)
 	{

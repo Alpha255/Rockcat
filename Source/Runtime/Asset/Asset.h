@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Asset/File.h"
+#include "Asset/File.h"
 
 struct DataBlock
 {
@@ -126,8 +126,11 @@ public:
 		return It == m_SupportedTypes.cend() ? nullptr : &(*It);
 	}
 
-	virtual bool Load(Asset& InAsset, const AssetType& InType) = 0;
+	virtual bool Load(Asset& InAsset, const AssetType& InType, std::string& ErrorMessage) = 0;
 protected:
+	friend class AssetLoadTask;
+
+	virtual std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& Path) = 0;
 private:
 	std::vector<AssetType> m_SupportedTypes;
 };

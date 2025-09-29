@@ -11,16 +11,14 @@ public:
 	void Finalize() override final;
 
 	template<class T>
-	inline std::shared_ptr<T> LoadAsync(const std::filesystem::path& Path)
+	inline std::shared_ptr<T> Load(const std::filesystem::path& Path, bool ForceReload = false, bool Async = true)
 	{
-		return LoadAssetImpl(GetUnifyAssetPath(Path), true);
+		return LoadAssetImpl(GetUnifyAssetPath(Path), ForceReload, Async);
 	}
 
-	template<class T>
-	inline std::shared_ptr<T> Load(const std::filesystem::path& Path)
-	{
-		return LoadAssetImpl(GetUnifyAssetPath(Path), true);
-	}
+	bool Unload(const std::filesystem::path& Path, bool Async = true);
+
+	bool CancelLoad(const std::filesystem::path& Path);
 private:
 	inline static std::filesystem::path GetUnifyAssetPath(const std::filesystem::path& Path, bool Lowercase = false)
 	{
@@ -30,7 +28,7 @@ private:
 
 	void CreateAssetLoaders();
 
-	std::shared_ptr<Asset> LoadAssetImpl(const std::filesystem::path& Path, bool Async);
+	std::shared_ptr<Asset> LoadAssetImpl(const std::filesystem::path& Path, bool ForceReload, bool Async);
 
 	std::unordered_map<std::filesystem::path, std::shared_ptr<class AssetLoadTask>> m_AssetLoadTasks;
 	std::vector<std::unique_ptr<AssetLoader>> m_AssetLoaders;

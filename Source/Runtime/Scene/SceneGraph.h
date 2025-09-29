@@ -240,7 +240,7 @@ public:
 	}
 
 protected:
-	friend class AssimpSceneImporter;
+	friend class AssimpSceneLoader;
 
 	inline void SetRoot(EntityID ID) { m_Root = ID; }
 	inline EntityList& GetAllEntities() { return m_Entities; }

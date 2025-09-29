@@ -42,7 +42,7 @@ public:
 protected:
 	void OnPostLoad() override;
 private:
-	void MergeWithAssimpScene(const AssimpSceneAsset& AssimpScene);
+	void MergeWithAssimpScene(const AssimpScene& InScene);
 
 	std::vector<std::string> m_AssimpScenes;
 	std::vector<std::shared_ptr<class ISceneView>> m_Views;

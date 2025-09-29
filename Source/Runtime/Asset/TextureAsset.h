@@ -3,7 +3,7 @@
 #include "Asset/Asset.h"
 #include "RHI/RHITexture.h"
 
-class TextureAsset : public Asset
+class Texture : public Asset
 {
 public:
 	using Asset::Asset;
@@ -15,20 +15,22 @@ public:
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
-		std::string Path = m_Path.string();
+		std::string Path = GetPath().string();
+
 		Ar(
+			CEREAL_BASE(Asset),
 			cereal::make_nvp("m_Path", Path)
 		);
-
+		
 		if (Archive::is_loading::value)
 		{
-			m_Path = Path;
+			SetPath(Path);
 		}
 	}
 protected:
-	friend class AssimpSceneImporter;
-	friend class StbImageImporter;
-	friend class DDSImageImporter;
+	friend class AssimpSceneLoader;
+	friend class StbTextureLoader;
+	friend class DDSTextureLoader;
 
 	void CreateRHI(class RHIDevice& Device, const RHITextureDesc& Desc);
 
@@ -40,10 +42,10 @@ protected:
 
 namespace cereal
 {
-	template<> struct LoadAndConstruct<TextureAsset>
+	template<> struct LoadAndConstruct<Texture>
 	{
 		template<class Archive>
-		static void load_and_construct(Archive& Ar, cereal::construct<TextureAsset>& Construct)
+		static void load_and_construct(Archive& Ar, cereal::construct<Texture>& Construct)
 		{
 			std::string Path;
 			Ar(

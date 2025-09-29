@@ -169,7 +169,7 @@ void ShaderLibrary::QueueCompile(const Shader& InShader, size_t BaseHash, size_t
 		if (RegisterCompileTask(TimestampHash))
 		{
 			auto& MetaData = InShader.GetMetaData();
-			auto RawData = MetaData.LoadData(AssetType::EContentsFormat::Text);
+			auto RawData = MetaData.LoadData(AssetType::EContentsFormat::PlainText);
 
 			const time_t Timestamp = MetaData.GetLastWriteTime();
 			const auto FileName = InShader.GetName().string();

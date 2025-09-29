@@ -5,7 +5,7 @@
 
 const std::map<std::string, ImGuiFont>* ImGuiScopedFont::AllFonts = nullptr;
 
-void ImGuiConfiguration::PostLoad()
+void ImGuiConfiguration::OnPostLoad()
 {
 	LoadDefaultFonts();
 	LoadDefaultThemes();

@@ -23,10 +23,12 @@ class TaskEvent
 {
 public:
 	TaskEvent() = default;
+	TaskEvent(TaskEvent&&) = default;
+	TaskEvent(const TaskEvent&) = delete;
 
-	TaskEvent(std::future<void>&& Future) noexcept
-		: m_Future(std::move((Future)))
+	TaskEvent(tf::Future<void>&& Future) noexcept
 	{
+		m_Future = std::move(Future);
 	}
 
 	inline bool IsDispatched() const { return m_Future.valid(); }
@@ -55,8 +57,13 @@ public:
 			m_Future.wait_for(std::chrono::milliseconds(Milliseconds));
 		}
 	}
+
+	inline bool Cancel()
+	{
+		return m_Future.valid() ? m_Future.cancel() : false;
+	}
 private:
-	std::future<void> m_Future;
+	tf::Future<void> m_Future;
 };
 
 using TaskEventPtr = std::shared_ptr<TaskEvent>;
@@ -146,6 +153,11 @@ public:
 			m_Event->WaitForMilliseconds(Milliseconds);
 		}
 	}
+
+	inline bool Cancel()
+	{
+		return m_Event ? m_Event->Cancel() : false;
+	}
 protected:
 	friend class TaskFlow;
 
@@ -168,10 +180,15 @@ public:
 	static bool IsGameThread();
 	static bool IsRenderThread();
 	static bool IsWorkerThread();
-
+	
 	void Execute();
 
 	void Dispatch(EThread Thread = EThread::WorkerThread) override final;
+
+	inline bool Cancel()
+	{
+		return m_Event ? m_Event->Cancel() : false;
+	}
 protected:
 	friend class TaskFlow;
 

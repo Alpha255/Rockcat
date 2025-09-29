@@ -9,30 +9,78 @@
 class AssetLoadTask : public Task
 {
 public:
-	AssetLoadTask(const std::filesystem::path& Path, AssetLoader& Loader)
-		: Task(StringUtils::Format("AssetLoadTask|%s", Path.string().c_str()))
+	AssetLoadTask(const std::filesystem::path& Path, const AssetType& Type, AssetLoader& Loader)
+		: Task(StringUtils::Format("AssetLoadTask|%s", Path.string()))
+		, m_Asset(std::move(Loader.CreateAsset(Path)))
+		, m_Type(Type)
 		, m_Loader(Loader)
 	{
 	}
 
 	std::shared_ptr<Asset> GetAsset() const { return m_Asset; }
-protected:
-	void ExecuteImpl() override final
-	{
-		m_Asset->OnPreLoad();
 
-		if (m_Importer.Reimport(*m_Asset, m_Type))
+	inline void DoLoad(bool Async)
+	{
+		DoTask(EOperation::Load, Async);
+	}
+
+	inline void DoUnload(bool Async)
+	{
+		DoTask(EOperation::Unload, Async);
+	}
+protected:
+	enum class EOperation : uint8_t
+	{
+		Load,
+		Unload
+	};
+
+	void DoTask(EOperation Operation, bool Async)
+	{
+		m_Operation = Operation;
+
+		if (Async)
 		{
-			m_Asset->OnReady();
+			Dispatch();
 		}
 		else
 		{
-			m_Asset->OnLoadFailed();
+			Execute();
+		}
+	}
+
+	void ExecuteImpl() override final
+	{
+		if (m_Operation == EOperation::Unload)
+		{
+			if (m_Asset->IsReady())
+			{
+				m_Asset->OnUnload();
+			}
+		}
+		else if (m_Operation == EOperation::Load)
+		{
+			std::string ErrorMessage;
+
+			m_Asset->OnPreLoad();
+
+			if (m_Loader.Load(*m_Asset, m_Type, ErrorMessage))
+			{
+				m_Asset->OnReady();
+				m_Asset->OnPostLoad();
+			}
+			else
+			{
+				m_Asset->OnLoadFailed(ErrorMessage);
+			}
 		}
 	}
 private:
-	AssetLoader& m_Loader;
 	std::shared_ptr<Asset> m_Asset;
+	const AssetType& m_Type;
+	AssetLoader& m_Loader;
+
+	EOperation m_Operation = EOperation::Load;
 };
 
 void AssetDatabase::Initialize()
@@ -49,7 +97,7 @@ void AssetDatabase::CreateAssetLoaders()
 	m_AssetLoaders.emplace_back(std::make_unique<AssimpSceneLoader>());
 }
 
-std::shared_ptr<Asset> AssetDatabase::LoadAssetImpl(const std::filesystem::path& Path, bool Async)
+std::shared_ptr<Asset> AssetDatabase::LoadAssetImpl(const std::filesystem::path& Path, bool ForceReload, bool Async)
 {
 	if (!std::filesystem::exists(Path))
 	{
@@ -69,32 +117,56 @@ std::shared_ptr<Asset> AssetDatabase::LoadAssetImpl(const std::filesystem::path&
 	{
 		for (auto& Loader : m_AssetLoaders)
 		{
-			if (auto AssetType = Importer->FindValidAssetType(Path))
+			if (auto AssetType = Loader->TryFindAssetTypeByPath(Path))
 			{
-				Task = m_AssetLoadTasks.insert(std::make_pair(Path,
-					std::make_shared<AssetImportTask>(Path, *Importer, *AssetType, Callbacks))).first->second.get();
+				LoadTask = m_AssetLoadTasks.insert(std::make_pair(Path,
+					std::make_shared<AssetLoadTask>(Path, *AssetType, *Loader))).first->second.get();
+				break;
 			}
 		}
 	}
 
-	if (!Task)
+	if (!LoadTask)
 	{
-		LOG_ERROR("AssetDatabase::The asset type of \"{}\" is not supported!", Path.string());
+		LOG_CAT_ERROR(LogAsset, "The asset type of \"{}\" is not supported!", Path.string());
 		return nullptr;
 	}
 	else
 	{
-		if (Async)
+		if (!LoadTask->GetAsset()->IsOnLoading())
 		{
-			Task->Dispatch();
-		}
-		else
-		{
-			Task->Execute();
+			const bool NeedReload = ForceReload || !LoadTask->GetAsset()->IsReady();
+			if (NeedReload)
+			{
+				LoadTask->DoLoad(Async);
+			}
 		}
 
-		return Task->GetAsset();
+		return LoadTask->GetAsset();
 	}
+}
+
+bool AssetDatabase::Unload(const std::filesystem::path& Path, bool Async)
+{
+	auto It = m_AssetLoadTasks.find(Path);
+	if (It != m_AssetLoadTasks.end())
+	{
+		It->second->DoUnload(Async);
+		return true;
+	}
+
+	return false;
+}
+
+bool AssetDatabase::CancelLoad(const std::filesystem::path& Path)
+{
+	auto It = m_AssetLoadTasks.find(Path);
+	if (It != m_AssetLoadTasks.end())
+	{
+		return It->second->Cancel();
+	}
+
+	return false;
 }
 
 void AssetDatabase::Finalize()

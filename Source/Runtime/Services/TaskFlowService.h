@@ -66,7 +66,7 @@ public:
 		{
 			return std::make_shared<TaskEvent>(std::move(Executor->async([&InTask]() {
 				InTask.Execute();
-				})));
+			})));
 		}
 
 		InTask.Execute();
@@ -86,7 +86,7 @@ public:
 				{
 					Flow.emplace([&Task]() {
 						Task->Execute();
-						}).name(std::string(Task->GetName()));
+					}).name(std::string(Task->GetName()));
 				}
 			}
 
