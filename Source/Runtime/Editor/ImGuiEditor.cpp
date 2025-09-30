@@ -3,6 +3,7 @@
 #include "Editor/Panels/SceneViewPanel.h"
 #include "Editor/Panels/AssetBrowserPanel.h"
 #include "Editor/Icons/Icons.h"
+#include "Paths.h"
 
 ImGuiEditor::ImGuiEditor(uint32_t AppWindowWidth, uint32_t AppWindowHeight)
 {
@@ -18,7 +19,7 @@ ImGuiEditor::ImGuiEditor(uint32_t AppWindowWidth, uint32_t AppWindowHeight)
     IO.ConfigWindowsMoveFromTitleBarOnly = true;
     //io.ConfigDockingTransparentPayload = true;
 	
-	m_Configs = ImGuiConfiguration::Load();
+	m_Configs = ImGuiConfiguration::Load(Paths::ConfigPath() / "EditorSettings.json");
     
     auto LogPanel = m_Panels.emplace_back(std::make_shared<LogConsolePanel>()).get();
     m_Panels.emplace_back(std::make_shared<SceneViewPanel>());

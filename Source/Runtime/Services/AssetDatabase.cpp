@@ -10,7 +10,7 @@ class AssetLoadTask : public Task
 {
 public:
 	AssetLoadTask(const std::filesystem::path& Path, const AssetType& Type, AssetLoader& Loader)
-		: Task(StringUtils::Format("AssetLoadTask|%s", Path.string()))
+		: Task(StringUtils::Format("AssetLoadTask|%s", Path.string().c_str()))
 		, m_Asset(std::move(Loader.CreateAsset(Path)))
 		, m_Type(Type)
 		, m_Loader(Loader)

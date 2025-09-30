@@ -23,12 +23,33 @@ class TaskEvent
 {
 public:
 	TaskEvent() = default;
-	TaskEvent(TaskEvent&&) = default;
-	TaskEvent(const TaskEvent&) = delete;
 
-	TaskEvent(tf::Future<void>&& Future) noexcept
+	TaskEvent(const TaskEvent&) = delete;
+	
+	TaskEvent(TaskEvent&& Other) noexcept
+	{
+		m_Future = std::move(Other.m_Future);
+	}
+
+	TaskEvent& operator=(const TaskEvent&) = delete;
+
+	TaskEvent& operator=(TaskEvent&& Other) noexcept
+	{
+		if (this != &Other)
+		{
+			m_Future = std::move(Other.m_Future);
+		}
+		return *this;
+	}
+
+	explicit TaskEvent(tf::Future<void>& Future) noexcept
 	{
 		m_Future = std::move(Future);
+	}
+
+	explicit TaskEvent(std::future<void>& Future) noexcept
+	{
+
 	}
 
 	inline bool IsDispatched() const { return m_Future.valid(); }

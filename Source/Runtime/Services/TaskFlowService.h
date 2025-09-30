@@ -21,7 +21,8 @@ public:
 			tf::Taskflow Flow;
 			Flow.for_each(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<Callable>(Function));
 
-			return std::make_shared<TaskEvent>(std::move(Executor->run(std::move(Flow))));
+			tf::Future<void> Future = Executor->run(std::move(Flow));
+			return std::make_shared<TaskEvent>(Future);
 		}
 
 		std::for_each(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<Callable>(Function));
@@ -37,7 +38,9 @@ public:
 		{
 			tf::Taskflow Flow;
 			Flow.sort(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<CompareOp>(Function));
-			return std::make_shared<TaskEvent>(std::move(Executor->run(std::move(Flow))));
+
+			tf::Future<void> Future = Executor->run(std::move(Flow));
+			return std::make_shared<TaskEvent>(Future);
 		}
 
 		std::sort(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<CompareOp>(Function));
@@ -51,7 +54,8 @@ public:
 
 		if (auto Executor = GetExecutor(Thread, Priority))
 		{
-			return std::make_shared<TaskEvent>(std::move(Executor->async(std::forward<Callable>(Function))));
+			std::future<void> Future = Executor->async(std::forward<Callable>(Function));
+			return std::make_shared<TaskEvent>(Future);
 		}
 
 		std::forward<Callable>(Function)();
@@ -64,9 +68,10 @@ public:
 
 		if (auto Executor = GetExecutor(Thread, Priority))
 		{
-			return std::make_shared<TaskEvent>(std::move(Executor->async([&InTask]() {
+			std::future<void> Future = Executor->async([&InTask]() {
 				InTask.Execute();
-			})));
+			});
+			return std::make_shared<TaskEvent>(Future);
 		}
 
 		InTask.Execute();
@@ -90,7 +95,8 @@ public:
 				}
 			}
 
-			return std::make_shared<TaskEvent>(std::move(Executor->run(std::move(Flow))));
+			tf::Future<void> Future = Executor->run(std::move(Flow));
+			return std::make_shared<TaskEvent>(Future);
 		}
 
 		for (auto& Task : InTasks)
@@ -107,8 +113,13 @@ public:
 	{
 		assert(Thread < EThread::Num && Thread != EThread::GameThread && Thread != EThread::RenderThread);
 
-		GetExecutor(Thread, Priority)->run(Set);
-		return Set.GetEvent();
+		if (auto Executor = GetExecutor(Thread, Priority))
+		{
+			tf::Future<void> Future = GetExecutor(Thread, Priority)->run(Set);
+			return std::make_shared<TaskEvent>(Future);
+		}
+
+		return std::make_shared<TaskEvent>();
 	}
 
 	inline uint8_t GetNumWorkerThreads() const { return m_NumWorkerThreads; }
