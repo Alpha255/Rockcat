@@ -43,7 +43,7 @@ public:
 
 	void SetMode(EWindowMode Mode);
 protected:
-	void UpdateSize();
+	void UpdateSize(uint32_t Width, uint32_t Height);
 private:
 	uint32_t m_Width;
 	uint32_t m_Height;

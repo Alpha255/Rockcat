@@ -51,16 +51,19 @@ Window::Window(const WindowSettings& Settings)
 	SetMode(Settings.Mode);
 }
 
-void Window::UpdateSize()
+void Window::UpdateSize(uint32_t Width, uint32_t Height)
 {
-	::RECT Rect;
-	VERIFY_WITH_SYSTEM_MESSAGE(::GetClientRect(reinterpret_cast<::HWND>(m_Handle), &Rect) != 0);
-	uint32_t Width = static_cast<uint32_t>(Rect.right - Rect.left);
-	uint32_t Height = static_cast<uint32_t>(Rect.bottom - Rect.top);
+	if (Width == 0 || Height == 0)
+	{
+		::RECT Rect{};
+		VERIFY_WITH_SYSTEM_MESSAGE(::GetClientRect(reinterpret_cast<::HWND>(m_Handle), &Rect) != 0);
+		Width = Rect.right - Rect.left;
+		Height = Rect.bottom - Rect.top;
+	}
 
 	if (m_Width != Width || m_Height != Height)
 	{
-		LOG_DEBUG("System: Window resized, width = {}, height = {}", m_Width, m_Height);
+		LOG_DEBUG("Set window mode to \"{}\", Window resized from @{}x{} to @{}x{}", magic_enum::enum_name(m_Mode), m_Width, m_Height, Width, Height);
 		m_Width = Width;
 		m_Height = Height;
 	}
@@ -73,45 +76,77 @@ void Window::SetMode(EWindowMode Mode)
 		return;
 	}
 
+	static ::WINDOWPLACEMENT s_PreFullscreenWindowPlacement{};
+
+	EWindowMode PreviousMode = m_Mode;
 	m_Mode = Mode;
 
 	::HWND hWnd = reinterpret_cast<::HWND>(m_Handle);
-	const ::LONG WindowedStyle = WS_OVERLAPPEDWINDOW;
-	const ::LONG FullscreenStyle = WS_POPUP;
-	::LONG WindowStyle = ::GetWindowLong(hWnd, GWL_STYLE);
-	::UINT Flags = SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED;
-	
-	::RECT WindowRect;
-	::GetClientRect(hWnd, &WindowRect);
-
-	const int32_t Left = WindowRect.left;
-	const int32_t Top = WindowRect.top;
-	int32_t Width = 0, Height = 0;
+	const long WindowedStyle = WS_OVERLAPPEDWINDOW;
+	const long FullscreenStyle = WS_POPUP;
+	long WindowStyle = ::GetWindowLong(hWnd, GWL_STYLE);
 
 	if (Mode == EWindowMode::Windowed)
 	{
 		WindowStyle &= ~FullscreenStyle;
 		WindowStyle |= WindowedStyle;
-		Flags |= SWP_NOSIZE;
+
+		::SetWindowLong(hWnd, GWL_STYLE, WindowStyle);
+		::SetWindowPos(hWnd, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+
+		if (s_PreFullscreenWindowPlacement.length)
+		{
+			::SetWindowPlacement(hWnd, &s_PreFullscreenWindowPlacement);
+		}
+
+		if (HICON hIcon = (HICON)::GetClassLongPtr(hWnd, GCLP_HICON))
+		{
+			::SendMessageW(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+		}
+
+		UpdateSize(0u, 0u);
 	}
 	else if (Mode == EWindowMode::BorderlessFullscreen || Mode == EWindowMode::ExclusiveFullscreen)
 	{
+		if (PreviousMode == EWindowMode::Windowed)
+		{
+			s_PreFullscreenWindowPlacement.length = sizeof(::WINDOWPLACEMENT);
+			::GetWindowPlacement(hWnd, &s_PreFullscreenWindowPlacement);
+		}
+
 		WindowStyle &= ~WindowedStyle;
 		WindowStyle |= FullscreenStyle;
 
+		::SetWindowLong(hWnd, GWL_STYLE, WindowStyle);
+		::SetWindowPos(hWnd, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+
+		if (Mode == EWindowMode::BorderlessFullscreen)
+		{
+			::ShowWindow(hWnd, SW_RESTORE);
+		}
+
+		::RECT ClientRect{};
+		::GetClientRect(hWnd, &ClientRect);
+
 		::HMONITOR Monitor = ::MonitorFromWindow(hWnd, Mode == EWindowMode::ExclusiveFullscreen ? MONITOR_DEFAULTTOPRIMARY : MONITOR_DEFAULTTONEAREST);
-		::MONITORINFO MonitorInfo;
-		MonitorInfo.cbSize = sizeof(::MONITORINFO);
+		::MONITORINFO MonitorInfo{ sizeof(::MONITORINFO) };
 		::GetMonitorInfo(Monitor, &MonitorInfo);
 
-		Width = static_cast<int32_t>(MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left);
-		Height = static_cast<int32_t>(MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top);
+		long MonitorWidth = MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left;
+		long TargetClientWidth = Mode == EWindowMode::ExclusiveFullscreen ?
+			std::min<long>(MonitorWidth, ClientRect.right - ClientRect.left) :
+			MonitorWidth;
+
+		long MonitorHeight = MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top;
+		long TargetClientHeight = Mode == EWindowMode::ExclusiveFullscreen ?
+			std::min<long>(MonitorHeight, ClientRect.bottom - ClientRect.top) :
+			MonitorHeight;
+
+		::SetWindowPos(hWnd, nullptr, MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top, TargetClientWidth, TargetClientHeight, 
+			SWP_NOZORDER | SWP_NOACTIVATE | ((m_Mode == EWindowMode::ExclusiveFullscreen) ? SWP_NOSENDCHANGING : 0));
+
+		UpdateSize(TargetClientWidth, TargetClientHeight);
 	}
-
-	::SetWindowLong(hWnd, GWL_STYLE, WindowStyle);
-	::SetWindowPos(hWnd, nullptr, Left, Top, Width, Height, Flags);
-
-	UpdateSize();
 }
 
 #endif // PLATFORM_WIN32
