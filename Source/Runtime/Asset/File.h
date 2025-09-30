@@ -51,8 +51,9 @@ public:
 	{
 		if (std::filesystem::exists(Path))
 		{
-			return std::chrono::duration_cast<std::filesystem::file_time_type::duration>(
-				std::filesystem::last_write_time(Path).time_since_epoch()).count();
+			auto LastWriteTimeDuration = std::filesystem::last_write_time(Path).time_since_epoch();
+			auto SysTimepoint = std::chrono::system_clock::time_point(std::chrono::duration_cast<std::chrono::system_clock::duration>(LastWriteTimeDuration));
+			return std::chrono::system_clock::to_time_t(SysTimepoint);
 		}
 		return 0;
 	}
@@ -70,6 +71,37 @@ protected:
 	inline void SetPath(T&& Path)
 	{
 		m_Path = std::forward<T>(Path);
+	}
+
+	static void SetLastWriteTime(const std::filesystem::path& Path, const std::chrono::system_clock::time_point& Timepoint = std::chrono::system_clock::from_time_t(0))
+	{
+		if (std::filesystem::exists(Path))
+		{
+			if (Timepoint.time_since_epoch().count() == 0)
+			{
+				std::filesystem::last_write_time(Path, std::filesystem::file_time_type::clock::now());
+			}
+			else
+			{
+				auto LastWriteTimeDuration = std::chrono::duration_cast<std::filesystem::file_time_type::duration>(Timepoint.time_since_epoch());
+				auto FileTimepoint = std::filesystem::file_time_type::time_point(LastWriteTimeDuration);
+				std::filesystem::last_write_time(Path, FileTimepoint);
+			}
+		}
+	}
+
+	void SetLastWriteTime(const std::chrono::system_clock::time_point& Timepoint = std::chrono::system_clock::from_time_t(0))
+	{
+		if (Timepoint.time_since_epoch().count() == 0)
+		{
+			auto Duration = std::filesystem::file_time_type::clock::now().time_since_epoch();
+			auto SysTimepoint = std::chrono::system_clock::time_point(std::chrono::duration_cast<std::chrono::system_clock::duration>(Duration));
+			m_LastWriteTime = std::chrono::system_clock::to_time_t(SysTimepoint);
+		}
+		else
+		{
+			m_LastWriteTime = std::chrono::system_clock::to_time_t(Timepoint);
+		}
 	}
 private:
 	std::filesystem::path m_Path; /// Notice the order of the members

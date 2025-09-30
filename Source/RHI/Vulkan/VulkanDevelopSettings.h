@@ -144,6 +144,7 @@ struct VulkanDevelopSettings : public Serializable<VulkanDevelopSettings>
 	void serialize(Archive& Ar)
 	{
 		Ar(
+			CEREAL_BASE(BaseClass),
 			CEREAL_NVP_ENUM(ERHIDebugLayerLevel, DebugLayerLevel),
 			CEREAL_NVP(Extensions),
 			CEREAL_NVP(DescriptorLimits)

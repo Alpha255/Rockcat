@@ -78,6 +78,7 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
+			CEREAL_BASE(BaseClass),
 			CEREAL_NVP(m_Timestamp),
 			CEREAL_NVP(m_Hash),
 			CEREAL_NVP(m_Blob)

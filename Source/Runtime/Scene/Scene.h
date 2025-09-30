@@ -34,6 +34,7 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
+			CEREAL_BASE(BaseClass),
 			CEREAL_BASE(SceneGraph),
 			CEREAL_NVP(m_AssimpScenes),
 			CEREAL_NVP(m_ComponentPool)

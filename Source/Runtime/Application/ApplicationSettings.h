@@ -15,6 +15,7 @@ struct ApplicationSettings : public Serializable<ApplicationSettings>
 	void serialize(Archive& Ar)
 	{
 		Ar(
+			CEREAL_BASE(BaseClass),
 			CEREAL_NVP(Window),
 			CEREAL_NVP(Rendering)
 		);

@@ -19,6 +19,22 @@ enum class EThread
 	MainThread
 };
 
+class Future : public tf::Future<void>
+{
+public:
+	using tf::Future<void>::Future;
+
+	explicit Future(tf::Future<void>& Future) noexcept
+	{
+		*this = std::move(Future);
+	}
+
+	explicit Future(std::future<void>& Future) noexcept
+	{
+		*this = std::move(Future);
+	}
+};
+
 class TaskEvent
 {
 public:
@@ -43,11 +59,12 @@ public:
 	}
 
 	explicit TaskEvent(tf::Future<void>& Future) noexcept
+		: m_Future(Future)
 	{
-		m_Future = std::move(Future);
 	}
 
 	explicit TaskEvent(std::future<void>& Future) noexcept
+		: m_Future(Future)
 	{
 
 	}
@@ -84,7 +101,7 @@ public:
 		return m_Future.valid() ? m_Future.cancel() : false;
 	}
 private:
-	tf::Future<void> m_Future;
+	Future m_Future;
 };
 
 using TaskEventPtr = std::shared_ptr<TaskEvent>;

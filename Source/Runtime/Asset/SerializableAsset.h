@@ -76,6 +76,9 @@ public:
 				VERIFY(std::filesystem::create_directories(ParentPath));
 			}
 
+			std::chrono::system_clock::time_point SerializeTimepoint = std::chrono::system_clock::now();
+			SetLastWriteTime(SerializeTimepoint);
+
 			std::ofstream FileStream(SavePath);
 			if (FileStream.is_open())
 			{
@@ -90,6 +93,8 @@ public:
 			}
 
 			FileStream.close();
+
+			File::SetLastWriteTime(SavePath, SerializeTimepoint);
 		}
 	}
 

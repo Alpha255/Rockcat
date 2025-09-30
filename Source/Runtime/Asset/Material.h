@@ -97,6 +97,7 @@ struct MaterialProperty : public Serializable<MaterialProperty>
 	void serialize(Archive& Ar)
 	{
 		Ar(
+			CEREAL_BASE(BaseClass),
 			CEREAL_NVP(Name),
 			CEREAL_NVP(CullMode),
 			CEREAL_NVP(ShadingMode),

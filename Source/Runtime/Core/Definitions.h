@@ -300,36 +300,9 @@ inline auto Invoke(Function&& Func, Args&&... ArgList) -> decltype(std::forward<
 	return std::forward<Function>(Func)(std::forward<Args>(ArgList)...);
 }
 
-size_t PopulationCount(size_t Value);
-size_t GetPowerOfTwo(uint32_t Value);
-
-std::string TrimEnumString(const std::string& Name);
-
-void SplitEnumArgs(const char* Args, std::string Names[], uint32_t Max);
-
 static constexpr size_t Kilobyte = 1 << 10u;
 static constexpr size_t Megabyte = 1 << 20u;
 static constexpr size_t Gigabyte = 1 << 30u;
-
-#define DECLARE_ENUM_CLASS(ClassName, ...)                     \
-class ClassName                                                \
-{                                                              \
-public:                                                        \
-	enum Value                                                 \
-	{                                                          \
-		__VA_ARGS__,                                           \
-		Max                                                    \
-	};                                                         \
-	static constexpr const char* ToString(Value& EnumName)     \
-	{                                                          \
-		static std::string Names[Max];                         \
-		if (Names[0].empty())                                  \
-		{                                                      \
-			SplitEnumArgs(#__VA_ARGS__, Names, Max);           \
-		}                                                      \
-		return Names[static_cast<uint32_t>(EnumName)].c_str(); \
-	}                                                          \
-};
 
 class NoneCopyable
 {
@@ -387,3 +360,10 @@ public:
 	inline T& operator[](size_t Index) { return this->at(Index); }
 	inline const T& operator[](size_t Index) const { return this->at(Index); }
 };
+
+namespace Utils
+{
+	size_t PopulationCount(size_t Value);
+	size_t GetPowerOfTwo(uint32_t Value);
+	std::string GetTimepointString(const std::chrono::system_clock::time_point& Timepoint, const char* Format = "%Y-%m-%d %H:%M:%S");
+}

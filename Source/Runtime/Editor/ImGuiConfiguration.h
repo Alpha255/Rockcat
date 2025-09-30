@@ -168,6 +168,7 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
+			CEREAL_BASE(BaseClass),
 			CEREAL_NVP(m_DefaultTheme),
 			CEREAL_NVP(m_DefaultFont),
 			CEREAL_NVP(m_Fonts)

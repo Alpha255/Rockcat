@@ -18,6 +18,7 @@ struct ImGuiTheme : public ImGuiStyle, public Serializable<ImGuiTheme>
 	void serialize(Archive& Ar)
 	{
 		Ar(
+            CEREAL_BASE(BaseClass),
             CEREAL_NVP(Alpha),
             CEREAL_NVP(DisabledAlpha),
             CEREAL_NVP(WindowPadding),
