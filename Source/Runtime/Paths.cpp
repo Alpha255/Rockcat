@@ -34,12 +34,12 @@ const std::filesystem::path& Paths::ShaderPath()
 	return Path;
 }
 
-const std::filesystem::path& Paths::ShaderBinaryCachePath()
+const std::filesystem::path& Paths::ShaderBinaryPath()
 {
 	static std::filesystem::path Path;
 	if (Path.empty())
 	{
-		Path = ShaderPath() / "ShaderBinaryCache";
+		Path = ShaderPath() / "ShaderBinary";
 	}
 
 	return Path;

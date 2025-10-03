@@ -11,18 +11,11 @@
 class ShaderDefines
 {
 public:
-	void SetDefine(const char* Name, const char* Value) { m_Defines[Name] = Value; }
-	void SetDefine(const char* Name, const std::string& Value) { m_Defines[Name] = Value; }
-	void SetDefine(const std::string& Name, const std::string& Value) { m_Defines[Name] = Value; }
-	void SetDefine(const std::string& Name, const char* Value) { m_Defines[Name] = Value; }
+	template<class T>
+	inline void SetDefine(const char* Name, T Value) { m_Defines[Name] = (std::stringstream() << Value).str(); }
 
 	template<class T>
-	void SetDefine(const char* Name, T Value) { m_Defines[Name] = (std::stringstream() << Value).str(); }
-
-	template<class T>
-	void SetDefine(const std::string& Name, T Value) { m_Defines[Name] = (std::stringstream() << Value).str(); }
-
-	void Merge(ShaderDefines&& Other) { m_Defines.merge(std::move(Other.m_Defines)); }
+	inline void SetDefine(const std::string& Name, T Value) { m_Defines[Name] = (std::stringstream() << Value).str(); }
 
 	void Merge(const ShaderDefines& Other)
 	{
@@ -33,17 +26,6 @@ public:
 	}
 
 	const std::map<std::string, std::string>& GetDefines() const { return m_Defines; }
-
-	virtual size_t ComputeHash() const
-	{
-		size_t Hash = 0u;
-		for (const auto& [Name, Value] : m_Defines)
-		{
-			HashCombine(Hash, Name);
-			HashCombine(Hash, Value);
-		}
-		return Hash;
-	}
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -56,7 +38,41 @@ private:
 	std::map<std::string, std::string> m_Defines;
 };
 
-using ShaderBlob = DataBlock;
+class ShaderMetaData : public Asset
+{
+public:
+	using Asset::Asset;
+
+	ShaderMetaData(const std::filesystem::path& Path, ERHIShaderStage Stage, const char* EntryName)
+		: Asset(Path)
+		, m_Stage(Stage)
+		, m_EntryName(EntryName)
+	{
+	}
+
+	ShaderMetaData(std::filesystem::path&& Path, ERHIShaderStage Stage, const char* EntryName)
+		: Asset(std::forward<std::filesystem::path>(Path))
+		, m_Stage(Stage)
+		, m_EntryName(EntryName)
+	{
+	}
+
+	inline ERHIShaderStage GetStage() const { return m_Stage; }
+	inline const char* GetEntryName() const { return m_EntryName.c_str(); }
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(Asset),
+			CEREAL_NVP(m_Stage),
+			CEREAL_NVP(m_EntryName)
+		);
+	}
+private:
+	ERHIShaderStage m_Stage;
+	std::string m_EntryName;
+};
 
 class ShaderBinary : public Serializable<ShaderBinary>
 {
@@ -126,23 +142,6 @@ struct ShaderVariable
 	inline bool IsValid() const { return Value.index() != 0u; }
 };
 
-class ShaderMetaData : public Asset
-{
-public:
-	ShaderMetaData(const char* const SubPath, const char* const Entry, ERHIShaderStage Stage)
-		: Asset(Paths::ShaderPath() / SubPath)
-		, m_Entry(Entry)
-		, m_Stage(Stage)
-	{
-	}
-
-	const char* const GetEntryPoint() const { return m_Entry; }
-	ERHIShaderStage GetStage() const { return m_Stage; }
-private:
-	const char* const m_Entry;
-	ERHIShaderStage m_Stage;
-};
-
 class Shader : public ShaderDefines
 {
 public:
@@ -204,4 +203,21 @@ protected:
 };
 
 #define DEFINITION_SHADER_METADATA(ShaderClass, SourceFile, Entry, Stage) ShaderMetaData GlobalShader<ShaderClass>::s_MetaData(SourceFile, Entry, Stage);
+
+namespace std
+{
+	template<> struct hash<ShaderDefines>
+	{
+		size_t operator()(const ShaderDefines& Defines) const
+		{
+			size_t Hash = 0u;
+			for (const auto& [Name, Value] : Defines.GetDefines())
+			{
+				HashCombine(Hash, Name);
+				HashCombine(Hash, Value);
+			}
+			return Hash;
+		}
+	};
+};
 
