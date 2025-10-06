@@ -1,115 +1,11 @@
 #pragma once
 
 #include "Core/Math/Matrix.h"
-#include "Core/Math/Transform.h"
 #include "Asset/SerializableAsset.h"
-#include "Asset/TextureAsset.h"
-#include "Rendering/RenderSettings.h"
+#include "RHI/RHITexture.h"
 #include "RHI/RHIShader.h"
-#include "Paths.h"
-
-class ShaderDefines
-{
-public:
-	template<class T>
-	inline void SetDefine(const char* Name, T Value) { m_Defines[Name] = (std::stringstream() << Value).str(); }
-
-	template<class T>
-	inline void SetDefine(const std::string& Name, T Value) { m_Defines[Name] = (std::stringstream() << Value).str(); }
-
-	void Merge(const ShaderDefines& Other)
-	{
-		for (const auto& [Name, Value] : Other.m_Defines)
-		{
-			SetDefine(Name, Value);
-		}
-	}
-
-	const std::map<std::string, std::string>& GetDefines() const { return m_Defines; }
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(m_Defines)
-		);
-	}
-private:
-	std::map<std::string, std::string> m_Defines;
-};
-
-class ShaderMetaData : public Asset
-{
-public:
-	using Asset::Asset;
-
-	ShaderMetaData(const std::filesystem::path& Path, ERHIShaderStage Stage, const char* EntryName)
-		: Asset(Path)
-		, m_Stage(Stage)
-		, m_EntryName(EntryName)
-	{
-	}
-
-	ShaderMetaData(std::filesystem::path&& Path, ERHIShaderStage Stage, const char* EntryName)
-		: Asset(std::forward<std::filesystem::path>(Path))
-		, m_Stage(Stage)
-		, m_EntryName(EntryName)
-	{
-	}
-
-	inline ERHIShaderStage GetStage() const { return m_Stage; }
-	inline const char* GetEntryName() const { return m_EntryName.c_str(); }
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_BASE(Asset),
-			CEREAL_NVP(m_Stage),
-			CEREAL_NVP(m_EntryName)
-		);
-	}
-private:
-	ERHIShaderStage m_Stage;
-	std::string m_EntryName;
-};
-
-class ShaderBinary : public Serializable<ShaderBinary>
-{
-public:
-	using BaseClass::BaseClass;
-
-	ShaderBinary(const std::string& ShaderName, const char* DeviceName, ERHIShaderStage Stage, std::time_t Timestamp, size_t Hash, ShaderBlob&& Blob);
-
-	static std::filesystem::path GetUniquePath(const std::string& ShaderName, const char* DeviceName, size_t Hash);
-
-	std::time_t GetTimestamp() const { return m_Timestamp; }
-	size_t GetHash() const { return m_Hash; }
-	size_t GetSize() const { return m_Blob.Size; }
-	ERHIShaderStage GetStage() const { return m_Stage; }
-	const std::byte* GetData() const { return m_Blob.Data.get(); }
-	bool IsValid() const { return m_Blob.IsValid(); }
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_BASE(BaseClass),
-			CEREAL_NVP(m_Timestamp),
-			CEREAL_NVP(m_Hash),
-			CEREAL_NVP(m_Blob)
-		);
-	}
-private:
-	std::time_t m_Timestamp = 0u;
-	size_t m_Hash = 0u;
-	ERHIShaderStage m_Stage = ERHIShaderStage::Num;
-	ShaderBlob m_Blob;
-};
-
-struct UniformBuffer
-{
-};
+#include "RHI/RHIBuffer.h"
+#include "Rendering/RenderSettings.h"
 
 struct ShaderVariable
 {
@@ -142,42 +38,87 @@ struct ShaderVariable
 	inline bool IsValid() const { return Value.index() != 0u; }
 };
 
-class Shader : public ShaderDefines
+class ShaderDefines
 {
 public:
-	const std::map<std::string_view, ShaderVariable>& GetVariables() const { return m_Variables; }
-	RHIBuffer* GetUniformBuffer(class RHIDevice& Device);
+	template<class T>
+	inline void SetDefine(const char* Name, T Value) { m_Defines[Name] = (std::stringstream() << Value).str(); }
 
-	virtual void SetupTransform(const Math::Transform&) {}
-	virtual void SetupViewParams(const class ISceneView&) {}
-	virtual void SetupMaterialProperty(const struct MaterialProperty&) {}
-	
-	virtual const ShaderMetaData& GetMetaData() const = 0;
-	virtual const std::filesystem::path& GetSourceFilePath() const = 0;
-	virtual time_t GetTimestamp() const = 0;
-	virtual std::filesystem::path GetName() const = 0;
-	virtual const char* const GetEntryPoint() const = 0;
-	virtual ERHIShaderStage GetStage() const = 0;
-	virtual bool IsDirty() const = 0;
+	template<class T>
+	inline void SetDefine(const std::string& Name, T Value) { m_Defines[Name] = (std::stringstream() << Value).str(); }
 
-	const RHIShader* TryGetRHI();
+	void Merge(const ShaderDefines& Other)
+	{
+		for (const auto& [Name, Value] : Other.m_Defines)
+		{
+			SetDefine(Name, Value);
+		}
+	}
 
-	size_t ComputeHash() const override { return ::ComputeHash(ComputeBaseHash(), GetTimestamp()); }
-	size_t ComputeBaseHash() const { return ::ComputeHash(std::filesystem::hash_value(GetSourceFilePath()), ShaderDefines::ComputeHash()); }
+	const std::map<std::string, std::string>& GetDefines() const { return m_Defines; }
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_NVP(m_Defines)
+		);
+	}
+private:
+	std::map<std::string, std::string> m_Defines;
+};
+
+class ShaderBinary : public Serializable<ShaderBinary>
+{
+public:
+	using BaseClass::BaseClass;
+
+	ShaderBinary(const class Shader& InShader, ERHIDeviceType DeviceType);
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(BaseClass)
+		);
+	}
+private:
+	static std::filesystem::path GetUniquePath(const Shader& InShader, ERHIDeviceType DeviceType);
+
+	DataBlock m_Blob;
+};
+
+class Shader : public Asset, public ShaderDefines
+{
+public:
+	Shader(const std::filesystem::path& Path, ERHIShaderStage Stage, const char* EntryPoint)
+		: Asset(Path)
+		, m_Stage(Stage)
+		, m_Entry(EntryPoint)
+	{
+	}
+
+	Shader(std::filesystem::path&& Path, ERHIShaderStage Stage, const char* EntryPoint)
+		: Asset(std::forward<std::filesystem::path>(Path))
+		, m_Stage(Stage)
+		, m_Entry(EntryPoint)
+	{
+	}
+
+	inline ERHIShaderStage GetStage() const { return m_Stage; }
+	inline const char* GetEntryPoint() const { return m_Entry.c_str(); }
+
+	inline const std::map<std::string_view, ShaderVariable>& GetVariables() const { return m_Variables; }
 protected:
 	friend struct ShaderCompileTask;
 	friend class ShaderLibrary;
 
 	void RegisterVariable(const char* Name, ShaderVariable&& Variable);
-	virtual ShaderMetaData& GetMetaData() = 0;
-	virtual const RHIShader* GetFallback() const;
 private:
-	size_t ComputeUniformBufferSize();
+	ERHIShaderStage m_Stage;
+	std::string m_Entry;
 
 	std::map<std::string_view, ShaderVariable> m_Variables;
-	RHIBufferPtr m_UniformBuffer;
-
-	const RHIShader* m_ShaderModule = nullptr;
 };
 
 template<class T>
@@ -188,21 +129,8 @@ public:
 	{
 		T::RegisterShaderVariables(Cast<T>(*this));
 	}
-
-	ERHIShaderStage GetStage() const override final { return s_MetaData.GetStage(); }
-	const ShaderMetaData& GetMetaData() const override final { return s_MetaData; }
-	const std::filesystem::path& GetSourceFilePath() const override final { return s_MetaData.GetPath(); }
-	time_t GetTimestamp() const override final { return s_MetaData.GetLastWriteTime(GetSourceFilePath()); }
-	const char* const GetEntryPoint() const override final { return s_MetaData.GetEntryPoint(); }
-	std::filesystem::path GetName() const override final { return s_MetaData.GetStem(); }
-	bool IsDirty() const override final { return s_MetaData.IsDirty(); }
 protected:
-	ShaderMetaData& GetMetaData() override final { return s_MetaData; }
-
-	static ShaderMetaData s_MetaData;
 };
-
-#define DEFINITION_SHADER_METADATA(ShaderClass, SourceFile, Entry, Stage) ShaderMetaData GlobalShader<ShaderClass>::s_MetaData(SourceFile, Entry, Stage);
 
 namespace std
 {
@@ -216,6 +144,16 @@ namespace std
 				HashCombine(Hash, Name);
 				HashCombine(Hash, Value);
 			}
+			return Hash;
+		}
+	};
+
+	template<> struct hash<Shader>
+	{
+		size_t operator()(const Shader& InShader) const
+		{
+			size_t Hash = std::hash<ShaderDefines>()(InShader);
+			HashCombine(Hash, static_cast<uint8_t>(InShader.GetStage()));
 			return Hash;
 		}
 	};
