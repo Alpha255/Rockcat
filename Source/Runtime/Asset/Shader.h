@@ -7,28 +7,21 @@
 #include "RHI/RHIBuffer.h"
 #include "Rendering/RenderSettings.h"
 
+using ShaderBlob = DataBlock;
+
 struct ShaderVariable
 {
 	using Variant = std::variant<
 		std::monostate,
-		float,
-		int32_t,
-		uint32_t,
-		Math::Vector2,
-		Math::Vector3,
-		Math::Vector4,
-		Math::Matrix,
+		const RHIBuffer*,
 		const RHITexture*,
-		const RHISampler*,
-		const RHIBuffer*>;
+		const RHISampler*>;
 
 	using Setter = std::function<void(const Variant&)>;
 	using Getter = std::function<Variant(void)>;
 
 	ERHIResourceType Type = ERHIResourceType::Unknown;
 	uint32_t Binding = ~0u;
-	size_t Offset = 0u;
-	size_t Stride = 0u;
 
 	Setter Set;
 	Getter Get;
@@ -75,6 +68,8 @@ public:
 
 	ShaderBinary(const class Shader& InShader, ERHIDeviceType DeviceType);
 
+	inline const ShaderBlob& GetBlob() const { return m_Blob; }
+
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
@@ -83,9 +78,9 @@ public:
 		);
 	}
 private:
-	static std::filesystem::path GetUniquePath(const Shader& InShader, ERHIDeviceType DeviceType);
+	static std::filesystem::path GetPath(const Shader& InShader, ERHIDeviceType DeviceType);
 
-	DataBlock m_Blob;
+	ShaderBlob m_Blob;
 };
 
 class Shader : public Asset, public ShaderDefines
@@ -125,7 +120,14 @@ template<class T>
 class GlobalShader : public Shader
 {
 public:
-	GlobalShader()
+	GlobalShader(const std::filesystem::path& Path, ERHIShaderStage Stage, const char* EntryPoint)
+		: Shader(Path, Stage, EntryPoint)
+	{
+		T::RegisterShaderVariables(Cast<T>(*this));
+	}
+
+	GlobalShader(std::filesystem::path&& Path, ERHIShaderStage Stage, const char* EntryPoint)
+		: Shader(std::forward<std::filesystem::path>(Path), Stage, EntryPoint)
 	{
 		T::RegisterShaderVariables(Cast<T>(*this));
 	}

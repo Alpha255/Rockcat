@@ -3,11 +3,11 @@
 #include "Paths.h"
 
 ShaderBinary::ShaderBinary(const Shader& InShader, ERHIDeviceType DeviceType)
-	: BaseClass(GetUniquePath(InShader, DeviceType))
+	: BaseClass(GetPath(InShader, DeviceType))
 {
 }
 
-std::filesystem::path ShaderBinary::GetUniquePath(const Shader& InShader, ERHIDeviceType DeviceType)
+std::filesystem::path ShaderBinary::GetPath(const Shader& InShader, ERHIDeviceType DeviceType)
 {
 	const std::filesystem::path RelativePath = std::filesystem::relative(InShader.GetPath(), Paths::ShaderPath()).parent_path();
 	return Paths::ShaderBinaryPath() / 
