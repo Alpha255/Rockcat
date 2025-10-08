@@ -60,9 +60,9 @@ private: \
 	OwnerClass& Set##Name(const Type* Resource) { Name = Resource; return *this; }
 
 #define SHADER_PARAMETER_GETTER_UNIFORM_BUFFER(Type, Name) \
-	inline Type& Get##Name() { return Name; } \
+	inline UniformBuffer_##Type& GetUniformBuffer() { return Name; } \
 
-#define SHADER_PARAMETER_UNIFORM_BUFFER(Type, Name, Binding) SHADER_PARAMETER(Type, Name, UniformBuffer, Binding, SHADER_PARAMETER_GETTER_UNIFORM_BUFFER(Type, Name))
+#define SHADER_PARAMETER_UNIFORM_BUFFER(Type, Name, Binding) SHADER_PARAMETER(UniformBuffer_##Type, Name, UniformBuffer, Binding, SHADER_PARAMETER_GETTER_UNIFORM_BUFFER(Type, Name))
 
 #define SHADER_PARAMETER_TEXTURE_1D(Name, Binding) SHADER_PARAMETER(const RHITexture*, Name, SampledImage, Binding, SHADER_PARAMETER_SETTER_GETTER_DEFAULT(RHITexture, Name))
 #define SHADER_PARAMETER_TEXTURE_1D_ARRAY(Name, Binding) SHADER_PARAMETER(const RHITexture*, Name, SampledImage, Binding, SHADER_PARAMETER_SETTER_GETTER_DEFAULT(RHITexture, Name))
@@ -285,13 +285,32 @@ struct VSOutput
 
 #endif  // __cplusplus
 
-#define DEFINITION_GENERIC_VS_SHADER_VARIABLES \
-	DECLARE_SHADER_VARIABLES_BEGIN(GenericVS) \
-		DECLARE_SV_UNIFORM_BUFFER_BEGIN(WVP, 0) \
-			DECLARE_SV_UNIFORM_BUFFER(float4x4, WorldMatrix) \
-			DECLARE_SV_UNIFORM_BUFFER(float4x4, ViewMatrix) \
-			DECLARE_SV_UNIFORM_BUFFER(float4x4, ProjectionMatrix) \
-		DECLARE_SV_UNIFORM_BUFFER_END \
-	DECLARE_SHADER_VARIABLES_END \
+struct UniformBuffer
+{
+};
+
+#define BEGIN_SHADER_PARAMETER_UNIFORM_BUFFER(Name) \
+	struct UniformBuffer_##Name : public UniformBuffer {
+
+#define UNIFORM_BUFFER_PARAMETER(Type, Name) Type Name;
+#define UNIFORM_BUFFER_PARAMETER2(Type, Name) \
+	private: \
+		Type Name; \
+	public: \
+		inline const Type& Get##Name() const { return Name; } \
+	    inline void Set##Name(const Type& Value) { Name = Value; }
+
+#define END_SHADER_PARAMETER_UNIFORM_BUFFER() };
+
+BEGIN_SHADER_PARAMETER_UNIFORM_BUFFER(WVP)
+	UNIFORM_BUFFER_PARAMETER(float4x4, WorldMatrix)
+	UNIFORM_BUFFER_PARAMETER(float4x4, ViewMatrix)
+	UNIFORM_BUFFER_PARAMETER(float4x4, ProjectionMatrix)
+END_SHADER_PARAMETER_UNIFORM_BUFFER()
+
+#define DEFINE_SHADER_PARAMETERS_GENERIC_VS \
+	BEGIN_SHADER_PARAMETER(GenericVS) \
+		SHADER_PARAMETER_UNIFORM_BUFFER(WVP, WVP, 0) \
+	END_SHADER_PARAMETER \
 
 #endif  // __INCLUDE_DEFINITIONS__
