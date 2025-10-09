@@ -9,20 +9,6 @@
 #include <filewatch/FileWatch.hpp>
 #pragma warning(default:4068)
 
-const RHIShader* ShaderLibrary::ShaderPermutation::GetOrCreateRHI(RHIDevice& Device)
-{
-	if (!Module && Binary->IsValid())
-	{
-		RHIShaderDesc Desc;
-		Desc.SetStage(Binary->GetStage())
-			.SetShaderBinary(Binary.get())
-			.SetName(Binary->GetName());
-		Module = Device.CreateShader(Desc);
-	}
-
-	return Module.get();
-}
-
 ShaderLibrary::ShaderLibrary(RHIDevice& Device)
 	: m_Device(Device)
 	, m_DeviceName(Device.GetName())

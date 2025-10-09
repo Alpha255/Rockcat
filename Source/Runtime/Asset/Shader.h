@@ -97,14 +97,6 @@ public:
 	}
 
 	const std::map<std::string, std::string>& GetDefines() const { return m_Defines; }
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(m_Defines)
-		);
-	}
 private:
 	std::map<std::string, std::string> m_Defines;
 };
@@ -152,12 +144,15 @@ public:
 	inline const char* GetEntryPoint() const { return m_Entry.c_str(); }
 
 	inline const std::vector<ShaderVariable>& GetVariables() const { return m_Variables; }
+
+	const RHIShader* GetRHI(ERHIDeviceType DeviceType) const;
 protected:
-	friend struct ShaderCompileTask;
 	friend class ShaderLibrary;
 
 	uint32_t RegisterVariable(ShaderVariable&& Variable);
 	inline std::vector<ShaderVariable>& GetVariables() { return m_Variables; }
+
+	virtual const RHIShader* GetFallback(ERHIDeviceType DeviceType) const;
 private:
 	ERHIShaderStage m_Stage;
 	std::string m_Entry;

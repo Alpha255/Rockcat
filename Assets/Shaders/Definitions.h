@@ -12,15 +12,6 @@ using float3 = Math::Vector3;
 using float4 = Math::Vector4;
 using float4x4 = Math::Matrix;
 
-template<class T>
-class UniformBuffer
-{
-public:
-	RHIBuffer* GetRHI(RHIDevice&) const { return m_Buffer.get(); }
-private:
-	RHIBufferPtr m_Buffer;
-};
-
 #define BEGIN_SHADER_VARIABLE(Owner) \
 protected: \
 	using OwnerClass = Owner; \
@@ -32,7 +23,7 @@ private: \
 	typedef FirstVariableID
 
 #define SHADER_VARIABLE(Name, ResType, Binding, SetterGetter) \
-	VariableID##Name; \
+	VariableID_##Name; \
 	private: \
 		struct Name##Index { inline static uint32_t Index = 0; }; \
 	public: \
@@ -43,16 +34,16 @@ private: \
 		{ \
 			ShaderVariable Variable{ Owner.GetStage(), ERHIResourceType::ResType, Binding, ~0u, #Name }; \
 			Name##Index::Index = Owner.RegisterVariable(std::move(Variable)); \
-			FuncPtr(*LastShaderVariableRegisterFunc)(VariableID##Name, OwnerClass&); \
+			FuncPtr(*LastShaderVariableRegisterFunc)(VariableID_##Name, OwnerClass&); \
 			LastShaderVariableRegisterFunc = RegisterShaderVariable; \
 			return reinterpret_cast<FuncPtr>(LastShaderVariableRegisterFunc); \
 		} \
 		typedef NextVariableID_##Name
 
 #define SHADER_VARIABLE_UNIFORM_BUFFER_IMPL(Type, Name, ResType, Binding, SetterGetter) \
-	VariableID##Name; \
+	VariableID_##Name; \
 	private: \
-		Type Name; \
+		Type Name{}; \
 		struct Name##Index { inline static uint32_t Index = 0; }; \
 	public: \
 		SetterGetter \
@@ -62,7 +53,7 @@ private: \
 		{ \
 			ShaderVariable Variable{ Owner.GetStage(), ERHIResourceType::ResType, Binding, ~0u, "UniformBuffer_" #Name }; \
 			Name##Index::Index = Owner.RegisterVariable(std::move(Variable)); \
-			FuncPtr(*LastShaderVariableRegisterFunc)(VariableID##Name, OwnerClass&); \
+			FuncPtr(*LastShaderVariableRegisterFunc)(VariableID_##Name, OwnerClass&); \
 			LastShaderVariableRegisterFunc = RegisterShaderVariable; \
 			return reinterpret_cast<FuncPtr>(LastShaderVariableRegisterFunc); \
 		} \
@@ -80,41 +71,33 @@ private: \
 				Func = reinterpret_cast<RegisterShaderVariableFunc>(Func)(FirstVariableID(), Owner); \
 			} while(Func); }
 
-#define SHADER_VARIABLE_SETTER_GETTER_BUFFER(Name) \
-	inline const RHIBuffer* Get##Name() const { return GetVariables()[Name##Index::Index].GetBuffer(); } \
-	inline OwnerClass& Set##Name(const RHIBuffer* Buffer) { GetVariables()[Name##Index::Index].SetBuffer(Buffer); return *this; }
-
-#define SHADER_VARIABLE_SETTER_GETTER_TEXTURE(Name) \
-	inline const RHITexture* Get##Name() const { return GetVariables()[Name##Index::Index].GetTexture(); } \
-	inline OwnerClass& Set##Name(const RHITexture* Texture) { GetVariables()[Name##Index::Index].SetTexture(Texture); return *this; }
-
-#define SHADER_VARIABLE_SETTER_GETTER_SAMPLER(Name) \
-	inline const RHISampler* Get##Name() const { return GetVariables()[Name##Index::Index].Resource.Sampler; } \
-	inline OwnerClass& Set##Name(const RHISampler* Sampler) { GetVariables()[Name##Index::Index].SetSampler(Sampler); return *this; }
+#define SHADER_VARIABLE_SETTER_GETTER(Name, Type) \
+	inline const RHI##Type* Get##Name() const { return GetVariables()[Name##Index::Index].Get##Type(); } \
+	inline OwnerClass& Set##Name(const RHI##Type* Resource) { GetVariables()[Name##Index::Index].Set##Type(Resource); return *this; }
 
 #define SHADER_VARIABLE_GETTER_UNIFORM_BUFFER(Name) \
-	inline UniformBuffer_##Name& GetUniformBuffer() { return Name; } \
-	inline const RHIBuffer* Get##Name(RHIDevice& Device) const { return Name.GetRHI(Device); }
+	SHADER_VARIABLE_SETTER_GETTER(Name, Buffer) \
+	inline UniformBuffer_##Name& GetUniformBuffer() { return Name; }
 
 #define SHADER_VARIABLE_UNIFORM_BUFFER(Name, Binding) SHADER_VARIABLE_UNIFORM_BUFFER_IMPL(UniformBuffer_##Name, Name, UniformBuffer, Binding, SHADER_VARIABLE_GETTER_UNIFORM_BUFFER(Name))
 
-#define SHADER_VARIABLE_TEXTURE_1D(Name, Binding) SHADER_VARIABLE(Name, SampledImage, Binding, SHADER_VARIABLE_SETTER_GETTER_TEXTURE(Name))
-#define SHADER_VARIABLE_TEXTURE_1D_ARRAY(Name, Binding) SHADER_VARIABLE(Name, SampledImage, Binding, SHADER_VARIABLE_SETTER_GETTER_TEXTURE(Name))
+#define SHADER_VARIABLE_TEXTURE_1D(Name, Binding) SHADER_VARIABLE(Name, SampledImage, Binding, SHADER_VARIABLE_SETTER_GETTER(Name, Texture))
+#define SHADER_VARIABLE_TEXTURE_1D_ARRAY(Name, Binding) SHADER_VARIABLE(Name, SampledImage, Binding, SHADER_VARIABLE_SETTER_GETTER(Name, Texture))
 
-#define SHADER_VARIABLE_TEXTURE_2D(Name, Binding) SHADER_VARIABLE(Name, SampledImage, Binding, SHADER_VARIABLE_SETTER_GETTER_TEXTURE(Name))
-#define SHADER_VARIABLE_TEXTURE_2D_ARRAY(Name, Binding) SHADER_VARIABLE(Name, SampledImage, Binding, SHADER_VARIABLE_SETTER_GETTER_TEXTURE(Name))
+#define SHADER_VARIABLE_TEXTURE_2D(Name, Binding) SHADER_VARIABLE(Name, SampledImage, Binding, SHADER_VARIABLE_SETTER_GETTER(Name, Texture))
+#define SHADER_VARIABLE_TEXTURE_2D_ARRAY(Name, Binding) SHADER_VARIABLE(Name, SampledImage, Binding, SHADER_VARIABLE_SETTER_GETTER(Name, Texture))
 
-#define SHADER_VARIABLE_TEXTURE_CUBE(Name, Binding) SHADER_VARIABLE(Name, SampledImage, Binding, SHADER_VARIABLE_SETTER_GETTER_TEXTURE(Name))
-#define SHADER_VARIABLE_TEXTURE_CUBE_ARRAY(Name, Binding) SHADER_VARIABLE( Name, SampledImage, Binding, SHADER_VARIABLE_SETTER_GETTER_TEXTURE(Name))
+#define SHADER_VARIABLE_TEXTURE_CUBE(Name, Binding) SHADER_VARIABLE(Name, SampledImage, Binding, SHADER_VARIABLE_SETTER_GETTER(Name, Texture))
+#define SHADER_VARIABLE_TEXTURE_CUBE_ARRAY(Name, Binding) SHADER_VARIABLE( Name, SampledImage, Binding, SHADER_VARIABLE_SETTER_GETTER(Name, Texture))
 
-#define SHADER_VARIABLE_TEXTURE_3D(Name, Binding) SHADER_VARIABLE(Name, SampledImage, Binding, SHADER_VARIABLE_SETTER_GETTER_TEXTURE(Name))
+#define SHADER_VARIABLE_TEXTURE_3D(Name, Binding) SHADER_VARIABLE(Name, SampledImage, Binding, SHADER_VARIABLE_SETTER_GETTER(Name, Texture))
 
-#define SHADER_VARIABLE_SAMPLER(Name, Binding) SHADER_VARIABLE(Name, Sampler, Binding, SHADER_VARIABLE_SETTER_GETTER_SAMPLER(Name))
+#define SHADER_VARIABLE_SAMPLER(Name, Binding) SHADER_VARIABLE(Name, Sampler, Binding, SHADER_VARIABLE_SETTER_GETTER(Name, Sampler))
 
-#define SHADER_VARIABLE_STORAGE_BUFFER(Name, Binding) SHADER_VARIABLE(Name, StorageBuffer, Binding, SHADER_VARIABLE_SETTER_GETTER_BUFFER(Name)))
+#define SHADER_VARIABLE_STORAGE_BUFFER(Name, Binding) SHADER_VARIABLE(Name, StorageBuffer, Binding, SHADER_VARIABLE_SETTER_GETTER(Name, Buffer)))
 
 #define BEGIN_SHADER_VARIABLE_UNIFORM_BUFFER(Name) \
-	struct UniformBuffer_##Name : public UniformBuffer<UniformBuffer_##Name> {
+	struct UniformBuffer_##Name {
 
 #define UNIFORM_BUFFER_VARIABLE(Type, Name) Type Name;
 
