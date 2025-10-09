@@ -11,24 +11,71 @@ using ShaderBlob = DataBlock;
 
 struct ShaderVariable
 {
-	using Variant = std::variant<
-		std::monostate,
-		const RHIBuffer*,
-		const RHITexture*,
-		const RHISampler*>;
+	struct CombinedTextureSampler
+	{
+		const RHITexture* Texture = nullptr;
+		const RHISampler* Sampler = nullptr;
+	};
 
-	using Setter = std::function<void(const Variant&)>;
-	using Getter = std::function<Variant(void)>;
-
+	ERHIShaderStage Stage = ERHIShaderStage::Num;
 	ERHIResourceType Type = ERHIResourceType::Unknown;
 	uint32_t Binding = ~0u;
+	uint32_t DescriptorIndex = ~0u;
 
-	Setter Set;
-	Getter Get;
+	std::string_view Name;
 
-	Variant Value;
+	union
+	{
+		const RHIBuffer* Buffer;
+		const RHITexture* Texture;
+		const RHISampler* Sampler;
+		CombinedTextureSampler CombinedTextureSampler;
+	} Resource;
 
-	inline bool IsValid() const { return Value.index() != 0u; }
+	inline const RHIBuffer* GetBuffer() const
+	{
+		assert(Type == ERHIResourceType::UniformBuffer || Type == ERHIResourceType::StorageBuffer || Type == ERHIResourceType::UniformBufferDynamic || Type == ERHIResourceType::StorageBufferDynamic);
+		return Resource.Buffer;
+	}
+	inline void SetBuffer(const RHIBuffer* Buffer)
+	{
+		assert(Type == ERHIResourceType::UniformBuffer || Type == ERHIResourceType::StorageBuffer || Type == ERHIResourceType::UniformBufferDynamic || Type == ERHIResourceType::StorageBufferDynamic);
+		Resource.Buffer = Buffer;
+	}
+
+	inline const RHITexture* GetTexture() const
+	{
+		assert(Type == ERHIResourceType::SampledImage || Type == ERHIResourceType::StorageImage);
+		return Resource.Texture;
+	}
+	inline void SetTexture(const RHITexture* Texture)
+	{
+		assert(Type == ERHIResourceType::SampledImage || Type == ERHIResourceType::StorageImage);
+		Resource.Texture = Texture;
+	}
+
+	inline const RHISampler* GetSampler() const
+	{
+		assert(Type == ERHIResourceType::Sampler);
+		return Resource.Sampler;
+	}
+	inline void SetSampler(const RHISampler* Sampler)
+	{
+		assert(Type == ERHIResourceType::Sampler);
+		Resource.Sampler = Sampler;
+	}
+
+	inline const CombinedTextureSampler& GetCombinedTextureSampler() const
+	{
+		assert(Type == ERHIResourceType::CombinedImageSampler);
+		return Resource.CombinedTextureSampler;
+	}
+	inline void SetCombinedTextureSampler(const RHITexture* Texture, const RHISampler* Sampler)
+	{
+		assert(Type == ERHIResourceType::CombinedImageSampler);
+		Resource.CombinedTextureSampler.Texture = Texture;
+		Resource.CombinedTextureSampler.Sampler = Sampler;
+	}
 };
 
 class ShaderDefines
@@ -103,17 +150,18 @@ public:
 	inline ERHIShaderStage GetStage() const { return m_Stage; }
 	inline const char* GetEntryPoint() const { return m_Entry.c_str(); }
 
-	inline const std::map<std::string_view, ShaderVariable>& GetVariables() const { return m_Variables; }
+	inline const std::vector<ShaderVariable>& GetVariables() const { return m_Variables; }
 protected:
 	friend struct ShaderCompileTask;
 	friend class ShaderLibrary;
 
-	void RegisterVariable(const char* Name, ShaderVariable&& Variable);
+	uint32_t RegisterVariable(ShaderVariable&& Variable);
+	inline std::vector<ShaderVariable>& GetVariables() { return m_Variables; }
 private:
 	ERHIShaderStage m_Stage;
 	std::string m_Entry;
 
-	std::map<std::string_view, ShaderVariable> m_Variables;
+	std::vector<ShaderVariable> m_Variables;
 };
 
 template<class T>
@@ -154,8 +202,9 @@ namespace std
 	{
 		size_t operator()(const Shader& InShader) const
 		{
-			size_t Hash = std::hash<ShaderDefines>()(InShader);
+			size_t Hash = std::filesystem::hash_value(InShader.GetPath());
 			HashCombine(Hash, static_cast<uint8_t>(InShader.GetStage()));
+			HashCombine(Hash, std::hash<ShaderDefines>()(InShader));
 			return Hash;
 		}
 	};

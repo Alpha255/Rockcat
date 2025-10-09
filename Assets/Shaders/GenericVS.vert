@@ -1,23 +1,23 @@
 #include "Shaders/Definitions.h"
 
-DEFINITION_GENERIC_VS_SHADER_VARIABLES
+DEFINE_SHADER_VARIABLES_GENERIC_VS
 
 VSOutput main(VSInput Input)
-{
+{	
 	VSOutput Output = (VSOutput)0;
 
-	float4 WorldPosition = mul(WorldMatrix, float4(Input.Position, 1.0));
+	float4 WorldPosition = mul(WVP.WorldMatrix, float4(Input.Position, 1.0));
 
 	Output.WorldPosition = WorldPosition.xyz;
-	Output.Position = mul(ProjectionMatrix, mul(ViewMatrix, WorldPosition));
+	Output.Position = mul(WVP.ProjectionMatrix, mul(WVP.ViewMatrix, WorldPosition));
 
 #if _HAS_NORMAL_
-	Output.WorldNormal = mul(WorldMatrix, float4(Input.Normal, 1.0)).xyz;
+	Output.WorldNormal = mul(WVP.WorldMatrix, float4(Input.Normal, 1.0)).xyz;
 #endif
 
 #if _HAS_TANGENT_
-	Output.WorldTangent = mul(WorldMatrix, float4(Input.Tangent, 1.0)).xyz;
-	Output.WorldBiTangent = mul(WorldMatrix, float4(Input.BiTangent, 1.0)).xyz;
+	Output.WorldTangent = mul(WVP.WorldMatrix, float4(Input.Tangent, 1.0)).xyz;
+	Output.WorldBiTangent = mul(WVP.WorldMatrix, float4(Input.BiTangent, 1.0)).xyz;
 #endif
 
 #if _HAS_UV0_

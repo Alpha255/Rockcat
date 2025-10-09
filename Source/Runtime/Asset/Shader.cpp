@@ -15,20 +15,9 @@ std::filesystem::path ShaderBinary::GetPath(const Shader& InShader, ERHIDeviceTy
 		StringUtils::Format("%s_%s_%lld", InShader.GetStem(), RHIDevice::GetName(DeviceType), std::hash<Shader>()(InShader));
 }
 
-void Shader::RegisterVariable(const char* Name, ShaderVariable&& Variable)
+uint32_t Shader::RegisterVariable(ShaderVariable&& Variable)
 {
-	auto It = m_Variables.find(Name);
-	if (It != m_Variables.end())
-	{
-		It->second = std::move(Variable);
-
-		if (It->second.IsValid())
-		{
-			It->second.Set(It->second.Value);
-		}
-	}
-	else
-	{
-		m_Variables.insert(std::make_pair(std::string_view(Name), std::forward<ShaderVariable>(Variable)));
-	}
+	uint32_t Index = static_cast<uint32_t>(m_Variables.size());
+	m_Variables.emplace_back(std::forward<ShaderVariable>(Variable));
+	return Index;
 }
