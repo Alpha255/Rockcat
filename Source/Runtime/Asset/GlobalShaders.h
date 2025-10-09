@@ -8,7 +8,7 @@ class GenericVS : public GlobalShader<GenericVS>
 {
 public:
 	GenericVS()
-		: GlobalShader(Paths::ShaderPath() / "GenericVS.vert", ERHIShaderStage::Vertex, "main")
+		: GlobalShader("GenericVS.vert", ERHIShaderStage::Vertex)
 	{
 	}
 
@@ -18,7 +18,7 @@ public:
 class DepthOnlyFS : public GlobalShader<DepthOnlyFS>
 {
 	DepthOnlyFS()
-		: GlobalShader(Paths::ShaderPath() / "DepthOnly.frag", ERHIShaderStage::Fragment, "main")
+		: GlobalShader("DepthOnly.frag", ERHIShaderStage::Fragment)
 	{
 	}
 

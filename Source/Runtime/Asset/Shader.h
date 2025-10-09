@@ -6,6 +6,7 @@
 #include "RHI/RHIShader.h"
 #include "RHI/RHIBuffer.h"
 #include "Rendering/RenderSettings.h"
+#include "Paths.h"
 
 using ShaderBlob = DataBlock;
 
@@ -168,14 +169,8 @@ template<class T>
 class GlobalShader : public Shader
 {
 public:
-	GlobalShader(const std::filesystem::path& Path, ERHIShaderStage Stage, const char* EntryPoint)
-		: Shader(Path, Stage, EntryPoint)
-	{
-		T::RegisterShaderVariables(Cast<T>(*this));
-	}
-
-	GlobalShader(std::filesystem::path&& Path, ERHIShaderStage Stage, const char* EntryPoint)
-		: Shader(std::forward<std::filesystem::path>(Path), Stage, EntryPoint)
+	GlobalShader(const char* SubPath, ERHIShaderStage Stage, const char* EntryPoint = "main")
+		: Shader(Paths::ShaderPath() / SubPath, Stage, EntryPoint)
 	{
 		T::RegisterShaderVariables(Cast<T>(*this));
 	}
