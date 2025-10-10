@@ -25,17 +25,17 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 
 	std::vector<VulkanShader> Shaders;
 	std::vector<vk::PipelineShaderStageCreateInfo> ShaderStageCreateInfos;
-	for (auto& Shader : Desc.ShaderPipeline)
+	for (auto& Shader : Desc.Shaders)
 	{
 		if (Shader)
 		{
-			auto ShaderModule = Cast<VulkanShader>(ShaderLibrary::Get().GetShaderModule(*Shader));
-			assert(ShaderModule);
+			auto Module = Cast<VulkanShader>(Shader->GetRHI(Device));
+			assert(Module);
 
 			ShaderStageCreateInfos.emplace_back(vk::PipelineShaderStageCreateInfo())
 				.setStage(GetShaderStage(Shader->GetStage()))
-				.setModule(ShaderModule->GetNative())
-				.setPName("main");
+				.setModule(Module->GetNative())
+				.setPName(Shader->GetEntryPoint());
 		}
 	}
 	assert(ShaderStageCreateInfos.size() > 0u);
@@ -112,19 +112,16 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 		.setAlphaToOneEnable(Desc.MultisampleState.EnableAlphaToOne);
 
 	vk::PipelineViewportStateCreateInfo ViewportStateCreateInfo;
+
+	std::vector<vk::DynamicState> DynamicStates
+	{
+		vk::DynamicState::eViewport,
+		vk::DynamicState::eScissor
+	};
 	
 	vk::PipelineDynamicStateCreateInfo DynamicStateCreateInfo;
 	if (Device.GetExtensionSettings().DynamicState)
 	{
-		std::vector<vk::DynamicState> DynamicStates
-		{
-			vk::DynamicState::eViewport,
-			vk::DynamicState::eScissor,
-			//vk::DynamicState::eCullMode,
-			//vk::DynamicState::ePolygonModeEXT,
-			//vk::DynamicState::eFrontFace,
-			//vk::DynamicState::ePrimitiveTopology,
-		};
 		DynamicStateCreateInfo.setDynamicStates(DynamicStates);
 	}
 	else
@@ -175,10 +172,19 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanDevice& Device, vk::P
 		.setPDepthStencilState(&DepthStencilStateCreateInfo)
 		.setPColorBlendState(&BlendStateCreateInfo)
 		.setPDynamicState(&DynamicStateCreateInfo)
-		.setLayout(Cast<VulkanPipelineState>(m_PipelineState)->GetPipelineLayout())
-		.setRenderPass(nullptr);
+		.setLayout(Cast<VulkanPipelineState>(m_PipelineState)->GetPipelineLayout());
 
-	/// #TODO Batch creations ???
+	if (Device.GetExtensionSettings().DynamicRendering)
+	{
+		vk::PipelineRenderingCreateInfoKHR DynamicRenderingCreateInfo;
+		PipelineCreateInfo.setPNext(&DynamicRenderingCreateInfo);
+	}
+	else
+	{
+		m_RenderPass = std::make_shared<VulkanRenderPass>(Device, Desc.RenderPass);
+		PipelineCreateInfo.setRenderPass(m_RenderPass->GetNative());
+	}
+
 	VERIFY_VK(GetNativeDevice().createGraphicsPipelines(PipelineCache, 1u, &PipelineCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
@@ -186,77 +192,77 @@ VulkanPipelineState::VulkanPipelineState(const VulkanDevice& Device, const RHIGr
 	: VkBaseDeviceResource(Device)
 	, RHIPipelineState(Desc)
 {
-	m_DescriptorSetLayout = std::make_unique<VulkanDescriptorSetLayout>(Device, GetShaderResourceLayout());
+	CreateLayouts(Device, Desc);
+	InitWriteDescriptorSets(Desc);
+}
+
+//void VulkanPipelineState::CommitShaderResources(RHICommandBuffer* CommandBuffer)
+//{
+//	assert(CommandBuffer);
+//
+//	if (!m_Set)
+//	{
+//		assert(false);
+//		//auto Context = Cast<VulkanCommandListContext>(CommandBuffer->GetContext());
+//		//m_Set = Context->AcquireDescriptorPool().Allocate(m_DescriptorSetLayout->GetNative());
+//		//InitWrites();
+//	}
+//
+//	for (auto& ShaderStageResources : GetShaderResourceLayout())
+//	{
+//		for (auto& ResourceInfo : ShaderStageResources)
+//		{
+//			switch (ResourceInfo.Type)
+//			{
+//			case ERHIResourceType::UniformTexelBuffer:
+//			case ERHIResourceType::StorageTexelBuffer:
+//			case ERHIResourceType::UniformBuffer:
+//			case ERHIResourceType::StorageBuffer:
+//			case ERHIResourceType::UniformBufferDynamic:
+//			case ERHIResourceType::StorageBufferDynamic:
+//				m_BufferInfos[ResourceInfo.DescriptorIndex].setBuffer(nullptr);
+//				break;
+//			case ERHIResourceType::SampledImage:
+//			case ERHIResourceType::StorageImage:
+//				m_ImageInfos[ResourceInfo.DescriptorIndex].setImageView(nullptr)
+//					.setImageLayout(vk::ImageLayout::eUndefined);
+//				break;
+//			case ERHIResourceType::CombinedImageSampler:
+//				m_ImageInfos[ResourceInfo.DescriptorIndex].setImageView(nullptr)
+//					.setSampler(nullptr)
+//					.setImageLayout(vk::ImageLayout::eUndefined);
+//				break;
+//			case ERHIResourceType::Sampler:
+//				m_ImageInfos[ResourceInfo.DescriptorIndex].setSampler(nullptr);
+//				break;
+//			default:
+//				assert(false);
+//				break;
+//			}
+//		}
+//	}
+//
+//	GetNativeDevice().updateDescriptorSets(static_cast<uint32_t>(m_Writes.size()), m_Writes.data(), 0u, nullptr);
+//}
+
+void VulkanPipelineState::CreateLayouts(const VulkanDevice& Device, const RHIGraphicsPipelineDesc& Desc)
+{
 	m_PipelineLayout = std::make_unique<VulkanPipelineLayout>(Device, m_DescriptorSetLayout->GetNative());
 }
 
-void VulkanPipelineState::CommitShaderResources(RHICommandBuffer* CommandBuffer)
+void VulkanPipelineState::InitWriteDescriptorSets(const RHIGraphicsPipelineDesc& Desc)
 {
-	assert(CommandBuffer);
-
-	if (!m_Set)
+	for (auto& Shader : Desc.Shaders)
 	{
-		assert(false);
-		//auto Context = Cast<VulkanCommandListContext>(CommandBuffer->GetContext());
-		//m_Set = Context->AcquireDescriptorPool().Allocate(m_DescriptorSetLayout->GetNative());
-		//InitWrites();
-	}
-
-	for (auto& ShaderStageResources : GetShaderResourceLayout())
-	{
-		for (auto& ResourceInfo : ShaderStageResources)
-		{
-			switch (ResourceInfo.Type)
-			{
-			case ERHIResourceType::UniformTexelBuffer:
-			case ERHIResourceType::StorageTexelBuffer:
-			case ERHIResourceType::UniformBuffer:
-			case ERHIResourceType::StorageBuffer:
-			case ERHIResourceType::UniformBufferDynamic:
-			case ERHIResourceType::StorageBufferDynamic:
-				m_BufferInfos[ResourceInfo.DescriptorIndex].setBuffer(nullptr);
-				break;
-			case ERHIResourceType::SampledImage:
-			case ERHIResourceType::StorageImage:
-				m_ImageInfos[ResourceInfo.DescriptorIndex].setImageView(nullptr)
-					.setImageLayout(vk::ImageLayout::eUndefined);
-				break;
-			case ERHIResourceType::CombinedImageSampler:
-				m_ImageInfos[ResourceInfo.DescriptorIndex].setImageView(nullptr)
-					.setSampler(nullptr)
-					.setImageLayout(vk::ImageLayout::eUndefined);
-				break;
-			case ERHIResourceType::Sampler:
-				m_ImageInfos[ResourceInfo.DescriptorIndex].setSampler(nullptr);
-				break;
-			default:
-				assert(false);
-				break;
-			}
-		}
-	}
-
-	GetNativeDevice().updateDescriptorSets(static_cast<uint32_t>(m_Writes.size()), m_Writes.data(), 0u, nullptr);
-}
-
-void VulkanPipelineState::CommitPipelineStates(RHICommandBuffer* CommandBuffer)
-{
-	assert(CommandBuffer);
-}
-
-void VulkanPipelineState::InitWrites()
-{
-	for (auto& ShaderStageResources : m_ShaderResourceLayout)
-	{
-		for (auto& ResourceInfo : ShaderStageResources)
+		for (auto& Variable : Shader->GetVariables())
 		{
 			auto& Write = m_Writes.emplace_back(vk::WriteDescriptorSet());
 			Write.setDstSet(m_Set)
 				.setDescriptorCount(1u)
-				.setDescriptorType(GetDescriptorType(ResourceInfo.Type))
-				.setDstBinding(ResourceInfo.Binding);
+				.setDescriptorType(GetDescriptorType(Variable.Type))
+				.setDstBinding(Variable.Binding);
 
-			switch (ResourceInfo.Type)
+			switch (Variable.Type)
 			{
 			case ERHIResourceType::UniformTexelBuffer:
 			case ERHIResourceType::StorageTexelBuffer:
@@ -264,7 +270,7 @@ void VulkanPipelineState::InitWrites()
 			case ERHIResourceType::StorageBuffer:
 			case ERHIResourceType::UniformBufferDynamic:
 			case ERHIResourceType::StorageBufferDynamic:
-				ResourceInfo.DescriptorIndex = static_cast<uint32_t>(m_BufferInfos.size());
+				Variable.DescriptorIndex = static_cast<uint32_t>(m_BufferInfos.size());
 
 				m_BufferInfos.emplace_back(vk::DescriptorBufferInfo())
 					.setBuffer(nullptr)
@@ -275,7 +281,7 @@ void VulkanPipelineState::InitWrites()
 				break;
 			case ERHIResourceType::SampledImage:
 			case ERHIResourceType::StorageImage:
-				ResourceInfo.DescriptorIndex = static_cast<uint32_t>(m_ImageInfos.size());
+				Variable.DescriptorIndex = static_cast<uint32_t>(m_ImageInfos.size());
 
 				m_ImageInfos.emplace_back(vk::DescriptorImageInfo())
 					.setImageView(nullptr)
@@ -284,7 +290,7 @@ void VulkanPipelineState::InitWrites()
 				Write.setPImageInfo(&m_ImageInfos.back());
 				break;
 			case ERHIResourceType::CombinedImageSampler:
-				ResourceInfo.DescriptorIndex = static_cast<uint32_t>(m_ImageInfos.size());
+				Variable.DescriptorIndex = static_cast<uint32_t>(m_ImageInfos.size());
 
 				m_ImageInfos.emplace_back(vk::DescriptorImageInfo())
 					.setImageView(nullptr)
@@ -293,7 +299,7 @@ void VulkanPipelineState::InitWrites()
 				Write.setPImageInfo(&m_ImageInfos.back());
 				break;
 			case ERHIResourceType::Sampler:
-				ResourceInfo.DescriptorIndex = static_cast<uint32_t>(m_ImageInfos.size());
+				Variable.DescriptorIndex = static_cast<uint32_t>(m_ImageInfos.size());
 
 				m_ImageInfos.emplace_back(vk::DescriptorImageInfo())
 					.setImageView(nullptr)
@@ -307,4 +313,10 @@ void VulkanPipelineState::InitWrites()
 			}
 		}
 	}
+}
+
+VulkanComputePipeline::VulkanComputePipeline(const VulkanDevice& Device, vk::PipelineCache PipelineCache, const RHIComputePipelineDesc& Desc)
+	: VulkanPipeline(Device)
+	, RHIComputePipeline(Desc)
+{
 }

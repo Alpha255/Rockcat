@@ -30,12 +30,16 @@ public:
 	inline const std::string& GetName() const { return m_Name; }
 	inline const std::string& GetStem() const { return m_Stem; }
 	inline const std::string& GetExtension() const { return m_Extension; }
-	inline std::time_t GetLastWriteTime() const { return m_LastWriteTime; }
+	inline std::time_t GetLastWriteTime() const
+	{
+		m_LastWriteTime = GetLastWriteTime(m_Path);
+		return m_LastWriteTime;
+	}
 
 	virtual bool IsDirty() const
 	{
 		std::time_t LastWriteTime = m_LastWriteTime;
-		m_LastWriteTime = GetLastWriteTime(m_Path);
+		GetLastWriteTime();
 		return m_LastWriteTime != LastWriteTime;
 	}
 

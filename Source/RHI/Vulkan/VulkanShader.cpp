@@ -6,13 +6,13 @@ VulkanShader::VulkanShader(const VulkanDevice& Device, const RHIShaderDesc& Desc
 	: VkHwResource(Device)
 	, RHIShader(Desc)
 {
-	assert(Desc.Binary && Desc.Binary->IsValid() && Desc.Binary->GetSize() % sizeof(uint32_t) == 0);
+	assert(Desc.Binary && Desc.Binary->GetBlob().IsValid() && (Desc.Binary->GetBlob().Size % sizeof(uint32_t) == 0));
 
-	vk::ShaderModuleCreateInfo ShaderCreateInfo;
-	ShaderCreateInfo.setCodeSize(Desc.Binary->GetSize())
-		.setPCode(reinterpret_cast<const uint32_t*>(Desc.Binary->GetData()));
+	vk::ShaderModuleCreateInfo CreateInfo;
+	CreateInfo.setCodeSize(Desc.Binary->GetSize())
+		.setPCode(reinterpret_cast<const uint32_t*>(Desc.Binary->GetBlob().Data.get()));
 
-	VERIFY_VK(GetNativeDevice().createShaderModule(&ShaderCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+	VERIFY_VK(GetNativeDevice().createShaderModule(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
 	VkHwResource::SetObjectName(Desc.Name.c_str());
 }

@@ -145,17 +145,25 @@ public:
 
 	inline const std::vector<ShaderVariable>& GetVariables() const { return m_Variables; }
 
-	const RHIShader* GetRHI(ERHIDeviceType DeviceType) const;
+	const RHIShader* GetRHI(const class RHIDevice&) const;
+
+	size_t GetHash() const
+	{
+		size_t Hash = std::hash<Shader>()(*this);
+		return IsReady() ? ComputeHash(Hash, m_CachedRHI) : Hash;
+	}
 protected:
 	friend class ShaderLibrary;
 
 	uint32_t RegisterVariable(ShaderVariable&& Variable);
 	inline std::vector<ShaderVariable>& GetVariables() { return m_Variables; }
 
-	virtual const RHIShader* GetFallback(ERHIDeviceType DeviceType) const;
+	virtual const RHIShader* GetFallback(const class RHIDevice&) const;
 private:
 	ERHIShaderStage m_Stage;
 	std::string m_Entry;
+
+	const RHIShader* m_CachedRHI = nullptr;
 
 	std::vector<ShaderVariable> m_Variables;
 };
@@ -174,7 +182,8 @@ protected:
 
 namespace std
 {
-	template<> struct hash<ShaderDefines>
+	template<>
+	struct hash<ShaderDefines>
 	{
 		size_t operator()(const ShaderDefines& Defines) const
 		{
@@ -188,13 +197,15 @@ namespace std
 		}
 	};
 
-	template<> struct hash<Shader>
+	template<>
+	struct hash<Shader>
 	{
 		size_t operator()(const Shader& InShader) const
 		{
 			size_t Hash = std::filesystem::hash_value(InShader.GetPath());
 			HashCombine(Hash, static_cast<uint8_t>(InShader.GetStage()));
 			HashCombine(Hash, std::hash<ShaderDefines>()(InShader));
+			HashCombine(Hash, InShader.GetLastWriteTime());
 			return Hash;
 		}
 	};

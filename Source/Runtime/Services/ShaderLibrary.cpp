@@ -9,9 +9,7 @@
 #include <filewatch/FileWatch.hpp>
 #pragma warning(default:4068)
 
-ShaderLibrary::ShaderLibrary(RHIDevice& Device)
-	: m_Device(Device)
-	, m_DeviceName(Device.GetName())
+ShaderLibrary::ShaderLibrary()
 {
 	REGISTER_LOG_CATEGORY(LogShaderCompile);
 

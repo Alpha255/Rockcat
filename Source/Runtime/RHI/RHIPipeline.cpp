@@ -3,16 +3,13 @@
 
 RHIPipelineState::RHIPipelineState(const RHIGraphicsPipelineDesc& Desc)
 {
-	for (auto& Shader : Desc.ShaderPipeline)
+	for (auto& Shader : Desc.Shaders)
 	{
 		if (!Shader)
 		{
 			continue;
 		}
 
-		auto& Bindings = m_ShaderResourceLayout[Shader->GetStage()];
-		std::vector<RHIShaderResourceBinding> AllBindings;
-		uint32_t MaxBindingIndex = 0u;
 		for (auto& [Name, Variable] : Shader->GetVariables())
 		{
 			RHIShaderResourceBinding Binding
@@ -35,27 +32,6 @@ RHIPipelineState::RHIPipelineState(const RHIGraphicsPipelineDesc& Desc)
 	}
 }
 
-void RHIPipelineState::Commit(RHICommandBuffer* CommandBuffer)
+RHIPipelineState::RHIPipelineState(const RHIComputePipelineDesc& Desc)
 {
-	assert(CommandBuffer);
-
-	if (IsDirty())
-	{
-		CommitPipelineStates(CommandBuffer);
-		CommitShaderResources(CommandBuffer);
-		ClearDirty();
-	}
-}
-
-size_t RHIGraphicsShaderPipeline::ComputeHash() const
-{
-	size_t Hash = 0u;
-	for (auto& Shader : *this)
-	{
-		if (Shader)
-		{
-			HashCombine(Hash, Shader->TryGetRHI());
-		}
-	}
-	return Hash;
 }
