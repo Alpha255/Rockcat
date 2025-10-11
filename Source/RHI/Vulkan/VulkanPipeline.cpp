@@ -319,4 +319,21 @@ VulkanComputePipeline::VulkanComputePipeline(const VulkanDevice& Device, vk::Pip
 	: VulkanPipeline(Device)
 	, RHIComputePipeline(Desc)
 {
+	assert(Desc.ComputeShader);
+
+	m_PipelineState = std::make_shared<VulkanPipelineState>(Device, Desc);
+
+	auto Module = Cast<VulkanShader>(Desc.ComputeShader->GetRHI(Device));
+	assert(Module);
+
+	vk::PipelineShaderStageCreateInfo ShaderStageCreateInfo;
+	ShaderStageCreateInfo.setModule(Module->GetNative())
+		.setStage(vk::ShaderStageFlagBits::eCompute)
+		.setPName(Desc.ComputeShader->GetEntryPoint());
+
+	vk::ComputePipelineCreateInfo PipelineCreateInfo;
+	PipelineCreateInfo.setStage(ShaderStageCreateInfo)
+		.setLayout(Cast<VulkanPipelineState>(m_PipelineState)->GetPipelineLayout());
+
+	VERIFY_VK(GetNativeDevice().createComputePipelines(PipelineCache, 1u, &PipelineCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }

@@ -9,11 +9,11 @@
 #include <filewatch/FileWatch.hpp>
 #pragma warning(default:4068)
 
-ShaderLibrary::ShaderLibrary()
+ShaderLibrary::ShaderLibrary(ERHIDeviceType DeviceType)
 {
-	REGISTER_LOG_CATEGORY(LogShaderCompile);
+	REGISTER_LOG_CATEGORY(LogShaderCompiler);
 
-	switch (Device.GetType())
+	switch (DeviceType)
 	{
 	case ERHIDeviceType::Vulkan:
 		m_Compiler = std::make_unique<DxcShaderCompiler>(true);
@@ -28,7 +28,7 @@ ShaderLibrary::ShaderLibrary()
 
 #if SHADER_HOT_RELOAD
 	auto ShaderPath = Paths::ShaderPath().string();
-	m_ShaderFileMonitor = std::make_shared<filewatch::FileWatch<std::string>>(ShaderPath, std::regex(R"(.*\.(vert|frag|comp|hlsl|hlsli)$)"),
+	m_ShaderFileWatch = std::make_shared<filewatch::FileWatch<std::string>>(ShaderPath, std::regex(R"(.*\.(vert|frag|comp|hlsl|hlsli)$)"),
 		[this](const std::string& SubPath, filewatch::Event FileEvent) {
 			switch (FileEvent)
 			{
@@ -40,91 +40,55 @@ ShaderLibrary::ShaderLibrary()
 #endif
 }
 
-void ShaderLibrary::OnShaderFileModified(const std::filesystem::path& FilePath)
+void ShaderLibrary::OnShaderFileModified(const std::filesystem::path& Path)
 {
-	auto Timestamp = Asset::GetLastWriteTime(FilePath);
-
-	std::lock_guard Locker(m_ShaderFileWatchLock);
-	auto It = m_ShaderFileWatches.find(FilePath);
-	if (It != m_ShaderFileWatches.end())
+	auto HeaderIt = m_HeaderFileInfos.find(Path);
+	if (HeaderIt == m_HeaderFileInfos.cend())
 	{
-		if (It->second.Timestamp >= Timestamp)
+		auto ShaderIt = m_Shaders.find(Path);
+		if (ShaderIt != m_Shaders.cend())
 		{
-			return;
-		}
-
-		LOG_INFO("ShaderLibrary: Shader file \"{}\" is modified. Queue compilling...", FilePath.string());
-		
-		It->second.Timestamp = Timestamp;
-		for (auto& Hash : It->second.AllPermutations)
-		{
-			auto PermutationIt = m_ShaderPermutations.find(Hash);
-			if (PermutationIt != m_ShaderPermutations.end())
-			{
-				QueueCompile(PermutationIt->second.SrcShader, Hash, PermutationIt->second.SrcShader.ComputeHash());
-			}
+			QueueCompileShader(*ShaderIt->second);
 		}
 	}
 	else
 	{
-		auto IncludeIt = m_IncludeFiles.find(FilePath);
-		if (IncludeIt != m_IncludeFiles.end())
+		// Modified file is a header file
+		for (auto LinkedShader : HeaderIt->second)
 		{
-			if (IncludeIt->second >= Timestamp)
+			if (LinkedShader)
 			{
-				return;
-			}
-
-			LOG_INFO("ShaderLibrary: Include file \"{}\" is modified. Queue compilling all relative shaders...", FilePath.string());
-
-			IncludeIt->second = Timestamp;
-			for (auto& [ShaderPath, Watch] : m_ShaderFileWatches)
-			{
-				if (Watch.IncludeFiles.find(FilePath) != Watch.IncludeFiles.cend())
+				auto IncludeFiles = ParseIncludeFiles(*LinkedShader);
+				if (IncludeFiles.contains(Path))
 				{
-					for (auto& Hash : Watch.AllPermutations)
-					{
-						auto PermutationIt = m_ShaderPermutations.find(Hash);
-						if (PermutationIt != m_ShaderPermutations.end())
-						{
-							QueueCompile(PermutationIt->second.SrcShader, Hash, PermutationIt->second.SrcShader.ComputeHash());
-						}
-					}
+					QueueCompileShader(*LinkedShader);
+				}
+				else
+				{
+					HeaderIt->second.erase(LinkedShader);
 				}
 			}
 		}
 	}
 }
 
-void ShaderLibrary::RegisterShaderFileWatch(const Shader& InShader, size_t Hash)
+void ShaderLibrary::RegisterShader(const Shader& InShader)
 {
-	tf::Async([this, &InShader, Hash]() {
-		auto& ShaderFilePath = InShader.GetSourceFilePath();
-
-		std::lock_guard Locker(m_ShaderFileWatchLock);
-		auto It = m_ShaderFileWatches.find(ShaderFilePath);
-		if (It == m_ShaderFileWatches.end())
-		{
-			It = m_ShaderFileWatches.emplace(ShaderFilePath, ShaderFileWatches()).first;
-			It->second.Timestamp = InShader.GetTimestamp();
-			It->second.IncludeFiles = ParseIncludeFiles(ShaderFilePath);
-			for (auto& Path : It->second.IncludeFiles)
-			{
-				m_IncludeFiles.emplace(Path, Asset::GetLastWriteTime(Path));
-			}
-		}
-
-		It->second.AllPermutations.emplace(Hash);
-	});
+	std::lock_guard Lock(m_ShaderLock);
+	m_Shaders[InShader.GetPath()] = &InShader;
+	for (auto& HeaderFile : ParseIncludeFiles(InShader))
+	{
+		m_HeaderFileInfos[HeaderFile].insert(&InShader);
+	}
 }
 
-std::unordered_set<std::filesystem::path> ShaderLibrary::ParseIncludeFiles(const std::filesystem::path& ShaderFilePath)
+std::unordered_set<std::filesystem::path> ShaderLibrary::ParseIncludeFiles(const Shader& InShader)
 {
 	std::unordered_set<std::filesystem::path> IncludeFiles;
 
-	if (std::filesystem::exists(ShaderFilePath))
+	if (std::filesystem::exists(InShader.GetPath()))
 	{
-		std::ifstream ShaderFile(ShaderFilePath);
+		std::ifstream ShaderFile(InShader.GetPath());
 		if (ShaderFile.is_open())
 		{
 			std::string Line;
@@ -147,27 +111,14 @@ std::unordered_set<std::filesystem::path> ShaderLibrary::ParseIncludeFiles(const
 	return IncludeFiles;
 }
 
-void ShaderLibrary::QueueCompile(const Shader& InShader, size_t BaseHash, size_t TimestampHash)
+void ShaderLibrary::CompileShader(const Shader& InShader)
 {
-	tf::Async([this, BaseHash, TimestampHash, &InShader]() {
-		if (RegisterCompileTask(TimestampHash))
-		{
-			auto& MetaData = InShader.GetMetaData();
-			auto RawData = MetaData.LoadData(AssetType::EContentsFormat::PlainText);
 
-			const time_t Timestamp = MetaData.GetLastWriteTime();
-			const auto FileName = InShader.GetName().string();
-			const auto SourceCode = reinterpret_cast<char*>(RawData->Data.get());
-			const auto Size = RawData->Size;
+}
 
-			auto Blob = m_Compiler->Compile(FileName.c_str(), SourceCode, Size, InShader.GetEntryPoint(), InShader.GetStage(), InShader);
-			auto Binary = std::make_shared<ShaderBinary>(FileName, m_DeviceName.data(), InShader.GetStage(), Timestamp, BaseHash, std::move(Blob));
-			Binary->Save(true);
-			AddBinary(InShader, Binary);
+void ShaderLibrary::QueueCompileShader(const Shader& InShader)
+{
 
-			DeregisterCompileTask(TimestampHash);
-		}
-	});
 }
 
 bool ShaderLibrary::RegisterCompileTask(size_t Hash)
@@ -188,63 +139,8 @@ void ShaderLibrary::DeregisterCompileTask(size_t Hash)
 	m_CompilingTasks.erase(Hash);
 }
 
-const RHIShader* ShaderLibrary::GetShaderModule(const Shader& InShader)
-{
-	auto BaseHash = InShader.ComputeBaseHash();
-
-	{
-		std::lock_guard Locker(m_ShaderPermutationLock);
-		auto It = m_ShaderPermutations.find(BaseHash);
-		if (It != m_ShaderPermutations.cend())
-		{
-			return It->second.GetOrCreateRHI(m_Device);
-		}
-	}
-
-#if SHADER_HOT_RELOAD
-	RegisterShaderFileWatch(InShader, BaseHash);
-#endif
-
-	{
-		auto CacheBinaryPath = ShaderBinary::GetUniquePath(InShader.GetName().string(), m_DeviceName.data(), BaseHash);
-		if (std::filesystem::exists(CacheBinaryPath))
-		{
-			auto Binary = ShaderBinary::Load(CacheBinaryPath);
-			AddBinary(InShader, Binary);
-		}
-	}
-
-	QueueCompile(InShader, BaseHash, InShader.ComputeHash());
-	return nullptr;
-}
-
-void ShaderLibrary::AddBinary(const Shader& InShader, std::shared_ptr<ShaderBinary>& Binary)
-{
-	if (Binary && Binary->IsValid())
-	{
-		std::lock_guard Locker(m_ShaderPermutationLock);
-		auto It = m_ShaderPermutations.find(Binary->GetHash());
-		if (It == m_ShaderPermutations.cend())
-		{
-			It = m_ShaderPermutations.emplace(std::make_pair(Binary->GetHash(), ShaderPermutation(InShader))).first;
-		}
-
-		auto& Permutation = It->second;
-		if (Permutation.Binary)
-		{
-			m_MemorySize.fetch_sub(Permutation.Binary->GetSize(), std::memory_order_release);
-			Permutation.Module.reset();
-			Permutation.Binary.reset();
-		}
-
-		std::swap(Permutation.Binary, Binary);
-		Permutation.GetOrCreateRHI(m_Device);
-		m_MemorySize.fetch_add(Binary->GetSize(), std::memory_order_relaxed);
-	}
-}
-
 ShaderLibrary::~ShaderLibrary()
 {
 	m_Compiler.reset();
-	m_ShaderFileMonitor.reset();
+	m_ShaderFileWatch.reset();
 }
