@@ -7,7 +7,7 @@
 class VulkanDescriptorSetLayout final : public VkHwResource<vk::DescriptorSetLayout>
 {
 public:
-	VulkanDescriptorSetLayout(const class VulkanDevice& Device, const RHIShaderResourceLayout& LayoutDesc);
+	VulkanDescriptorSetLayout(const class VulkanDevice& Device, const RHIGraphicsPipelineDesc& Desc);
 };
 
 class VulkanPipelineLayout final : public VkHwResource<vk::PipelineLayout>

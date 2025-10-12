@@ -2,22 +2,52 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanDevelopSettings.h"
 
-VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(const VulkanDevice& Device, const RHIShaderResourceLayout& LayoutDesc)
+VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(const VulkanDevice& Device, const RHIGraphicsPipelineDesc& Desc)
 	: VkHwResource(Device)
 {
-	std::vector<vk::DescriptorSetLayoutBinding> Bindings;
-	for (uint32_t Index = 0u; Index < LayoutDesc.size(); ++Index)
+	struct StageInfo
 	{
-		auto Stage = static_cast<ERHIShaderStage>(Index);
+		vk::ShaderStageFlags StageFlags{};
+		uint32_t BindingIndex = ~0u;
+	};
+	std::vector<vk::DescriptorSetLayoutBinding> Bindings;
+	std::unordered_map<std::string_view, StageInfo> ResourceStages;
 
-		for (auto& ResourceInfo : LayoutDesc[Stage])
+	for (uint32_t Index = 0u; Index < Desc.Shaders.size(); ++Index)
+	{
+		if (!Desc.Shaders[Index])
 		{
-			Bindings.emplace_back(vk::DescriptorSetLayoutBinding())
-				.setBinding(ResourceInfo.Binding)
-				.setDescriptorType(GetDescriptorType(ResourceInfo.Type))
-				.setDescriptorCount(1u)
-				.setStageFlags(GetShaderStageFlags(Stage))
-				.setPImmutableSamplers(nullptr);
+			continue;
+		}
+
+		const Shader& Shader = *Desc.Shaders[Index];
+		for (auto& Variable : Shader.GetVariables())
+		{
+			auto It = ResourceStages.find(Variable.Name);
+			if (It == ResourceStages.cend())
+			{
+				It = ResourceStages.emplace(Variable.Name, 
+					StageInfo
+					{
+						GetShaderStageFlags(Shader.GetStage()), 
+						static_cast<uint32_t>(Bindings.size())
+					}).first;
+
+				Bindings.emplace_back(vk::DescriptorSetLayoutBinding())
+					.setBinding(Variable.Binding)
+					.setDescriptorType(GetDescriptorType(Variable.Type))
+					.setDescriptorCount(1u)
+					.setStageFlags(It->second.StageFlags)
+					.setPImmutableSamplers(nullptr);
+			}
+			else
+			{
+				auto& Binding = Bindings[It->second.BindingIndex];
+				assert(Binding.binding == Variable.Binding && Binding.descriptorType == GetDescriptorType(Variable.Type));
+
+				It->second.StageFlags |= GetShaderStageFlags(Shader.GetStage());
+				Binding.setStageFlags(It->second.StageFlags);
+			}
 		}
 	}
 

@@ -10,7 +10,7 @@ RHIPipelineState::RHIPipelineState(const RHIGraphicsPipelineDesc& Desc)
 			continue;
 		}
 
-		for (auto& [Name, Variable] : Shader->GetVariables())
+		for (auto& Variable : Shader->GetVariables())
 		{
 			RHIShaderResourceBinding Binding
 			{

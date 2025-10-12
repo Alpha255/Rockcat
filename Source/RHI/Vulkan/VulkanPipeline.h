@@ -49,6 +49,8 @@ public:
 	vk::DescriptorSetLayout GetDescriptorSetLayout() const { return m_DescriptorSetLayout->GetNative(); }
 	vk::PipelineLayout GetPipelineLayout() const { return m_PipelineLayout->GetNative(); }
 private:
+	inline bool SetDirty(bool Dirty) { m_Dirty = Dirty; return m_Dirty; }
+
 	void CreateLayouts(const class VulkanDevice& Device, const RHIGraphicsPipelineDesc& Desc);
 	void InitWriteDescriptorSets(const RHIGraphicsPipelineDesc& Desc);
 
@@ -60,4 +62,6 @@ private:
 	std::vector<vk::WriteDescriptorSet> m_Writes;
 
 	vk::DescriptorSet m_Set;
+
+	bool m_Dirty = false;
 };

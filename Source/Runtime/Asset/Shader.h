@@ -12,6 +12,9 @@ using ShaderBlob = DataBlock;
 
 struct ShaderVariable
 {
+	using OnSetFunc = std::function<void(const RHIResource*)>;
+	using OnSetCombinedTextureSamplerFunc = std::function<void(const RHITexture*, const RHISampler*)>;
+
 	struct CombinedTextureSampler
 	{
 		const RHITexture* Texture = nullptr;
@@ -33,6 +36,19 @@ struct ShaderVariable
 		CombinedTextureSampler CombinedTextureSampler;
 	} Resource;
 
+	mutable OnSetFunc OnSet;
+	mutable OnSetCombinedTextureSamplerFunc OnSetCombinedTextureSampler;
+	
+	inline void BindOnSet(OnSetFunc&& Func) const
+	{
+		OnSet = std::move(Func);
+	}
+
+	inline void BindOnSetCombinedTextureSampler(OnSetCombinedTextureSamplerFunc&& Func) const
+	{
+		OnSetCombinedTextureSampler = std::move(Func);
+	}
+
 	inline const RHIBuffer* GetBuffer() const
 	{
 		assert(Type == ERHIResourceType::UniformBuffer || Type == ERHIResourceType::StorageBuffer || Type == ERHIResourceType::UniformBufferDynamic || Type == ERHIResourceType::StorageBufferDynamic);
@@ -42,6 +58,10 @@ struct ShaderVariable
 	{
 		assert(Type == ERHIResourceType::UniformBuffer || Type == ERHIResourceType::StorageBuffer || Type == ERHIResourceType::UniformBufferDynamic || Type == ERHIResourceType::StorageBufferDynamic);
 		Resource.Buffer = Buffer;
+		if (OnSet)
+		{
+			OnSet(Buffer);
+		}
 	}
 
 	inline const RHITexture* GetTexture() const
@@ -53,6 +73,10 @@ struct ShaderVariable
 	{
 		assert(Type == ERHIResourceType::SampledImage || Type == ERHIResourceType::StorageImage);
 		Resource.Texture = Texture;
+		if (OnSet)
+		{
+			OnSet(Texture);
+		}
 	}
 
 	inline const RHISampler* GetSampler() const
@@ -64,6 +88,10 @@ struct ShaderVariable
 	{
 		assert(Type == ERHIResourceType::Sampler);
 		Resource.Sampler = Sampler;
+		if (OnSet)
+		{
+			OnSet(Sampler);
+		}
 	}
 
 	inline const CombinedTextureSampler& GetCombinedTextureSampler() const
