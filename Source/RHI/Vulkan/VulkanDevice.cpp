@@ -10,6 +10,7 @@
 #include "RHI/Vulkan/VulkanDevelopSettings.h"
 #include "RHI/Vulkan/VulkanSwapchain.h"
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
+#include "RHI/Vulkan/VulkanRenderPass.h"
 #include "Services/TaskFlowService.h"
 
 #if USE_DYNAMIC_VK_LOADER
@@ -259,47 +260,47 @@ VulkanDevice::VulkanDevice()
 	VulkanMemoryAllocator::Create(*this);
 }
 
-RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderDesc& Desc)
+RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderDesc& Desc) const
 {
 	return std::make_shared<VulkanShader>(*this, Desc);
 }
 
-RHITexturePtr VulkanDevice::CreateTexture(const RHITextureDesc& Desc)
+RHITexturePtr VulkanDevice::CreateTexture(const RHITextureDesc& Desc) const
 {
 	return std::make_shared<VulkanTexture>(*this, Desc);
 }
 
-RHIInputLayoutPtr VulkanDevice::CreateInputLayout(const RHIInputLayoutDesc& Desc)
+RHIInputLayoutPtr VulkanDevice::CreateInputLayout(const RHIInputLayoutDesc& Desc) const
 {
 	return std::make_shared<VulkanInputLayout>(Desc);
 }
 
-RHIFrameBufferPtr VulkanDevice::CreateFrameBuffer(const RHIFrameBufferDesc& /*Desc*/)
+RHIFrameBufferPtr VulkanDevice::CreateFrameBuffer(const RHIFrameBufferDesc& Desc) const
 {
-	return RHIFrameBufferPtr();
+	return std::make_shared<VulkanFrameBuffer>(*this, vk::RenderPass{}, Desc);
 }
 
-RHIGraphicsPipelinePtr VulkanDevice::CreateGraphicsPipeline(const RHIGraphicsPipelineDesc& Desc)
+RHIGraphicsPipelinePtr VulkanDevice::CreateGraphicsPipeline(const RHIGraphicsPipelineDesc& Desc) const
 {
 	return std::make_shared<VulkanGraphicsPipeline>(*this, m_PipelineCache->GetNative(), Desc);
 }
 
-RHIPipelineStatePtr VulkanDevice::CreatePipelineState(const RHIGraphicsPipelineDesc& Desc)
+RHIPipelineStatePtr VulkanDevice::CreatePipelineState(const RHIGraphicsPipelineDesc& Desc) const
 {
 	return std::make_shared<VulkanPipelineState>(*this, Desc);
 }
 
-RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferDesc& Desc)
+RHIBufferPtr VulkanDevice::CreateBuffer(const RHIBufferDesc& Desc) const
 {
 	return std::make_shared<VulkanBuffer>(*this, Desc);
 }
 
-RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerDesc& Desc)
+RHISamplerPtr VulkanDevice::CreateSampler(const RHISamplerDesc& Desc) const
 {
 	return std::make_shared<VulkanSampler>(*this, Desc);
 }
 
-RHISwapchainPtr VulkanDevice::CreateSwapchain(const RHISwapchainDesc& Desc)
+RHISwapchainPtr VulkanDevice::CreateSwapchain(const RHISwapchainDesc& Desc) const
 {
 	return std::make_shared<VulkanSwapchain>(*this, Desc);
 }

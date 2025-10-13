@@ -2,8 +2,10 @@
 #include "RHI/RHIDevice.h"
 #include "Paths.h"
 
-ShaderBinary::ShaderBinary(const Shader& InShader, ERHIDeviceType DeviceType)
+ShaderBinary::ShaderBinary(const Shader& InShader, ERHIDeviceType DeviceType, ShaderBlob& Blob)
 	: BaseClass(GetPath(InShader, DeviceType))
+	, m_ShaderLastWriteTime(InShader.GetLastWriteTime())
+	, m_Blob(std::move(Blob))
 {
 }
 
@@ -12,7 +14,13 @@ std::filesystem::path ShaderBinary::GetPath(const Shader& InShader, ERHIDeviceTy
 	const std::filesystem::path RelativePath = std::filesystem::relative(InShader.GetPath(), Paths::ShaderPath()).parent_path();
 	return Paths::ShaderBinaryPath() / 
 		RelativePath / 
-		StringUtils::Format("%s_%s_%lld", InShader.GetStem(), RHIDevice::GetName(DeviceType), std::hash<Shader>()(InShader));
+		StringUtils::Format("%s_%s_%lld", InShader.GetStem().c_str(), RHIDevice::GetName(DeviceType), std::hash<Shader>()(InShader));
+}
+
+size_t Shader::GetHash() const
+{
+	size_t Hash = std::hash<Shader>()(*this);
+	return IsReady() ? ComputeHash(Hash, m_CachedRHI.get()) : Hash;
 }
 
 uint32_t Shader::RegisterVariable(ShaderVariable&& Variable)
@@ -20,4 +28,40 @@ uint32_t Shader::RegisterVariable(ShaderVariable&& Variable)
 	uint32_t Index = static_cast<uint32_t>(m_Variables.size());
 	m_Variables.emplace_back(std::forward<ShaderVariable>(Variable));
 	return Index;
+}
+
+const RHIShader* Shader::GetRHI(const RHIDevice& Device)
+{
+	if (m_CachedBinary)
+	{
+		if (m_CachedBinary->GetBlob().IsValid())
+		{
+			RHIShaderDesc Desc;
+			Desc.SetName(GetStem())
+				.SetStage(GetStage())
+				.SetShaderBinary(m_CachedBinary.get());
+
+			m_CachedRHI = Device.CreateShader(Desc);
+
+			m_CachedBinary->ResetBlob();
+
+			SetStatus(Asset::EStatus::Ready);
+		}
+
+		return m_CachedRHI.get();
+	}
+
+	return GetFallback(Device);
+}
+
+void Shader::SetBlob(ShaderBlob& Blob, ERHIDeviceType DeviceType) const
+{
+	if (m_CachedBinary)
+	{
+		m_CachedBinary->SetBlob(Blob, GetLastWriteTime());
+	}
+	else
+	{
+		m_CachedBinary = std::make_shared<ShaderBinary>(*this, DeviceType, Blob);
+	}
 }

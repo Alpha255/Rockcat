@@ -25,6 +25,12 @@ struct DataBlock
 	
 	inline bool IsValid() const { return Size && Data; }
 
+	inline void Reset()
+	{
+		Size = Offset = 0u;
+		Data.reset();
+	}
+
 	template<class Archive>
 	void load(Archive& Ar)
 	{
@@ -76,9 +82,9 @@ public:
 
 	using File::File;
 
-	inline EStatus GetStatus() const { return m_Status.load(std::memory_order_relaxed); }
-	inline bool IsReady() const { return GetStatus() == EStatus::Ready; }
-	inline bool IsOnLoading() const { return GetStatus() == EStatus::Loading; }
+	inline EStatus GetStatus(std::memory_order MemoryOrder = std::memory_order_relaxed) const { return m_Status.load(MemoryOrder); }
+	inline bool IsReady(std::memory_order MemoryOrder = std::memory_order_relaxed) const { return GetStatus(MemoryOrder) == EStatus::Ready; }
+	inline bool IsOnLoading(std::memory_order MemoryOrder = std::memory_order_relaxed) const { return GetStatus(MemoryOrder) == EStatus::Loading; }
 
 	std::shared_ptr<DataBlock> LoadData(AssetType::EContentsFormat ContentsFormat) const;
 
@@ -92,7 +98,7 @@ public:
 protected:
 	friend class AssetLoadTask;
 
-	inline void SetStatus(EStatus Status) { m_Status.store(Status, std::memory_order_release); }
+	inline void SetStatus(EStatus Status, std::memory_order MemoryOrder = std::memory_order_release) { m_Status.store(Status, MemoryOrder); }
 
 	virtual void OnPreLoad() { SetStatus(EStatus::Loading); }
 	virtual void OnReady() {}

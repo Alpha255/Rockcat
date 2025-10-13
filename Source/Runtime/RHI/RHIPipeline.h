@@ -241,6 +241,25 @@ namespace std
 	};
 
 	template<>
+	struct hash<RHIInputLayoutDesc>
+	{
+		size_t operator()(const RHIInputLayoutDesc& Desc) const
+		{
+			size_t Hash = 0u;
+			for (auto& Binding : Desc.Bindings)
+			{
+				HashCombine(Hash, Binding.Binding, Binding.Stride, Binding.InputRate);
+				for (auto& Attribute : Binding.Attributes)
+				{
+					HashCombine(Hash, Attribute.Location, Attribute.Stride, Attribute.Format);
+					HashCombine(Hash, std::hash<std::string>()(Attribute.Usage));
+				}
+			}
+			return Hash;
+		}
+	};
+
+	template<>
 	struct hash<RHIGraphicsPipelineDesc>
 	{
 		size_t operator()(const RHIGraphicsPipelineDesc& Desc) const

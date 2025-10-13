@@ -9,22 +9,13 @@
 #include <filewatch/FileWatch.hpp>
 #pragma warning(default:4068)
 
-ShaderLibrary::ShaderLibrary(ERHIDeviceType DeviceType)
+ShaderLibrary::ShaderLibrary()
 {
 	REGISTER_LOG_CATEGORY(LogShaderCompiler);
 
-	switch (DeviceType)
-	{
-	case ERHIDeviceType::Vulkan:
-		m_Compiler = std::make_unique<DxcShaderCompiler>(true);
-		break;
-	case ERHIDeviceType::D3D11:
-		m_Compiler = std::make_unique<D3DShaderCompiler>();
-		break;
-	case ERHIDeviceType::D3D12:
-		m_Compiler = std::make_unique<DxcShaderCompiler>(false);
-		break;
-	}
+	m_Compilers[ERHIDeviceType::Vulkan] = std::make_unique<DxcShaderCompiler>(true);
+	m_Compilers[ERHIDeviceType::D3D11] = std::make_unique<D3DShaderCompiler>();
+	m_Compilers[ERHIDeviceType::D3D12] = std::make_unique<DxcShaderCompiler>(false);
 
 #if SHADER_HOT_RELOAD
 	auto ShaderPath = Paths::ShaderPath().string();
@@ -48,7 +39,10 @@ void ShaderLibrary::OnShaderFileModified(const std::filesystem::path& Path)
 		auto ShaderIt = m_Shaders.find(Path);
 		if (ShaderIt != m_Shaders.cend())
 		{
-			QueueCompileShader(*ShaderIt->second);
+			for (auto DeviceType : m_ActiveCompilers)
+			{
+				QueueCompileShader(*ShaderIt->second, DeviceType);
+			}
 		}
 	}
 	else
@@ -61,7 +55,10 @@ void ShaderLibrary::OnShaderFileModified(const std::filesystem::path& Path)
 				auto IncludeFiles = ParseIncludeFiles(*LinkedShader);
 				if (IncludeFiles.contains(Path))
 				{
-					QueueCompileShader(*LinkedShader);
+					for (auto DeviceType : m_ActiveCompilers)
+					{
+						QueueCompileShader(*LinkedShader, DeviceType);
+					}
 				}
 				else
 				{
@@ -111,14 +108,45 @@ std::unordered_set<std::filesystem::path> ShaderLibrary::ParseIncludeFiles(const
 	return IncludeFiles;
 }
 
-void ShaderLibrary::CompileShader(const Shader& InShader)
+void ShaderLibrary::CompileShader(const Shader& InShader, ERHIDeviceType DeviceType)
 {
+	assert(std::filesystem::exists(InShader.GetPath()));
 
+	size_t Hash = std::hash<Shader>()(InShader);
+
+	if (RegisterCompileTask(Hash))
+	{
+		RegisterShader(InShader);
+
+		if (auto Compiler = GetCompiler(DeviceType))
+		{
+			std::ifstream FileStream(InShader.GetPath(), std::ios::in);
+			assert(FileStream.is_open());
+			std::string SourceCode(Asset::GetSize(InShader.GetPath()), '\0');
+			FileStream.read(SourceCode.data(), SourceCode.size());
+			FileStream.close();
+			auto Blob = Compiler->Compile(
+				InShader.GetStem().c_str(), 
+				SourceCode.data(), 
+				SourceCode.size(),
+				InShader.GetEntryPoint(),
+				InShader.GetStage(),
+				InShader);
+			if (Blob.IsValid())
+			{
+				InShader.SetBlob(Blob, DeviceType);
+			}
+		}
+
+		DeregisterCompileTask(Hash);
+	}
 }
 
-void ShaderLibrary::QueueCompileShader(const Shader& InShader)
+void ShaderLibrary::QueueCompileShader(const Shader& InShader, ERHIDeviceType DeviceType)
 {
-
+	tf::Async([this, &InShader, DeviceType]() {
+		CompileShader(InShader, DeviceType); 
+	}, EThread::WorkerThread, Task::EPriority::High);
 }
 
 bool ShaderLibrary::RegisterCompileTask(size_t Hash)
@@ -141,6 +169,12 @@ void ShaderLibrary::DeregisterCompileTask(size_t Hash)
 
 ShaderLibrary::~ShaderLibrary()
 {
-	m_Compiler.reset();
+	for (auto& Compiler : m_Compilers)
+	{
+		if (Compiler)
+		{
+			Compiler.reset();
+		}
+	}
 	m_ShaderFileWatch.reset();
 }

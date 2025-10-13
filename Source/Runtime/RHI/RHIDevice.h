@@ -105,15 +105,15 @@ public:
 
 	virtual void WaitIdle() const = 0;
 
-	virtual RHIShaderPtr CreateShader(const RHIShaderDesc& Desc) = 0;
-	virtual RHITexturePtr CreateTexture(const RHITextureDesc& Desc) = 0;
-	virtual RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutDesc& Desc) = 0;
-	virtual RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferDesc& Desc) = 0;
-	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineDesc& Desc) = 0;
-	virtual RHIPipelineStatePtr CreatePipelineState(const RHIGraphicsPipelineDesc& Desc) = 0;
-	virtual RHIBufferPtr CreateBuffer(const RHIBufferDesc& Desc) = 0;
-	virtual RHISamplerPtr CreateSampler(const RHISamplerDesc& Desc) = 0;
-	virtual RHISwapchainPtr CreateSwapchain(const RHISwapchainDesc& Desc) = 0;
+	virtual RHIShaderPtr CreateShader(const RHIShaderDesc& Desc) const = 0;
+	virtual RHITexturePtr CreateTexture(const RHITextureDesc& Desc) const = 0;
+	virtual RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutDesc& Desc) const = 0;
+	virtual RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferDesc& Desc) const = 0;
+	virtual RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineDesc& Desc) const = 0;
+	virtual RHIPipelineStatePtr CreatePipelineState(const RHIGraphicsPipelineDesc& Desc) const = 0;
+	virtual RHIBufferPtr CreateBuffer(const RHIBufferDesc& Desc) const = 0;
+	virtual RHISamplerPtr CreateSampler(const RHISamplerDesc& Desc) const = 0;
+	virtual RHISwapchainPtr CreateSwapchain(const RHISwapchainDesc& Desc) const = 0;
 
 	virtual RHICommandListContext* GetImmediateCommandListContext(ERHIDeviceQueue Queue) = 0;
 	virtual RHICommandListContextPtr AcquireDeferredCommandListContext() = 0;

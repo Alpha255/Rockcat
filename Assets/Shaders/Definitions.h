@@ -32,7 +32,7 @@ private: \
 		struct NextVariableID_##Name{}; \
 		static FuncPtr RegisterShaderVariable(NextVariableID_##Name, OwnerClass& Owner) \
 		{ \
-			ShaderVariable Variable{ Owner.GetStage(), ERHIResourceType::ResType, Binding, ~0u, #Name }; \
+			ShaderVariable Variable{ Owner.GetStage(), ERHIResourceType::ResType, Binding, #Name }; \
 			Name##Index::Index = Owner.RegisterVariable(std::move(Variable)); \
 			FuncPtr(*LastShaderVariableRegisterFunc)(VariableID_##Name, OwnerClass&); \
 			LastShaderVariableRegisterFunc = RegisterShaderVariable; \
@@ -51,7 +51,7 @@ private: \
 		struct NextVariableID_##Name{}; \
 		static FuncPtr RegisterShaderVariable(NextVariableID_##Name, OwnerClass& Owner) \
 		{ \
-			ShaderVariable Variable{ Owner.GetStage(), ERHIResourceType::ResType, Binding, ~0u, "UniformBuffer_" #Name }; \
+			ShaderVariable Variable{ Owner.GetStage(), ERHIResourceType::ResType, Binding, "UniformBuffer_" #Name }; \
 			Name##Index::Index = Owner.RegisterVariable(std::move(Variable)); \
 			FuncPtr(*LastShaderVariableRegisterFunc)(VariableID_##Name, OwnerClass&); \
 			LastShaderVariableRegisterFunc = RegisterShaderVariable; \

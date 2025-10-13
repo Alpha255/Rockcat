@@ -108,7 +108,7 @@ VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIRenderPa
 	VERIFY_VK(GetNativeDevice().createRenderPass(&RenderPassCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
-VulkanFramebuffer::VulkanFramebuffer(const VulkanDevice& Device, vk::RenderPass CompatibleRenderPass, const RHIFrameBufferDesc& Desc)
+VulkanFrameBuffer::VulkanFrameBuffer(const VulkanDevice& Device, vk::RenderPass CompatibleRenderPass, const RHIFrameBufferDesc& Desc)
 	: VkHwResource(Device)
 	, RHIFrameBuffer(Desc)
 {

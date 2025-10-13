@@ -10,15 +10,15 @@ public:
 
 	void WaitIdle() const override final {}
 
-	RHIShaderPtr CreateShader(const RHIShaderDesc& Desc) override final;
-	RHITexturePtr CreateTexture(const RHITextureDesc& Desc) override final;
-	RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutDesc& Desc) override final;
-	RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferDesc& Desc) override final;
-	RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineDesc& Desc) override final;
-	RHIPipelineStatePtr CreatePipelineState(const RHIGraphicsPipelineDesc& Desc) override final;
-	RHIBufferPtr CreateBuffer(const RHIBufferDesc& Desc) override final;
-	RHISamplerPtr CreateSampler(const RHISamplerDesc& Desc) override final;
-	RHISwapchainPtr CreateSwapchain(const RHISwapchainDesc& Desc) override final;
+	RHIShaderPtr CreateShader(const RHIShaderDesc& Desc) const override final;
+	RHITexturePtr CreateTexture(const RHITextureDesc& Desc) const override final;
+	RHIInputLayoutPtr CreateInputLayout(const RHIInputLayoutDesc& Desc) const override final;
+	RHIFrameBufferPtr CreateFrameBuffer(const RHIFrameBufferDesc& Desc) const override final;
+	RHIGraphicsPipelinePtr CreateGraphicsPipeline(const RHIGraphicsPipelineDesc& Desc) const override final;
+	RHIPipelineStatePtr CreatePipelineState(const RHIGraphicsPipelineDesc& Desc) const override final;
+	RHIBufferPtr CreateBuffer(const RHIBufferDesc& Desc) const override final;
+	RHISamplerPtr CreateSampler(const RHISamplerDesc& Desc) const override final;
+	RHISwapchainPtr CreateSwapchain(const RHISwapchainDesc& Desc) const override final;
 
 	RHICommandListContext* GetImmediateCommandListContext(ERHIDeviceQueue Queue) override final;
 	RHICommandListContextPtr AcquireDeferredCommandListContext() override final;

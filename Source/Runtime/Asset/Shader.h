@@ -24,7 +24,6 @@ struct ShaderVariable
 	ERHIShaderStage Stage = ERHIShaderStage::Num;
 	ERHIResourceType Type = ERHIResourceType::Unknown;
 	uint32_t Binding = ~0u;
-	uint32_t DescriptorIndex = ~0u;
 
 	std::string_view Name;
 
@@ -134,21 +133,46 @@ class ShaderBinary : public Serializable<ShaderBinary>
 public:
 	using BaseClass::BaseClass;
 
-	ShaderBinary(const class Shader& InShader, ERHIDeviceType DeviceType);
+	ShaderBinary(const class Shader& InShader, ERHIDeviceType DeviceType, ShaderBlob& Blob);
 
-	inline const ShaderBlob& GetBlob() const { return m_Blob; }
+	inline const ShaderBlob& GetBlob() const
+	{
+		std::lock_guard<std::mutex> Lock(m_BlobLock);
+		return m_Blob;
+	}
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(BaseClass)
+			CEREAL_BASE(BaseClass),
+			CEREAL_NVP(m_ShaderLastWriteTime),
+			CEREAL_NVP(m_Blob)
 		);
+	}
+protected:
+	friend class Shader;
+	friend class ShaderLibrary;
+
+	inline void ResetBlob()
+	{
+		std::lock_guard<std::mutex> Lock(m_BlobLock);
+		m_Blob.Reset();
+	}
+
+	inline void SetBlob(ShaderBlob& InBlob, time_t LastWriteTime)
+	{
+		std::lock_guard<std::mutex> Lock(m_BlobLock);
+		m_Blob = std::move(InBlob);
+		m_ShaderLastWriteTime = LastWriteTime;
+		Save(true);
 	}
 private:
 	static std::filesystem::path GetPath(const Shader& InShader, ERHIDeviceType DeviceType);
 
+	time_t m_ShaderLastWriteTime = 0;
 	ShaderBlob m_Blob;
+	mutable std::mutex m_BlobLock;
 };
 
 class Shader : public Asset, public ShaderDefines
@@ -173,25 +197,24 @@ public:
 
 	inline const std::vector<ShaderVariable>& GetVariables() const { return m_Variables; }
 
-	const RHIShader* GetRHI(const class RHIDevice&) const;
+	const RHIShader* GetRHI(const class RHIDevice&);
 
-	size_t GetHash() const
-	{
-		size_t Hash = std::hash<Shader>()(*this);
-		return IsReady() ? ComputeHash(Hash, m_CachedRHI) : Hash;
-	}
+	size_t GetHash() const;
 protected:
 	friend class ShaderLibrary;
 
 	uint32_t RegisterVariable(ShaderVariable&& Variable);
 	inline std::vector<ShaderVariable>& GetVariables() { return m_Variables; }
 
+	void SetBlob(ShaderBlob& Blob, ERHIDeviceType DeviceType) const;
+
 	virtual const RHIShader* GetFallback(const class RHIDevice&) const;
 private:
 	ERHIShaderStage m_Stage;
 	std::string m_Entry;
 
-	const RHIShader* m_CachedRHI = nullptr;
+	RHIShaderPtr m_CachedRHI;
+	mutable std::shared_ptr<ShaderBinary> m_CachedBinary;
 
 	std::vector<ShaderVariable> m_Variables;
 };
