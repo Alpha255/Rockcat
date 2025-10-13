@@ -54,14 +54,20 @@ const RHIShader* Shader::GetRHI(const RHIDevice& Device)
 	return GetFallback(Device);
 }
 
-void Shader::SetBlob(ShaderBlob& Blob, ERHIDeviceType DeviceType) const
+void Shader::SetBlob(ShaderBlob& Blob, ERHIDeviceType DeviceType)
 {
 	if (m_CachedBinary)
 	{
 		m_CachedBinary->SetBlob(Blob, GetLastWriteTime());
+		SetStatus(Asset::EStatus::Loading);
 	}
 	else
 	{
 		m_CachedBinary = std::make_shared<ShaderBinary>(*this, DeviceType, Blob);
 	}
+}
+
+const RHIShader* Shader::GetFallback(const RHIDevice&) const
+{
+	return nullptr;
 }
