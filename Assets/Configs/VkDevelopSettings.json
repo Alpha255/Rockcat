@@ -1,6 +1,15 @@
 {
     "struct VulkanDevelopSettings": {
-        "DebugLayerLevel": 3,
+        "class Serializable<struct VulkanDevelopSettings>": {
+            "class Asset": {
+                "class File": {
+                    "m_LastWriteTime": 1760425061
+                }
+            }
+        },
+        "DebugLayerLevel": {
+            "value0": "Warning"
+        },
         "Extensions": {
             "KhronosValidationLayer": true,
             "KHRSurface": true,

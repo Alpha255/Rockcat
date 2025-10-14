@@ -8,12 +8,12 @@ namespace filewatch
 	template<class T> class FileWatch;
 };
 
-class ShaderLibrary : public Singleton<ShaderLibrary>
+class ShaderLibrary : public IService<ShaderLibrary>
 {
-protected:
-	ShaderLibrary();
-	~ShaderLibrary();
 public:
+	virtual void Initialize() override final;
+	virtual void Finalize() override final;
+
 	inline void RegisterActiveCompiler(ERHIDeviceType DeviceType)
 	{
 		m_ActiveCompilers.insert(DeviceType);

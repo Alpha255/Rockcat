@@ -4,9 +4,11 @@
 
 ShaderBinary::ShaderBinary(const Shader& InShader, ERHIDeviceType DeviceType, ShaderBlob& Blob)
 	: BaseClass(GetPath(InShader, DeviceType))
+	, m_DeviceType(DeviceType)
 	, m_ShaderLastWriteTime(InShader.GetLastWriteTime())
 	, m_Blob(std::move(Blob))
 {
+	Save(true);
 }
 
 std::filesystem::path ShaderBinary::GetPath(const Shader& InShader, ERHIDeviceType DeviceType)
@@ -14,7 +16,10 @@ std::filesystem::path ShaderBinary::GetPath(const Shader& InShader, ERHIDeviceTy
 	const std::filesystem::path RelativePath = std::filesystem::relative(InShader.GetPath(), Paths::ShaderPath()).parent_path();
 	return Paths::ShaderBinaryPath() / 
 		RelativePath / 
-		StringUtils::Format("%s_%s_%lld", InShader.GetStem().c_str(), RHIDevice::GetName(DeviceType), std::hash<Shader>()(InShader));
+		StringUtils::Format("%s_%s_%llu.json", 
+			InShader.GetStem().c_str(), 
+			RHIDevice::GetName(DeviceType), 
+			std::hash<Shader>()(InShader));
 }
 
 size_t Shader::GetHash() const
@@ -58,6 +63,13 @@ void Shader::SetBlob(ShaderBlob& Blob, ERHIDeviceType DeviceType)
 {
 	if (m_CachedBinary)
 	{
+#if _DEBUG
+		if (m_CachedBinary->GetDeviceType() != DeviceType)
+		{
+			m_CachedBinary = std::make_shared<ShaderBinary>(*this, DeviceType, Blob);
+			return;
+		}
+#endif
 		m_CachedBinary->SetBlob(Blob, GetLastWriteTime());
 		SetStatus(Asset::EStatus::Loading);
 	}

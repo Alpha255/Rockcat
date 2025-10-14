@@ -6,6 +6,7 @@ VulkanShader::VulkanShader(const VulkanDevice& Device, const RHIShaderDesc& Desc
 	: VkHwResource(Device)
 	, RHIShader(Desc)
 {
+	// #TODO: thread safe ???
 	assert(Desc.Binary && Desc.Binary->GetBlob().IsValid() && (Desc.Binary->GetBlob().Size % sizeof(uint32_t) == 0));
 
 	vk::ShaderModuleCreateInfo CreateInfo;

@@ -11,7 +11,9 @@
 #include "RHI/Vulkan/VulkanSwapchain.h"
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
 #include "RHI/Vulkan/VulkanRenderPass.h"
+#include "Paths.h"
 #include "Services/TaskFlowService.h"
+#include "Services/ShaderLibrary.h"
 
 #if USE_DYNAMIC_VK_LOADER
 	VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
@@ -27,7 +29,7 @@ VulkanDevice::VulkanDevice()
 	VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);
 #endif
 
-	m_DevelopSettings = VulkanDevelopSettings::Load("Configs\\VkDevelopSettings.json");
+	m_DevelopSettings = VulkanDevelopSettings::Load(Paths::ConfigPath() / "VkDevelopSettings.json");
 
 	m_Instance = std::make_unique<VulkanInstance>(m_DevelopSettings->Extensions, m_DevelopSettings->DebugLayerLevel);
 
@@ -258,6 +260,8 @@ VulkanDevice::VulkanDevice()
 	m_PipelineCache = std::make_shared<VulkanPipelineCache>(*this);
 	
 	VulkanMemoryAllocator::Create(*this);
+
+	ShaderLibrary::Get().RegisterActiveCompiler(GetType());
 }
 
 RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderDesc& Desc) const

@@ -4,6 +4,7 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "Services/TaskFlowService.h"
 #include "Services/AssetDatabase.h"
+#include "Services/ShaderLibrary.h"
 #include "Profile/CpuTimer.h"
 #include "Profile/Stats.h"
 #include "System/System.h"
@@ -37,9 +38,6 @@ bool BaseApplication::InitializeRHI()
 		LOG_CRITICAL("Render backend \"{}\" is not support yet!", RHIDevice::GetName(m_Settings->Rendering.DeviceType));
 		return false;
 	}
-
-	//ShaderLibrary::Create(*m_RenderDevice);
-	//RHIUploadManager::Create(*m_RenderDevice);
 
 	return true;
 }
@@ -195,16 +193,17 @@ void BaseApplication::Run()
 	TaskFlow::Get().Initialize();
 	AssetDatabase::Get().Initialize();
 	Stats::Get().Initialize();
+	ShaderLibrary::Get().Initialize();
 
 	if (m_Settings->Rendering.Enable)
 	{
 		m_Window = std::make_unique<Window>(m_Settings->Window);
 		assert(m_Window);
 
-		//if (!InitializeRHI())
-		//{
-		//	return;
-		//}
+		if (!InitializeRHI())
+		{
+			return;
+		}
 	}
 
 	Initialize();
@@ -229,6 +228,7 @@ void BaseApplication::Run()
 
 	Finalize();
 
+	ShaderLibrary::Get().Finalize();
 	AssetDatabase::Get().Finalize();
 	TaskFlow::Get().Finalize();
 	Stats::Get().Finalize();

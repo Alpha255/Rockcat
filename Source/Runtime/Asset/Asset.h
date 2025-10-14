@@ -39,7 +39,7 @@ struct DataBlock
 			CEREAL_NVP(Offset)
 		);
 
-		Data.reset(new std::byte[Size + Offset]());
+		Data.reset(new std::byte[Size]());
 
 		Ar.loadBinaryValue(Data.get() + Offset, Size, "Data");
 	}

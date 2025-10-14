@@ -12,7 +12,7 @@ DxcShaderCompiler::DxcShaderCompiler(bool GenerateSpirv)
 	uint32_t Major = 0u, Minor = 0u;
 	VERIFY(VersionInfo->GetVersion(&Major, &Minor) == S_OK);
 
-	LOG_CAT_INFO(LogShaderCompiler, "Create dxc shader compiler v{}.{}, spir-v is {}", Major, Minor, GenerateSpirv ? "enabled" : "disabled");
+	LOG_CAT_INFO(LogShaderLibrary, "Create dxc shader compiler v{}.{}, spir-v is {}", Major, Minor, GenerateSpirv ? "enabled" : "disabled");
 }
 
 ShaderBlob DxcShaderCompiler::Compile(
@@ -114,8 +114,8 @@ ShaderBlob DxcShaderCompiler::Compile(
 	{
 		DxcBlobEncoding Error;
 		VERIFY(Result->GetErrorBuffer(Error.Reference()) == S_OK);
-		LOG_CAT_ERROR(LogShaderCompiler, "Failed to compile shader: {}, error message: {}", SourceName, static_cast<const char*>(Error->GetBufferPointer()));
-		return ShaderBlob(0u);
+		LOG_CAT_ERROR(LogShaderLibrary, "Failed to compile shader: {}, error message: {}", SourceName, static_cast<const char*>(Error->GetBufferPointer()));
+		return ShaderBlob{};
 	}
 
 	DxcBlob Blob;
@@ -174,8 +174,8 @@ ShaderBlob D3DShaderCompiler::Compile(
 		Binary.Reference(),
 		Error.Reference())))
 	{
-		LOG_CAT_ERROR(LogShaderCompiler, "Failed to compile shader: {}, error message: {}", SourceName, reinterpret_cast<const char* const>(Error->GetBufferPointer()));
-		assert(0);
+		LOG_CAT_ERROR(LogShaderLibrary, "Failed to compile shader: {}, error message: {}", SourceName, reinterpret_cast<const char* const>(Error->GetBufferPointer()));
+		return ShaderBlob{};
 	}
 
 	return ShaderBlob(Binary->GetBufferSize(), Binary->GetBufferPointer());

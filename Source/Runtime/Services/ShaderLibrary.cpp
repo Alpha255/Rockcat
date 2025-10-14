@@ -9,7 +9,7 @@
 #include <filewatch/FileWatch.hpp>
 #pragma warning(default:4068)
 
-ShaderLibrary::ShaderLibrary()
+void ShaderLibrary::Initialize()
 {
 	REGISTER_LOG_CATEGORY(LogShaderLibrary);
 
@@ -112,6 +112,8 @@ void ShaderLibrary::CompileShader(Shader& InShader, ERHIDeviceType DeviceType)
 {
 	assert(std::filesystem::exists(InShader.GetPath()));
 
+	RegisterShader(InShader);
+
 	auto CachedBinaryPath = ShaderBinary::GetPath(InShader, DeviceType);
 	if (std::filesystem::exists(CachedBinaryPath))
 	{
@@ -127,8 +129,6 @@ void ShaderLibrary::CompileShader(Shader& InShader, ERHIDeviceType DeviceType)
 
 	if (RegisterCompileTask(Hash))
 	{
-		RegisterShader(InShader);
-
 		if (auto Compiler = GetCompiler(DeviceType))
 		{
 			std::ifstream FileStream(InShader.GetPath(), std::ios::in);
@@ -146,6 +146,7 @@ void ShaderLibrary::CompileShader(Shader& InShader, ERHIDeviceType DeviceType)
 			if (Blob.IsValid())
 			{
 				InShader.SetBlob(Blob, DeviceType);
+				LOG_CAT_INFO(LogShaderLibrary, "Shader \"{}\" compile success for device \"{}\".", InShader.GetStem(), magic_enum::enum_name(DeviceType).data());
 			}
 		}
 		else
@@ -157,14 +158,14 @@ void ShaderLibrary::CompileShader(Shader& InShader, ERHIDeviceType DeviceType)
 	}
 	else
 	{
-		LOG_CAT_WARNING(LogShaderLibrary, "The shader \"{}\" is already in compiling queue", InShader.GetStem());
+		LOG_CAT_DEBUG(LogShaderLibrary, "The shader \"{}\" is already in compiling queue", InShader.GetStem());
 	}
 }
 
 void ShaderLibrary::QueueCompileShader(Shader& InShader, ERHIDeviceType DeviceType)
 {
 	tf::Async([this, &InShader, DeviceType]() {
-		CompileShader(InShader, DeviceType); 
+		CompileShader(InShader, DeviceType);
 	}, EThread::WorkerThread, Task::EPriority::High);
 }
 
@@ -186,8 +187,11 @@ void ShaderLibrary::DeregisterCompileTask(size_t Hash)
 	m_CompilingTasks.erase(Hash);
 }
 
-ShaderLibrary::~ShaderLibrary()
+void ShaderLibrary::Finalize()
 {
+	m_HeaderFileInfos.clear();
+	m_Shaders.clear();
+
 	for (auto& Compiler : m_Compilers)
 	{
 		if (Compiler)

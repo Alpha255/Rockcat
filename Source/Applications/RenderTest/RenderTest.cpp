@@ -4,8 +4,18 @@
 #include "Scene/SceneView.h"
 #include "Rendering/RenderGraph/RenderGraph.h"
 
+#include "Asset/GlobalShaders.h"
+#include "Services/ShaderLibrary.h"
+
+static std::shared_ptr<GenericVS> VS;
+
 void RenderTest::Initialize()
 {
+	VS = std::make_shared<GenericVS>();
+	ShaderLibrary::Get().CompileShader(*VS, ERHIDeviceType::Vulkan);
+	ShaderLibrary::Get().CompileShader(*VS, ERHIDeviceType::D3D11);
+	ShaderLibrary::Get().CompileShader(*VS, ERHIDeviceType::D3D12);
+
 	return;
 	m_Scene = Scene::Load(Paths::ScenePath() / "RenderTest.scene");
 	m_Scene->AddView<PlanarSceneView>();

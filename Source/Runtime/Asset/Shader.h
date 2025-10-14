@@ -167,9 +167,12 @@ protected:
 		m_ShaderLastWriteTime = LastWriteTime;
 		Save(true);
 	}
+
+	inline ERHIDeviceType GetDeviceType() const { return m_DeviceType; }
 private:
 	static std::filesystem::path GetPath(const Shader& InShader, ERHIDeviceType DeviceType);
 
+	ERHIDeviceType m_DeviceType = ERHIDeviceType::Num;
 	time_t m_ShaderLastWriteTime = 0;
 	ShaderBlob m_Blob;
 	mutable std::mutex m_BlobLock;
@@ -260,7 +263,6 @@ namespace std
 			size_t Hash = std::filesystem::hash_value(InShader.GetPath());
 			HashCombine(Hash, static_cast<uint8_t>(InShader.GetStage()));
 			HashCombine(Hash, std::hash<ShaderDefines>()(InShader));
-			HashCombine(Hash, InShader.GetLastWriteTime());
 			return Hash;
 		}
 	};
