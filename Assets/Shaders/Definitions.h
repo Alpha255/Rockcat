@@ -12,6 +12,14 @@ using float3 = Math::Vector3;
 using float4 = Math::Vector4;
 using float4x4 = Math::Matrix;
 
+#define BEGIN_SHADER_DEFINES
+
+#define SHADER_DEFINE(Type, Name, AliasName) \
+	public: \
+		inline void Set##AliasName(Type Value) { SetDefine(#Name, Value); } \
+
+#define END_SHADER_DEFINES
+
 #define BEGIN_SHADER_VARIABLE(Owner) \
 protected: \
 	using OwnerClass = Owner; \
