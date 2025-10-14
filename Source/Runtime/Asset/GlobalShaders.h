@@ -17,6 +17,7 @@ public:
 
 class DepthOnlyFS : public GlobalShader<DepthOnlyFS>
 {
+public:
 	DepthOnlyFS()
 		: GlobalShader("DepthOnly.frag", ERHIShaderStage::Fragment)
 	{

@@ -206,6 +206,10 @@ protected:
 	uint32_t RegisterVariable(ShaderVariable&& Variable);
 	inline std::vector<ShaderVariable>& GetVariables() { return m_Variables; }
 
+	inline void SetBinary(std::shared_ptr<ShaderBinary>& InBinary)
+	{
+		m_CachedBinary = std::move(InBinary);
+	}
 	void SetBlob(ShaderBlob& Blob, ERHIDeviceType DeviceType);
 
 	virtual const RHIShader* GetFallback(const class RHIDevice&) const;

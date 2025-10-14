@@ -70,15 +70,15 @@ void MeshDrawCommandBuilder::SetupShaderParameters(RHIGraphicsPipelineDesc& Desc
 	const Math::Transform& InTransform,
 	const MaterialProperty& InMaterial)
 {
-	for (auto& Shader : Desc.ShaderPipeline)
-	{
-		if (Shader)
-		{
-			Shader->SetupTransform(InTransform);
-			Shader->SetupViewParams(InView);
-			Shader->SetupMaterialProperty(InMaterial);
-		}
-	}
+	//for (auto& Shader : Desc.ShaderPipeline)
+	//{
+	//	if (Shader)
+	//	{
+	//		Shader->SetupTransform(InTransform);
+	//		Shader->SetupViewParams(InView);
+	//		Shader->SetupMaterialProperty(InMaterial);
+	//	}
+	//}
 }
 
 RHIFrameBuffer* GeometryPass::GetFrameBuffer()

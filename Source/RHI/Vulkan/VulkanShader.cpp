@@ -9,7 +9,7 @@ VulkanShader::VulkanShader(const VulkanDevice& Device, const RHIShaderDesc& Desc
 	assert(Desc.Binary && Desc.Binary->GetBlob().IsValid() && (Desc.Binary->GetBlob().Size % sizeof(uint32_t) == 0));
 
 	vk::ShaderModuleCreateInfo CreateInfo;
-	CreateInfo.setCodeSize(Desc.Binary->GetSize())
+	CreateInfo.setCodeSize(Desc.Binary->GetBlob().Size)
 		.setPCode(reinterpret_cast<const uint32_t*>(Desc.Binary->GetBlob().Data.get()));
 
 	VERIFY_VK(GetNativeDevice().createShaderModule(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));

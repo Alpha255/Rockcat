@@ -45,6 +45,7 @@ class VulkanPipelineState : public RHIPipelineState, public VkBaseDeviceResource
 {
 public:
 	VulkanPipelineState(const class VulkanDevice& Device, const RHIGraphicsPipelineDesc& Desc);
+	VulkanPipelineState(const class VulkanDevice& Device, const RHIComputePipelineDesc& Desc);
 
 	vk::DescriptorSetLayout GetDescriptorSetLayout() const { return m_DescriptorSetLayout->GetNative(); }
 	vk::PipelineLayout GetPipelineLayout() const { return m_PipelineLayout->GetNative(); }

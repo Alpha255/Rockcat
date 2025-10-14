@@ -11,7 +11,7 @@
 
 ShaderLibrary::ShaderLibrary()
 {
-	REGISTER_LOG_CATEGORY(LogShaderCompiler);
+	REGISTER_LOG_CATEGORY(LogShaderLibrary);
 
 	m_Compilers[ERHIDeviceType::Vulkan] = std::make_unique<DxcShaderCompiler>(true);
 	m_Compilers[ERHIDeviceType::D3D11] = std::make_unique<D3DShaderCompiler>();
@@ -69,7 +69,7 @@ void ShaderLibrary::OnShaderFileModified(const std::filesystem::path& Path)
 	}
 }
 
-void ShaderLibrary::RegisterShader(const Shader& InShader)
+void ShaderLibrary::RegisterShader(Shader& InShader)
 {
 	std::lock_guard Lock(m_ShaderLock);
 	m_Shaders[InShader.GetPath()] = &InShader;
@@ -108,9 +108,20 @@ std::unordered_set<std::filesystem::path> ShaderLibrary::ParseIncludeFiles(const
 	return IncludeFiles;
 }
 
-void ShaderLibrary::CompileShader(const Shader& InShader, ERHIDeviceType DeviceType)
+void ShaderLibrary::CompileShader(Shader& InShader, ERHIDeviceType DeviceType)
 {
 	assert(std::filesystem::exists(InShader.GetPath()));
+
+	auto CachedBinaryPath = ShaderBinary::GetPath(InShader, DeviceType);
+	if (std::filesystem::exists(CachedBinaryPath))
+	{
+		std::shared_ptr<ShaderBinary> CachedBinary = ShaderBinary::Load(CachedBinaryPath);
+		if (CachedBinary->GetBlob().IsValid() && CachedBinary->m_ShaderLastWriteTime == InShader.GetLastWriteTime())
+		{
+			InShader.SetBinary(CachedBinary);
+			return;
+		}
+	}
 
 	size_t Hash = std::hash<Shader>()(InShader);
 
@@ -137,12 +148,20 @@ void ShaderLibrary::CompileShader(const Shader& InShader, ERHIDeviceType DeviceT
 				InShader.SetBlob(Blob, DeviceType);
 			}
 		}
+		else
+		{
+			LOG_CAT_ERROR(LogShaderLibrary, "Unsupported device type \"{}\" for shader \"{}\"", magic_enum::enum_name(DeviceType).data(), InShader.GetStem());
+		}
 
 		DeregisterCompileTask(Hash);
 	}
+	else
+	{
+		LOG_CAT_WARNING(LogShaderLibrary, "The shader \"{}\" is already in compiling queue", InShader.GetStem());
+	}
 }
 
-void ShaderLibrary::QueueCompileShader(const Shader& InShader, ERHIDeviceType DeviceType)
+void ShaderLibrary::QueueCompileShader(Shader& InShader, ERHIDeviceType DeviceType)
 {
 	tf::Async([this, &InShader, DeviceType]() {
 		CompileShader(InShader, DeviceType); 

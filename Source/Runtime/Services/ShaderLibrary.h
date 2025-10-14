@@ -19,18 +19,18 @@ public:
 		m_ActiveCompilers.insert(DeviceType);
 	}
 
-	void CompileShader(const Shader& InShader, ERHIDeviceType DeviceType);
-	void QueueCompileShader(const Shader& InShader, ERHIDeviceType DeviceType);
+	void CompileShader(Shader& InShader, ERHIDeviceType DeviceType);
+	void QueueCompileShader(Shader& InShader, ERHIDeviceType DeviceType);
 protected:
 private:
-	using LinkedShaders = std::unordered_set<const Shader*>;
+	using LinkedShaders = std::unordered_set<Shader*>;
 
 	bool RegisterCompileTask(size_t Hash);
 	void DeregisterCompileTask(size_t Hash);
 
 	void OnShaderFileModified(const std::filesystem::path& Path);
 
-	void RegisterShader(const Shader& InShader);
+	void RegisterShader(Shader& InShader);
 
 	std::unordered_set<std::filesystem::path> ParseIncludeFiles(const Shader& InShader);
 
@@ -41,7 +41,7 @@ private:
 	Array<std::unique_ptr<IShaderCompiler>, ERHIDeviceType> m_Compilers;
 	std::shared_ptr<filewatch::FileWatch<std::string>> m_ShaderFileWatch;
 	std::unordered_map<std::filesystem::path, LinkedShaders> m_HeaderFileInfos;
-	std::unordered_map<std::filesystem::path, const Shader*> m_Shaders;
+	std::unordered_map<std::filesystem::path, Shader*> m_Shaders;
 
 	std::mutex m_CompileTaskLock;
 	std::mutex m_ShaderLock;

@@ -196,6 +196,13 @@ VulkanPipelineState::VulkanPipelineState(const VulkanDevice& Device, const RHIGr
 	InitWriteDescriptorSets(Desc);
 }
 
+VulkanPipelineState::VulkanPipelineState(const VulkanDevice& Device, const RHIComputePipelineDesc& Desc)
+	: VkBaseDeviceResource(Device)
+	, RHIPipelineState(Desc)
+{
+	assert(false); // TODO
+}
+
 void VulkanPipelineState::CreateLayouts(const VulkanDevice& Device, const RHIGraphicsPipelineDesc& Desc)
 {
 	m_DescriptorSetLayout = std::make_unique<VulkanDescriptorSetLayout>(Device, Desc);
