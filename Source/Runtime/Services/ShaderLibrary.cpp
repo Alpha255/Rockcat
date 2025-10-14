@@ -21,11 +21,24 @@ void ShaderLibrary::Initialize()
 	auto ShaderPath = Paths::ShaderPath().string();
 	m_ShaderFileWatch = std::make_shared<filewatch::FileWatch<std::string>>(ShaderPath, std::regex(R"(.*\.(vert|frag|comp|hlsl|hlsli)$)"),
 		[this](const std::string& SubPath, filewatch::Event FileEvent) {
+			static std::unordered_map<std::string, std::chrono::steady_clock::time_point> s_EventTimeMap;
+			static const std::chrono::milliseconds s_DeltaTime(500);
+
 			switch (FileEvent)
 			{
 			case filewatch::Event::modified:
+			{
+				auto Now = std::chrono::steady_clock::now();
+				auto& LastTimepoint = s_EventTimeMap[SubPath];
+				if (Now - LastTimepoint < s_DeltaTime)
+				{
+					return;
+				}
+
+				LastTimepoint = Now;
 				OnShaderFileModified(Paths::ShaderPath() / SubPath);
 				break;
+			}
 			}
 		});
 #endif
@@ -33,6 +46,8 @@ void ShaderLibrary::Initialize()
 
 void ShaderLibrary::OnShaderFileModified(const std::filesystem::path& Path)
 {
+	std::lock_guard Lock(m_ShaderLock);
+
 	auto HeaderIt = m_HeaderFileInfos.find(Path);
 	if (HeaderIt == m_HeaderFileInfos.cend())
 	{
@@ -72,6 +87,7 @@ void ShaderLibrary::OnShaderFileModified(const std::filesystem::path& Path)
 void ShaderLibrary::RegisterShader(Shader& InShader)
 {
 	std::lock_guard Lock(m_ShaderLock);
+
 	m_Shaders[InShader.GetPath()] = &InShader;
 	for (auto& HeaderFile : ParseIncludeFiles(InShader))
 	{
@@ -121,11 +137,12 @@ void ShaderLibrary::CompileShader(Shader& InShader, ERHIDeviceType DeviceType)
 		if (CachedBinary->GetBlob().IsValid() && CachedBinary->m_ShaderLastWriteTime == InShader.GetLastWriteTime())
 		{
 			InShader.SetBinary(CachedBinary);
+			LOG_CAT_DEBUG(LogShaderLibrary, "Load shader binary from \"{}\".", CachedBinaryPath.string());
 			return;
 		}
 	}
 
-	size_t Hash = std::hash<Shader>()(InShader);
+	size_t Hash = ComputeHash(std::hash<Shader>()(InShader), DeviceType);
 
 	if (RegisterCompileTask(Hash))
 	{
