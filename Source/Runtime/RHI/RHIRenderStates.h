@@ -348,7 +348,8 @@ struct RHIRenderPassDesc
 	{
 		assert(RHI::IsColor(Format) && ColorAttachments.size() < (ERHILimitations::MaxRenderTargets - 1u));
 
-		ColorAttachments.emplace_back(RHIAttachment
+		ColorAttachments.emplace_back(
+			RHIAttachment
 			{
 				Format,
 				LoadOp,
@@ -432,8 +433,8 @@ struct RHIRenderPassDesc2
 {
 	struct RHIAttachmentDesc
 	{
-		const RHITexture* Attachment = nullptr;
-		RHISubresource Subresource = RHI::AllSubresource;
+		const RHITexture* Attachment = 0u;
+		ERHISampleCount NumSamples = ERHISampleCount::Sample_1_Bit;
 
 		ERHILoadOp LoadOp = ERHILoadOp::None;
 		ERHIStoreOp StoreOp = ERHIStoreOp::None;
@@ -441,8 +442,6 @@ struct RHIRenderPassDesc2
 		ERHILoadOp StencilLoadOp = ERHILoadOp::None;
 		ERHIStoreOp StencilStoreOp = ERHIStoreOp::None;
 	};
-
-	using AttachmentRef = uint32_t;
 
 	struct RHISubpassDesc
 	{
@@ -459,27 +458,28 @@ struct RHIRenderPassDesc2
 			Compute
 		};
 
-		std::vector<AttachmentRef> Inputs;
-		std::vector<AttachmentRef> Outputs;
-
 		ERHIBindPoint BindPoint = ERHIBindPoint::Graphics;
 		ERHIDepthStencilOp DepthStencilOp = ERHIDepthStencilOp::None;
-		RHIRenderPassDesc2& RenderPassDesc;
 
-		RHISubpassDesc(ERHIBindPoint InBindPoint, RHIRenderPassDesc2& InDesc)
+		std::vector<uint32_t> InputAttachments;
+		std::vector<uint32_t> OutputColorAttachments;
+		uint32_t DepthStencilAttachment;
+
+		RHISubpassDesc(ERHIBindPoint InBindPoint)
 			: BindPoint(InBindPoint)
-			, RenderPassDesc(InDesc)
 		{
 		}
 
-		inline RHISubpassDesc& AddInput(const RHITexture* Texture)
+		inline RHISubpassDesc& AddInputAttachment(uint32_t Index)
 		{
-			return AddAttachment(Texture, Inputs);
+			InputAttachments.emplace_back(Index);
+			return *this;
 		}
 
-		inline RHISubpassDesc& AddOutput(const RHITexture* Texture)
+		inline RHISubpassDesc& AddOutputColorAttachment(uint32_t Index)
 		{
-			return AddAttachment(Texture, Outputs);
+			OutputColorAttachments.emplace_back(Index);
+			return *this;
 		}
 
 		inline RHISubpassDesc& SetBindPoint(ERHIBindPoint InBindPoint)
@@ -493,61 +493,11 @@ struct RHIRenderPassDesc2
 			DepthStencilOp = InDepthStencilOp;
 			return *this;
 		}
-	private:
-		inline RHISubpassDesc& AddAttachment(const RHITexture* Texture, std::vector<AttachmentRef>& Attachments)
-		{
-			assert(Texture && RHI::IsColor(Texture->GetFormat()));
-			auto It = RenderPassDesc.ColorAttachemntIndices.find(Texture);
-			assert(It != RenderPassDesc.ColorAttachemntIndices.end());
-			Attachments.emplace_back(It->second);
-			return *this;
-		}
 	};
 
 	std::vector<RHIAttachmentDesc> ColorAttachments;
 	RHIAttachmentDesc DepthStencilAttachment;
 	std::vector<RHISubpassDesc> Subpasses;
-
-	std::unordered_map<const RHITexture*, AttachmentRef> ColorAttachemntIndices;
-
-	inline RHIRenderPassDesc2& AddColorAttachment(const RHITexture* Texture,
-		ERHILoadOp LoadOp = ERHILoadOp::Load, 
-		ERHIStoreOp StoreOp = ERHIStoreOp::Store, 
-		RHISubresource Subresource = RHI::AllSubresource)
-	{
-		assert(Texture && RHI::IsColor(Texture->GetFormat()));
-
-		auto It = ColorAttachemntIndices.find(Texture);
-		if (It == ColorAttachemntIndices.end())
-		{
-			It = ColorAttachemntIndices.insert(std::make_pair(Texture, static_cast<AttachmentRef>(ColorAttachments.size()))).first;
-			ColorAttachments.emplace_back(RHIAttachmentDesc{ Texture, Subresource, LoadOp, StoreOp, ERHILoadOp::None, ERHIStoreOp::None });
-		}
-		return *this;
-	}
-
-	inline RHIRenderPassDesc2& SetDepthStencilAttachment(const RHITexture* Texture,
-		ERHILoadOp LoadOp = ERHILoadOp::Load,
-		ERHIStoreOp StoreOp = ERHIStoreOp::Store,
-		ERHILoadOp StencilLoadOp = ERHILoadOp::Load,
-		ERHIStoreOp StencilStoreOp = ERHIStoreOp::Store,
-		RHISubresource Subresource = RHI::AllSubresource)
-	{
-		assert(Texture && RHI::IsDepthStencil(Texture->GetFormat()));
-
-		DepthStencilAttachment = RHIAttachmentDesc{ Texture, Subresource, LoadOp, StoreOp, StencilLoadOp, StencilStoreOp };
-		return *this;
-	}
-
-	inline RHISubpassDesc& AddSubpass()
-	{
-		return Subpasses.emplace_back(RHISubpassDesc(RHISubpassDesc::ERHIBindPoint::Graphics, *this));
-	}
-
-	inline RHISubpassDesc& AddComputeSubpass()
-	{
-		return Subpasses.emplace_back(RHISubpassDesc(RHISubpassDesc::ERHIBindPoint::Compute, *this));
-	}
 
 	inline uint32_t GetNumSubpass() const { return Subpasses.empty() ? 1u : static_cast<uint32_t>(Subpasses.size()); }
 };
