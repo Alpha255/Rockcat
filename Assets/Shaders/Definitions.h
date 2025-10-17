@@ -20,6 +20,24 @@ using float4x4 = Math::Matrix;
 
 #define END_SHADER_DEFINES
 
+#define BEGIN_SHADER_PERMUTATIONS \
+	struct Permutation {
+
+#define SHADER_PERMUTATION_BOOL(Name, AliasName, DefaultValue) \
+	private: \
+		bool AliasName = DefaultValue; \
+	public: \
+		inline void Set##AliasName(bool Value) { if (Value != AliasName) { AliasName = Value; } }
+
+#define SHADER_PERMUTATION_INT(Name, AliasName, DefaultValue, ...) \
+	private: \
+		inline static std::vector<int32_t> AliasName##Values{__VA_ARGS__}; \
+		int32_t AliasName = DefaultValue; \
+	public: \
+		inline void Set##AliasName(int32_t Value) { if (Value != AliasName) { AliasName = Value; } }
+
+#define END_SHADER_PERMUTATIONS };
+
 #define BEGIN_SHADER_VARIABLE(Owner) \
 protected: \
 	using OwnerClass = Owner; \

@@ -4,6 +4,7 @@
 VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIRenderPassDesc& Desc)
 	: VkHwResource(Device)
 {
+	// https://docs.vulkan.org/guide/latest/deprecated.html#render_pass_functions_replacement
 	/*********************************************************************************************************************
 		VK_ATTACHMENT_LOAD_OP_LOAD specifies that the previous contents of the image within the render area will be preserved.
 		For attachments with a depth/stencil format, this uses the access type VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT.

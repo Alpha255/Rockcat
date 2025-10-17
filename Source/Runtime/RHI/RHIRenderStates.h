@@ -429,20 +429,28 @@ struct RHISwapchainDesc
 	inline RHISwapchainDesc& SetHDR(bool InHDR) { HDR = InHDR; return *this; }
 };
 
+struct RHIAttachmentDesc
+{
+	const RHITexture* Attachment = nullptr;
+
+	ERHIFormat Format = ERHIFormat::Unknown;
+	ERHISampleCount NumSamples = ERHISampleCount::Sample_1_Bit;
+
+	ERHILoadOp LoadOp = ERHILoadOp::None;
+	ERHIStoreOp StoreOp = ERHIStoreOp::None;
+
+	ERHILoadOp StencilLoadOp = ERHILoadOp::None;
+	ERHIStoreOp StencilStoreOp = ERHIStoreOp::None;
+};
+
+struct RHIRenderTargetLayout
+{
+	std::vector<RHIAttachmentDesc> Colors;
+	RHIAttachmentDesc DepthStencil;
+};
+
 struct RHIRenderPassDesc2
 {
-	struct RHIAttachmentDesc
-	{
-		const RHITexture* Attachment = 0u;
-		ERHISampleCount NumSamples = ERHISampleCount::Sample_1_Bit;
-
-		ERHILoadOp LoadOp = ERHILoadOp::None;
-		ERHIStoreOp StoreOp = ERHIStoreOp::None;
-
-		ERHILoadOp StencilLoadOp = ERHILoadOp::None;
-		ERHIStoreOp StencilStoreOp = ERHIStoreOp::None;
-	};
-
 	struct RHISubpassDesc
 	{
 		enum class ERHIDepthStencilOp
@@ -463,7 +471,7 @@ struct RHIRenderPassDesc2
 
 		std::vector<uint32_t> InputAttachments;
 		std::vector<uint32_t> OutputColorAttachments;
-		uint32_t DepthStencilAttachment;
+		uint32_t DepthStencilAttachment = ~0u;
 
 		RHISubpassDesc(ERHIBindPoint InBindPoint)
 			: BindPoint(InBindPoint)
@@ -495,11 +503,18 @@ struct RHIRenderPassDesc2
 		}
 	};
 
-	std::vector<RHIAttachmentDesc> ColorAttachments;
-	RHIAttachmentDesc DepthStencilAttachment;
 	std::vector<RHISubpassDesc> Subpasses;
 
-	inline uint32_t GetNumSubpass() const { return Subpasses.empty() ? 1u : static_cast<uint32_t>(Subpasses.size()); }
+	inline uint32_t GetNumSubpass() const { static_cast<uint32_t>(Subpasses.size()); }
+
+	inline RHIRenderPassDesc2& AddColor(
+		ERHILoadOp LoadOp, 
+		ERHIStoreOp StoreOp, 
+		ERHISampleCount NumSample = ERHISampleCount::Sample_1_Bit,
+		const RHITexture* Attachment = nullptr)
+	{
+		return *this;
+	}
 };
 
 class RHIRenderPass2 : public RHIResource
