@@ -6,6 +6,8 @@ class VulkanRenderPass final : public VkHwResource<vk::RenderPass>
 {
 public:
 	VulkanRenderPass(const class VulkanDevice& Device, const RHIRenderPassDesc& Desc);
+
+	VulkanRenderPass(const class VulkanDevice& Device, const RHIRenderPassDesc2& Desc);
 	
 	~VulkanRenderPass() = default;
 protected:

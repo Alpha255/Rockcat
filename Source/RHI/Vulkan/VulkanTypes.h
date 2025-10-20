@@ -29,4 +29,7 @@ vk::VertexInputRate GetInputRate(ERHIVertexInputRate InputRate);
 vk::AttachmentLoadOp GetAttachmentLoadOp(ERHILoadOp LoadOp);
 vk::AttachmentStoreOp GetAttachmentStoreOp(ERHIStoreOp StoreOp);
 vk::IndexType GetIndexType(ERHIIndexFormat Format);
-vk::ImageLayout GetImageLayout(ERHIResourceState Stage);
+vk::ImageLayout GetImageLayout(ERHIResourceState State);
+vk::AccessFlags GetAccessFlags(ERHIResourceState State);
+vk::PipelineStageFlags GetPipelineStageFlags(ERHIResourceState State);
+void GetPipelineStagesAndAccessFlags(ERHIResourceState State, vk::ImageLayout& ImageLayout, vk::AccessFlags& AccessFlags, vk::PipelineStageFlags& StageFlags);

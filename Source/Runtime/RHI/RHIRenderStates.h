@@ -431,10 +431,11 @@ struct RHISwapchainDesc
 
 struct RHIAttachmentDesc
 {
-	const RHITexture* Attachment = nullptr;
-
 	ERHIFormat Format = ERHIFormat::Unknown;
 	ERHISampleCount NumSamples = ERHISampleCount::Sample_1_Bit;
+
+	ERHIResourceState InitialStates = ERHIResourceState::Unknown;
+	ERHIResourceState FinalStates = ERHIResourceState::Unknown;
 
 	ERHILoadOp LoadOp = ERHILoadOp::None;
 	ERHIStoreOp StoreOp = ERHIStoreOp::None;
@@ -447,19 +448,28 @@ struct RHIRenderTargetLayout
 {
 	std::vector<RHIAttachmentDesc> Colors;
 	RHIAttachmentDesc DepthStencil;
+
+	inline bool HasDepthStencil() const
+	{
+		return RHI::IsDepthStencil(DepthStencil.Format) || RHI::IsDepth(DepthStencil.Format);
+	}
+
+	inline bool IsValid() const
+	{
+		return !Colors.empty() || HasDepthStencil();
+	}
+};
+
+struct RHIAttachmentRef
+{
+	uint32_t Index = ~0u;
+	ERHIResourceState States = ERHIResourceState::Unknown;
 };
 
 struct RHIRenderPassDesc2
 {
 	struct RHISubpassDesc
 	{
-		enum class ERHIDepthStencilOp
-		{
-			None,
-			Read,
-			Write
-		};
-
 		enum class ERHIBindPoint
 		{
 			Graphics,
@@ -467,53 +477,104 @@ struct RHIRenderPassDesc2
 		};
 
 		ERHIBindPoint BindPoint = ERHIBindPoint::Graphics;
-		ERHIDepthStencilOp DepthStencilOp = ERHIDepthStencilOp::None;
 
-		std::vector<uint32_t> InputAttachments;
-		std::vector<uint32_t> OutputColorAttachments;
-		uint32_t DepthStencilAttachment = ~0u;
+		std::vector<RHIAttachmentRef> Inputs;
+		std::vector<RHIAttachmentRef> OutputColors;
+		RHIAttachmentRef DepthStencil;
 
 		RHISubpassDesc(ERHIBindPoint InBindPoint)
 			: BindPoint(InBindPoint)
 		{
 		}
 
-		inline RHISubpassDesc& AddInputAttachment(uint32_t Index)
+		inline bool IsGraphics() const { return BindPoint == ERHIBindPoint::Graphics; }
+		inline bool IsCompute() const { return BindPoint == ERHIBindPoint::Compute; }
+		inline bool HasDepthStencil() const { return DepthStencil.Index != ~0u; }
+
+		inline RHISubpassDesc& AddInput(uint32_t Index, ERHIResourceState State)
 		{
-			InputAttachments.emplace_back(Index);
+			Inputs.emplace_back(RHIAttachmentRef{Index, State});
 			return *this;
 		}
 
-		inline RHISubpassDesc& AddOutputColorAttachment(uint32_t Index)
+		inline RHISubpassDesc& AddOutputColor(uint32_t Index, ERHIResourceState States)
 		{
-			OutputColorAttachments.emplace_back(Index);
+			OutputColors.emplace_back(RHIAttachmentRef{Index, States});
 			return *this;
 		}
 
-		inline RHISubpassDesc& SetBindPoint(ERHIBindPoint InBindPoint)
+		inline RHISubpassDesc& SetDepthStencil(uint32_t Index, ERHIResourceState States)
 		{
-			BindPoint = InBindPoint;
-			return *this;
-		}
-
-		inline RHISubpassDesc& SetDepthStencilOp(ERHIDepthStencilOp InDepthStencilOp)
-		{
-			DepthStencilOp = InDepthStencilOp;
+			DepthStencil.Index = Index;
+			DepthStencil.States = States;
 			return *this;
 		}
 	};
 
+	RHIRenderTargetLayout RenderTargetLayout;
 	std::vector<RHISubpassDesc> Subpasses;
 
 	inline uint32_t GetNumSubpass() const { static_cast<uint32_t>(Subpasses.size()); }
 
 	inline RHIRenderPassDesc2& AddColor(
-		ERHILoadOp LoadOp, 
-		ERHIStoreOp StoreOp, 
-		ERHISampleCount NumSample = ERHISampleCount::Sample_1_Bit,
-		const RHITexture* Attachment = nullptr)
+		ERHIFormat Format,
+		ERHIResourceState InitialStates = ERHIResourceState::Unknown,
+		ERHIResourceState FinalStates = ERHIResourceState::RenderTarget,
+		ERHILoadOp LoadOp = ERHILoadOp::DontCare, 
+		ERHIStoreOp StoreOp = ERHIStoreOp::Store, 
+		ERHISampleCount NumSample = ERHISampleCount::Sample_1_Bit)
 	{
+		assert(RHI::IsColor(Format));
+
+		RenderTargetLayout.Colors.emplace_back(
+			RHIAttachmentDesc
+			{
+				Format,
+				NumSample,
+				InitialStates,
+				FinalStates,
+				LoadOp,
+				StoreOp,
+				ERHILoadOp::DontCare,
+				ERHIStoreOp::DontCare
+			});
 		return *this;
+	}
+
+	inline RHIRenderPassDesc2& SetDepthStencil(
+		ERHIFormat Format = ERHIFormat::Unknown,
+		ERHIResourceState InitialStates = ERHIResourceState::Unknown,
+		ERHIResourceState FinalStates = ERHIResourceState::DepthRead | ERHIResourceState::DepthWrite,
+		ERHILoadOp LoadOp = ERHILoadOp::DontCare,
+		ERHIStoreOp StoreOp = ERHIStoreOp::Store,
+		ERHILoadOp StencilLoadOp = ERHILoadOp::DontCare,
+		ERHIStoreOp StencilStoreOp = ERHIStoreOp::Store,
+		ERHISampleCount NumSample = ERHISampleCount::Sample_1_Bit)
+	{
+		assert(RHI::IsDepthStencil(Format));
+
+		RenderTargetLayout.DepthStencil = RHIAttachmentDesc 
+		{
+			Format,
+			NumSample,
+			InitialStates,
+			FinalStates,
+			LoadOp,
+			StoreOp,
+			StencilLoadOp,
+			StencilStoreOp
+		};
+		return *this;
+	}
+
+	inline RHISubpassDesc& AddGraphicsSubpass()
+	{
+		return Subpasses.emplace_back(RHISubpassDesc(RHISubpassDesc::ERHIBindPoint::Graphics));
+	}
+
+	inline RHISubpassDesc& AddComputeSubpass()
+	{
+		return Subpasses.emplace_back(RHISubpassDesc(RHISubpassDesc::ERHIBindPoint::Compute));
 	}
 };
 

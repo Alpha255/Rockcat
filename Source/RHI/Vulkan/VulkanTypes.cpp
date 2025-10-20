@@ -485,3 +485,185 @@ vk::ImageLayout GetImageLayout(ERHIResourceState State)
 		return vk::ImageLayout::eUndefined;
 	}
 }
+
+vk::AccessFlags GetAccessFlags(ERHIResourceState State)
+{
+	switch (State)
+	{
+	case ERHIResourceState::VertexBuffer:
+		return vk::AccessFlagBits::eVertexAttributeRead;
+	case ERHIResourceState::UniformBuffer:
+		return vk::AccessFlagBits::eUniformRead;
+	case ERHIResourceState::IndexBuffer:
+		return vk::AccessFlagBits::eIndexRead;
+	case ERHIResourceState::RenderTarget:
+		return vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
+	case ERHIResourceState::UnorderedAccess:
+		return vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eShaderWrite;
+	case ERHIResourceState::DepthWrite:
+		return vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+	case ERHIResourceState::DepthRead:
+		return vk::AccessFlagBits::eDepthStencilAttachmentRead;
+	case ERHIResourceState::StreamOut:
+		return vk::AccessFlagBits::eTransformFeedbackWriteEXT;
+	case ERHIResourceState::IndirectArgument:
+		return vk::AccessFlagBits::eIndirectCommandRead;
+	case ERHIResourceState::TransferDst:
+	case ERHIResourceState::ResolveDst:
+		return vk::AccessFlagBits::eTransferWrite;
+	case ERHIResourceState::TransferSrc:
+	case ERHIResourceState::ResolveSrc:
+		return vk::AccessFlagBits::eTransferRead;
+	case ERHIResourceState::AccelerationStructure:
+		return vk::AccessFlagBits::eAccelerationStructureReadKHR | vk::AccessFlagBits::eAccelerationStructureWriteKHR;
+	case ERHIResourceState::ShadingRate:
+		return vk::AccessFlagBits::eFragmentShadingRateAttachmentReadKHR;
+	case ERHIResourceState::ShaderResource:
+		return vk::AccessFlagBits::eShaderRead;
+	case ERHIResourceState::Present:
+		return vk::AccessFlagBits::eMemoryRead;
+	case ERHIResourceState::Common:
+	case ERHIResourceState::Unknown:
+	default:
+		return vk::AccessFlags();
+	}
+}
+
+vk::PipelineStageFlags GetPipelineStageFlags(ERHIResourceState State)
+{
+	switch (State)
+	{
+	case ERHIResourceState::Common:
+		return vk::PipelineStageFlagBits::eTopOfPipe;
+	case ERHIResourceState::VertexBuffer:
+		return vk::PipelineStageFlagBits::eVertexInput;
+	case ERHIResourceState::UniformBuffer:
+		return vk::PipelineStageFlagBits::eAllCommands;
+	case ERHIResourceState::IndexBuffer:
+		return vk::PipelineStageFlagBits::eVertexInput;
+	case ERHIResourceState::RenderTarget:
+		return vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	case ERHIResourceState::UnorderedAccess:
+		return vk::PipelineStageFlagBits::eAllCommands;
+	case ERHIResourceState::DepthWrite:
+		return vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
+	case ERHIResourceState::DepthRead:
+		return vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
+	case ERHIResourceState::StreamOut:
+		return vk::PipelineStageFlagBits::eTransformFeedbackEXT;
+	case ERHIResourceState::IndirectArgument:
+		return vk::PipelineStageFlagBits::eDrawIndirect;
+	case ERHIResourceState::TransferDst:
+	case ERHIResourceState::ResolveDst:
+		return vk::PipelineStageFlagBits::eTransfer;
+	case ERHIResourceState::TransferSrc:
+	case ERHIResourceState::ResolveSrc:
+		return vk::PipelineStageFlagBits::eTransfer;
+	case ERHIResourceState::AccelerationStructure:
+		return vk::PipelineStageFlagBits::eAccelerationStructureBuildKHR;
+	case ERHIResourceState::ShadingRate:
+		return vk::PipelineStageFlagBits::eFragmentShadingRateAttachmentKHR;
+	case ERHIResourceState::ShaderResource:
+	case ERHIResourceState::Present:
+		return vk::PipelineStageFlagBits::eAllCommands;
+	case ERHIResourceState::Unknown:
+	default:
+		return vk::PipelineStageFlags();
+	}
+}
+
+void GetPipelineStagesAndAccessFlags(ERHIResourceState State, vk::ImageLayout& ImageLayout, vk::AccessFlags& AccessFlags, vk::PipelineStageFlags& StageFlags)
+{
+	switch (State)
+	{
+	case ERHIResourceState::Unknown:
+		break;
+	case ERHIResourceState::Common:
+		ImageLayout = vk::ImageLayout::eUndefined;
+		AccessFlags = vk::AccessFlags();
+		StageFlags = vk::PipelineStageFlagBits::eTopOfPipe;
+		break;
+	case ERHIResourceState::VertexBuffer:
+		ImageLayout = vk::ImageLayout::eUndefined;
+		AccessFlags = vk::AccessFlagBits::eVertexAttributeRead;
+		StageFlags = vk::PipelineStageFlagBits::eVertexInput;
+		break;
+	case ERHIResourceState::UniformBuffer:
+		ImageLayout = vk::ImageLayout::eUndefined;
+		AccessFlags = vk::AccessFlagBits::eUniformRead;
+		StageFlags = vk::PipelineStageFlagBits::eAllCommands;
+		break;
+	case ERHIResourceState::IndexBuffer:
+		ImageLayout = vk::ImageLayout::eUndefined;
+		AccessFlags = vk::AccessFlagBits::eIndexRead;
+		StageFlags = vk::PipelineStageFlagBits::eVertexInput;
+		break;
+	case ERHIResourceState::RenderTarget:
+		ImageLayout = vk::ImageLayout::eColorAttachmentOptimal;
+		AccessFlags = vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
+		StageFlags = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+		break;
+	case ERHIResourceState::UnorderedAccess:
+		ImageLayout = vk::ImageLayout::eGeneral;
+		AccessFlags = vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eShaderWrite;
+		StageFlags = vk::PipelineStageFlagBits::eAllCommands;
+		break;
+	case ERHIResourceState::DepthWrite:
+		ImageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+		AccessFlags = vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+		StageFlags = vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
+		break;
+	case ERHIResourceState::DepthRead:
+		ImageLayout = vk::ImageLayout::eDepthStencilReadOnlyOptimal;
+		AccessFlags = vk::AccessFlagBits::eDepthStencilAttachmentRead;
+		StageFlags = vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
+		break;
+	case ERHIResourceState::StreamOut:
+		ImageLayout = vk::ImageLayout::eUndefined;
+		AccessFlags = vk::AccessFlagBits::eTransformFeedbackWriteEXT;
+		StageFlags = vk::PipelineStageFlagBits::eTransformFeedbackEXT;
+		break;
+	case ERHIResourceState::IndirectArgument:
+		ImageLayout = vk::ImageLayout::eUndefined;
+		AccessFlags = vk::AccessFlagBits::eIndirectCommandRead;
+		StageFlags = vk::PipelineStageFlagBits::eDrawIndirect;
+		break;
+	case ERHIResourceState::TransferDst:
+	case ERHIResourceState::ResolveDst:
+		ImageLayout = vk::ImageLayout::eTransferDstOptimal;
+		AccessFlags = vk::AccessFlagBits::eTransferWrite;
+		StageFlags = vk::PipelineStageFlagBits::eTransfer;
+		break;
+	case ERHIResourceState::TransferSrc:
+	case ERHIResourceState::ResolveSrc:
+		ImageLayout = vk::ImageLayout::eTransferSrcOptimal;
+		AccessFlags = vk::AccessFlagBits::eTransferRead;
+		StageFlags = vk::PipelineStageFlagBits::eTransfer;
+		break;
+	case ERHIResourceState::AccelerationStructure:
+		ImageLayout = vk::ImageLayout::eUndefined;
+		AccessFlags = vk::AccessFlagBits::eAccelerationStructureReadKHR | vk::AccessFlagBits::eAccelerationStructureWriteKHR;
+		StageFlags = vk::PipelineStageFlagBits::eAccelerationStructureBuildKHR;
+		break;
+	case ERHIResourceState::ShadingRate:
+		ImageLayout = vk::ImageLayout::eFragmentShadingRateAttachmentOptimalKHR;
+		AccessFlags = vk::AccessFlagBits::eFragmentShadingRateAttachmentReadKHR;
+		StageFlags = vk::PipelineStageFlagBits::eFragmentShadingRateAttachmentKHR;
+		break;
+	case ERHIResourceState::ShaderResource:
+		ImageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+		AccessFlags = vk::AccessFlagBits::eShaderRead;
+		StageFlags = vk::PipelineStageFlagBits::eAllCommands;
+		break;
+	case ERHIResourceState::Present:
+		ImageLayout = vk::ImageLayout::ePresentSrcKHR;
+		AccessFlags = vk::AccessFlagBits::eMemoryRead;
+		StageFlags = vk::PipelineStageFlagBits::eAllCommands;
+		break;
+	default:
+		ImageLayout = vk::ImageLayout::eUndefined;
+		AccessFlags = vk::AccessFlags();
+		StageFlags = vk::PipelineStageFlags();
+		break;
+	}
+}

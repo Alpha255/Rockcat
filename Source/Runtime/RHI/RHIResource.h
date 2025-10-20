@@ -91,6 +91,7 @@ enum class ERHIResourceState : uint32_t
 	Present = 0x10000,
 	InputAttachment = 0x20000
 };
+ENUM_FLAG_OPERATORS(ERHIResourceState)
 
 enum class ERHIDebugLayerLevel
 {

@@ -109,6 +109,136 @@ VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIRenderPa
 	VERIFY_VK(GetNativeDevice().createRenderPass(&RenderPassCreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 }
 
+VulkanRenderPass::VulkanRenderPass(const VulkanDevice& Device, const RHIRenderPassDesc2& Desc)
+	: VkHwResource(Device)
+{
+	assert(Desc.RenderTargetLayout.IsValid());
+
+	const size_t NumAttachments = Desc.RenderTargetLayout.Colors.size() + (Desc.RenderTargetLayout.HasDepthStencil() ? 1u : 0u);
+	std::vector<vk::AttachmentDescription> AttachmentDescriptions(NumAttachments);
+
+	for (auto& Color : Desc.RenderTargetLayout.Colors)
+	{
+		AttachmentDescriptions.emplace_back(vk::AttachmentDescription())
+			.setFormat(GetFormat(Color.Format))
+			.setSamples(GetSampleCount(Color.NumSamples))
+			.setLoadOp(GetAttachmentLoadOp(Color.LoadOp))
+			.setStoreOp(GetAttachmentStoreOp(Color.StoreOp))
+			.setStencilLoadOp(GetAttachmentLoadOp(Color.StencilLoadOp))
+			.setStencilStoreOp(GetAttachmentStoreOp(Color.StencilStoreOp))
+			.setInitialLayout(GetImageLayout(Color.InitialStates))
+			.setFinalLayout(GetImageLayout(Color.FinalStates));
+	}
+
+	if (Desc.RenderTargetLayout.HasDepthStencil())
+	{
+		auto& DepthStencil = Desc.RenderTargetLayout.DepthStencil;
+		AttachmentDescriptions.emplace_back(vk::AttachmentDescription())
+			.setFormat(GetFormat(DepthStencil.Format))
+			.setSamples(GetSampleCount(DepthStencil.NumSamples))
+			.setLoadOp(GetAttachmentLoadOp(DepthStencil.LoadOp))
+			.setStoreOp(GetAttachmentStoreOp(DepthStencil.StoreOp))
+			.setStencilLoadOp(GetAttachmentLoadOp(DepthStencil.StencilLoadOp))
+			.setStencilStoreOp(GetAttachmentStoreOp(DepthStencil.StencilStoreOp))
+			.setInitialLayout(GetImageLayout(Desc.RenderTargetLayout.DepthStencil.InitialStates))
+			.setFinalLayout(GetImageLayout(Desc.RenderTargetLayout.DepthStencil.FinalStates));
+	}
+
+	std::vector<vk::AttachmentReference> AttachmentRefs;
+
+	std::vector<vk::SubpassDependency> SubpassDependencies;
+
+	vk::RenderPassCreateInfo CreateInfo;
+
+	const size_t NumSubpasses = Desc.Subpasses.empty() ? 1u : Desc.Subpasses.size();
+	std::vector<vk::SubpassDescription> SubpassDescriptions(NumSubpasses);
+	if (Desc.Subpasses.empty())
+	{
+		// Create a default subpass
+		auto& SubpassDescription = SubpassDescriptions[0];
+
+		for (uint32_t Index = 0u; Index < Desc.RenderTargetLayout.Colors.size(); ++Index)
+		{
+			AttachmentRefs.emplace_back(vk::AttachmentReference(Index, vk::ImageLayout::eColorAttachmentOptimal));
+		}
+
+		SubpassDescription.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
+			.setColorAttachments(AttachmentRefs);
+
+		if (Desc.RenderTargetLayout.HasDepthStencil())
+		{
+			AttachmentRefs.emplace_back(vk::AttachmentReference())
+				.setAttachment(static_cast<uint32_t>(AttachmentDescriptions.size()) - 1u)
+				.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+
+			SubpassDescription.setPDepthStencilAttachment(&AttachmentRefs.back());
+		}
+	}
+	else
+	{
+		auto GetSubpassDependency = [](
+			uint32_t SrcSubpassIndex,
+			uint32_t DstSubpassIndex,
+			const RHIRenderPassDesc2::RHISubpassDesc& SrcSubpass, 
+			const RHIRenderPassDesc2::RHISubpassDesc& DstSubpass,
+			vk::SubpassDependency& Dependency
+			)
+			{
+				vk::ImageLayout Layout = vk::ImageLayout::eUndefined;
+				vk::PipelineStageFlags SrcPipelineStages;
+				vk::PipelineStageFlags DstPipelineStages;
+				vk::AccessFlags SrcAccessMasks;
+				vk::AccessFlags DstAccessMasks;
+
+				Dependency.setSrcSubpass(SrcSubpassIndex)
+					.setDstSubpass(DstSubpassIndex);
+			};
+
+		SubpassDependencies.resize(Desc.Subpasses.size() + 1u);
+
+		GetSubpassDependency(VK_SUBPASS_EXTERNAL, 0u, Desc.Subpasses.back(), Desc.Subpasses[0], SubpassDependencies[0]);
+
+		for (uint32_t Index = 0u; Index < Desc.Subpasses.size(); ++Index)
+		{
+			auto& Subpass = Desc.Subpasses[Index];
+			auto& SubpassDescription = SubpassDescriptions[Index];
+
+			const bool IsLastSubpass = (Index == Desc.Subpasses.size() - 1u);
+			uint32_t SubpassIndex = Index;
+			uint32_t NextSubpassIndex = IsLastSubpass ? VK_SUBPASS_EXTERNAL : (Index + 1u);
+			auto& NextSubpass = IsLastSubpass ? Desc.Subpasses[0u] : Desc.Subpasses[Index + 1u];
+
+			for (auto& Input : Subpass.Inputs)
+			{
+				AttachmentRefs.emplace_back(vk::AttachmentReference(Input.Index, GetImageLayout(Input.States)));
+			}
+			SubpassDescription.setInputAttachments(AttachmentRefs);
+
+			const size_t ColorAttachmentIndex = AttachmentRefs.size();
+			for (auto& Color : Subpass.OutputColors)
+			{
+				AttachmentRefs.emplace_back(vk::AttachmentReference(Color.Index, GetImageLayout(Color.States)));
+			}
+			SubpassDescription.setColorAttachmentCount(static_cast<uint32_t>(Subpass.OutputColors.size()))
+				.setPColorAttachments(&AttachmentRefs[ColorAttachmentIndex]);
+
+			if (Subpass.HasDepthStencil())
+			{
+				AttachmentRefs.emplace_back(vk::AttachmentReference(Subpass.DepthStencil.Index, GetImageLayout(Subpass.DepthStencil.States)));
+				SubpassDescription.setPDepthStencilAttachment(&AttachmentRefs.back());
+			}
+
+			GetSubpassDependency(SubpassIndex, NextSubpassIndex, Subpass, NextSubpass, SubpassDependencies[Index]);
+		}
+	}
+
+	CreateInfo.setAttachments(AttachmentDescriptions)
+		.setSubpasses(SubpassDescriptions)
+		.setDependencies(SubpassDependencies);
+
+	VERIFY_VK(GetNativeDevice().createRenderPass(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+}
+
 VulkanFrameBuffer::VulkanFrameBuffer(const VulkanDevice& Device, vk::RenderPass CompatibleRenderPass, const RHIFrameBufferDesc& Desc)
 	: VkHwResource(Device)
 	, RHIFrameBuffer(Desc)
