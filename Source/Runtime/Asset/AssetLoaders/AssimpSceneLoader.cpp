@@ -3,6 +3,7 @@
 #include "Services/AssetDatabase.h"
 #include "Paths.h"
 #include "RHI/RHIDevice.h"
+#include "Profile/CpuTimer.h"
 
 #include <assimp/version.h>
 #include <assimp/Importer.hpp>
@@ -117,6 +118,8 @@ bool AssimpSceneLoader::Load(Asset& InAsset, const AssetType& Type, std::string&
 {
 	(void)Type;
 
+	CpuTimer Timer;
+
 	auto& Scene = Cast<AssimpScene>(InAsset);
 
 	const uint32_t ProcessFlags = static_cast<uint32_t>(
@@ -144,6 +147,8 @@ bool AssimpSceneLoader::Load(Asset& InAsset, const AssetType& Type, std::string&
 				ProcessMaterials(AiScene, Scene);
 				ProcessMeshes(AiScene, Scene);
 
+				Timer.Pause();
+				LOG_CAT_INFO(LogAsset, "Loaded assimp scene \"{}\" in {:.2f} ms", Scene.GetName(), Timer.GetElapsedMilliseconds());
 				return true;
 			}
 
@@ -337,22 +342,22 @@ void AssimpSceneLoader::ProcessMeshes(const aiScene* AiScene, AssimpScene& Scene
 		}
 		if (!AiMesh->HasPositions())
 		{
-			LOG_CAT_ERROR(LogAsset, "The mesh has no vertices data!");
+			LOG_CAT_ERROR(LogAsset, "The mesh \"{}\" has no vertices data!", AiMesh->mName.C_Str());
 			continue;
 		}
 		if (!AiMesh->HasNormals())
 		{
-			LOG_CAT_WARNING(LogAsset, "The mesh has no normals!");
+			LOG_CAT_WARNING(LogAsset, "The mesh \"{}\" has no normals!", AiMesh->mName.C_Str());
 			continue;
 		}
 		if (!AiMesh->HasFaces())
 		{
-			LOG_CAT_ERROR(LogAsset, "The mesh has no indices data!");
+			LOG_CAT_ERROR(LogAsset, "The mesh \"{}\" has no indices data!", AiMesh->mName.C_Str());
 			continue;
 		}
 		if (AiMesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
 		{
-			LOG_CAT_ERROR(LogAsset, "Detected others primitive type, should never be happen!");
+			LOG_CAT_ERROR(LogAsset, "The mesh \"{}\" has unsupported primitive type!", AiMesh->mName.C_Str());
 			continue;
 		}
 
@@ -360,7 +365,7 @@ void AssimpSceneLoader::ProcessMeshes(const aiScene* AiScene, AssimpScene& Scene
 			Math::Vector3(AiMesh->mAABB.mMin.x, AiMesh->mAABB.mMin.y, AiMesh->mAABB.mMin.z),
 			Math::Vector3(AiMesh->mAABB.mMax.x, AiMesh->mAABB.mMax.y, AiMesh->mAABB.mMax.z));
 
-		MeshData MeshDataBlock(
+		MeshData Data(
 			AiMesh->mNumVertices,
 			AiMesh->mNumFaces * 3u,
 			AiMesh->mNumFaces,
@@ -377,43 +382,43 @@ void AssimpSceneLoader::ProcessMeshes(const aiScene* AiScene, AssimpScene& Scene
 		{
 			const auto& Face = AiMesh->mFaces[FaceIndex];
 			assert(Face.mNumIndices == 3u);
-			MeshDataBlock.SetFace(FaceIndex, Face.mIndices[0], Face.mIndices[1], Face.mIndices[2]);
+			Data.SetFace(FaceIndex, Face.mIndices[0], Face.mIndices[1], Face.mIndices[2]);
 		}
 
 		for (uint32_t VertexIndex = 0u; VertexIndex < AiMesh->mNumVertices; ++VertexIndex)
 		{
 			const auto& Position = AiMesh->mVertices[VertexIndex];
-			MeshDataBlock.SetPosition(VertexIndex, Math::Vector3(Position.x, Position.y, Position.z));
+			Data.SetPosition(VertexIndex, Math::Vector3(Position.x, Position.y, Position.z));
 
 			if (AiMesh->HasNormals())
 			{
 				const auto& Normal = AiMesh->mNormals[VertexIndex];
-				MeshDataBlock.SetNormal(VertexIndex, Math::Vector3(Normal.x, Normal.y, Normal.z));
+				Data.SetNormal(VertexIndex, Math::Vector3(Normal.x, Normal.y, Normal.z));
 			}
 			if (AiMesh->HasTangentsAndBitangents())
 			{
 				const auto& Tangent = AiMesh->mTangents[VertexIndex];
-				MeshDataBlock.SetTangent(VertexIndex, Math::Vector3(Tangent.x, Tangent.y, Tangent.z));
+				Data.SetTangent(VertexIndex, Math::Vector3(Tangent.x, Tangent.y, Tangent.z));
 
 				const auto& Bitangent = AiMesh->mBitangents[VertexIndex];
-				MeshDataBlock.SetBitangent(VertexIndex, Math::Vector3(Bitangent.x, Bitangent.y, Bitangent.z));
+				Data.SetBitangent(VertexIndex, Math::Vector3(Bitangent.x, Bitangent.y, Bitangent.z));
 			}
 
 			if (AiMesh->HasTextureCoords(0u))
 			{
 				const auto& UV = AiMesh->mTextureCoords[0u][VertexIndex];
-				MeshDataBlock.SetUV0(VertexIndex, Math::Vector3(UV.x, UV.y, UV.z));
+				Data.SetUV0(VertexIndex, Math::Vector3(UV.x, UV.y, UV.z));
 			}
 			if (AiMesh->HasTextureCoords(1))
 			{
 				const auto& UV = AiMesh->mTextureCoords[1u][VertexIndex];
-				MeshDataBlock.SetUV0(VertexIndex, Math::Vector3(UV.x, UV.y, UV.z));
+				Data.SetUV0(VertexIndex, Math::Vector3(UV.x, UV.y, UV.z));
 			}
 
 			if (AiMesh->HasVertexColors(0u))
 			{
 				const auto& Color = AiMesh->mColors[0u][VertexIndex];
-				MeshDataBlock.SetColor(VertexIndex, Math::Color(Color.r, Color.g, Color.b, Color.a));
+				Data.SetColor(VertexIndex, Math::Color(Color.r, Color.g, Color.b, Color.a));
 			}
 		}
 
@@ -423,7 +428,7 @@ void AssimpSceneLoader::ProcessMeshes(const aiScene* AiScene, AssimpScene& Scene
 		}
 		else
 		{
-			auto& Mesh = Scene.StaticMeshes.emplace_back(std::make_shared<StaticMesh>(MeshDataBlock));
+			auto& Mesh = Scene.StaticMeshes.emplace_back(std::make_shared<StaticMesh>(Data));
 			//Mesh->CreateRHI(MeshDataBlock, );
 		}
 	}
