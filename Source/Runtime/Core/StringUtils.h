@@ -19,6 +19,14 @@ namespace StringUtils
 
 	std::vector<std::string> Split(const std::string& Str, const char* Token);
 
+#if _HAS_CXX20
+	template<class ...Args>
+	inline std::string vFormat(const char* Fmt, Args&&... InArgs)
+	{
+		return std::vformat(Fmt, std::make_format_args(InArgs...));
+	}
+#endif
+
 	std::string Format(const char* Fmt, ...);
 
 	std::wstring ToWide(const std::string& Str);

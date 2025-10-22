@@ -56,7 +56,7 @@ void ShaderLibrary::OnShaderFileModified(const std::filesystem::path& Path)
 		{
 			for (auto DeviceType : m_ActiveCompilers)
 			{
-				QueueCompileShader(*ShaderIt->second, DeviceType);
+				QueueCompile(*ShaderIt->second, DeviceType);
 			}
 		}
 	}
@@ -72,7 +72,7 @@ void ShaderLibrary::OnShaderFileModified(const std::filesystem::path& Path)
 				{
 					for (auto DeviceType : m_ActiveCompilers)
 					{
-						QueueCompileShader(*LinkedShader, DeviceType);
+						QueueCompile(*LinkedShader, DeviceType);
 					}
 				}
 				else
@@ -124,7 +124,7 @@ std::unordered_set<std::filesystem::path> ShaderLibrary::ParseIncludeFiles(const
 	return IncludeFiles;
 }
 
-void ShaderLibrary::CompileShader(Shader& InShader, ERHIDeviceType DeviceType)
+void ShaderLibrary::Compile(Shader& InShader, ERHIDeviceType DeviceType)
 {
 	assert(std::filesystem::exists(InShader.GetPath()));
 
@@ -179,10 +179,10 @@ void ShaderLibrary::CompileShader(Shader& InShader, ERHIDeviceType DeviceType)
 	}
 }
 
-void ShaderLibrary::QueueCompileShader(Shader& InShader, ERHIDeviceType DeviceType)
+void ShaderLibrary::QueueCompile(Shader& InShader, ERHIDeviceType DeviceType)
 {
 	tf::Async([this, &InShader, DeviceType]() {
-		CompileShader(InShader, DeviceType);
+		Compile(InShader, DeviceType);
 	}, EThread::WorkerThread, Task::EPriority::High);
 }
 

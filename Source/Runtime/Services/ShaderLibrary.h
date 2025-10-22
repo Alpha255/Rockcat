@@ -19,8 +19,8 @@ public:
 		m_ActiveCompilers.insert(DeviceType);
 	}
 
-	void CompileShader(Shader& InShader, ERHIDeviceType DeviceType);
-	void QueueCompileShader(Shader& InShader, ERHIDeviceType DeviceType);
+	void Compile(Shader& InShader, ERHIDeviceType DeviceType);
+	void QueueCompile(Shader& InShader, ERHIDeviceType DeviceType);
 protected:
 private:
 	using LinkedShaders = std::unordered_set<Shader*>;

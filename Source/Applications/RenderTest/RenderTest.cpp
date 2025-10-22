@@ -11,10 +11,12 @@ static std::shared_ptr<GenericVS> VS;
 
 void RenderTest::Initialize()
 {
+	auto test = StringUtils::vFormat("Test %d", 123);
+
 	VS = std::make_shared<GenericVS>();
-	ShaderLibrary::Get().CompileShader(*VS, ERHIDeviceType::Vulkan);
-	ShaderLibrary::Get().CompileShader(*VS, ERHIDeviceType::D3D11);
-	ShaderLibrary::Get().CompileShader(*VS, ERHIDeviceType::D3D12);
+	ShaderLibrary::Get().Compile(*VS, ERHIDeviceType::Vulkan);
+	ShaderLibrary::Get().Compile(*VS, ERHIDeviceType::D3D11);
+	ShaderLibrary::Get().Compile(*VS, ERHIDeviceType::D3D12);
 
 	return;
 	m_Scene = Scene::Load(Paths::ScenePath() / "RenderTest.scene");
