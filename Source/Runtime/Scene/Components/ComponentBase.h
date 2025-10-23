@@ -16,9 +16,20 @@ public: \
 class ComponentBase
 {
 public:
-	class Entity* GetOwner() const { return m_Owner; }
+	ComponentBase() = default;
+
+	ComponentBase(const class Entity* Owner)
+		: m_Owner(Owner)
+	{
+	}
+
+	virtual ~ComponentBase() = default;
+
+	inline const class Entity* GetOwner() const { return m_Owner; }
 
 	virtual ComponentID GetComponentID() const { return 0u; }
+
+	virtual void Tick(float /*ElapsedSeconds*/) {}
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -31,8 +42,8 @@ private:
 	friend class ComponentPool;
 
 	inline void SetHash(size_t Hash) { m_Hash = Hash; }
-	inline void SetOwner(class Entity* Owner) { m_Owner = Owner; }
+	inline void SetOwner(const class Entity* Owner) { m_Owner = Owner; }
 	
 	size_t m_Hash = 0u;
-	class Entity* m_Owner = nullptr;
+	const class Entity* m_Owner = nullptr;
 };
