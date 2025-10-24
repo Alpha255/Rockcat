@@ -77,6 +77,8 @@ public:
 	template<class T>
 	T* AddComponent(T* Component)
 	{
+		static_assert(std::is_base_of_v<ComponentBase, T>, "T must be derived from ComponentBase");
+
 		assert(Component);
 		m_Components.insert(Component);
 		return Component;
@@ -103,7 +105,6 @@ public:
 	void RemoveAllComponents()
 	{
 		m_Components.clear();
-		m_ComponentHashes.clear();
 	}
 
 	template<class Archive>
@@ -128,8 +129,6 @@ protected:
 	inline bool IsAlive() const { return m_Alive; }
 	inline Entity& SetAlive(bool Alive) { m_Alive = Alive; return *this; }
 private:
-	inline const std::unordered_set<size_t>& GetComponentHashes() const { return m_ComponentHashes; }
-
 	EntityID m_ID;
 	EntityID m_Parent;
 	EntityID m_Child;
@@ -142,7 +141,6 @@ private:
 	std::string m_Name;
 
 	std::unordered_set<ComponentBase*> m_Components;
-	std::unordered_set<size_t> m_ComponentHashes;
 };
 
 class SceneGraph
@@ -193,7 +191,7 @@ public:
 		m_Entities[ID.GetIndex()].SetAlive(false);
 	}
 
-	void RemoveDyingEntities()
+	void RemoveInvalidEntities()
 	{
 		std::vector<Entity> AliveEntities;
 		AliveEntities.reserve(m_Entities.size());

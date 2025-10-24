@@ -36,8 +36,7 @@ public:
 		Ar(
 			CEREAL_BASE(BaseClass),
 			CEREAL_BASE(SceneGraph),
-			CEREAL_NVP(m_AssimpScenes),
-			CEREAL_NVP(m_ComponentPool)
+			CEREAL_NVP(m_AssimpScenes)
 		);
 	}
 protected:
@@ -48,6 +47,5 @@ private:
 	std::vector<std::string> m_AssimpScenes;
 	std::vector<std::shared_ptr<class ISceneView>> m_Views;
 	std::vector<std::shared_ptr<class Camera>> m_Cameras;
-	ComponentPool m_ComponentPool;
 };
 
