@@ -86,11 +86,32 @@ public:
 		return *this;
 	}
 
+	inline Transform& SetRotation(const Vector3& Rotation)
+	{
+		m_Rotation.RotationXAxis(Rotation.x);
+		m_Rotation.RotationYAxis(Rotation.y);
+		m_Rotation.RotationZAxis(Rotation.z);
+		return *this;
+	}
+
+	inline Transform& SetRotation(const float X, const float Y, const float Z)
+	{
+		m_Rotation.RotationXAxis(X);
+		m_Rotation.RotationYAxis(Y);
+		m_Rotation.RotationZAxis(Z);
+		return *this;
+	}
+
 	inline Quaternion GetRotation() const { return m_Rotation; }
 
 	inline Matrix GetMatrix() const
 	{
 		return Matrix::Scaling(m_Scalling) * m_Rotation.GetRotationMatrix() * Matrix::Translation(m_Translation);
+	}
+
+	inline void SetMatrix(const Matrix& InMatrix)
+	{
+		InMatrix.Decompose(m_Translation, m_Scalling, m_Rotation);
 	}
 
 	template<class Archive>

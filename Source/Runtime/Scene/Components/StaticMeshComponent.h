@@ -7,6 +7,8 @@ class StaticMeshComponent : public ComponentBase
 public:
 	DECLARE_COMPONENT_ID(StaticMeshComponent)
 
+	using ComponentBase::ComponentBase;
+
 	inline void SetMesh(std::shared_ptr<class StaticMesh> Mesh)
 	{
 		m_StaticMesh = Mesh;
