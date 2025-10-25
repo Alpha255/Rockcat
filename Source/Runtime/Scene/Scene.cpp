@@ -6,7 +6,21 @@
 
 void Scene::Tick(float ElapsedSeconds)
 {
-	(void)ElapsedSeconds;
+	for (auto& Entity : GetAllEntities())
+	{
+		if (!Entity.IsAlive() || !Entity.IsVisible())
+		{
+			continue;
+		}
+
+		for (auto Comp : Entity.GetAllComponents())
+		{
+			if (Comp)
+			{
+				Comp->Tick(ElapsedSeconds);
+			}
+		}
+	}
 }
 
 void Scene::MergeWithAssimpScene(const AssimpScene& InScene)
@@ -87,6 +101,6 @@ void Scene::OnPostLoad()
 
 Scene::~Scene()
 {
-	RemoveDyingEntities();
+	RemoveInvalidEntities();
 	Save(true);
 }

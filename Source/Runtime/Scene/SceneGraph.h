@@ -10,9 +10,9 @@ class Entity
 public:
 	Entity() = default;
 
-	Entity(const char* Name, EntityID ID, EntityID ParentID = EntityID())
+	Entity(const char* Name, EntityID ID, EntityID Parent = EntityID())
 		: m_ID(ID)
-		, m_Parent(ParentID)
+		, m_Parent(Parent)
 		, m_Name(Name ? Name : "")
 	{
 	}
@@ -44,6 +44,8 @@ public:
 	inline const char* GetName() const { return m_Name.c_str(); }
 	inline Entity& SetName(const char* Name) { m_Name = Name; return *this; }
 
+	inline bool IsAlive() const { return m_Alive; }
+
 	inline const std::unordered_set<ComponentBase*>& GetAllComponents() const { return m_Components; }
 
 	template<class T>
@@ -74,14 +76,9 @@ public:
 		return nullptr;
 	}
 
-	template<class T>
-	T* AddComponent(T* Component)
+	template<class T, class... Args>
+	T* AddComponent(Args&&...)
 	{
-		static_assert(std::is_base_of_v<ComponentBase, T>, "T must be derived from ComponentBase");
-
-		assert(Component);
-		m_Components.insert(Component);
-		return Component;
 	}
 
 	void RemoveComponent(ComponentBase* Component)
@@ -117,17 +114,24 @@ public:
 			CEREAL_NVP(m_Sibling),
 			CEREAL_NVP(m_Visible),
 			CEREAL_NVP(m_Selected),
-			CEREAL_NVP(m_Name),
-			CEREAL_NVP(m_ComponentHashes)
+			CEREAL_NVP(m_Name)
 		);
 	}
 protected:
 	friend class SceneGraph;
+	friend class Scene;
 
 	inline void SetID(EntityID ID) { m_ID = ID; }
 	
-	inline bool IsAlive() const { return m_Alive; }
 	inline Entity& SetAlive(bool Alive) { m_Alive = Alive; return *this; }
+
+	void AddComponent(ComponentBase* Component)
+	{
+		if (Component)
+		{
+			m_Components.insert(Component);
+		}
+	}
 private:
 	EntityID m_ID;
 	EntityID m_Parent;
@@ -146,8 +150,6 @@ private:
 class SceneGraph
 {
 public:
-	using EntityList = std::vector<Entity>;
-
 	EntityID AddSibling(EntityID Sibling, const char* Name)
 	{
 		assert(Sibling.IsValid() && Sibling.GetIndex() < m_Entities.size());
@@ -224,7 +226,7 @@ public:
 	}
 
 	inline EntityID GetRoot() const { return m_Root; }
-	inline const EntityList& GetAllEntities() const { return m_Entities; }
+	inline const std::vector<Entity>& GetAllEntities() const { return m_Entities; }
 	inline size_t GetNumEntity() const { return static_cast<uint32_t>(m_Entities.size()); }
 	inline bool HasEntity() const { return !m_Entities.empty(); }
 
@@ -241,8 +243,8 @@ protected:
 	friend class AssimpSceneLoader;
 
 	inline void SetRoot(EntityID ID) { m_Root = ID; }
-	inline EntityList& GetAllEntities() { return m_Entities; }
+	inline std::vector<Entity>& GetAllEntities() { return m_Entities; }
 private:
 	EntityID m_Root;
-	EntityList m_Entities;
+	std::vector<Entity> m_Entities;
 };

@@ -13,10 +13,16 @@ public:
 
 	void Tick(float ElapsedSeconds) override final;
 
-	template<class T>
-	T* AddComponent(Entity& InEntity)
+	template<class T, class... Args>
+	T* AddComponent(Entity& InEntity, Args&&... InArgs)
 	{
-		return InEntity.AddComponent(m_ComponentPool.Allocate<T>());
+		static_assert(std::is_base_of_v<ComponentBase, T>, "T must be derived from ComponentBase");
+
+		auto Component = m_Components[InEntity.GetID()].emplace_back(
+			std::move(std::make_shared<T>(&InEntity, std::forward<Args>(InArgs)...)));
+
+		InEntity.AddComponent(Component.get());
+		return Component.get();
 	}
 
 	const std::vector<std::shared_ptr<class ISceneView>>& GetViews() const { return m_Views; }
@@ -36,7 +42,9 @@ public:
 		Ar(
 			CEREAL_BASE(BaseClass),
 			CEREAL_BASE(SceneGraph),
-			CEREAL_NVP(m_AssimpScenes)
+			CEREAL_NVP(m_AssimpScenes),
+			CEREAL_NVP(m_Views),
+			CEREAL_NVP(m_Components)
 		);
 	}
 protected:
@@ -47,5 +55,6 @@ private:
 	std::vector<std::string> m_AssimpScenes;
 	std::vector<std::shared_ptr<class ISceneView>> m_Views;
 	std::vector<std::shared_ptr<class Camera>> m_Cameras;
+	std::unordered_map<EntityID, std::vector<std::shared_ptr<ComponentBase>>> m_Components;
 };
 

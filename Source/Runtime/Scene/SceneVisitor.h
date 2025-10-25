@@ -5,12 +5,12 @@
 struct DepthFirst {};
 struct BreadthFirst {};
 
-using EntityIterator = SceneGraph::EntityList::const_iterator;
-
 template<class Policy = DepthFirst>
 class SceneVisitor
 {
 public:
+	using EntityIterator = std::vector<Entity>::const_iterator;
+
 	SceneVisitor(const Scene& InScene)
 		: m_Scene(InScene)
 		, m_Iterator(std::next(InScene.GetAllEntities().cbegin(), InScene.GetRoot().GetIndex()))
