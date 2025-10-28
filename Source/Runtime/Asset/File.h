@@ -87,7 +87,12 @@ protected:
 			}
 			else
 			{
-				auto LastWriteTimeDuration = std::chrono::duration_cast<std::filesystem::file_time_type::duration>(Timepoint.time_since_epoch());
+#if _HAS_CXX20
+				auto LastWriteTimeDuration = std::chrono::clock_cast<std::filesystem::file_time_type::clock>(Timepoint);
+#else
+				constexpr auto EpochOffset = std::chrono::seconds(11644473600L);
+				auto LastWriteTimeDuration = std::chrono::duration_cast<std::filesystem::file_time_type::duration>(Timepoint.time_since_epoch()) + EpochOffset;
+#endif
 				auto FileTimepoint = std::filesystem::file_time_type::time_point(LastWriteTimeDuration);
 				std::filesystem::last_write_time(Path, FileTimepoint);
 			}
