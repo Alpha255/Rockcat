@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Core/Singleton.h"
+#include "Core/Cereal.h"
 
 using ComponentID = uint64_t;
 
 #define REGISTER_COMPONENT_ID(ComponentType) \
 private: \
+	friend class ComponentPool; \
 	inline static constexpr ComponentID ID = FnvHash(#ComponentType); \
 public: \
 	inline static constexpr ComponentID GetID() { return ID; } \
@@ -32,6 +34,8 @@ public:
 	}
 private:
 	friend class ComponentPool;
+
+	inline void SetOwner(class Entity* Owner) { m_Owner = Owner; }
 	
 	class Entity* m_Owner = nullptr;
 };
@@ -40,20 +44,20 @@ class ComponentPool : public Singleton<ComponentPool>
 {
 public:
 	template<class T, class... Args>
-	std::shared_ptr<T> Allocate(Args&&... ArgList)
+	std::shared_ptr<T> Allocate(Args&&... InArgs)
 	{
 		static_assert(std::is_base_of_v<ComponentBase, T>, "T must be derived from ComponentBase");
 
 		auto& FreeComponents = m_FreeComponents[T::ID];
 		if (FreeComponents.empty())
 		{
-			return std::make_shared<T>(std::forward<Args>(ArgList)...);
+			return std::make_shared<T>(std::forward<Args>(InArgs)...);
 		}
 		else
 		{
 			auto Component = Cast<T>(FreeComponents.front());
 			FreeComponents.pop_front();
-			new (Component.get()) T(std::forward<Args>(ArgList)...);
+			new (Component.get()) T(std::forward<Args>(InArgs)...);
 			return Component;
 		}
 	}
@@ -69,3 +73,5 @@ public:
 private:
 	std::unordered_map<ComponentID, std::list<std::shared_ptr<ComponentBase>>> m_FreeComponents;
 };
+
+CEREAL_REGISTER_TYPE(ComponentBase);

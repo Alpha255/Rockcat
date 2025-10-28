@@ -5,89 +5,26 @@
 #include "Rendering/RenderGraph/RenderGraph.h"
 
 #include "Asset/GlobalShaders.h"
-#include "Services/ShaderLibrary.h"
-
-static std::shared_ptr<GenericVS> VS;
-
-class Serialize
-{
-public:
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_NVP(A)
-		);
-	}
-
-	void Set(uint32_t Value) 
-	{
-		A = Value;
-	}
-private:
-	uint32_t A = 32;
-};
-
-class SerializeA : public Serialize
-{
-public:
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_BASE(Serialize)
-		);
-	}
-};
-
-class SerializeB : public Serialize
-{
-public:
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_BASE(Serialize)
-		);
-	}
-};
-
-class SerializeTest : public Serializable<SerializeTest>
-{
-public:
-	using BaseClass::BaseClass;
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_BASE(BaseClass),
-			CEREAL_NVP(A),
-			CEREAL_NVP(B)
-		);
-	}
-
-public:
-	std::shared_ptr<Serialize> A = std::make_shared<SerializeA>();
-	std::shared_ptr<Serialize> B = std::make_shared<SerializeB>();
-};
+#include "Scene/Components/TransformComponent.h"
 
 void RenderTest::Initialize()
 {
-	auto Test = SerializeTest::Load("Test.json");
-	Test->A->Set(123);
-	Test->B->Set(456);
-	Test->Save(true);
-
-	auto test = StringUtils::vFormat("Test %d", 123);
-
-	VS = std::make_shared<GenericVS>();
-	ShaderLibrary::Get().Compile(*VS, ERHIDeviceType::Vulkan);
-	ShaderLibrary::Get().Compile(*VS, ERHIDeviceType::D3D11);
-	ShaderLibrary::Get().Compile(*VS, ERHIDeviceType::D3D12);
-
-	return;
 	m_Scene = Scene::Load(Paths::ScenePath() / "RenderTest.json");
+
+	//m_Scene->AddEntity(EntityID::NullIndex, "entity0");
+	//m_Scene->AddEntity(EntityID::NullIndex, "entity1");
+
+	auto Entity0 = m_Scene->GetEntity("entity0");
+	auto Entity1 = m_Scene->GetEntity("entity1");
+
+	//auto Trans0 = Entity0->AddComponent<TransformComponent>();
+	//auto Trans1 = Entity1->AddComponent<TransformComponent>();
+
+	//Trans0->SetTranslation(1, 1, 1);
+	//Trans1->SetTranslation(2, 2, 2);
+
+	m_Scene->Save(true);
+
 	m_Scene->AddView<PlanarSceneView>();
 	//m_View = std::make_shared<PlanarView>();
 	//m_View->SetCamera(&m_Scene->GetMainCamera());

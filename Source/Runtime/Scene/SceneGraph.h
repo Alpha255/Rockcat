@@ -92,7 +92,7 @@ public:
 	template<class T, class... Args>
 	inline std::shared_ptr<T> AddComponent(Args&&... InArgs)
 	{
-		return m_Components.emplace_back(ComponentPool::Get().Allocate<T>(this, std::forward<Args>(InArgs)...));
+		return Cast<T>(m_Components.emplace_back(ComponentPool::Get().Allocate<T>(this, std::forward<Args>(InArgs)...)));
 	}
 
 	template<class T>
@@ -223,7 +223,19 @@ public:
 		std::swap(m_Entities, AliveEntities);
 	}
 
-	const Entity* FindEntityByName(const char* Name) const
+	const Entity* GetEntity(const char* Name) const
+	{
+		for (auto& Entity : m_Entities)
+		{
+			if (strcmp(Entity.GetName(), Name) == 0)
+			{
+				return &Entity;
+			}
+		}
+		return nullptr;
+	}
+
+	Entity* GetEntity(const char* Name)
 	{
 		for (auto& Entity : m_Entities)
 		{
@@ -237,6 +249,12 @@ public:
 
 	const Entity* GetEntity(const EntityID& ID) const
 	{ 
+		assert(ID.IsValid() && ID.GetIndex() < m_Entities.size());
+		return m_Entities[ID.GetIndex()].IsAlive() ? &m_Entities[ID.GetIndex()] : nullptr;
+	}
+
+	Entity* GetEntity(const EntityID& ID)
+	{
 		assert(ID.IsValid() && ID.GetIndex() < m_Entities.size());
 		return m_Entities[ID.GetIndex()].IsAlive() ? &m_Entities[ID.GetIndex()] : nullptr;
 	}

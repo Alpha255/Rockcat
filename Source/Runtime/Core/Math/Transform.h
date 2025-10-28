@@ -40,6 +40,24 @@ public:
 		return *this;
 	}
 
+	inline Transform& SetTranslationX(const float X)
+	{
+		m_Translation.x = X;
+		return *this;
+	}
+
+	inline Transform& SetTranslationY(const float Y)
+	{
+		m_Translation.y = Y;
+		return *this;
+	}
+
+	inline Transform& SetTranslationZ(const float Z)
+	{
+		m_Translation.x = Z;
+		return *this;
+	}
+
 	inline Vector3 GetTranslation() const { return m_Translation; }
 
 	inline Transform& SetScale(const Vector3& Scalling)

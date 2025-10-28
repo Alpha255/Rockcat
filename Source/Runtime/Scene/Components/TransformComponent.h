@@ -22,6 +22,24 @@ public:
 		return *this;
 	}
 
+	inline TransformComponent& SetTranslationX(const float X)
+	{
+		m_Transform.SetTranslationX(X);
+		return *this;
+	}
+
+	inline TransformComponent& SetTranslationY(const float Y)
+	{
+		m_Transform.SetTranslationY(Y);
+		return *this;
+	}
+
+	inline TransformComponent& SetTranslationZ(const float Z)
+	{
+		m_Transform.SetTranslationZ(Z);
+		return *this;
+	}
+
 	inline TransformComponent& SetRotationX(const float Angle)
 	{
 		m_Transform.SetRotationXAxis(Angle);
@@ -87,10 +105,12 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(ComponentBase),
 			CEREAL_NVP(m_Transform)
 		);
 	}
 private:
 	Math::Transform m_Transform;
 };
+
+CEREAL_REGISTER_TYPE(TransformComponent);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(ComponentBase, TransformComponent);
