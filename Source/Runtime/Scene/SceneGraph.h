@@ -46,14 +46,12 @@ public:
 
 	inline bool IsAlive() const { return m_Alive; }
 
-	inline const std::unordered_set<ComponentBase*>& GetAllComponents() const { return m_Components; }
-
 	template<class T>
 	bool HasComponent()
 	{
 		for (auto Comp : m_Components)
 		{
-			if (Comp && Comp->GetID() == T::GetID())
+			if (Comp && Comp->GetID() == T::ID)
 			{
 				return true;
 			}
@@ -63,27 +61,38 @@ public:
 	}
 
 	template<class T>
-	T* GetComponent()
+	std::shared_ptr<T> GetComponent()
 	{
 		for (auto Comp : m_Components)
 		{
-			if (Comp && Comp->GetID() == T::GetID())
+			if (Comp && Comp->GetID() == T::ID)
 			{
-				return static_cast<T*>(Comp);
+				return Comp;
 			}
 		}
 
 		return nullptr;
 	}
 
-	template<class T, class... Args>
-	T* AddComponent(Args&&...)
+	template<class T>
+	std::vector<std::shared_ptr<T>> GetComponents()
 	{
+		std::vector<std::shared_ptr<T>> Components;
+		for (auto Comp : m_Components)
+		{
+			if (Comp && Comp->GetID() == T::ID)
+			{
+				Components.push_back(Cast<T>(Comp));
+			}
+		}
+
+		return Components;
 	}
 
-	void RemoveComponent(ComponentBase* Component)
+	template<class T, class... Args>
+	inline std::shared_ptr<T> AddComponent(Args&&... InArgs)
 	{
-		m_Components.erase(Component);
+		return m_Components.emplace_back(ComponentPool::Get().Allocate<T>(this, std::forward<Args>(InArgs)...));
 	}
 
 	template<class T>
@@ -91,10 +100,22 @@ public:
 	{
 		for (auto It = m_Components.begin(); It != m_Components.end(); ++It)
 		{
-			if ((*It)->GetComponentID() == T::GetID())
+			if (Cast<T>((*It))->GetID() == T::ID)
 			{
 				m_Components.erase(It);
 				break;
+			}
+		}
+	}
+
+	template<class T>
+	void RemoveComponents()
+	{
+		for (auto It = m_Components.begin(); It != m_Components.end(); ++It)
+		{
+			if (Cast<T>((*It))->GetID() == T::ID)
+			{
+				It = m_Components.erase(It);
 			}
 		}
 	}
@@ -114,7 +135,8 @@ public:
 			CEREAL_NVP(m_Sibling),
 			CEREAL_NVP(m_Visible),
 			CEREAL_NVP(m_Selected),
-			CEREAL_NVP(m_Name)
+			CEREAL_NVP(m_Name),
+			CEREAL_NVP(m_Components)
 		);
 	}
 protected:
@@ -125,13 +147,7 @@ protected:
 	
 	inline Entity& SetAlive(bool Alive) { m_Alive = Alive; return *this; }
 
-	void AddComponent(ComponentBase* Component)
-	{
-		if (Component)
-		{
-			m_Components.insert(Component);
-		}
-	}
+	inline const std::vector<std::shared_ptr<ComponentBase>>& GetAllComponents() const { return m_Components; }
 private:
 	EntityID m_ID;
 	EntityID m_Parent;
@@ -144,7 +160,7 @@ private:
 
 	std::string m_Name;
 
-	std::unordered_set<ComponentBase*> m_Components;
+	std::vector<std::shared_ptr<ComponentBase>> m_Components;
 };
 
 class SceneGraph

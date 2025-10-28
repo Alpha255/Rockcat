@@ -6,7 +6,7 @@
 class TransformComponent : public ComponentBase
 {
 public:
-	DECLARE_COMPONENT_ID(TransformComponent)
+	REGISTER_COMPONENT_ID(TransformComponent);
 
 	using ComponentBase::ComponentBase;
 

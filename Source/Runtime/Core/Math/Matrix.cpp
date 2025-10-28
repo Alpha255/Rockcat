@@ -1,4 +1,5 @@
 #include "Core/Math/Matrix.h"
+#include "Core/Math/Quaternion.h"
 
 NAMESPACE_START(Math)
 
@@ -78,5 +79,24 @@ void Matrix::GaussJordanInverse()
 	}
 }
 #endif
+
+bool Matrix::Decompose(Vector3& Translation, Vector3& Scalling, class Quaternion& Rotation) const
+{
+	DirectX::XMVECTOR OutTranslation, OutScalling, OutRotation;
+
+	if (DirectX::XMMatrixDecompose(
+		&OutScalling,
+		&OutRotation,
+		&OutTranslation,
+		MATRIX_LOAD(this)))
+	{
+		VECTOR_STORE(3, &Scalling, OutScalling);
+		VECTOR_STORE(4, &Rotation, OutRotation);
+		VECTOR_STORE(3, &Translation, OutTranslation);
+		return true;
+	}
+
+	return false;
+}
 
 NAMESPACE_END(Math)

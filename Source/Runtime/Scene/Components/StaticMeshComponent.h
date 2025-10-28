@@ -5,7 +5,7 @@
 class StaticMeshComponent : public ComponentBase
 {
 public:
-	DECLARE_COMPONENT_ID(StaticMeshComponent)
+	REGISTER_COMPONENT_ID(StaticMeshComponent)
 
 	using ComponentBase::ComponentBase;
 

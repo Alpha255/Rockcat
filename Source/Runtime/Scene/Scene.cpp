@@ -23,41 +23,11 @@ void Scene::Tick(float ElapsedSeconds)
 	}
 }
 
-void Scene::MergeWithAssimpScene(const AssimpScene& InScene)
+void Scene::Merge(const AssimpScene& InScene)
 {
 	if (!HasEntity())
 	{
 		SetRoot(InScene.Graph.GetRoot());
-
-		auto& Entities = GetAllEntities();
-		auto& AssimpSceneEntities = InScene.Graph.GetAllEntities();
-		Entities.insert(Entities.end(), AssimpSceneEntities.begin(), AssimpSceneEntities.end());
-
-		for (auto& Entity : Entities)
-		{
-			auto It = InScene.EntityDataIndices.find(Entity.GetID());
-			if (It != InScene.EntityDataIndices.end())
-			{
-				auto MeshIndex = It->second.Mesh;
-				auto MaterialIndex = It->second.Material;
-				auto TransformIndex = It->second.Transfrom;
-
-				if (MeshIndex != ~0u)
-				{
-					auto StaticMeshComp = AddComponent<StaticMeshComponent>(Entity);
-					StaticMeshComp->SetMesh(InScene.StaticMeshes[MeshIndex]);
-
-					if (MaterialIndex != ~0u)
-					{
-						StaticMeshComp->SetMaterial(InScene.MaterialProperties[MaterialIndex]);
-					}
-				}
-				if (TransformIndex != ~0u)
-				{
-					AddComponent<TransformComponent>(Entity)->SetTransform(InScene.Transforms[TransformIndex]);
-				}
-			}
-		}
 	}
 	else
 	{

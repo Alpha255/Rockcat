@@ -4,5 +4,5 @@
 
 class LightComponent : public ComponentBase
 {
-	DECLARE_COMPONENT_ID(LightComponent)
+	REGISTER_COMPONENT_ID(LightComponent);
 };

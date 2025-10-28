@@ -84,6 +84,14 @@ public:
 		m_ScissorRects.resize(1u);
 	}
 
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(ISceneView)
+		);
+	}
+
 	void SetViewport(const RHIViewport& Viewport) override final;
 	void SetScissorRect(const RHIScissorRect& ScissorRect) override final;
 };
@@ -103,6 +111,14 @@ public:
 	{
 		m_Viewports.resize(2u);
 		m_ScissorRects.resize(2u);
+	}
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(ISceneView)
+		);
 	}
 
 	void SetViewport(const RHIViewport& Viewport) override final;
@@ -130,6 +146,14 @@ public:
 	{
 		m_Viewports.resize(6u);
 		m_ScissorRects.resize(6u);
+	}
+
+	template<class Archive>
+	void serialize(Archive& Ar)
+	{
+		Ar(
+			CEREAL_BASE(ISceneView)
+		);
 	}
 
 	bool IsCubemapView() const override final { return true; }

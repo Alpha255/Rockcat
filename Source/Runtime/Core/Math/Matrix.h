@@ -170,24 +170,7 @@ public:
 		return Vector4(m[0u][ColumnIndex], m[1u][ColumnIndex], m[2u][ColumnIndex], m[3u][ColumnIndex]);
 	}
 
-	bool Decompose(Vector3& Translation, Vector3& Scalling, Quaternion& Rotation) const
-	{
-		DirectX::XMVECTOR OutTranslation, OutScalling, OutRotation;
-
-		if (DirectX::XMMatrixDecompose(
-			&OutScalling,
-			&OutRotation,
-			&OutTranslation,
-			MATRIX_LOAD(this)))
-		{
-			VECTOR_STORE(3, &Scalling, OutScalling);
-			VECTOR_STORE(4, &Rotation, OutRotation);
-			VECTOR_STORE(3, &Translation, OutTranslation);
-			return true;
-		}
-
-		return false;
-	}
+	bool Decompose(Vector3& Translation, Vector3& Scalling, class Quaternion& Rotation) const;
 
 	inline static Matrix Translation(float X, float Y, float Z)
 	{

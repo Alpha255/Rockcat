@@ -1,49 +1,71 @@
 #pragma once
 
-#include "Core/Definitions.h"
+#include "Core/Singleton.h"
 
 using ComponentID = uint64_t;
 
-#define DECLARE_COMPONENT_ID(ComponentType) \
+#define REGISTER_COMPONENT_ID(ComponentType) \
 private: \
-	enum class EComponentType : ComponentID { \
- 		ID = FnvHash(#ComponentType) \
-	}; \
+	inline static constexpr ComponentID ID = FnvHash(#ComponentType); \
 public: \
-	static inline constexpr ComponentID GetID() { return static_cast<ComponentID>(EComponentType::ID); } \
-	ComponentID GetComponentID() const override final { return static_cast<ComponentID>(EComponentType::ID); }
+	inline static constexpr ComponentID GetID() { return ID; } \
 
-class ComponentBase
+class ComponentBase : std::enable_shared_from_this<ComponentBase>
 {
 public:
 	ComponentBase() = default;
 
-	ComponentBase(const class Entity* Owner)
+	ComponentBase(class Entity* Owner)
 		: m_Owner(Owner)
 	{
 	}
 
 	virtual ~ComponentBase() = default;
 
-	inline const class Entity* GetOwner() const { return m_Owner; }
-
-	virtual ComponentID GetComponentID() const { return 0u; }
+	inline const class Entity& GetOwner() const { return *m_Owner; }
 
 	virtual void Tick(float /*ElapsedSeconds*/) {}
 
 	template<class Archive>
-	void serialize(Archive& Ar)
+	void serialize(Archive&)
 	{
-		Ar(
-			CEREAL_NVP(m_Hash)
-		);
 	}
 private:
 	friend class ComponentPool;
-
-	inline void SetHash(size_t Hash) { m_Hash = Hash; }
-	inline void SetOwner(const class Entity* Owner) { m_Owner = Owner; }
 	
-	size_t m_Hash = 0u;
-	const class Entity* m_Owner = nullptr;
+	class Entity* m_Owner = nullptr;
+};
+
+class ComponentPool : public Singleton<ComponentPool>
+{
+public:
+	template<class T, class... Args>
+	std::shared_ptr<T> Allocate(Args&&... ArgList)
+	{
+		static_assert(std::is_base_of_v<ComponentBase, T>, "T must be derived from ComponentBase");
+
+		auto& FreeComponents = m_FreeComponents[T::ID];
+		if (FreeComponents.empty())
+		{
+			return std::make_shared<T>(std::forward<Args>(ArgList)...);
+		}
+		else
+		{
+			auto Component = Cast<T>(FreeComponents.front());
+			FreeComponents.pop_front();
+			new (Component.get()) T(std::forward<Args>(ArgList)...);
+			return Component;
+		}
+	}
+
+	template<class T>
+	void Free(std::shared_ptr<T>& Component)
+	{
+		if (Component)
+		{
+			m_FreeComponents[T::ID].emplace_back(std::move(Component));
+		}
+	}
+private:
+	std::unordered_map<ComponentID, std::list<std::shared_ptr<ComponentBase>>> m_FreeComponents;
 };
