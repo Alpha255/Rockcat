@@ -84,9 +84,6 @@ public:
 	static RHIInputLayoutDesc GetInputLayout(EVertexAttributes Attributes, ERHIVertexInputRate InputRate = ERHIVertexInputRate::Vertex);
 
 	static const size_t PositionStride = sizeof(Math::Vector3);
-	static const size_t NormalStride = sizeof(Math::Vector3);
-	static const size_t TangentStride = sizeof(Math::Vector3);
-	static const size_t UVStride = sizeof(Math::Vector3);
 	static const size_t ColorStride = sizeof(Math::Color);
 	static const size_t AlignOf = alignof(Math::Vector4);
 
@@ -190,10 +187,10 @@ struct MeshData : public MeshProperty
 	inline size_t GetIndexDataSize() const { return GetNumIndex() * static_cast<size_t>(GetIndexFormat()); }
 
 	inline size_t GetPositionDataSize() const { return PositionStride * GetNumVertex(); }
-	inline size_t GetNormalDataSize() const { return HasNormal() ? (NormalStride * GetNumVertex()) : 0u; }
-	inline size_t GetTangentDataSize() const { return HasTangent() ? (TangentStride * GetNumVertex()) : 0u; }
-	inline size_t GetUV0DataSize() const { return HasUV0() ? (UVStride * GetNumVertex()) : 0u; }
-	inline size_t GetUV1DataSize() const { return HasUV1() ? (UVStride * GetNumVertex()) : 0u; }
+	inline size_t GetNormalDataSize() const { return HasNormal() ? (PositionStride * GetNumVertex()) : 0u; }
+	inline size_t GetTangentDataSize() const { return HasTangent() ? (PositionStride * GetNumVertex()) : 0u; }
+	inline size_t GetUV0DataSize() const { return HasUV0() ? (PositionStride * GetNumVertex()) : 0u; }
+	inline size_t GetUV1DataSize() const { return HasUV1() ? (PositionStride * GetNumVertex()) : 0u; }
 	inline size_t GetColorDataSize() const { return HasColor() ? (ColorStride * GetNumVertex()) : 0u; }
 
 	inline size_t GetPositionOffset() const { return 0u; }
@@ -208,19 +205,19 @@ struct MeshData : public MeshProperty
 	DataBlock IndicesData;
 };
 
-class StaticMeshBuffers
+class PrimitiveBuffers
 {
 public:
-	const RHIBuffer* GetIndexBuffer() const { return m_IndexBuffer.get(); }
-	const RHIBuffer* GetPositionBuffer() const { return GetVertexBuffer(EVertexAttributes::Position); }
-	const RHIBuffer* GetNormalBuffer() const { return GetVertexBuffer(EVertexAttributes::Normal); }
-	const RHIBuffer* GetTangentBuffer() const { return GetVertexBuffer(EVertexAttributes::Tangent); }
-	const RHIBuffer* GetUV0Buffer() const { return GetVertexBuffer(EVertexAttributes::UV0); }
-	const RHIBuffer* GetUV1Buffer() const { return GetVertexBuffer(EVertexAttributes::UV1); }
-	const RHIBuffer* GetColorBuffer() const { return GetVertexBuffer(EVertexAttributes::Color); }
-	const RHIBuffer* GetVertexBuffer(EVertexAttributes Attributes) const;
+	inline const RHIBuffer* GetIndexBuffer() const { return m_IndexBuffer.get(); }
+	inline const RHIBuffer* GetPositionBuffer() const { return GetVertexBuffer(EVertexAttributes::Position); }
+	inline const RHIBuffer* GetNormalBuffer() const { return GetVertexBuffer(EVertexAttributes::Normal); }
+	inline const RHIBuffer* GetTangentBuffer() const { return GetVertexBuffer(EVertexAttributes::Tangent); }
+	inline const RHIBuffer* GetUV0Buffer() const { return GetVertexBuffer(EVertexAttributes::UV0); }
+	inline const RHIBuffer* GetUV1Buffer() const { return GetVertexBuffer(EVertexAttributes::UV1); }
+	inline const RHIBuffer* GetColorBuffer() const { return GetVertexBuffer(EVertexAttributes::Color); }
+	inline const RHIBuffer* GetVertexBuffer(EVertexAttributes Attributes) const;
 private:
-	friend class AssimpSceneImporter;
+	friend class AssimpSceneLoader;
 
 	virtual void CreateRHI(const MeshData& Data, class RHIDevice& Device);
 
@@ -228,13 +225,13 @@ private:
 	RHIBufferPtr m_IndexBuffer;
 };
 
-class StaticMesh : public MeshProperty, public StaticMeshBuffers
+class StaticMesh : public MeshProperty, public PrimitiveBuffers
 {
 public:
 	StaticMesh(const MeshProperty& Properties);
 };
 
-class SkinnedMeshBuffers : public StaticMeshBuffers
+class SkinnedMeshBuffers : public PrimitiveBuffers
 {
 };
 

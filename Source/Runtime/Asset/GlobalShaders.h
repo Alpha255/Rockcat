@@ -2,7 +2,6 @@
 
 #include "Assets/Shaders/Definitions.h"
 #include "Asset/Shader.h"
-#include "Paths.h"
 
 class GenericVS : public GlobalShader<GenericVS>
 {

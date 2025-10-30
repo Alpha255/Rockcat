@@ -31,10 +31,10 @@ MeshData::MeshData(
 	assert(NumVertex && NumIndex && NumPrimitive);
 
 	VerticesData.Size += PositionStride * NumVertex; // Position
-	VerticesData.Size += HasNormal ? NormalStride * NumVertex : 0u; // Normal
-	VerticesData.Size += HasTangent ? TangentStride * NumVertex * 2u : 0u; // Tangent and BiTangent
-	VerticesData.Size += HasUV0 ? UVStride * NumVertex : 0u; // UV0
-	VerticesData.Size += HasUV1 ? UVStride * NumVertex : 0u; // UV1
+	VerticesData.Size += HasNormal ? PositionStride * NumVertex : 0u; // Normal
+	VerticesData.Size += HasTangent ? PositionStride * NumVertex * 2u : 0u; // Tangent and BiTangent
+	VerticesData.Size += HasUV0 ? PositionStride * NumVertex : 0u; // UV0
+	VerticesData.Size += HasUV1 ? PositionStride * NumVertex : 0u; // UV1
 	VerticesData.Size += HasColor ? ColorStride * NumVertex : 0u; // Color
 	VerticesData.Data.reset(new std::byte[VerticesData.Size]());
 
@@ -57,11 +57,11 @@ RHIInputLayoutDesc MeshProperty::GetInputLayout(EVertexAttributes Attributes, ER
 	};
 
 	AddAttribute(EVertexAttributes::Position, PositionStride, ERHIFormat::RGB32_Float, "POSITION");
-	AddAttribute(EVertexAttributes::Normal, NormalStride, ERHIFormat::RGB32_Float, "NORMAL");
-	AddAttribute(EVertexAttributes::Tangent, TangentStride, ERHIFormat::RGB32_Float, "TANGENT");
-	AddAttribute(EVertexAttributes::Tangent, TangentStride, ERHIFormat::RGB32_Float, "BITANGENT");
-	AddAttribute(EVertexAttributes::UV0, UVStride, ERHIFormat::RGB32_Float, "TEXCOORD0");
-	AddAttribute(EVertexAttributes::UV1, UVStride, ERHIFormat::RGB32_Float, "TEXCOORD1");
+	AddAttribute(EVertexAttributes::Normal, PositionStride, ERHIFormat::RGB32_Float, "NORMAL");
+	AddAttribute(EVertexAttributes::Tangent, PositionStride, ERHIFormat::RGB32_Float, "TANGENT");
+	AddAttribute(EVertexAttributes::Tangent, PositionStride, ERHIFormat::RGB32_Float, "BITANGENT");
+	AddAttribute(EVertexAttributes::UV0, PositionStride, ERHIFormat::RGB32_Float, "TEXCOORD0");
+	AddAttribute(EVertexAttributes::UV1, PositionStride, ERHIFormat::RGB32_Float, "TEXCOORD1");
 	AddAttribute(EVertexAttributes::Color, ColorStride, ERHIFormat::RGBA32_Float, "COLOR");
 
 	return Desc;
@@ -72,7 +72,7 @@ StaticMesh::StaticMesh(const MeshProperty& Properties)
 {
 }
 
-const RHIBuffer* StaticMeshBuffers::GetVertexBuffer(EVertexAttributes Attributes) const
+const RHIBuffer* PrimitiveBuffers::GetVertexBuffer(EVertexAttributes Attributes) const
 {
 	switch (Attributes)
 	{
@@ -92,7 +92,7 @@ const RHIBuffer* StaticMeshBuffers::GetVertexBuffer(EVertexAttributes Attributes
 	return nullptr;
 }
 
-void StaticMeshBuffers::CreateRHI(const MeshData& Data, RHIDevice& Device)
+void PrimitiveBuffers::CreateRHI(const MeshData& Data, RHIDevice& Device)
 {
 	RHIBufferDesc Desc;
 	if (Data.GetNumIndex())

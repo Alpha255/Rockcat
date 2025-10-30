@@ -36,9 +36,14 @@ void Scene::Merge(const AssimpScene& InScene)
 }
 
 void Scene::OnPostLoad()
-{
-	//std::vector<const AssimpScene*> AssimpScenes;
+{	
+	for (const auto& Path : m_AssimpScenes)
+	{
+		auto AssimpScenePath = Paths::GltfSampleModelPath() / Path;
+		AssetDatabase::Get().Load<AssimpScene>(AssimpScenePath);
+	}
 
+	// std::vector<const AssimpScene*> AssimpScenes;
 	//auto Callbacks = std::make_optional(Asset::AssetLoadCallbacks{});
 
 	//Callbacks.value().PreLoadCallback = [this, &AssimpScenes](Asset& InAsset) {
