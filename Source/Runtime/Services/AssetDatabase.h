@@ -13,7 +13,7 @@ public:
 	template<class T>
 	inline std::shared_ptr<T> Load(const std::filesystem::path& Path, bool ForceReload = false, bool Async = true)
 	{
-		return LoadAssetImpl(GetUnifyAssetPath(Path), ForceReload, Async);
+		return Cast<T>(LoadAssetImpl(GetUnifyAssetPath(Path), ForceReload, Async));
 	}
 
 	bool Unload(const std::filesystem::path& Path, bool Async = true);

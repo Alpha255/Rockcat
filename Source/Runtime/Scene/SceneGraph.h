@@ -17,6 +17,14 @@ public:
 	{
 	}
 
+	Entity(class Scene* InScene, const char* Name, EntityID ID, EntityID Parent = EntityID())
+		: m_Scene(InScene)
+		, m_ID(ID)
+		, m_Parent(Parent)
+		, m_Name(Name ? Name : "")
+	{
+	}
+
 	Entity(const Entity&) = default;
 	Entity(Entity&&) = default;
 	Entity& operator=(const Entity&) = default;
@@ -159,6 +167,8 @@ private:
 	bool m_Selected = false;
 
 	std::string m_Name;
+
+	class Scene* m_Scene = nullptr;
 
 	std::vector<std::shared_ptr<ComponentBase>> m_Components;
 };

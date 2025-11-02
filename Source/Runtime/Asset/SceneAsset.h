@@ -26,3 +26,15 @@ struct AssimpScene : public Asset
 
 	std::unordered_map<EntityID, DataIndex> EntityDataIndices;
 };
+
+class AssimpScene2 : public Asset, public SceneGraph
+{
+public:
+	using Asset::Asset;
+
+	void OnPostLoad() override;
+
+	inline void SetScene(class Scene* InScene) { m_Scene = InScene; }
+private:
+	class Scene* m_Scene = nullptr;
+};

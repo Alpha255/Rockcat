@@ -30,7 +30,7 @@ public:
 		Ar(
 			CEREAL_BASE(BaseClass),
 			CEREAL_BASE(SceneGraph),
-			CEREAL_NVP(m_AssimpScenes),
+			CEREAL_NVP(m_AssimpScenePaths),
 			//CEREAL_NVP(m_Views),
 			CEREAL_NVP(m_Cameras)
 		);
@@ -38,10 +38,14 @@ public:
 protected:
 	void OnPostLoad() override;
 private:
-	void Merge(const AssimpScene& InScene);
+	friend class AssimpScene2;
+	void MergeAssimpScenes();
 
-	std::vector<std::string> m_AssimpScenes;
+	std::vector<std::string> m_AssimpScenePaths;
+	std::vector<std::shared_ptr<AssimpScene>> m_AssimpScenes;
 	std::vector<std::shared_ptr<class ISceneView>> m_Views;
 	std::vector<std::shared_ptr<class Camera>> m_Cameras;
+
+	std::unordered_map<size_t, std::vector<std::shared_ptr<ComponentBase>>> m_Components;
 };
 

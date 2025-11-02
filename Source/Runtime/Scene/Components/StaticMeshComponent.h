@@ -9,15 +9,11 @@ public:
 
 	using ComponentBase::ComponentBase;
 
-	inline void SetMesh(std::shared_ptr<class StaticMesh> Mesh)
-	{
-		m_StaticMesh = Mesh;
-	}
+	inline void SetMesh(std::shared_ptr<class StaticMesh> Mesh) { m_StaticMesh = Mesh; }
+	const class StaticMesh* GetMesh() const { return m_StaticMesh.get(); }
 
-	inline void SetMaterial(std::shared_ptr<struct MaterialProperty> Material)
-	{
-		m_Material = Material;
-	}
+	inline void SetMaterialProperty(std::shared_ptr<struct MaterialProperty> Material) { m_Material = Material; }
+	const struct MaterialProperty* GetMaterialProperty() const { return m_Material.get(); }
 private:
 	std::shared_ptr<class StaticMesh> m_StaticMesh;
 	std::shared_ptr<struct MaterialProperty> m_Material;

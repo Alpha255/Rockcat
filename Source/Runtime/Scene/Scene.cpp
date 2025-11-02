@@ -6,6 +6,11 @@
 
 void Scene::Tick(float ElapsedSeconds)
 {
+	if (!IsReady())
+	{
+		return;
+	}
+
 	for (auto& Entity : GetAllEntities())
 	{
 		if (!Entity.IsAlive() || !Entity.IsVisible())
@@ -23,24 +28,39 @@ void Scene::Tick(float ElapsedSeconds)
 	}
 }
 
-void Scene::Merge(const AssimpScene& InScene)
+void Scene::MergeAssimpScenes()
 {
-	if (!HasEntity())
+	for (auto& AssimpScene : m_AssimpScenes)
 	{
-		SetRoot(InScene.Graph.GetRoot());
+		if (!AssimpScene->IsReady())
+		{
+			return;
+		}
 	}
-	else
-	{
 
-	}
+	Asset::OnPostLoad();
 }
 
 void Scene::OnPostLoad()
-{	
-	for (const auto& Path : m_AssimpScenes)
+{
+	for (const auto& Path : m_AssimpScenePaths)
 	{
-		auto AssimpScenePath = Paths::GltfSampleModelPath() / Path;
-		AssetDatabase::Get().Load<AssimpScene>(AssimpScenePath);
+		if (std::filesystem::exists(Path))
+		{
+			m_AssimpScenes.emplace_back(AssetDatabase::Get().Load<AssimpScene>(Path));
+		}
+		else
+		{
+			auto AssimpScenePath = Paths::GltfSampleModelPath() / Path;
+			if (std::filesystem::exists(AssimpScenePath))
+			{
+				m_AssimpScenes.emplace_back(AssetDatabase::Get().Load<AssimpScene>(Path));
+			}
+			else
+			{
+				LOG_ERROR("The assimp scene asset \"{}\" is not exists", Path);
+			}
+		}
 	}
 
 	// std::vector<const AssimpScene*> AssimpScenes;
