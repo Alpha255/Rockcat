@@ -28,70 +28,67 @@ void Scene::Tick(float ElapsedSeconds)
 	}
 }
 
-void Scene::MergeAssimpScenes()
+void Scene::MergeAssimpScenes(std::vector<std::shared_ptr<AssimpScene>>* AssimpScenes)
 {
-	for (auto& AssimpScene : m_AssimpScenes)
+	if (AssimpScenes->size() != m_AssimpScenePaths.size())
 	{
+		return;
+	}
+
+	for (auto& AssimpScene : *AssimpScenes)
+	{
+		if (!AssimpScene)
+		{
+			continue;
+		}
+
 		if (!AssimpScene->IsReady())
 		{
 			return;
 		}
 	}
 
-	Asset::OnPostLoad();
-}
-
-void Scene::OnPostLoad()
-{
-	for (const auto& Path : m_AssimpScenePaths)
+	for (auto& AssimpScene : *AssimpScenes)
 	{
-		if (std::filesystem::exists(Path))
+		if (!AssimpScene)
 		{
-			m_AssimpScenes.emplace_back(AssetDatabase::Get().Load<AssimpScene>(Path));
-		}
-		else
-		{
-			auto AssimpScenePath = Paths::GltfSampleModelPath() / Path;
-			if (std::filesystem::exists(AssimpScenePath))
-			{
-				m_AssimpScenes.emplace_back(AssetDatabase::Get().Load<AssimpScene>(Path));
-			}
-			else
-			{
-				LOG_ERROR("The assimp scene asset \"{}\" is not exists", Path);
-			}
+			continue;
 		}
 	}
 
-	// std::vector<const AssimpScene*> AssimpScenes;
-	//auto Callbacks = std::make_optional(Asset::AssetLoadCallbacks{});
+	SetStatus(EStatus::Ready);
 
-	//Callbacks.value().PreLoadCallback = [this, &AssimpScenes](Asset& InAsset) {
-	//	AssimpScenes.push_back(Cast<AssimpSceneAsset>(&InAsset));
-	//};
+	delete AssimpScenes;
+}
 
-	//Callbacks.value().ReadyCallback = [this, &AssimpScenes](Asset&) {
-	//	for (auto AssimpScene : AssimpScenes)
-	//	{
-	//		if (!AssimpScene->IsReady())
-	//		{
-	//			return;
-	//		}
-	//	}
+void Scene::ResetStatusChangeCallbacks()
+{
+	BaseClass::ResetStatusChangeCallbacks();
 
-	//	for (auto AssimpScene : AssimpScenes)
-	//	{
-	//		MergeWithAssimpScene(*AssimpScene);
-	//	}
+	std::vector<std::shared_ptr<AssimpScene>>* AssimpScenes = new std::vector<std::shared_ptr<AssimpScene>>();
 
-	//	BaseClass::OnPostLoad();
-	//};
+	SetOnPostLoad([this, AssimpScenes]() {
+		for (const auto& Path : m_AssimpScenePaths)
+		{
+			std::filesystem::path AssimpScenePath = Path;
+			if (!std::filesystem::exists(AssimpScenePath))
+			{
+				AssimpScenePath = Paths::GltfSampleModelPath() / Path;
+				if (!std::filesystem::exists(AssimpScenePath))
+				{
+					AssimpScenes->emplace_back(nullptr);
+					continue;
+				}
+			}
 
-	//for (const auto& Path : m_AssimpScenes)
-	//{
-	//	auto AssimpScenePath = Paths::GltfSampleModelPath() / Path;
-	//	AssetDatabase::Get().GetOrReimportAsset<AssimpScene>(AssimpScenePath, Callbacks);
-	//}
+			/// @TODO: Thread safe ???
+			auto AssimpSceneOnLoading = AssimpScenes->emplace_back(AssetDatabase::Get().Load<AssimpScene>(AssimpScenePath)).get();
+			AssimpSceneOnLoading->SetOnReady([this, AssimpScenes, AssimpSceneOnLoading]() {
+				AssimpSceneOnLoading->SetStatus(EStatus::Ready);
+				MergeAssimpScenes(AssimpScenes);
+			});
+		}
+	});
 }
 
 Scene::~Scene()

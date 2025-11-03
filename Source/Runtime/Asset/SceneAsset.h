@@ -10,6 +10,7 @@
 struct AssimpScene : public Asset
 {
 	using Asset::Asset;
+	friend class Scene;
 
 	struct DataIndex
 	{
@@ -31,10 +32,4 @@ class AssimpScene2 : public Asset, public SceneGraph
 {
 public:
 	using Asset::Asset;
-
-	void OnPostLoad() override;
-
-	inline void SetScene(class Scene* InScene) { m_Scene = InScene; }
-private:
-	class Scene* m_Scene = nullptr;
 };

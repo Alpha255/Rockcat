@@ -60,18 +60,16 @@ protected:
 		}
 		else if (m_Operation == EOperation::Load)
 		{
-			std::string ErrorMessage;
-
 			m_Asset->OnPreLoad();
 
-			if (m_Loader.Load(*m_Asset, m_Type, ErrorMessage))
+			if (m_Loader.Load(*m_Asset, m_Type))
 			{
 				m_Asset->OnReady();
 				m_Asset->OnPostLoad();
 			}
 			else
 			{
-				m_Asset->OnLoadFailed(ErrorMessage);
+				m_Asset->OnLoadFailed();
 			}
 		}
 	}

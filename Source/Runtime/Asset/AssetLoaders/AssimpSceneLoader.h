@@ -8,9 +8,9 @@ class AssimpSceneLoader : public AssetLoader
 public:
 	AssimpSceneLoader();
 
-	bool Load(Asset& InAsset, const AssetType& Type, std::string& ErrorMessage) override final;
+	bool Load(Asset& InAsset, const AssetType& Type) override final;
 protected:
-	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& Path) override final;
+	std::shared_ptr<Asset> CreateAssetImpl(const std::filesystem::path& Path) override final;
 
 	void ProcessTransform(const struct aiNode* AiNode, struct AssimpScene& Scene);
 	bool ProcessNode(const struct aiScene* AiScene, const struct aiNode* AiNode, const EntityID GraphNode, struct AssimpScene& Scene);

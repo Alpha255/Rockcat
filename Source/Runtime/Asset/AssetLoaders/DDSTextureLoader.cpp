@@ -188,12 +188,12 @@ DDSTextureLoader::DDSTextureLoader()
 {
 }
 
-std::shared_ptr<Asset> DDSTextureLoader::CreateAsset(const std::filesystem::path& Path)
+std::shared_ptr<Asset> DDSTextureLoader::CreateAssetImpl(const std::filesystem::path& Path)
 {
 	return std::make_shared<Texture>(Path);
 }
 
-bool DDSTextureLoader::Load(Asset& InAsset, const AssetType& Type, std::string& ErrorMessage)
+bool DDSTextureLoader::Load(Asset& InAsset, const AssetType& Type)
 {
 	auto& DDSImage = Cast<Texture>(InAsset);
 
@@ -324,6 +324,5 @@ bool DDSTextureLoader::Load(Asset& InAsset, const AssetType& Type, std::string& 
 	Desc.SetInitialData(DataBlock(BitSize, BitData));
 	//DDSImage.CreateRHI(RenderService::Get().GetBackend().GetDevice(), Desc);
 
-	ErrorMessage = "Success";
 	return true;
 }

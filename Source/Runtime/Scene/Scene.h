@@ -36,13 +36,11 @@ public:
 		);
 	}
 protected:
-	void OnPostLoad() override;
+	void ResetStatusChangeCallbacks() override final;
 private:
-	friend class AssimpScene2;
-	void MergeAssimpScenes();
+	void MergeAssimpScenes(std::vector<std::shared_ptr<AssimpScene>>* AssimpScenes);
 
 	std::vector<std::string> m_AssimpScenePaths;
-	std::vector<std::shared_ptr<AssimpScene>> m_AssimpScenes;
 	std::vector<std::shared_ptr<class ISceneView>> m_Views;
 	std::vector<std::shared_ptr<class Camera>> m_Cameras;
 

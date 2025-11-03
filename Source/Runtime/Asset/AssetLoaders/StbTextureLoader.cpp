@@ -23,12 +23,12 @@ StbTextureLoader::StbTextureLoader()
 	LOG_INFO("Create STB texture loader, stb_image @2.3");
 }
 
-std::shared_ptr<Asset> StbTextureLoader::CreateAsset(const std::filesystem::path& Path)
+std::shared_ptr<Asset> StbTextureLoader::CreateAssetImpl(const std::filesystem::path& Path)
 {
 	return std::make_shared<Texture>(Path);
 }
 
-bool StbTextureLoader::Load(Asset& InAsset, const AssetType& Type, std::string& ErrorMessage)
+bool StbTextureLoader::Load(Asset& InAsset, const AssetType& Type)
 {
 	auto& StbImage = Cast<Texture>(InAsset);
 	auto AssetData = StbImage.LoadData(Type.ContentsFormat);
@@ -39,8 +39,7 @@ bool StbTextureLoader::Load(Asset& InAsset, const AssetType& Type, std::string& 
 
 	if (!stbi_info_from_memory(Data, DataSize, &Width, &Height, &OriginalChannels))
 	{
-		ErrorMessage = stbi_failure_reason();
-		LOG_CAT_ERROR(LogAsset, "Couldn't parse image header, image path: {}, fail reason: {}", StbImage.GetPath().string(), ErrorMessage);
+		LOG_CAT_ERROR(LogAsset, "Couldn't parse image header, image path: {}, fail reason: {}", StbImage.GetPath().string(), stbi_failure_reason());
 		return false;
 	}
 
@@ -62,8 +61,7 @@ bool StbTextureLoader::Load(Asset& InAsset, const AssetType& Type, std::string& 
 
 	if (!Bitmap)
 	{
-		ErrorMessage = stbi_failure_reason();
-		LOG_CAT_ERROR(LogAsset, "Failed to load image: {}, fail reason: {}", StbImage.GetPath().string(), ErrorMessage);
+		LOG_CAT_ERROR(LogAsset, "Failed to load image: {}, fail reason: {}", StbImage.GetPath().string(), stbi_failure_reason());
 		return false;
 	}
 

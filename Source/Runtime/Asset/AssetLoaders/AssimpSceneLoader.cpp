@@ -109,12 +109,12 @@ AssimpSceneLoader::AssimpSceneLoader()
 	LOG_INFO("Create Assimp scene loader, assimp version @{}.{}.{}", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionPatch());
 }
 
-std::shared_ptr<Asset> AssimpSceneLoader::CreateAsset(const std::filesystem::path& AssetPath)
+std::shared_ptr<Asset> AssimpSceneLoader::CreateAssetImpl(const std::filesystem::path& AssetPath)
 {
 	return std::make_shared<AssimpScene>(AssetPath);
 }
 
-bool AssimpSceneLoader::Load(Asset& InAsset, const AssetType& Type, std::string& ErrorMessage)
+bool AssimpSceneLoader::Load(Asset& InAsset, const AssetType& Type)
 {
 	(void)Type;
 
@@ -161,8 +161,7 @@ bool AssimpSceneLoader::Load(Asset& InAsset, const AssetType& Type, std::string&
 		}
 	}
 
-	ErrorMessage = AssimpImporter.GetErrorString();
-	LOG_CAT_ERROR(LogAsset, "Failed to load assimp scene: {}: \"{}\"", Scene.GetName(), ErrorMessage);
+	LOG_CAT_ERROR(LogAsset, "Failed to load assimp scene: {}: \"{}\"", Scene.GetName(), AssimpImporter.GetErrorString());
 	return false;
 }
 

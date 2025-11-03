@@ -82,11 +82,21 @@ public:
 
 	using File::File;
 
+	using OnStatusChangeCallback = std::function<void()>;
+
 	inline EStatus GetStatus(std::memory_order MemoryOrder = std::memory_order_relaxed) const { return m_Status.load(MemoryOrder); }
 	inline bool IsReady(std::memory_order MemoryOrder = std::memory_order_relaxed) const { return GetStatus(MemoryOrder) == EStatus::Ready; }
 	inline bool IsOnLoading(std::memory_order MemoryOrder = std::memory_order_relaxed) const { return GetStatus(MemoryOrder) == EStatus::Loading; }
 
 	std::shared_ptr<DataBlock> LoadData(AssetType::EContentsFormat ContentsFormat) const;
+
+	inline void SetOnPreLoad(OnStatusChangeCallback&& Callback) { OnPreLoad = std::move(Callback); }
+	inline void SetOnReady(OnStatusChangeCallback&& Callback) { OnReady = std::move(Callback); }
+	inline void SetOnCancel(OnStatusChangeCallback&& Callback) { OnCancel = std::move(Callback); }
+	inline void SetOnPostLoad(OnStatusChangeCallback&& Callback) { OnPostLoad = std::move(Callback); }
+	inline void SetOnUnload(OnStatusChangeCallback&& Callback) { OnUnload = std::move(Callback); }
+	inline void SetOnReload(OnStatusChangeCallback&& Callback) { OnReload = std::move(Callback); }
+	inline void SetOnLoadFailed(OnStatusChangeCallback&& Callback) { OnLoadFailed = std::move(Callback); }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -97,16 +107,42 @@ public:
 	}
 protected:
 	friend class AssetLoadTask;
+	friend class AssetLoader;
 
 	inline void SetStatus(EStatus Status, std::memory_order MemoryOrder = std::memory_order_release) { m_Status.store(Status, MemoryOrder); }
 
-	virtual void OnPreLoad() { SetStatus(EStatus::Loading); }
-	virtual void OnReady() {}
-	virtual void OnCancel() { SetStatus(EStatus::NotLoaded); }
-	virtual void OnPostLoad() { SetStatus(EStatus::Ready); }
-	virtual void OnUnload() { SetStatus(EStatus::NotLoaded); }
-	virtual void OnReload() {}
-	virtual void OnLoadFailed(const std::string& ErrorMessage);
+	OnStatusChangeCallback OnPreLoad;
+	OnStatusChangeCallback OnReady;
+	OnStatusChangeCallback OnCancel;
+	OnStatusChangeCallback OnPostLoad;
+	OnStatusChangeCallback OnUnload;
+	OnStatusChangeCallback OnReload;
+	OnStatusChangeCallback OnLoadFailed;
+
+	virtual void ResetStatusChangeCallbacks()
+	{
+		SetOnPreLoad([this]() {
+			SetStatus(EStatus::Loading);
+		});
+		SetOnReady([this]() {
+			SetStatus(EStatus::Ready);
+		});
+		SetOnCancel([this]() {
+			SetStatus(EStatus::NotLoaded);
+		});
+		SetOnPostLoad([this]() {
+			SetStatus(EStatus::Ready);
+		});
+		SetOnUnload([this]() {
+			SetStatus(EStatus::NotLoaded);
+		});
+		SetOnReload([this]() {
+			SetStatus(EStatus::Loading);
+		});
+		SetOnLoadFailed([this]() {
+			SetStatus(EStatus::LoadFailed);
+		});
+	}
 
 	std::atomic<EStatus> m_Status = EStatus::NotLoaded;
 };
@@ -132,11 +168,18 @@ public:
 		return It == m_SupportedTypes.cend() ? nullptr : &(*It);
 	}
 
-	virtual bool Load(Asset& InAsset, const AssetType& InType, std::string& ErrorMessage) = 0;
+	virtual bool Load(Asset& InAsset, const AssetType& InType) = 0;
 protected:
 	friend class AssetLoadTask;
 
-	virtual std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& Path) = 0;
+	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& Path)
+	{
+		auto Asset = CreateAssetImpl(Path);
+		Asset->ResetStatusChangeCallbacks();
+		return Asset;
+	}
+
+	virtual std::shared_ptr<Asset> CreateAssetImpl(const std::filesystem::path& Path) = 0;
 private:
 	std::vector<AssetType> m_SupportedTypes;
 };
