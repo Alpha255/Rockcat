@@ -29,19 +29,24 @@ public:
 	Entity(Entity&&) = default;
 	Entity& operator=(const Entity&) = default;
 
+	inline bool IsValid() const { return m_ID.IsValid(); }
+
 	inline EntityID GetID() const { return m_ID; }
 
 	inline bool HasParent() const { return m_Parent.IsValid(); }
 	inline EntityID GetParent() const { return m_Parent; }
 	inline Entity& SetParent(EntityID ParentID) { m_Parent = ParentID; return *this; }
+	inline Entity& SetParent(const Entity& Parent) { m_Parent = Parent.GetID(); return *this; }
 
 	inline bool HasChild() const { return m_Child.IsValid(); }
 	inline EntityID GetChild() const { return m_Child; }
 	inline Entity& SetChild(EntityID ChildID) { m_Child = ChildID; return *this; }
+	inline Entity& SetChild(const Entity& Child) { m_Child = Child.GetID(); return *this; }
 
 	inline bool HasSibling() const { return m_Sibling.IsValid(); }
 	inline EntityID GetSibling() const { return m_Sibling; }
 	inline Entity& SetSibling(EntityID SiblingID) { m_Sibling = SiblingID; return *this; }
+	inline Entity& SetSibling(const Entity& Sibling) { m_Sibling = Sibling.GetID(); return *this; }
 
 	inline bool IsVisible() const { return m_Visible; }
 	inline Entity& SetVisible(bool Visible) { m_Visible = Visible; return *this; }
@@ -176,40 +181,51 @@ private:
 class SceneGraph
 {
 public:
-	EntityID AddSibling(EntityID Sibling, const char* Name)
+	inline Entity& AddSibling(const Entity& Sibling, const char* Name)
 	{
-		assert(Sibling.IsValid() && Sibling.GetIndex() < m_Entities.size());
-		EntityID::IndexType SiblingIndex = Sibling.GetIndex();
+		return AddSibling(Sibling.GetID(), Name);
+	}
+
+	Entity& AddSibling(EntityID SiblingID, const char* Name)
+	{
+		assert(SiblingID.IsValid() && SiblingID.GetIndex() < m_Entities.size());
+
+		EntityID::IndexType SiblingIndex = SiblingID.GetIndex();
 		while (m_Entities[SiblingIndex].HasSibling())
 		{
 			SiblingIndex = m_Entities[SiblingIndex].GetSibling().GetIndex();
 		}
 
-		EntityID SiblingNode = AddEntity(m_Entities[SiblingIndex].GetParent(), Name);
-		m_Entities[Sibling.GetIndex()].SetSibling(SiblingNode);
+		Entity& SiblingNode = AddEntity(m_Entities[SiblingIndex].GetParent(), Name);
+		m_Entities[SiblingID.GetIndex()].SetSibling(SiblingNode);
 		return SiblingNode;
 	}
 
-	EntityID AddChild(EntityID Parent, const char* Name)
+	inline Entity& AddChild(const Entity& Parent, const char* Name)
 	{
-		assert(Parent.IsValid() && Parent.GetIndex() < m_Entities.size());
-		if (m_Entities[Parent.GetIndex()].HasChild())
+		return AddChild(Parent.GetID(), Name);
+	}
+
+	Entity& AddChild(EntityID ParentID, const char* Name)
+	{
+		assert(ParentID.IsValid() && ParentID.GetIndex() < m_Entities.size());
+
+		if (m_Entities[ParentID.GetIndex()].HasChild())
 		{
-			return AddSibling(m_Entities[Parent.GetIndex()].GetChild(), Name);
+			return AddSibling(m_Entities[ParentID.GetIndex()].GetChild(), Name);
 		}
 		else
 		{
-			auto NextID = AddEntity(Parent, Name);
-			m_Entities[Parent.GetIndex()].SetChild(NextID);
-			return NextID;
+			auto& Node = AddEntity(ParentID, Name);
+			m_Entities[ParentID.GetIndex()].SetChild(Node);
+			return Node;
 		}
 	}
 
-	EntityID AddEntity(EntityID Parent, const char* Name)
+	Entity& AddEntity(EntityID Parent, const char* Name)
 	{
 		EntityID ID = EntityID(static_cast<EntityID::IndexType>(m_Entities.size()));
-		m_Entities.emplace_back(Entity(Name, ID, Parent));
-		return ID;
+		return m_Entities.emplace_back(Entity(Name, ID, Parent));
 	}
 
 	void RemoveEntity(EntityID ID)
@@ -269,10 +285,10 @@ public:
 		return m_Entities[ID.GetIndex()].IsAlive() ? &m_Entities[ID.GetIndex()] : nullptr;
 	}
 
-	inline EntityID GetRoot() const { return m_Root; }
+	inline const Entity* GetRoot() const { return m_Root.IsValid() ? GetEntity(m_Root) : nullptr; }
 	inline const std::vector<Entity>& GetAllEntities() const { return m_Entities; }
-	inline size_t GetNumEntity() const { return static_cast<uint32_t>(m_Entities.size()); }
-	inline bool HasEntity() const { return !m_Entities.empty(); }
+	inline uint32_t GetNumEntity() const { return static_cast<uint32_t>(m_Entities.size()); }
+	inline bool IsEmpty() const { return m_Entities.empty(); }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -286,7 +302,19 @@ public:
 protected:
 	friend class AssimpSceneLoader;
 
-	inline void SetRoot(EntityID ID) { m_Root = ID; }
+	inline void SetRoot(EntityID ID)
+	{
+		m_Root = ID;
+	}
+
+	inline void SetRoot(const Entity& InEntity)
+	{
+		auto ID = InEntity.GetID();
+		if (ID.IsValid())
+		{
+			m_Root = ID;
+		}
+	}
 	inline std::vector<Entity>& GetAllEntities() { return m_Entities; }
 private:
 	EntityID m_Root;
