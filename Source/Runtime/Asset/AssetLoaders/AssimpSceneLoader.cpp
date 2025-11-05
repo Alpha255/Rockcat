@@ -147,9 +147,6 @@ bool AssimpSceneLoader::Load(Asset& InAsset, const AssetType& Type)
 			Scene.Graph.SetRoot(Scene.Graph.AddEntity(EntityID(), AiScene->mRootNode->mName.C_Str()));
 			if (ProcessNode(AiScene, AiScene->mRootNode, *Scene.Graph.GetRoot(), Scene))
 			{
-				ProcessMaterials(AiScene, Scene);
-				ProcessMeshes(AiScene, Scene);
-
 				Timer.Pause();
 				LOG_CAT_INFO(LogAsset, "Loaded assimp scene \"{}\" in {:.2f} ms", Scene.GetName(), Timer.GetElapsedMilliseconds());
 				return true;
@@ -203,7 +200,17 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 		return false;
 	}
 
+	auto SetNodeName = [](Entity& Node) {
+		if (strlen(Node.GetName()) == 0)
+		{
+			std::string Name = StringUtils::Format("node%d", Node.GetID().GetIndex());
+			Node.SetName(Name.c_str());
+		}
+	};
+
 	auto& NextNode = AiScene->mRootNode == AiNode ? GraphNode : Scene.Graph.AddChild(GraphNode, AiNode->mName.C_Str());
+	SetNodeName(NextNode);
+
 	for (uint32_t Index = 0u; Index < AiNode->mNumMeshes; ++Index)
 	{
 		const auto MeshIndex = AiNode->mMeshes[Index];
@@ -212,10 +219,12 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 		if (AiMesh->HasBones())
 		{
 			LOG_CAT_ERROR(LogAsset, "Not supported skeletal mesh yet!");
-			assert(false);
+			continue;
 		}
 
 		auto& Node = Scene.Graph.AddChild(GraphNode, AiMesh->mName.C_Str());
+		SetNodeName(Node);
+
 		auto TransformComp = Node.AddComponent<TransformComponent>();
 		auto StaticMeshComp = Node.AddComponent<StaticMeshComponent>();
 
@@ -244,11 +253,19 @@ void AssimpSceneLoader::ProcessMaterial(const aiScene* AiScene, AssimpScene& Sce
 
 	if (auto AiMaterial = AiScene->mMaterials[MaterialIndex])
 	{
-		auto Property = std::make_shared<MaterialProperty>();
-		StaticMeshComp.SetMaterialProperty(Property);
-
 		aiString Name;
 		AiMaterial->Get(AI_MATKEY_NAME, Name);
+
+		auto MaterialFilePath = (Paths::MaterialPath() / Scene.GetStem() / Name.C_Str()).replace_extension(MaterialProperty::GetExtension());
+		if (std::filesystem::exists(MaterialFilePath))
+		{
+			auto Property = MaterialProperty::Load(MaterialFilePath);
+			StaticMeshComp.SetMaterialProperty(Property);
+			return;
+		}
+
+		auto Property = std::make_shared<MaterialProperty>();
+		StaticMeshComp.SetMaterialProperty(Property);
 
 		aiString AlphaMode;
 		if (AiMaterial->Get(AI_MATKEY_GLTF_ALPHAMODE, AlphaMode) == AI_SUCCESS)

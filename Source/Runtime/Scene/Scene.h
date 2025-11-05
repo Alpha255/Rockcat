@@ -32,7 +32,8 @@ public:
 			CEREAL_BASE(SceneGraph),
 			CEREAL_NVP(m_AssimpScenePaths),
 			//CEREAL_NVP(m_Views),
-			CEREAL_NVP(m_Cameras)
+			CEREAL_NVP(m_Cameras),
+			CEREAL_NVP(m_SavedComponents)
 		);
 	}
 protected:
@@ -44,6 +45,6 @@ private:
 	std::vector<std::shared_ptr<class ISceneView>> m_Views;
 	std::vector<std::shared_ptr<class Camera>> m_Cameras;
 
-	std::unordered_map<size_t, std::vector<std::shared_ptr<ComponentBase>>> m_Components;
+	std::unordered_map<size_t, std::vector<std::shared_ptr<ComponentBase>>> m_SavedComponents;
 };
 
