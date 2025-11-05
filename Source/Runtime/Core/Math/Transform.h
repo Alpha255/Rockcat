@@ -104,6 +104,18 @@ public:
 		return *this;
 	}
 
+	inline Transform& SetRotation(const Quaternion& Rotation)
+	{
+		m_Rotation = Rotation;
+		return *this;
+	}
+
+	inline Transform& SetRotation(const float X, const float Y, const float Z, const float W)
+	{
+		m_Rotation = Quaternion(X, Y, Z, W);
+		return *this;
+	}
+
 	inline Transform& SetRotation(const Vector3& Rotation)
 	{
 		m_Rotation.RotationXAxis(Rotation.x);

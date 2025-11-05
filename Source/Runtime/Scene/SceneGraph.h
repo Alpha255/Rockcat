@@ -181,45 +181,43 @@ private:
 class SceneGraph
 {
 public:
-	inline Entity& AddSibling(const Entity& Sibling, const char* Name)
+	inline Entity& AddSibling(Entity& Sibling, const char* Name)
 	{
-		return AddSibling(Sibling.GetID(), Name);
+		assert(Sibling.IsValid() && Sibling.GetID().GetIndex() < m_Entities.size());
+
+		auto NextSibing = &Sibling;
+		while (NextSibing->HasSibling())
+		{
+			NextSibing = GetEntity(NextSibing->GetSibling());
+		}
+
+		Entity& Node = AddEntity(NextSibing->GetParent(), Name);
+		NextSibing->SetSibling(Node);
+		return Node;
 	}
 
 	Entity& AddSibling(EntityID SiblingID, const char* Name)
 	{
-		assert(SiblingID.IsValid() && SiblingID.GetIndex() < m_Entities.size());
-
-		EntityID::IndexType SiblingIndex = SiblingID.GetIndex();
-		while (m_Entities[SiblingIndex].HasSibling())
-		{
-			SiblingIndex = m_Entities[SiblingIndex].GetSibling().GetIndex();
-		}
-
-		Entity& SiblingNode = AddEntity(m_Entities[SiblingIndex].GetParent(), Name);
-		m_Entities[SiblingID.GetIndex()].SetSibling(SiblingNode);
-		return SiblingNode;
+		return AddSibling(*GetEntity(SiblingID), Name);
 	}
 
-	inline Entity& AddChild(const Entity& Parent, const char* Name)
+	inline Entity& AddChild(Entity& Parent, const char* Name)
 	{
-		return AddChild(Parent.GetID(), Name);
+		assert(Parent.IsValid() && Parent.GetID().GetIndex() < m_Entities.size());
+
+		if (Parent.HasChild())
+		{
+			return AddSibling(Parent.GetChild(), Name);
+		}
+
+		Entity& Node = AddEntity(Parent.GetID(), Name);
+		Parent.SetChild(Node.GetID());
+		return Node;
 	}
 
 	Entity& AddChild(EntityID ParentID, const char* Name)
 	{
-		assert(ParentID.IsValid() && ParentID.GetIndex() < m_Entities.size());
-
-		if (m_Entities[ParentID.GetIndex()].HasChild())
-		{
-			return AddSibling(m_Entities[ParentID.GetIndex()].GetChild(), Name);
-		}
-		else
-		{
-			auto& Node = AddEntity(ParentID, Name);
-			m_Entities[ParentID.GetIndex()].SetChild(Node);
-			return Node;
-		}
+		return AddChild(*GetEntity(ParentID), Name);
 	}
 
 	Entity& AddEntity(EntityID Parent, const char* Name)
@@ -230,9 +228,11 @@ public:
 
 	void RemoveEntity(EntityID ID)
 	{
-		assert(ID.IsValid() && ID.GetIndex() < m_Entities.size());
-		m_Entities[ID.GetIndex()].RemoveAllComponents();
-		m_Entities[ID.GetIndex()].SetAlive(false);
+		if (ID.IsValid() && ID.GetIndex() < m_Entities.size())
+		{
+			m_Entities[ID.GetIndex()].SetAlive(false)
+				.RemoveAllComponents();
+		}
 	}
 
 	void RemoveInvalidEntities()
@@ -274,18 +274,19 @@ public:
 	}
 
 	const Entity* GetEntity(const EntityID& ID) const
-	{ 
+	{
 		assert(ID.IsValid() && ID.GetIndex() < m_Entities.size());
-		return m_Entities[ID.GetIndex()].IsAlive() ? &m_Entities[ID.GetIndex()] : nullptr;
+		return &m_Entities[ID.GetIndex()];
 	}
 
 	Entity* GetEntity(const EntityID& ID)
 	{
 		assert(ID.IsValid() && ID.GetIndex() < m_Entities.size());
-		return m_Entities[ID.GetIndex()].IsAlive() ? &m_Entities[ID.GetIndex()] : nullptr;
+		return &m_Entities[ID.GetIndex()];
 	}
 
 	inline const Entity* GetRoot() const { return m_Root.IsValid() ? GetEntity(m_Root) : nullptr; }
+	inline Entity* GetRoot() { return m_Root.IsValid() ? GetEntity(m_Root) : nullptr; }
 	inline const std::vector<Entity>& GetAllEntities() const { return m_Entities; }
 	inline uint32_t GetNumEntity() const { return static_cast<uint32_t>(m_Entities.size()); }
 	inline bool IsEmpty() const { return m_Entities.empty(); }

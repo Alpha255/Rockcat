@@ -12,9 +12,10 @@ public:
 protected:
 	std::shared_ptr<Asset> CreateAssetImpl(const std::filesystem::path& Path) override final;
 
-	void ProcessTransform(const struct aiNode* AiNode, struct AssimpScene& Scene);
-	bool ProcessNode(const struct aiScene* AiScene, const struct aiNode* AiNode, const EntityID GraphNode, struct AssimpScene& Scene);
-	void ProcessMaterials(const struct aiScene* AiScene, struct AssimpScene& Scene);
-	void ProcessMeshes(const struct aiScene* AiScene, struct AssimpScene& Asset);
+	void ProcessTransform(const struct aiNode* AiNode, struct AssimpScene& Scene, class TransformComponent& TransformComp);
+	bool ProcessNode(const struct aiScene* AiScene, const struct aiNode* AiNode, Entity& GraphNode, struct AssimpScene& Scene);
 	void ProcessTextures(const struct aiMaterial* AiMaterial, struct MaterialProperty& Material, const std::filesystem::path& RootPath);
+
+	void ProcessMaterial(const struct aiScene* AiScene, struct AssimpScene& Scene, uint32_t MaterialIndex, class StaticMeshComponent& StaticMeshComp);
+	void ProcessMesh(const struct aiScene* AiScene, struct AssimpScene& Scene, uint32_t MeshIndex, class StaticMeshComponent& StaticMeshComp);
 };

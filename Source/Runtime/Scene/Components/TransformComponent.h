@@ -64,6 +64,18 @@ public:
 		return *this;
 	}
 
+	inline TransformComponent& SetRotation(const Math::Quaternion& Rotation)
+	{
+		m_Transform.SetRotation(Rotation);
+		return *this;
+	}
+
+	inline TransformComponent& SetRotation(const float X, const float Y, const float Z, const float W)
+	{
+		m_Transform.SetRotation(X, Y, Z, W);
+		return *this;
+	}
+
 	inline TransformComponent& SetRotation(const float X, const float Y, const float Z)
 	{
 		m_Transform.SetRotation(X, Y, Z);

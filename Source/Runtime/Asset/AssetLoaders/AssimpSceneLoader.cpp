@@ -5,6 +5,9 @@
 #include "RHI/RHIDevice.h"
 #include "Profile/CpuTimer.h"
 
+#include "Scene/Components/TransformComponent.h"
+#include "Scene/Components/StaticMeshComponent.h"
+
 #include <assimp/version.h>
 #include <assimp/Importer.hpp>
 #include <assimp/ProgressHandler.hpp>
@@ -142,7 +145,7 @@ bool AssimpSceneLoader::Load(Asset& InAsset, const AssetType& Type)
 		if (AiScene->HasMeshes() && AiScene->mRootNode)
 		{
 			Scene.Graph.SetRoot(Scene.Graph.AddEntity(EntityID(), AiScene->mRootNode->mName.C_Str()));
-			if (ProcessNode(AiScene, AiScene->mRootNode, Scene.Graph.GetRoot(), Scene))
+			if (ProcessNode(AiScene, AiScene->mRootNode, *Scene.Graph.GetRoot(), Scene))
 			{
 				ProcessMaterials(AiScene, Scene);
 				ProcessMeshes(AiScene, Scene);
@@ -165,7 +168,7 @@ bool AssimpSceneLoader::Load(Asset& InAsset, const AssetType& Type)
 	return false;
 }
 
-void AssimpSceneLoader::ProcessTransform(const aiNode* AiNode, AssimpScene& Scene)
+void AssimpSceneLoader::ProcessTransform(const aiNode* AiNode, AssimpScene& Scene, TransformComponent& TransformComp)
 {
 	std::stack<const aiMatrix4x4*> RelativeTransforms;
 	auto Node = AiNode;
@@ -187,21 +190,20 @@ void AssimpSceneLoader::ProcessTransform(const aiNode* AiNode, AssimpScene& Scen
 	aiVector3D Scalling;
 	aiQuaternion Rotation;
 	FinalTransform.Decompose(Scalling, Rotation, Translation);
-	Scene.Transforms.emplace_back(
-		Math::Transform(
-			Math::Vector3(Translation.x, Translation.y, Translation.z),
-			Math::Vector3(Scalling.x, Scalling.y, Scalling.z),
-			Math::Quaternion(Rotation.x, Rotation.y, Rotation.z, Rotation.w)));
+
+	TransformComp.SetTranslation(Translation.x, Translation.y, Translation.z)
+		.SetScale(Scalling.x, Scalling.y, Scalling.z)
+		.SetRotation(Rotation.x, Rotation.y, Rotation.z, Rotation.w);
 }
 
-bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode, const EntityID GraphNode, AssimpScene& Scene)
+bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode, Entity& GraphNode, AssimpScene& Scene)
 {
 	if (!AiNode)
 	{
 		return false;
 	}
 
-	auto Node = AiScene->mRootNode == AiNode ? GraphNode : Scene.Graph.AddChild(GraphNode, AiNode->mName.C_Str());
+	auto& NextNode = AiScene->mRootNode == AiNode ? GraphNode : Scene.Graph.AddChild(GraphNode, AiNode->mName.C_Str());
 	for (uint32_t Index = 0u; Index < AiNode->mNumMeshes; ++Index)
 	{
 		const auto MeshIndex = AiNode->mMeshes[Index];
@@ -209,22 +211,22 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 
 		if (AiMesh->HasBones())
 		{
-			LOG_CAT_ERROR(LogAsset, "Not supported yet!");
+			LOG_CAT_ERROR(LogAsset, "Not supported skeletal mesh yet!");
 			assert(false);
 		}
 
-		auto NodeID = Scene.Graph.AddChild(GraphNode, AiMesh->mName.C_Str());
-		auto& DataIndices = Scene.EntityDataIndices.insert(std::make_pair(NodeID, AssimpScene::DataIndex{})).first->second;
-		DataIndices.Mesh = MeshIndex;
-		DataIndices.Material = AiMesh->mMaterialIndex;
-		DataIndices.Transfrom = static_cast<uint32_t>(Scene.Transforms.size());
+		auto& Node = Scene.Graph.AddChild(GraphNode, AiMesh->mName.C_Str());
+		auto TransformComp = Node.AddComponent<TransformComponent>();
+		auto StaticMeshComp = Node.AddComponent<StaticMeshComponent>();
 
-		ProcessTransform(AiNode, Scene);
+		ProcessTransform(AiNode, Scene, *TransformComp);
+		ProcessMesh(AiScene, Scene, MeshIndex, *StaticMeshComp);
+		ProcessMaterial(AiScene, Scene, AiMesh->mMaterialIndex, *StaticMeshComp);
 	}
 
 	for (uint32_t NodeIndex = 0u; NodeIndex < AiNode->mNumChildren; ++NodeIndex)
 	{
-		if (!ProcessNode(AiScene, AiNode->mChildren[NodeIndex], Node, Scene))
+		if (!ProcessNode(AiScene, AiNode->mChildren[NodeIndex], NextNode, Scene))
 		{
 			return false;
 		}
@@ -233,203 +235,191 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 	return true;
 }
 
-void AssimpSceneLoader::ProcessMaterials(const aiScene* AiScene, AssimpScene& Scene)
+void AssimpSceneLoader::ProcessMaterial(const aiScene* AiScene, AssimpScene& Scene, uint32_t MaterialIndex, StaticMeshComponent& StaticMeshComp)
 {
 	if (!AiScene->HasMaterials())
 	{
 		return;
 	}
 
-	Scene.MaterialProperties.resize(AiScene->mNumMaterials);
-	for (uint32_t Index = 0u; Index < AiScene->mNumMaterials; ++Index)
+	if (auto AiMaterial = AiScene->mMaterials[MaterialIndex])
 	{
-		if (auto AiMaterial = AiScene->mMaterials[Index])
+		auto Property = std::make_shared<MaterialProperty>();
+		StaticMeshComp.SetMaterialProperty(Property);
+
+		aiString Name;
+		AiMaterial->Get(AI_MATKEY_NAME, Name);
+
+		aiString AlphaMode;
+		if (AiMaterial->Get(AI_MATKEY_GLTF_ALPHAMODE, AlphaMode) == AI_SUCCESS)
 		{
-			aiString Name;
-			AiMaterial->Get(AI_MATKEY_NAME, Name);
-
-			auto MaterialPath = (Paths::MaterialPath() / Scene.GetStem() / Name.C_Str()).replace_extension(MaterialProperty::GetExtension());
-			auto NeedReload = std::filesystem::exists(MaterialPath);
-			auto& Property = Scene.MaterialProperties.at(Index);
-			Property = MaterialProperty::Load(MaterialPath);
-
-			if (NeedReload)
+			if (AlphaMode == aiString("OPAQUE"))
 			{
-				aiString AlphaMode;
-				if (AiMaterial->Get(AI_MATKEY_GLTF_ALPHAMODE, AlphaMode) == AI_SUCCESS)
-				{
-					if (AlphaMode == aiString("OPAQUE"))
-					{
-						Property->BlendMode = EBlendMode::Opaque;
-					}
-					else if (AlphaMode == aiString("MASK"))
-					{
-						Property->BlendMode = EBlendMode::Masked;
-					}
-					else if (AlphaMode == aiString("BLEND"))
-					{
-						Property->BlendMode = EBlendMode::Translucent;
-					}
-				}
+				Property->BlendMode = EBlendMode::Opaque;
+			}
+			else if (AlphaMode == aiString("MASK"))
+			{
+				Property->BlendMode = EBlendMode::Masked;
+			}
+			else if (AlphaMode == aiString("BLEND"))
+			{
+				Property->BlendMode = EBlendMode::Translucent;
+			}
+		}
 
-				aiShadingMode ShadingMode = aiShadingMode_Unlit;
-				AiMaterial->Get(AI_MATKEY_SHADING_MODEL, ShadingMode);
+		aiShadingMode ShadingMode = aiShadingMode_Unlit;
+		AiMaterial->Get(AI_MATKEY_SHADING_MODEL, ShadingMode);
 
-				Property->Name.assign(Name.C_Str());
+		Property->Name.assign(Name.C_Str());
 
 #define GET_COLOR_FACTOR(Key, Target) { aiColor4D Factor(1.0f, 1.0f, 1.0f, 1.0f); AiMaterial->Get(Key, Factor); Target = Math::Color(Factor.r, Factor.g, Factor.b, Factor.a); }
 #define GET_FACTOR(Key, Target) { ai_real Factor = 1.0f; AiMaterial->Get(Key, Factor); Target = Factor; }
 
-				GET_COLOR_FACTOR(AI_MATKEY_BASE_COLOR, Property->Factors.BaseColor);
-				GET_COLOR_FACTOR(AI_MATKEY_COLOR_DIFFUSE, Property->Factors.DiffuseColor);
-				GET_COLOR_FACTOR(AI_MATKEY_COLOR_SPECULAR, Property->Factors.SpecularColor);
-				GET_COLOR_FACTOR(AI_MATKEY_COLOR_EMISSIVE, Property->Factors.EmissiveColor);
-				GET_COLOR_FACTOR(AI_MATKEY_COLOR_TRANSPARENT, Property->Factors.TransparentColor);
-				GET_COLOR_FACTOR(AI_MATKEY_COLOR_REFLECTIVE, Property->Factors.ReflectiveColor);
+		GET_COLOR_FACTOR(AI_MATKEY_BASE_COLOR, Property->Factors.BaseColor);
+		GET_COLOR_FACTOR(AI_MATKEY_COLOR_DIFFUSE, Property->Factors.DiffuseColor);
+		GET_COLOR_FACTOR(AI_MATKEY_COLOR_SPECULAR, Property->Factors.SpecularColor);
+		GET_COLOR_FACTOR(AI_MATKEY_COLOR_EMISSIVE, Property->Factors.EmissiveColor);
+		GET_COLOR_FACTOR(AI_MATKEY_COLOR_TRANSPARENT, Property->Factors.TransparentColor);
+		GET_COLOR_FACTOR(AI_MATKEY_COLOR_REFLECTIVE, Property->Factors.ReflectiveColor);
 
-				GET_FACTOR(AI_MATKEY_METALLIC_FACTOR, Property->Factors.Metalness);
-				GET_FACTOR(AI_MATKEY_ROUGHNESS_FACTOR, Property->Factors.Roughness);
-				GET_FACTOR(AI_MATKEY_GLOSSINESS_FACTOR, Property->Factors.Glossiness);
-				GET_FACTOR(AI_MATKEY_SPECULAR_FACTOR, Property->Factors.Specular);
-				GET_FACTOR(AI_MATKEY_OPACITY, Property->Factors.Opacity);
-				GET_FACTOR(AI_MATKEY_SHININESS, Property->Factors.Shininess);
+		GET_FACTOR(AI_MATKEY_METALLIC_FACTOR, Property->Factors.Metalness);
+		GET_FACTOR(AI_MATKEY_ROUGHNESS_FACTOR, Property->Factors.Roughness);
+		GET_FACTOR(AI_MATKEY_GLOSSINESS_FACTOR, Property->Factors.Glossiness);
+		GET_FACTOR(AI_MATKEY_SPECULAR_FACTOR, Property->Factors.Specular);
+		GET_FACTOR(AI_MATKEY_OPACITY, Property->Factors.Opacity);
+		GET_FACTOR(AI_MATKEY_SHININESS, Property->Factors.Shininess);
 
-				AiMaterial->Get(AI_MATKEY_GLTF_ALPHACUTOFF, Property->AlphaCutoff);
-				AiMaterial->Get(AI_MATKEY_TWOSIDED, Property->DoubleSided);
+		AiMaterial->Get(AI_MATKEY_GLTF_ALPHACUTOFF, Property->AlphaCutoff);
+		AiMaterial->Get(AI_MATKEY_TWOSIDED, Property->DoubleSided);
 #undef GET_COLOR_FACTOR
 #undef GET_FACTOR
 
-				switch (ShadingMode)
-				{
-				case aiShadingMode_Flat:
-				case aiShadingMode_Gouraud:
-				case aiShadingMode_Phong:
-				case aiShadingMode_Blinn:
-					Property->ShadingMode = EShadingMode::BlinnPhong;
-					break;
-				case aiShadingMode_Toon:
-					Property->ShadingMode = EShadingMode::Toon;
-					break;
-				case aiShadingMode_OrenNayar:
-				case aiShadingMode_Minnaert:
-				case aiShadingMode_CookTorrance:
-				case aiShadingMode_Fresnel:
-				case aiShadingMode_PBR_BRDF:
-					Property->ShadingMode = EShadingMode::StandardPBR;
-					break;
-				case aiShadingMode_NoShading:
-					Property->ShadingMode = EShadingMode::Unlit;
-					break;
-				}
-			}
-
-			ProcessTextures(AiMaterial, *Property, Scene.GetPath().parent_path());
+		switch (ShadingMode)
+		{
+		case aiShadingMode_Flat:
+		case aiShadingMode_Gouraud:
+		case aiShadingMode_Phong:
+		case aiShadingMode_Blinn:
+			Property->ShadingMode = EShadingMode::BlinnPhong;
+			break;
+		case aiShadingMode_Toon:
+			Property->ShadingMode = EShadingMode::Toon;
+			break;
+		case aiShadingMode_OrenNayar:
+		case aiShadingMode_Minnaert:
+		case aiShadingMode_CookTorrance:
+		case aiShadingMode_Fresnel:
+		case aiShadingMode_PBR_BRDF:
+			Property->ShadingMode = EShadingMode::StandardPBR;
+			break;
+		case aiShadingMode_NoShading:
+			Property->ShadingMode = EShadingMode::Unlit;
+			break;
 		}
+
+		ProcessTextures(AiMaterial, *Property, Scene.GetPath().parent_path());
 	}
 }
 
-void AssimpSceneLoader::ProcessMeshes(const aiScene* AiScene, AssimpScene& Scene)
+void AssimpSceneLoader::ProcessMesh(const aiScene* AiScene, AssimpScene& Scene, uint32_t MeshIndex, StaticMeshComponent& StaticMeshComp)
 {
-	for (uint32_t Index = 0u; Index < AiScene->mNumMeshes; ++Index)
+	const auto AiMesh = AiScene->mMeshes[MeshIndex];
+
+	if (!AiMesh)
 	{
-		const auto AiMesh = AiScene->mMeshes[Index];
+		LOG_CAT_ERROR(LogAsset, "Detected invalid mesh!");
+		return;
+	}
+	if (!AiMesh->HasPositions())
+	{
+		LOG_CAT_ERROR(LogAsset, "The mesh \"{}\" has no vertices data!", AiMesh->mName.C_Str());
+		return;
+	}
+	if (!AiMesh->HasNormals())
+	{
+		LOG_CAT_WARNING(LogAsset, "The mesh \"{}\" has no normals!", AiMesh->mName.C_Str());
+		return;
+	}
+	if (!AiMesh->HasFaces())
+	{
+		LOG_CAT_ERROR(LogAsset, "The mesh \"{}\" has no indices data!", AiMesh->mName.C_Str());
+		return;
+	}
+	if (AiMesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
+	{
+		LOG_CAT_ERROR(LogAsset, "The mesh \"{}\" has unsupported primitive type!", AiMesh->mName.C_Str());
+		return;
+	}
 
-		if (!AiMesh)
+	Math::AABB BoundingBox = Math::AABB(
+		Math::Vector3(AiMesh->mAABB.mMin.x, AiMesh->mAABB.mMin.y, AiMesh->mAABB.mMin.z),
+		Math::Vector3(AiMesh->mAABB.mMax.x, AiMesh->mAABB.mMax.y, AiMesh->mAABB.mMax.z));
+
+	MeshData Data(
+		AiMesh->mNumVertices,
+		AiMesh->mNumFaces * 3u,
+		AiMesh->mNumFaces,
+		AiMesh->HasNormals(),
+		AiMesh->HasTangentsAndBitangents(),
+		AiMesh->HasTextureCoords(0u),
+		AiMesh->HasTextureCoords(1u),
+		AiMesh->HasVertexColors(0u),
+		ERHIPrimitiveTopology::TriangleList,
+		BoundingBox,
+		AiMesh->mName.C_Str());
+
+	for (uint32_t FaceIndex = 0u; FaceIndex < AiMesh->mNumFaces; ++FaceIndex)
+	{
+		const auto& Face = AiMesh->mFaces[FaceIndex];
+		assert(Face.mNumIndices == 3u);
+		Data.SetFace(FaceIndex, Face.mIndices[0], Face.mIndices[1], Face.mIndices[2]);
+	}
+
+	for (uint32_t VertexIndex = 0u; VertexIndex < AiMesh->mNumVertices; ++VertexIndex)
+	{
+		const auto& Position = AiMesh->mVertices[VertexIndex];
+		Data.SetPosition(VertexIndex, Math::Vector3(Position.x, Position.y, Position.z));
+
+		if (AiMesh->HasNormals())
 		{
-			LOG_CAT_ERROR(LogAsset, "Detected invalid mesh!");
-			continue;
+			const auto& Normal = AiMesh->mNormals[VertexIndex];
+			Data.SetNormal(VertexIndex, Math::Vector3(Normal.x, Normal.y, Normal.z));
 		}
-		if (!AiMesh->HasPositions())
+		if (AiMesh->HasTangentsAndBitangents())
 		{
-			LOG_CAT_ERROR(LogAsset, "The mesh \"{}\" has no vertices data!", AiMesh->mName.C_Str());
-			continue;
-		}
-		if (!AiMesh->HasNormals())
-		{
-			LOG_CAT_WARNING(LogAsset, "The mesh \"{}\" has no normals!", AiMesh->mName.C_Str());
-			continue;
-		}
-		if (!AiMesh->HasFaces())
-		{
-			LOG_CAT_ERROR(LogAsset, "The mesh \"{}\" has no indices data!", AiMesh->mName.C_Str());
-			continue;
-		}
-		if (AiMesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
-		{
-			LOG_CAT_ERROR(LogAsset, "The mesh \"{}\" has unsupported primitive type!", AiMesh->mName.C_Str());
-			continue;
-		}
+			const auto& Tangent = AiMesh->mTangents[VertexIndex];
+			Data.SetTangent(VertexIndex, Math::Vector3(Tangent.x, Tangent.y, Tangent.z));
 
-		Math::AABB BoundingBox = Math::AABB(
-			Math::Vector3(AiMesh->mAABB.mMin.x, AiMesh->mAABB.mMin.y, AiMesh->mAABB.mMin.z),
-			Math::Vector3(AiMesh->mAABB.mMax.x, AiMesh->mAABB.mMax.y, AiMesh->mAABB.mMax.z));
-
-		MeshData Data(
-			AiMesh->mNumVertices,
-			AiMesh->mNumFaces * 3u,
-			AiMesh->mNumFaces,
-			AiMesh->HasNormals(),
-			AiMesh->HasTangentsAndBitangents(),
-			AiMesh->HasTextureCoords(0u),
-			AiMesh->HasTextureCoords(1u),
-			AiMesh->HasVertexColors(0u),
-			ERHIPrimitiveTopology::TriangleList,
-			BoundingBox,
-			AiMesh->mName.C_Str());
-
-		for (uint32_t FaceIndex = 0u; FaceIndex < AiMesh->mNumFaces; ++FaceIndex)
-		{
-			const auto& Face = AiMesh->mFaces[FaceIndex];
-			assert(Face.mNumIndices == 3u);
-			Data.SetFace(FaceIndex, Face.mIndices[0], Face.mIndices[1], Face.mIndices[2]);
-		}
-
-		for (uint32_t VertexIndex = 0u; VertexIndex < AiMesh->mNumVertices; ++VertexIndex)
-		{
-			const auto& Position = AiMesh->mVertices[VertexIndex];
-			Data.SetPosition(VertexIndex, Math::Vector3(Position.x, Position.y, Position.z));
-
-			if (AiMesh->HasNormals())
-			{
-				const auto& Normal = AiMesh->mNormals[VertexIndex];
-				Data.SetNormal(VertexIndex, Math::Vector3(Normal.x, Normal.y, Normal.z));
-			}
-			if (AiMesh->HasTangentsAndBitangents())
-			{
-				const auto& Tangent = AiMesh->mTangents[VertexIndex];
-				Data.SetTangent(VertexIndex, Math::Vector3(Tangent.x, Tangent.y, Tangent.z));
-
-				const auto& Bitangent = AiMesh->mBitangents[VertexIndex];
-				Data.SetBitangent(VertexIndex, Math::Vector3(Bitangent.x, Bitangent.y, Bitangent.z));
-			}
-
-			if (AiMesh->HasTextureCoords(0u))
-			{
-				const auto& UV = AiMesh->mTextureCoords[0u][VertexIndex];
-				Data.SetUV0(VertexIndex, Math::Vector3(UV.x, UV.y, UV.z));
-			}
-			if (AiMesh->HasTextureCoords(1))
-			{
-				const auto& UV = AiMesh->mTextureCoords[1u][VertexIndex];
-				Data.SetUV0(VertexIndex, Math::Vector3(UV.x, UV.y, UV.z));
-			}
-
-			if (AiMesh->HasVertexColors(0u))
-			{
-				const auto& Color = AiMesh->mColors[0u][VertexIndex];
-				Data.SetColor(VertexIndex, Math::Color(Color.r, Color.g, Color.b, Color.a));
-			}
+			const auto& Bitangent = AiMesh->mBitangents[VertexIndex];
+			Data.SetBitangent(VertexIndex, Math::Vector3(Bitangent.x, Bitangent.y, Bitangent.z));
 		}
 
-		if (AiMesh->HasBones())
+		if (AiMesh->HasTextureCoords(0u))
 		{
-			assert(false);
+			const auto& UV = AiMesh->mTextureCoords[0u][VertexIndex];
+			Data.SetUV0(VertexIndex, Math::Vector3(UV.x, UV.y, UV.z));
 		}
-		else
+		if (AiMesh->HasTextureCoords(1))
 		{
-			auto& Mesh = Scene.StaticMeshes.emplace_back(std::make_shared<StaticMesh>(Data));
-			//Mesh->CreateRHI(MeshDataBlock, );
+			const auto& UV = AiMesh->mTextureCoords[1u][VertexIndex];
+			Data.SetUV0(VertexIndex, Math::Vector3(UV.x, UV.y, UV.z));
 		}
+
+		if (AiMesh->HasVertexColors(0u))
+		{
+			const auto& Color = AiMesh->mColors[0u][VertexIndex];
+			Data.SetColor(VertexIndex, Math::Color(Color.r, Color.g, Color.b, Color.a));
+		}
+	}
+
+	if (AiMesh->HasBones())
+	{
+		assert(false);
+	}
+	else
+	{
+		auto Mesh = std::make_shared<StaticMesh>(Data);
+		StaticMeshComp.SetMesh(Mesh);
 	}
 }
 
@@ -461,13 +451,6 @@ void AssimpSceneLoader::ProcessTextures(const aiMaterial* AiMaterial, MaterialPr
 						CurTexture.reset(new Texture(TexturePath));
 
 						It = Textures.emplace(TexturePath, CurTexture).first;
-
-						//auto AssetLoadCallbacks = std::make_optional<Asset::AssetLoadCallbacks>();
-						//AssetLoadCallbacks.value().PreLoadCallback = [this, &TextureType](Asset& InAsset) {
-						//	Cast<TextureAsset>(InAsset).SetLinear(TextureType != aiTextureType_DIFFUSE && TextureType != aiTextureType_BASE_COLOR);
-						//	};
-
-						//AssetDatabase::Get().GetOrReimportAsset<TextureAsset>(Texture->GetPath(), AssetLoadCallbacks);
 					}
 					else
 					{
