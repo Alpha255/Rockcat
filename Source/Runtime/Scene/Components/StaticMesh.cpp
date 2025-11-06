@@ -116,7 +116,7 @@ void PrimitiveBuffers::CreateRHI(const MeshData& Data, RHIDevice& Device)
 			.SetPermanentStates(ERHIResourceState::VertexBuffer)
 			.SetSize(Data.GetPositionDataSize())
 			.SetInitialData(Data.VerticesData.Data.get() + Data.GetPositionOffset())
-			.SetName(StringUtils::Format("%s-PositionBuffer", Data.GetName()));
+			.SetName(StringUtils::Format("%s-VertexPosition", Data.GetName()));
 		m_VertexBuffers[0u] = Device.CreateBuffer(Desc);
 
 		auto CreateVerteBuffer = [&Data, &Device, &Desc, this](bool ShouldCreate, size_t Size, size_t Offset, size_t Index, std::string&& Name) {
@@ -130,18 +130,18 @@ void PrimitiveBuffers::CreateRHI(const MeshData& Data, RHIDevice& Device)
 		};
 
 		CreateVerteBuffer(Data.HasNormal(), Data.GetNormalDataSize(), Data.GetNormalOffset(), 1u, 
-			StringUtils::Format("%s-NormalBuffer", Data.GetName()));
+			StringUtils::Format("%s-VertexNormal", Data.GetName()));
 
 		CreateVerteBuffer(Data.HasTangent(), Data.GetTangentDataSize(), Data.GetTangentOffset(), 2u,
-			StringUtils::Format("%s-TangentBuffer", Data.GetName()));
+			StringUtils::Format("%s-VertexTangent", Data.GetName()));
 
 		CreateVerteBuffer(Data.HasUV0(), Data.GetUV0DataSize(), Data.GetUV0Offset(), 3u,
-			StringUtils::Format("%s-UV0Buffer", Data.GetName()));
+			StringUtils::Format("%s-VertexUV0", Data.GetName()));
 
 		CreateVerteBuffer(Data.HasUV1(), Data.GetUV1DataSize(), Data.GetUV1Offset(), 4u,
-			StringUtils::Format("%s-UV1Buffer", Data.GetName()));
+			StringUtils::Format("%s-VertexUV1", Data.GetName()));
 
 		CreateVerteBuffer(Data.HasColor(), Data.GetColorDataSize(), Data.GetColorOffset(), 5u,
-			StringUtils::Format("%s-TangentBuffer", Data.GetName()));
+			StringUtils::Format("%s-VertexColor", Data.GetName()));
 	}
 }

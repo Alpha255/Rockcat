@@ -203,8 +203,7 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 	auto SetNodeName = [](Entity& Node) {
 		if (strlen(Node.GetName()) == 0)
 		{
-			std::string Name = StringUtils::Format("node%d", Node.GetID().GetIndex());
-			Node.SetName(Name.c_str());
+			Node.SetName(StringUtils::Format("node%d", Node.GetID().GetIndex()));
 		}
 	};
 
@@ -335,6 +334,8 @@ void AssimpSceneLoader::ProcessMaterial(const aiScene* AiScene, AssimpScene& Sce
 		}
 
 		ProcessTextures(AiMaterial, *Property, Scene.GetPath().parent_path());
+
+		Property->Save(true, MaterialFilePath);
 	}
 }
 
@@ -384,6 +385,11 @@ void AssimpSceneLoader::ProcessMesh(const aiScene* AiScene, AssimpScene& Scene, 
 		ERHIPrimitiveTopology::TriangleList,
 		BoundingBox,
 		AiMesh->mName.C_Str());
+
+	if (strlen(Data.GetName()) == 0)
+	{
+		Data.SetName(StringUtils::Format("mesh%d", MeshIndex));
+	}
 
 	for (uint32_t FaceIndex = 0u; FaceIndex < AiMesh->mNumFaces; ++FaceIndex)
 	{
@@ -446,34 +452,36 @@ void AssimpSceneLoader::ProcessTextures(const aiMaterial* AiMaterial, MaterialPr
 
 	for (uint32_t Index = aiTextureType_DIFFUSE; Index < aiTextureType_TRANSMISSION; ++Index)
 	{
-		auto TextureType = static_cast<aiTextureType>(Index);
-		if (AiMaterial->GetTextureCount(TextureType) == 0u || TextureType == aiTextureType_UNKNOWN)
+		auto AiType = static_cast<aiTextureType>(Index);
+		if (AiMaterial->GetTextureCount(AiType) == 0u || AiType == aiTextureType_UNKNOWN)
 		{
 			continue;
 		}
 
 		aiString URL;
-		if (AI_SUCCESS == AiMaterial->GetTexture(TextureType, 0u, &URL))  /// TODO: How to do if the material has more than one textures for some texture type ???
+		if (AI_SUCCESS != AiMaterial->GetTexture(AiType, 0u, &URL))  /// TODO: How to do if the material has more than one textures for some texture type ???
 		{
-			std::filesystem::path TexturePath = RootPath / URL.C_Str();
-			if (std::filesystem::exists(TexturePath))
-			{
-				auto TextureIndex = GetTextureType(TextureType);
-				if (TextureIndex != MaterialProperty::ETextureType::Num)
-				{
-					auto It = Textures.find(TexturePath);
-					if (It == Textures.end())
-					{
-						auto& CurTexture = Material.Textures[TextureIndex];
-						CurTexture.reset(new Texture(TexturePath));
+			continue;
+		}
 
-						It = Textures.emplace(TexturePath, CurTexture).first;
-					}
-					else
-					{
-						Material.Textures[TextureIndex] = It->second;
-					}
-				}
+		std::filesystem::path Path = RootPath / URL.C_Str();
+		if (!std::filesystem::exists(Path))
+		{
+			continue;
+		}
+		
+		auto Type = GetTextureType(AiType);
+		if (Type != MaterialProperty::ETextureType::Num)
+		{
+			auto It = Textures.find(Path);
+			if (It == Textures.end())
+			{
+				Material.Textures[Type].reset(new Texture(Path));
+				Textures.emplace(Path, Material.Textures[Type]).first;
+			}
+			else
+			{
+				Material.Textures[Type] = It->second;
 			}
 		}
 	}

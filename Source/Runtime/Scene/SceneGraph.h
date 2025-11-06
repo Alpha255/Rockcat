@@ -55,7 +55,11 @@ public:
 	inline Entity& SetSelected(bool Selected) { m_Selected = Selected; return *this; }
 
 	inline const char* GetName() const { return m_Name.c_str(); }
-	inline Entity& SetName(const char* Name) { m_Name = Name; return *this; }
+	template<class T>
+	inline Entity& SetName(T&& Name)
+	{
+		m_Name = std::move(std::string(std::forward<T>(Name)));
+	}
 
 	inline bool IsAlive() const { return m_Alive; }
 

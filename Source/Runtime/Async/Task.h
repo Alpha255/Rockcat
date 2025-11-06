@@ -157,9 +157,10 @@ public:
 	virtual void Dispatch(EThread Thread = EThread::WorkerThread) = 0;
 
 	inline const char* GetName() const { return m_Name.c_str(); }
-	inline void SetName(const char* Name)
+	template<class T>
+	inline void SetName(T&& Name)
 	{
-		m_Name = Name;
+		m_Name = std::move(std::string(std::forward<T>(Name)));
 		tf::Task::name(m_Name);
 	}
 

@@ -78,6 +78,11 @@ public:
 	inline MaterialID GetMaterialID() const { return m_MaterialID; }
 
 	inline const char* GetName() const { return m_Name.c_str(); }
+	template<class T>
+	inline void SetName(T&& Name)
+	{
+		m_Name = std::move(std::string(std::forward<T>(Name)));
+	}
 
 	inline RHIInputLayoutDesc GetInputLayout() const { return GetInputLayout(m_VertexAttributes); }
 

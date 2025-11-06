@@ -24,7 +24,8 @@ public:
 	void SetColor(const Math::Color& Value) { m_Color = Value; }
 
 	const char* GetName() const { return m_Name.c_str(); }
-	void SetName(const char* Name) { m_Name = Name; }
+	template<class T>
+	inline void SetName(T&& Name) { m_Name = std::move(std::string(std::forward<T>(Name))); }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
