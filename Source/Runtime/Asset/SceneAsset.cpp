@@ -57,13 +57,3 @@ public:
 	}
 };
 #endif
-
-void AssimpScene2::OnPostLoad()
-{
-	Asset::OnPostLoad();
-
-	if (m_Scene)
-	{
-		m_Scene->MergeAssimpScenes();
-	}
-}

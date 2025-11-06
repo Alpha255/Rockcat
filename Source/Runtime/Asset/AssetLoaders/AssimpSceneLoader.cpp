@@ -165,7 +165,7 @@ bool AssimpSceneLoader::Load(Asset& InAsset, const AssetType& Type)
 	return false;
 }
 
-void AssimpSceneLoader::ProcessTransform(const aiNode* AiNode, AssimpScene& Scene, TransformComponent& TransformComp)
+void AssimpSceneLoader::ProcessTransform(const aiNode* AiNode, TransformComponent& TransformComp)
 {
 	std::stack<const aiMatrix4x4*> RelativeTransforms;
 	auto Node = AiNode;
@@ -227,7 +227,7 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 		auto TransformComp = Node.AddComponent<TransformComponent>();
 		auto StaticMeshComp = Node.AddComponent<StaticMeshComponent>();
 
-		ProcessTransform(AiNode, Scene, *TransformComp);
+		ProcessTransform(AiNode, *TransformComp);
 		ProcessMesh(AiScene, Scene, MeshIndex, *StaticMeshComp);
 		ProcessMaterial(AiScene, Scene, AiMesh->mMaterialIndex, *StaticMeshComp);
 	}
@@ -256,15 +256,14 @@ void AssimpSceneLoader::ProcessMaterial(const aiScene* AiScene, AssimpScene& Sce
 		AiMaterial->Get(AI_MATKEY_NAME, Name);
 
 		auto MaterialFilePath = (Paths::MaterialPath() / Scene.GetStem() / Name.C_Str()).replace_extension(MaterialProperty::GetExtension());
-		if (std::filesystem::exists(MaterialFilePath))
+		const bool MaterialFileExists = std::filesystem::exists(MaterialFilePath);
+		auto Property = MaterialProperty::Load(MaterialFilePath);
+		StaticMeshComp.SetMaterialProperty(Property);
+
+		if (MaterialFileExists)
 		{
-			auto Property = MaterialProperty::Load(MaterialFilePath);
-			StaticMeshComp.SetMaterialProperty(Property);
 			return;
 		}
-
-		auto Property = std::make_shared<MaterialProperty>();
-		StaticMeshComp.SetMaterialProperty(Property);
 
 		aiString AlphaMode;
 		if (AiMaterial->Get(AI_MATKEY_GLTF_ALPHAMODE, AlphaMode) == AI_SUCCESS)

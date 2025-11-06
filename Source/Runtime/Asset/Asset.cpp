@@ -15,9 +15,3 @@ std::shared_ptr<DataBlock> Asset::LoadData(AssetType::EContentsFormat ContentsFo
 
 	return Block;
 }
-
-void Asset::OnLoadFailed(const std::string& ErrorMessage)
-{
-	SetStatus(EStatus::LoadFailed);
-	LOG_CAT_ERROR(LogAsset, "Failed to load \"{}\": {}", GetPath().string(), ErrorMessage);
-}

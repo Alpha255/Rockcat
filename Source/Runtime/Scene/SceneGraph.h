@@ -59,6 +59,7 @@ public:
 	inline Entity& SetName(T&& Name)
 	{
 		m_Name = std::move(std::string(std::forward<T>(Name)));
+		return *this;
 	}
 
 	inline bool IsAlive() const { return m_Alive; }

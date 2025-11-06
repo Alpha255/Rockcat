@@ -19,7 +19,6 @@ public:
 		if (!s_Asset)
 		{
 			s_Asset = std::make_shared<Type>(std::forward<Args>(InArgs)...);
-			s_Asset->ResetStatusChangeCallbacks();
 			s_Asset->Reload<Type>();
 		}
 
@@ -38,6 +37,8 @@ public:
 	template<class Type = T>
 	void Reload()
 	{
+		ResetStatusChangeCallbacks();
+
 		OnPreLoad();
 
 		std::ifstream FileStream(GetPath());

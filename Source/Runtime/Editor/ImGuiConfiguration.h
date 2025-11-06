@@ -175,7 +175,7 @@ public:
 		);
 	}
 protected:
-	void OnPostLoad() override;
+	void ResetStatusChangeCallbacks() override;
 private:
 	friend class ImGuiEditor;
 
