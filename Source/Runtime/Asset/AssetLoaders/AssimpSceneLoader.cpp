@@ -8,6 +8,8 @@
 #include "Scene/Components/TransformComponent.h"
 #include "Scene/Components/StaticMeshComponent.h"
 
+#pragma warning(push)
+#pragma warning(disable:4819)
 #include <assimp/version.h>
 #include <assimp/Importer.hpp>
 #include <assimp/ProgressHandler.hpp>
@@ -15,6 +17,7 @@
 #include <assimp/GltfMaterial.h>
 #include <assimp/postprocess.h>
 #include <assimp/DefaultLogger.hpp>
+#pragma warning(pop)
 
 class AssimpProgressHandler : public Assimp::ProgressHandler
 {
