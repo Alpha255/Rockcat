@@ -1,8 +1,8 @@
 #include "Services/SpdLogService.h"
 
-void SpdLogService::WinDebugSinkAsync::_sink_it(const spdlog::details::log_msg& Log)
+void SpdLogService::WinDebugSinkAsync::sink_it_(const spdlog::details::log_msg& Log)
 {
-	BaseSink::_sink_it(Log);
+	spdlog::sinks::windebug_sink_mt::sink_it_(Log);
 
 	for (auto Sink : m_Service.GetRedirectors())
 	{
@@ -27,7 +27,7 @@ SpdLogService::SpdLogService()
 
 std::shared_ptr<spdlog::logger> SpdLogService::CreateLogger(const char* Name, ELogLevel Level)
 {
-	auto Logger = spdlog::create_async(Name, std::make_shared<WinDebugSinkAsync>(*this), 1024u);
+	auto Logger = spdlog::create_async<WinDebugSinkAsync>(Name, *this);
 	Logger->set_level(static_cast<spdlog::level::level_enum>(Level));
 	Logger->set_pattern("[%n]: [%^%l%$]: %v");
 	return Logger;

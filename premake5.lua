@@ -13,6 +13,7 @@ workspace "Rockcat"
 	debugdir "$(SolutionDir)Out"
 	--flags { "MultiProcessorCompile", "NoIncrementalLink" }
 	cppdialect "C++20"
+	buildoptions { "/utf-8" }
 	flags { "MultiProcessorCompile", }
 	filter { "configurations:Debug" }
 		symbols "On"

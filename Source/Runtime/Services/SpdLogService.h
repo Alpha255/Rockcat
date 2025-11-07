@@ -2,12 +2,10 @@
 
 #include "Core/StringUtils.h"
 #include "Core/Module.h"
-#pragma warning(push)
-#pragma warning(disable:4702)
+
 #include <spdlog/spdlog.h>
-#include <spdlog/async_logger.h>
-#include <spdlog/sinks/windebug_sink.h>
-#pragma warning(pop)
+#include <spdlog/async.h>
+#include <spdlog/sinks/msvc_sink.h>
 
 using SpdLogMessage = spdlog::details::log_msg;
 
@@ -33,18 +31,18 @@ public:
 
 	SpdLogService();
 
-	template<class... Arg>
-	void Log(const char* Category, ELogLevel Level, const char* Format, Arg&&... Args)
+	template<class... Args>
+	void Log(const char* Category, ELogLevel Level, const char* Format, Args&&... InArgs)
 	{
 		if (!Category)
 		{
-			m_DefaultLogger->log(static_cast<spdlog::level::level_enum>(Level), Format, std::forward<Arg>(Args)...);
+			m_DefaultLogger->log(static_cast<spdlog::level::level_enum>(Level), fmt::runtime(Format), std::forward<Args>(InArgs)...);
 		}
 		else
 		{
 			if (auto Logger = spdlog::get(Category))
 			{
-				Logger->log(static_cast<spdlog::level::level_enum>(Level), Format, std::forward<Arg>(Args)...);
+				Logger->log(static_cast<spdlog::level::level_enum>(Level), fmt::runtime(Format), std::forward<Args>(InArgs)...);
 			}
 		}
 	}
@@ -58,15 +56,13 @@ private:
 	class WinDebugSinkAsync : public spdlog::sinks::windebug_sink_mt
 	{
 	public:
-		using BaseSink = spdlog::sinks::windebug_sink_mt;
-		using BaseSink::BaseSink;
-
 		WinDebugSinkAsync(SpdLogService& Service)
-			: m_Service(Service)
+			: spdlog::sinks::windebug_sink_mt(false)
+			, m_Service(Service)
 		{
 		}
 	protected:
-		void _sink_it(const spdlog::details::log_msg& Log) override;
+		void sink_it_(const spdlog::details::log_msg& Log) override;
 	private:
 		SpdLogService& m_Service;
 	};

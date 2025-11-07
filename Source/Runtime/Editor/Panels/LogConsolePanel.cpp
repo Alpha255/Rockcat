@@ -3,7 +3,7 @@
 
 LogConsolePanel::LogMessage::LogMessage(const spdlog::details::log_msg& Message, int32_t MessageID)
 	: Level(Message.level)
-	, Text(Message.formatted.c_str())
+	, Text(Message.payload.data())
 	, Time(Message.time)
 	, ID(MessageID)
 {
@@ -106,7 +106,7 @@ void LogConsolePanel::DrawHeader()
 
 		if (ImGui::IsItemHovered())
 		{
-			ImGui::SetTooltip("%s", spdlog::level::level_names[Index]);
+			ImGui::SetTooltip("%s", spdlog::level::level_string_views[Index]);
 		}
 
 		ImGui::SameLine();
