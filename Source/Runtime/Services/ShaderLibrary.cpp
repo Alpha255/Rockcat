@@ -11,8 +11,6 @@
 
 void ShaderLibrary::Initialize()
 {
-	REGISTER_LOG_CATEGORY(LogShaderLibrary);
-
 	m_Compilers[ERHIDeviceType::Vulkan] = std::make_unique<DxcShaderCompiler>(true);
 	m_Compilers[ERHIDeviceType::D3D11] = std::make_unique<D3DShaderCompiler>();
 	m_Compilers[ERHIDeviceType::D3D12] = std::make_unique<DxcShaderCompiler>(false);

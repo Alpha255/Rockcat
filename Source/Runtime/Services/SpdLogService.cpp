@@ -4,32 +4,60 @@ void SpdLogService::WinDebugSinkAsync::sink_it_(const spdlog::details::log_msg& 
 {
 	spdlog::sinks::windebug_sink_mt::sink_it_(Log);
 
-	for (auto Sink : m_Service.GetRedirectors())
+	for (auto Rediretor : SpdLogService::Get().GetRedirectors())
 	{
-		if (Sink)
+		if (Rediretor)
 		{
-			Sink->Log(Log);
+			Rediretor->Log(Log);
 		}
 	}
 }
 
 SpdLogService::SpdLogService()
 {
-	m_DefaultLogger = CreateLogger("LogDefault", 
-#if _DEBUG
-		ELogLevel::Trace
-#else
-		ELogLevel::Info
-#endif
-	);
+	m_DefaultLogger = spdlog::create_async<WinDebugSinkAsync>("LogDefault", false);
+	m_DefaultSink = m_DefaultLogger->sinks().front();
+
+	m_DefaultLogger->set_level(static_cast<spdlog::level::level_enum>(GetDefaultLogLevel()));
+	m_DefaultLogger->set_pattern(GetDefaultPattern());
+
 	m_DefaultLogger->info("Use spdlog @{}", SPDLOG_VERSION);
+}
+
+const char* SpdLogService::GetDefaultPattern()
+{
+	return "[%n][%^%l%$]: %v";
+}
+
+const ELogLevel SpdLogService::GetDefaultLogLevel()
+{
+#if _DEBUG
+	return ELogLevel::Trace;
+#else
+	return ELogLevel::Info;
+#endif
 }
 
 std::shared_ptr<spdlog::logger> SpdLogService::CreateLogger(const char* Name, ELogLevel Level)
 {
-	auto Logger = spdlog::create_async<WinDebugSinkAsync>(Name, *this);
-	Logger->set_level(static_cast<spdlog::level::level_enum>(Level));
-	Logger->set_pattern("[%n]: [%^%l%$]: %v");
+	auto LowercaseName = StringUtils::Lowercase(Name);
+	auto Logger = spdlog::get(LowercaseName);
+	if (!Logger)
+	{
+		Logger = std::make_shared<spdlog::logger>(LowercaseName, m_DefaultSink);
+		spdlog::initialize_logger(Logger);
+		Logger->set_pattern(GetDefaultPattern());
+		Logger->set_level(static_cast<spdlog::level::level_enum>(Level));
+	}
+	else
+	{
+		auto TargetLevel = static_cast<spdlog::level::level_enum>(Level);
+		if (Logger->level() != TargetLevel)
+		{
+			Logger->set_level(TargetLevel);
+		}
+	}
+
 	return Logger;
 }
 
@@ -37,13 +65,4 @@ void SpdLogService::RegisterRedirector(LogRedirector* Redirector)
 {
 	// TODO: Thread safe ???
 	m_Redirectors.insert(Redirector);
-}
-
-void SpdLogService::RegisterLogCategory(const char* Category, ELogLevel Level)
-{
-	std::string LoggerName = StringUtils::Lowercase(std::string(Category));
-	if (!spdlog::get(LoggerName))
-	{
-		CreateLogger(Category, Level);
-	}
 }

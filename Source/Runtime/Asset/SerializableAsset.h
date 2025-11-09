@@ -51,7 +51,7 @@ public:
 		}
 		else
 		{
-			LOG_TRACE("Create serializable asset: \"{}\".", GetPath().string());
+			//LOG_TRACE("Create serializable asset: \"{}\".", GetPath().string());
 			Save<Type>(true);
 		}
 
@@ -91,7 +91,7 @@ public:
 			}
 			else
 			{
-				LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath.string());
+				//LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath.string());
 			}
 
 			FileStream.close();

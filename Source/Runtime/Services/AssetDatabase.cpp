@@ -83,8 +83,6 @@ private:
 
 void AssetDatabase::Initialize()
 {
-	REGISTER_LOG_CATEGORY(LogAsset);
-
 	CreateAssetLoaders();
 }
 

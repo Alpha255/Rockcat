@@ -8,6 +8,7 @@
 #include <spdlog/sinks/msvc_sink.h>
 
 using SpdLogMessage = spdlog::details::log_msg;
+using SpdLogger = spdlog::logger;
 
 enum class ELogLevel
 {
@@ -31,63 +32,55 @@ public:
 
 	SpdLogService();
 
-	template<class... Args>
-	void Log(const char* Category, ELogLevel Level, const char* Format, Args&&... InArgs)
-	{
-		if (!Category)
-		{
-			m_DefaultLogger->log(static_cast<spdlog::level::level_enum>(Level), fmt::runtime(Format), std::forward<Args>(InArgs)...);
-		}
-		else
-		{
-			if (auto Logger = spdlog::get(Category))
-			{
-				Logger->log(static_cast<spdlog::level::level_enum>(Level), fmt::runtime(Format), std::forward<Args>(InArgs)...);
-			}
-		}
-	}
-
 	void RegisterRedirector(LogRedirector* Redirector);
 
-	void RegisterLogCategory(const char* Category, ELogLevel Level = ELogLevel::Debug);
+	inline std::shared_ptr<spdlog::logger> GetLogger(const char* Name)
+	{
+		return CreateLogger(Name, GetDefaultLogLevel());
+	}
+
+	inline std::shared_ptr<spdlog::logger> GetDefaultLogger()
+	{
+		return m_DefaultLogger;
+	}
+
+	std::shared_ptr<spdlog::logger> CreateLogger(const char* Name, ELogLevel Level);
 
 	const std::unordered_set<LogRedirector*>& GetRedirectors() const { return m_Redirectors; }
 private:
 	class WinDebugSinkAsync : public spdlog::sinks::windebug_sink_mt
 	{
 	public:
-		WinDebugSinkAsync(SpdLogService& Service)
-			: spdlog::sinks::windebug_sink_mt(false)
-			, m_Service(Service)
-		{
-		}
+		using spdlog::sinks::windebug_sink_mt::windebug_sink_mt;
 	protected:
 		void sink_it_(const spdlog::details::log_msg& Log) override;
-	private:
-		SpdLogService& m_Service;
 	};
 
-	std::shared_ptr<spdlog::logger> CreateLogger(const char* Name, ELogLevel Level);
+	static const char* GetDefaultPattern();
+	static const ELogLevel GetDefaultLogLevel();
 
 	std::shared_ptr<spdlog::logger> m_DefaultLogger;
+	spdlog::sink_ptr m_DefaultSink;
 	std::unordered_set<LogRedirector*> m_Redirectors;
 };
 
-#define REGISTER_LOG_CATEGORY(Category) SpdLogService::Get().RegisterLogCategory(#Category)
+#define SPD_LOG_CATEGORY(Category, Level, Format, ...) \
+	SpdLogService::Get().GetLogger(#Category)->Level(Format, __VA_ARGS__)
 
-#define LOG(Level, Format, ...) SpdLogService::Get().Log(nullptr, ELogLevel::Level, Format, __VA_ARGS__)
-#define LOG_TRACE(Format, ...) SpdLogService::Get().Log(nullptr, ELogLevel::Trace, Format, __VA_ARGS__)
-#define LOG_DEBUG(Format, ...) SpdLogService::Get().Log(nullptr, ELogLevel::Debug, Format, __VA_ARGS__)
-#define LOG_INFO(Format, ...) SpdLogService::Get().Log(nullptr, ELogLevel::Info, Format, __VA_ARGS__)
-#define LOG_WARNING(Format, ...) SpdLogService::Get().Log(nullptr, ELogLevel::Warning, Format, __VA_ARGS__)
-#define LOG_ERROR(Format, ...) SpdLogService::Get().Log(nullptr, ELogLevel::Error, Format, __VA_ARGS__)
-#define LOG_CRITICAL(Format, ...) SpdLogService::Get().Log(nullptr, ELogLevel::Critical, Format, __VA_ARGS__)
+#define SPD_LOG_DEFAULT(Level, Format, ...) \
+	SpdLogService::Get().GetDefaultLogger()->Level(Format, __VA_ARGS__)
 
-#define LOG_CAT(Category, Level, Format, ...) SpdLogService::Get().Log(#Category, ELogLevel::Level, Format, __VA_ARGS__)
-#define LOG_CAT_TRACE(Category, Format, ...) SpdLogService::Get().Log(#Category, ELogLevel::Trace, Format, __VA_ARGS__)
-#define LOG_CAT_DEBUG(Category, Format, ...) SpdLogService::Get().Log(#Category, ELogLevel::Debug, Format, __VA_ARGS__)
-#define LOG_CAT_INFO(Category, Format, ...) SpdLogService::Get().Log(#Category, ELogLevel::Info, Format, __VA_ARGS__)
-#define LOG_CAT_WARNING(Category, Format, ...) SpdLogService::Get().Log(#Category, ELogLevel::Warning, Format, __VA_ARGS__)
-#define LOG_CAT_ERROR(Category, Format, ...) SpdLogService::Get().Log(#Category, ELogLevel::Error, Format, __VA_ARGS__)
-#define LOG_CAT_CRITICAL(Category, Format, ...) SpdLogService::Get().Log(#Category, ELogLevel::Critical, Format, __VA_ARGS__)
+#define LOG_TRACE(Format, ...) SPD_LOG_DEFAULT(trace, Format, __VA_ARGS__)
+#define LOG_DEBUG(Format, ...) SPD_LOG_DEFAULT(debug, Format, __VA_ARGS__)
+#define LOG_INFO(Format, ...) SPD_LOG_DEFAULT(info, Format, __VA_ARGS__)
+#define LOG_WARNING(Format, ...) SPD_LOG_DEFAULT(warn, Format, __VA_ARGS__)
+#define LOG_ERROR(Format, ...) SPD_LOG_DEFAULT(error, Format, __VA_ARGS__)
+#define LOG_CRITICAL(Format, ...) SPD_LOG_DEFAULT(critical, Format, __VA_ARGS__)
+
+#define LOG_CAT_TRACE(Category, Format, ...) SPD_LOG_CATEGORY(Category, trace, Format, __VA_ARGS__)
+#define LOG_CAT_DEBUG(Category, Format, ...) SPD_LOG_CATEGORY(Category, debug, Format, __VA_ARGS__)
+#define LOG_CAT_INFO(Category, Format, ...) SPD_LOG_CATEGORY(Category, info, Format, __VA_ARGS__)
+#define LOG_CAT_WARNING(Category, Format, ...) SPD_LOG_CATEGORY(Category, warn, Format, __VA_ARGS__)
+#define LOG_CAT_ERROR(Category, Format, ...) SPD_LOG_CATEGORY(Category, error, Format, __VA_ARGS__)
+#define LOG_CAT_CRITICAL(Category, Format, ...) SPD_LOG_CATEGORY(Category, critical, Format, __VA_ARGS__)
 

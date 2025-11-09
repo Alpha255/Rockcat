@@ -514,8 +514,6 @@ struct RHIRenderPassDesc2
 	RHIRenderTargetLayout RenderTargetLayout;
 	std::vector<RHISubpassDesc> Subpasses;
 
-	inline uint32_t GetNumSubpass() const { static_cast<uint32_t>(Subpasses.size()); }
-
 	inline RHIRenderPassDesc2& AddColor(
 		ERHIFormat Format,
 		ERHIResourceState InitialStates = ERHIResourceState::Unknown,

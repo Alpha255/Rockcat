@@ -21,8 +21,6 @@
 
 VulkanDevice::VulkanDevice()
 {
-	REGISTER_LOG_CATEGORY(LogVulkanRHI);
-
 #if USE_DYNAMIC_VK_LOADER
 	const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = m_DynamicLoader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
 	assert(vkGetInstanceProcAddr);
