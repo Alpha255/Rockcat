@@ -135,7 +135,7 @@ void ShaderLibrary::Compile(Shader& InShader, ERHIDeviceType DeviceType)
 		if (CachedBinary->GetBlob().IsValid() && CachedBinary->m_ShaderLastWriteTime == InShader.GetLastWriteTime())
 		{
 			InShader.SetBinary(CachedBinary);
-			LOG_CAT_DEBUG(LogShaderLibrary, "Load shader binary from \"{}\".", CachedBinaryPath.string());
+			LOG_DEBUG_CAT(LogShaderLibrary, "Load shader binary from \"{}\".", CachedBinaryPath.string());
 			return;
 		}
 	}
@@ -161,19 +161,19 @@ void ShaderLibrary::Compile(Shader& InShader, ERHIDeviceType DeviceType)
 			if (Blob.IsValid())
 			{
 				InShader.SetBlob(Blob, DeviceType);
-				LOG_CAT_INFO(LogShaderLibrary, "Shader \"{}\" compile success for device \"{}\".", InShader.GetStem(), magic_enum::enum_name(DeviceType).data());
+				LOG_INFO_CAT(LogShaderLibrary, "Shader \"{}\" compile success for device \"{}\".", InShader.GetStem(), magic_enum::enum_name(DeviceType).data());
 			}
 		}
 		else
 		{
-			LOG_CAT_ERROR(LogShaderLibrary, "Unsupported device type \"{}\" for shader \"{}\"", magic_enum::enum_name(DeviceType).data(), InShader.GetStem());
+			LOG_ERROR_CAT(LogShaderLibrary, "Unsupported device type \"{}\" for shader \"{}\"", magic_enum::enum_name(DeviceType).data(), InShader.GetStem());
 		}
 
 		DeregisterCompileTask(Hash);
 	}
 	else
 	{
-		LOG_CAT_DEBUG(LogShaderLibrary, "The shader \"{}\" is already in compiling queue", InShader.GetStem());
+		LOG_DEBUG_CAT(LogShaderLibrary, "The shader \"{}\" is already in compiling queue", InShader.GetStem());
 	}
 }
 

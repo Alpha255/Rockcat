@@ -17,6 +17,8 @@ void TaskFlow::Initialize()
 {
 	TaskFlowTask::InitializeThreadTags();
 
+	LOG_INFO_CAT(LogTaskFlow, "Use taskflow @{}", tf::version());
+
 	m_Executors.resize(static_cast<size_t>(EThread::Num) + 1u);
 
 	auto NumTotalThreads = System::GetHardwareConcurrencyThreadsCount(m_UseHyperThreading);
@@ -52,7 +54,7 @@ void TaskFlow::Initialize()
 				std::stringstream Stream;
 				Stream << std::this_thread::get_id();
 				uint32_t ThreadID = std::stoul(Stream.str());
-				LOG_INFO("Set foreground thread {} high priority", ThreadID);
+				LOG_INFO_CAT(LogTaskFlow, "Set foreground thread {} high priority", ThreadID);
 			});
 		}
 		for (uint32_t Index = 0u; Index < SubFlows.size(); ++Index)
@@ -68,12 +70,11 @@ void TaskFlow::Initialize()
 		m_Executors[static_cast<size_t>(EThread::WorkerThread)].reset(new tf::Executor(m_NumWorkerThreads));
 	}
 
-	LOG_INFO("TaskFlow: Create taskflow executors with {} threads, {} seperate threads, {} worker threads, hyper threading is {}, taskflow @{}",
+	LOG_INFO_CAT(LogTaskFlow, "Create taskflow executors with {} threads, {} seperate threads, {} worker threads, hyper threading is {}",
 		NumTotalThreads,
 		m_NumSeperateThreads,
 		m_NumWorkerThreads,
-		m_UseHyperThreading ? "enabled" : "disabled",
-		tf::version());
+		m_UseHyperThreading ? "enabled" : "disabled");
 }
 
 tf::Executor* TaskFlow::GetExecutor(EThread Thread, Task::EPriority Priority)

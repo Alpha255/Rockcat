@@ -100,7 +100,7 @@ VulkanDevice::VulkanDevice()
 
 	if (DiscreteGpus.size() == 0u && OtherGpus.size() > 0u)
 	{
-		LOG_CAT_WARNING(LogVulkanRHI, "Can't find discrete GPU");
+		LOG_WARNING_CAT(LogVulkanRHI, "Can't find discrete GPU");
 	}
 
 	m_PhysicalDevice = DiscreteGpus.size() > 0u ? *DiscreteGpus[0] : (OtherGpus.size() > 0u ? *OtherGpus[0] : vk::PhysicalDevice{});
@@ -121,7 +121,7 @@ VulkanDevice::VulkanDevice()
 	{
 		LogValidDeviceLayers += StringUtils::Format("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
 	}
-	LOG_CAT_DEBUG(LogVulkanRHI, LogValidDeviceLayers.c_str());
+	LOG_DEBUG_CAT(LogVulkanRHI, LogValidDeviceLayers.c_str());
 
 	for (auto& Layer : WantedLayers)
 	{
@@ -147,7 +147,7 @@ VulkanDevice::VulkanDevice()
 	{
 		LogValidDeviceExtensions += StringUtils::Format("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
 	}
-	LOG_CAT_DEBUG(LogVulkanRHI, LogValidDeviceExtensions.c_str());
+	LOG_DEBUG_CAT(LogVulkanRHI, LogValidDeviceExtensions.c_str());
 
 	for (auto& Ext : WantedExtensions)
 	{
@@ -212,7 +212,7 @@ VulkanDevice::VulkanDevice()
 	VERIFY_VK(m_PhysicalDevice.createDevice(&CreateInfo, nullptr, &m_LogicalDevice));
 
 	auto PhysicalDeviceProperties = m_PhysicalDevice.getProperties();
-	LOG_CAT_INFO(LogVulkanRHI, "Created vulkan device on adapter: \"{}\", DeviceID = {}. DeviceType = {}. VulkanAPI @{}.{}.{}, Driver @{}.{}.{}",
+	LOG_INFO_CAT(LogVulkanRHI, "Created vulkan device on adapter: \"{}\", DeviceID = {}. DeviceType = {}. VulkanAPI @{}.{}.{}, Driver @{}.{}.{}",
 		PhysicalDeviceProperties.deviceName.data(),
 		PhysicalDeviceProperties.deviceID,
 		vk::to_string(PhysicalDeviceProperties.deviceType).c_str(),

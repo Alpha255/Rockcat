@@ -278,7 +278,7 @@ protected:
 	vk::Result TempResult = (Func);                                                                                                                    \
 	if (TempResult != vk::Result::eSuccess)                                                                                                            \
 	{                                                                                                                                                  \
-		LOG_CAT_CRITICAL(LogVulkanRHI, "Failed to invoke VulkanAPI: File: {}, Line: {}, vkResult: {}", __FILE__, __LINE__, vk::to_string(TempResult)); \
+		LOG_CRITICAL_CAT(LogVulkanRHI, "Failed to invoke VulkanAPI: File: {}, Line: {}, vkResult: {}", __FILE__, __LINE__, vk::to_string(TempResult)); \
 		assert(0);                                                                                                                                     \
 	}                                                                                                                                                  \
 }

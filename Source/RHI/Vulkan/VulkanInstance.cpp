@@ -60,20 +60,20 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsMessengerCallback(
 #if 0
 		LOG_INFO("VulkanRHI Validation: {:<3}{:<10}: {}", MessengerCallbackData->messageIdNumber, MessengerCallbackData->pMessageIdName, MessengerCallbackData->pMessage);
 #else
-		LOG_CAT_INFO(LogVulkanRHI, Message.c_str());
+		LOG_INFO_CAT(LogVulkanRHI, Message.c_str());
 #endif
 	}
 	else if (EnumHasAnyFlags(MessageServerityFlagBits, VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT))
 	{
-		LOG_CAT_WARNING(LogVulkanRHI, Message.c_str());
+		LOG_WARNING_CAT(LogVulkanRHI, Message.c_str());
 	}
 	else if (EnumHasAnyFlags(MessageServerityFlagBits, VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT))
 	{
-		LOG_CAT_ERROR(LogVulkanRHI, Message.c_str());
+		LOG_ERROR_CAT(LogVulkanRHI, Message.c_str());
 	}
 	else if (EnumHasAnyFlags(MessageServerityFlagBits, VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT))
 	{
-		LOG_CAT_DEBUG(LogVulkanRHI, Message.c_str());
+		LOG_DEBUG_CAT(LogVulkanRHI, Message.c_str());
 	}
 	else
 	{
@@ -101,15 +101,15 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugReportCallback(
 
 	if (EnumHasAnyFlags(Flags, VK_DEBUG_REPORT_ERROR_BIT_EXT))
 	{
-		LOG_CAT_ERROR(LogVulkanRHI, "{}: {}", LayerPrefix, Message);
+		LOG_ERROR_CAT(LogVulkanRHI, "{}: {}", LayerPrefix, Message);
 	}
 	else if (EnumHasAnyFlags(Flags, VK_DEBUG_REPORT_WARNING_BIT_EXT) || EnumHasAnyFlags(Flags, VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT))
 	{
-		LOG_CAT_WARNING(LogVulkanRHI, "{}: {}", LayerPrefix, Message);
+		LOG_WARNING_CAT(LogVulkanRHI, "{}: {}", LayerPrefix, Message);
 	}
 	else
 	{
-		LOG_CAT_INFO(LogVulkanRHI, "{}: {}", LayerPrefix, Message);
+		LOG_INFO_CAT(LogVulkanRHI, "{}: {}", LayerPrefix, Message);
 	}
 
 	return VK_FALSE;
@@ -130,7 +130,7 @@ VulkanInstance::VulkanInstance(VulkanExtensionSettings& Settings, ERHIDebugLayer
 	{
 		LogValidInstanceLayers += StringUtils::Format("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
 	}
-	LOG_CAT_DEBUG(LogVulkanRHI, LogValidInstanceLayers.c_str());
+	LOG_DEBUG_CAT(LogVulkanRHI, LogValidInstanceLayers.c_str());
 	
 	for (auto& Layer : WantedLayers)
 	{
@@ -160,7 +160,7 @@ VulkanInstance::VulkanInstance(VulkanExtensionSettings& Settings, ERHIDebugLayer
 	{
 		LogValidInstanceExtensions += StringUtils::Format("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
 	}
-	LOG_CAT_DEBUG(LogVulkanRHI, LogValidInstanceExtensions.c_str());
+	LOG_DEBUG_CAT(LogVulkanRHI, LogValidInstanceExtensions.c_str());
 
 	for (auto& Ext : WantedExtensions)
 	{

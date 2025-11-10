@@ -20,7 +20,7 @@ StbTextureLoader::StbTextureLoader()
 			AssetType{"High-Dynamic Range", ".hdr"}
 		})
 {
-	LOG_INFO("Create STB texture loader, stb_image @2.3");
+	LOG_INFO_CAT(LogAsset, "Create stb image loader, use stb_image @2.3");
 }
 
 std::shared_ptr<Asset> StbTextureLoader::CreateAssetImpl(const std::filesystem::path& Path)
@@ -39,7 +39,7 @@ bool StbTextureLoader::Load(Asset& InAsset, const AssetType& Type)
 
 	if (!stbi_info_from_memory(Data, DataSize, &Width, &Height, &OriginalChannels))
 	{
-		LOG_CAT_ERROR(LogAsset, "Couldn't parse image header, image path: {}, fail reason: {}", StbImage.GetPath().string(), stbi_failure_reason());
+		LOG_ERROR_CAT(LogAsset, "Couldn't parse image header, image path: {}, fail reason: {}", StbImage.GetPath().string(), stbi_failure_reason());
 		return false;
 	}
 
@@ -61,7 +61,7 @@ bool StbTextureLoader::Load(Asset& InAsset, const AssetType& Type)
 
 	if (!Bitmap)
 	{
-		LOG_CAT_ERROR(LogAsset, "Failed to load image: {}, fail reason: {}", StbImage.GetPath().string(), stbi_failure_reason());
+		LOG_ERROR_CAT(LogAsset, "Failed to load image: {}, fail reason: {}", StbImage.GetPath().string(), stbi_failure_reason());
 		return false;
 	}
 

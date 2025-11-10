@@ -18,7 +18,7 @@ SpdLogService::SpdLogService()
 	m_DefaultLogger = spdlog::create_async<WinDebugSinkAsync>("LogDefault", false);
 	m_DefaultSink = m_DefaultLogger->sinks().front();
 
-	m_DefaultLogger->set_level(static_cast<spdlog::level::level_enum>(GetDefaultLogLevel()));
+	m_DefaultLogger->set_level(static_cast<spdlog::level::level_enum>(GetDefaultLevel()));
 	m_DefaultLogger->set_pattern(GetDefaultPattern());
 
 	m_DefaultLogger->info("Use spdlog @{}", SPDLOG_VERSION);
@@ -29,7 +29,7 @@ const char* SpdLogService::GetDefaultPattern()
 	return "[%n][%^%l%$]: %v";
 }
 
-const ELogLevel SpdLogService::GetDefaultLogLevel()
+const ELogLevel SpdLogService::GetDefaultLevel()
 {
 #if _DEBUG
 	return ELogLevel::Trace;
@@ -40,11 +40,10 @@ const ELogLevel SpdLogService::GetDefaultLogLevel()
 
 std::shared_ptr<spdlog::logger> SpdLogService::CreateLogger(const char* Name, ELogLevel Level)
 {
-	auto LowercaseName = StringUtils::Lowercase(Name);
-	auto Logger = spdlog::get(LowercaseName);
+	auto Logger = spdlog::get(Name);
 	if (!Logger)
 	{
-		Logger = std::make_shared<spdlog::logger>(LowercaseName, m_DefaultSink);
+		Logger = std::make_shared<spdlog::logger>(Name, m_DefaultSink);
 		spdlog::initialize_logger(Logger);
 		Logger->set_pattern(GetDefaultPattern());
 		Logger->set_level(static_cast<spdlog::level::level_enum>(Level));

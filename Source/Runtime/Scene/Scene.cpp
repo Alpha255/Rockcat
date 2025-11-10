@@ -76,7 +76,7 @@ void Scene::ResetStatusChangeCallbacks()
 				AssimpScenePath = Paths::GltfSampleModelPath() / Path;
 				if (!std::filesystem::exists(AssimpScenePath))
 				{
-					AssimpScenes->emplace_back(nullptr);
+					LOG_WARNING("Assimp asset \"{}\" not exists", Path);
 					continue;
 				}
 			}

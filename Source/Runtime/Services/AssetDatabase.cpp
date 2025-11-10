@@ -97,7 +97,7 @@ std::shared_ptr<Asset> AssetDatabase::LoadAssetImpl(const std::filesystem::path&
 {
 	if (!std::filesystem::exists(Path))
 	{
-		LOG_CAT_ERROR(LogAsset, "Asset \"{}\" do not exists.", Path.string());
+		LOG_ERROR_CAT(LogAsset, "Asset \"{}\" do not exists.", Path.string());
 		return nullptr;
 	}
 
@@ -124,7 +124,7 @@ std::shared_ptr<Asset> AssetDatabase::LoadAssetImpl(const std::filesystem::path&
 
 	if (!LoadTask)
 	{
-		LOG_CAT_ERROR(LogAsset, "The asset type of \"{}\" is not supported!", Path.string());
+		LOG_ERROR_CAT(LogAsset, "The asset type of \"{}\" is not supported!", Path.string());
 		return nullptr;
 	}
 	else
