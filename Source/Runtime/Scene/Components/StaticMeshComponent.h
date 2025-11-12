@@ -2,10 +2,19 @@
 
 #include "Scene/Components/ComponentBase.h"
 
+///  PrimitiveBuffers ???
+class PrimitiveComponent : public ComponentBase
+{
+public:
+	REGISTER_COMPONENT_ID(PrimitiveComponent);
+
+	using ComponentBase::ComponentBase;
+};
+
 class StaticMeshComponent : public ComponentBase
 {
 public:
-	REGISTER_COMPONENT_ID(StaticMeshComponent)
+	REGISTER_COMPONENT_ID(StaticMeshComponent);
 
 	using ComponentBase::ComponentBase;
 
