@@ -18,7 +18,7 @@ public:
 	template<class T>
 	std::shared_ptr<T> AddView()
 	{
-		auto View = std::static_pointer_cast<T>(m_Views.emplace_back(std::make_shared<T>()));
+		auto View = Cast<T>(m_Views.emplace_back(std::make_shared<T>()));
 		auto Cam = m_Cameras.emplace_back(std::make_shared<class Camera>());
 		View->SetCamera(Cam.get());
 		return View;

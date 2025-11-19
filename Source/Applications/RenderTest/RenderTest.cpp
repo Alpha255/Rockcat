@@ -7,8 +7,26 @@
 #include "Asset/GlobalShaders.h"
 #include "Scene/Components/TransformComponent.h"
 
+#include "Asset/ShaderPermutation.h"
+
 void RenderTest::Initialize()
 {
+	class TestPemutation1 : public ShaderDefineInt32<0, 1, 2, 3>
+	{
+
+	};
+
+	class TestPemutation2 : public ShaderDefineBool
+	{
+	};
+
+	class Permutation : public ShaderDefineContainer<TestPemutation1, TestPemutation2>
+	{
+
+	};
+
+	size_t NumVariants = Permutation::Num;
+
 	m_Scene = Scene::Load(Paths::ScenePath() / "RenderTest.json");
 
 	//m_Scene->AddEntity(EntityID::NullIndex, "entity0");
