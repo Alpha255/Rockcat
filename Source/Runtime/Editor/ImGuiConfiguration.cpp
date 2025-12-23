@@ -5,9 +5,9 @@
 
 const std::map<std::string, ImGuiFont>* ImGuiScopedFont::AllFonts = nullptr;
 
-void ImGuiConfiguration::ResetStatusChangeCallbacks()
+void ImGuiConfiguration::SetStatusChangeCallbacks()
 {
-	BaseClass::ResetStatusChangeCallbacks();
+	BaseClass::SetStatusChangeCallbacks();
 
 	SetOnPostLoad([this]() {
 		LoadDefaultFonts();

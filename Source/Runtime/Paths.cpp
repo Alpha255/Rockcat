@@ -83,7 +83,7 @@ const std::filesystem::path& Paths::GltfSampleModelPath()
 	static std::filesystem::path Path;
 	if (Path.empty())
 	{
-		Path = AssetPath() / "glTF-Sample-Assets" / "Models";
+		Path = AssetPath() / "glTF-Sample-Assets/Models";
 	}
 
 	return Path;

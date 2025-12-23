@@ -175,7 +175,7 @@ public:
 		);
 	}
 protected:
-	void ResetStatusChangeCallbacks() override;
+	void SetStatusChangeCallbacks() override;
 private:
 	friend class ImGuiEditor;
 

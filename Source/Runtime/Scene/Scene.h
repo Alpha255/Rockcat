@@ -37,7 +37,7 @@ public:
 		);
 	}
 protected:
-	void ResetStatusChangeCallbacks() override final;
+	void SetStatusChangeCallbacks() override final;
 
 	inline const std::vector<EntityID::IndexType>& GetAddedPrimitives() const { return m_AddedPrimitives; }
 	inline const std::vector<EntityID::IndexType>& GetRemovedPrimitives() const { return m_RemovedPrimitives; }

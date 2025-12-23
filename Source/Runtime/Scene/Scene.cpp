@@ -61,9 +61,9 @@ void Scene::MergeAssimpScenes(std::vector<std::shared_ptr<AssimpScene>>* AssimpS
 	delete AssimpScenes;
 }
 
-void Scene::ResetStatusChangeCallbacks()
+void Scene::SetStatusChangeCallbacks()
 {
-	BaseClass::ResetStatusChangeCallbacks();
+	BaseClass::SetStatusChangeCallbacks();
 
 	std::vector<std::shared_ptr<AssimpScene>>* AssimpScenes = new std::vector<std::shared_ptr<AssimpScene>>();
 

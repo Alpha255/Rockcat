@@ -105,7 +105,9 @@
                 }
             ]
         },
-        "m_AssimpScenes": [],
+        "m_AssimpScenes": [
+            "AnimatedCube/glTF/AnimatedCube.gltf"
+        ],
         "m_Cameras": []
     }
 }

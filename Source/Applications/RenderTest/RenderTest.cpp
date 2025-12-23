@@ -20,7 +20,7 @@ void RenderTest::Initialize()
 	{
 	};
 
-	class Permutation : public ShaderDefineContainer<TestPemutation1, TestPemutation2>
+	class Permutation : public ShaderVariants<TestPemutation1, TestPemutation2>
 	{
 
 	};

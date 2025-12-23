@@ -38,19 +38,48 @@ public:
 };
 
 template<class... T>
-class ShaderDefineContainer
+class ShaderVariants
 {
 public:
-	using Type = ShaderDefineContainer<T...>;
+	using Type = ShaderVariants<T...>;
 	static constexpr size_t Num = 1u;
 };
 
 template<class First, class... Rest>
-class ShaderDefineContainer<First, Rest...>
+class ShaderVariants<First, Rest...>
 {
 public:
-	using Type = ShaderDefineContainer<First, Rest...>;
-	using Next = ShaderDefineContainer<Rest...>;
+	using Type = ShaderVariants<First, Rest...>;
+	using Next = ShaderVariants<Rest...>;
 
 	static constexpr size_t Num = Next::Num * First::Num;
+
+	template<class Variable>
+	void Set(const auto& Value)
+	{
+		if constexpr (std::is_same_v<Variable, First>)
+		{
+			m_Value = Value;
+		}
+		else
+		{
+			m_Next.Set<Variable>(Value);
+		}
+	}
+
+	template<class Variable>
+	const auto& Get() const
+	{
+		if constexpr (std::is_same_v<Variable, First>)
+		{
+			return m_Value;
+		}
+		else
+		{
+			return m_Next.Get<Variable>();
+		}
+	}
+private:
+	typename First::Type m_Value;
+	Next m_Next;
 };

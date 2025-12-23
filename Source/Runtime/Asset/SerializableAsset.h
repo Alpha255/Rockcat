@@ -37,7 +37,7 @@ public:
 	template<class Type = T>
 	void Reload()
 	{
-		ResetStatusChangeCallbacks();
+		SetStatusChangeCallbacks();
 
 		OnPreLoad();
 

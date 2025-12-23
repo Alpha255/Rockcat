@@ -119,7 +119,7 @@ protected:
 	OnStatusChangeCallback OnReload;
 	OnStatusChangeCallback OnLoadFailed;
 
-	virtual void ResetStatusChangeCallbacks()
+	virtual void SetStatusChangeCallbacks()
 	{
 		SetOnPreLoad([this]() {
 			SetStatus(EStatus::Loading);
@@ -175,7 +175,7 @@ protected:
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& Path)
 	{
 		auto Asset = CreateAssetImpl(Path);
-		Asset->ResetStatusChangeCallbacks();
+		Asset->SetStatusChangeCallbacks();
 		return Asset;
 	}
 
