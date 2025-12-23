@@ -30,7 +30,7 @@ void Scene::Tick(float ElapsedSeconds)
 
 void Scene::MergeAssimpScenes(std::vector<std::shared_ptr<AssimpScene>>* AssimpScenes)
 {
-	if (AssimpScenes->size() != m_AssimpScenePaths.size())
+	if (AssimpScenes->size() != m_AssimpScenes.size())
 	{
 		return;
 	}
@@ -68,7 +68,7 @@ void Scene::SetStatusChangeCallbacks()
 	std::vector<std::shared_ptr<AssimpScene>>* AssimpScenes = new std::vector<std::shared_ptr<AssimpScene>>();
 
 	SetOnPostLoad([this, AssimpScenes]() {
-		for (const auto& Path : m_AssimpScenePaths)
+		for (const auto& Path : m_AssimpScenes)
 		{
 			std::filesystem::path AssimpScenePath = Path;
 			if (!std::filesystem::exists(AssimpScenePath))

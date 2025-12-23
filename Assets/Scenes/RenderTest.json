@@ -3,7 +3,7 @@
         "class Serializable<class Scene>": {
             "class Asset": {
                 "class File": {
-                    "m_LastWriteTime": 1761648020
+                    "m_LastWriteTime": 1766486824
                 }
             }
         },
@@ -106,8 +106,9 @@
             ]
         },
         "m_AssimpScenes": [
-            "AnimatedCube/glTF/AnimatedCube.gltf"
+            "AnimatedCube\\glTF\\AnimatedCube.gltf"
         ],
-        "m_Cameras": []
+        "m_Cameras": [],
+        "m_SavedComponents": []
     }
 }
