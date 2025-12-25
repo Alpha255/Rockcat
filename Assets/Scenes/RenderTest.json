@@ -3,7 +3,7 @@
         "class Serializable<class Scene>": {
             "class Asset": {
                 "class File": {
-                    "m_LastWriteTime": 1766486824
+                    "m_LastWriteTime": 1766653204
                 }
             }
         },
@@ -11,102 +11,10 @@
             "m_Root": {
                 "m_Index": 4294967295
             },
-            "m_Entities": [
-                {
-                    "m_ID": {
-                        "m_Index": 0
-                    },
-                    "m_Parent": {
-                        "m_Index": 4294967295
-                    },
-                    "m_Child": {
-                        "m_Index": 4294967295
-                    },
-                    "m_Sibling": {
-                        "m_Index": 4294967295
-                    },
-                    "m_Visible": true,
-                    "m_Selected": false,
-                    "m_Name": "entity0",
-                    "m_Components": [
-                        {
-                            "polymorphic_id": 2147483649,
-                            "polymorphic_name": "TransformComponent",
-                            "ptr_wrapper": {
-                                "id": 2147483649,
-                                "data": {
-                                    "m_Transform": {
-                                        "m_Translation": {
-                                            "x": 1.0,
-                                            "y": 1.0,
-                                            "z": 1.0
-                                        },
-                                        "m_Scalling": {
-                                            "x": 1.0,
-                                            "y": 1.0,
-                                            "z": 1.0
-                                        },
-                                        "m_Rotation": {
-                                            "x": 0.0,
-                                            "y": 0.0,
-                                            "z": 0.0,
-                                            "w": 1.0
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                },
-                {
-                    "m_ID": {
-                        "m_Index": 1
-                    },
-                    "m_Parent": {
-                        "m_Index": 4294967295
-                    },
-                    "m_Child": {
-                        "m_Index": 4294967295
-                    },
-                    "m_Sibling": {
-                        "m_Index": 4294967295
-                    },
-                    "m_Visible": true,
-                    "m_Selected": false,
-                    "m_Name": "entity1",
-                    "m_Components": [
-                        {
-                            "polymorphic_id": 1,
-                            "ptr_wrapper": {
-                                "id": 2147483650,
-                                "data": {
-                                    "m_Transform": {
-                                        "m_Translation": {
-                                            "x": 2.0,
-                                            "y": 2.0,
-                                            "z": 2.0
-                                        },
-                                        "m_Scalling": {
-                                            "x": 1.0,
-                                            "y": 1.0,
-                                            "z": 1.0
-                                        },
-                                        "m_Rotation": {
-                                            "x": 0.0,
-                                            "y": 0.0,
-                                            "z": 0.0,
-                                            "w": 1.0
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                }
-            ]
+            "m_Entities": []
         },
         "m_AssimpScenes": [
-            "AnimatedCube\\glTF\\AnimatedCube.gltf"
+            "BoxTextured\\glTF\\BoxTextured.gltf"
         ],
         "m_Cameras": [],
         "m_SavedComponents": []

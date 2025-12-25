@@ -210,9 +210,6 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 		}
 	};
 
-	auto& NextNode = AiScene->mRootNode == AiNode ? GraphNode : Scene.Graph.AddChild(GraphNode, AiNode->mName.C_Str());
-	SetNodeName(NextNode);
-
 	for (uint32_t Index = 0u; Index < AiNode->mNumMeshes; ++Index)
 	{
 		const auto MeshIndex = AiNode->mMeshes[Index];
@@ -234,6 +231,14 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 		ProcessMesh(AiScene, Scene, MeshIndex, *StaticMeshComp);
 		ProcessMaterial(AiScene, Scene, AiMesh->mMaterialIndex, *StaticMeshComp);
 	}
+
+	if (AiNode->mNumChildren == 0u)
+	{
+		return true;
+	}
+
+	auto& NextNode = Scene.Graph.AddChild(GraphNode, AiNode->mName.C_Str());
+	SetNodeName(NextNode);
 
 	for (uint32_t NodeIndex = 0u; NodeIndex < AiNode->mNumChildren; ++NodeIndex)
 	{

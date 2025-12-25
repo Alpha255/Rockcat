@@ -32,8 +32,8 @@ void RenderTest::Initialize()
 	//m_Scene->AddEntity(EntityID::NullIndex, "entity0");
 	//m_Scene->AddEntity(EntityID::NullIndex, "entity1");
 
-	auto Entity0 = m_Scene->GetEntity("entity0");
-	auto Entity1 = m_Scene->GetEntity("entity1");
+	//auto Entity0 = m_Scene->GetEntity("entity0");
+	//auto Entity1 = m_Scene->GetEntity("entity1");
 
 	//auto Trans0 = Entity0->AddComponent<TransformComponent>();
 	//auto Trans1 = Entity1->AddComponent<TransformComponent>();

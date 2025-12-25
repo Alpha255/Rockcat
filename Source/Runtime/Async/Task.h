@@ -123,13 +123,15 @@ public:
 		: m_Priority(Priority)
 		, m_Name(Name)
 	{
-		tf::Task::name(m_Name); // ?? The node is null
+		// The node is null if it is not yet emplaced in a taskflow
+		//tf::Task::name(m_Name);
 	}
 
 	TaskFlowTask(std::string&& Name, EPriority Priority = EPriority::Normal)
 		: m_Priority(Priority)
 		, m_Name(std::move(Name))
 	{
+		// The node is null if it is not yet emplaced in a taskflow
 		//tf::Task::name(m_Name);
 	}
 
