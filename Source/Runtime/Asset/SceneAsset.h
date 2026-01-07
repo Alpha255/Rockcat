@@ -12,20 +12,7 @@ struct AssimpScene : public Asset
 	using Asset::Asset;
 	friend class Scene;
 
-	struct DataIndex
-	{
-		uint32_t Mesh = ~0u;
-		uint32_t Material = ~0u;
-		uint32_t Transfrom = ~0u;
-	};
-
 	SceneGraph Graph;
-
-	std::vector<std::shared_ptr<StaticMesh>> StaticMeshes;
-	std::vector<std::shared_ptr<MaterialProperty>> MaterialProperties;
-	std::vector<Math::Transform> Transforms;
-
-	std::unordered_map<EntityID, DataIndex> EntityDataIndices;
 };
 
 class AssimpScene2 : public Asset, public SceneGraph

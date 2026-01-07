@@ -15,6 +15,10 @@ public:
 
 	const std::vector<std::shared_ptr<class ISceneView>>& GetViews() const { return m_Views; }
 
+	void AddPrimitive();
+	void RemovePrimitive();
+	void UpdatePrimitiveTransform();
+
 	template<class T>
 	std::shared_ptr<T> AddView()
 	{
@@ -33,7 +37,7 @@ public:
 			CEREAL_NVP(m_AssimpScenes),
 			//CEREAL_NVP(m_Views),
 			CEREAL_NVP(m_Cameras),
-			CEREAL_NVP(m_SavedComponents)
+			CEREAL_NVP(m_Components)
 		);
 	}
 protected:
@@ -61,6 +65,6 @@ private:
 	std::vector<EntityID::IndexType> m_AddedPrimitives;
 	std::vector<EntityID::IndexType> m_RemovedPrimitives;
 
-	std::unordered_map<size_t, std::vector<std::shared_ptr<ComponentBase>>> m_SavedComponents;
+	std::unordered_map<size_t, std::vector<std::shared_ptr<ComponentBase>>> m_Components;
 };
 
