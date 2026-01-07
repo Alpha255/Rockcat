@@ -201,7 +201,8 @@ workspace "Rockcat"
 				"./Submodules/assimp/samples/**",
 				"./Submodules/assimp/contrib/zip/test/**",
 				"./Submodules/assimp/contrib/draco/**",
-				"./Submodules/assimp/contrib/googletest/**"
+				"./Submodules/assimp/contrib/googletest/**",
+				"./Submodules/assimp/fuzz/**"
 			}
 			includedirs { 
 				"$(SolutionDir)Submodules/assimp/build/include",
