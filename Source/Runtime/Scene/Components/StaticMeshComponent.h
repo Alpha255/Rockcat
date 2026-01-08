@@ -1,22 +1,13 @@
 #pragma once
 
-#include "Scene/Components/ComponentBase.h"
+#include "Scene/Components/PrimitiveComponent.h"
 
-///  PrimitiveBuffers ???
-class PrimitiveComponent : public ComponentBase
-{
-public:
-	REGISTER_COMPONENT_ID(PrimitiveComponent);
-
-	using ComponentBase::ComponentBase;
-};
-
-class StaticMeshComponent : public ComponentBase
+class StaticMeshComponent : public PrimitiveComponent
 {
 public:
 	REGISTER_COMPONENT_ID(StaticMeshComponent);
 
-	using ComponentBase::ComponentBase;
+	using PrimitiveComponent::PrimitiveComponent;
 
 	inline void SetMesh(std::shared_ptr<class StaticMesh>& Mesh) { m_StaticMesh = Mesh; }
 	inline const class StaticMesh& GetMesh() const

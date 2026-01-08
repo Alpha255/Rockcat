@@ -15,9 +15,9 @@ public:
 
 	const std::vector<std::shared_ptr<class ISceneView>>& GetViews() const { return m_Views; }
 
-	void AddPrimitive();
-	void RemovePrimitive();
-	void UpdatePrimitiveTransform();
+	void AddPrimitive(const class PrimitiveComponent* PrimitiveComp);
+	void RemovePrimitive(const class PrimitiveComponent* PrimitiveComp);
+	void UpdatePrimitiveTransform(const class PrimitiveComponent* PrimitiveComp);
 
 	template<class T>
 	std::shared_ptr<T> AddView()

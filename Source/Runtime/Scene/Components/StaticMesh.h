@@ -33,19 +33,12 @@ public:
 		bool HasUV1, 
 		bool HasColor, 
 		ERHIIndexFormat IndexFormat, 
-		ERHIPrimitiveTopology PrimitiveTopology,
-		const Math::AABB& BoundingBox,
-		const char* const Name)
+		ERHIPrimitiveTopology PrimitiveTopology)
 		: m_NumVertex(NumVertex)
 		, m_NumIndex(NumIndex)
 		, m_NumPrimitive(NumPrimitive)
 		, m_IndexFormat(IndexFormat)
 		, m_PrimitiveTopology(PrimitiveTopology)
-		, m_BoundingBox(BoundingBox)
-		, m_BoundingSphere(
-			BoundingBox.GetCenter(),
-			std::max<float>(std::max<float>(BoundingBox.GetExtents().x, BoundingBox.GetExtents().y), BoundingBox.GetExtents().z))
-		, m_Name(Name ? Name : "")
 	{
 		EVertexAttributes None = static_cast<EVertexAttributes>(0u);
 
@@ -72,17 +65,7 @@ public:
 	inline ERHIIndexFormat GetIndexFormat() const { return m_IndexFormat; }
 	inline ERHIPrimitiveTopology GetPrimitiveTopology() const { return m_PrimitiveTopology; }
 
-	inline const Math::AABB& GetBoundingBox() const { return m_BoundingBox; }
-	inline const Math::Sphere& GetBoundingSphere() const { return m_BoundingSphere; }
-
 	inline MaterialID GetMaterialID() const { return m_MaterialID; }
-
-	inline const char* GetName() const { return m_Name.c_str(); }
-	template<class T>
-	inline void SetName(T&& Name)
-	{
-		m_Name = std::move(std::string(std::forward<T>(Name)));
-	}
 
 	inline RHIInputLayoutDesc GetInputLayout() const { return GetInputLayout(m_VertexAttributes); }
 
@@ -105,11 +88,6 @@ private:
 	EVertexAttributes m_VertexAttributes = EVertexAttributes::Position;
 	ERHIIndexFormat m_IndexFormat = ERHIIndexFormat::UInt16;
 	ERHIPrimitiveTopology m_PrimitiveTopology = ERHIPrimitiveTopology::TriangleList;
-
-	Math::AABB m_BoundingBox;
-	Math::Sphere m_BoundingSphere;
-
-	std::string m_Name;
 };
 
 struct MeshData : public MeshProperty
@@ -123,9 +101,7 @@ struct MeshData : public MeshProperty
 		bool HasUV0, 
 		bool HasUV1, 
 		bool HasColor, 
-		ERHIPrimitiveTopology PrimitiveTopology,
-		const Math::AABB& BoundingBox, 
-		const char* const Name = nullptr);
+		ERHIPrimitiveTopology PrimitiveTopology);
 
 	MeshData(const MeshData&) = default;
 	MeshData& operator=(const MeshData&) = default;

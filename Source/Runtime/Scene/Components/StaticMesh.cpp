@@ -11,9 +11,7 @@ MeshData::MeshData(
 	bool HasUV0, 
 	bool HasUV1, 
 	bool HasColor, 
-	ERHIPrimitiveTopology PrimitiveTopology,
-	const Math::AABB& BoundingBox, 
-	const char* const Name)
+	ERHIPrimitiveTopology PrimitiveTopology)
 	: MeshProperty(
 		NumVertex, 
 		NumIndex, 
@@ -24,9 +22,7 @@ MeshData::MeshData(
 		HasUV1, 
 		HasColor,
 		NumVertex >= std::numeric_limits<uint16_t>::max() ? ERHIIndexFormat::UInt32 : ERHIIndexFormat::UInt16,
-		PrimitiveTopology, 
-		BoundingBox,
-		Name)
+		PrimitiveTopology)
 {
 	assert(NumVertex && NumIndex && NumPrimitive);
 

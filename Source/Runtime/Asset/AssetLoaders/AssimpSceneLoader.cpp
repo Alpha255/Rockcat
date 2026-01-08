@@ -376,9 +376,15 @@ void AssimpSceneLoader::ProcessMesh(const aiScene* AiScene, AssimpScene& Scene, 
 		return;
 	}
 
-	Math::AABB BoundingBox = Math::AABB(
-		Math::Vector3(AiMesh->mAABB.mMin.x, AiMesh->mAABB.mMin.y, AiMesh->mAABB.mMin.z),
-		Math::Vector3(AiMesh->mAABB.mMax.x, AiMesh->mAABB.mMax.y, AiMesh->mAABB.mMax.z));
+	auto Center = (AiMesh->mAABB.mMax + AiMesh->mAABB.mMin) * 0.5f;
+	auto Extents = (AiMesh->mAABB.mMax - AiMesh->mAABB.mMin) * 0.5f;
+	auto Radius = std::max<ai_real>(std::max<ai_real>(Extents.x, Extents.y), Extents.z);
+
+	BoxSphereBounds Bounds(Math::Vector3(Center.x, Center.y, Center.z), Math::Vector3(Extents.x, Extents.y, Extents.z), Radius);
+	StaticMeshComp.SetBounds(Bounds);
+
+	auto Name = AiMesh->mName.Empty() ? StringUtils::Format("mesh%d", MeshIndex) : AiMesh->mName.C_Str();
+	StaticMeshComp.SetName(std::move(Name));
 
 	MeshData Data(
 		AiMesh->mNumVertices,
@@ -389,14 +395,7 @@ void AssimpSceneLoader::ProcessMesh(const aiScene* AiScene, AssimpScene& Scene, 
 		AiMesh->HasTextureCoords(0u),
 		AiMesh->HasTextureCoords(1u),
 		AiMesh->HasVertexColors(0u),
-		ERHIPrimitiveTopology::TriangleList,
-		BoundingBox,
-		AiMesh->mName.C_Str());
-
-	if (strlen(Data.GetName()) == 0)
-	{
-		Data.SetName(StringUtils::Format("mesh%d", MeshIndex));
-	}
+		ERHIPrimitiveTopology::TriangleList);
 
 	for (uint32_t FaceIndex = 0u; FaceIndex < AiMesh->mNumFaces; ++FaceIndex)
 	{
