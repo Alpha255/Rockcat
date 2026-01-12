@@ -22,7 +22,7 @@ public:
 			cereal::make_nvp("m_Path", Path)
 		);
 		
-		if (Archive::is_loading::value)
+		if constexpr (Archive::is_loading::value)
 		{
 			SetPath(Path);
 		}

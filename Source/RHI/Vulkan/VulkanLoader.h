@@ -323,15 +323,15 @@ class VkHwResource : public VkDeviceResource<VkObject>
 {
 protected:
 	using BaseType = VkDeviceResource<VkObject>;
-public:
-	using NativeType = VkObject::NativeType;
-	using BaseType::BaseType;
 
 	void SetObjectName(const char* Name)
 	{
 		assert(Name);
 		VkBaseDeviceResource::SetObjectName(VkObject::objectType, reinterpret_cast<uint64_t>((NativeType)BaseType::GetNative()), Name);
 	}
+public:
+	using NativeType = VkObject::NativeType;
+	using BaseType::BaseType;
 
 	virtual ~VkHwResource()
 	{ 

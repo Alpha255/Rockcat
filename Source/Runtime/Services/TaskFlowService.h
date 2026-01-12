@@ -91,7 +91,7 @@ public:
 				{
 					Flow.emplace([&Task]() {
 						Task->Execute();
-					}).name(std::string(Task->GetName()));
+					}).name(Task->GetName().Get().data());
 				}
 			}
 

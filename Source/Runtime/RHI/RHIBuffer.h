@@ -14,16 +14,14 @@ struct RHIBufferDesc
 	size_t Size = 0ull;
 	const void* InitialData = nullptr;
 
-	std::string Name;
+	FName Name;
 
 	inline RHIBufferDesc& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; }
 	inline RHIBufferDesc& SetAccessFlags(ERHIDeviceAccessFlags Flags) { AccessFlags = Flags | AccessFlags; return *this; }
 	inline RHIBufferDesc& SetPermanentStates(ERHIResourceState States) { PermanentStates = States; return *this; }
 	inline RHIBufferDesc& SetSize(size_t InSize) { Size = InSize; return *this; }
 	inline RHIBufferDesc& SetInitialData(const void* Data) { InitialData = Data; return *this; }
-
-	template<class T>
-	inline RHIBufferDesc& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
+	inline RHIBufferDesc& SetName(FName&& InName) { Name = std::move(InName); return *this; }
 };
 
 enum class ERHIMapMode
@@ -44,7 +42,7 @@ class RHIBuffer : public RHIResource
 {
 public:
 	RHIBuffer(const RHIBufferDesc& Desc)
-		: RHIResource(Desc.Name.c_str())
+		: RHIResource(Desc.Name)
 		, m_Size(Desc.Size)
 	{
 	}
@@ -81,7 +79,7 @@ struct RHIFrameBufferDesc
 	RHIAttachment DepthStencilAttachment;
 	std::vector<RHIAttachment> ColorAttachments;
 
-	std::string Name;
+	FName Name;
 
 	inline uint32_t GetNumColorAttachments() const { return NumColorAttachments; }
 
@@ -150,8 +148,7 @@ struct RHIFrameBufferDesc
 		return *this;
 	}
 
-	template<class T>
-	inline RHIFrameBufferDesc& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
+	inline RHIFrameBufferDesc& SetName(FName&& InName) { Name = std::move(InName); return *this; }
 private:
 	uint32_t NumColorAttachments = 0u;
 
@@ -176,7 +173,7 @@ class RHIFrameBuffer : public RHIResource
 {
 public:
 	RHIFrameBuffer(const RHIFrameBufferDesc& Desc)
-		: RHIResource(Desc.Name.c_str())
+		: RHIResource(Desc.Name)
 	{
 	}
 

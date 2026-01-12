@@ -15,7 +15,7 @@ VulkanShader::VulkanShader(const VulkanDevice& Device, const RHIShaderDesc& Desc
 
 	VERIFY_VK(GetNativeDevice().createShaderModule(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
-	VkHwResource::SetObjectName(Desc.Name.c_str());
+	VkHwResource::SetObjectName(Desc.Name.Get().data());
 }
 
 VulkanInputLayout::VulkanInputLayout(const RHIInputLayoutDesc& Desc)

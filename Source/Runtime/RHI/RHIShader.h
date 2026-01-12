@@ -100,14 +100,12 @@ struct RHIShaderDesc
 	ERHIShaderLanguage Language = ERHIShaderLanguage::HLSL;
 
 	const class ShaderBinary* Binary = nullptr;
-	std::string Name;
+	FName Name;
 
 	inline RHIShaderDesc& SetStage(ERHIShaderStage InStage) { Stage = InStage; return *this; }
 	inline RHIShaderDesc& SetLanguage(ERHIShaderLanguage InLanguage) { Language = InLanguage; return *this; }
 	inline RHIShaderDesc& SetShaderBinary(const class ShaderBinary* const InBinary) { Binary = InBinary; return *this; }
-
-	template<class T>
-	inline RHIShaderDesc& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
+	inline RHIShaderDesc& SetName(FName&& InName) { Name = std::move(InName); return *this; }
 };
 
 class RHIShader

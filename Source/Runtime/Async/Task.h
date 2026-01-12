@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Definitions.h"
+#include "Core/Name.h"
 
 #pragma warning(push)
 #pragma warning(disable:4456 4244 4127 4267 4324)
@@ -119,15 +120,7 @@ public:
 
 	TaskFlowTask() = default;
 	
-	TaskFlowTask(const std::string& Name, EPriority Priority = EPriority::Normal)
-		: m_Priority(Priority)
-		, m_Name(Name)
-	{
-		// The node is null if it is not yet emplaced in a taskflow
-		//tf::Task::name(m_Name);
-	}
-
-	TaskFlowTask(std::string&& Name, EPriority Priority = EPriority::Normal)
+	TaskFlowTask(FName&& Name, EPriority Priority = EPriority::Normal)
 		: m_Priority(Priority)
 		, m_Name(std::move(Name))
 	{
@@ -158,19 +151,18 @@ public:
 		, m_Name(std::move(Other.m_Name))
 		, m_Event(std::move(Other.m_Event))
 	{
-		tf::Task::name(m_Name);
+		//tf::Task::name(m_Name);
 	}
 
 	~TaskFlowTask() = default;
 
 	virtual void Dispatch(EThread Thread = EThread::WorkerThread) = 0;
 
-	inline const char* GetName() const { return m_Name.c_str(); }
-	template<class T>
-	inline void SetName(T&& Name)
+	inline const FName& GetName() const { return m_Name; }
+	inline void SetName(FName&& Name)
 	{
-		m_Name = std::move(std::string(std::forward<T>(Name)));
-		tf::Task::name(m_Name);
+		m_Name = std::move(Name);
+		tf::Task::name(m_Name.Get().data());
 	}
 
 	inline EPriority GetPriority() const { return m_Priority; }
@@ -214,7 +206,7 @@ protected:
 	bool m_Executing = false;
 	EPriority m_Priority = EPriority::Normal;
 
-	std::string m_Name;
+	FName m_Name;
 
 	TaskEventPtr m_Event;
 };

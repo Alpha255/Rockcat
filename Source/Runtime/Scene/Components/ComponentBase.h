@@ -2,6 +2,7 @@
 
 #include "Core/Singleton.h"
 #include "Core/Cereal.h"
+#include "Core/Name.h"
 
 using ComponentID = uint64_t;
 

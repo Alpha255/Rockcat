@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/Name.h"
 #include "RHI/RHIFormat.h"
 #include <d3d11.h>
 
@@ -193,13 +194,18 @@ public:
 	RHIResource() = default;
 	virtual ~RHIResource() = default;
 
-	RHIResource(const char* DebugName)
-		: m_DebugName(DebugName ? DebugName : "")
+	RHIResource(const FName& DebugName)
+		: m_DebugName(DebugName)
 	{
 	}
 
-	virtual void SetDebugName(const char* DebugName) { m_DebugName = DebugName; }
-	inline const char* GetDebugName() const { return m_DebugName.c_str(); }
+	RHIResource(FName&& DebugName)
+		: m_DebugName(std::move(DebugName))
+	{
+	}
+
+	virtual void SetDebugName(FName&& DebugName) { m_DebugName = std::move(DebugName); }
+	inline const FName& GetDebugName() const { return m_DebugName; }
 private:
-	std::string m_DebugName;
+	FName m_DebugName;
 };

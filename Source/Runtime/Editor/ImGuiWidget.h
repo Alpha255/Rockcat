@@ -1,23 +1,24 @@
 #pragma once
 
 #include "Core/Definitions.h"
+#include "Core/Name.h"
 
 class ImGuiWidget
 {
 public:
-	ImGuiWidget(const char* const Name = nullptr, const ImGuiWidget* Parent = nullptr)
-		: m_Name(Name)
+	ImGuiWidget(FName&& Name, const ImGuiWidget* Parent = nullptr)
+		: m_Name(std::move(Name))
 		, m_Parent(Parent)
 	{
 	}
 
 	virtual ~ImGuiWidget() = default;
 
-	const char* const GetName() const { return m_Name.data(); }
-	void SetName(const char* const Name) { m_Name = Name; }
+	const FName& GetName() const { return m_Name; }
+	void SetName(FName&& Name) { m_Name = std::move(Name); }
 
 	virtual void Draw() = 0;
 private:
 	const ImGuiWidget* m_Parent;
-	std::string_view m_Name;
+	FName m_Name;
 };

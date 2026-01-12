@@ -76,15 +76,15 @@ public:
 		return *this;
 	}
 
-	void SetDebugName(const char* DebugName) override final
+	void SetDebugName(FName&& DebugName) override final
 	{
-		assert(DebugName && m_Native);
+		assert(m_Native);
 #if 0
 		m_Native->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<uint32_t>(std::strlen(DebugName)), DebugName);
 		auto LDebugName = StringUtils::ToWide(DebugName);
 		m_Native->SetName(LDebugName.c_str());
 #endif
-		RHIResource::SetDebugName(DebugName);
+		RHIResource::SetDebugName(std::move(DebugName));
 	}
 
 	FORCEINLINE HwObjectType** Reference() { return &m_Native; }

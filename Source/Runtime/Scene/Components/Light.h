@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Math/Color.h"
+#include "Core/Name.h"
 
 class Light
 {
@@ -14,18 +15,17 @@ public:
 	};
 
 	Light() = default;
-	Light(const char* Name)
+	Light(FName&& Name)
 		: m_Color(Math::Color::White)
-		, m_Name(Name)
+		, m_Name(std::move(Name))
 	{
 	}
 
 	const Math::Color& GetColor() const { return m_Color; }
 	void SetColor(const Math::Color& Value) { m_Color = Value; }
 
-	const char* GetName() const { return m_Name.c_str(); }
-	template<class T>
-	inline void SetName(T&& Name) { m_Name = std::move(std::string(std::forward<T>(Name))); }
+	const FName& GetName() const { return m_Name; }
+	inline void SetName(FName&& Name) { m_Name = std::move(Name); }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -39,7 +39,7 @@ public:
 	virtual ELightType GetType() const = 0;
 protected:
 	Math::Color m_Color;
-	std::string m_Name;
+	FName m_Name;
 };
 
 class DirectionalLight final : public Light

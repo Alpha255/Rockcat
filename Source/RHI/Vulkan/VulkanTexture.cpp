@@ -101,7 +101,7 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureDesc& D
 		}
 	}
 
-	VkHwResource::SetObjectName(Desc.Name.c_str());
+	VkHwResource::SetObjectName(Desc.Name.Get().data());
 }
 
 void VulkanTexture::AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags)

@@ -204,7 +204,7 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 	}
 
 	auto SetNodeName = [](Entity& Node) {
-		if (strlen(Node.GetName()) == 0)
+		if (Node.GetName().Get().empty())
 		{
 			Node.SetName(StringUtils::Format("node%d", Node.GetID().GetIndex()));
 		}

@@ -86,7 +86,7 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferDesc& Desc
 		//}
 	}
 
-	VkHwResource::SetObjectName(Desc.Name.c_str());
+	VkHwResource::SetObjectName(Desc.Name.Get().data());
 }
 
 void VulkanBuffer::AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags)

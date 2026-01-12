@@ -35,20 +35,14 @@ struct RHISubresource
 		}
 	};
 
-	bool operator==(const RHISubresource& Other) const
+	inline bool operator==(const RHISubresource& Other) const
 	{
-		return BaseMipLevel == Other.BaseMipLevel &&
-			NumMips == Other.NumMips &&
-			BaseArrayLayer == Other.BaseArrayLayer &&
-			NumLayers == Other.NumLayers;
+		return BaseMipLevel == Other.BaseMipLevel && NumMips == Other.NumMips && BaseArrayLayer == Other.BaseArrayLayer && NumLayers == Other.NumLayers;
 	}
 
-	bool operator!=(const RHISubresource& Other) const
+	inline bool operator!=(const RHISubresource& Other) const
 	{
-		return BaseMipLevel != Other.BaseMipLevel ||
-			NumMips != Other.NumMips ||
-			BaseArrayLayer != Other.BaseArrayLayer ||
-			NumLayers != Other.NumLayers;
+		return BaseMipLevel != Other.BaseMipLevel || NumMips != Other.NumMips || BaseArrayLayer != Other.BaseArrayLayer || NumLayers != Other.NumLayers;
 	}
 };
 
@@ -75,7 +69,7 @@ struct RHITextureDesc
 
 	DataBlock InitialData;
 
-	std::string Name;
+	FName Name;
 
 	inline RHITextureDesc& SetWidth(uint32_t Value) { Width = Value; return *this; }
 	inline RHITextureDesc& SetHeight(uint32_t Value) { Height = Value; return *this; }
@@ -89,9 +83,7 @@ struct RHITextureDesc
 	inline RHITextureDesc& SetPermanentState(ERHIResourceState States) { PermanentState = States; return *this; }
 	inline RHITextureDesc& SetInitialData(const DataBlock& Data) { InitialData = Data; return *this; }
 	inline RHITextureDesc& SetInitialData(size_t Size, const std::shared_ptr<std::byte>& Data) { InitialData.Size = Size; InitialData.Data = Data; return *this; }
-
-	template<class T>
-	inline RHITextureDesc& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
+	inline RHITextureDesc& SetName(FName&& InName) { Name = std::move(InName); return *this; }
 };
 
 class RHITexture : public RHIResource
@@ -106,7 +98,7 @@ public:
 		, m_Dimension(Desc.Dimension)
 		, m_Format(Desc.Format)
 		, m_State(Desc.PermanentState)
-		, RHIResource(Desc.Name.c_str())
+		, RHIResource(Desc.Name)
 	{
 	}
 
@@ -180,7 +172,7 @@ struct RHISamplerDesc
 	float MinLOD = 0.0f;
 	float MaxLOD = 0.0f;
 
-	std::string Name;
+	FName Name;
 	
 	inline RHISamplerDesc& SetMinMagFilter(ERHIFilter Filter) { MinMagFilter = Filter; return *this; }
 	inline RHISamplerDesc& SetMipmapMode(ERHIFilter Mode) { MipmapMode = Mode; return *this; }
@@ -194,16 +186,14 @@ struct RHISamplerDesc
 	inline RHISamplerDesc& SetMipLODBias(float MipLODBiasValue) { MipLODBias = MipLODBiasValue; return *this; }
 	inline RHISamplerDesc& SetMinLOD(float MinLODValue) { MinLOD = MinLODValue; return *this; }
 	inline RHISamplerDesc& SetMaxLOD(float MaxLODValue) { MaxLOD = MaxLODValue; return *this; }
-
-	template<class T>
-	inline RHISamplerDesc& SetName(T&& InName) { Name = std::move(std::string(std::forward<T>(InName))); return *this; }
+	inline RHISamplerDesc& SetName(FName&& InName) { Name = std::move(InName); return *this; }
 };
 
 class RHISampler : public RHIResource
 {
 public:
 	RHISampler(const RHISamplerDesc& Desc)
-		: RHIResource(Desc.Name.c_str())
+		: RHIResource(Desc.Name)
 	{
 	}
 };

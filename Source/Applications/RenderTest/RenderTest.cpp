@@ -8,6 +8,7 @@
 #include "Scene/Components/TransformComponent.h"
 
 #include "Asset/ShaderPermutation.h"
+#include "Core/Name.h"
 
 void RenderTest::Initialize()
 {
