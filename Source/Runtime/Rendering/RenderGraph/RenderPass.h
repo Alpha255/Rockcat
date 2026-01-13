@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Rendering/RenderGraph/RenderScene.h"
+#include "Rendering/RenderScene.h"
 
 class RenderPass
 {

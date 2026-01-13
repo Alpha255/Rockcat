@@ -1,4 +1,4 @@
-#include "Rendering/RenderGraph/RenderScene.h"
+#include "Rendering/RenderScene.h"
 #include "Scene/Scene.h"
 #include "Scene/SceneVisitor.h"
 #include "Services/TaskFlowService.h"

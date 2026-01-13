@@ -1,7 +1,7 @@
 #include "Applications/RenderTest/RenderTest.h"
 #include "Application/ApplicationManager.h"
 #include "Scene/Scene.h"
-#include "Scene/SceneView.h"
+#include "Rendering/SceneView.h"
 #include "Rendering/RenderGraph/RenderGraph.h"
 
 #include "Asset/GlobalShaders.h"
