@@ -44,8 +44,8 @@ public:
 	TaskEvent(const TaskEvent&) = delete;
 	
 	TaskEvent(TaskEvent&& Other) noexcept
+		: m_Future(std::move(Other.m_Future))
 	{
-		m_Future = std::move(Other.m_Future);
 	}
 
 	TaskEvent& operator=(const TaskEvent&) = delete;
@@ -262,4 +262,59 @@ protected:
 	friend class TaskFlow;
 private:
 	std::vector<std::shared_ptr<tf::Task>> m_Tasks;
+};
+
+class TTask
+{
+public:
+	enum class EPriority : uint8_t
+	{
+		Low,
+		Normal,
+		High,
+		Critical
+	};
+
+	TTask() = default;
+
+	TTask(FName&& Name, EPriority Priority = EPriority::Normal)
+		: m_Priority(Priority)
+		, m_Name(std::move(Name))
+	{
+	}
+
+	TTask(const TTask& Other) = delete;
+
+	TTask& operator=(const TTask& Other) = delete;
+
+	TTask(TTask&& Other) noexcept
+		: m_Launched(Other.m_Launched)
+		, m_Priority(Other.m_Priority)
+		, m_Name(std::move(Other.m_Name))
+		, m_Event(std::move(Other.m_Event))
+	{
+	}
+
+	~TTask() = default;
+
+	void Launch(EThread Thread = EThread::WorkerThread);
+
+	void AddPrerequisite(TTask* Prerequisite)
+	{
+		if (Prerequisite)
+		{
+			m_Prerequisites.insert(Prerequisite);
+		}
+	}
+protected:
+	virtual void Execute() = 0;
+private:
+	bool m_Launched = false;
+	EPriority m_Priority = EPriority::Normal;
+	TaskEventPtr m_Event;
+	FName m_Name;
+
+	std::unordered_set<TTask*> m_Prerequisites;
+
+	tf::Taskflow m_Flow;
 };
