@@ -122,6 +122,25 @@ public:
 		return std::make_shared<TaskEvent>();
 	}
 
+	template<class TaskBody, class PrerequisiteTasks>
+	void Launch(
+		FName&& Name, 
+		TaskBody&& Body, 
+		PrerequisiteTasks&& Prerequisites, 
+		EThread Thread = EThread::WorkerThread, 
+		::Task::EPriority Priority = ::Task::EPriority::Normal)
+	{
+	}
+
+	template<class TaskBody, class PrerequisiteTasks>
+	void Launch(
+		FName&& Name,
+		TaskBody&& Body,
+		EThread Thread = EThread::WorkerThread,
+		::Task::EPriority Priority = ::Task::EPriority::Normal)
+	{
+	}
+
 	inline uint8_t GetNumWorkerThreads() const { return m_NumWorkerThreads; }
 
 	void FrameSync(bool AllowOneFrameLag);
