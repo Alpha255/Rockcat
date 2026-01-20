@@ -17,11 +17,7 @@ private:
 class IConsoleVariable
 {
 public:
-	IConsoleVariable(const char* Name, const char* Description)
-		: m_Name(Name)
-		, m_Description(Description)
-	{
-	}
+	IConsoleVariable(const char* Name, const char* Description);
 
 	inline std::string_view GetName() const { return m_Name; }
 	inline std::string_view GetDescription() const { return m_Description; }

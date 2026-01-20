@@ -1,6 +1,12 @@
 #include "Services/TaskFlowService.h"
 #include "Services/SpdLogService.h"
+#include "Core/ConsoleVariable.h"
 #include "System/System.h"
+
+ConsoleVariable<bool> CVarUseHyperThreading(
+	"tf.use_hyper_threading",
+	"Enable or disable hyper threading for taskflow executors.",
+	true);
 
 TaskFlow::TaskFlow()
 	: m_UseHyperThreading(false)
