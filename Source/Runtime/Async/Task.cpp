@@ -61,24 +61,3 @@ void TaskSet::Dispatch(EThread Thread)
 		m_Event = TaskFlow::Get().DispatchTaskSet(*this, Thread, m_Priority);
 	}
 }
-
-void TTask::Launch(EThread Thread)
-{
-	if (!m_Launched)
-	{
-		m_Launched = true;
-
-		auto Task = m_Flow.emplace([this] {
-			this->Execute();
-		});
-
-		for (auto& Prerequisite : m_Prerequisites)
-		{
-			Task.precede(m_Flow.emplace([Prerequisite] {
-				Prerequisite->Execute();
-			}));
-		}
-
-		//m_Event = TaskFlow::Get().DispatchTaskFlow(m_Flow, Thread, m_Priority);
-	}
-}

@@ -264,7 +264,21 @@ private:
 	std::vector<std::shared_ptr<tf::Task>> m_Tasks;
 };
 
-class TTask
+class TTaskEvent
+{
+public:
+	TTaskEvent(std::future<void>&& Future)
+		: m_Future(std::move(Future))
+	{
+	}
+
+	inline void Wait() { m_Future.wait(); }
+	inline void WaitFor(size_t Milliseconds) { m_Future.wait_for(std::chrono::milliseconds(Milliseconds)); }
+private:
+	std::future<void> m_Future;
+};
+
+class TTask : protected tf::AsyncTask
 {
 public:
 	enum class EPriority : uint8_t
@@ -275,20 +289,30 @@ public:
 		Critical
 	};
 
-	TTask() = default;
+	enum class EState : uint8_t
+	{
+		Ready,
+		Scheduled,
+		Running,
+		Completed,
+		Canceled
+	};
 
-	TTask(FName&& Name, EPriority Priority = EPriority::Normal)
-		: m_Priority(Priority)
+	using tf::AsyncTask::AsyncTask;
+
+	TTask(FName&& Name, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+		: m_Thread(Thread)
+		, m_Priority(Priority)
 		, m_Name(std::move(Name))
 	{
 	}
 
-	TTask(const TTask& Other) = delete;
+	TTask(const TTask&) = delete;
 
-	TTask& operator=(const TTask& Other) = delete;
+	TTask& operator=(const TTask&) = delete;
 
 	TTask(TTask&& Other) noexcept
-		: m_Launched(Other.m_Launched)
+		: m_Thread(Other.m_Thread)
 		, m_Priority(Other.m_Priority)
 		, m_Name(std::move(Other.m_Name))
 		, m_Event(std::move(Other.m_Event))
@@ -297,7 +321,29 @@ public:
 
 	~TTask() = default;
 
-	void Launch(EThread Thread = EThread::WorkerThread);
+	inline bool IsCompleted(std::memory_order MemoryOrder = std::memory_order_seq_cst) const
+	{
+		return m_State.load(MemoryOrder) == EState::Completed;
+	}
+
+	inline bool IsCanceled() const
+	{
+		return m_State.load(std::memory_order_relaxed) == EState::Canceled;
+	}
+
+	inline bool IsRunning() const
+	{
+		return m_State.load(std::memory_order_relaxed) == EState::Running;
+	}
+
+	inline bool IsReady() const
+	{
+		return m_State.load(std::memory_order_relaxed) != EState::Running;
+	}
+
+	inline const FName& GetName() const { return m_Name; }
+
+	void Launch();
 
 	void AddPrerequisite(TTask* Prerequisite)
 	{
@@ -307,14 +353,19 @@ public:
 		}
 	}
 protected:
+	bool TryLaunch();
+	bool TryExecute();
+	bool TryCancel();
+
 	virtual void Execute() = 0;
 private:
-	bool m_Launched = false;
+	EThread m_Thread = EThread::WorkerThread;
 	EPriority m_Priority = EPriority::Normal;
+
+	std::atomic<EState> m_State = EState::Ready;
+
 	TaskEventPtr m_Event;
 	FName m_Name;
 
 	std::unordered_set<TTask*> m_Prerequisites;
-
-	tf::Taskflow m_Flow;
 };
