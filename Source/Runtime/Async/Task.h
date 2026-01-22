@@ -349,13 +349,28 @@ public:
 	{
 		if (Prerequisite)
 		{
+			std::lock_guard<std::mutex> Locker(m_Lock);
 			m_Prerequisites.insert(Prerequisite);
+		}
+	}
+
+	void AddSubsequents(TTask* Subsequent)
+	{
+		if (Subsequent)
+		{
+			std::lock_guard<std::mutex> Locker(m_Lock);
+			m_Subsequents.insert(Subsequent);
 		}
 	}
 protected:
 	bool TryLaunch();
 	bool TryExecute();
 	bool TryCancel();
+
+	inline void SetState(EState State, std::memory_order MemoryOrder = std::memory_order_relaxed)
+	{
+		m_State.store(State, MemoryOrder);
+	}
 
 	virtual void Execute() = 0;
 private:
@@ -368,4 +383,7 @@ private:
 	FName m_Name;
 
 	std::unordered_set<TTask*> m_Prerequisites;
+	std::unordered_set<TTask*> m_Subsequents;
+
+	std::mutex m_Lock;
 };
