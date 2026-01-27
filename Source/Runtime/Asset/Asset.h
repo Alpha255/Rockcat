@@ -150,6 +150,8 @@ protected:
 struct AssetLoadRequest
 {
 	std::string_view Path;
+	bool ForceReload = false;
+	bool Async = true;
 };
 
 class AssetLoader

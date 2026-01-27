@@ -30,6 +30,8 @@ private:
 
 	std::shared_ptr<Asset> LoadAssetImpl(const std::filesystem::path& Path, bool ForceReload, bool Async);
 
+	std::shared_ptr<Asset> ProcessAssetLoadRequest(const AssetLoadRequest& Request);
+
 	std::unordered_map<std::filesystem::path, std::shared_ptr<class AssetLoadTask>> m_AssetLoadTasks;
 	std::unordered_map<std::filesystem::path, AssetLoadRequest> m_AssetLoadRequests;
 	std::vector<std::unique_ptr<AssetLoader>> m_AssetLoaders;
