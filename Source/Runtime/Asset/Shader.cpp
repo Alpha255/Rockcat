@@ -16,7 +16,7 @@ std::filesystem::path ShaderBinary::GetPath(const Shader& InShader, ERHIDeviceTy
 	const std::filesystem::path RelativePath = std::filesystem::relative(InShader.GetPath(), Paths::ShaderPath()).parent_path();
 	return Paths::ShaderBinaryPath() / 
 		RelativePath / 
-		StringUtils::Format("%s_%s_%llu.json", 
+		String::Format("%s_%s_%llu.json", 
 			InShader.GetStem().c_str(), 
 			RHIDevice::GetName(DeviceType), 
 			std::hash<Shader>()(InShader));

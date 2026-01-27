@@ -23,7 +23,7 @@ private:
 	inline static std::filesystem::path GetUnifyAssetPath(const std::filesystem::path& Path, bool Lowercase = false)
 	{
 		auto UnifyPath = std::filesystem::path(std::move(std::filesystem::path(Path).make_preferred()));
-		return Lowercase ? std::filesystem::path(StringUtils::Lowercase(UnifyPath.string())) : UnifyPath;
+		return Lowercase ? std::filesystem::path(String::Lowercase(UnifyPath.string())) : UnifyPath;
 	}
 
 	void CreateAssetLoaders();

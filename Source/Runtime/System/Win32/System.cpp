@@ -21,7 +21,7 @@ std::string System::GetErrorMessage(uint32_t ErrorCode)
 		UINT16_MAX,
 		nullptr) != 0);
 
-	return StringUtils::ToMultiByte(s_Buffer);
+	return String::ToMultiByte(s_Buffer);
 }
 
 std::filesystem::path System::GetApplicationDirectory()
@@ -78,7 +78,7 @@ void System::ExecuteProcess(const char* Commandline, bool WaitDone)
 	static wchar_t s_Buffer[UINT16_MAX];
 	memset(s_Buffer, 0, sizeof(s_Buffer));
 
-	std::wstring wComandline = StringUtils::ToWide(Commandline);
+	std::wstring wComandline = String::ToWide(Commandline);
 
 	::PROCESS_INFORMATION ProcessInfo;
 	if (::CreateProcessW(
@@ -102,7 +102,7 @@ void System::ExecuteProcess(const char* Commandline, bool WaitDone)
 				::DWORD Bytes = 0u;
 				VERIFY_WITH_SYSTEM_MESSAGE(::ReadFile(Read, s_Buffer, sizeof(s_Buffer), &Bytes, nullptr) != 0);
 				//buffer[bytes] = '\0';
-				std::string ErrorMessage = StringUtils::ToMultiByte(s_Buffer);
+				std::string ErrorMessage = String::ToMultiByte(s_Buffer);
 				LOG_ERROR("Failed to executing process \"%s\"", ErrorMessage);
 			}
 			else
@@ -130,10 +130,10 @@ std::string System::GetEnvironmentVariables(const char* Variable)
 	static wchar_t s_Buffer[UINT16_MAX];
 	memset(s_Buffer, 0, sizeof(s_Buffer));
 
-	std::wstring wVariable = StringUtils::ToWide(Variable);
+	std::wstring wVariable = String::ToWide(Variable);
 
 	VERIFY_WITH_SYSTEM_MESSAGE(::GetEnvironmentVariableW(wVariable.c_str(), s_Buffer, sizeof(s_Buffer)) != 0);
-	return StringUtils::ToMultiByte(s_Buffer);
+	return String::ToMultiByte(s_Buffer);
 }
 
 void* System::GetApplicationInstance()

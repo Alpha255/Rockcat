@@ -5,7 +5,7 @@ ImGuiPanel::ImGuiPanel(const char* Title, const char* Icon, const ImGuiWidget* P
 	: ImGuiWidget(Title, Parent)
 	, m_WindowFlags(WindowsFlags | ImGuiWindowFlags_NoCollapse)
 	, m_Title(Title)
-	, m_TitleWithIcon(StringUtils::Format("%s%s%s###%s", Icon ? Icon : "", Icon ? " " : "", Title, StringUtils::Lowercase(Title).c_str()))
+	, m_TitleWithIcon(String::Format("%s%s%s###%s", Icon ? Icon : "", Icon ? " " : "", Title, String::Lowercase(Title).c_str()))
 {
 }
 

@@ -262,7 +262,7 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 			.SetFormat(RHI::GetRHIFormat(m_ColorFormat))
 			.SetSampleCount(ERHISampleCount::Sample_1_Bit)
 			.SetUsages(ERHIBufferUsageFlags::None)
-			.SetName(StringUtils::Format("SwapchainImage-%d", Index));
+			.SetName(String::Format("SwapchainImage-%d", Index));
 		m_BackBuffers[Index] = std::make_shared<VulkanTexture>(GetDevice(), Desc, Images[Index]);
 	}
 

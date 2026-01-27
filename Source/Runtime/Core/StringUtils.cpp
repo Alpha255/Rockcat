@@ -1,7 +1,7 @@
 #include "Core/StringUtils.h"
 #include <stdarg.h>
 
-namespace StringUtils
+namespace String
 {
 	void ToLower(std::string& Str)
 	{

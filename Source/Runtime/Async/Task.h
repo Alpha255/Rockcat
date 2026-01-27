@@ -289,13 +289,6 @@ public:
 		Critical
 	};
 
-	enum class EState : uint8_t
-	{
-		Ready,
-		Running,
-		Completed
-	};
-
 	TTask(FName&& Name, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
 		: m_Thread(Thread)
 		, m_Priority(Priority)
@@ -319,30 +312,21 @@ public:
 		: m_Thread(Other.m_Thread)
 		, m_Priority(Other.m_Priority)
 		, m_Name(std::move(Other.m_Name))
-		, m_Event(std::move(Other.m_Event))
 	{
 	}
 
 	~TTask() = default;
 
-	inline bool IsCompleted(std::memory_order MemoryOrder = std::memory_order_seq_cst) const
-	{
-		return m_State.load(MemoryOrder) == EState::Completed;
-	}
+	inline bool IsCompleted() const { return m_TFTask ? m_TFTask->is_done() : false; }
 
-	inline bool IsRunning() const
-	{
-		return m_State.load(std::memory_order_relaxed) == EState::Running;
-	}
-
-	inline bool IsReady() const
-	{
-		return m_State.load(std::memory_order_relaxed) == EState::Ready;
-	}
+	inline bool IsRunning() const { return m_TFTask != nullptr; }
 
 	inline const FName& GetName() const { return m_Name; }
 
 	void Launch();
+protected:
+	bool TryLaunch();
+	bool TryCancel();
 
 	bool AddPrerequisite(TTask& Prerequisite)
 	{
@@ -362,23 +346,12 @@ public:
 		std::lock_guard<std::mutex> Locker(m_Lock);
 		m_Subsequents.insert(&Subsequent);
 	}
-protected:
-	inline void SetState(EState State, std::memory_order MemoryOrder = std::memory_order_relaxed)
-	{
-		m_State.store(State, MemoryOrder);
-	}
-
-	bool TryLaunch();
-	bool TryCancel();
 
 	virtual void Execute() = 0;
 private:
 	EThread m_Thread = EThread::WorkerThread;
 	EPriority m_Priority = EPriority::Normal;
 
-	std::atomic<EState> m_State = EState::Ready;
-
-	TaskEventPtr m_Event;
 	FName m_Name;
 
 	std::unordered_set<TTask*> m_Prerequisites;
@@ -387,4 +360,6 @@ private:
 	std::mutex m_Lock;
 
 	std::function<void()> m_TaskBody;
+
+	std::shared_ptr<tf::AsyncTask> m_TFTask;
 };

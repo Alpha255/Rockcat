@@ -206,7 +206,7 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 	auto SetNodeName = [](Entity& Node) {
 		if (Node.GetName().Get().empty())
 		{
-			Node.SetName(StringUtils::Format("node%d", Node.GetID().GetIndex()));
+			Node.SetName(String::Format("node%d", Node.GetID().GetIndex()));
 		}
 	};
 
@@ -383,7 +383,7 @@ void AssimpSceneLoader::ProcessMesh(const aiScene* AiScene, AssimpScene& Scene, 
 	BoxSphereBounds Bounds(Math::Vector3(Center.x, Center.y, Center.z), Math::Vector3(Extents.x, Extents.y, Extents.z), Radius);
 	StaticMeshComp.SetBounds(Bounds);
 
-	auto Name = AiMesh->mName.Empty() ? StringUtils::Format("mesh%d", MeshIndex) : AiMesh->mName.C_Str();
+	auto Name = AiMesh->mName.Empty() ? String::Format("mesh%d", MeshIndex) : AiMesh->mName.C_Str();
 	StaticMeshComp.SetName(std::move(Name));
 
 	MeshData Data(

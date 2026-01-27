@@ -31,7 +31,7 @@ Window::Window(const WindowSettings& Settings)
 	::HWND Handle = ::CreateWindowExW(
 		0,
 		WINDOW_CLASS_NAME,
-		StringUtils::ToWide(Settings.Title).c_str(),
+		String::ToWide(Settings.Title).c_str(),
 		WS_OVERLAPPEDWINDOW ^ ExtraWindowStyle,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,

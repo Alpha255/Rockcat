@@ -81,7 +81,7 @@ public:
 		assert(m_Native);
 #if 0
 		m_Native->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<uint32_t>(std::strlen(DebugName)), DebugName);
-		auto LDebugName = StringUtils::ToWide(DebugName);
+		auto LDebugName = String::ToWide(DebugName);
 		m_Native->SetName(LDebugName.c_str());
 #endif
 		RHIResource::SetDebugName(std::move(DebugName));

@@ -119,7 +119,7 @@ VulkanDevice::VulkanDevice()
 
 	for (const auto& LayerProperty : LayerProperties)
 	{
-		LogValidDeviceLayers += StringUtils::Format("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
+		LogValidDeviceLayers += String::Format("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
 	}
 	LOG_DEBUG_CAT(LogVulkanRHI, LogValidDeviceLayers.c_str());
 
@@ -145,7 +145,7 @@ VulkanDevice::VulkanDevice()
 
 	for (const auto& ExtensionProperty : ExtensionProperties)
 	{
-		LogValidDeviceExtensions += StringUtils::Format("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
+		LogValidDeviceExtensions += String::Format("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
 	}
 	LOG_DEBUG_CAT(LogVulkanRHI, LogValidDeviceExtensions.c_str());
 

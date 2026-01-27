@@ -152,7 +152,7 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	case WM_CHAR:
 	{
 		const wchar_t wCharacter = static_cast<wchar_t>(wParam);
-		const auto Character = StringUtils::ToMultiByte(&wCharacter);
+		const auto Character = String::ToMultiByte(&wCharacter);
 		DispatchKeyCharMessage(Character[0]);
 		break;
 	}

@@ -22,10 +22,10 @@ public:
 	{
 		if (Format == EFormat::DigitsWithHyphens)
 		{
-			return StringUtils::Format("%08X-%04X-%04X-%04X-%04X%08X", m_A, m_B >> 16, m_B & 0xFFFF, m_C >> 16, m_C & 0xFFFF, m_D);
+			return String::Format("%08X-%04X-%04X-%04X-%04X%08X", m_A, m_B >> 16, m_B & 0xFFFF, m_C >> 16, m_C & 0xFFFF, m_D);
 		}
 
-		return StringUtils::Format("%08X%08X%08X%08X", m_A, m_B, m_C, m_D);
+		return String::Format("%08X%08X%08X%08X", m_A, m_B, m_C, m_D);
 	}
 
 	static Guid FromString(std::string_view Str)
@@ -63,10 +63,10 @@ public:
 		}
 
 		ret = Guid(
-			StringUtils::ToHex(Normalized.substr(0u, 8u).c_str()),
-			StringUtils::ToHex(Normalized.substr(8u, 8u).c_str()),
-			StringUtils::ToHex(Normalized.substr(16u, 8u).c_str()),
-			StringUtils::ToHex(Normalized.substr(24u, 8u).c_str()));
+			String::ToHex(Normalized.substr(0u, 8u).c_str()),
+			String::ToHex(Normalized.substr(8u, 8u).c_str()),
+			String::ToHex(Normalized.substr(16u, 8u).c_str()),
+			String::ToHex(Normalized.substr(24u, 8u).c_str()));
 
 		return ret;
 	}

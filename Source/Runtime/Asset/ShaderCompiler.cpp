@@ -41,8 +41,8 @@ ShaderBlob DxcShaderCompiler::Compile(
 	uint32_t Index = 0u;
 	for (const auto& [Name, Value] : Definitions.GetDefines())
 	{
-		LocalShaderDefinitions[Index].Name = std::move(StringUtils::ToWide(Name.c_str()));
-		LocalShaderDefinitions[Index].Value = std::move(StringUtils::ToWide(Value.c_str()));
+		LocalShaderDefinitions[Index].Name = std::move(String::ToWide(Name.c_str()));
+		LocalShaderDefinitions[Index].Value = std::move(String::ToWide(Value.c_str()));
 		++Index;
 	}
 
@@ -60,12 +60,12 @@ ShaderBlob DxcShaderCompiler::Compile(
 		DxcDefines[Index].Value = L"1";
 	}
 
-	auto WSourceName = SourceName ? StringUtils::ToWide(SourceName).c_str() : std::wstring();
-	auto WEntryPoint = StringUtils::ToWide(EntryPoint);
-	auto WProfile = StringUtils::ToWide(GetProfile(ShaderStage, true));
+	auto WSourceName = SourceName ? String::ToWide(SourceName).c_str() : std::wstring();
+	auto WEntryPoint = String::ToWide(EntryPoint);
+	auto WProfile = String::ToWide(GetProfile(ShaderStage, true));
 
 	std::vector<const wchar_t*> Args;
-	//auto IncludeDirectoryArg = StringUtils::ToWide(StringUtils::Format("-I %s", ASSET_PATH_SHADERS));
+	//auto IncludeDirectoryArg = String::ToWide(String::Format("-I %s", ASSET_PATH_SHADERS));
 	//Args.push_back(IncludeDirectoryArg.c_str());
 	if (m_GenSpirv)
 	{

@@ -50,7 +50,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsMessengerCallback(
 	(void)(UserData);
 	(void)(MessageTypeFlags);
 
-	std::string Message = StringUtils::Format("[Validation]: [%3d][%10s]: %s",
+	std::string Message = String::Format("[Validation]: [%3d][%10s]: %s",
 		MessengerCallbackData->messageIdNumber,
 		MessengerCallbackData->pMessageIdName,
 		MessengerCallbackData->pMessage);
@@ -128,7 +128,7 @@ VulkanInstance::VulkanInstance(VulkanExtensionSettings& Settings, ERHIDebugLayer
 
 	for (const auto& LayerProperty : LayerProperties)
 	{
-		LogValidInstanceLayers += StringUtils::Format("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
+		LogValidInstanceLayers += String::Format("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
 	}
 	LOG_DEBUG_CAT(LogVulkanRHI, LogValidInstanceLayers.c_str());
 	
@@ -158,7 +158,7 @@ VulkanInstance::VulkanInstance(VulkanExtensionSettings& Settings, ERHIDebugLayer
 
 	for (const auto& ExtensionProperty : ExtensionProperties)
 	{
-		LogValidInstanceExtensions += StringUtils::Format("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
+		LogValidInstanceExtensions += String::Format("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
 	}
 	LOG_DEBUG_CAT(LogVulkanRHI, LogValidInstanceExtensions.c_str());
 

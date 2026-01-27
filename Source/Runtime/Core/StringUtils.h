@@ -2,7 +2,7 @@
 
 #include "Core/Definitions.h"
 
-namespace StringUtils
+namespace String
 {
 	void ToLower(std::string& Str);
 	void ToUpper(std::string& Str);

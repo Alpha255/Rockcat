@@ -45,7 +45,7 @@ bool IConsoleVariable::SetFromString(std::string_view Command)
 	auto Pos = Command.find(Name);
 	if (Pos != std::string_view::npos)
 	{
-		auto Value = StringUtils::Lowercase(std::string(Command.substr(Name.length() + 1u)));
+		auto Value = String::Lowercase(std::string(Command.substr(Name.length() + 1u)));
 
 		if (IsBool())
 		{

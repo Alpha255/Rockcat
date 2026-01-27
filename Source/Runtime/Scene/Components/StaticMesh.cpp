@@ -100,7 +100,7 @@ void PrimitiveBuffers::CreateRHI(const MeshData& Data, RHIDevice& Device)
 			.SetPermanentStates(ERHIResourceState::IndexBuffer)
 			.SetSize(Data.GetIndexDataSize())
 			.SetInitialData(Data.IndicesData.Data.get());
-			//.SetName(StringUtils::Format("%s-IndexBuffer", Data.GetName()));
+			//.SetName(String::Format("%s-IndexBuffer", Data.GetName()));
 		m_IndexBuffer = Device.CreateBuffer(Desc);
 	}
 
@@ -112,7 +112,7 @@ void PrimitiveBuffers::CreateRHI(const MeshData& Data, RHIDevice& Device)
 			.SetPermanentStates(ERHIResourceState::VertexBuffer)
 			.SetSize(Data.GetPositionDataSize())
 			.SetInitialData(Data.VerticesData.Data.get() + Data.GetPositionOffset());
-			//.SetName(StringUtils::Format("%s-VertexPosition", Data.GetName()));
+			//.SetName(String::Format("%s-VertexPosition", Data.GetName()));
 		m_VertexBuffers[0u] = Device.CreateBuffer(Desc);
 
 		auto CreateVerteBuffer = [&Data, &Device, &Desc, this](bool ShouldCreate, size_t Size, size_t Offset, size_t Index) {
@@ -126,18 +126,18 @@ void PrimitiveBuffers::CreateRHI(const MeshData& Data, RHIDevice& Device)
 		};
 
 		CreateVerteBuffer(Data.HasNormal(), Data.GetNormalDataSize(), Data.GetNormalOffset(), 1u);
-			//StringUtils::Format("%s-VertexNormal", Data.GetName()));
+			//String::Format("%s-VertexNormal", Data.GetName()));
 
 		CreateVerteBuffer(Data.HasTangent(), Data.GetTangentDataSize(), Data.GetTangentOffset(), 2u);
-			//StringUtils::Format("%s-VertexTangent", Data.GetName()));
+			//String::Format("%s-VertexTangent", Data.GetName()));
 
 		CreateVerteBuffer(Data.HasUV0(), Data.GetUV0DataSize(), Data.GetUV0Offset(), 3u);
-			//StringUtils::Format("%s-VertexUV0", Data.GetName()));
+			//String::Format("%s-VertexUV0", Data.GetName()));
 
 		CreateVerteBuffer(Data.HasUV1(), Data.GetUV1DataSize(), Data.GetUV1Offset(), 4u);
-			//StringUtils::Format("%s-VertexUV1", Data.GetName()));
+			//String::Format("%s-VertexUV1", Data.GetName()));
 
 		CreateVerteBuffer(Data.HasColor(), Data.GetColorDataSize(), Data.GetColorOffset(), 5u);
-			//StringUtils::Format("%s-VertexColor", Data.GetName()));
+			//String::Format("%s-VertexColor", Data.GetName()));
 	}
 }
