@@ -24,7 +24,7 @@ public:
 		
 		if constexpr (Archive::is_loading::value)
 		{
-			SetPath(Path);
+			SetPath(std::move(Path));
 		}
 	}
 protected:

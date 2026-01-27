@@ -278,7 +278,7 @@ private:
 	std::future<void> m_Future;
 };
 
-class TTask : protected tf::AsyncTask
+class TTask : public NoneCopyable
 {
 public:
 	enum class EPriority : uint8_t
@@ -292,15 +292,19 @@ public:
 	enum class EState : uint8_t
 	{
 		Ready,
-		Scheduled,
 		Running,
-		Completed,
-		Canceled
+		Completed
 	};
 
-	using tf::AsyncTask::AsyncTask;
-
 	TTask(FName&& Name, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+		: m_Thread(Thread)
+		, m_Priority(Priority)
+		, m_Name(std::move(Name))
+	{
+	}
+
+	template<class TaskBodyType>
+	TTask(FName&& Name, TaskBodyType&& TaskBody, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
 		: m_Thread(Thread)
 		, m_Priority(Priority)
 		, m_Name(std::move(Name))
@@ -326,11 +330,6 @@ public:
 		return m_State.load(MemoryOrder) == EState::Completed;
 	}
 
-	inline bool IsCanceled() const
-	{
-		return m_State.load(std::memory_order_relaxed) == EState::Canceled;
-	}
-
 	inline bool IsRunning() const
 	{
 		return m_State.load(std::memory_order_relaxed) == EState::Running;
@@ -338,39 +337,39 @@ public:
 
 	inline bool IsReady() const
 	{
-		return m_State.load(std::memory_order_relaxed) != EState::Running;
+		return m_State.load(std::memory_order_relaxed) == EState::Ready;
 	}
 
 	inline const FName& GetName() const { return m_Name; }
 
 	void Launch();
 
-	void AddPrerequisite(TTask* Prerequisite)
+	bool AddPrerequisite(TTask& Prerequisite)
 	{
-		if (Prerequisite)
+		if (!Prerequisite.AddSubsequents(*this))
 		{
-			std::lock_guard<std::mutex> Locker(m_Lock);
-			m_Prerequisites.insert(Prerequisite);
+			return false;
 		}
+
+		std::lock_guard<std::mutex> Locker(m_Lock);
+		m_Prerequisites.insert(&Prerequisite);
+
+		return true;
 	}
 
-	void AddSubsequents(TTask* Subsequent)
+	bool AddSubsequents(TTask& Subsequent)
 	{
-		if (Subsequent)
-		{
-			std::lock_guard<std::mutex> Locker(m_Lock);
-			m_Subsequents.insert(Subsequent);
-		}
+		std::lock_guard<std::mutex> Locker(m_Lock);
+		m_Subsequents.insert(&Subsequent);
 	}
 protected:
-	bool TryLaunch();
-	bool TryExecute();
-	bool TryCancel();
-
 	inline void SetState(EState State, std::memory_order MemoryOrder = std::memory_order_relaxed)
 	{
 		m_State.store(State, MemoryOrder);
 	}
+
+	bool TryLaunch();
+	bool TryCancel();
 
 	virtual void Execute() = 0;
 private:
@@ -386,4 +385,6 @@ private:
 	std::unordered_set<TTask*> m_Subsequents;
 
 	std::mutex m_Lock;
+
+	std::function<void()> m_TaskBody;
 };

@@ -61,3 +61,25 @@ void TaskSet::Dispatch(EThread Thread)
 		m_Event = TaskFlow::Get().DispatchTaskSet(*this, Thread, m_Priority);
 	}
 }
+
+void TTask::Launch()
+{
+}
+
+bool TTask::TryLaunch()
+{
+	for (auto Prerequisite : m_Prerequisites)
+	{
+		if (!Prerequisite->IsCompleted())
+		{
+			return false;
+		}
+	}
+
+	return false;
+}
+
+bool TTask::TryCancel()
+{
+	return false;
+}

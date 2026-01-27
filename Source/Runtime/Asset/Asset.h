@@ -147,6 +147,11 @@ protected:
 	std::atomic<EStatus> m_Status = EStatus::NotLoaded;
 };
 
+struct AssetLoadRequest
+{
+	std::string_view Path;
+};
+
 class AssetLoader
 {
 public:
@@ -169,6 +174,8 @@ public:
 	}
 
 	virtual bool Load(Asset& InAsset, const AssetType& InType) = 0;
+
+	virtual bool TryLoad(AssetLoadRequest Request) = 0;
 protected:
 	friend class AssetLoadTask;
 
