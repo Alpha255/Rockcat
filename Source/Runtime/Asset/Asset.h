@@ -157,22 +157,17 @@ struct AssetLoadRequest
 class AssetLoader
 {
 public:
-	AssetLoader(std::vector<AssetType>&& SupportedAssetTypes)
-		: m_SupportedTypes(std::move(SupportedAssetTypes))
+	AssetLoader(std::vector<std::string_view>&& SupportedFormats)
+		: m_SupportedFormats(std::move(SupportedFormats))
 	{
 	}
 
-	inline bool IsSupportedAssetType(const std::filesystem::path& Path) const
+	inline bool IsSupportedFormat(const std::filesystem::path& Path) const
 	{
-		return TryFindAssetTypeByPath(Path) != nullptr;
-	}
-
-	const AssetType* TryFindAssetTypeByPath(const std::filesystem::path& Path) const
-	{
-		auto It = std::find_if(m_SupportedTypes.cbegin(), m_SupportedTypes.cend(), [&Path](const AssetType& Type) {
-			return Path.extension() == Type.Extension;
-			});
-		return It == m_SupportedTypes.cend() ? nullptr : &(*It);
+		return std::find(
+			m_SupportedFormats.begin(), 
+			m_SupportedFormats.end(), 
+			String::Lowercase(Path.extension().string())) != m_SupportedFormats.end();
 	}
 
 	virtual bool Load(Asset& InAsset, const AssetType& InType) = 0;
@@ -190,5 +185,5 @@ protected:
 
 	virtual std::shared_ptr<Asset> CreateAssetImpl(const std::filesystem::path& Path) = 0;
 private:
-	std::vector<AssetType> m_SupportedTypes;
+	std::vector<std::string_view> m_SupportedFormats;
 };

@@ -184,7 +184,9 @@ static DXGI_FORMAT GetDXGIFormat(const DirectX::DDS_PIXELFORMAT& PixelFormat)
 }
 
 DDSTextureLoader::DDSTextureLoader()
-	: AssetLoader({ AssetType{"DirectDraw Surface", ".dds"} })
+	: AssetLoader({
+		".dds"
+	})
 {
 }
 

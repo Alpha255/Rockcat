@@ -9,16 +9,15 @@
 #pragma warning(default:4244)
 
 StbTextureLoader::StbTextureLoader()
-	: AssetLoader(
-		{
-			AssetType{"Joint Photographic Experts Group", ".jpeg"},
-			AssetType{"Joint Photographic Experts Group", ".jpg"},
-			AssetType{"Portable Network Graphics", ".png"},
-			AssetType{"Bitmap", ".bmp"},
-			AssetType{"Targa", ".tga"},
-			AssetType{"Photoshop Document", ".psd"},
-			AssetType{"High-Dynamic Range", ".hdr"}
-		})
+	: AssetLoader({
+		".jpeg",
+		".jpg",
+		".png",
+		".bmp",
+		".tga",
+		".psd",
+		".hdr"
+	})
 {
 	LOG_INFO_CAT(LogAsset, "Create stb image loader, use stb_image @2.3");
 }

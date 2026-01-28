@@ -99,18 +99,17 @@ MaterialProperty::ETextureType GetTextureType(aiTextureType Type)
 }
 
 AssimpSceneLoader::AssimpSceneLoader()
-	: AssetLoader(
-		{
-			AssetType{"Autodesk 3dsMax", ".3ds"},
-			AssetType{"Blender 3D", ".blend"},
-			AssetType{"OpenCOLLADA", ".dae", AssetType::EContentsFormat::PlainText},
-			AssetType{"Autodesk FBX", ".fbx"},
-			AssetType{"Graphics Language Transmission Format", ".gltf", AssetType::EContentsFormat::PlainText},
-			AssetType{"Wavefront", ".obj", AssetType::EContentsFormat::PlainText},
-			AssetType{"Polygon File Format", ".ply", AssetType::EContentsFormat::PlainText},
-			AssetType{"Stereolithography", ".stl", AssetType::EContentsFormat::PlainText},
-			AssetType{"XFile", ".x", AssetType::EContentsFormat::PlainText}
-		})
+	: AssetLoader({
+		".3ds",
+		".blend",
+		".dae",
+		".fbx",
+		".gltf",
+		".obj",
+		".ply",
+		".stl",
+		".x"
+	})
 {
 	LOG_INFO_CAT(LogAsset, "Create assimp scene loader, use assimp @{}.{}.{}", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionPatch());
 }

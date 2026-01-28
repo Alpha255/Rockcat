@@ -3,6 +3,12 @@
 #include "Asset/Asset.h"
 #include "RHI/RHITexture.h"
 
+class RenderResource
+{
+public:
+	virtual void InitRHI() {}
+};
+
 class Texture : public Asset
 {
 public:
@@ -33,6 +39,8 @@ protected:
 	friend class DDSTextureLoader;
 
 	void CreateRHI(class RHIDevice& Device, const RHITextureDesc& Desc);
+
+	void OnPostLoad();
 
 	void SetLinear(bool Linear) { m_Linear = Linear; }
 
