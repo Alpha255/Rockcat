@@ -317,9 +317,8 @@ public:
 
 	~TTask() = default;
 
-	inline bool IsCompleted() const { return m_TFTask ? m_TFTask->is_done() : false; }
-
-	inline bool IsRunning() const { return m_TFTask != nullptr; }
+	inline bool IsCompleted() const { return m_LowLevelTask ? m_LowLevelTask->IsDone() : false; }
+	inline bool IsDispatched() const { return m_LowLevelTask ? m_LowLevelTask->IsValid() : false; }
 
 	inline const FName& GetName() const { return m_Name; }
 
@@ -361,5 +360,16 @@ private:
 
 	std::function<void()> m_TaskBody;
 
-	std::shared_ptr<tf::AsyncTask> m_TFTask;
+	struct TFTask : public std::pair<tf::AsyncTask, std::future<void>>
+	{
+		using std::pair<tf::AsyncTask, std::future<void>>::pair;
+
+		inline bool IsValid() const { return second.valid(); }
+		inline bool IsDone() const { return first.is_done(); }
+
+		inline tf::AsyncTask& GetTask() { return first; }
+		inline std::future<void>& GetFuture() { return second; }
+	};
+
+	std::shared_ptr<TFTask> m_LowLevelTask;
 };

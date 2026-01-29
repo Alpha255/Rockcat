@@ -64,6 +64,13 @@ void TaskSet::Dispatch(EThread Thread)
 
 void TTask::Launch()
 {
+	if (!IsDispatched())
+	{
+		tf::Executor* Executor = nullptr;
+		m_LowLevelTask = std::make_shared(std::move(Executor->dependent_async([this]() {
+			Execute();
+		})));
+	}
 }
 
 bool TTask::TryLaunch()

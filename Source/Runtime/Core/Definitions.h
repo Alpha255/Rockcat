@@ -109,55 +109,6 @@
 #define CAT_INNER(A, B) A##B
 #define FILE_LINE CAT(__FILE__, __LINE__)
 
-template<class Enum>
-struct EnumSerializer
-{
-	Enum& Value;
-
-	EnumSerializer(Enum& InValue)
-		: Value(InValue)
-	{
-	}
-
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		std::string EnumName;
-		if constexpr (Archive::is_saving::value)
-		{
-			EnumName = std::string(magic_enum::enum_name<Enum>(Value));
-			Ar(EnumName);
-		}
-		else if constexpr (Archive::is_loading::value)
-		{
-			Ar(EnumName);
-			auto OptValue = magic_enum::enum_cast<Enum>(EnumName);
-			if (OptValue.has_value())
-			{
-				Value = OptValue.value();
-			}
-		}
-	}
-};
-
-#define CEREAL_BASE(ClassType) ::cereal::make_nvp(typeid(ClassType).name(), ::cereal::virtual_base_class<ClassType>(this))
-
-#define CEREAL_SERIALIZE_ENUM(EnumType, Value) \
-	if constexpr (Archive::is_saving::value) { \
-		auto EnumName = std::string(magic_enum::enum_name<EnumType>(Value)); \
-		Ar(::cereal::make_nvp(#Value, EnumName)); \
-	} \
-	else if constexpr (Archive::is_loading::value) { \
-		std::string EnumName; \
-		Ar(::cereal::make_nvp(#Value, EnumName)); \
-		auto OptValue = magic_enum::enum_cast<EnumType>(EnumName); \
-		if (OptValue.has_value()) { \
-			Value = OptValue.value(); \
-		} \
-	}
-
-#define CEREAL_NVP_ENUM(EnumType, Value) ::cereal::make_nvp(#Value, EnumSerializer<EnumType>(Value))
-
 #define ENUM_FLAG_OPERATORS(Enum) \
 	inline constexpr Enum    operator|(Enum Left, Enum Right) { return static_cast<Enum>(static_cast<std::underlying_type_t<Enum>>(Left) | static_cast<std::underlying_type_t<Enum>>(Right)); } \
 	inline constexpr Enum    operator&(Enum Left, Enum Right) { return static_cast<Enum>(static_cast<std::underlying_type_t<Enum>>(Left) & static_cast<std::underlying_type_t<Enum>>(Right)); } \
@@ -367,3 +318,8 @@ namespace Utils
 	size_t GetPowerOfTwo(uint32_t Value);
 	std::string GetTimepointString(const std::chrono::system_clock::time_point& Timepoint, const char* Format = "%Y-%m-%d %H:%M:%S");
 }
+
+enum : uint32_t
+{
+	NONE_INDEX = std::numeric_limits<uint32_t>::max()
+};
