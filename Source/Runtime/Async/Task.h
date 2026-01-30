@@ -264,21 +264,7 @@ private:
 	std::vector<std::shared_ptr<tf::Task>> m_Tasks;
 };
 
-class TTaskEvent
-{
-public:
-	TTaskEvent(std::future<void>&& Future)
-		: m_Future(std::move(Future))
-	{
-	}
-
-	inline void Wait() { m_Future.wait(); }
-	inline void WaitFor(size_t Milliseconds) { m_Future.wait_for(std::chrono::milliseconds(Milliseconds)); }
-private:
-	std::future<void> m_Future;
-};
-
-class TTask : public NoneCopyable
+class TFTask : public NoneCopyable
 {
 public:
 	enum class EPriority : uint8_t
@@ -289,87 +275,79 @@ public:
 		Critical
 	};
 
-	TTask(FName&& Name, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	TFTask(FName&& Name, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
 		: m_Thread(Thread)
 		, m_Priority(Priority)
 		, m_Name(std::move(Name))
 	{
 	}
 
-	template<class TaskBodyType>
-	TTask(FName&& Name, TaskBodyType&& TaskBody, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	template<class LAMBDA>
+	TFTask(FName&& Name, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
 		: m_Thread(Thread)
 		, m_Priority(Priority)
 		, m_Name(std::move(Name))
+		, m_TaskFunc([Func=std::forward<LAMBDA>(Lambda)]() {
+			Func() })
 	{
 	}
 
-	TTask(const TTask&) = delete;
-
-	TTask& operator=(const TTask&) = delete;
-
-	TTask(TTask&& Other) noexcept
+	TFTask(TFTask&& Other) noexcept
 		: m_Thread(Other.m_Thread)
 		, m_Priority(Other.m_Priority)
 		, m_Name(std::move(Other.m_Name))
+		, m_TaskFunc(std::move(Other.m_TaskFunc))
 	{
 	}
 
-	~TTask() = default;
+	~TFTask() = default;
 
-	inline bool IsCompleted() const { return m_LowLevelTask ? m_LowLevelTask->IsDone() : false; }
-	inline bool IsDispatched() const { return m_LowLevelTask ? m_LowLevelTask->IsValid() : false; }
+	inline bool IsCompleted() const { return m_LowLevelTask ? m_LowLevelTask->first.is_done() : false; }
+	inline bool IsDispatched() const { return m_LowLevelTask ? m_LowLevelTask->second.valid() : false; }
+
+	inline tf::AsyncTask* GetLowLevelTask() { return m_LowLevelTask ? &m_LowLevelTask->first : nullptr; }
 
 	inline const FName& GetName() const { return m_Name; }
 
 	void Launch();
+
+	template<class LAMBDA>
+	static std::shared_ptr<TFTask> Launch(FName&& Name, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	{
+		auto Task = std::make_shared<TFTask>(std::forward<FName>(Name), std::forward<LAMBDA>(Lambda), Thread, Priority);
+		Task->Launch();
+		return Task;
+	}
+
+	template<class LAMBDA, class Prerequisites>
+	static std::shared_ptr<TFTask> Launch(FName&& Name, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	{
+
+	}
 protected:
-	bool TryLaunch();
 	bool TryCancel();
 
-	bool AddPrerequisite(TTask& Prerequisite)
-	{
-		if (!Prerequisite.AddSubsequents(*this))
-		{
-			return false;
-		}
+	bool AddPrerequisite(TFTask& Prerequisite);
+	bool AddSubsequents(TFTask& Subsequent);
 
-		std::lock_guard<std::mutex> Locker(m_Lock);
-		m_Prerequisites.insert(&Prerequisite);
+	inline bool IsCanceled(std::memory_order MemoryOrder = std::memory_order_relaxed) const { return m_Canceled.load(MemoryOrder); }
+	inline void SetCanceled(bool Canceled, std::memory_order MemoryOrder = std::memory_order_relaxed) {m_Canceled.store(Canceled, MemoryOrder); }
 
-		return true;
-	}
-
-	bool AddSubsequents(TTask& Subsequent)
-	{
-		std::lock_guard<std::mutex> Locker(m_Lock);
-		m_Subsequents.insert(&Subsequent);
-	}
-
-	virtual void Execute() = 0;
+	virtual void Execute();
 private:
 	EThread m_Thread = EThread::WorkerThread;
 	EPriority m_Priority = EPriority::Normal;
 
 	FName m_Name;
 
-	std::unordered_set<TTask*> m_Prerequisites;
-	std::unordered_set<TTask*> m_Subsequents;
+	std::unordered_set<TFTask*> m_Prerequisites;
+	std::unordered_set<TFTask*> m_Subsequents;
 
 	std::mutex m_Lock;
+	std::atomic<bool> m_Canceled;
 
-	std::function<void()> m_TaskBody;
+	std::function<void()> m_TaskFunc;
 
-	struct TFTask : public std::pair<tf::AsyncTask, std::future<void>>
-	{
-		using std::pair<tf::AsyncTask, std::future<void>>::pair;
-
-		inline bool IsValid() const { return second.valid(); }
-		inline bool IsDone() const { return first.is_done(); }
-
-		inline tf::AsyncTask& GetTask() { return first; }
-		inline std::future<void>& GetFuture() { return second; }
-	};
-
-	std::shared_ptr<TFTask> m_LowLevelTask;
+	using LowLevelTask = std::pair<tf::AsyncTask, std::future<void>>;
+	std::shared_ptr<LowLevelTask> m_LowLevelTask;
 };

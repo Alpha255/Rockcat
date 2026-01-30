@@ -62,31 +62,57 @@ void TaskSet::Dispatch(EThread Thread)
 	}
 }
 
-void TTask::Launch()
+bool TFTask::AddPrerequisite(TFTask& Prerequisite)
 {
+	if (!Prerequisite.AddSubsequents(*this))
+	{
+		return false;
+	}
+
+	std::lock_guard<std::mutex> Locker(m_Lock);
+	m_Prerequisites.insert(&Prerequisite);
+
+	return true;
+}
+
+bool TFTask::AddSubsequents(TFTask& Subsequent)
+{
+	std::lock_guard<std::mutex> Locker(m_Lock);
+	m_Subsequents.insert(&Subsequent);
+}
+
+void TFTask::Execute()
+{
+	if (m_TaskFunc)
+	{
+		m_TaskFunc();
+	}
+}
+
+void TFTask::Launch()
+{
+	if (IsCanceled())
+	{
+		return;
+	}
+
 	if (!IsDispatched())
 	{
 		tf::Executor* Executor = nullptr;
-		m_LowLevelTask = std::make_shared(std::move(Executor->dependent_async([this]() {
+		std::array<tf::AsyncTask, 3> Tasks;
+		m_LowLevelTask = std::make_shared<LowLevelTask>(std::move(Executor->dependent_async([this]() {
 			Execute();
-		})));
+		}, Tasks.begin(), Tasks.end())));
 	}
 }
 
-bool TTask::TryLaunch()
+bool TFTask::TryCancel()
 {
-	for (auto Prerequisite : m_Prerequisites)
+	if (IsDispatched())
 	{
-		if (!Prerequisite->IsCompleted())
-		{
-			return false;
-		}
+		return false;
 	}
 
-	return false;
-}
-
-bool TTask::TryCancel()
-{
-	return false;
+	SetCanceled(true);
+	return true;
 }
