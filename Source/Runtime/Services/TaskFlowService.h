@@ -144,8 +144,9 @@ public:
 	inline uint8_t GetNumWorkerThreads() const { return m_NumWorkerThreads; }
 
 	void FrameSync(bool AllowOneFrameLag);
-private:
+
 	tf::Executor* GetExecutor(EThread Thread, Task::EPriority Priority);
+private:
 
 	bool m_UseHyperThreading;
 	bool m_SeparateGameThread = false;

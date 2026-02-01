@@ -98,11 +98,28 @@ void TFTask::Launch()
 
 	if (!IsDispatched())
 	{
-		tf::Executor* Executor = nullptr;
-		std::array<tf::AsyncTask, 3> Tasks;
-		m_LowLevelTask = std::make_shared<LowLevelTask>(std::move(Executor->dependent_async([this]() {
-			Execute();
-		}, Tasks.begin(), Tasks.end())));
+		if (auto Executor = TaskFlow::Get().GetExecutor(m_Thread, m_Priority))
+		{
+			std::vector<tf::AsyncTask> PrerequisiteTasks;
+			PrerequisiteTasks.reserve(m_Prerequisites.size());
+
+			for (auto Prerequisite : m_Prerequisites)
+			{
+				if (Prerequisite)
+				{
+					Prerequisite->Launch();
+
+					if (auto LowLevelTask = Prerequisite->GetLowLevelTask())
+					{
+						PrerequisiteTasks.emplace_back(tf::AsyncTask(*LowLevelTask));
+					}
+				}
+			}
+
+			m_LowLevelTask = std::make_shared<LowLevelTask>(std::move(Executor->dependent_async([this]() {
+				Execute();
+			}, PrerequisiteTasks.begin(), PrerequisiteTasks.end())));
+		}
 	}
 }
 
