@@ -1,65 +1,61 @@
 #include "Async/Task.h"
 #include "Services/TaskFlowService.h"
 
-thread_local EThread t_ThreadTag = EThread::WorkerThread;
+thread_local TFTask::EThread t_ThreadTag = TFTask::EThread::WorkerThread;
 
-void TaskFlowTask::InitializeThreadTags()
+struct ThreadPriorityScope
 {
-	t_ThreadTag = EThread::MainThread;
+	ThreadPriorityScope(TFTask::EPriority Priority)
+		: SkipPriorityChange(!TFTask::IsWorkerThread() || Priority == TFTask::EPriority::Normal)
+	{
+		if (!SkipPriorityChange)
+		{
+			System::SetThreadPriority(std::this_thread::get_id(), TFTask::EPriority::Priority);
+		}
+	}
+
+	~ThreadPriorityScope()
+	{
+		if (!SkipPriorityChange)
+		{
+			System::SetThreadPriority(std::this_thread::get_id(), TFTask::EPriority::Normal);
+		}
+	}
+
+	bool SkipPriorityChange;
+};
+
+void TFTask::InitializeThreadTags()
+{
+	t_ThreadTag = TFTask::EThread::MainThread;
 
 	tf::Async_WaitDone([]() {
-		t_ThreadTag = EThread::GameThread;
-	}, EThread::GameThread);
+		t_ThreadTag = TFTask::EThread::GameThread;
+	}, TFTask::EThread::GameThread);
 
 	tf::Async_WaitDone([]() {
-		t_ThreadTag = EThread::RenderThread;
+		t_ThreadTag = TFTask::EThread::RenderThread;
 	}, EThread::RenderThread);
 }
 
-bool Task::IsMainThread()
+bool TFTask::IsMainThread()
 {
 	return t_ThreadTag == EThread::MainThread;
 }
 
-bool Task::IsGameThread()
+bool TFTask::IsGameThread()
 {
 	return t_ThreadTag == EThread::GameThread;
 }
 
-bool Task::IsRenderThread()
+bool TFTask::IsRenderThread()
 {
 	return t_ThreadTag == EThread::RenderThread;
 }
 
-bool Task::IsWorkerThread()
+bool TFTask::IsWorkerThread()
 {
 	return t_ThreadTag == EThread::WorkerThread;
-}
-
-void Task::Dispatch(EThread Thread)
-{
-	if (!m_Event || m_Event->IsCompleted())
-	{
-		m_Event = TaskFlow::Get().DispatchTask(*this, Thread, m_Priority);
-	}
-}
-
-void Task::Execute()
-{
-	if (!m_Executing)
-	{
-		m_Executing = true;
-		ExecuteImpl();
-		m_Executing = false;
-	}
-}
-
-void TaskSet::Dispatch(EThread Thread)
-{
-	if (!m_Event || m_Event->IsCompleted())
-	{
-		m_Event = TaskFlow::Get().DispatchTaskSet(*this, Thread, m_Priority);
-	}
 }
 
 bool TFTask::AddPrerequisite(TFTask& Prerequisite)
