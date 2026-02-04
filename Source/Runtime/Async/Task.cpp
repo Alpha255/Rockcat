@@ -1,4 +1,5 @@
 #include "Async/Task.h"
+#include "System/System.h"
 #include "Services/TaskFlowService.h"
 
 thread_local TFTask::EThread t_ThreadTag = TFTask::EThread::WorkerThread;
@@ -10,7 +11,7 @@ struct ThreadPriorityScope
 	{
 		if (!SkipPriorityChange)
 		{
-			System::SetThreadPriority(std::this_thread::get_id(), TFTask::EPriority::Priority);
+			System::SetThreadPriority(std::this_thread::get_id(), Priority);
 		}
 	}
 
@@ -105,14 +106,14 @@ void TFTask::Launch()
 				{
 					Prerequisite->Launch();
 
-					if (auto LowLevelTask = Prerequisite->GetLowLevelTask())
+					if (auto LowLevelTask = Prerequisite->GetAsyncTask())
 					{
 						PrerequisiteTasks.emplace_back(tf::AsyncTask(*LowLevelTask));
 					}
 				}
 			}
 
-			m_LowLevelTask = std::make_shared<LowLevelTask>(std::move(Executor->dependent_async([this]() {
+			m_AsyncTask = std::make_shared<tf::AsyncTask>(std::move(Executor->dependent_async([this]() {
 				Execute();
 			}, PrerequisiteTasks.begin(), PrerequisiteTasks.end())));
 		}

@@ -202,16 +202,8 @@ Guid Guid::Create()
 	return System::CreateGUID();
 }
 
-void System::SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priority)
+void System::SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Priority)
 {
-	static const char* s_ThreadPriorityNames[] =
-	{
-		"Low",
-		"Normal",
-		"High",
-		"Critical",		
-	};
-
 	std::stringstream Stream;
 	Stream << ThreadID;
 
@@ -222,13 +214,13 @@ void System::SetThreadPriority(std::thread::id ThreadID, Task::EPriority Priorit
 	int32_t ThreadPriority = THREAD_PRIORITY_NORMAL;
 	switch (Priority)
 	{
-	case Task::EPriority::Critical:
+	case TFTask::EPriority::Critical:
 		ThreadPriority = THREAD_PRIORITY_HIGHEST;
 		break;
-	case Task::EPriority::High:
+	case TFTask::EPriority::High:
 		ThreadPriority = THREAD_PRIORITY_ABOVE_NORMAL;
 		break;
-	case Task::EPriority::Low:
+	case TFTask::EPriority::Low:
 		ThreadPriority = THREAD_PRIORITY_BELOW_NORMAL;
 		break;
 	}
