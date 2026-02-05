@@ -84,9 +84,9 @@ public:
 
 	using OnStatusChangeCallback = std::function<void()>;
 
-	inline EStatus GetStatus(std::memory_order MemoryOrder = std::memory_order_relaxed) const { return m_Status.load(MemoryOrder); }
-	inline bool IsReady(std::memory_order MemoryOrder = std::memory_order_relaxed) const { return GetStatus(MemoryOrder) == EStatus::Ready; }
-	inline bool IsOnLoading(std::memory_order MemoryOrder = std::memory_order_relaxed) const { return GetStatus(MemoryOrder) == EStatus::Loading; }
+	inline EStatus GetStatus() const { return m_Status.load(std::memory_order_relaxed); }
+	inline bool IsReady() const { return GetStatus() == EStatus::Ready; }
+	inline bool IsOnLoading() const { return GetStatus() == EStatus::Loading; }
 
 	std::shared_ptr<DataBlock> LoadData(AssetType::EContentsFormat ContentsFormat) const;
 

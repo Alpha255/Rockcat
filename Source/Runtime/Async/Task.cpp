@@ -59,23 +59,24 @@ bool TFTask::IsWorkerThread()
 	return t_ThreadTag == EThread::WorkerThread;
 }
 
-bool TFTask::AddPrerequisite(TFTask& Prerequisite)
+void TFTask::AddPrerequisite(TFTask& Prerequisite)
 {
-	if (!Prerequisite.AddSubsequents(*this))
-	{
-		return false;
-	}
+	assert(IsSameThread(*this, Prerequisite) || !IsDispatched());
+
+	Prerequisite.AddSubsequents(*this);
 
 	std::lock_guard<std::mutex> Locker(m_Lock);
 	m_Prerequisites.insert(&Prerequisite);
-
-	return true;
 }
 
-bool TFTask::AddSubsequents(TFTask& Subsequent)
+void TFTask::AddSubsequents(TFTask& Subsequent)
 {
-	std::lock_guard<std::mutex> Locker(m_Lock);
-	m_Subsequents.insert(&Subsequent);
+	if (!IsSameThread(*this, Subsequent))
+	{
+		std::lock_guard<std::mutex> Locker(m_Lock);
+		m_Subsequents.insert(&Subsequent);
+		Subsequent.AddRef();
+	}
 }
 
 void TFTask::Execute()
@@ -86,37 +87,47 @@ void TFTask::Execute()
 	}
 }
 
-void TFTask::Launch()
+void TFTask::TriggerSubsequents()
 {
-	if (IsCanceled())
+	std::lock_guard<std::mutex> Locker(m_Lock);
+	for (auto Subsequent : m_Subsequents)
+	{
+		if (Subsequent->ReleaseRef())
+		{
+			Subsequent->Trigger();
+		}
+	}
+}
+
+void TFTask::Trigger()
+{
+	if (IsCanceled() || IsDispatched())
 	{
 		return;
 	}
 
-	if (!IsDispatched())
+	if (auto Executor = TaskFlow::Get().GetExecutor(m_Thread, m_Priority))
 	{
-		if (auto Executor = TaskFlow::Get().GetExecutor(m_Thread, m_Priority))
+		std::vector<tf::AsyncTask> PrerequisiteTasks;
+		PrerequisiteTasks.reserve(m_Prerequisites.size());
+
+		for (auto Prerequisite : m_Prerequisites)
 		{
-			std::vector<tf::AsyncTask> PrerequisiteTasks;
-			PrerequisiteTasks.reserve(m_Prerequisites.size());
-
-			for (auto Prerequisite : m_Prerequisites)
+			if (Prerequisite)
 			{
-				if (Prerequisite)
-				{
-					Prerequisite->Launch();
+				Prerequisite->Trigger();
 
-					if (auto LowLevelTask = Prerequisite->GetAsyncTask())
-					{
-						PrerequisiteTasks.emplace_back(tf::AsyncTask(*LowLevelTask));
-					}
+				if (auto LowLevelTask = Prerequisite->GetAsyncTask())
+				{
+					PrerequisiteTasks.emplace_back(tf::AsyncTask(*LowLevelTask));
 				}
 			}
-
-			m_AsyncTask = std::make_shared<tf::AsyncTask>(std::move(Executor->dependent_async([this]() {
-				Execute();
-			}, PrerequisiteTasks.begin(), PrerequisiteTasks.end())));
 		}
+
+		m_AsyncTask = std::make_shared<tf::AsyncTask>(std::move(Executor->dependent_async([this]() {
+			Execute();
+			TriggerSubsequents();
+		}, PrerequisiteTasks.begin(), PrerequisiteTasks.end())));
 	}
 }
 

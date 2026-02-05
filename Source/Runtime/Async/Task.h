@@ -111,13 +111,13 @@ public:
 
 	inline bool IsCompleted() const { return m_AsyncTask ? m_AsyncTask->is_done() : false; }
 	inline bool IsDispatched() const { return m_Event ? true : false; }
-	inline bool IsCanceled(std::memory_order MemoryOrder = std::memory_order_relaxed) const { return m_Canceled.load(MemoryOrder); }
+	inline bool IsCanceled() const { return m_Canceled.load(std::memory_order_acquire); }
 
 	inline const FName& GetName() const { return m_Name; }
 
-	bool AddPrerequisite(TFTask& Prerequisite);
+	void AddPrerequisite(TFTask& Prerequisite);
 
-	void Launch();
+	void Trigger();
 
 	static bool IsMainThread();
 	static bool IsGameThread();
@@ -125,30 +125,41 @@ public:
 	static bool IsWorkerThread();
 
 	template<class LAMBDA>
-	static std::shared_ptr<TFTask> Launch(FName&& Name, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	static std::shared_ptr<TFTask> TryLaunch(FName&& Name, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
 	{
 		auto Task = std::make_shared<TFTask>(std::forward<FName>(Name), std::forward<LAMBDA>(Lambda), Thread, Priority);
-		Task->Launch();
+		Task->Trigger();
 		return Task;
 	}
 
 	template<class LAMBDA, class Prerequisites>
-	static std::shared_ptr<TFTask> Launch(FName&& Name, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	static std::shared_ptr<TFTask> TryLaunch(FName&& Name, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
 	{
 
 	}
 protected:
 	static void InitializeThreadTags();
 
-	bool AddSubsequents(TFTask& Subsequent);
+	void AddSubsequents(TFTask& Subsequent);
+
+	void TriggerSubsequents();
 
 	bool TryCancel();
 
 	inline tf::AsyncTask* GetAsyncTask() { return m_AsyncTask.get(); }
 
-	inline void SetCanceled(bool Canceled, std::memory_order MemoryOrder = std::memory_order_relaxed) { m_Canceled.store(Canceled, MemoryOrder); }
+	inline void SetCanceled(bool Canceled) { m_Canceled.store(Canceled, std::memory_order_release); }
 
 	virtual void Execute();
+
+	inline friend bool IsSameThread(const TFTask& Task1, const TFTask& Task2) { return Task1.m_Thread == Task2.m_Thread; }
+
+	inline void AddRef() { m_NumRef.fetch_add(1u, std::memory_order_relaxed); }
+	inline bool ReleaseRef()
+	{
+		assert(m_NumRef.load(std::memory_order_acquire) > 0u);
+		return m_NumRef.fetch_sub(1u, std::memory_order_acq_rel) == 1u;
+	}
 private:
 	EThread m_Thread = EThread::WorkerThread;
 	EPriority m_Priority = EPriority::Normal;
@@ -160,6 +171,8 @@ private:
 
 	std::mutex m_Lock;
 	std::atomic<bool> m_Canceled;
+
+	std::atomic<uint32_t> m_NumRef{ 0u };
 
 	std::function<void()> m_TaskFunc;
 
