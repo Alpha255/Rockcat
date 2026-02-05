@@ -1,8 +1,29 @@
 #include "Async/Task.h"
+#include "Core/ConsoleVariable.h"
 #include "System/System.h"
 #include "Services/TaskFlowService.h"
 
 thread_local TFTask::EThread t_ThreadTag = TFTask::EThread::WorkerThread;
+
+ConsoleVariable<bool> CVarUseHyperThreading(
+	"tf.use_hyper_threading",
+	"Enable or disable hyper threading for taskflow executors.",
+	false);
+
+ConsoleVariable<bool> CVarUseSeperateGameThread(
+	"tf.use_seperate_game_thread",
+	"Enable or disable seperate game thread.",
+	false);
+
+ConsoleVariable<bool> CVarUseSeperateRenderThread(
+	"tf.use_seperate_render_thread",
+	"Enable or disable seperate render thread.",
+	false);
+
+ConsoleVariable<uint32_t> CVarNumForegroundThreads(
+	"tf.num_foreground_threads",
+	"Number of foreground threads.",
+	2u);
 
 struct ThreadPriorityScope
 {
@@ -39,6 +60,25 @@ void TFTask::InitializeThreadTags()
 	}, EThread::RenderThread);
 }
 
+uint32_t TFTask::GetNumWorkerThreads()
+{
+	static uint32_t s_NumWorkerThreads = 0u;
+
+	if (!s_NumWorkerThreads)
+	{
+		uint32_t NumSeperateThreads = 0u;
+		auto NumTotalThreads = System::GetHardwareConcurrencyThreadsCount(CVarUseHyperThreading.Get());
+
+		NumSeperateThreads += CVarUseSeperateGameThread.Get() ? 1u : 0u;
+		NumSeperateThreads += CVarUseSeperateRenderThread.Get() ? 1u : 0u;
+		NumSeperateThreads -= CVarNumForegroundThreads.Get();
+
+		s_NumWorkerThreads = static_cast<uint32_t>(NumTotalThreads - NumSeperateThreads);
+	}
+
+	return s_NumWorkerThreads;
+}
+
 bool TFTask::IsMainThread()
 {
 	return t_ThreadTag == EThread::MainThread;
@@ -58,6 +98,68 @@ bool TFTask::IsWorkerThread()
 {
 	return t_ThreadTag == EThread::WorkerThread;
 }
+
+class TFExecutorManager : public Singleton<TFExecutorManager>
+{
+public:
+	void Initialize()
+	{
+		std::vector<size_t> WorkersInExecutor
+		{
+			CVarUseSeperateGameThread.Get(),
+			CVarUseSeperateRenderThread.Get(),
+			CVarNumForegroundThreads.Get(),
+			TFTask::GetNumWorkerThreads()
+		};
+
+		m_Executors.reserve(WorkersInExecutor.size());
+
+		for (auto& NumWorkers : WorkersInExecutor)
+		{
+			if (NumWorkers > 0u)
+			{
+				m_Executors.emplace_back(std::make_unique<tf::Executor>(NumWorkers));
+			}
+		}
+	}
+
+	void Finalize()
+	{
+		for (auto& Executor : m_Executors)
+		{
+			if (Executor)
+			{
+				Executor->wait_for_all();
+				Executor.reset();
+			}
+		}
+	}
+
+	tf::Executor* GetExecutor(TFTask::EThread Thread, TFTask::EPriority Priority)
+	{
+		assert(Thread < TFTask::EThread::Num);
+
+		if (!CVarUseSeperateGameThread.Get() && Thread == TFTask::EThread::GameThread)
+		{
+			return nullptr;
+		}
+
+		if (!CVarUseSeperateRenderThread.Get() && Thread == TFTask::EThread::RenderThread)
+		{
+			return nullptr;
+		}
+
+		size_t Index = static_cast<size_t>(Thread);
+		if (Thread == TFTask::EThread::WorkerThread && Priority > TFTask::EPriority::Normal && CVarNumForegroundThreads.Get())
+		{
+			Index += 1u;
+		}
+
+		return m_Executors[Index].get();
+	}
+private:
+	std::vector<std::unique_ptr<tf::Executor>> m_Executors;
+};
 
 void TFTask::AddPrerequisite(TFTask& Prerequisite)
 {
@@ -101,7 +203,7 @@ void TFTask::TriggerSubsequents()
 
 void TFTask::Trigger()
 {
-	if (IsCanceled() || IsDispatched())
+	if (IsCanceled() || IsDispatched() || HasAnyRef())
 	{
 		return;
 	}
@@ -125,6 +227,7 @@ void TFTask::Trigger()
 		}
 
 		m_AsyncTask = std::make_shared<tf::AsyncTask>(std::move(Executor->dependent_async([this]() {
+			ThreadPriorityScope ScopedTaskPriority(m_Priority);
 			Execute();
 			TriggerSubsequents();
 		}, PrerequisiteTasks.begin(), PrerequisiteTasks.end())));

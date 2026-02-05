@@ -1,23 +1,6 @@
 #include "Services/TaskFlowService.h"
 #include "Services/SpdLogService.h"
-#include "Core/ConsoleVariable.h"
 #include "System/System.h"
-
-ConsoleVariable<bool> CVarUseHyperThreading(
-	"tf.use_hyper_threading",
-	"Enable or disable hyper threading for taskflow executors.",
-	true);
-
-TaskFlow::TaskFlow()
-	: m_UseHyperThreading(false)
-	, m_SeparateGameThread(false)
-	, m_SeparateRenderThread(false)
-	, m_NumThreads(0u)
-	, m_NumWorkerThreads(0u)
-	, m_NumSeperateThreads(0u)
-	, m_NumForegroundThreads(2u)
-{
-}
 
 void TaskFlow::Initialize()
 {
@@ -81,30 +64,6 @@ void TaskFlow::Initialize()
 		m_NumSeperateThreads,
 		m_NumWorkerThreads,
 		m_UseHyperThreading ? "enabled" : "disabled");
-}
-
-tf::Executor* TaskFlow::GetExecutor(EThread Thread, Task::EPriority Priority)
-{
-	assert(Thread < EThread::Num);
-
-	if (!m_SeparateGameThread && Thread == EThread::GameThread)
-	{
-		return nullptr;
-	}
-
-	if (!m_SeparateRenderThread && Thread == EThread::RenderThread)
-	{
-		return nullptr;
-	}
-
-	size_t ExecutorIndex = static_cast<size_t>(Thread);
-
-	if (Thread == EThread::WorkerThread && Priority > Task::EPriority::Normal && m_NumForegroundThreads > 0u)
-	{
-		ExecutorIndex += 1u;
-	}
-
-	return m_Executors[ExecutorIndex].get();
 }
 
 void TaskFlow::FrameSync(bool AllowOneFrameLag)

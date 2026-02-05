@@ -124,6 +124,8 @@ public:
 	static bool IsRenderThread();
 	static bool IsWorkerThread();
 
+	static uint32_t GetNumWorkerThreads();
+
 	template<class LAMBDA>
 	static std::shared_ptr<TFTask> TryLaunch(FName&& Name, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
 	{
@@ -154,6 +156,7 @@ protected:
 
 	inline friend bool IsSameThread(const TFTask& Task1, const TFTask& Task2) { return Task1.m_Thread == Task2.m_Thread; }
 
+	inline bool HasAnyRef() const { return m_NumRef.load(std::memory_order_acquire) > 0u; }
 	inline void AddRef() { m_NumRef.fetch_add(1u, std::memory_order_relaxed); }
 	inline bool ReleaseRef()
 	{
