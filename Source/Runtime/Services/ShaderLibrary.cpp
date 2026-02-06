@@ -1,7 +1,6 @@
 #include "Services/ShaderLibrary.h"
 #include "Async/Task.h"
 #include "Services/SpdLogService.h"
-#include "Services/TaskFlowService.h"
 #include "Paths.h"
 #include "RHI/RHIPipeline.h"
 #include "RHI/RHIDevice.h"
@@ -179,9 +178,9 @@ void ShaderLibrary::Compile(Shader& InShader, ERHIDeviceType DeviceType)
 
 void ShaderLibrary::QueueCompile(Shader& InShader, ERHIDeviceType DeviceType)
 {
-	tf::Async([this, &InShader, DeviceType]() {
-		Compile(InShader, DeviceType);
-	}, EThread::WorkerThread, Task::EPriority::High);
+	//tf::Async([this, &InShader, DeviceType]() {
+	//	Compile(InShader, DeviceType);
+	//}, EThread::WorkerThread, Task::EPriority::High);
 }
 
 bool ShaderLibrary::RegisterCompileTask(size_t Hash)

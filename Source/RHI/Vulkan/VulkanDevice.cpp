@@ -12,8 +12,8 @@
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
 #include "RHI/Vulkan/VulkanRenderPass.h"
 #include "Paths.h"
-#include "Services/TaskFlowService.h"
 #include "Services/ShaderLibrary.h"
+#include "Async/Task.h"
 
 #if USE_DYNAMIC_VK_LOADER
 	VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
@@ -250,7 +250,7 @@ VulkanDevice::VulkanDevice()
 	
 	assert(PresentQueueIndex == GraphicsQueueIndex);
 
-	for (uint8_t Index = 0u; Index < TaskFlow::Get().GetNumWorkerThreads(); ++Index)
+	for (uint8_t Index = 0u; Index < TFTask::GetNumWorkerThreads(); ++Index)
 	{
 		m_ThreadedCmdListContexts.emplace(std::make_shared<VulkanCommandListContext>(*this, *m_Queues[ERHIDeviceQueue::Graphics]));
 	}

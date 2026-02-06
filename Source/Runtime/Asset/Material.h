@@ -3,7 +3,7 @@
 #include "Core/Math/Matrix.h"
 #include "Core/Math/Color.h"
 #include "Asset/SerializableAsset.h"
-#include "Asset/TextureAsset.h"
+#include "Asset/Texture.h"
 #include "RHI/RHIRenderStates.h"
 
 enum class EShadingMode : uint8_t
@@ -104,8 +104,8 @@ struct MaterialProperty : public Serializable<MaterialProperty>
 			CEREAL_NVP(DoubleSided),
 			CEREAL_NVP(Wireframe),
 			CEREAL_NVP(AlphaCutoff),
-			CEREAL_NVP(Factors),
-			CEREAL_NVP(Textures)
+			CEREAL_NVP(Factors)/*,
+			CEREAL_NVP(Textures)*/
 		);
 	}
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Asset/File.h"
+#include "Core/StringUtils.h"
 
 struct DataBlock
 {
@@ -172,7 +173,7 @@ public:
 
 	virtual bool Load(Asset& InAsset, const AssetType& InType) = 0;
 
-	virtual bool TryLoad(AssetLoadRequest Request) = 0;
+	virtual bool TryLoad(AssetLoadRequest) { return false; }
 protected:
 	friend class AssetLoadTask;
 

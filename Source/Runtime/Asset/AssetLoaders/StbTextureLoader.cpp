@@ -1,5 +1,5 @@
 #include "Asset/AssetLoaders/StbTextureLoader.h"
-#include "Asset/TextureAsset.h"
+#include "Asset/Texture.h"
 #include "RHI/RHITexture.h"
 #include "RHI/RHIDevice.h"
 #include "Services/SpdLogService.h"

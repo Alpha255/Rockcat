@@ -14,14 +14,14 @@ public:
 
 	const RHITexture* GetRHI() const { assert(m_Texture); return m_Texture.get(); }
 
-	template<class Archive>
-	void serialize(Archive& Ar)
-	{
-		Ar(
-			CEREAL_BASE(Asset),
-			CEREAL_NVP(m_Path)
-		);
-	}
+	//template<class Archive>
+	//void serialize(Archive& Ar)
+	//{
+	//	Ar(
+	//		CEREAL_BASE(Asset)/*,
+	//		CEREAL_NVP(m_Path)*/
+	//	);
+	//}
 protected:
 	friend class AssimpSceneLoader;
 	friend class StbTextureLoader;

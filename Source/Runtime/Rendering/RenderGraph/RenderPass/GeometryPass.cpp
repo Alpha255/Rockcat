@@ -32,38 +32,38 @@ struct ScopeDebugMarker
 	RHICommandBuffer* CommandBuffer = nullptr;
 };
 
-struct MeshDrawTask : public Task
-{
-	MeshDrawTask(const MeshDrawCommand& Command, RHICommandListContext* CommandListContext)
-		: Task("MeshDrawTask", EPriority::High)
-		, DrawCommand(Command)
-		, CommandBuffer(CommandListContext->GetGraphicsCommandBuffer())
-	{
-		assert(CommandBuffer);
-	}
-
-	const MeshDrawCommand& DrawCommand;
-	RHICommandBuffer* CommandBuffer;
-
-protected:
-	void ExecuteImpl() override final
-	{
-		/// How to update shader resources ??? 
-		/// How to update uniform buffer ???
-		//auto PipelineState = DrawCommand.GraphicsPipeline->GetPipelineState();
-		//assert(PipelineState);
-
-		ScopeDebugMarker DebugMarker(CommandBuffer, DrawCommand.GetDebugName(), Math::Color::Random());
-
-		//CommandBuffer->SetGraphicsPipeline(DrawCommand.GraphicsPipeline);
-		CommandBuffer->SetVertexStream(0u, DrawCommand.VertexStream);
-		CommandBuffer->SetIndexBuffer(
-			DrawCommand.IndexBuffer,
-			DrawCommand.FirstIndex * static_cast<size_t>(DrawCommand.IndexFormat),
-			DrawCommand.IndexFormat);
-		CommandBuffer->DrawIndexedInstanced(DrawCommand.NumIndex, DrawCommand.NumInstances, DrawCommand.FirstIndex, DrawCommand.VertexArgs.BaseIndex);
-	}
-};
+//struct MeshDrawTask : public Task
+//{
+//	MeshDrawTask(const MeshDrawCommand& Command, RHICommandListContext* CommandListContext)
+//		: Task("MeshDrawTask", EPriority::High)
+//		, DrawCommand(Command)
+//		, CommandBuffer(CommandListContext->GetGraphicsCommandBuffer())
+//	{
+//		assert(CommandBuffer);
+//	}
+//
+//	const MeshDrawCommand& DrawCommand;
+//	RHICommandBuffer* CommandBuffer;
+//
+//protected:
+//	void ExecuteImpl() override final
+//	{
+//		/// How to update shader resources ??? 
+//		/// How to update uniform buffer ???
+//		//auto PipelineState = DrawCommand.GraphicsPipeline->GetPipelineState();
+//		//assert(PipelineState);
+//
+//		ScopeDebugMarker DebugMarker(CommandBuffer, DrawCommand.GetDebugName(), Math::Color::Random());
+//
+//		//CommandBuffer->SetGraphicsPipeline(DrawCommand.GraphicsPipeline);
+//		CommandBuffer->SetVertexStream(0u, DrawCommand.VertexStream);
+//		CommandBuffer->SetIndexBuffer(
+//			DrawCommand.IndexBuffer,
+//			DrawCommand.FirstIndex * static_cast<size_t>(DrawCommand.IndexFormat),
+//			DrawCommand.IndexFormat);
+//		CommandBuffer->DrawIndexedInstanced(DrawCommand.NumIndex, DrawCommand.NumInstances, DrawCommand.FirstIndex, DrawCommand.VertexArgs.BaseIndex);
+//	}
+//};
 
 void MeshDrawCommandBuilder::SetupShaderParameters(RHIGraphicsPipelineDesc& Desc,
 	const ISceneView& InView,

@@ -2,12 +2,12 @@
 #include "Application/ApplicationSettings.h"
 #include "Application/Window.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "Services/TaskFlowService.h"
 #include "Services/AssetDatabase.h"
 #include "Services/ShaderLibrary.h"
 #include "Profile/CpuTimer.h"
 #include "Profile/Stats.h"
 #include "System/System.h"
+#include "Async/Task.h"
 
 BaseApplication::BaseApplication(const char* SettingsFile)
 { 
@@ -49,7 +49,7 @@ void BaseApplication::RenderFrame()
 		Render();
 		RenderGUI();
 
-		TaskFlow::Get().FrameSync(true);
+		//TaskFlow::Get().FrameSync(true);
 	}
 }
 
@@ -190,7 +190,7 @@ void BaseApplication::Run()
 	System::SetWorkingDirectory(Paths::AssetPath());
 	LOG_INFO("Mount working directory to \"{}\".", System::GetWorkingDirectory().string());
 
-	TaskFlow::Get().Initialize();
+	TFTask::Initialize();
 	AssetDatabase::Get().Initialize();
 	Stats::Get().Initialize();
 	ShaderLibrary::Get().Initialize();
@@ -230,7 +230,7 @@ void BaseApplication::Run()
 
 	ShaderLibrary::Get().Finalize();
 	AssetDatabase::Get().Finalize();
-	TaskFlow::Get().Finalize();
+	TFTask::Finalize();
 	Stats::Get().Finalize();
 
 	FinalizeRHI();

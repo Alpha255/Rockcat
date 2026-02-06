@@ -119,28 +119,35 @@ public:
 
 	void Trigger();
 
-	inline void Wait() 
+	inline bool Wait() 
 	{
 		if (m_TFAsyncTask)
 		{
 			m_TFAsyncTask->second.wait();
+			return true;
 		}
+
+		return false;
 	}
 
-	inline void WaitForSeconds(size_t Seconds) 
+	inline bool WaitForSeconds(size_t Seconds) 
 	{
 		if (m_TFAsyncTask)
 		{
-			m_TFAsyncTask->second.wait_for(std::chrono::seconds(Seconds));
+			return m_TFAsyncTask->second.wait_for(std::chrono::seconds(Seconds)) == std::future_status::ready;
 		}
+
+		return false;
 	}
 
-	inline void WaitForMilliseconds(size_t Milliseconds)
+	inline bool WaitForMilliseconds(size_t Milliseconds)
 	{
 		if (m_TFAsyncTask)
 		{
-			m_TFAsyncTask->second.wait_for(std::chrono::milliseconds(Milliseconds));
+			return m_TFAsyncTask->second.wait_for(std::chrono::milliseconds(Milliseconds)) == std::future_status::ready;
 		}
+
+		return false;
 	}
 
 	static void Initialize();

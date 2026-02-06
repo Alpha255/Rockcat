@@ -10,7 +10,6 @@
 #include "Asset/ShaderPermutation.h"
 #include "Core/Name.h"
 #include "Async/Task.h"
-#include "Services/TaskFlowService.h"
 
 void RenderTest::Initialize()
 {
@@ -28,32 +27,32 @@ void RenderTest::Initialize()
 
 	};
 
-	class Task1 : public Task
-	{
-	protected:
-		void ExecuteImpl() override final
-		{
-			LOG_INFO("Task1-{}", IsWorkerThread() ? "WorkerThread" : "OtherThread");
-		}
-	};
+	//class Task1 : public Task
+	//{
+	//protected:
+	//	void ExecuteImpl() override final
+	//	{
+	//		LOG_INFO("Task1-{}", IsWorkerThread() ? "WorkerThread" : "OtherThread");
+	//	}
+	//};
 
-	class Task2 : public Task
-	{
-	protected:
-		void ExecuteImpl() override final
-		{
-			LOG_INFO("Task2-{}", IsWorkerThread() ? "WorkerThread" : "OtherThread");
-		}
-	};
+	//class Task2 : public Task
+	//{
+	//protected:
+	//	void ExecuteImpl() override final
+	//	{
+	//		LOG_INFO("Task2-{}", IsWorkerThread() ? "WorkerThread" : "OtherThread");
+	//	}
+	//};
 
-	Task1 T1;
-	Task2 T2;
+	//Task1 T1;
+	//Task2 T2;
 
-	T1.Dispatch();
-	T2.Dispatch();
+	//T1.Dispatch();
+	//T2.Dispatch();
 
-	T2.Wait();
-	T1.Wait();
+	//T2.Wait();
+	//T1.Wait();
 	//T1.precede(T2);
 
 	size_t NumVariants = Permutation::Num;

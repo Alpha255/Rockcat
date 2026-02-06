@@ -1,5 +1,5 @@
 #include "Asset/AssetLoaders/DDSTextureLoader.h"
-#include "Asset/TextureAsset.h"
+#include "Asset/Texture.h"
 #include <Asset/DDS.h>
 #include <dxgiformat.h>
 #include "RHI/RHIDevice.h"
