@@ -27,6 +27,10 @@ void RenderTest::Initialize()
 
 	};
 
+	TFTask::Launch("Test", []() {
+		LOG_INFO("This is a test");
+	})->Wait();
+
 	//class Task1 : public Task
 	//{
 	//protected:

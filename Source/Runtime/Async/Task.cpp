@@ -20,6 +20,11 @@ ConsoleVariable<bool> CVarUseSeperateRenderThread(
 	"Enable or disable seperate render thread.",
 	false);
 
+ConsoleVariable<bool> CVarUseSeperateRHIThread(
+	"tf.use_seperate_rhi_thread",
+	"Enable or disable seperate rhi thread.",
+	false);
+
 ConsoleVariable<uint32_t> CVarNumForegroundThreads(
 	"tf.num_foreground_threads",
 	"Number of foreground threads.",
@@ -56,8 +61,8 @@ public:
 		{
 			CVarUseSeperateGameThread.Get(),
 			CVarUseSeperateRenderThread.Get(),
-			CVarNumForegroundThreads.Get(),
-			TFTask::GetNumWorkerThreads()
+			TFTask::GetNumWorkerThreads(),
+			CVarNumForegroundThreads.Get()
 		};
 
 		m_Executors.reserve(WorkersInExecutor.size());
@@ -76,29 +81,22 @@ public:
 			assert(Executor);
 
 			tf::Taskflow Flow;
-			std::vector<tf::Taskflow> SubFlows(CVarNumForegroundThreads.Get());
-
-			for (auto& SubFlow : SubFlows)
+			for (uint32_t Index = 0u; Index < CVarNumForegroundThreads.Get(); ++Index)
 			{
-				SubFlow.emplace([]() {
-					System::SetThreadPriority(std::this_thread::get_id(), TFTask::EPriority::High);
+				Flow.emplace([]() {
+					const std::thread::id ThreadID = std::this_thread::get_id();
+
+					System::SetThreadPriority(ThreadID, TFTask::EPriority::High);
 
 					std::stringstream Stream;
-					Stream << std::this_thread::get_id();
-					uint32_t ThreadID = std::stoul(Stream.str());
-					LOG_INFO_CAT(LogTaskFlow, "Set foreground thread {} high priority", ThreadID);
-				});
-			}
-			for (uint32_t Index = 0u; Index < SubFlows.size(); ++Index)
-			{
-				Flow.emplace([Executor, &SubFlow = SubFlows[Index]]() {
-					Executor->corun(SubFlow);
+					Stream << ThreadID;
+					LOG_INFO_CAT(LogTaskFlow, "Set foreground thread {} high priority", std::stoul(Stream.str()));
 				});
 			}
 			Executor->run(Flow).wait();
 		}
 
-		const uint32_t NumSeperateThreads = CVarUseSeperateGameThread.Get() + CVarUseSeperateRenderThread.Get() + CVarNumForegroundThreads.Get() > 0u;
+		const uint32_t NumSeperateThreads = CVarUseSeperateGameThread.Get() + CVarUseSeperateRenderThread.Get() + CVarNumForegroundThreads.Get();
 		LOG_INFO_CAT(LogTaskFlow, "Create executors with {} seperate threads, {} worker threads, hyper threading is {}",
 			NumSeperateThreads,
 			TFTask::GetNumWorkerThreads(),
@@ -121,23 +119,17 @@ public:
 	{
 		assert(Thread < TFTask::EThread::Num);
 
-		if (!CVarUseSeperateGameThread.Get() && Thread == TFTask::EThread::GameThread)
-		{
-			return nullptr;
-		}
+		static Array<size_t, TFTask::EThread> s_ExecutorIndices {
+			static_cast<size_t>(TFTask::EThread::GameThread),
+			static_cast<size_t>(TFTask::EThread::RenderThread) - !CVarUseSeperateGameThread.Get(),
+			static_cast<size_t>(TFTask::EThread::WorkerThread) - !CVarUseSeperateGameThread.Get() - !CVarUseSeperateRenderThread.Get()
+		};
 
-		if (!CVarUseSeperateRenderThread.Get() && Thread == TFTask::EThread::RenderThread)
-		{
-			return nullptr;
-		}
+		const bool IsHighPriority = (Priority > TFTask::EPriority::Normal) ||
+			(Thread == TFTask::EThread::GameThread && !CVarUseSeperateGameThread.Get()) ||
+			(Thread == TFTask::EThread::RenderThread && !CVarUseSeperateRenderThread.Get());
 
-		size_t Index = static_cast<size_t>(Thread);
-		if (Thread == TFTask::EThread::WorkerThread && Priority > TFTask::EPriority::Normal && CVarNumForegroundThreads.Get())
-		{
-			Index += 1u;
-		}
-
-		return m_Executors[Index].get();
+		return m_Executors[s_ExecutorIndices[static_cast<size_t>(Thread)] + IsHighPriority].get();
 	}
 private:
 	std::vector<std::unique_ptr<tf::Executor>> m_Executors;
@@ -264,11 +256,11 @@ void TFTask::TriggerSubsequents()
 	}
 }
 
-void TFTask::Trigger()
+bool TFTask::Trigger()
 {
 	if (IsCanceled() || IsDispatched() || HasAnyRef())
 	{
-		return;
+		return false;
 	}
 
 	if (auto Executor = TFExecutorManager::Get().GetExecutor(m_Thread, m_Priority))
@@ -290,11 +282,15 @@ void TFTask::Trigger()
 		}
 
 		m_TFAsyncTask = std::make_shared<TFAsyncTask>(std::move(Executor->dependent_async([this]() {
-			ThreadPriorityScope ScopedTaskPriority(m_Priority);
+			//ThreadPriorityScope ScopedTaskPriority(m_Priority);
 			Execute();
 			TriggerSubsequents();
 		}, PrerequisiteTasks.begin(), PrerequisiteTasks.end())));
+
+		return true;
 	}
+
+	return false;
 }
 
 bool TFTask::TryCancel()

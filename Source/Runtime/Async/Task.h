@@ -117,7 +117,7 @@ public:
 
 	void AddPrerequisite(TFTask& Prerequisite);
 
-	void Trigger();
+	bool Trigger();
 
 	inline bool Wait() 
 	{

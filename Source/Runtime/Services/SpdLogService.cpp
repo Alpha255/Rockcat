@@ -1,4 +1,5 @@
 #include "Services/SpdLogService.h"
+#include <spdlog/details/registry.h>
 
 void SpdLogService::WinDebugSinkAsync::sink_it_(const spdlog::details::log_msg& Log)
 {
@@ -38,26 +39,29 @@ const ELogLevel SpdLogService::GetDefaultLevel()
 #endif
 }
 
-std::shared_ptr<spdlog::logger> SpdLogService::CreateLogger(const char* Name, ELogLevel Level)
+spdlog::logger& SpdLogService::GetOrCreateLogger(const char* Name, ELogLevel Level)
 {
-	auto Logger = spdlog::get(Name);
-	if (!Logger)
+	std::lock_guard Locker(m_LoggerLock);
+
+	auto It = m_Loggers.find(Name);
+	if (It == m_Loggers.end())
 	{
-		Logger = std::make_shared<spdlog::logger>(Name, m_DefaultSink);
+		auto Logger = std::make_shared<spdlog::logger>(Name, m_DefaultSink);
 		spdlog::initialize_logger(Logger);
 		Logger->set_pattern(GetDefaultPattern());
 		Logger->set_level(static_cast<spdlog::level::level_enum>(Level));
+		It = m_Loggers.emplace(std::make_pair(std::string_view(Name), std::move(Logger))).first;
 	}
 	else
 	{
 		auto TargetLevel = static_cast<spdlog::level::level_enum>(Level);
-		if (Logger->level() != TargetLevel)
+		if (It->second->level() != TargetLevel)
 		{
-			Logger->set_level(TargetLevel);
+			It->second->set_level(TargetLevel);
 		}
 	}
 
-	return Logger;
+	return *It->second;
 }
 
 void SpdLogService::RegisterRedirector(LogRedirector* Redirector)

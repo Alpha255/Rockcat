@@ -53,8 +53,5 @@ public:
 	inline bool IsFloat() const override { return std::is_same_v<T, float>; }
 	inline bool IsString() const override { return std::is_same_v<T, std::string> || std::is_same_v<T, const char*>; }
 private:
-	std::string_view m_Name;
-	std::string_view m_Description;
-
 	std::atomic<T> m_Value;
 };

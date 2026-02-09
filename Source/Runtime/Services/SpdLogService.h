@@ -37,17 +37,10 @@ public:
 
 	void RegisterRedirector(LogRedirector* Redirector);
 
-	inline std::shared_ptr<spdlog::logger> GetLogger(const char* Name)
-	{
-		return CreateLogger(Name, GetDefaultLevel());
-	}
+	inline spdlog::logger& GetLogger(const char* Name) { return GetOrCreateLogger(Name, GetDefaultLevel()); }
+	inline spdlog::logger& GetDefaultLogger() { return *m_DefaultLogger; }
 
-	inline std::shared_ptr<spdlog::logger> GetDefaultLogger()
-	{
-		return m_DefaultLogger;
-	}
-
-	std::shared_ptr<spdlog::logger> CreateLogger(const char* Name, ELogLevel Level);
+	spdlog::logger& GetOrCreateLogger(const char* Name, ELogLevel Level);
 
 	const std::unordered_set<LogRedirector*>& GetRedirectors() const { return m_Redirectors; }
 private:
@@ -65,13 +58,16 @@ private:
 	spdlog::sink_ptr m_DefaultSink;
 	std::shared_ptr<spdlog::logger> m_DefaultLogger;
 	std::unordered_set<LogRedirector*> m_Redirectors;
+	std::unordered_map<std::string_view, std::shared_ptr<spdlog::logger>> m_Loggers;
+
+	std::mutex m_LoggerLock;
 };
 
 #define SPD_LOG_CATEGORY(Category, Level, Format, ...) \
-	SpdLogService::Get().GetLogger(#Category)->Level(Format, __VA_ARGS__)
+	SpdLogService::Get().GetLogger(#Category).Level(Format, __VA_ARGS__)
 
 #define SPD_LOG_DEFAULT(Level, Format, ...) \
-	SpdLogService::Get().GetDefaultLogger()->Level(Format, __VA_ARGS__)
+	SpdLogService::Get().GetDefaultLogger().Level(Format, __VA_ARGS__)
 
 #define LOG_TRACE(Format, ...) SPD_LOG_DEFAULT(trace, Format, __VA_ARGS__)
 #define LOG_DEBUG(Format, ...) SPD_LOG_DEFAULT(debug, Format, __VA_ARGS__)
