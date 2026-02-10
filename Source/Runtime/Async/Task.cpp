@@ -93,7 +93,8 @@ public:
 					LOG_INFO_CAT(LogTaskFlow, "Set foreground thread {} high priority", std::stoul(Stream.str()));
 				});
 			}
-			Executor->run(Flow).wait();
+			Executor->run(Flow);
+			Executor->wait_for_all();
 		}
 
 		const uint32_t NumSeperateThreads = CVarUseSeperateGameThread.Get() + CVarUseSeperateRenderThread.Get() + CVarNumForegroundThreads.Get();
@@ -156,14 +157,14 @@ void TFTask::InitializeThreadTags()
 	{
 		Launch("tf.SetGameThreadTag", []() {
 			t_ThreadTag = TFTask::EThread::GameThread;
-		}, EThread::GameThread);
+		}, EThread::GameThread)->Wait();
 	}
 
 	if (CVarUseSeperateRenderThread.Get())
 	{
 		Launch("tf.SetRenderThreadTag", []() {
 			t_ThreadTag = TFTask::EThread::RenderThread;
-		}, EThread::RenderThread);
+		}, EThread::RenderThread)->Wait();
 	}
 }
 
@@ -218,7 +219,7 @@ bool TFTask::IsWorkerThread()
 
 void TFTask::AddPrerequisite(TFTask& Prerequisite)
 {
-	assert(IsSameThread(*this, Prerequisite) || !IsDispatched());
+	assert(IsSameExecutor(*this, Prerequisite) || !IsDispatched());
 
 	Prerequisite.AddSubsequents(*this);
 
@@ -228,7 +229,7 @@ void TFTask::AddPrerequisite(TFTask& Prerequisite)
 
 void TFTask::AddSubsequents(TFTask& Subsequent)
 {
-	if (!IsSameThread(*this, Subsequent))
+	if (!IsSameExecutor(*this, Subsequent))
 	{
 		std::lock_guard<std::mutex> Locker(m_Lock);
 		m_Subsequents.insert(&Subsequent);
@@ -270,10 +271,8 @@ bool TFTask::Trigger()
 
 		for (auto Prerequisite : m_Prerequisites)
 		{
-			if (Prerequisite)
+			if (Prerequisite && Prerequisite->Trigger())
 			{
-				Prerequisite->Trigger();
-
 				if (auto LowLevelTask = Prerequisite->GetAsyncTask())
 				{
 					PrerequisiteTasks.emplace_back(tf::AsyncTask(*LowLevelTask));
@@ -302,6 +301,15 @@ bool TFTask::TryCancel()
 
 	SetCanceled(true);
 	return true;
+}
+
+TFTask::~TFTask()
+{
+	if (IsDispatched() && !IsCompleted())
+	{
+		LOG_WARNING_CAT(LogTaskFlow, "Unexpected wait by task: {}", GetName().Get());
+		Wait();
+	}
 }
 
 //void TaskFlow::FrameSync(bool AllowOneFrameLag)

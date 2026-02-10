@@ -27,41 +27,41 @@ void RenderTest::Initialize()
 
 	};
 
-	TFTask::Launch("Test", []() {
-		LOG_INFO("This is a test");
-	})->Wait();
+	auto TaskA = std::make_shared<TFTask>("TaskA", []() {
+		LOG_INFO("TaskA");
+	});
 
-	//class Task1 : public Task
-	//{
-	//protected:
-	//	void ExecuteImpl() override final
-	//	{
-	//		LOG_INFO("Task1-{}", IsWorkerThread() ? "WorkerThread" : "OtherThread");
-	//	}
-	//};
+	auto TaskB = TFTask::Launch("TaskB", []() {
+		LOG_INFO("TaskB");
+	}, {TaskA.get()});
 
-	//class Task2 : public Task
-	//{
-	//protected:
-	//	void ExecuteImpl() override final
-	//	{
-	//		LOG_INFO("Task2-{}", IsWorkerThread() ? "WorkerThread" : "OtherThread");
-	//	}
-	//};
+	auto TaskC = std::make_shared<TFTask>("TaskC", []() {
+		LOG_INFO("TaskC");
+	});
 
-	//Task1 T1;
-	//Task2 T2;
+	auto TaskD = std::make_shared<TFTask>("TaskD", []() {
+		LOG_INFO("TaskD");
+	}, TFTask::EThread::WorkerThread, TFTask::EPriority::High);
 
-	//T1.Dispatch();
-	//T2.Dispatch();
+	TaskC->AddPrerequisite(*TaskB);
+	TaskC->AddPrerequisite(*TaskD);
+	TaskC->Trigger();
+	TaskD->Trigger();
 
-	//T2.Wait();
-	//T1.Wait();
-	//T1.precede(T2);
+	//TaskA->Wait();
+	//TaskB->Wait();
+	//TaskC->Wait();
+	//TaskD->Wait();
+
+	auto GetState = [](std::shared_ptr<TFTask>& Task) {
+		return Task->IsCompleted() ? "Completed" : "Uncompleted";
+	};
+
+	LOG_INFO("TaskA is {}, TaskB is {}, TaskC is {}, TaskD is {}", GetState(TaskA), GetState(TaskB), GetState(TaskC), GetState(TaskD));
 
 	size_t NumVariants = Permutation::Num;
 
-	m_Scene = Scene::Load(Paths::ScenePath() / "RenderTest.json");
+	//m_Scene = Scene::Load(Paths::ScenePath() / "RenderTest.json");
 
 	//m_Scene->AddEntity(EntityID::NullIndex, "entity0");
 	//m_Scene->AddEntity(EntityID::NullIndex, "entity1");
@@ -75,9 +75,9 @@ void RenderTest::Initialize()
 	//Trans0->SetTranslation(1, 1, 1);
 	//Trans1->SetTranslation(2, 2, 2);
 
-	m_Scene->Save(true);
+	//m_Scene->Save(true);
 
-	m_Scene->AddView<PlanarSceneView>();
+	//m_Scene->AddView<PlanarSceneView>();
 	//m_View = std::make_shared<PlanarView>();
 	//m_View->SetCamera(&m_Scene->GetMainCamera());
 	//m_View->SetViewport(RHIViewport(m_Window->GetWidth(), m_Window->GetHeight()));

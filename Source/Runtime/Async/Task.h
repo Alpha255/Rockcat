@@ -30,7 +30,7 @@ public:
 	{
 		if (m_Future.valid())
 		{
-			m_Future.wait();
+			m_Future.get();
 		}
 	}
 
@@ -107,7 +107,7 @@ public:
 	{
 	}
 
-	~TFTask() = default;
+	~TFTask();
 
 	inline bool IsCompleted() const { return m_TFAsyncTask ? m_TFAsyncTask->first.is_done() : false; }
 	inline bool IsDispatched() const { return m_TFAsyncTask ? true : false; }
@@ -123,7 +123,7 @@ public:
 	{
 		if (m_TFAsyncTask)
 		{
-			m_TFAsyncTask->second.wait();
+			m_TFAsyncTask->second.get();
 			return true;
 		}
 
@@ -217,7 +217,7 @@ protected:
 
 	virtual void Execute();
 
-	inline friend bool IsSameThread(const TFTask& Task1, const TFTask& Task2) { return Task1.m_Thread == Task2.m_Thread; }
+	inline friend bool IsSameExecutor(const TFTask& Task1, const TFTask& Task2) { return Task1.m_Thread == Task2.m_Thread && Task1.m_Priority == Task2.m_Priority; }
 
 	inline bool HasAnyRef() const { return m_NumRef.load(std::memory_order_acquire) > 0u; }
 	inline void AddRef() { m_NumRef.fetch_add(1u, std::memory_order_relaxed); }
