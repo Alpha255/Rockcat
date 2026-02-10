@@ -9,7 +9,7 @@ public:
 
 	bool Load(Asset& InAsset, const AssetType& Type) override final;
 protected:
-	std::shared_ptr<Asset> CreateAssetImpl(const std::filesystem::path& Path) override final;
+	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& Path) override final;
 
 	void ProcessTransform(const struct aiNode* AiNode, class TransformComponent& TransformComp);
 	bool ProcessNode(const struct aiScene* AiScene, const struct aiNode* AiNode, class Entity& GraphNode, struct AssimpScene& Model);

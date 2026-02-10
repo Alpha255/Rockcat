@@ -11,7 +11,7 @@ public:
 	void Finalize() override final;
 
 	template<class T>
-	inline std::shared_ptr<T> Load(const std::filesystem::path& Path, bool ForceReload = false, bool Async = true)
+	inline std::shared_ptr<T> RequestLoad(const std::filesystem::path& Path, bool ForceReload = false, bool Async = true)
 	{
 		return Cast<T>(LoadAssetImpl(GetUnifyAssetPath(Path), ForceReload, Async));
 	}

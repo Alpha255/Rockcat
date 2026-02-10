@@ -116,7 +116,7 @@ AssimpSceneLoader::AssimpSceneLoader()
 	LOG_INFO_CAT(LogAsset, "Create assimp scene loader, use assimp @{}.{}.{}", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionPatch());
 }
 
-std::shared_ptr<Asset> AssimpSceneLoader::CreateAssetImpl(const std::filesystem::path& AssetPath)
+std::shared_ptr<Asset> AssimpSceneLoader::CreateAsset(const std::filesystem::path& AssetPath)
 {
 	return std::make_shared<AssimpScene>(AssetPath);
 }

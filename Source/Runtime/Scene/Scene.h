@@ -10,6 +10,7 @@ struct AssimpScene : public Asset, public SceneGraph
 {
 	using Asset::Asset;
 
+protected:
 	void OnPostLoad() override final;
 };
 
@@ -55,7 +56,7 @@ protected:
 	inline const std::vector<EntityID::IndexType>& GetAddedPrimitives() const { return m_AddedPrimitives; }
 	inline const std::vector<EntityID::IndexType>& GetRemovedPrimitives() const { return m_RemovedPrimitives; }
 private:
-	void MergeAssimpScenes(std::vector<std::shared_ptr<AssimpScene>>* AssimpScenes);
+	void MergeWithAssimpScenes(const AssimpScene& AiScene);
 
 	inline void AddPrimitive(const Entity& InEntity)
 	{

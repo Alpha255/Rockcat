@@ -3,6 +3,7 @@
 #include "Services/AssetDatabase.h"
 #include "Components/TransformComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Paths.h"
 
 void AssimpScene::OnPostLoad()
 {
@@ -33,55 +34,54 @@ void Scene::Tick(float ElapsedSeconds)
 	}
 }
 
-void Scene::MergeAssimpScenes(std::vector<std::shared_ptr<AssimpScene>>* AssimpScenes)
+void Scene::MergeWithAssimpScenes(const AssimpScene& AiScene)
 {
-	if (AssimpScenes->size() != m_AssimpScenes.size())
-	{
-		return;
-	}
+	//if (AssimpScenes->size() != m_AssimpScenes.size())
+	//{
+	//	return;
+	//}
 
-	for (auto& AssimpScene : *AssimpScenes)
-	{
-		if (!AssimpScene)
-		{
-			continue;
-		}
+	//for (auto& AssimpScene : *AssimpScenes)
+	//{
+	//	if (!AssimpScene)
+	//	{
+	//		continue;
+	//	}
 
-		if (!AssimpScene->IsReady(std::memory_order_acquire))
-		{
-			return;
-		}
-	}
+	//	if (!AssimpScene->IsReady(std::memory_order_acquire))
+	//	{
+	//		return;
+	//	}
+	//}
 
-	for (auto& AssimpScene : *AssimpScenes)
-	{
-		if (!AssimpScene)
-		{
-			continue;
-		}
-	}
+	//for (auto& AssimpScene : *AssimpScenes)
+	//{
+	//	if (!AssimpScene)
+	//	{
+	//		continue;
+	//	}
+	//}
 
-	SetStatus(EStatus::Ready);
+	//SetStatus(EStatus::Ready);
 
-	delete AssimpScenes;
+	//delete AssimpScenes;
 }
 
 void Scene::OnPostLoad()
 {
-	std::vector<std::shared_ptr<AssimpScene>>* AssimpScenes = new std::vector<std::shared_ptr<AssimpScene>>();
-
-	//for (const auto& Path : m_AssimpScenes)
-	//{
-	//	std::filesystem::path AssimpScenePath = Path;
-	//	if (!std::filesystem::exists(AssimpScenePath))
-	//	{
-	//		AssimpScenePath = Paths::GltfSampleModelPath() / Path;
-	//		if (!std::filesystem::exists(AssimpScenePath))
-	//		{
-	//			LOG_WARNING("Assimp scene \"{}\" not exists", Path);
-	//			continue;
-	//		}
-	//	}
+	for (const auto& Path : m_AssimpScenes)
+	{
+		std::filesystem::path AiScenePath(Path);
+		if (!std::filesystem::exists(AiScenePath))
+		{
+			AiScenePath = Paths::GltfSampleModelPath() / Path;
+			if (!std::filesystem::exists(AiScenePath))
+			{
+				LOG_WARNING("Assimp scene \"{}\" not exists", Path);
+				continue;
+			}
+		}
+	}
 
 	//	/// @TODO: Thread safe ???
 	//	auto AssimpSceneOnLoading = AssimpScenes->emplace_back(AssetDatabase::Get().Load<AssimpScene>(AssimpScenePath));

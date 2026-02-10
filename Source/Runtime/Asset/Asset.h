@@ -146,14 +146,7 @@ public:
 
 	virtual bool TryLoad(AssetLoadRequest) { return false; }
 protected:
-	friend class AssetLoadTask;
-
-	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& Path)
-	{
-		return CreateAssetImpl(Path);
-	}
-
-	virtual std::shared_ptr<Asset> CreateAssetImpl(const std::filesystem::path& Path) = 0;
+	virtual std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& Path) = 0;
 private:
 	std::vector<std::string_view> m_SupportedFormats;
 };

@@ -22,7 +22,7 @@ StbTextureLoader::StbTextureLoader()
 	LOG_INFO_CAT(LogAsset, "Create stb image loader, use stb_image @2.3");
 }
 
-std::shared_ptr<Asset> StbTextureLoader::CreateAssetImpl(const std::filesystem::path& Path)
+std::shared_ptr<Asset> StbTextureLoader::CreateAsset(const std::filesystem::path& Path)
 {
 	return std::make_shared<Texture>(Path);
 }

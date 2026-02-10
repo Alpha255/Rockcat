@@ -190,7 +190,7 @@ DDSTextureLoader::DDSTextureLoader()
 {
 }
 
-std::shared_ptr<Asset> DDSTextureLoader::CreateAssetImpl(const std::filesystem::path& Path)
+std::shared_ptr<Asset> DDSTextureLoader::CreateAsset(const std::filesystem::path& Path)
 {
 	return std::make_shared<Texture>(Path);
 }
