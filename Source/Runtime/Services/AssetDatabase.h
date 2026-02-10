@@ -16,7 +16,7 @@ public:
 		return Cast<T>(LoadAssetImpl(GetUnifyAssetPath(Path), ForceReload, Async));
 	}
 
-	bool Unload(const std::filesystem::path& Path, bool Async = true);
+	bool Unload(const std::filesystem::path& Path);
 
 	bool CancelLoad(const std::filesystem::path& Path);
 private:

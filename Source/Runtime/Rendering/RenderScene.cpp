@@ -1,5 +1,6 @@
 #include "Rendering/RenderScene.h"
 #include "Scene/Scene.h"
+#include "Scene/Components/StaticMesh.h"
 #include "Scene/SceneVisitor.h"
 #include "RHI/RHIDevice.h"
 #include "Rendering/RenderGraph/RenderPass/GeometryPass.h"

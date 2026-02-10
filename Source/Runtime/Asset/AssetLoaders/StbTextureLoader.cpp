@@ -30,7 +30,7 @@ std::shared_ptr<Asset> StbTextureLoader::CreateAssetImpl(const std::filesystem::
 bool StbTextureLoader::Load(Asset& InAsset, const AssetType& Type)
 {
 	auto& StbImage = Cast<Texture>(InAsset);
-	auto AssetData = StbImage.LoadData(Type.ContentsFormat);
+	auto AssetData = StbImage.LoadData();
 	auto const DataSize = static_cast<int32_t>(AssetData->Size);
 	auto Data = reinterpret_cast<const stbi_uc*>(AssetData->Data.get());
 

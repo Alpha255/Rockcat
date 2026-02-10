@@ -11,22 +11,20 @@
 #include "Core/Name.h"
 #include "Async/Task.h"
 
+class TestPemutation1 : public ShaderDefineInt32<0, 1, 2, 3>
+{
+};
+
+class TestPemutation2 : public ShaderDefineBool
+{
+};
+
+class Permutation : public ShaderVariants<TestPemutation1, TestPemutation2>
+{
+};
+
 void RenderTest::Initialize()
 {
-	class TestPemutation1 : public ShaderDefineInt32<0, 1, 2, 3>
-	{
-
-	};
-
-	class TestPemutation2 : public ShaderDefineBool
-	{
-	};
-
-	class Permutation : public ShaderVariants<TestPemutation1, TestPemutation2>
-	{
-
-	};
-
 	auto TaskA = std::make_shared<TFTask>("TaskA", []() {
 		LOG_INFO("TaskA");
 	});
@@ -61,7 +59,7 @@ void RenderTest::Initialize()
 
 	size_t NumVariants = Permutation::Num;
 
-	//m_Scene = Scene::Load(Paths::ScenePath() / "RenderTest.json");
+	m_Scene = Scene::Load(Paths::ScenePath() / "RenderTest.json");
 
 	//m_Scene->AddEntity(EntityID::NullIndex, "entity0");
 	//m_Scene->AddEntity(EntityID::NullIndex, "entity1");

@@ -157,7 +157,7 @@ std::shared_ptr<Asset> AssetDatabase::ProcessAssetLoadRequest(const AssetLoadReq
 	return std::shared_ptr<Asset>();
 }
 
-bool AssetDatabase::Unload(const std::filesystem::path& Path, bool Async)
+bool AssetDatabase::Unload(const std::filesystem::path& Path)
 {
 	//auto It = m_AssetLoadTasks.find(Path);
 	//if (It != m_AssetLoadTasks.end())

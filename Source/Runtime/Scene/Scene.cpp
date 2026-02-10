@@ -4,6 +4,11 @@
 #include "Components/TransformComponent.h"
 #include "Components/StaticMeshComponent.h"
 
+void AssimpScene::OnPostLoad()
+{
+
+}
+
 void Scene::Tick(float ElapsedSeconds)
 {
 	if (!IsReady())
@@ -42,7 +47,7 @@ void Scene::MergeAssimpScenes(std::vector<std::shared_ptr<AssimpScene>>* AssimpS
 			continue;
 		}
 
-		if (!AssimpScene->IsReady())
+		if (!AssimpScene->IsReady(std::memory_order_acquire))
 		{
 			return;
 		}
@@ -61,34 +66,27 @@ void Scene::MergeAssimpScenes(std::vector<std::shared_ptr<AssimpScene>>* AssimpS
 	delete AssimpScenes;
 }
 
-void Scene::SetStatusChangeCallbacks()
+void Scene::OnPostLoad()
 {
-	BaseClass::SetStatusChangeCallbacks();
-
 	std::vector<std::shared_ptr<AssimpScene>>* AssimpScenes = new std::vector<std::shared_ptr<AssimpScene>>();
 
-	SetOnPostLoad([this, AssimpScenes]() {
-		for (const auto& Path : m_AssimpScenes)
-		{
-			std::filesystem::path AssimpScenePath = Path;
-			if (!std::filesystem::exists(AssimpScenePath))
-			{
-				AssimpScenePath = Paths::GltfSampleModelPath() / Path;
-				if (!std::filesystem::exists(AssimpScenePath))
-				{
-					LOG_WARNING("Assimp asset \"{}\" not exists", Path);
-					continue;
-				}
-			}
+	//for (const auto& Path : m_AssimpScenes)
+	//{
+	//	std::filesystem::path AssimpScenePath = Path;
+	//	if (!std::filesystem::exists(AssimpScenePath))
+	//	{
+	//		AssimpScenePath = Paths::GltfSampleModelPath() / Path;
+	//		if (!std::filesystem::exists(AssimpScenePath))
+	//		{
+	//			LOG_WARNING("Assimp scene \"{}\" not exists", Path);
+	//			continue;
+	//		}
+	//	}
 
-			/// @TODO: Thread safe ???
-			auto AssimpSceneOnLoading = AssimpScenes->emplace_back(AssetDatabase::Get().Load<AssimpScene>(AssimpScenePath)).get();
-			AssimpSceneOnLoading->SetOnReady([this, AssimpScenes, AssimpSceneOnLoading]() {
-				AssimpSceneOnLoading->SetStatus(EStatus::Ready);
-				MergeAssimpScenes(AssimpScenes);
-			});
-		}
-	});
+	//	/// @TODO: Thread safe ???
+	//	auto AssimpSceneOnLoading = AssimpScenes->emplace_back(AssetDatabase::Get().Load<AssimpScene>(AssimpScenePath));
+	//	AssimpSceneOnLoading->MergeAssimpScenes(AssimpScenes);
+	//}
 }
 
 Scene::~Scene()

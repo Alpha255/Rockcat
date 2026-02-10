@@ -199,7 +199,7 @@ bool DDSTextureLoader::Load(Asset& InAsset, const AssetType& Type)
 {
 	auto& DDSImage = Cast<Texture>(InAsset);
 
-	auto AssetData = DDSImage.LoadData(Type.ContentsFormat);
+	auto AssetData = DDSImage.LoadData();
 	auto const DataSize = static_cast<int32_t>(AssetData->Size);
 	auto Data = reinterpret_cast<const uint8_t*>(AssetData->Data.get());
 

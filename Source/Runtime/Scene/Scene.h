@@ -1,8 +1,17 @@
 #pragma once
 
-#include "Asset/SceneAsset.h"
+#include "Asset/SerializableAsset.h"
+#include "Scene/SceneGraph.h"
 #include "Components/ComponentPool.h"
+#include "Components/Camera.h"
 #include "Core/Tickable.h"
+
+struct AssimpScene : public Asset, public SceneGraph
+{
+	using Asset::Asset;
+
+	void OnPostLoad() override final;
+};
 
 class Scene : public ITickable, public SceneGraph, public Serializable<Scene>
 {
@@ -41,7 +50,7 @@ public:
 		);
 	}
 protected:
-	void SetStatusChangeCallbacks() override final;
+	void OnPostLoad() override final;
 
 	inline const std::vector<EntityID::IndexType>& GetAddedPrimitives() const { return m_AddedPrimitives; }
 	inline const std::vector<EntityID::IndexType>& GetRemovedPrimitives() const { return m_RemovedPrimitives; }
@@ -59,8 +68,9 @@ private:
 	}
 
 	std::vector<std::string> m_AssimpScenes;
+
 	std::vector<std::shared_ptr<class ISceneView>> m_Views;
-	std::vector<std::shared_ptr<class Camera>> m_Cameras;
+	std::vector<std::shared_ptr<Camera>> m_Cameras;
 
 	std::vector<EntityID::IndexType> m_AddedPrimitives;
 	std::vector<EntityID::IndexType> m_RemovedPrimitives;

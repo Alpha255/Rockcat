@@ -14,20 +14,6 @@ public:
 	template<class Type = T, class... Args>
 	static std::shared_ptr<Type> Load(Args&&... InArgs)
 	{
-		static std::shared_ptr<T> s_Asset;
-
-		if (!s_Asset)
-		{
-			s_Asset = std::make_shared<Type>(std::forward<Args>(InArgs)...);
-			s_Asset->Reload<Type>();
-		}
-
-		return s_Asset;
-	}
-
-	template<class Type = T, class... Args>
-	static std::shared_ptr<Type> LoadInstance(Args&&... InArgs)
-	{
 		auto NewAsset = std::make_shared<Type>(std::forward<Args>(InArgs)...);
 		NewAsset->Reload<Type>();
 
@@ -37,9 +23,7 @@ public:
 	template<class Type = T>
 	void Reload()
 	{
-		SetStatusChangeCallbacks();
-
-		OnPreLoad();
+		SetStatus(EStatus::Loading);
 
 		std::ifstream FileStream(GetPath());
 		if (FileStream.is_open())
@@ -57,7 +41,7 @@ public:
 
 		FileStream.close();
 
-		OnPostLoad();
+		SetStatus(EStatus::Ready);
 	}
 
 	template<class Type = T>

@@ -5,8 +5,10 @@
 #include "RHI/RHIDevice.h"
 #include "Profile/CpuTimer.h"
 
+#include "Scene/Components/StaticMesh.h"
 #include "Scene/Components/TransformComponent.h"
 #include "Scene/Components/StaticMeshComponent.h"
+#include "Asset/Material.h"
 
 #pragma warning(push)
 #pragma warning(disable:4819)
@@ -125,7 +127,7 @@ bool AssimpSceneLoader::Load(Asset& InAsset, const AssetType& Type)
 
 	CpuTimer Timer;
 
-	auto& Scene = Cast<AssimpScene>(InAsset);
+	auto& Model = Cast<AssimpScene>(InAsset);
 
 	const uint32_t ProcessFlags = static_cast<uint32_t>(
 		aiProcessPreset_TargetRealtime_MaxQuality |
@@ -140,17 +142,17 @@ bool AssimpSceneLoader::Load(Asset& InAsset, const AssetType& Type)
 	AssimpImporter.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, RemoveFlags);
 #if _DEBUG
 	Assimp::DefaultLogger::set(new AssimpLogger());
-	AssimpImporter.SetProgressHandler(new AssimpProgressHandler(Scene.GetPath()));
+	AssimpImporter.SetProgressHandler(new AssimpProgressHandler(Model.GetPath()));
 #endif
-	if (auto AiScene = AssimpImporter.ReadFile(Scene.GetPath().string(), ProcessFlags))
+	if (auto AiScene = AssimpImporter.ReadFile(Model.GetPath().string(), ProcessFlags))
 	{
 		if (AiScene->HasMeshes() && AiScene->mRootNode)
 		{
-			Scene.Graph.SetRoot(Scene.Graph.AddEntity(EntityID(), AiScene->mRootNode->mName.C_Str()));
-			if (ProcessNode(AiScene, AiScene->mRootNode, *Scene.Graph.GetRoot(), Scene))
+			Model.SetRoot(Model.AddEntity(EntityID(), AiScene->mRootNode->mName.C_Str()));
+			if (ProcessNode(AiScene, AiScene->mRootNode, *Model.GetRoot(), Model))
 			{
 				Timer.Pause();
-				LOG_INFO_CAT(LogAsset, "Loaded assimp scene \"{}\" in {:.2f} ms", Scene.GetName(), Timer.GetElapsedMilliseconds());
+				LOG_INFO_CAT(LogAsset, "Loaded assimp scene \"{}\" in {:.2f} ms", Model.GetName(), Timer.GetElapsedMilliseconds());
 				return true;
 			}
 
@@ -163,7 +165,7 @@ bool AssimpSceneLoader::Load(Asset& InAsset, const AssetType& Type)
 		}
 	}
 
-	LOG_ERROR_CAT(LogAsset, "Failed to load assimp scene: {}: \"{}\"", Scene.GetName(), AssimpImporter.GetErrorString());
+	LOG_ERROR_CAT(LogAsset, "Failed to load assimp scene: {}: \"{}\"", Model.GetName(), AssimpImporter.GetErrorString());
 	return false;
 }
 
@@ -195,7 +197,7 @@ void AssimpSceneLoader::ProcessTransform(const aiNode* AiNode, TransformComponen
 		.SetRotation(Rotation.x, Rotation.y, Rotation.z, Rotation.w);
 }
 
-bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode, Entity& GraphNode, AssimpScene& Scene)
+bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode, Entity& GraphNode, AssimpScene& Model)
 {
 	if (!AiNode)
 	{
@@ -220,15 +222,15 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 			continue;
 		}
 
-		auto& Node = Scene.Graph.AddChild(GraphNode, AiMesh->mName.C_Str());
+		auto& Node = Model.AddChild(GraphNode, AiMesh->mName.C_Str());
 		SetNodeName(Node);
 
 		auto TransformComp = Node.AddComponent<TransformComponent>();
 		auto StaticMeshComp = Node.AddComponent<StaticMeshComponent>();
 
 		ProcessTransform(AiNode, *TransformComp);
-		ProcessMesh(AiScene, Scene, MeshIndex, *StaticMeshComp);
-		ProcessMaterial(AiScene, Scene, AiMesh->mMaterialIndex, *StaticMeshComp);
+		ProcessMesh(AiScene, Model, MeshIndex, *StaticMeshComp);
+		ProcessMaterial(AiScene, Model, AiMesh->mMaterialIndex, *StaticMeshComp);
 	}
 
 	if (AiNode->mNumChildren == 0u)
@@ -236,12 +238,12 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 		return true;
 	}
 
-	auto& NextNode = Scene.Graph.AddChild(GraphNode, AiNode->mName.C_Str());
+	auto& NextNode = Model.AddChild(GraphNode, AiNode->mName.C_Str());
 	SetNodeName(NextNode);
 
 	for (uint32_t NodeIndex = 0u; NodeIndex < AiNode->mNumChildren; ++NodeIndex)
 	{
-		if (!ProcessNode(AiScene, AiNode->mChildren[NodeIndex], NextNode, Scene))
+		if (!ProcessNode(AiScene, AiNode->mChildren[NodeIndex], NextNode, Model))
 		{
 			return false;
 		}
