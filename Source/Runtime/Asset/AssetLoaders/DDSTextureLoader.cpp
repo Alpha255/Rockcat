@@ -195,7 +195,7 @@ std::shared_ptr<Asset> DDSTextureLoader::CreateAsset(const std::filesystem::path
 	return std::make_shared<Texture>(Path);
 }
 
-bool DDSTextureLoader::Load(Asset& InAsset, const AssetType& Type)
+bool DDSTextureLoader::Load(Asset& InAsset)
 {
 	auto& DDSImage = Cast<Texture>(InAsset);
 

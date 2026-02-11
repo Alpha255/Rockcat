@@ -34,5 +34,7 @@ protected:
 	void SetLinear(bool Linear) { m_Linear = Linear; }
 
 	bool m_Linear = false;
+
+	RHITextureDesc m_Desc;
 	RHITexturePtr m_Texture;
 };

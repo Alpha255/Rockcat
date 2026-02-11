@@ -7,7 +7,7 @@ class AssimpSceneLoader : public AssetLoader
 public:
 	AssimpSceneLoader();
 
-	bool Load(Asset& InAsset, const AssetType& Type) override final;
+	bool Load(Asset& Target) override final;
 protected:
 	std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& Path) override final;
 

@@ -57,19 +57,6 @@ struct DataBlock
 	}
 };
 
-struct AssetType
-{
-	enum class EContentsFormat
-	{
-		PlainText,
-		Binary
-	};
-
-	std::string_view Description;
-	std::string_view Extension;
-	EContentsFormat ContentsFormat = EContentsFormat::Binary;
-};
-
 class Asset : public File
 {
 public:
@@ -99,32 +86,45 @@ public:
 	}
 protected:
 	friend class AssetLoader;
+	friend struct AssetLoadRequest;
 
 	inline EStatus GetStatus(std::memory_order Order = std::memory_order_relaxed) const { return m_Status.load(Order); }
-
-	inline void SetStatus(EStatus Status)
-	{
-		m_Status.store(Status, std::memory_order_release);
-		OnStatusChanged(Status);
-	}
-
-	void OnStatusChanged(EStatus Status);
-
-	virtual void OnPreLoad() {}
-	virtual void OnCanceled() {}
-	virtual void OnPostLoad() {}
-	virtual void OnUnload() {}
-	virtual void OnLoadFailed() {}
+	inline void SetStatus(EStatus Status) { m_Status.store(Status, std::memory_order_release); }
 
 	std::atomic<EStatus> m_Status{ EStatus::None };
 };
 
 struct AssetLoadRequest
 {
+	using AssetLoadCallback = std::function<void(Asset&)>;
+
 	std::string_view Path;
 	bool ForceReload = false;
 	bool Async = true;
+	std::shared_ptr<Asset> Target;
+
+	AssetLoadCallback OnLoading;
+	AssetLoadCallback OnLoaded;
+	AssetLoadCallback OnLoadFailed;
+	AssetLoadCallback OnCanceled;
+	AssetLoadCallback OnUnload;
+
+	bool Cancel();
+	bool Unload();
+protected:
+	friend class AssetDatabase;
+	
+	inline void InvokeAssetLoadCallback(AssetLoadCallback& Func)
+	{
+		if (Func)
+		{
+			Func(*Target);
+		}
+	}
+
+	void SetAssetStatus(Asset::EStatus Status);
 };
+using AssetLoadRequests = std::vector<AssetLoadRequest>;
 
 class AssetLoader
 {
@@ -134,18 +134,17 @@ public:
 	{
 	}
 
-	inline bool IsSupportedFormat(const std::filesystem::path& Path) const
+	inline bool IsSupportedFormat(std::string_view Extension) const
 	{
-		return std::find(
-			m_SupportedFormats.begin(), 
-			m_SupportedFormats.end(), 
-			String::Lowercase(Path.extension().string())) != m_SupportedFormats.end();
+		return std::find_if(m_SupportedFormats.begin(), m_SupportedFormats.end(), [Extension](const std::string_view& Ext) {
+				return _stricmp(Ext.data(), Extension.data()) == 0;
+			}) != m_SupportedFormats.end();
 	}
 
-	virtual bool Load(Asset& InAsset, const AssetType& InType) = 0;
-
-	virtual bool TryLoad(AssetLoadRequest) { return false; }
+	virtual bool Load(Asset& Target) = 0;
 protected:
+	friend class AssetDatabase;
+
 	virtual std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& Path) = 0;
 private:
 	std::vector<std::string_view> m_SupportedFormats;

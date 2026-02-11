@@ -118,5 +118,5 @@ void ImGuiConfiguration::SetTheme(const std::string& ThemeName, bool Force)
 
 ImGuiConfiguration::~ImGuiConfiguration()
 {
-	Save<ImGuiConfiguration>(true);
+	Save(true);
 }

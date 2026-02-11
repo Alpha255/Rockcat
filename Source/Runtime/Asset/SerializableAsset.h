@@ -23,7 +23,7 @@ public:
 	template<class Type = T>
 	void Reload()
 	{
-		SetStatus(EStatus::Loading);
+		OnPreLoad();
 
 		std::ifstream FileStream(GetPath());
 		if (FileStream.is_open())
@@ -41,7 +41,7 @@ public:
 
 		FileStream.close();
 
-		SetStatus(EStatus::Ready);
+		OnPostLoad();
 	}
 
 	template<class Type = T>
@@ -93,5 +93,10 @@ public:
 			CEREAL_BASE(Asset)
 		);
 	}
+
+protected:
+	virtual void OnPreLoad() { SetStatus(EStatus::Loading); }
+
+	virtual void OnPostLoad() { SetStatus(EStatus::Ready); }
 };
 

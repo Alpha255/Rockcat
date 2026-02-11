@@ -121,13 +121,11 @@ std::shared_ptr<Asset> AssimpSceneLoader::CreateAsset(const std::filesystem::pat
 	return std::make_shared<AssimpScene>(AssetPath);
 }
 
-bool AssimpSceneLoader::Load(Asset& InAsset, const AssetType& Type)
+bool AssimpSceneLoader::Load(Asset& Target)
 {
-	(void)Type;
-
 	CpuTimer Timer;
 
-	auto& Model = Cast<AssimpScene>(InAsset);
+	auto& Model = Cast<AssimpScene>(Target);
 
 	const uint32_t ProcessFlags = static_cast<uint32_t>(
 		aiProcessPreset_TargetRealtime_MaxQuality |

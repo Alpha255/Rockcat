@@ -1,5 +1,5 @@
 #include "Asset/Asset.h"
-#include "Services/SpdLogService.h"
+#include "Services/AssetDatabase.h"
 
 std::shared_ptr<DataBlock> Asset::LoadData(bool IsBinary) const
 {
@@ -16,28 +16,36 @@ std::shared_ptr<DataBlock> Asset::LoadData(bool IsBinary) const
 	return Block;
 }
 
-void Asset::OnStatusChanged(EStatus Status)
+bool AssetLoadRequest::Cancel()
 {
+	return AssetDatabase::Get().CancelLoad(*this);
+}
+
+bool AssetLoadRequest::Unload()
+{
+	return AssetDatabase::Get().Unload(*this);
+}
+
+void AssetLoadRequest::SetAssetStatus(Asset::EStatus Status)
+{
+	Target->SetStatus(Status);
+
 	switch (Status)
 	{
-	case EStatus::None:
+	case Asset::EStatus::Loading:
+		InvokeAssetLoadCallback(OnLoading);
 		break;
-	case EStatus::Loading:
-		OnPreLoad();
+	case Asset::EStatus::Ready:
+		InvokeAssetLoadCallback(OnLoaded);
 		break;
-	case EStatus::Ready:
-		OnPostLoad();
+	case Asset::EStatus::Canceled:
+		InvokeAssetLoadCallback(OnCanceled);
 		break;
-	case EStatus::Canceled:
-		OnCanceled();
+	case Asset::EStatus::LoadFailed:
+		InvokeAssetLoadCallback(OnLoadFailed);
 		break;
-	case EStatus::LoadFailed:
-		OnLoadFailed();
-		break;
-	case EStatus::Unload:
-		OnUnload();
-		break;
-	default:
+	case Asset::EStatus::Unload:
+		InvokeAssetLoadCallback(OnUnload);
 		break;
 	}
 }

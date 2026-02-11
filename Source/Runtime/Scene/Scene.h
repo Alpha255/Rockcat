@@ -9,9 +9,6 @@
 struct AssimpScene : public Asset, public SceneGraph
 {
 	using Asset::Asset;
-
-protected:
-	void OnPostLoad() override final;
 };
 
 class Scene : public ITickable, public SceneGraph, public Serializable<Scene>

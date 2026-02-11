@@ -257,8 +257,23 @@ void TFTask::TriggerSubsequents()
 	}
 }
 
+bool TFTask::Restart()
+{
+	/// #TODO: Thread safe
+	if (IsDispatched() && IsCompleted())
+	{
+		SetCanceled(false);
+		m_TFAsyncTask.reset();
+
+		return Trigger();
+	}
+
+	return false;
+}
+
 bool TFTask::Trigger()
 {
+	/// #TODO: Thread safe
 	if (IsCanceled() || IsDispatched() || HasAnyRef())
 	{
 		return false;

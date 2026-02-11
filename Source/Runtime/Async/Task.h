@@ -119,6 +119,8 @@ public:
 
 	bool Trigger();
 
+	bool Restart();
+
 	inline bool Wait() 
 	{
 		if (m_TFAsyncTask)

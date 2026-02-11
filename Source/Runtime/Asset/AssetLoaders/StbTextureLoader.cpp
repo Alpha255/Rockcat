@@ -27,7 +27,7 @@ std::shared_ptr<Asset> StbTextureLoader::CreateAsset(const std::filesystem::path
 	return std::make_shared<Texture>(Path);
 }
 
-bool StbTextureLoader::Load(Asset& InAsset, const AssetType& Type)
+bool StbTextureLoader::Load(Asset& InAsset)
 {
 	auto& StbImage = Cast<Texture>(InAsset);
 	auto AssetData = StbImage.LoadData();

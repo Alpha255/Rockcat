@@ -5,11 +5,6 @@
 #include "Components/StaticMeshComponent.h"
 #include "Paths.h"
 
-void AssimpScene::OnPostLoad()
-{
-
-}
-
 void Scene::Tick(float ElapsedSeconds)
 {
 	if (!IsReady())
@@ -62,9 +57,7 @@ void Scene::MergeWithAssimpScenes(const AssimpScene& AiScene)
 	//	}
 	//}
 
-	//SetStatus(EStatus::Ready);
-
-	//delete AssimpScenes;
+	SetStatus(EStatus::Ready);
 }
 
 void Scene::OnPostLoad()
