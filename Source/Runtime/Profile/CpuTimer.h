@@ -19,7 +19,7 @@ public:
 		{
 			auto CurrentTime = std::chrono::high_resolution_clock::now();
 			auto Elapsed = std::chrono::duration_cast<Milliseconds>(CurrentTime - m_LastTime).count();
-			m_LastTime = CurrentTime;
+			//m_LastTime = CurrentTime;
 			return Elapsed * m_Speed;
 		}
 
@@ -32,7 +32,7 @@ public:
 		{
 			auto CurrentTime = std::chrono::high_resolution_clock::now();
 			auto Elapsed = std::chrono::duration_cast<Seconds>(CurrentTime - m_LastTime).count();
-			m_LastTime = CurrentTime;
+			//m_LastTime = CurrentTime;
 			return Elapsed * m_Speed;
 		}
 
@@ -61,6 +61,8 @@ public:
 	}
 
 	inline bool IsPaused() const { return m_State == EState::Paused; }
+
+	inline float GetPausedTime() const { return m_PausedTime; }
 
 	using Seconds = std::chrono::duration<float, std::ratio<1, 1>>;
 	using Milliseconds = std::chrono::duration<float, std::milli>;

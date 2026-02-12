@@ -101,7 +101,7 @@ struct AssetLoadRequest
 {
 	using AssetLoadCallback = std::function<void(Asset&)>;
 
-	std::string_view Path;
+	std::string Path;
 	bool ForceReload = false;
 	bool Async = true;
 	std::shared_ptr<Asset> Target;

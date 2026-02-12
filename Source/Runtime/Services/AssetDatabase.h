@@ -38,9 +38,9 @@ private:
 		std::shared_ptr<Asset> Target;
 	};
 
-	inline static std::filesystem::path GetUnifiedAssetPath(const std::string_view& Path, bool Lowercase = false)
+	inline static std::filesystem::path GetUnifiedAssetPath(const std::string& Path, bool Lowercase = false)
 	{
-		auto UnifiedPath = Lowercase ? std::filesystem::path(std::move(String::Lowercase(std::string(Path)))) : std::filesystem::path(Path);
+		auto UnifiedPath = Lowercase ? std::filesystem::path(std::move(String::Lowercase(Path))) : std::filesystem::path(Path);
 		UnifiedPath.make_preferred();
 		return UnifiedPath;
 	}

@@ -67,14 +67,15 @@ void AssetDatabase::ProcessAssetLoadRequest(AssetLoadRequest& Request)
 		auto It = m_AssetLoadTasks.find(UnifiedPath);
 		if (It == m_AssetLoadTasks.end())
 		{
-			auto Target = Loader->CreateAsset(UnifiedPath);
+			Request.Target = Loader->CreateAsset(UnifiedPath);
+
 			auto Task = std::make_shared<TFTask>(String::Format("LoadAsset:%s", UnifiedPath.filename().string().c_str()),
 				[Loader, &Request, this]()
 				{
 					LoadAssetFunc(*Loader, Request);
 				});
 
-			It = m_AssetLoadTasks.emplace(std::move(UnifiedPath), AssetLoadTask{ std::move(Task), std::move(Target) }).first;
+			It = m_AssetLoadTasks.emplace(std::move(UnifiedPath), AssetLoadTask{ std::move(Task), Request.Target }).first;
 		}
 		else
 		{
@@ -107,23 +108,26 @@ void AssetDatabase::ProcessAssetLoadRequest(AssetLoadRequest& Request)
 
 bool AssetDatabase::Unload(const std::filesystem::path& Path)
 {
-	//auto It = m_AssetLoadTasks.find(Path);
-	//if (It != m_AssetLoadTasks.end())
-	//{
-	//	It->second->DoUnload(Async);
-	//	return true;
-	//}
+	std::lock_guard Locker(m_Lock);
+
+	auto It = m_AssetLoadTasks.find(Path);
+	if (It != m_AssetLoadTasks.end())
+	{
+		return true;
+	}
 
 	return false;
 }
 
 bool AssetDatabase::CancelLoad(const std::filesystem::path& Path)
 {
-	//auto It = m_AssetLoadTasks.find(Path);
-	//if (It != m_AssetLoadTasks.end())
-	//{
-	//	return It->second->Cancel();
-	//}
+	std::lock_guard Locker(m_Lock);
+
+	auto It = m_AssetLoadTasks.find(Path);
+	if (It != m_AssetLoadTasks.end())
+	{
+		return true;
+	}
 
 	return false;
 }

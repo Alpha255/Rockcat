@@ -21,7 +21,6 @@ public:
 	inline ERHIFormat GetFormat() const { return m_Desc.Format; }
 	inline ERHISampleCount GetSampleCount() const { return m_Desc.SampleCount; }
 	inline bool IsLinear() const { return m_Desc.IsLinear; }
-	inline std::string_view GetSourceFileName() const { return m_Desc.Name.Get(); }
 	inline const DataBlock& GetBulkData() const { return *m_Desc.BulkData; }
 
 protected:

@@ -29,39 +29,15 @@ void Scene::Tick(float ElapsedSeconds)
 	}
 }
 
-void Scene::MergeWithAssimpScenes(const AssimpScene& AiScene)
+void Scene::MergeWithAssimpScene(const AssimpScene& AiScene)
 {
-	//if (AssimpScenes->size() != m_AssimpScenes.size())
-	//{
-	//	return;
-	//}
-
-	//for (auto& AssimpScene : *AssimpScenes)
-	//{
-	//	if (!AssimpScene)
-	//	{
-	//		continue;
-	//	}
-
-	//	if (!AssimpScene->IsReady(std::memory_order_acquire))
-	//	{
-	//		return;
-	//	}
-	//}
-
-	//for (auto& AssimpScene : *AssimpScenes)
-	//{
-	//	if (!AssimpScene)
-	//	{
-	//		continue;
-	//	}
-	//}
-
-	SetStatus(EStatus::Ready);
 }
 
 void Scene::OnPostLoad()
 {
+	m_AssimpLoadRequests.reset(new AssetLoadRequests());
+	m_AssimpLoadRequests->reserve(m_AssimpScenes.size());
+
 	for (const auto& Path : m_AssimpScenes)
 	{
 		std::filesystem::path AiScenePath(Path);
@@ -74,12 +50,31 @@ void Scene::OnPostLoad()
 				continue;
 			}
 		}
+
+		m_AssimpLoadRequests->emplace_back(AssetLoadRequest{AiScenePath.string()});
 	}
 
-	//	/// @TODO: Thread safe ???
-	//	auto AssimpSceneOnLoading = AssimpScenes->emplace_back(AssetDatabase::Get().Load<AssimpScene>(AssimpScenePath));
-	//	AssimpSceneOnLoading->MergeAssimpScenes(AssimpScenes);
-	//}
+	for (auto& Request : *m_AssimpLoadRequests)
+	{
+		Request.OnLoaded = [LocalLoadRequests = m_AssimpLoadRequests.get(), this](Asset&) {
+			for (const auto& LocalRequest : *LocalLoadRequests)
+			{
+				if (!LocalRequest.Target->IsReady(std::memory_order_acquire))
+				{
+					return;
+				}
+			}
+
+			for (const auto& LocalRequest : *LocalLoadRequests)
+			{
+				MergeWithAssimpScene(*Cast<AssimpScene>(LocalRequest.Target));
+			}
+
+			SetStatus(EStatus::Ready);
+		};
+	}
+
+	AssetDatabase::Get().RequestLoad(*m_AssimpLoadRequests);
 }
 
 Scene::~Scene()

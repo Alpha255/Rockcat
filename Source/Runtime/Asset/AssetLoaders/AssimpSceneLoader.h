@@ -15,6 +15,6 @@ protected:
 	bool ProcessNode(const struct aiScene* AiScene, const struct aiNode* AiNode, class Entity& GraphNode, struct AssimpScene& Model);
 	void ProcessTextures(const struct aiMaterial* AiMaterial, struct MaterialProperty& Material, const std::filesystem::path& RootPath);
 
-	void ProcessMaterial(const struct aiScene* AiScene, struct AssimpScene& Model, uint32_t MaterialIndex, class StaticMeshComponent& StaticMeshComp);
-	void ProcessMesh(const struct aiScene* AiScene, struct AssimpScene& Model, uint32_t MeshIndex, class StaticMeshComponent& StaticMeshComp);
+	void ProcessMaterial(const struct aiScene* AiScene, const struct AssimpScene& Model, uint32_t MaterialIndex, class StaticMeshComponent& StaticMeshComp);
+	void ProcessMesh(const struct aiScene* AiScene, uint32_t MeshIndex, class StaticMeshComponent& StaticMeshComp);
 };

@@ -28,6 +28,8 @@ bool AssetLoadRequest::Unload()
 
 void AssetLoadRequest::SetAssetStatus(Asset::EStatus Status)
 {
+	assert(Target);
+
 	Target->SetStatus(Status);
 
 	switch (Status)

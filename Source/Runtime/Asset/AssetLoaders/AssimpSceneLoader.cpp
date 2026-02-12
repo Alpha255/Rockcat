@@ -123,7 +123,9 @@ std::shared_ptr<Asset> AssimpSceneLoader::CreateAsset(const std::filesystem::pat
 
 bool AssimpSceneLoader::Load(Asset& Target)
 {
+#if _DEBUG
 	CpuTimer Timer;
+#endif
 
 	auto& Model = Cast<AssimpScene>(Target);
 
@@ -138,10 +140,12 @@ bool AssimpSceneLoader::Load(Asset& Target)
 
 	int32_t RemoveFlags = aiComponent::aiComponent_CAMERAS | aiComponent::aiComponent_LIGHTS;
 	AssimpImporter.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, RemoveFlags);
+
 #if _DEBUG
 	Assimp::DefaultLogger::set(new AssimpLogger());
 	AssimpImporter.SetProgressHandler(new AssimpProgressHandler(Model.GetPath()));
 #endif
+
 	if (auto AiScene = AssimpImporter.ReadFile(Model.GetPath().string(), ProcessFlags))
 	{
 		if (AiScene->HasMeshes() && AiScene->mRootNode)
@@ -149,8 +153,9 @@ bool AssimpSceneLoader::Load(Asset& Target)
 			Model.SetRoot(Model.AddEntity(EntityID(), AiScene->mRootNode->mName.C_Str()));
 			if (ProcessNode(AiScene, AiScene->mRootNode, *Model.GetRoot(), Model))
 			{
-				Timer.Pause();
-				LOG_INFO_CAT(LogAsset, "Loaded assimp scene \"{}\" in {:.2f} ms", Model.GetName(), Timer.GetElapsedMilliseconds());
+#if _DEBUG
+				LOG_DEBUG_CAT(LogAsset, "Load assimp scene \"{}\" takes {:.2f} ms", Model.GetName(), Timer.GetElapsedMilliseconds());
+#endif
 				return true;
 			}
 
@@ -227,7 +232,7 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 		auto StaticMeshComp = Node.AddComponent<StaticMeshComponent>();
 
 		ProcessTransform(AiNode, *TransformComp);
-		ProcessMesh(AiScene, Model, MeshIndex, *StaticMeshComp);
+		ProcessMesh(AiScene, MeshIndex, *StaticMeshComp);
 		ProcessMaterial(AiScene, Model, AiMesh->mMaterialIndex, *StaticMeshComp);
 	}
 
@@ -250,7 +255,7 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 	return true;
 }
 
-void AssimpSceneLoader::ProcessMaterial(const aiScene* AiScene, AssimpScene& Scene, uint32_t MaterialIndex, StaticMeshComponent& StaticMeshComp)
+void AssimpSceneLoader::ProcessMaterial(const aiScene* AiScene, const AssimpScene& Model, uint32_t MaterialIndex, StaticMeshComponent& StaticMeshComp)
 {
 	if (!AiScene->HasMaterials())
 	{
@@ -262,7 +267,7 @@ void AssimpSceneLoader::ProcessMaterial(const aiScene* AiScene, AssimpScene& Sce
 		aiString Name;
 		AiMaterial->Get(AI_MATKEY_NAME, Name);
 
-		auto MaterialFilePath = (Paths::MaterialPath() / Scene.GetStem() / Name.C_Str()).replace_extension(MaterialProperty::GetExtension());
+		auto MaterialFilePath = (Paths::MaterialPath() / Model.GetStem() / Name.C_Str()).replace_extension(MaterialProperty::GetExtension());
 		const bool MaterialFileExists = std::filesystem::exists(MaterialFilePath);
 		auto Property = MaterialProperty::Load(MaterialFilePath);
 		StaticMeshComp.SetMaterialProperty(Property);
@@ -339,13 +344,13 @@ void AssimpSceneLoader::ProcessMaterial(const aiScene* AiScene, AssimpScene& Sce
 			break;
 		}
 
-		ProcessTextures(AiMaterial, *Property, Scene.GetPath().parent_path());
+		ProcessTextures(AiMaterial, *Property, Model.GetPath().parent_path());
 
 		Property->Save(true, MaterialFilePath);
 	}
 }
 
-void AssimpSceneLoader::ProcessMesh(const aiScene* AiScene, AssimpScene& Scene, uint32_t MeshIndex, StaticMeshComponent& StaticMeshComp)
+void AssimpSceneLoader::ProcessMesh(const aiScene* AiScene, uint32_t MeshIndex, StaticMeshComponent& StaticMeshComp)
 {
 	const auto AiMesh = AiScene->mMeshes[MeshIndex];
 

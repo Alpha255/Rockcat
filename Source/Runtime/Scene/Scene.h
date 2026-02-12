@@ -53,7 +53,7 @@ protected:
 	inline const std::vector<EntityID::IndexType>& GetAddedPrimitives() const { return m_AddedPrimitives; }
 	inline const std::vector<EntityID::IndexType>& GetRemovedPrimitives() const { return m_RemovedPrimitives; }
 private:
-	void MergeWithAssimpScenes(const AssimpScene& AiScene);
+	void MergeWithAssimpScene(const AssimpScene& AiScene);
 
 	inline void AddPrimitive(const Entity& InEntity)
 	{
@@ -74,5 +74,7 @@ private:
 	std::vector<EntityID::IndexType> m_RemovedPrimitives;
 
 	std::unordered_map<size_t, std::vector<std::shared_ptr<ComponentBase>>> m_Components;
+
+	std::shared_ptr<AssetLoadRequests> m_AssimpLoadRequests;
 };
 
