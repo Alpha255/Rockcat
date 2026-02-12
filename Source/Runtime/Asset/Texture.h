@@ -10,31 +10,29 @@ class Texture : public Asset, public RenderResource
 public:
 	using Asset::Asset;
 
-	bool IsLinear() const { return m_Linear; }
+	const RHITexture* GetRHI() const { assert(m_RHIResource); return m_RHIResource.get(); }
 
-	const RHITexture* GetRHI() const { assert(m_Texture); return m_Texture.get(); }
+	inline uint32_t GetWidth() const { return m_Desc.Width; }
+	inline uint32_t GetHeight() const { return m_Desc.Height; }
+	inline uint32_t GetDepth() const { return m_Desc.Depth; }
+	inline uint32_t GetNumArrayLayers() const { return m_Desc.NumArrayLayer; }
+	inline uint32_t GetNumMipLevels() const { return m_Desc.NumMipLevel; }
+	inline ERHITextureDimension GetDimension() const { return m_Desc.Dimension; }
+	inline ERHIFormat GetFormat() const { return m_Desc.Format; }
+	inline ERHISampleCount GetSampleCount() const { return m_Desc.SampleCount; }
+	inline bool IsLinear() const { return m_Desc.IsLinear; }
+	inline std::string_view GetSourceFileName() const { return m_Desc.Name.Get(); }
+	inline const DataBlock& GetBulkData() const { return *m_Desc.BulkData; }
 
-	//template<class Archive>
-	//void serialize(Archive& Ar)
-	//{
-	//	Ar(
-	//		CEREAL_BASE(Asset)/*,
-	//		CEREAL_NVP(m_Path)*/
-	//	);
-	//}
 protected:
-	friend class AssimpSceneLoader;
-	friend class StbTextureLoader;
-	friend class DDSTextureLoader;
+	friend class TextureLoader;
+
+	inline RHITextureDesc& GetDesc() { return m_Desc; }
 
 	static Texture* CreateColoredTexture(std::string_view Name, const Math::Color& Value, uint32_t Width = 1u, uint32_t Height = 1u);
 
-	void CreateRHI(class RHIDevice& Device, const RHITextureDesc& Desc);
-
-	void SetLinear(bool Linear) { m_Linear = Linear; }
-
-	bool m_Linear = false;
+	void CreateRHI();
 
 	RHITextureDesc m_Desc;
-	RHITexturePtr m_Texture;
+	RHITexturePtr m_RHIResource;
 };

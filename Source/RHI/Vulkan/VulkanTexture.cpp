@@ -95,9 +95,9 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureDesc& D
 
 		AllocateAndBindMemory(AccessFlags);
 
-		if (Desc.InitialData.IsValid())
+		if (Desc.BulkData && Desc.BulkData->IsValid())
 		{
-			RHIUploadManager::Get().QueueUploadTexture(this, Desc.InitialData.Data.get(), Desc.InitialData.Size, Desc.InitialData.Offset);
+			RHIUploadManager::Get().QueueUploadTexture(this, Desc.BulkData->GetRawData(), Desc.BulkData->GetSize(), Desc.BulkData->GetOffset());
 		}
 	}
 

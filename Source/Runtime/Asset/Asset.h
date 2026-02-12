@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Asset/File.h"
-#include "Core/StringUtils.h"
 
 struct DataBlock
 {
@@ -31,6 +30,10 @@ struct DataBlock
 		Size = Offset = 0u;
 		Data.reset();
 	}
+
+	inline size_t GetSize() const { return Size; }
+	inline size_t GetOffset() const { return Offset; }
+	inline std::byte* GetRawData() const { return Data.get(); }
 
 	template<class Archive>
 	void load(Archive& Ar)

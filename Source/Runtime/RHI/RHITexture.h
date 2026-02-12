@@ -54,20 +54,24 @@ namespace RHI
 struct RHITextureDesc
 {
 	uint32_t Width = 1u;
+	
 	uint32_t Height = 1u;
+
 	uint32_t Depth = 1u;
+
 	uint16_t NumArrayLayer = 1u;
 	uint16_t NumMipLevel = 1u;
-
-	ERHITextureDimension Dimension = ERHITextureDimension::Unknown;
-	ERHISampleCount SampleCount = ERHISampleCount::Sample_1_Bit;
 
 	ERHIFormat Format = ERHIFormat::Unknown;
 	ERHIBufferUsageFlags BufferUsageFlags = ERHIBufferUsageFlags::None;
 
+	ERHITextureDimension Dimension = ERHITextureDimension::Unknown;
+	ERHISampleCount SampleCount = ERHISampleCount::Sample_1_Bit;
+	bool IsLinear = true;
+
 	ERHIResourceState PermanentState = ERHIResourceState::Unknown;
 
-	DataBlock InitialData;
+	std::shared_ptr<DataBlock> BulkData;
 
 	FName Name;
 
@@ -81,8 +85,10 @@ struct RHITextureDesc
 	inline RHITextureDesc& SetSampleCount(ERHISampleCount Count) { SampleCount = Count; return *this; }
 	inline RHITextureDesc& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; };
 	inline RHITextureDesc& SetPermanentState(ERHIResourceState States) { PermanentState = States; return *this; }
-	inline RHITextureDesc& SetInitialData(const DataBlock& Data) { InitialData = Data; return *this; }
-	inline RHITextureDesc& SetInitialData(size_t Size, const std::shared_ptr<std::byte>& Data) { InitialData.Size = Size; InitialData.Data = Data; return *this; }
+	inline RHITextureDesc& SetLinear(bool Linear) { IsLinear = Linear; return *this; }
+	inline RHITextureDesc& SetBulkData(std::shared_ptr<DataBlock>& Data) { BulkData = Data; return *this; }
+	inline RHITextureDesc& SetBulkData(std::shared_ptr<DataBlock>&& Data) { BulkData = std::move(Data); return *this; }
+	inline RHITextureDesc& SetBulkData(size_t Size, const void* RawData = nullptr, size_t Offset = 0u) { BulkData = std::make_shared<DataBlock>(Size, RawData, Offset); return *this; }
 	inline RHITextureDesc& SetName(FName&& InName) { Name = std::move(InName); return *this; }
 };
 
