@@ -25,9 +25,13 @@ public:
 
 	virtual ~ComponentBase() = default;
 
-	inline const class Entity& GetOwner() const { return *m_Owner; }
+	inline const class Entity* GetOwner() const { return m_Owner; }
+
+	inline bool IsTickable() const { return m_Tickable; }
 
 	virtual void Tick(float /*ElapsedSeconds*/) {}
+
+	virtual void ApplyOverrideProperties(const ComponentBase&) {}
 
 	template<class Archive>
 	void serialize(Archive&)
@@ -39,6 +43,7 @@ private:
 	inline void SetOwner(class Entity* Owner) { m_Owner = Owner; }
 	
 	class Entity* m_Owner = nullptr;
+	bool m_Tickable = false;
 };
 
 class ComponentPool : public Singleton<ComponentPool>
