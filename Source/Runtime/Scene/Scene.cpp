@@ -29,10 +29,6 @@ void Scene::Tick(float ElapsedSeconds)
 	}
 }
 
-void Scene::MergeWithAssimpScene(const AssimpScene& AiScene)
-{
-}
-
 void Scene::OnPostLoad()
 {
 	m_AssimpLoadRequests.reset(new AssetLoadRequests());
@@ -67,7 +63,7 @@ void Scene::OnPostLoad()
 
 			for (const auto& LocalRequest : *LocalLoadRequests)
 			{
-				MergeWithAssimpScene(*Cast<AssimpScene>(LocalRequest.Target));
+				Merge(*this, *Cast<AssimpScene>(LocalRequest.Target));
 			}
 
 			SetStatus(EStatus::Ready);

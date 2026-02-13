@@ -53,8 +53,6 @@ protected:
 	inline const std::vector<EntityID::IndexType>& GetAddedPrimitives() const { return m_AddedPrimitives; }
 	inline const std::vector<EntityID::IndexType>& GetRemovedPrimitives() const { return m_RemovedPrimitives; }
 private:
-	void MergeWithAssimpScene(const AssimpScene& AiScene);
-
 	inline void AddPrimitive(const Entity& InEntity)
 	{
 		m_AddedPrimitives.push_back(InEntity.GetID().GetIndex());

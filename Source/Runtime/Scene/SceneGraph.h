@@ -303,20 +303,13 @@ public:
 protected:
 	friend class AssimpSceneLoader;
 
-	inline void SetRoot(EntityID ID)
-	{
-		m_Root = ID;
-	}
+	inline void SetRoot(EntityID ID) { m_Root = ID; }
 
-	inline void SetRoot(const Entity& InEntity)
-	{
-		auto ID = InEntity.GetID();
-		if (ID.IsValid())
-		{
-			m_Root = ID;
-		}
-	}
+	inline void SetRoot(const Entity& Node) { return SetRoot(Node.GetID()); }
+
 	inline std::vector<Entity>& GetAllEntities() { return m_Entities; }
+
+	friend void Merge(SceneGraph& Dest, const SceneGraph& Src);
 private:
 	EntityID m_Root;
 	std::vector<Entity> m_Entities;

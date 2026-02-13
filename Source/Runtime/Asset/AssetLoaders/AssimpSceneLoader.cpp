@@ -150,8 +150,7 @@ bool AssimpSceneLoader::Load(Asset& Target)
 	{
 		if (AiScene->HasMeshes() && AiScene->mRootNode)
 		{
-			Model.SetRoot(Model.AddEntity(EntityID(), AiScene->mRootNode->mName.C_Str()));
-			if (ProcessNode(AiScene, AiScene->mRootNode, *Model.GetRoot(), Model))
+			if (ProcessNode(AiScene, AiScene->mRootNode, nullptr, Model))
 			{
 #if _DEBUG
 				LOG_DEBUG_CAT(LogAsset, "Load assimp scene \"{}\" takes {:.2f} ms", Model.GetName(), Timer.GetElapsedMilliseconds());
@@ -200,19 +199,26 @@ void AssimpSceneLoader::ProcessTransform(const aiNode* AiNode, TransformComponen
 		.SetRotation(Rotation.x, Rotation.y, Rotation.z, Rotation.w);
 }
 
-bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode, Entity& GraphNode, AssimpScene& Model)
+bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode, const Entity* Parent, AssimpScene& Model)
 {
 	if (!AiNode)
 	{
 		return false;
 	}
 
-	auto SetNodeName = [](Entity& Node) {
+	static auto SetNodeName = [](Entity& Node) {
 		if (Node.GetName().Get().empty())
 		{
 			Node.SetName(String::Format("node%d", Node.GetID().GetIndex()));
 		}
 	};
+
+	auto& ParentNode = Model.AddEntity(Parent ? Parent->GetID() : EntityID(), AiNode->mName.C_Str());
+
+	if (AiNode == AiScene->mRootNode)
+	{
+		Model.SetRoot(ParentNode.GetID());
+	}
 
 	for (uint32_t Index = 0u; Index < AiNode->mNumMeshes; ++Index)
 	{
@@ -225,11 +231,11 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 			continue;
 		}
 
-		auto& Node = Model.AddChild(GraphNode, AiMesh->mName.C_Str());
-		SetNodeName(Node);
+		auto& ChildNode = Model.AddChild(ParentNode, AiMesh->mName.C_Str());
+		SetNodeName(ChildNode);
 
-		auto TransformComp = Node.AddComponent<TransformComponent>();
-		auto StaticMeshComp = Node.AddComponent<StaticMeshComponent>();
+		auto TransformComp = ChildNode.AddComponent<TransformComponent>();
+		auto StaticMeshComp = ChildNode.AddComponent<StaticMeshComponent>();
 
 		ProcessTransform(AiNode, *TransformComp);
 		ProcessMesh(AiScene, MeshIndex, *StaticMeshComp);
@@ -241,12 +247,9 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 		return true;
 	}
 
-	auto& NextNode = Model.AddChild(GraphNode, AiNode->mName.C_Str());
-	SetNodeName(NextNode);
-
 	for (uint32_t NodeIndex = 0u; NodeIndex < AiNode->mNumChildren; ++NodeIndex)
 	{
-		if (!ProcessNode(AiScene, AiNode->mChildren[NodeIndex], NextNode, Model))
+		if (!ProcessNode(AiScene, AiNode->mChildren[NodeIndex], &ParentNode, Model))
 		{
 			return false;
 		}
