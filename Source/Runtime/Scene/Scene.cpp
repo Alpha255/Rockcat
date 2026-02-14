@@ -15,7 +15,7 @@ void Scene::Tick(float ElapsedSeconds)
 	for (auto& Entity : GetAllEntities())
 	{
 		if (!Entity.IsAlive() || !Entity.IsVisible())
-		{
+		{ 
 			continue;
 		}
 
@@ -28,7 +28,7 @@ void Scene::Tick(float ElapsedSeconds)
 		}
 	}
 }
-
+ 
 void Scene::OnPostLoad()
 {
 	m_AssimpLoadRequests.reset(new AssetLoadRequests());
@@ -63,7 +63,7 @@ void Scene::OnPostLoad()
 
 			for (const auto& LocalRequest : *LocalLoadRequests)
 			{
-				Merge(*this, *Cast<AssimpScene>(LocalRequest.Target));
+				Integrate(*this, *Cast<AssimpScene>(LocalRequest.Target));
 			}
 
 			SetStatus(EStatus::Ready);

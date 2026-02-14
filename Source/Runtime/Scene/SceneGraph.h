@@ -156,7 +156,7 @@ protected:
 	friend class SceneGraph;
 	friend class Scene;
 
-	inline void SetID(EntityID ID) { m_ID = ID; }
+	inline void SetID(EntityID ID) { m_ID = std::move(ID); }
 	
 	inline Entity& SetAlive(bool Alive) { m_Alive = Alive; return *this; }
 
@@ -307,9 +307,12 @@ protected:
 
 	inline void SetRoot(const Entity& Node) { return SetRoot(Node.GetID()); }
 
+	inline void SetEntityID(Entity& Node, EntityID ID) { Node.SetID(ID); }
+
 	inline std::vector<Entity>& GetAllEntities() { return m_Entities; }
 
 	friend void Merge(SceneGraph& Dest, const SceneGraph& Src);
+	friend void Integrate(SceneGraph& Dest, SceneGraph& Src);
 private:
 	EntityID m_Root;
 	std::vector<Entity> m_Entities;
