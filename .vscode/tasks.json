@@ -1,49 +1,105 @@
 {
     "version": "2.0.0",
-    "command": "clang++",
-    "args": [
-        "${file}",
-        "-o",
-        "${file}.exe",
-        "-Wall",
-        "-g",
-        "-static-libgcc",
-        "-fcolor-diagnostics",
-        "-w",
-        "--target=x86_64-w64-mingw",
-        "-lws2_32",
-        "-lIphlpapi",
-        "-lgdi32"
-    ],
     "tasks": [
         {
-            "label": "clang++",
+            "label": "CMake: Configure",
             "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-S",
+                "${workspaceFolder}",
+                "-B",
+                "${workspaceFolder}/build",
+                "-G",
+                "Ninja",
+                "-DCMAKE_C_COMPILER=E:/clice/bin/clice.exe",
+                "-DCMAKE_CXX_COMPILER=E:/clice/bin/clice.exe"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "CMake: Build Debug",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build",
+                "--config",
+                "Debug",
+                "--target",
+                "RenderTest"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
             "presentation": {
-                "echo": true,
                 "reveal": "always",
-                "focus": false,
                 "panel": "shared"
-            }
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "CMake: Build Release",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build",
+                "--config",
+                "Release",
+                "--target",
+                "RenderTest"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Build with clice",
+            "type": "shell",
+            "command": "E:/clice/bin/clice.exe",
+            "args": [
+                "/std:c++17",
+                "/O2",
+                "/EHsc",
+                "/I${workspaceFolder}/Source",
+                "/I${workspaceFolder}/Submodules/cereal/include",
+                "/I${workspaceFolder}/Submodules/spdlog/include",
+                "/I${workspaceFolder}/Submodules/Vulkan-Headers/include",
+                "/I${workspaceFolder}/ThirdParty/KTX-Software/include",
+                "/I${workspaceFolder}/ThirdParty/assimp/include",
+                "/I${workspaceFolder}/ThirdParty/glslang",
+                "/I${workspaceFolder}/ThirdParty/Vulkan-Headers/include",
+                "/D_UNICODE",
+                "/DUNICODE",
+                "/D_WIN32",
+                "/DVK_USE_PLATFORM_WIN32_KHR=1",
+                "/DPLATFORM_WIN32=1",
+                "/LD",
+                "/Fe:${workspaceFolder}/Out/RenderTest.exe",
+                "${workspaceFolder}/Source/Applications/RenderTest/RenderTest.cpp"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
         }
-    ],
-    "problemMatcher": {
-        "owner": "c",
-        "fileLocation": [
-            "relative",
-            "${workspaceRoot}"
-        ],
-        "pattern": {
-            "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
-            "file": 1,
-            "line": 2,
-            "column": 3,
-            "severity": 4,
-            "message": 5
-        }
-    }
+    ]
 }

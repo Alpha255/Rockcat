@@ -43,5 +43,8 @@ Assets/Configurations
 Assets/Shaders/ShaderBinary
 Assets/Materials/
 build
+build2
+build3
+build4
 Out/Intermediate
 Out/*.json

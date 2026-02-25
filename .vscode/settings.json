@@ -1,21 +1,51 @@
 {
-    "cmake.useCMakePresets": "always",
+    "cmake.useCMakePresets": "never",
     "C_Cpp.autoAddFileAssociations": false,
     "C_Cpp.autocompleteAddParentheses": true,
-    "C_Cpp.intelliSenseEngine": "default",
+    "C_Cpp.intelliSenseEngine": "clangd",
     "C_Cpp.inactiveRegionOpacity": 0.55,
     "C_Cpp.dimInactiveRegions": true,
     "clangd.onConfigChanged": "restart",
     "cmake.exportCompileCommandsFile": true,
     "editor.suggest.snippetsPreventQuickSuggestions": false,
     "editor.semanticHighlighting.enabled": true,
-    "cmake.copyCompileCommands": "${workspaceFolder}build/compile_commands.json",
+    "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "C_Cpp.default.cppStandard": "c++20",
+    "C_Cpp.default.cStandard": "c17",
+    "C_Cpp.default.intelliSenseMode": "windows-clang-x64",
+    "C_Cpp.default.compilerPath": "E:/LLVM/bin/clang.exe",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}",
+        "${workspaceFolder}/Source",
+        "${workspaceFolder}/Submodules/cereal/include",
+        "${workspaceFolder}/Submodules/spdlog/include",
+        "${workspaceFolder}/Submodules/magic_enum/include",
+        "${workspaceFolder}/Submodules/filewatch",
+        "${workspaceFolder}/Submodules/imgui",
+        "${workspaceFolder}/Submodules/stb",
+        "${workspaceFolder}/Submodules/assimp/include",
+        "${workspaceFolder}/Submodules/assimp/build/include"
+    ],
+    "C_Cpp.default.defines": [
+        "_WIN32",
+        "UNICODE",
+        "_UNICODE",
+        "VK_USE_PLATFORM_WIN32_KHR=1",
+        "PLATFORM_WIN32=1",
+        "STB_IMAGE_IMPLEMENTATION",
+        "KHRONOS_STATIC",
+        "LIBKTX"
+    ],
+    "files.associations": {
+        "*.h": "cpp",
+        "*.cpp": "cpp"
+    },
     "clangd.arguments": [
         "--background-index",
-        "--enable-config",
-        "--compile-commands-dir=${workspaceFolder}build",
+        "--compile-commands-dir=${workspaceFolder}",
         "-j=8",
-        "--query-driver=/usr/bin/clang",
+        "--query-driver=E:/LLVM/bin/clang.exe",
         "--clang-tidy",
         "--all-scopes-completion",
         "--completion-style=detailed",
@@ -24,11 +54,6 @@
         "--pch-storage=disk",
         "--pretty"
     ],
-    "lldb.showDisassembly": "auto",
-    "lldb.dereferencePointers": true,
-    "lldb.consoleMode": "commands",
-    "C_Cpp.default.cppStandard": "c++17",
-    "C_Cpp.default.cStandard": "c17",
-    "C_Cpp.default.intelliSenseMode": "linux-clang-x64",
-    "C_Cpp.intelliSenseEngineFallback": "disabled"
+    "clangd.path": "clangd",
+    "clice.executable": "E:/clice/bin/clice.exe"
 }

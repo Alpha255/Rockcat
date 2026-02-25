@@ -89,11 +89,6 @@
 
 #define RENDERER_POSTFIX "Renderer"
 
-#define SPDLOG_LEVEL_NAMES                                              \
-    {                                                                   \
-        "Trace", "Debug", "Info", "Warning", "Error", "Critical", "Off" \
-    }
-
 #define DECLARE_SMART_PTR(ClassName) class ClassName;        \
 	using ClassName##SharedPtr = std::shared_ptr<ClassName>; \
 	using ClassName##UniquePtr = std::unique_ptr<ClassName>; \

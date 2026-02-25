@@ -1,19 +1,24 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.20)
 
-project(Rockcat)
+project(Rockcat VERSION 1.0.0)
 
 if(WIN32)
     add_definitions(-DUNICODE -D_UNICODE)
 endif()
 
 if(MSVC)
-    add_compile_options(/W4)
-    #add_compile_options(/GR-)
+    add_compile_options(/W4 /utf-8)
     add_compile_options(/MP)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    add_compile_options(-Wall -Wextra -Wpedantic)
+    add_compile_options(-mavx -msse4.1)
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 function(AutoSetSourceFileFilters)
     cmake_parse_arguments(ARG "" "BasePath" "SourceFileList" ${ARGN})
@@ -28,27 +33,23 @@ function(AutoSetSourceFileFilters)
     endforeach()
 endfunction()
 
-# macro(GetSourceFileList OutFileList TargetPath)
-#   file(GLOB_RECURSE FileList RELATIVE ${TargetPath} ${TargetPath}/*)
-#   SET(dirlist "")
-#   FOREACH(child ${children})
-#     IF(IS_DIRECTORY ${curdir}/${child})
-#       LIST(APPEND dirlist ${child})
-#     ENDIF()
-#   ENDFOREACH()
-#   SET(${result} ${dirlist})
-# endmacro()
-
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake")
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
 
 set(RockCatRootPath ${CMAKE_CURRENT_LIST_DIR})
 
+find_package(Vulkan REQUIRED)
+
+if(Vulkan_FOUND)
+    message(STATUS "Vulkan SDK found: ${Vulkan_VERSION}")
+endif()
+
 function(AddPrivateIncludeDirectories)
     include_directories(${RockCatRootPath})
     include_directories(${RockCatRootPath}/Source)
-    include_directories(${RockCatRootPath}/ThirdParty/cereal/include)
+    include_directories(${RockCatRootPath}/Source/Runtime)
+    include_directories(${RockCatRootPath}/Submodules/cereal/include)
 endfunction()
 
 function(AddPrivateDefinitions)
@@ -59,11 +60,8 @@ endfunction()
 
 add_subdirectory(CMake/Core)
 add_subdirectory(CMake/Runtime)
-add_subdirectory(CMake/Colorful/IRender)
-add_subdirectory(CMake/Colorful/Vulkan)
-add_subdirectory(CMake/Colorful/D3D12)
-add_subdirectory(CMake/Applications/RenderTest)
-add_subdirectory(CMake/ThirdParty/ImGUI)
-add_subdirectory(CMake/ThirdParty/libktx)
-add_subdirectory(CMake/ThirdParty/spirv-cross)
-add_subdirectory(CMake/ThirdParty/assimp)
+add_subdirectory(CMake/RHI)
+
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CMake/Applications)
+    add_subdirectory(CMake/Applications)
+endif()

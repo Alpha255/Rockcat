@@ -1,44 +1,45 @@
 {
     "configurations": [
         {
-            "name": "clang",
-            "intelliSenseMode": "linux-clang-x64",
-            "compilerPath": "/usr/bin/clang",
+            "name": "clice",
+            "intelliSenseMode": "windows-clang-x64",
+            "compilerPath": "E:/clice/bin/clice.exe",
             "includePath": [
                 "${workspaceFolder}",
                 "${workspaceFolder}/Source",
+                "${workspaceFolder}/Source/Runtime",
+                "${workspaceFolder}/Source/Colorful",
+                "${workspaceFolder}/Source/Applications",
                 "${workspaceFolder}/Submodules/cereal/include",
                 "${workspaceFolder}/Submodules/spdlog/include",
-                "${workspaceFolder}/Submodules/Vulkan-Headers/include"
+                "${workspaceFolder}/Submodules/magic_enum/include",
+                "${workspaceFolder}/Submodules/filewatch",
+                "${workspaceFolder}/Submodules/imgui",
+                "${workspaceFolder}/Submodules/stb",
+                "${workspaceFolder}/Submodules/assimp/include",
+                "${workspaceFolder}/Submodules/assimp/build/include"
             ],
             "defines": [
-                "_WIN32"
+                "_WIN32",
+                "UNICODE",
+                "_UNICODE",
+                "VK_USE_PLATFORM_WIN32_KHR=1",
+                "PLATFORM_WIN32=1",
+                "STB_IMAGE_IMPLEMENTATION",
+                "KHRONOS_STATIC",
+                "LIBKTX"
             ],
             "browse": {
                 "path": [
-                    "${workspaceFolder}"
+                    "${workspaceFolder}/Source"
                 ],
-                "limitSymbolsToIncludedHeaders": false,
-                "databaseFilename": ""
+                "limitSymbolsToIncludedHeaders": true
             },
             "cStandard": "c11",
-            "cppStandard": "c++17"
-        },
-        {
-            "name": "gcc",
-            "includePath": [
-                "${workspaceFolder}",
-                "${workspaceFolder}/Source",
-                "${workspaceFolder}/Submodules/cereal/include",
-                "${workspaceFolder}/Submodules/spdlog/include",
-                "${workspaceFolder}/Submodules/Vulkan-Headers/include"
-            ],
-            "defines": [
-                "_WIN32"
-            ],
-            "compilerPath": "/usr/bin/gcc",
-            "cStandard": "c11",
-            "cppStandard": "c++17"
+            "cppStandard": "c++17",
+            "compilerPathInCppPropertiesJson": "E:/clice/bin/clice.exe",
+            "mergeConfigurations": false,
+            "windowsSdkVersion": "10.0.22621.0"
         }
     ],
     "version": 4

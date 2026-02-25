@@ -5,7 +5,7 @@
 
 #pragma warning(push)
 #pragma warning(disable:4456 4244 4127 4267 4324)
-#include <taskflow/taskflow/utility/traits.hpp>
+#include <taskflow/utility/traits.hpp>
 #include <taskflow/taskflow.hpp>
 #include <taskflow/core/task.hpp>
 #include <taskflow/algorithm/for_each.hpp>

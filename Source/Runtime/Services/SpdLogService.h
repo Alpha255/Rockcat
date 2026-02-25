@@ -3,6 +3,11 @@
 #include "Core/StringUtils.h"
 #include "Core/Module.h"
 
+#define SPDLOG_LEVEL_NAMES                                              \
+    {                                                                   \
+        "Trace", "Debug", "Info", "Warning", "Error", "Critical", "Off" \
+    }
+
 #pragma warning(push)
 #pragma warning(disable:4459)
 #include <spdlog/spdlog.h>
