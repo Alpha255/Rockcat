@@ -5,5 +5,7 @@
 class CameraComponent : public ComponentBase
 {
 public:
-	DECLARE_COMPONENT_ID(CameraComponent)
+	REGISTER_COMPONENT_ID(CameraComponent);
+
+
 };

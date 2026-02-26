@@ -18,6 +18,10 @@ struct RHIGraphicsPipelineDesc
 	std::vector<RHIScissorRect> ScissorRects;
 	Array<std::shared_ptr<Shader>, ERHIShaderStage> Shaders;
 
+	Shader* VS = nullptr;
+	Shader* GS = nullptr;
+	Shader* FS = nullptr;
+
 	inline RHIGraphicsPipelineDesc& SetPrimitiveTopology(ERHIPrimitiveTopology InTopology) { PrimitiveTopology = InTopology; return *this; }
 	inline RHIGraphicsPipelineDesc& SetRasterizationState(const RHIRasterizationStateDesc& InRasterizationState) { RasterizationState = InRasterizationState; return *this; }
 	inline RHIGraphicsPipelineDesc& SetBlendState(const RHIBlendStateDesc& InBlendState) { BlendState = InBlendState; return *this; }
@@ -26,6 +30,10 @@ struct RHIGraphicsPipelineDesc
 	inline RHIGraphicsPipelineDesc& SetInputLayout(const RHIInputLayoutDesc& InInputLayout) { InputLayout = InInputLayout; return *this; }
 	inline RHIGraphicsPipelineDesc& SetRenderPass(const RHIRenderPassDesc& InRenderPass) { RenderPass = InRenderPass; return *this; }
 	inline RHIGraphicsPipelineDesc& SetShader(const std::shared_ptr<Shader>& InShader) { Shaders[InShader->GetStage()] = InShader; return *this; }
+
+	inline RHIGraphicsPipelineDesc& SetVertexShader(Shader* InShader) { VS = InShader; return *this; }
+	inline RHIGraphicsPipelineDesc& SetGeometryShader(Shader* InShader) { GS = InShader; return *this; }
+	inline RHIGraphicsPipelineDesc& SetFragmentShader(Shader* InShader) { FS = InShader; return *this; }
 	
 	inline RHIGraphicsPipelineDesc& SetViewport(const RHIViewport& Viewport)
 	{
