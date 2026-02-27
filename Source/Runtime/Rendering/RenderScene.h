@@ -8,6 +8,12 @@
 #include "Rendering/SceneView.h"
 #include "Rendering/MeshDrawCommand.h"
 
+enum class ERenderOutput
+{
+	SceneColor,
+	SwapchainBackbuffer
+};
+
 class RenderScene
 {
 public:

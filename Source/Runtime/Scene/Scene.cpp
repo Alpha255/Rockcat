@@ -66,6 +66,19 @@ void Scene::OnPostLoad()
 				Integrate(*this, *Cast<AssimpScene>(LocalRequest.Target));
 			}
 
+			for (auto& Ent : GetAllEntities())
+			{
+				if (!Ent.IsAlive())
+				{
+					continue;
+				}
+
+				if (auto PrimitiveComp = Ent.GetComponent<PrimitiveComponent>())
+				{
+
+				}
+			}
+
 			SetStatus(EStatus::Ready);
 		};
 	}

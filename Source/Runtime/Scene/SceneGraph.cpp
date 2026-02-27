@@ -9,7 +9,7 @@ void Merge(SceneGraph& Dest, const SceneGraph& Src)
 	}
 	else
 	{
-		const EntityID::IndexType Offset = static_cast<EntityID::IndexType>(Dest.GetNumEntity());
+		const auto Offset = Dest.GetNumEntity();
 		auto Start = Dest.m_Entities.insert(Dest.m_Entities.end(), Src.m_Entities.begin(), Src.m_Entities.end());
 
 		for (auto It = Start; It != Dest.m_Entities.end(); ++It)
@@ -28,7 +28,7 @@ void Integrate(SceneGraph& Dest, SceneGraph& Src)
 	}
 	else
 	{
-		const EntityID::IndexType Offset = static_cast<EntityID::IndexType>(Dest.GetNumEntity());
+		const auto Offset = Dest.GetNumEntity();
 		for (auto& Node : Src.GetAllEntities())
 		{
 			Src.SetEntityID(Node, EntityID(Node.GetID() + Offset));

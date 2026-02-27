@@ -24,7 +24,6 @@ public:
 
 	void AddPrimitive(const class PrimitiveComponent* PrimitiveComp);
 	void RemovePrimitive(const class PrimitiveComponent* PrimitiveComp);
-	void UpdatePrimitiveTransform(const class PrimitiveComponent* PrimitiveComp);
 
 	template<class T>
 	std::shared_ptr<T> AddView()

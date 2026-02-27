@@ -17,14 +17,6 @@ public:
 	{
 	}
 
-	Entity(class Scene* InScene, FName&& Name, EntityID ID, EntityID Parent = EntityID())
-		: m_Scene(InScene)
-		, m_ID(ID)
-		, m_Parent(Parent)
-		, m_Name(std::move(Name))
-	{
-	}
-
 	Entity(const Entity&) = default;
 	Entity(Entity&&) = default;
 	Entity& operator=(const Entity&) = default;
@@ -173,8 +165,6 @@ private:
 
 	FName m_Name;
 
-	class Scene* m_Scene = nullptr;
-
 	std::vector<std::shared_ptr<ComponentBase>> m_Components;
 };
 
@@ -196,7 +186,7 @@ public:
 		return Node;
 	}
 
-	Entity& AddSibling(EntityID SiblingID, FName&& Name)
+	inline Entity& AddSibling(EntityID SiblingID, FName&& Name)
 	{
 		return AddSibling(*GetEntity(SiblingID), std::move(Name));
 	}
@@ -215,12 +205,12 @@ public:
 		return Node;
 	}
 
-	Entity& AddChild(EntityID ParentID, FName&& Name)
+	inline Entity& AddChild(EntityID ParentID, FName&& Name)
 	{
 		return AddChild(*GetEntity(ParentID), std::move(Name));
 	}
 
-	Entity& AddEntity(EntityID Parent, FName&& Name)
+	inline Entity& AddEntity(EntityID Parent, FName&& Name)
 	{
 		EntityID ID = EntityID(static_cast<EntityID::IndexType>(m_Entities.size()));
 		return m_Entities.emplace_back(Entity(std::move(Name), ID, Parent));
@@ -261,7 +251,7 @@ public:
 		return nullptr;
 	}
 
-	Entity* GetEntity(FName&& Name)
+	inline Entity* GetEntity(FName&& Name)
 	{
 		for (auto& Entity : m_Entities)
 		{
@@ -273,13 +263,13 @@ public:
 		return nullptr;
 	}
 
-	const Entity* GetEntity(const EntityID& ID) const
+	inline const Entity* GetEntity(const EntityID& ID) const
 	{
 		assert(ID.IsValid() && ID.GetIndex() < m_Entities.size());
 		return &m_Entities[ID.GetIndex()];
 	}
 
-	Entity* GetEntity(const EntityID& ID)
+	inline Entity* GetEntity(const EntityID& ID)
 	{
 		assert(ID.IsValid() && ID.GetIndex() < m_Entities.size());
 		return &m_Entities[ID.GetIndex()];
@@ -290,6 +280,12 @@ public:
 	inline const std::vector<Entity>& GetAllEntities() const { return m_Entities; }
 	inline uint32_t GetNumEntity() const { return static_cast<uint32_t>(m_Entities.size()); }
 	inline bool IsEmpty() const { return m_Entities.empty(); }
+
+	template<class T, class ...Args>
+	std::shared_ptr<T> AddComponent(EntityID Owner, Args&&... ConstructArgs)
+	{
+
+	}
 
 	template<class Archive>
 	void serialize(Archive& Ar)

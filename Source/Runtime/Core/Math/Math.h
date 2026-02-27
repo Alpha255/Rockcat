@@ -50,4 +50,70 @@ inline float RadiansToDegree(float Radians)
 	return DirectX::XMConvertToDegrees(Radians);
 }
 
+/** Spreads bits to every other. */
+static constexpr inline uint32_t MortonCode2(uint32_t X)
+{
+	X &= 0x0000ffff;
+	X = (X ^ (X << 8)) & 0x00ff00ff;
+	X = (X ^ (X << 4)) & 0x0f0f0f0f;
+	X = (X ^ (X << 2)) & 0x33333333;
+	X = (X ^ (X << 1)) & 0x55555555;
+	return X;
+}
+
+static constexpr inline uint64_t MortonCode2_64(uint64_t X)
+{
+	X &= 0x00000000ffffffff;
+	X = (X ^ (X << 16)) & 0x0000ffff0000ffff;
+	X = (X ^ (X << 8)) & 0x00ff00ff00ff00ff;
+	X = (X ^ (X << 4)) & 0x0f0f0f0f0f0f0f0f;
+	X = (X ^ (X << 2)) & 0x3333333333333333;
+	X = (X ^ (X << 1)) & 0x5555555555555555;
+	return X;
+}
+
+/** Reverses MortonCode2. Compacts every other bit to the right. */
+static constexpr inline uint32_t ReverseMortonCode2(uint32_t X)
+{
+	X &= 0x55555555;
+	X = (X ^ (X >> 1)) & 0x33333333;
+	X = (X ^ (X >> 2)) & 0x0f0f0f0f;
+	X = (X ^ (X >> 4)) & 0x00ff00ff;
+	X = (X ^ (X >> 8)) & 0x0000ffff;
+	return X;
+}
+
+static constexpr inline uint64_t ReverseMortonCode2_64(uint64_t X)
+{
+	X &= 0x5555555555555555;
+	X = (X ^ (X >> 1)) & 0x3333333333333333;
+	X = (X ^ (X >> 2)) & 0x0f0f0f0f0f0f0f0f;
+	X = (X ^ (X >> 4)) & 0x00ff00ff00ff00ff;
+	X = (X ^ (X >> 8)) & 0x0000ffff0000ffff;
+	X = (X ^ (X >> 16)) & 0x00000000ffffffff;
+	return X;
+}
+
+/** Spreads bits to every 3rd. */
+static constexpr inline uint32_t MortonCode3(uint32_t X)
+{
+	X &= 0x000003ff;
+	X = (X ^ (X << 16)) & 0xff0000ff;
+	X = (X ^ (X <<  8)) & 0x0300f00f;
+	X = (X ^ (X <<  4)) & 0x030c30c3;
+	X = (X ^ (X <<  2)) & 0x09249249;
+	return X;
+}
+
+/** Reverses MortonCode3. Compacts every 3rd bit to the right. */
+static constexpr inline uint32_t ReverseMortonCode3(uint32_t X)
+{
+	X &= 0x09249249;
+	X = (X ^ (X >>  2)) & 0x030c30c3;
+	X = (X ^ (X >>  4)) & 0x0300f00f;
+	X = (X ^ (X >>  8)) & 0xff0000ff;
+	X = (X ^ (X >> 16)) & 0x000003ff;
+	return X;
+}
+
 NAMESPACE_END(Math)
