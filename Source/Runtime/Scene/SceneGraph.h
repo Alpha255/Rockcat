@@ -72,7 +72,7 @@ public:
 		{
 			if (Comp && Comp->GetID() == T::ID)
 			{
-				return Comp;
+				return Cast<T>(Comp);
 			}
 		}
 
@@ -243,7 +243,7 @@ public:
 	{
 		for (auto& Entity : m_Entities)
 		{
-			if (Entity.GetName() == Name)
+			if (Entity.IsAlive() && Entity.GetName() == Name)
 			{
 				return &Entity;
 			}
@@ -255,7 +255,7 @@ public:
 	{
 		for (auto& Entity : m_Entities)
 		{
-			if (Entity.GetName() == Name)
+			if (Entity.IsAlive() && Entity.GetName() == Name)
 			{
 				return &Entity;
 			}
@@ -266,13 +266,13 @@ public:
 	inline const Entity* GetEntity(const EntityID& ID) const
 	{
 		assert(ID.IsValid() && ID.GetIndex() < m_Entities.size());
-		return &m_Entities[ID.GetIndex()];
+		return m_Entities[ID.GetIndex()].IsAlive() ? &m_Entities[ID.GetIndex()] : nullptr;
 	}
 
 	inline Entity* GetEntity(const EntityID& ID)
 	{
 		assert(ID.IsValid() && ID.GetIndex() < m_Entities.size());
-		return &m_Entities[ID.GetIndex()];
+		return m_Entities[ID.GetIndex()].IsAlive() ? &m_Entities[ID.GetIndex()] : nullptr;
 	}
 
 	inline const Entity* GetRoot() const { return m_Root.IsValid() ? GetEntity(m_Root) : nullptr; }

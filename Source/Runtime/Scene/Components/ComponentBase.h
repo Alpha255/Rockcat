@@ -7,11 +7,18 @@
 using ComponentID = uint64_t;
 
 #define REGISTER_COMPONENT_ID(ComponentType) \
-private: \
+public: \
 	friend class ComponentPool; \
 	inline static constexpr ComponentID ID = FnvHash(#ComponentType); \
+	inline ComponentID GetID() override { return ID; } \
+
+#define REGISTER_COMPONENT(ComponentType, BaseType) \
 public: \
-	inline static constexpr ComponentID GetID() { return ID; } \
+	friend class ComponentPool; \
+	inline static constexpr ComponentID ID = FnvHash(#ComponentType); \
+	inline ComponentID GetID() override { return ID; } \
+    template<> inline constexpr bool IsA<ComponentType>() { return true; } \
+    template<> inline constexpr bool IsA<BaseType>() { return true; }
 
 class ComponentBase : std::enable_shared_from_this<ComponentBase>
 {
@@ -29,9 +36,17 @@ public:
 
 	inline bool IsTickable() const { return m_Tickable; }
 
+	inline virtual ComponentID GetID() { return 0ull; }
+
 	virtual void Tick(float /*ElapsedSeconds*/) {}
 
 	virtual void ApplyOverrideProperties(const ComponentBase&) {}
+
+	template<class T>
+	inline constexpr bool IsA()
+	{
+		return false;
+	}
 
 	template<class Archive>
 	void serialize(Archive&)

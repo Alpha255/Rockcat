@@ -45,3 +45,15 @@ private:
 	const class ISceneView& m_SceneView;
 	const struct RenderSettings& m_RenderSettings;
 };
+
+class RenderGraph2
+{
+public:
+	RenderGraph2(const struct RenderSettings* Settings);
+
+	template<class... Args>
+	std::shared_ptr<RenderPass> AddPass(FName&& PassName, Args&&... ExecLambda)
+	{
+
+	}
+};
