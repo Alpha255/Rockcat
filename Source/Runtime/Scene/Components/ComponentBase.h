@@ -4,6 +4,8 @@
 #include "Core/Cereal.h"
 #include "Core/Name.h"
 
+#include <type_traits>
+
 using ComponentID = uint64_t;
 
 #define REGISTER_COMPONENT_ID(ComponentType) \
@@ -17,10 +19,11 @@ public: \
 	friend class ComponentPool; \
 	inline static constexpr ComponentID ID = FnvHash(#ComponentType); \
 	inline ComponentID GetID() override { return ID; } \
-    template<> inline constexpr bool IsA<ComponentType>() { return true; } \
-    template<> inline constexpr bool IsA<BaseType>() { return true; }
+    template<class T> inline constexpr bool IsA() const { \
+        return std::is_same_v<T, ComponentType> || BaseType::template IsA<T>(); \
+    }
 
-class ComponentBase : std::enable_shared_from_this<ComponentBase>
+class ComponentBase : public std::enable_shared_from_this<ComponentBase>
 {
 public:
 	ComponentBase() = default;
@@ -43,9 +46,9 @@ public:
 	virtual void ApplyOverrideProperties(const ComponentBase&) {}
 
 	template<class T>
-	inline constexpr bool IsA()
+	inline constexpr bool IsA() const
 	{
-		return false;
+		return std::is_same_v<T, ComponentBase> ? true : false;
 	}
 
 	template<class Archive>

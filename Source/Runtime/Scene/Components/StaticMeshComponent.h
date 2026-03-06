@@ -5,7 +5,7 @@
 class StaticMeshComponent : public PrimitiveComponent
 {
 public:
-	REGISTER_COMPONENT_ID(StaticMeshComponent);
+	REGISTER_COMPONENT(StaticMeshComponent, PrimitiveComponent);
 
 	using PrimitiveComponent::PrimitiveComponent;
 

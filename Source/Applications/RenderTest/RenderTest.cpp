@@ -10,6 +10,8 @@
 #include "Asset/ShaderPermutation.h"
 #include "Core/Name.h"
 #include "Async/Task.h"
+#include "Scene/Components/CameraComponent.h"
+#include "Scene/Components/StaticMeshComponent.h"
 
 class TestPemutation1 : public ShaderDefineInt32<0, 1, 2, 3>
 {
@@ -58,6 +60,17 @@ void RenderTest::Initialize()
 	LOG_INFO("TaskA is {}, TaskB is {}, TaskC is {}, TaskD is {}", GetState(TaskA), GetState(TaskB), GetState(TaskC), GetState(TaskD));
 
 	size_t NumVariants = Permutation::Num;
+
+	auto Comp = new CameraComponent();
+	const auto IsACamera = Comp->IsA<CameraComponent>();
+	const auto IsABase = Comp->IsA<ComponentBase>();
+	const auto IsATransform = Comp->IsA<TransformComponent>();
+
+	auto StaticMesh = new StaticMeshComponent();
+	const auto IsAStaticMesh = StaticMesh->IsA<StaticMeshComponent>();
+	const auto IsAPrimitive = StaticMesh->IsA<PrimitiveComponent>();
+	const auto IsATrans = StaticMesh->IsA<TransformComponent>();
+	const auto IsACam = StaticMesh->IsA<CameraComponent>();
 
 	m_Scene = Scene::Load(Paths::ScenePath() / "RenderTest.json");
 

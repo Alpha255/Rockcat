@@ -7,7 +7,7 @@
 class PrimitiveComponent : public ComponentBase
 {
 public:
-	REGISTER_COMPONENT_ID(PrimitiveComponent);
+	REGISTER_COMPONENT(PrimitiveComponent, ComponentBase);
 
 	using ComponentBase::ComponentBase;
 
