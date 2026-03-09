@@ -71,6 +71,8 @@ public:
 
 	inline std::string_view Get() const { return m_ValueView; }
 
+	inline void Set(std::string_view Value) { m_ValueView = Value; }
+
 	inline void Set(const char* Value) { m_ValueView = Value; }
 
 	inline void Set(const std::string& Value) 

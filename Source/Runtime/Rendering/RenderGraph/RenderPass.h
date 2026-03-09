@@ -72,20 +72,45 @@ struct RDGResourceDesc
 	std::string_view Name;
 };
 
-class RenderPass2
+enum class ERDGPassFlags : uint16_t
 {
-public:
-	RenderPass2(const char* Name)
-		: m_Name(Name)
+	None,
+	Raster,
+	Compute,
+	AsyncCompute
+};
+
+struct RDGEvent
+{
+	FName Name;
+	Math::Color Color;
+
+	RDGEvent(FName&& InName, const Math::Color InColor = Math::Color::Random())
+		: Name(std::move(InName))
+		, Color(InColor)
 	{
 	}
 
-	const char* GetName() const { return m_Name.data(); }
-	void SetName(const char* Name) { m_Name = Name; }
+	inline void SetName(FName&& InName) { Name = std::move(InName); }
+	inline void SetColor(const Math::Color& InColor) { Color = InColor; }
+};
 
-	virtual void Setup(class ResourceManager& ResourceMgr) = 0;
+class RenderPass2
+{
+public:
+	RenderPass2(RDGEvent&& Event, ERDGPassFlags Flags)
+		: m_Event(std::move(Event))
+		, m_Flags(Flags)
+	{
+	}
+
+	inline RDGEvent& GetEvent() { return m_Event; }
+	inline ERDGPassFlags GetFlags() const { return m_Flags; }
+protected:
+	virtual void Setup(class ResourceManager&) {}
 	virtual void Compile() {}
-	virtual void Execute(class RenderContext& Context) = 0;
+	virtual void Execute(class RenderContext&) {}
 private:
-	std::string_view m_Name;
+	RDGEvent m_Event;
+	ERDGPassFlags m_Flags = ERDGPassFlags::None;
 };
