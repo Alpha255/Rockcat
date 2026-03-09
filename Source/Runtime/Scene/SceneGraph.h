@@ -56,7 +56,7 @@ public:
 	{
 		for (auto Comp : m_Components)
 		{
-			if (Comp && Comp->GetID() == T::ID)
+			if (Comp && Comp->IsA<T>())
 			{
 				return true;
 			}
@@ -70,7 +70,7 @@ public:
 	{
 		for (auto Comp : m_Components)
 		{
-			if (Comp && Comp->GetID() == T::ID)
+			if (Comp && Comp->IsA<T>())
 			{
 				return Cast<T>(Comp);
 			}
@@ -85,7 +85,7 @@ public:
 		std::vector<std::shared_ptr<T>> Components;
 		for (auto Comp : m_Components)
 		{
-			if (Comp && Comp->GetID() == T::ID)
+			if (Comp && Comp->IsA<T>())
 			{
 				Components.push_back(Cast<T>(Comp));
 			}
@@ -105,7 +105,7 @@ public:
 	{
 		for (auto It = m_Components.begin(); It != m_Components.end(); ++It)
 		{
-			if (Cast<T>((*It))->GetID() == T::ID)
+			if (Cast<T>((*It))->IsA<T>())
 			{
 				m_Components.erase(It);
 				break;
@@ -118,7 +118,7 @@ public:
 	{
 		for (auto It = m_Components.begin(); It != m_Components.end(); ++It)
 		{
-			if (Cast<T>((*It))->GetID() == T::ID)
+			if (Cast<T>((*It))->IsA<T>())
 			{
 				It = m_Components.erase(It);
 			}

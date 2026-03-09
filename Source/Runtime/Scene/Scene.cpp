@@ -73,7 +73,7 @@ void Scene::OnPostLoad()
 					continue;
 				}
 
-				if (auto PrimitiveComp = Ent.GetComponent<PrimitiveComponent>())
+				for (auto& PrimitiveComp : Ent.GetComponents<PrimitiveComponent>())
 				{
 
 				}
