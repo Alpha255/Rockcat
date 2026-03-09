@@ -95,10 +95,10 @@ struct RDGEvent
 	inline void SetColor(const Math::Color& InColor) { Color = InColor; }
 };
 
-class RenderPass2
+class RDGRenderPass
 {
 public:
-	RenderPass2(RDGEvent&& Event, ERDGPassFlags Flags)
+	RDGRenderPass(RDGEvent&& Event, ERDGPassFlags Flags)
 		: m_Event(std::move(Event))
 		, m_Flags(Flags)
 	{
@@ -113,4 +113,18 @@ protected:
 private:
 	RDGEvent m_Event;
 	ERDGPassFlags m_Flags = ERDGPassFlags::None;
+};
+
+template<class LAMBDA>
+class RDGLambdaRenderPass : public RDGRenderPass
+{
+public:
+	RDGLambdaRenderPass(RDGEvent&& Event, ERDGPassFlags Flags, LAMBDA&& Lambda)
+		: RDGRenderPass(std::forward<RDGEvent>(Event), Flags)
+		, m_Lambda(std::move(Lambda))
+	{
+	}
+
+private:
+	LAMBDA m_Lambda;
 };
