@@ -85,7 +85,7 @@ struct RDGEvent
 	FName Name;
 	Math::Color Color;
 
-	RDGEvent(FName&& InName, const Math::Color InColor = Math::Color::Random())
+	RDGEvent(FName&& InName, const Math::Color& InColor = Math::Color::Random())
 		: Name(std::move(InName))
 		, Color(InColor)
 	{
@@ -107,9 +107,7 @@ public:
 	inline RDGEvent& GetEvent() { return m_Event; }
 	inline ERDGPassFlags GetFlags() const { return m_Flags; }
 protected:
-	virtual void Setup(class ResourceManager&) {}
-	virtual void Compile() {}
-	virtual void Execute(class RenderContext&) {}
+	virtual void Execute() {}
 private:
 	RDGEvent m_Event;
 	ERDGPassFlags m_Flags = ERDGPassFlags::None;
@@ -124,7 +122,11 @@ public:
 		, m_Lambda(std::move(Lambda))
 	{
 	}
-
+protected:
+	void Execute() override
+	{
+		m_Lambda();
+	}
 private:
 	LAMBDA m_Lambda;
 };

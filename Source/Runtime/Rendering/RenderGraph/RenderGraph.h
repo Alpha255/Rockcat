@@ -46,14 +46,18 @@ private:
 	const struct RenderSettings& m_RenderSettings;
 };
 
-class RenderGraph2
+class RDGRenderGraph
 {
 public:
-	RenderGraph2(const struct RenderSettings* Settings);
+	RDGRenderGraph(const struct RenderSettings& Settings);
 
-	template<class... Args>
-	std::shared_ptr<RenderPass> AddPass(FName&& PassName, Args&&... ExecLambda)
+	template<class LAMBDA>
+	std::shared_ptr<RDGRenderPass> AddPass(RDGEvent&& Event, ERDGPassFlags Flags, LAMBDA&& Lambda)
 	{
 
 	}
+
+	void Execute();
+private:
+	void Compile();
 };
