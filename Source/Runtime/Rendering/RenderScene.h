@@ -5,7 +5,7 @@
 #include "RHI/RHIPipeline.h"
 #include "Asset/Material.h"
 #include "Scene/SceneGraph.h"
-#include "Rendering/SceneView.h"
+#include "Scene/SceneView.h"
 #include "Rendering/MeshDrawCommand.h"
 
 enum class ERenderOutput

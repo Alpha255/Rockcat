@@ -1,28 +1,11 @@
 #include "Rendering/RenderGraph/RenderGraph.h"
 #include "Rendering/RenderGraph/ResourceManager.h"
-#include "Rendering/RenderGraph/ForwardRenderingPath.h"
 #include "Scene/Scene.h"
-#include "Rendering/SceneView.h"
+#include "Scene/SceneView.h"
 
 std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& InRenderSettings, RHIDevice& Device, const ISceneView& InView)
 {
-	std::shared_ptr<RenderGraph> Graph;
-
-	switch (InRenderSettings.RenderingPath)
-	{
-	case ERenderingPath::ForwardRendering:
-		Graph.reset(new ForwardRenderingPath(InRenderSettings, Device, InView));
-		break;
-	case ERenderingPath::DeferredShading:
-		assert(false);
-		break;
-	case ERenderingPath::DeferredLighting:
-		assert(false);
-		break;
-	}
-
-	Graph->SetupRenderPasses();
-	return Graph;
+	return nullptr;
 }
 
 RenderGraph::RenderGraph(const RenderSettings& InRenderSettings, RHIDevice& Device, const ISceneView& InView)
@@ -67,4 +50,17 @@ void RenderGraph::Execute(const Scene& InScene)
 	{
 		Pass->Execute(*m_RenderScene);
 	}
+}
+
+RDGRenderGraph::RDGRenderGraph(const RenderSettings& Settings)
+	: m_Settings(Settings)
+{
+}
+
+void RDGRenderGraph::Execute()
+{
+}
+
+void RDGRenderGraph::Compile()
+{
 }

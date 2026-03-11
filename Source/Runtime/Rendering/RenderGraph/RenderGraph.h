@@ -54,10 +54,15 @@ public:
 	template<class LAMBDA>
 	std::shared_ptr<RDGRenderPass> AddPass(RDGEvent&& Event, ERDGPassFlags Flags, LAMBDA&& Lambda)
 	{
+		using RDGPassType = RDGLambdaRenderPass<LAMBDA>;
 
+		return m_Passes.emplace_back(std::make_shared<RDGPassType>(std::forward<RDGEvent>(Event), Flags, std::forward<LAMBDA>(Lambda)));
 	}
 
 	void Execute();
 private:
 	void Compile();
+
+	std::vector<std::shared_ptr<RDGRenderPass>> m_Passes;
+	const struct RenderSettings& m_Settings;
 };

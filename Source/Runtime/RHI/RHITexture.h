@@ -18,22 +18,14 @@ enum class ERHITextureDimension : uint8_t
 
 struct RHISubresource
 {
-	static constexpr uint32_t AllMipLevels = ~0u;
-	static constexpr uint32_t AllArrayLayers = ~0u;
+	static constexpr uint16_t AllMipLevels = 0xffff;
+	static constexpr uint16_t AllArrayLayers = 0xffff;
 
-	uint32_t BaseMipLevel = 0u;
-	uint32_t NumMips = 1u;
+	uint16_t BaseMipLevel = 0u;
+	uint16_t NumMips = AllMipLevels;
 
-	uint32_t BaseArrayLayer = 0u;
-	uint32_t NumLayers = 1u;
-
-	struct Hasher
-	{
-		size_t operator()(const RHISubresource& Subresource) const noexcept
-		{
-			return ComputeHash(Subresource.BaseMipLevel, Subresource.NumMips, Subresource.BaseArrayLayer, Subresource.NumLayers);
-		}
-	};
+	uint16_t BaseArrayLayer = 0u;
+	uint16_t NumLayers = AllArrayLayers;
 
 	inline bool operator==(const RHISubresource& Other) const
 	{

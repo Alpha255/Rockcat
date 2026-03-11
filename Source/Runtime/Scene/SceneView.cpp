@@ -1,4 +1,4 @@
-#include "Rendering/SceneView.h"
+#include "Scene/SceneView.h"
 #include "Scene/Components/Camera.h"
 
 void ISceneView::SetCamera(Camera* Camera)

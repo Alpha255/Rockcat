@@ -75,10 +75,12 @@ struct RDGResourceDesc
 enum class ERDGPassFlags : uint16_t
 {
 	None,
-	Raster,
-	Compute,
-	AsyncCompute
+	Raster = 1 << 0,
+	Compute = 1 << 1,
+	AsyncCompute = 1 << 2,
+	NoAsyncExecute = 1 << 3
 };
+ENUM_FLAG_OPERATORS(ERDGPassFlags);
 
 struct RDGEvent
 {
@@ -98,6 +100,14 @@ struct RDGEvent
 class RDGRenderPass
 {
 public:
+	struct RDGTextureState
+	{
+	};
+
+	struct RDGBufferState
+	{
+	};
+
 	RDGRenderPass(RDGEvent&& Event, ERDGPassFlags Flags)
 		: m_Event(std::move(Event))
 		, m_Flags(Flags)
@@ -106,11 +116,23 @@ public:
 
 	inline RDGEvent& GetEvent() { return m_Event; }
 	inline ERDGPassFlags GetFlags() const { return m_Flags; }
+	inline bool IsAsyncCompute() const { return EnumHasAnyFlags(m_Flags, ERDGPassFlags::AsyncCompute); }
+	inline bool IsCulled() const { return m_Culled; }
+
+	inline const std::vector<RDGTextureState>& GetTextureStates() const { return m_TextureStates; }
+	inline const std::vector<RDGBufferState>& GetBufferStates() const { return m_BufferStates; }
 protected:
+
 	virtual void Execute() {}
-private:
+
+	bool m_AllowAsyncExecute = true;
+	bool m_Culled = false;
+
 	RDGEvent m_Event;
 	ERDGPassFlags m_Flags = ERDGPassFlags::None;
+
+	std::vector<RDGTextureState> m_TextureStates;
+	std::vector<RDGBufferState> m_BufferStates;
 };
 
 template<class LAMBDA>
@@ -123,7 +145,7 @@ public:
 	{
 	}
 protected:
-	void Execute() override
+	inline void Execute() override
 	{
 		m_Lambda();
 	}
