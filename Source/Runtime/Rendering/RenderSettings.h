@@ -8,6 +8,7 @@ enum class ERenderingPath : uint8_t
 	ForwardRendering,  /// Tiled Based/Cluster Based/Stencil Based
 	DeferredShading, /// Tiled Based/Cluster Based/Stencil Based
 	DeferredLighting,
+	GpuDrivenRendering
 };
 
 enum class ELightingPolicy : uint8_t
