@@ -6,6 +6,4 @@ class CameraComponent : public ComponentBase
 {
 public:
 	REGISTER_COMPONENT(CameraComponent, ComponentBase);
-
-
 };

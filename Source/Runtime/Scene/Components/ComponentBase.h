@@ -8,19 +8,14 @@
 
 using ComponentID = uint64_t;
 
-#define REGISTER_COMPONENT_ID(ComponentType) \
-public: \
-	friend class ComponentPool; \
-	inline static constexpr ComponentID ID = FnvHash(#ComponentType); \
-	inline ComponentID GetID() override { return ID; } \
-
 #define REGISTER_COMPONENT(ComponentType, BaseType) \
 public: \
 	friend class ComponentPool; \
 	inline static constexpr ComponentID ID = FnvHash(#ComponentType); \
-	inline ComponentID GetID() override { return ID; } \
-    template<class T> inline constexpr bool IsA() const { \
-        return std::is_same_v<T, ComponentType> || BaseType::template IsA<T>(); \
+	inline ComponentID GetID() const override { return ComponentType::ID; } \
+    template<class T> inline constexpr bool IsA() const \
+	{ \
+        return std::is_same_v<T, ComponentType> || std::is_base_of_v<ComponentType, BaseType>; \
     }
 
 class ComponentBase : public std::enable_shared_from_this<ComponentBase>
@@ -39,17 +34,15 @@ public:
 
 	inline bool IsTickable() const { return m_Tickable; }
 
-	inline virtual ComponentID GetID() { return 0ull; }
-
 	virtual void Tick(float /*ElapsedSeconds*/) {}
 
 	virtual void ApplyOverrideProperties(const ComponentBase&) {}
 
+	inline static constexpr ComponentID ID = FnvHash("ComponentType");
+	inline virtual ComponentID GetID() const { return ID; }
+
 	template<class T>
-	inline constexpr bool IsA() const
-	{
-		return std::is_same_v<T, ComponentBase> ? true : false;
-	}
+	inline constexpr bool IsA() const { return false; }
 
 	template<class Archive>
 	void serialize(Archive&)

@@ -25,6 +25,9 @@ public:
 	void AddPrimitive(const class PrimitiveComponent* PrimitiveComp);
 	void RemovePrimitive(const class PrimitiveComponent* PrimitiveComp);
 
+	inline const std::vector<const class PrimitiveComponent*>& GetAddedPrimitives() const { return m_AddedPrimitives; }
+	inline const std::vector<const class PrimitiveComponent*>& GetRemovedPrimitives() const { return m_RemovedPrimitives; }
+
 	template<class T>
 	std::shared_ptr<T> AddView()
 	{
@@ -48,27 +51,14 @@ public:
 	}
 protected:
 	void OnPostLoad() override final;
-
-	inline const std::vector<EntityID::IndexType>& GetAddedPrimitives() const { return m_AddedPrimitives; }
-	inline const std::vector<EntityID::IndexType>& GetRemovedPrimitives() const { return m_RemovedPrimitives; }
 private:
-	inline void AddPrimitive(const Entity& InEntity)
-	{
-		m_AddedPrimitives.push_back(InEntity.GetID().GetIndex());
-	}
-
-	inline void RemovePrimitive(const Entity& InEntity)
-	{
-		m_RemovedPrimitives.push_back(InEntity.GetID().GetIndex());
-	}
-
 	std::vector<std::string> m_AssimpScenes;
 
 	std::vector<std::shared_ptr<class ISceneView>> m_Views;
 	std::vector<std::shared_ptr<Camera>> m_Cameras;
 
-	std::vector<EntityID::IndexType> m_AddedPrimitives;
-	std::vector<EntityID::IndexType> m_RemovedPrimitives;
+	std::vector<const class PrimitiveComponent*> m_AddedPrimitives;
+	std::vector<const class PrimitiveComponent*> m_RemovedPrimitives;
 
 	std::unordered_map<size_t, std::vector<std::shared_ptr<ComponentBase>>> m_Components;
 

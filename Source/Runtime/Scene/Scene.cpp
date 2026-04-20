@@ -1,8 +1,8 @@
 #include "Scene/Scene.h"
 #include "Scene/SceneVisitor.h"
 #include "Services/AssetDatabase.h"
-#include "Components/TransformComponent.h"
-#include "Components/StaticMeshComponent.h"
+#include "Async/Task.h"
+#include "Components/PrimitiveComponent.h"
 #include "Paths.h"
 
 void Scene::Tick(float ElapsedSeconds)
@@ -27,6 +27,20 @@ void Scene::Tick(float ElapsedSeconds)
 			}
 		}
 	}
+}
+
+void Scene::AddPrimitive(const PrimitiveComponent* PrimitiveComp)
+{
+	assert(TFTask::IsMainThread() || TFTask::IsGameThread());
+
+	m_AddedPrimitives.push_back(PrimitiveComp);
+}
+
+void Scene::RemovePrimitive(const PrimitiveComponent* PrimitiveComp)
+{
+	assert(TFTask::IsMainThread() || TFTask::IsGameThread());
+
+	m_RemovedPrimitives.push_back(PrimitiveComp);
 }
  
 void Scene::OnPostLoad()
@@ -68,14 +82,9 @@ void Scene::OnPostLoad()
 
 			for (auto& Ent : GetAllEntities())
 			{
-				if (!Ent.IsAlive())
-				{
-					continue;
-				}
-
 				for (auto& PrimitiveComp : Ent.GetComponents<PrimitiveComponent>())
 				{
-
+					AddPrimitive(PrimitiveComp.get());
 				}
 			}
 

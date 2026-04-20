@@ -6,5 +6,5 @@
 class SkeletalMeshComponent : public ComponentBase
 {
 public:
-	REGISTER_COMPONENT_ID(SkeletalMeshComponent);
+	REGISTER_COMPONENT(SkeletalMeshComponent, ComponentBase);
 };
