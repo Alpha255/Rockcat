@@ -26,6 +26,7 @@
 *.iobj
 *.ipdb
 *.sln
+*.slnx
 *.spv
 *.spirv
 *.aps

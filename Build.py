@@ -16,13 +16,13 @@ def PreMakeAssimp():
 		if not os.path.exists(AssimpBuildPath):
 			os.mkdir(AssimpBuildPath)
 		print('Build: Premake assimp...')
-		ExecCommand('cmake -S .\\Submodules\\assimp -B .\\Submodules\\assimp\\build -G "Visual Studio 17 2022" -A x64')
+		ExecCommand('cmake -S .\\Submodules\\assimp -B .\\Submodules\\assimp\\build -G "Visual Studio 18 2026" -A x64')
 	except OSError as Err:
 		print('Failed to make directory: {0}'.format(Err.__str__()))
 
 def PreMake():
 	print('Build: Premake...')
-	ExecCommand(os.path.join(os.getcwd(), 'premake-5.0.0-beta7-windows\\premake5 ') + '--scripts=' + os.path.join(os.getcwd() + 'premake.lua vs2022'))
+	ExecCommand(os.path.join(os.getcwd(), 'premake-5.0.0-beta8-windows\\premake5 ') + '--scripts=' + os.path.join(os.getcwd() + 'premake.lua vs2026'))
 
 if __name__ == "__main__":
 	PreMakeAssimp()
