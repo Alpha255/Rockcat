@@ -11,10 +11,9 @@ workspace "Rockcat"
 	systemversion "latest"
 	symbolspath "$(IntDir)$(TargetName).pdb"
 	debugdir "$(SolutionDir)Out"
-	--flags { "MultiProcessorCompile", "NoIncrementalLink" }
 	cppdialect "C++20"
 	buildoptions { "/utf-8" }
-	flags { "MultiProcessorCompile", }
+	multiprocessorcompile ("on")
 	filter { "configurations:Debug" }
 		symbols "On"
 		optimize "Debug"
