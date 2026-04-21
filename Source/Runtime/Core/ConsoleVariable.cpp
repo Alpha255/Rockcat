@@ -11,7 +11,7 @@ void ConsoleVariableManager::RegisterConsoleVariable(IConsoleVariable* CVar)
 
 	if (VariableGroup.find(CVar->GetName()) != VariableGroup.end())
 	{
-		LOG_WARNING("Console variable '{}' is already registered.", CVar->GetName());
+		LOG_WARNING(LogDefault, "Console variable '{}' is already registered.", CVar->GetName());
 		return;
 	}
 

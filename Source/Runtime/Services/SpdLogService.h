@@ -68,23 +68,29 @@ private:
 	std::mutex m_LoggerLock;
 };
 
-#define SPD_LOG_CATEGORY(Category, Level, Format, ...) \
-	SpdLogService::Get().GetLogger(#Category).Level(Format, __VA_ARGS__)
+#define DECLARE_LOG_CATEGOTY(Category) \
+	namespace spdlog { \
+		extern spdlog::logger* LogCat_##Category; \
+		spdlog::logger* GetLogger_##Category(); \
+	}
 
-#define SPD_LOG_DEFAULT(Level, Format, ...) \
-	SpdLogService::Get().GetDefaultLogger().Level(Format, __VA_ARGS__)
+#define DEFINE_LOG_CATEGORY(Category) \
+	namespace spdlog { \
+		spdlog::logger* LogCat_##Category = nullptr; \
+		spdlog::logger* GetLogger_##Category() { \
+			if (!LogCat_##Category) { \
+				LogCat_##Category = &SpdLogService::Get().GetLogger(#Category); \
+			} \
+			return LogCat_##Category; \
+		} \
+	}
 
-#define LOG_TRACE(Format, ...) SPD_LOG_DEFAULT(trace, Format, __VA_ARGS__)
-#define LOG_DEBUG(Format, ...) SPD_LOG_DEFAULT(debug, Format, __VA_ARGS__)
-#define LOG_INFO(Format, ...) SPD_LOG_DEFAULT(info, Format, __VA_ARGS__)
-#define LOG_WARNING(Format, ...) SPD_LOG_DEFAULT(warn, Format, __VA_ARGS__)
-#define LOG_ERROR(Format, ...) SPD_LOG_DEFAULT(error, Format, __VA_ARGS__)
-#define LOG_CRITICAL(Format, ...) SPD_LOG_DEFAULT(critical, Format, __VA_ARGS__)
+#define LOG_TRACE(Category, Format, ...) spdlog::GetLogger_##Category()->trace(Format, __VA_ARGS__)
+#define LOG_DEBUG(Category, Format, ...) spdlog::GetLogger_##Category()->debug(Format, __VA_ARGS__)
+#define LOG_INFO(Category, Format, ...) spdlog::GetLogger_##Category()->info(Format, __VA_ARGS__)
+#define LOG_WARNING(Category, Format, ...) spdlog::GetLogger_##Category()->warn(Format, __VA_ARGS__)
+#define LOG_ERROR(Category, Format, ...) spdlog::GetLogger_##Category()->error(Format, __VA_ARGS__)
+#define LOG_CRITICAL(Category, Format, ...) spdlog::GetLogger_##Category()->critical(Format, __VA_ARGS__)
 
-#define LOG_TRACE_CAT(Category, Format, ...) SPD_LOG_CATEGORY(Category, trace, Format, __VA_ARGS__)
-#define LOG_DEBUG_CAT(Category, Format, ...) SPD_LOG_CATEGORY(Category, debug, Format, __VA_ARGS__)
-#define LOG_INFO_CAT(Category, Format, ...) SPD_LOG_CATEGORY(Category, info, Format, __VA_ARGS__)
-#define LOG_WARNING_CAT(Category, Format, ...) SPD_LOG_CATEGORY(Category, warn, Format, __VA_ARGS__)
-#define LOG_ERROR_CAT(Category, Format, ...) SPD_LOG_CATEGORY(Category, error, Format, __VA_ARGS__)
-#define LOG_CRITICAL_CAT(Category, Format, ...) SPD_LOG_CATEGORY(Category, critical, Format, __VA_ARGS__)
+DECLARE_LOG_CATEGOTY(LogDefault);
 

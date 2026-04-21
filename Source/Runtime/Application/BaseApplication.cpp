@@ -35,7 +35,7 @@ bool BaseApplication::InitializeRHI()
 
 	if (!m_RenderDevice)
 	{
-		LOG_CRITICAL("Render backend \"{}\" is not support yet!", RHIDevice::GetName(m_Settings->Rendering.DeviceType));
+		LOG_CRITICAL(LogDefault, "Render backend \"{}\" is not support yet!", RHIDevice::GetName(m_Settings->Rendering.DeviceType));
 		return false;
 	}
 
@@ -183,12 +183,12 @@ void BaseApplication::Run()
 {
 	if (!std::filesystem::exists(Paths::AssetPath()))
 	{
-		LOG_CRITICAL("Invalid assets directory: {}.", Paths::AssetPath().string());
+		LOG_CRITICAL(LogDefault, "Invalid assets directory: {}.", Paths::AssetPath().string());
 		return;
 	}
 
 	System::SetWorkingDirectory(Paths::AssetPath());
-	LOG_INFO("Mount working directory to \"{}\".", System::GetWorkingDirectory().string());
+	LOG_INFO(LogDefault, "Mount working directory to \"{}\".", System::GetWorkingDirectory().string());
 
 	TFTask::Initialize();
 	AssetDatabase::Get().Initialize();

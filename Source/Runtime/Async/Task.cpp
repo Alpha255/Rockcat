@@ -3,6 +3,8 @@
 #include "System/System.h"
 #include "Services/SpdLogService.h"
 
+DEFINE_LOG_CATEGORY(LogTaskFlow);
+
 thread_local TFTask::EThread t_ThreadTag = TFTask::EThread::WorkerThread;
 
 ConsoleVariable<bool> CVarUseHyperThreading(
@@ -90,7 +92,7 @@ public:
 
 					std::stringstream Stream;
 					Stream << ThreadID;
-					LOG_INFO_CAT(LogTaskFlow, "Set foreground thread {} high priority", std::stoul(Stream.str()));
+					LOG_INFO(LogTaskFlow, "Set foreground thread {} high priority", std::stoul(Stream.str()));
 				});
 			}
 			Executor->run(Flow);
@@ -98,7 +100,7 @@ public:
 		}
 
 		const uint32_t NumSeperateThreads = CVarUseSeperateGameThread.Get() + CVarUseSeperateRenderThread.Get() + CVarNumForegroundThreads.Get();
-		LOG_INFO_CAT(LogTaskFlow, "Create executors with {} seperate threads, {} worker threads, hyper threading is {}",
+		LOG_INFO(LogTaskFlow, "Create executors with {} seperate threads, {} worker threads, hyper threading is {}",
 			NumSeperateThreads,
 			TFTask::GetNumWorkerThreads(),
 			CVarUseHyperThreading.Get() ? "enabled" : "disabled");
@@ -141,7 +143,7 @@ void TFTask::Initialize()
 	TFExecutorManager::Get().Initialize();
 	InitializeThreadTags();
 
-	LOG_INFO_CAT(LogTaskFlow, "Use taskflow @{}", tf::version());
+	LOG_INFO(LogTaskFlow, "Use taskflow @{}", tf::version());
 }
 
 void TFTask::Finalize()
@@ -322,7 +324,7 @@ TFTask::~TFTask()
 {
 	if (IsDispatched() && !IsCompleted())
 	{
-		LOG_WARNING_CAT(LogTaskFlow, "Unexpected wait by task: {}", GetName().Get());
+		LOG_WARNING(LogTaskFlow, "Unexpected wait by task: {}", GetName().Get());
 		Wait();
 	}
 }

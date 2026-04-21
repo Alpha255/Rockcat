@@ -33,13 +33,13 @@ public:
 	{
 		if (Percentage >= 1.0f)
 		{
-			LOG_DEBUG_CAT(LogAsset, "Loading assimp scene \"{}\" completed", m_AssetPath.string());
+			LOG_DEBUG(LogAsset, "Loading assimp scene \"{}\" completed", m_AssetPath.string());
 			return true;
 		}
 
 		if (static_cast<int32_t>(Percentage * 100) % 10 == 0)
 		{
-			LOG_DEBUG_CAT(LogAsset, "Loading assimp scene: \"{}\" in progress {:.2f}%", m_AssetPath.string(), Percentage * 100);
+			LOG_DEBUG(LogAsset, "Loading assimp scene: \"{}\" in progress {:.2f}%", m_AssetPath.string(), Percentage * 100);
 		}
 		return false;
 	}
@@ -50,11 +50,11 @@ private:
 class AssimpLogger : public Assimp::Logger
 {
 public:
-	void OnDebug(const char* Message) override final { LOG_DEBUG_CAT(LogAsset, Message); }
-	void OnVerboseDebug(const char* Message) override final { LOG_DEBUG_CAT(LogAsset, Message); }
-	void OnInfo(const char* Message) override final { LOG_INFO_CAT(LogAsset, Message); }
-	void OnWarn(const char* Message) override final { LOG_WARNING_CAT(LogAsset, Message); }
-	void OnError(const char* Message) override final { LOG_ERROR_CAT(LogAsset, Message); }
+	void OnDebug(const char* Message) override final { LOG_DEBUG(LogAsset, Message); }
+	void OnVerboseDebug(const char* Message) override final { LOG_DEBUG(LogAsset, Message); }
+	void OnInfo(const char* Message) override final { LOG_INFO(LogAsset, Message); }
+	void OnWarn(const char* Message) override final { LOG_WARNING(LogAsset, Message); }
+	void OnError(const char* Message) override final { LOG_ERROR(LogAsset, Message); }
 	bool attachStream(Assimp::LogStream*, uint32_t) override final { return true; }
 	bool detachStream(Assimp::LogStream*, uint32_t) override final { return true; }
 };
@@ -113,7 +113,7 @@ AssimpSceneLoader::AssimpSceneLoader()
 		".x"
 	})
 {
-	LOG_INFO_CAT(LogAsset, "Create assimp scene loader, use assimp @{}.{}.{}", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionPatch());
+	LOG_INFO(LogAsset, "Create assimp scene loader, use assimp @{}.{}.{}", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionPatch());
 }
 
 std::shared_ptr<Asset> AssimpSceneLoader::CreateAsset(const std::filesystem::path& AssetPath)
@@ -153,7 +153,7 @@ bool AssimpSceneLoader::Load(Asset& Target)
 			if (ProcessNode(AiScene, AiScene->mRootNode, nullptr, Model))
 			{
 #if _DEBUG
-				LOG_DEBUG_CAT(LogAsset, "Load assimp scene \"{}\" takes {:.2f} ms", Model.GetName(), Timer.GetElapsedMilliseconds());
+				LOG_DEBUG(LogAsset, "Load assimp scene \"{}\" takes {:.2f} ms", Model.GetName(), Timer.GetElapsedMilliseconds());
 #endif
 				return true;
 			}
@@ -162,12 +162,12 @@ bool AssimpSceneLoader::Load(Asset& Target)
 		}
 		else
 		{
-			LOG_WARNING_CAT(LogAsset, "Assimp scene: \"{}\" has no meshes");
+			LOG_WARNING(LogAsset, "Assimp scene: \"{}\" has no meshes");
 			return true;
 		}
 	}
 
-	LOG_ERROR_CAT(LogAsset, "Failed to load assimp scene: {}: \"{}\"", Model.GetName(), AssimpImporter.GetErrorString());
+	LOG_ERROR(LogAsset, "Failed to load assimp scene: {}: \"{}\"", Model.GetName(), AssimpImporter.GetErrorString());
 	return false;
 }
 
@@ -227,7 +227,7 @@ bool AssimpSceneLoader::ProcessNode(const aiScene* AiScene, const aiNode* AiNode
 
 		if (AiMesh->HasBones())
 		{
-			LOG_ERROR_CAT(LogAsset, "Not supported skeletal mesh yet!");
+			LOG_ERROR(LogAsset, "Not supported skeletal mesh yet!");
 			continue;
 		}
 
@@ -359,27 +359,27 @@ void AssimpSceneLoader::ProcessMesh(const aiScene* AiScene, uint32_t MeshIndex, 
 
 	if (!AiMesh)
 	{
-		LOG_ERROR_CAT(LogAsset, "Detected invalid mesh!");
+		LOG_ERROR(LogAsset, "Detected invalid mesh!");
 		return;
 	}
 	if (!AiMesh->HasPositions())
 	{
-		LOG_ERROR_CAT(LogAsset, "The mesh \"{}\" has no vertices data!", AiMesh->mName.C_Str());
+		LOG_ERROR(LogAsset, "The mesh \"{}\" has no vertices data!", AiMesh->mName.C_Str());
 		return;
 	}
 	if (!AiMesh->HasNormals())
 	{
-		LOG_WARNING_CAT(LogAsset, "The mesh \"{}\" has no normals!", AiMesh->mName.C_Str());
+		LOG_WARNING(LogAsset, "The mesh \"{}\" has no normals!", AiMesh->mName.C_Str());
 		return;
 	}
 	if (!AiMesh->HasFaces())
 	{
-		LOG_ERROR_CAT(LogAsset, "The mesh \"{}\" has no indices data!", AiMesh->mName.C_Str());
+		LOG_ERROR(LogAsset, "The mesh \"{}\" has no indices data!", AiMesh->mName.C_Str());
 		return;
 	}
 	if (AiMesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
 	{
-		LOG_ERROR_CAT(LogAsset, "The mesh \"{}\" has unsupported primitive type!", AiMesh->mName.C_Str());
+		LOG_ERROR(LogAsset, "The mesh \"{}\" has unsupported primitive type!", AiMesh->mName.C_Str());
 		return;
 	}
 

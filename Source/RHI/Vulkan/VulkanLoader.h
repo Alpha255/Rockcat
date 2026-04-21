@@ -3,6 +3,7 @@
 #include "System/DynamicLinkLibrary.h"
 #include "RHI/RHIResource.h"
 #include "RHI/Vulkan/VulkanExtensionDefines.h"
+#include "Services/SpdlogService.h"
 
 #define VK_ALLOCATION_CALLBACKS nullptr
 
@@ -234,14 +235,14 @@ namespace VulkanResult
 	const char* const ToString(VkResult Result);
 };
 
-#define VERIFY_VK(Func)                                                                      \
-{                                                                                            \
-	VkResult Result = (Func);                                                                \
-	if (Result != VK_SUCCESS)                                                                \
-	{                                                                                        \
-		LOG_ERROR("Vulkan: Failed to invoke VulkanAPI: {}", VulkanResult::ToString(Result)); \
-		assert(0);                                                                           \
-	}                                                                                        \
+#define VERIFY_VK(Func)                                                                                 \
+{                                                                                                       \
+	VkResult Result = (Func);                                                                           \
+	if (Result != VK_SUCCESS)                                                                           \
+	{                                                                                                   \
+		LOG_ERROR(LogVulkan, "Vulkan: Failed to invoke VulkanAPI: {}", VulkanResult::ToString(Result)); \
+		assert(0);                                                                                      \
+	}                                                                                                   \
 }
 
 template<class TInterface, class THWObject>
@@ -273,14 +274,14 @@ protected:
 	class VulkanDevice* m_Device = nullptr;
 };
 #else
-#define VERIFY_VK(Func)                                                                                                                                \
-{                                                                                                                                                      \
-	vk::Result TempResult = (Func);                                                                                                                    \
-	if (TempResult != vk::Result::eSuccess)                                                                                                            \
-	{                                                                                                                                                  \
-		LOG_CRITICAL_CAT(LogVulkanRHI, "Failed to invoke VulkanAPI: File: {}, Line: {}, vkResult: {}", __FILE__, __LINE__, vk::to_string(TempResult)); \
-		assert(0);                                                                                                                                     \
-	}                                                                                                                                                  \
+#define VERIFY_VK(Func)                                                                                                                         \
+{                                                                                                                                               \
+	vk::Result TempResult = (Func);                                                                                                             \
+	if (TempResult != vk::Result::eSuccess)                                                                                                     \
+	{                                                                                                                                           \
+		LOG_CRITICAL(LogVulkan, "Failed to invoke VulkanAPI: File: {}, Line: {}, vkResult: {}", __FILE__, __LINE__, vk::to_string(TempResult)); \
+		assert(0);                                                                                                                              \
+	}                                                                                                                                           \
 }
 #endif
 
@@ -339,3 +340,5 @@ public:
 		BaseType::GetNative() = nullptr;
 	}
 };
+
+DECLARE_LOG_CATEGOTY(LogVulkan);

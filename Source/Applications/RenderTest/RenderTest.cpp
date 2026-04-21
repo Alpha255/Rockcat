@@ -31,19 +31,19 @@ class Permutation : public ShaderVariants<TestPemutation1, TestPemutation2>
 void RenderTest::Initialize()
 {
 	auto TaskA = std::make_shared<TFTask>("TaskA", []() {
-		LOG_INFO("TaskA");
+		LOG_INFO(LogDefault, "TaskA");
 	});
 
 	auto TaskB = TFTask::Launch("TaskB", []() {
-		LOG_INFO("TaskB");
+		LOG_INFO(LogDefault, "TaskB");
 	}, {TaskA.get()});
 
 	auto TaskC = std::make_shared<TFTask>("TaskC", []() {
-		LOG_INFO("TaskC");
+		LOG_INFO(LogDefault, "TaskC");
 	});
 
 	auto TaskD = std::make_shared<TFTask>("TaskD", []() {
-		LOG_INFO("TaskD");
+		LOG_INFO(LogDefault, "TaskD");
 	}, TFTask::EThread::WorkerThread, TFTask::EPriority::High);
 
 	TaskC->AddPrerequisite(*TaskB);
@@ -60,7 +60,7 @@ void RenderTest::Initialize()
 		return Task->IsCompleted() ? "Completed" : "Uncompleted";
 	};
 
-	LOG_INFO("TaskA is {}, TaskB is {}, TaskC is {}, TaskD is {}", GetState(TaskA), GetState(TaskB), GetState(TaskC), GetState(TaskD));
+	LOG_INFO(LogDefault, "TaskA is {}, TaskB is {}, TaskC is {}, TaskD is {}", GetState(TaskA), GetState(TaskB), GetState(TaskC), GetState(TaskD));
 	TaskD->Wait();
 
 	size_t NumVariants = Permutation::Num;

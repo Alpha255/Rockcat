@@ -127,7 +127,7 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	{
 		auto ActualKeyCode = MapKeyCode(wParam, lParam);
 		DispatchKeyDownMessage(KeyEvent{ ActualKeyCode, wParam });
-		LOG_DEBUG("Key \"{}\" down", magic_enum::enum_name(ActualKeyCode).data());
+		LOG_DEBUG(LogDefault, "Key \"{}\" down", magic_enum::enum_name(ActualKeyCode).data());
 		break;
 	}
 	case WM_KEYUP:
@@ -135,7 +135,7 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	{
 		auto ActualKeyCode = MapKeyCode(wParam, lParam);
 		DispatchKeyUpMessage(KeyEvent{ ActualKeyCode, wParam });
-		LOG_DEBUG("Key \"{}\" up", magic_enum::enum_name(ActualKeyCode).data());
+		LOG_DEBUG(LogDefault, "Key \"{}\" up", magic_enum::enum_name(ActualKeyCode).data());
 		break;
 	}
 	case WM_GETMINMAXINFO:

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Asset/File.h"
+#include "Services/SpdlogService.h"
 
 struct DataBlock
 {
@@ -152,3 +153,6 @@ protected:
 private:
 	std::vector<std::string_view> m_SupportedFormats;
 };
+
+
+DECLARE_LOG_CATEGOTY(LogAsset);

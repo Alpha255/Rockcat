@@ -23,6 +23,8 @@ SpdLogService::SpdLogService()
 	m_DefaultLogger->set_pattern(GetDefaultPattern());
 
 	m_DefaultLogger->info("Use spdlog @{}", SPDLOG_VERSION);
+
+	m_Loggers.insert(std::make_pair(std::string_view("LogDefault"), m_DefaultLogger));
 }
 
 const char* SpdLogService::GetDefaultPattern()
@@ -69,3 +71,5 @@ void SpdLogService::RegisterRedirector(LogRedirector* Redirector)
 	// TODO: Thread safe ???
 	m_Redirectors.insert(Redirector);
 }
+
+DEFINE_LOG_CATEGORY(LogDefault);

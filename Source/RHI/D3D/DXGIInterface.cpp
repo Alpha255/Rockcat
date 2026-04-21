@@ -1,6 +1,9 @@
 #include "RHI/D3D/DXGIInterface.h"
 #include "RHI/RHIDevice.h"
 
+DEFINE_LOG_CATEGORY(LogD3D11);
+DEFINE_LOG_CATEGORY(LogD3D12);
+
 namespace D3DResult
 {
 	const char* const ToString(::HRESULT Result)

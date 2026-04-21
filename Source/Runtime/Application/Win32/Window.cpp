@@ -63,7 +63,7 @@ void Window::UpdateSize(uint32_t Width, uint32_t Height)
 
 	if (m_Width != Width || m_Height != Height)
 	{
-		LOG_DEBUG("Set window mode to \"{}\", Window resized from @{}x{} to @{}x{}", magic_enum::enum_name(m_Mode), m_Width, m_Height, Width, Height);
+		LOG_DEBUG(LogDefault, "Set window mode to \"{}\", Window resized from @{}x{} to @{}x{}", magic_enum::enum_name(m_Mode), m_Width, m_Height, Width, Height);
 		m_Width = Width;
 		m_Height = Height;
 	}

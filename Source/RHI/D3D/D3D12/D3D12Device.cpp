@@ -31,7 +31,7 @@ D3D12Device::D3D12Device(const DxgiFactory& Factory)
 	if (IsValid())
 	{
 		DXGI_ADAPTER_DESC AdapterDesc;
-		VERIFY_D3D(m_Adapter->GetNative()->GetDesc(&AdapterDesc));
+		VERIFY_D3D12(m_Adapter->GetNative()->GetDesc(&AdapterDesc));
 
 		auto GetFeatureLevelName = [](D3D_FEATURE_LEVEL Level)->const char* const
 		{
@@ -52,7 +52,7 @@ D3D12Device::D3D12Device(const DxgiFactory& Factory)
 			}
 		};
 
-		LOG_INFO("Create D3D12 device on adapter: \"{}\", DeviceID = {}. Feature Level = {}",
+		LOG_INFO(LogD3D12, "Create D3D12 device on adapter: \"{}\", DeviceID = {}. Feature Level = {}",
 			String::ToMultiByte(AdapterDesc.Description),
 			AdapterDesc.DeviceId,
 			GetFeatureLevelName(FeatureLevel));
@@ -123,7 +123,7 @@ D3D12Device::D3D12Device(const DxgiFactory& Factory)
 	}
 	else
 	{
-		LOG_ERROR("Failed to create D3D12 device");
+		LOG_ERROR(LogD3D12, "Failed to create D3D12 device");
 		assert(0);
 	}
 }

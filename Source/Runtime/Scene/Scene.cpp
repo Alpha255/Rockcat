@@ -54,7 +54,7 @@ void Scene::OnPostLoad()
 			AiScenePath = Paths::GltfSampleModelPath() / Path;
 			if (!std::filesystem::exists(AiScenePath))
 			{
-				LOG_WARNING("Assimp scene \"{}\" not exists", Path);
+				LOG_WARNING(LogDefault, "Assimp scene \"{}\" not exists", Path);
 				continue;
 			}
 		}

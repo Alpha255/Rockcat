@@ -103,7 +103,7 @@ void System::ExecuteProcess(const char* Commandline, bool WaitDone)
 				VERIFY_WITH_SYSTEM_MESSAGE(::ReadFile(Read, s_Buffer, sizeof(s_Buffer), &Bytes, nullptr) != 0);
 				//buffer[bytes] = '\0';
 				std::string ErrorMessage = String::ToMultiByte(s_Buffer);
-				LOG_ERROR("Failed to executing process \"%s\"", ErrorMessage);
+				LOG_ERROR(LogDefault, "Failed to executing process \"%s\"", ErrorMessage);
 			}
 			else
 			{

@@ -60,7 +60,7 @@ void ImGuiConfiguration::LoadDefaultFonts()
 
 	if (!IO.Fonts->Build())
 	{
-		LOG_ERROR("Failed to build ImGui font atlas!");
+		LOG_ERROR(LogDefault, "Failed to build ImGui font atlas!");
 	}
 	else
 	{
@@ -90,7 +90,7 @@ void ImGuiConfiguration::LoadDefaultThemes()
 		}
 		else
 		{
-			LOG_ERROR("Duplicated ImGui editor theme in different directory!");
+			LOG_ERROR(LogDefault, "Duplicated ImGui editor theme in different directory!");
 		}
 	}
 	

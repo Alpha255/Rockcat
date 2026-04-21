@@ -2,13 +2,15 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 
+DEFINE_LOG_CATEGORY(LogVulkan);
+
 #if !defined(VULKAN_HPP_CPLUSPLUS)
 
-#define VK_LOADER_VERIFY_FUNC(Func)                                   \
-	if (!Func)                                                        \
-	{                                                                 \
-		LOG_ERROR("Can't get entry point of function \"{}\"", #Func); \
-		assert(0);                                                    \
+#define VK_LOADER_VERIFY_FUNC(Func)												 \
+	if (!Func)																	 \
+	{																			 \
+		LOG_ERROR(LogVulkan, "Can't get entry point of function \"{}\"", #Func); \
+		assert(0);                                                               \
 	}
 
 #if USE_VK_LOADER

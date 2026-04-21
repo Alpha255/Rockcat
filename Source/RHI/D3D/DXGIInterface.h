@@ -2,6 +2,7 @@
 
 #include "Core/StringUtils.h"
 #include "RHI/RHIResource.h"
+#include "Services/SpdLogService.h"
 #include <d3d11.h>
 #include <d3d11_1.h>
 #include <d3d11_2.h>
@@ -116,14 +117,24 @@ namespace D3DResult
 	const char* const ToString(::HRESULT Result);
 };
 
-#define VERIFY_D3D(Func)                                                       \
-{                                                                              \
-	::HRESULT Result = (Func);                                                 \
-	if (FAILED(Result))                                                        \
-	{                                                                          \
-		LOG_ERROR("Failed to invoke D3DAPI, {}", D3DResult::ToString(Result)); \
-		assert(0);                                                             \
-	}                                                                          \
+#define VERIFY_D3D11(Func)                                                                 \
+{                                                                                          \
+	::HRESULT Result = (Func);                                                             \
+	if (FAILED(Result))                                                                    \
+	{                                                                                      \
+		LOG_ERROR(LogD3D11, "Failed to invoke D3D11API, {}", D3DResult::ToString(Result)); \
+		assert(0);                                                                         \
+	}                                                                                      \
+}
+
+#define VERIFY_D3D12(Func)                                                                 \
+{                                                                                          \
+	::HRESULT Result = (Func);                                                             \
+	if (FAILED(Result))                                                                    \
+	{                                                                                      \
+		LOG_ERROR(LogD3D12, "Failed to invoke D3D12API, {}", D3DResult::ToString(Result)); \
+		assert(0);                                                                         \
+	}                                                                                      \
 }
 
 #define DECLARE_D3D_HWOBJECT(ClassName, HWInterface) \
@@ -182,3 +193,6 @@ inline uint32_t CalcSubresource(uint32_t MipLevel, uint32_t ArrayLayer, uint32_t
 {
 	return MipLevel + (ArrayLayer * NumMips) + (PlaneSlice * NumMips * NumArray);
 }
+
+DECLARE_LOG_CATEGOTY(LogD3D11);
+DECLARE_LOG_CATEGOTY(LogD3D12);

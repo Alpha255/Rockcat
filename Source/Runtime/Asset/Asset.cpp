@@ -1,6 +1,8 @@
 #include "Asset/Asset.h"
 #include "Services/AssetDatabase.h"
 
+DEFINE_LOG_CATEGORY(LogAsset);
+
 std::shared_ptr<DataBlock> Asset::LoadData(bool IsBinary) const
 {
 	if (!std::filesystem::exists(GetPath()))

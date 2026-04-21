@@ -55,7 +55,7 @@ void AssetDatabase::ProcessAssetLoadRequest(AssetLoadRequest& Request)
 	std::filesystem::path UnifiedPath = GetUnifiedAssetPath(Request.Path);
 	if (!std::filesystem::exists(UnifiedPath))
 	{
-		LOG_ERROR_CAT(LogAsset, "The target asset \"{}\" is not exists.", Request.Path);
+		LOG_ERROR(LogAsset, "The target asset \"{}\" is not exists.", Request.Path);
 		return;
 	}
 
@@ -102,7 +102,7 @@ void AssetDatabase::ProcessAssetLoadRequest(AssetLoadRequest& Request)
 	}
 	else
 	{
-		LOG_ERROR_CAT(LogAsset, "The target asset \"{}\" is not supported yet.", Request.Path);
+		LOG_ERROR(LogAsset, "The target asset \"{}\" is not supported yet.", Request.Path);
 	}
 }
 

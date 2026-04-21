@@ -155,7 +155,7 @@ void D3D12RootSignature::Create(const D3D12Device& Device, const std::vector<D3D
 
 		if (FAILED(D3D12SerializeVersionedRootSignature(&CreateDesc, Signature.Reference(), Error.Reference())))
 		{
-			LOG_ERROR("Failed to serialize versioned root signature: {}", reinterpret_cast<const char*>(Error->GetBufferPointer()));
+			LOG_ERROR(LogD3D12, "Failed to serialize versioned root signature: {}", reinterpret_cast<const char*>(Error->GetBufferPointer()));
 			assert(false);
 		}
 	}
@@ -164,7 +164,7 @@ void D3D12RootSignature::Create(const D3D12Device& Device, const std::vector<D3D
 		assert(false);
 	}
 
-	VERIFY_D3D(Device->CreateRootSignature(0u, Signature->GetBufferPointer(), Signature->GetBufferSize(), IID_PPV_ARGS(Reference())));
+	VERIFY_D3D12(Device->CreateRootSignature(0u, Signature->GetBufferPointer(), Signature->GetBufferSize(), IID_PPV_ARGS(Reference())));
 }
 
 D3D12GraphicsPipelineState::D3D12GraphicsPipelineState(const D3D12Device& Device, const RHIGraphicsPipelineDesc& Desc)
@@ -301,7 +301,7 @@ D3D12GraphicsPipelineState::D3D12GraphicsPipelineState(const D3D12Device& Device
 
 	CreateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
-	VERIFY_D3D(Device->CreateGraphicsPipelineState(&CreateDesc, IID_PPV_ARGS(Reference())));
+	VERIFY_D3D12(Device->CreateGraphicsPipelineState(&CreateDesc, IID_PPV_ARGS(Reference())));
 }
 
 D3D12GraphicsPipeline::D3D12GraphicsPipeline(const D3D12Device& Device, const RHIGraphicsPipelineDesc& Desc)

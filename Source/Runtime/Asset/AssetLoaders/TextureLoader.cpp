@@ -135,7 +135,7 @@ TextureLoader::TextureLoader()
 		GetDDSExtension()
 	})
 {
-	LOG_INFO_CAT(LogAsset, "Use stb_image @2.3");
+	LOG_INFO(LogAsset, "Use stb_image @2.3");
 }
 
 std::shared_ptr<Asset> TextureLoader::CreateAsset(const std::filesystem::path& Path)
@@ -163,7 +163,7 @@ bool TextureLoader::LoadStb(Texture& Image)
 
 	if (!stbi_info_from_memory(Data, DataSize, &Width, &Height, &OriginalChannels))
 	{
-		LOG_ERROR_CAT(LogAsset, "Couldn't parse image header of \"{}\": {}", Image.GetPath().string(), stbi_failure_reason());
+		LOG_ERROR(LogAsset, "Couldn't parse image header of \"{}\": {}", Image.GetPath().string(), stbi_failure_reason());
 		return false;
 	}
 
@@ -185,7 +185,7 @@ bool TextureLoader::LoadStb(Texture& Image)
 
 	if (!Bitmap)
 	{
-		LOG_ERROR_CAT(LogAsset, "Failed to load image \"{}\": {}", Image.GetPath().string(), stbi_failure_reason());
+		LOG_ERROR(LogAsset, "Failed to load image \"{}\": {}", Image.GetPath().string(), stbi_failure_reason());
 		return false;
 	}
 

@@ -46,7 +46,7 @@ D3D11Device::D3D11Device(const DxgiFactory& Factory)
 	if (IsValid())
 	{
 		DXGI_ADAPTER_DESC AdapterDesc;
-		VERIFY_D3D(m_Adapter->GetNative()->GetDesc(&AdapterDesc));
+		VERIFY_D3D11(m_Adapter->GetNative()->GetDesc(&AdapterDesc));
 
 		auto GetFeatureLevelName = [](D3D_FEATURE_LEVEL Level)->const char* const
 		{
@@ -67,7 +67,7 @@ D3D11Device::D3D11Device(const DxgiFactory& Factory)
 			}
 		};
 
-		LOG_INFO("Create D3D11 device on adapter: \"{}\", DeviceID = {}. Feature Level = {}",
+		LOG_INFO(LogD3D11, "Create D3D11 device on adapter: \"{}\", DeviceID = {}. Feature Level = {}",
 			String::ToMultiByte(AdapterDesc.Description),
 			AdapterDesc.DeviceId,
 			GetFeatureLevelName(FeatureLevel));
@@ -115,7 +115,7 @@ D3D11Device::D3D11Device(const DxgiFactory& Factory)
 	}
 	else
 	{
-		LOG_ERROR("Failed to create D3D11 device");
+		LOG_ERROR(LogD3D11, "Failed to create D3D11 device");
 		assert(0);
 	}
 }
