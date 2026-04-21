@@ -69,7 +69,6 @@ void RenderTest::Initialize()
 	const auto IsABase = Comp->IsA<ComponentBase>();
 	const auto IsATransform = Comp->IsA<TransformComponent>();
 
-	constexpr auto same = std::is_base_of_v<PrimitiveComponent, ComponentBase>;
 	auto StaticMesh = new StaticMeshComponent();
 	const auto IsAStaticMesh = StaticMesh->IsA<StaticMeshComponent>();
 	const auto IsAPrimitive = StaticMesh->IsA<PrimitiveComponent>();

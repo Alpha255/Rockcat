@@ -10,17 +10,16 @@ using ComponentID = uint64_t;
 
 #define REGISTER_COMPONENT(ComponentType, BaseType) \
 public: \
-	friend class ComponentPool; \
-	inline static constexpr ComponentID ID = FnvHash(#ComponentType); \
-	inline ComponentID GetID() const override { return ComponentType::ID; } \
-    template<class T> inline constexpr bool IsA() const \
-	{ \
-        return std::is_same_v<T, ComponentType> || std::is_base_of_v<ComponentType, BaseType>; \
-    }
+	constexpr static ComponentID ID = FnvHash(#ComponentType); \
+protected: \
+	bool Is(ComponentID CompID) const override { return ID == CompID || BaseType::Is(CompID); } \
+public:
 
 class ComponentBase : public std::enable_shared_from_this<ComponentBase>
 {
 public:
+	constexpr static ComponentID ID = FnvHash("ComponentBase");
+
 	ComponentBase() = default;
 
 	ComponentBase(class Entity* Owner)
@@ -38,19 +37,20 @@ public:
 
 	virtual void ApplyOverrideProperties(const ComponentBase&) {}
 
-	inline static constexpr ComponentID ID = FnvHash("ComponentType");
-	inline virtual ComponentID GetID() const { return ID; }
-
 	template<class T>
-	inline constexpr bool IsA() const { return false; }
+	inline bool IsA() const
+	{
+		static_assert(std::is_base_of_v<ComponentBase, T>, "T must be derived from ComponentBase");
+		return Is(T::ID);
+	}
 
 	template<class Archive>
 	void serialize(Archive&)
 	{
 	}
+protected:
+	virtual bool Is(ComponentID CompID) const { return ID == CompID; }
 private:
-	friend class ComponentPool;
-
 	inline void SetOwner(class Entity* Owner) { m_Owner = Owner; }
 	
 	class Entity* m_Owner = nullptr;
