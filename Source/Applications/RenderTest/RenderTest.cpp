@@ -61,6 +61,7 @@ void RenderTest::Initialize()
 	};
 
 	LOG_INFO("TaskA is {}, TaskB is {}, TaskC is {}, TaskD is {}", GetState(TaskA), GetState(TaskB), GetState(TaskC), GetState(TaskD));
+	TaskD->Wait();
 
 	size_t NumVariants = Permutation::Num;
 

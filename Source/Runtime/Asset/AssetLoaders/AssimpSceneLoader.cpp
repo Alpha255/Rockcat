@@ -270,12 +270,12 @@ void AssimpSceneLoader::ProcessMaterial(const aiScene* AiScene, const AssimpScen
 		aiString Name;
 		AiMaterial->Get(AI_MATKEY_NAME, Name);
 
-		auto MaterialFilePath = (Paths::MaterialPath() / Model.GetStem() / Name.C_Str()).replace_extension(MaterialProperty::GetExtension());
-		const bool MaterialFileExists = std::filesystem::exists(MaterialFilePath);
-		auto Property = MaterialProperty::Load(MaterialFilePath);
+		auto Path = (Paths::MaterialPath() / Model.GetStem() / Name.C_Str()).replace_extension(MaterialProperty::GetExtension());
+		const bool FileExists = std::filesystem::exists(Path);
+		auto Property = MaterialProperty::Load(Path);
 		StaticMeshComp.SetMaterialProperty(Property);
 
-		if (MaterialFileExists)
+		if (FileExists)
 		{
 			return;
 		}
@@ -349,7 +349,7 @@ void AssimpSceneLoader::ProcessMaterial(const aiScene* AiScene, const AssimpScen
 
 		ProcessTextures(AiMaterial, *Property, Model.GetPath().parent_path());
 
-		Property->Save(true, MaterialFilePath);
+		Property->Save(true, Path);
 	}
 }
 

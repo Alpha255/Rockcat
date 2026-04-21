@@ -31,8 +31,6 @@ void Scene::Tick(float ElapsedSeconds)
 
 void Scene::AddPrimitive(const PrimitiveComponent* PrimitiveComp)
 {
-	assert(TFTask::IsMainThread() || TFTask::IsGameThread());
-
 	m_AddedPrimitives.push_back(PrimitiveComp);
 }
 
