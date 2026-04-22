@@ -70,27 +70,20 @@ private:
 
 #define DECLARE_LOG_CATEGOTY(Category) \
 	namespace spdlog { \
-		extern spdlog::logger* LogCat_##Category; \
-		spdlog::logger* GetLogger_##Category(); \
+		extern logger* spdLogger_##Category; \
 	}
 
 #define DEFINE_LOG_CATEGORY(Category) \
 	namespace spdlog { \
-		spdlog::logger* LogCat_##Category = nullptr; \
-		spdlog::logger* GetLogger_##Category() { \
-			if (!LogCat_##Category) { \
-				LogCat_##Category = &SpdLogService::Get().GetLogger(#Category); \
-			} \
-			return LogCat_##Category; \
-		} \
+		logger* spdLogger_##Category = &SpdLogService::Get().GetLogger(#Category); \
 	}
 
-#define LOG_TRACE(Category, Format, ...) spdlog::GetLogger_##Category()->trace(Format, __VA_ARGS__)
-#define LOG_DEBUG(Category, Format, ...) spdlog::GetLogger_##Category()->debug(Format, __VA_ARGS__)
-#define LOG_INFO(Category, Format, ...) spdlog::GetLogger_##Category()->info(Format, __VA_ARGS__)
-#define LOG_WARNING(Category, Format, ...) spdlog::GetLogger_##Category()->warn(Format, __VA_ARGS__)
-#define LOG_ERROR(Category, Format, ...) spdlog::GetLogger_##Category()->error(Format, __VA_ARGS__)
-#define LOG_CRITICAL(Category, Format, ...) spdlog::GetLogger_##Category()->critical(Format, __VA_ARGS__)
+#define LOG_TRACE(Category, Format, ...) spdlog::spdLogger_##Category->trace(Format, __VA_ARGS__)
+#define LOG_DEBUG(Category, Format, ...) spdlog::spdLogger_##Category->debug(Format, __VA_ARGS__)
+#define LOG_INFO(Category, Format, ...) spdlog::spdLogger_##Category->info(Format, __VA_ARGS__)
+#define LOG_WARNING(Category, Format, ...) spdlog::spdLogger_##Category->warn(Format, __VA_ARGS__)
+#define LOG_ERROR(Category, Format, ...) spdlog::spdLogger_##Category->error(Format, __VA_ARGS__)
+#define LOG_CRITICAL(Category, Format, ...) spdlog::spdLogger_##Category->critical(Format, __VA_ARGS__)
 
 DECLARE_LOG_CATEGOTY(LogDefault);
 
