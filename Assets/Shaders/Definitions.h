@@ -6,6 +6,10 @@
 #include "Runtime/Core/Math/Matrix.h"
 #include "Runtime/Asset/Texture.h"
 
+#define DECLARE_GBUFFER_SLOT_BEGIN enum class EGBufferSlot {
+#define DECLARE_GBUFFER_SLOT_END };
+#define GBUFFER_SLOT(Name, Slot) Name = Slot,
+
 using uint = uint32_t;
 using float2 = Math::Vector2;
 using float3 = Math::Vector3;
@@ -130,6 +134,10 @@ private: \
 #define END_SHADER_VARIABLE_UNIFORM_BUFFER };
 
 #else  // __cplusplus
+
+#define DECLARE_GBUFFER_SLOT_BEGIN
+#define DECLARE_GBUFFER_SLOT_END
+#define GBUFFER_SLOT(Name, Slot) const int Name = Slot;
 
 #if _SPIRV_
 	#define VK_PUSH_CONSTANT      [[vk::push_constant]]
@@ -338,6 +346,17 @@ struct VSOutput
 };
 
 #endif  // __cplusplus
+
+DECLARE_GBUFFER_SLOT_BEGIN
+	GBUFFER_SLOT(SceneColor, 0)
+	GBUFFER_SLOT(WorldNormal, 1)
+	GBUFFER_SLOT(Metallic, 2)
+	GBUFFER_SLOT(Roughness, 3)
+	GBUFFER_SLOT(BaseColor, 4)
+	GBUFFER_SLOT(AmbientOcclusion, 5)
+	GBUFFER_SLOT(Velocity, 6)
+	GBUFFER_SLOT(WorldTangent, 7)
+DECLARE_GBUFFER_SLOT_END
 
 BEGIN_SHADER_VARIABLE_UNIFORM_BUFFER(WVP)
 	UNIFORM_BUFFER_VARIABLE(float4x4, WorldMatrix)

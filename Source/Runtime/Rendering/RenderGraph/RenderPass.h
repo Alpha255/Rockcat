@@ -76,7 +76,6 @@ enum class ERDGPassFlags : uint16_t
 {
 	None,
 	Raster = 1 << 0,
-	Compute = 1 << 1,
 	AsyncCompute = 1 << 2,
 	NoAsyncExecute = 1 << 3
 };

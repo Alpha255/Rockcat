@@ -82,6 +82,96 @@ struct RHITextureDesc
 	inline RHITextureDesc& SetBulkData(std::shared_ptr<DataBlock>&& Data) { BulkData = std::move(Data); return *this; }
 	inline RHITextureDesc& SetBulkData(size_t Size, const void* RawData = nullptr, size_t Offset = 0u) { BulkData = std::make_shared<DataBlock>(Size, RawData, Offset); return *this; }
 	inline RHITextureDesc& SetName(FName&& InName) { Name = std::move(InName); return *this; }
+
+	static RHITextureDesc Create1D(uint32_t Width, ERHIFormat Format, ERHIBufferUsageFlags Flags, uint16_t NumMipLevel = 1u, ERHISampleCount NumSamples = ERHISampleCount::Sample_1_Bit)
+	{
+		return RHITextureDesc()
+			.SetWidth(Width)
+			.SetFormat(Format)
+			.SetUsages(Flags)
+			.SetDimension(ERHITextureDimension::T_1D)
+			.SetNumMipLevel(NumMipLevel)
+			.SetSampleCount(NumSamples)
+			.SetNumArrayLayer(1u);
+	}
+
+	static RHITextureDesc Create1DArray(uint32_t Width, ERHIFormat Format, ERHIBufferUsageFlags Flags, uint16_t NumMipLevel = 1u, uint16_t NumArrayLayers = 1u, ERHISampleCount NumSamples = ERHISampleCount::Sample_1_Bit)
+	{
+		return RHITextureDesc()
+			.SetWidth(Width)
+			.SetFormat(Format)
+			.SetUsages(Flags)
+			.SetDimension(ERHITextureDimension::T_1D_Array)
+			.SetNumMipLevel(NumMipLevel)
+			.SetNumArrayLayer(NumArrayLayers)
+			.SetSampleCount(NumSamples);
+	}
+
+	static RHITextureDesc Create2D(uint32_t Width, uint32_t Height, ERHIFormat Format, ERHIBufferUsageFlags Flags, uint16_t NumMipLevel = 1u, ERHISampleCount NumSamples = ERHISampleCount::Sample_1_Bit)
+	{
+		return RHITextureDesc()
+			.SetWidth(Width)
+			.SetHeight(Height)
+			.SetFormat(Format)
+			.SetUsages(Flags)
+			.SetDimension(ERHITextureDimension::T_2D)
+			.SetNumMipLevel(NumMipLevel)
+			.SetSampleCount(NumSamples)
+			.SetNumArrayLayer(1u);
+	}
+
+	static RHITextureDesc Create2DArray(uint32_t Width, uint32_t Height, ERHIFormat Format, ERHIBufferUsageFlags Flags, uint16_t NumMipLevel = 1u, uint16_t NumArrayLayers = 1u, ERHISampleCount NumSamples = ERHISampleCount::Sample_1_Bit)
+	{
+		return RHITextureDesc()
+			.SetWidth(Width)
+			.SetHeight(Height)
+			.SetFormat(Format)
+			.SetUsages(Flags)
+			.SetDimension(ERHITextureDimension::T_2D_Array)
+			.SetNumMipLevel(NumMipLevel)
+			.SetNumArrayLayer(NumArrayLayers)
+			.SetSampleCount(NumSamples);
+	}
+
+	static RHITextureDesc Create3D(uint32_t Width, uint32_t Height, uint32_t Depth, ERHIFormat Format, ERHIBufferUsageFlags Flags, uint16_t NumMipLevel = 1u, ERHISampleCount NumSamples = ERHISampleCount::Sample_1_Bit)
+	{
+		return RHITextureDesc()
+			.SetWidth(Width)
+			.SetHeight(Height)
+			.SetDepth(Depth)
+			.SetFormat(Format)
+			.SetUsages(Flags)
+			.SetDimension(ERHITextureDimension::T_3D)
+			.SetNumMipLevel(NumMipLevel)
+			.SetSampleCount(NumSamples)
+			.SetNumArrayLayer(1u);
+	}
+
+	static RHITextureDesc CreateCube(uint32_t Width, uint32_t Height, ERHIFormat Format, ERHIBufferUsageFlags Flags, uint16_t NumMipLevel = 1u, ERHISampleCount NumSamples = ERHISampleCount::Sample_1_Bit)
+	{
+		return RHITextureDesc()
+			.SetWidth(Width)
+			.SetHeight(Height)
+			.SetFormat(Format)
+			.SetUsages(Flags)
+			.SetDimension(ERHITextureDimension::T_Cube)
+			.SetNumMipLevel(NumMipLevel)
+			.SetSampleCount(NumSamples)
+			.SetNumArrayLayer(1u);
+	}
+
+	static RHITextureDesc CreateCubeArray(uint32_t Width, uint32_t Height, ERHIFormat Format, ERHIBufferUsageFlags Flags, uint16_t NumMipLevel = 1u, uint16_t NumArrayLayers = 1u, ERHISampleCount NumSamples = ERHISampleCount::Sample_1_Bit)
+	{
+		return RHITextureDesc()
+			.SetWidth(Width)
+			.SetHeight(Height)
+			.SetFormat(Format)
+			.SetUsages(Flags)
+			.SetDimension(ERHITextureDimension::T_Cube_Array)
+			.SetNumMipLevel(NumMipLevel)
+			.SetNumArrayLayer(NumArrayLayers)
+			.SetSampleCount(NumSamples);
+	}
 };
 
 class RHITexture : public RHIResource
