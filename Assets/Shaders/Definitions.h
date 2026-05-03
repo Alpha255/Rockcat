@@ -348,14 +348,14 @@ struct VSOutput
 #endif  // __cplusplus
 
 DECLARE_GBUFFER_SLOT_BEGIN
-	GBUFFER_SLOT(SceneColor, 0)
-	GBUFFER_SLOT(WorldNormal, 1)
-	GBUFFER_SLOT(Metallic, 2)
-	GBUFFER_SLOT(Roughness, 3)
-	GBUFFER_SLOT(BaseColor, 4)
-	GBUFFER_SLOT(AmbientOcclusion, 5)
-	GBUFFER_SLOT(Velocity, 6)
-	GBUFFER_SLOT(WorldTangent, 7)
+	GBUFFER_SLOT(SceneColor, 1)
+	GBUFFER_SLOT(WorldNormal, 2)
+	GBUFFER_SLOT(Metallic, 3)
+	GBUFFER_SLOT(Roughness, 4)
+	GBUFFER_SLOT(BaseColor, 5)
+	GBUFFER_SLOT(AmbientOcclusion, 6)
+	GBUFFER_SLOT(Velocity, 7)
+	GBUFFER_SLOT(WorldTangent, 8)
 DECLARE_GBUFFER_SLOT_END
 
 BEGIN_SHADER_VARIABLE_UNIFORM_BUFFER(WVP)

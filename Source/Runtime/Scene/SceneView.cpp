@@ -1,41 +1,52 @@
 #include "Scene/SceneView.h"
 #include "Scene/Components/Camera.h"
 
-void ISceneView::SetCamera(Camera* Camera)
+void SceneView::SetCamera(Camera* Camera)
 {
 	m_Camera = Camera;
 }
 
-const Math::Matrix& ISceneView::GetWorldMartix() const
+const Math::Matrix& SceneView::GetWorldMartix() const
 {
 	assert(m_Camera);
 	return m_Camera->GetWorldMatrix();
 }
 
-const Math::Matrix& ISceneView::GetViewMatrix() const
+const Math::Matrix& SceneView::GetViewMatrix() const
 {
 	assert(m_Camera);
 	return m_Camera->GetViewMatrix();
 }
 
-const Math::Matrix& ISceneView::GetProjectionMatrix() const
+const Math::Matrix& SceneView::GetProjectionMatrix() const
 {
 	assert(m_Camera);
 	return m_Camera->GetProjectionMatrix();
 }
 
-const Math::Vector3& ISceneView::GetViewOriginPosition() const
+const Math::Vector3& SceneView::GetViewOriginPosition() const
 {
 	assert(m_Camera);
 	return m_Camera->GetEyePosition();
 }
 
-Math::Frustum ISceneView::GetFrustum() const
+Math::Frustum SceneView::GetFrustum() const
 {
 	return Math::Frustum();
 }
 
-void ISceneView::SetViewMode(EViewMode ViewMode)
+void SceneView::SetDefaultScissorRect()
+{
+	if (m_ScissorRects.empty())
+	{
+		assert(!m_Viewports.empty());
+
+		RHIScissorRect Scissor(static_cast<uint32_t>(m_Viewports[0].GetWidth()), static_cast<uint32_t>(m_Viewports[0].GetHeight()));
+		SetScissorRect(Scissor);
+	}
+}
+
+void SceneView::SetViewMode(EViewMode ViewMode)
 {
 	m_ViewMode = ViewMode;
 
@@ -44,9 +55,15 @@ void ISceneView::SetViewMode(EViewMode ViewMode)
 	}
 }
 
+Math::UInt2 SceneView::GetViewSize() const
+{
+	return m_Viewports.empty() ? Math::UInt2(0u, 0u) : Math::UInt2(static_cast<uint32_t>(m_Viewports[0].GetWidth()), static_cast<uint32_t>(m_Viewports[0].GetHeight()));
+}
+
 void PlanarSceneView::SetViewport(const RHIViewport& Viewport)
 {
 	m_Viewports[0] = Viewport;
+	SetDefaultScissorRect();
 }
 
 void PlanarSceneView::SetScissorRect(const RHIScissorRect& ScissorRect)
@@ -67,6 +84,8 @@ void StereoSceneView::SetViewport(const RHIViewport& Viewport)
 		Viewport.LeftTop.y,
 		Viewport.GetWidth() * 0.5f,
 		Viewport.GetHeight());
+
+	SetDefaultScissorRect();
 }
 
 void StereoSceneView::SetScissorRect(const RHIScissorRect& ScissorRect)
@@ -90,6 +109,8 @@ void CubemapSceneView::SetViewport(const RHIViewport& Viewport)
 	{
 		m_Viewports[Index] = Viewport;
 	}
+
+	SetDefaultScissorRect();
 }
 
 void CubemapSceneView::SetScissorRect(const RHIScissorRect& ScissorRect)

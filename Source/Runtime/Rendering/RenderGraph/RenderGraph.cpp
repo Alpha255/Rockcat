@@ -3,55 +3,6 @@
 #include "Scene/Scene.h"
 #include "Scene/SceneView.h"
 
-std::shared_ptr<RenderGraph> RenderGraph::Create(const RenderSettings& InRenderSettings, RHIDevice& Device, const ISceneView& InView)
-{
-	return nullptr;
-}
-
-RenderGraph::RenderGraph(const RenderSettings& InRenderSettings, RHIDevice& Device, const ISceneView& InView)
-	: m_Device(Device)
-	, m_SceneView(InView)
-	, m_RenderSettings(InRenderSettings)
-	, m_ResourceMgr(new ResourceManager(m_Device))
-{
-}
-
-void RenderGraph::Compile()
-{
-	if (m_Dirty)
-	{
-		for (auto& Pass : m_RenderPasses)
-		{
-			Pass->Compile();
-		}
-
-		SetDirty(false);
-	}
-}
-
-void RenderGraph::Execute(const Scene& InScene)
-{
-	if (!InScene.IsReady())
-	{
-		return;
-	}
-
-	if (!m_RenderScene || (&m_RenderScene->GetScene() != &InScene))
-	{
-		m_RenderScene = std::make_shared<RenderScene>(InScene, m_RenderSettings.EnableAsyncMeshDrawCommandsBuilding);
-	}
-	m_RenderScene->BuildMeshDrawCommands(m_SceneView);
-
-	Compile();
-
-	m_ResourceMgr->ResolveResources();
-
-	for (auto& Pass : m_RenderPasses)
-	{
-		Pass->Execute(*m_RenderScene);
-	}
-}
-
 RDGRenderGraph::RDGRenderGraph(const RenderSettings& Settings)
 	: m_Settings(Settings)
 {
@@ -59,6 +10,16 @@ RDGRenderGraph::RDGRenderGraph(const RenderSettings& Settings)
 
 void RDGRenderGraph::Execute()
 {
+}
+
+RDGTexture* RDGRenderGraph::CreateTexture(const RHITextureDesc& Desc)
+{
+	return nullptr;
+}
+
+RDGBuffer* RDGRenderGraph::CreateBuffer(const RHIBufferDesc& Desc)
+{
+	return nullptr;
 }
 
 void RDGRenderGraph::Compile()

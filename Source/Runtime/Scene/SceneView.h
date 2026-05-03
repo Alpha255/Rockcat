@@ -14,10 +14,10 @@ enum class EViewMode : uint8_t
 	VisualizeShadowMap,
 };
 
-class ISceneView
+class SceneView
 {
 public:
-	virtual ~ISceneView() = default;
+	virtual ~SceneView() = default;
 	
 	virtual bool IsStereoView() const { return false; }
 	virtual bool IsCubemapView() const { return false; }
@@ -42,6 +42,8 @@ public:
 	inline EViewMode GetViewMode() const { return m_ViewMode; }
 	void SetViewMode(EViewMode ViewMode);
 
+	Math::UInt2 GetViewSize() const;
+
 	const Math::Matrix& GetWorldMartix() const;
 	const Math::Matrix& GetViewMatrix() const;
 	const Math::Matrix& GetProjectionMatrix() const;
@@ -60,6 +62,8 @@ public:
 		);
 	}
 protected:
+	void SetDefaultScissorRect();
+
 	bool m_InverseDepth = false;
 	bool m_Mirrored = false;
 
@@ -73,10 +77,10 @@ protected:
 	std::vector<RHIScissorRect> m_ScissorRects;
 };
 
-class PlanarSceneView : public ISceneView
+class PlanarSceneView : public SceneView
 {
 public:
-	using ISceneView::ISceneView;
+	using SceneView::SceneView;
 
 	PlanarSceneView()
 	{
@@ -88,7 +92,7 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(ISceneView)
+			CEREAL_BASE(SceneView)
 		);
 	}
 
@@ -96,10 +100,10 @@ public:
 	void SetScissorRect(const RHIScissorRect& ScissorRect) override final;
 };
 
-class StereoSceneView : public ISceneView
+class StereoSceneView : public SceneView
 {
 public:
-	using ISceneView::ISceneView;
+	using SceneView::SceneView;
 
 	enum class EView
 	{
@@ -117,7 +121,7 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(ISceneView)
+			CEREAL_BASE(SceneView)
 		);
 	}
 
@@ -127,10 +131,10 @@ public:
 	bool IsStereoView() const override final { return true; }
 };
 
-class CubemapSceneView : public ISceneView
+class CubemapSceneView : public SceneView
 {
 public:
-	using ISceneView::ISceneView;
+	using SceneView::SceneView;
 
 	enum class EView
 	{
@@ -152,7 +156,7 @@ public:
 	void serialize(Archive& Ar)
 	{
 		Ar(
-			CEREAL_BASE(ISceneView)
+			CEREAL_BASE(SceneView)
 		);
 	}
 

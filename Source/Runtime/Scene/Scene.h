@@ -20,7 +20,7 @@ public:
 
 	void Tick(float ElapsedSeconds) override final;
 
-	const std::vector<std::shared_ptr<class ISceneView>>& GetViews() const { return m_Views; }
+	const std::vector<std::shared_ptr<class SceneView>>& GetViews() const { return m_Views; }
 
 	void AddPrimitive(const class PrimitiveComponent* PrimitiveComp);
 	void RemovePrimitive(const class PrimitiveComponent* PrimitiveComp);
@@ -54,7 +54,7 @@ protected:
 private:
 	std::vector<std::string> m_AssimpScenes;
 
-	std::vector<std::shared_ptr<class ISceneView>> m_Views;
+	std::vector<std::shared_ptr<class SceneView>> m_Views;
 	std::vector<std::shared_ptr<Camera>> m_Cameras;
 
 	std::vector<const class PrimitiveComponent*> m_AddedPrimitives;

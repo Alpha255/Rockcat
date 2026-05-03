@@ -1,56 +1,23 @@
-#include "Rendering/RenderGraph/RenderPassField.h"
-#include "RHI/RHIDevice.h"
+#include "Rendering/RenderGraph/RenderPassParameters.h"
 
-RDGResource::RDGResource(RDGResourceID ID, EType Type, const char* Name, EVisibility Visibility)
-	: m_ID(ID)
-	, m_Visibility(Visibility)
-	, m_Type(Type)
-	, m_Name(Name)
+void RDGSceneTextures::InitializeWithSceneView(RDGRenderGraph& GraphBuilder, SceneView& View)
 {
-	switch (m_Type)
-	{
-	case EType::Buffer:
-		CreateAsBuffer();
-		break;
-	case EType::Texture:
-		CreateAsTexture();
-		break;
-	}
 }
 
-RDGResource& RDGResource::SetVisibility(EVisibility Visibility) 
+uint32_t RDGSceneTextures::GetSceneTextureBindingSlots(RDGRenderTargetBindingSlots& Slots, bool WithDepthStencil) const
 {
-	m_Visibility = Visibility | m_Visibility; 
-	return *this;
+	return 0;
 }
 
-void RDGResource::CreateAsTexture()
+uint32_t RDGSceneTextures::GetGBufferBindingSlots(RDGRenderTargetBindingSlots& Slots) const
 {
-	assert(!m_ResourceDesc);
-	SetType(EType::Texture);
-	m_ResourceDesc = std::make_optional(RHITextureDesc());
-	GetTextureDesc().SetName(m_Name.data());
+	return 0;
 }
 
-void RDGResource::CreateAsBuffer()
+RDGSceneViewInfo::RDGSceneViewInfo(const SceneView& View)
+	: ViewMode(View.GetViewMode())
+	, OriginalViewSize(View.GetViewSize())
+	, DesiredViewSize(View.GetViewSize())
+	, FinalOutput(View.GetRenderSurface())
 {
-	assert(!m_ResourceDesc);
-	SetType(EType::Buffer);
-	m_ResourceDesc = std::make_optional(RHIBufferDesc());
-	GetBufferDesc().SetName(m_Name.data());
-}
-
-void RDGResource::CreateRHI(RHIDevice& Device)
-{
-	assert(!m_RHIResource);
-
-	switch (m_Type)
-	{
-	case EType::Buffer:
-		m_RHIResource = Device.CreateBuffer(GetBufferDesc());
-		break;
-	case EType::Texture:
-		m_RHIResource = Device.CreateTexture(GetTextureDesc());
-		break;
-	}
 }
