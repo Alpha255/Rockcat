@@ -20,6 +20,8 @@ public:
 
 	RDGTexture* CreateTexture(const RHITextureDesc& Desc);
 	RDGBuffer* CreateBuffer(const RHIBufferDesc& Desc);
+
+	const struct RenderSettings& GetRenderSettings() const { return m_Settings; }
 private:
 	void Compile();
 

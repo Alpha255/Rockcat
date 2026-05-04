@@ -1,12 +1,27 @@
 #include "Rendering/RenderGraph/RenderPassParameters.h"
+#include "Rendering/RenderGraph/RenderGraph.h"
 
-void RDGSceneTextures::InitializeWithSceneView(RDGRenderGraph& GraphBuilder, SceneView& View)
+void RDGSceneTextures::InitializeWithSceneView(RDGRenderGraph& Graph, const SceneView& View)
 {
+	if (Graph.GetRenderSettings().RenderingPath == ERenderingPath::DeferredShading)
+	{
+		//GBuffers.BaseColor = Graph.CreateTexture();
+	}
+	else
+	{
+
+	}
 }
 
 uint32_t RDGSceneTextures::GetSceneTextureBindingSlots(RDGRenderTargetBindingSlots& Slots, bool WithDepthStencil) const
 {
-	return 0;
+	uint32_t NumRenderTargets = 0u;
+
+	Slots.Colors[0].SetTexture(Color.Target)
+		.SetResolveTexture(Color.ResolveTarget);
+	++NumRenderTargets;
+
+	return NumRenderTargets;
 }
 
 uint32_t RDGSceneTextures::GetGBufferBindingSlots(RDGRenderTargetBindingSlots& Slots) const
@@ -14,10 +29,11 @@ uint32_t RDGSceneTextures::GetGBufferBindingSlots(RDGRenderTargetBindingSlots& S
 	return 0;
 }
 
-RDGSceneViewInfo::RDGSceneViewInfo(const SceneView& View)
+RDGSceneViewInfo::RDGSceneViewInfo(RDGRenderGraph& Graph, const SceneView& View)
 	: ViewMode(View.GetViewMode())
 	, OriginalViewSize(View.GetViewSize())
 	, DesiredViewSize(View.GetViewSize())
 	, FinalOutput(View.GetRenderSurface())
 {
+	SceneTextures.InitializeWithSceneView(Graph, View);
 }

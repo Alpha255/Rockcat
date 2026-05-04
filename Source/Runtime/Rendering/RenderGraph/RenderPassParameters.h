@@ -4,6 +4,7 @@
 #include "RHI/RHIBuffer.h"
 #include "RHI/RHIRenderStates.h"
 #include "Scene/SceneView.h"
+#include "Rendering/RenderSettings.h"
 
 using DAGNodeID = DirectedAcyclicGraph::NodeID;
 using RDGResourceID = ObjectID<class RDGResource>;
@@ -162,14 +163,13 @@ struct RDGSceneTextures
 {
 	struct RDGGBuffers
 	{
-		RDGTexture SceneColor;
-		RDGTexture WorldNormal;
-		RDGTexture Metallic;
-		RDGTexture Roughness;
-		RDGTexture BaseColor;
+		RDGTexture* BaseColor;
+		RDGTexture* WorldNormal;
+		RDGTexture* Metallic;
+		RDGTexture* Roughness;
 	};
 
-	void InitializeWithSceneView(class RDGRenderGraph& Graph, class SceneView& View);
+	void InitializeWithSceneView(class RDGRenderGraph& Graph, const SceneView& View);
 
 	uint32_t GetSceneTextureBindingSlots(RDGRenderTargetBindingSlots& Slots, bool WithDepthStencil = true) const;
 	uint32_t GetGBufferBindingSlots(RDGRenderTargetBindingSlots& Slots) const;
@@ -179,14 +179,14 @@ struct RDGSceneTextures
 
 	RDGGBuffers GBuffers;
 
-	RDGTexture Velocity;
+	RDGTexture* Velocity;
 
-	RDGTexture ScreenSpacAO;
+	RDGTexture* ScreenSpacAO;
 };
 
 struct RDGSceneViewInfo
 {
-	RDGSceneViewInfo(const SceneView& View);
+	RDGSceneViewInfo(class RDGRenderGraph& Graph, const SceneView& View);
 
 	EViewMode ViewMode;
 
