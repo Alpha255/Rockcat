@@ -186,9 +186,7 @@ struct RDGSceneTextures
 
 struct RDGSceneViewInfo
 {
-	RDGSceneViewInfo(class RDGRenderGraph& Graph, const SceneView& View);
-
-	EViewMode ViewMode;
+	RDGSceneViewInfo(class RDGRenderGraph& Graph, const class RHIViewWindow& ViewWindow);
 
 	Math::UInt2 OriginalViewSize;
 	Math::UInt2 DesiredViewSize;
@@ -196,6 +194,8 @@ struct RDGSceneViewInfo
 	RHITexture* FinalOutput;
 
 	RDGSceneTextures SceneTextures;
+
+	std::vector<SceneView> Views;
 };
 
 class RDGRenderPassParameters

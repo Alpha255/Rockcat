@@ -1,4 +1,4 @@
-#include "System/System.h"
+#include "OS/OS.h"
 #include "Services/SpdLogService.h"
 
 #if PLATFORM_WIN32
@@ -7,7 +7,7 @@
 #include <windowsx.h>
 #include <shlobj.h>
 
-std::string System::GetErrorMessage(uint32_t ErrorCode)
+std::string OS::GetErrorMessage(uint32_t ErrorCode)
 {
 	static wchar_t s_Buffer[UINT16_MAX];
 	memset(s_Buffer, 0, sizeof(s_Buffer));
@@ -24,36 +24,36 @@ std::string System::GetErrorMessage(uint32_t ErrorCode)
 	return String::ToMultiByte(s_Buffer);
 }
 
-std::filesystem::path System::GetApplicationDirectory()
+std::filesystem::path OS::GetApplicationDirectory()
 {
 	static wchar_t s_Buffer[UINT16_MAX];
 	memset(s_Buffer, 0, sizeof(s_Buffer));
 
-	VERIFY_WITH_SYSTEM_MESSAGE(::GetModuleFileNameW(nullptr, s_Buffer, sizeof(s_Buffer)) != 0);
+	VERIFY_WITH_OS_MESSAGE(::GetModuleFileNameW(nullptr, s_Buffer, sizeof(s_Buffer)) != 0);
 	return std::filesystem::path(s_Buffer).parent_path();
 }
 
-std::filesystem::path System::GetWorkingDirectory()
+std::filesystem::path OS::GetWorkingDirectory()
 {
 	static wchar_t s_Buffer[UINT16_MAX];
 	memset(s_Buffer, 0, sizeof(s_Buffer));
 
-	VERIFY_WITH_SYSTEM_MESSAGE(::GetCurrentDirectoryW(sizeof(s_Buffer), s_Buffer) != 0);
+	VERIFY_WITH_OS_MESSAGE(::GetCurrentDirectoryW(sizeof(s_Buffer), s_Buffer) != 0);
 	return std::filesystem::path(s_Buffer);
 }
 
-void System::SetWorkingDirectory(const std::filesystem::path& Directory)
+void OS::SetWorkingDirectory(const std::filesystem::path& Directory)
 {
 	assert(std::filesystem::exists(Directory));
-	VERIFY_WITH_SYSTEM_MESSAGE(::SetCurrentDirectoryW(Directory.c_str()) != 0);
+	VERIFY_WITH_OS_MESSAGE(::SetCurrentDirectoryW(Directory.c_str()) != 0);
 }
 
-void System::Sleep(uint32_t Milliseconds)
+void OS::Sleep(uint32_t Milliseconds)
 {
 	::Sleep(static_cast<::DWORD>(Milliseconds));
 }
 
-void System::ExecuteProcess(const char* Commandline, bool WaitDone)
+void OS::ExecuteProcess(const char* Commandline, bool WaitDone)
 {
 	::SECURITY_ATTRIBUTES Security
 	{
@@ -63,8 +63,8 @@ void System::ExecuteProcess(const char* Commandline, bool WaitDone)
 	};
 
 	::HANDLE Read = nullptr, Write = nullptr;
-	VERIFY_WITH_SYSTEM_MESSAGE(::CreatePipe(&Read, &Write, &Security, INT16_MAX) != 0);
-	VERIFY_WITH_SYSTEM_MESSAGE(::SetStdHandle(STD_OUTPUT_HANDLE, Write) != 0);
+	VERIFY_WITH_OS_MESSAGE(::CreatePipe(&Read, &Write, &Security, INT16_MAX) != 0);
+	VERIFY_WITH_OS_MESSAGE(::SetStdHandle(STD_OUTPUT_HANDLE, Write) != 0);
 
 	/// If an error occurs, the ANSI version of this function (GetStartupInfoA) can raise an exception. 
 	/// The Unicode version (GetStartupInfoW) does not fail
@@ -100,14 +100,14 @@ void System::ExecuteProcess(const char* Commandline, bool WaitDone)
 			if (::GetExitCodeProcess(ProcessInfo.hProcess, &Exit) && Exit != 0u)
 			{
 				::DWORD Bytes = 0u;
-				VERIFY_WITH_SYSTEM_MESSAGE(::ReadFile(Read, s_Buffer, sizeof(s_Buffer), &Bytes, nullptr) != 0);
+				VERIFY_WITH_OS_MESSAGE(::ReadFile(Read, s_Buffer, sizeof(s_Buffer), &Bytes, nullptr) != 0);
 				//buffer[bytes] = '\0';
 				std::string ErrorMessage = String::ToMultiByte(s_Buffer);
 				LOG_ERROR(LogDefault, "Failed to executing process \"%s\"", ErrorMessage);
 			}
 			else
 			{
-				VERIFY_WITH_SYSTEM_MESSAGE(0);
+				VERIFY_WITH_OS_MESSAGE(0);
 			}
 
 			/// STILL_ACTIVE
@@ -122,35 +122,35 @@ void System::ExecuteProcess(const char* Commandline, bool WaitDone)
 		return;
 	}
 
-	VERIFY_WITH_SYSTEM_MESSAGE(0);
+	VERIFY_WITH_OS_MESSAGE(0);
 }
 
-std::string System::GetEnvironmentVariables(const char* Variable)
+std::string OS::GetEnvironmentVariables(const char* Variable)
 {
 	static wchar_t s_Buffer[UINT16_MAX];
 	memset(s_Buffer, 0, sizeof(s_Buffer));
 
 	std::wstring wVariable = String::ToWide(Variable);
 
-	VERIFY_WITH_SYSTEM_MESSAGE(::GetEnvironmentVariableW(wVariable.c_str(), s_Buffer, sizeof(s_Buffer)) != 0);
+	VERIFY_WITH_OS_MESSAGE(::GetEnvironmentVariableW(wVariable.c_str(), s_Buffer, sizeof(s_Buffer)) != 0);
 	return String::ToMultiByte(s_Buffer);
 }
 
-void* System::GetApplicationInstance()
+void* OS::GetApplicationInstance()
 {
 	::HMODULE Handle = ::GetModuleHandleW(nullptr);
-	VERIFY_WITH_SYSTEM_MESSAGE(Handle);
+	VERIFY_WITH_OS_MESSAGE(Handle);
 	return reinterpret_cast<void*>(Handle);
 }
 
-Guid System::CreateGUID()
+Guid OS::CreateGUID()
 {
 	Guid Ret;
-	VERIFY_WITH_SYSTEM_MESSAGE(::CoCreateGuid(reinterpret_cast<::GUID*>(&Ret)) == S_OK);
+	VERIFY_WITH_OS_MESSAGE(::CoCreateGuid(reinterpret_cast<::GUID*>(&Ret)) == S_OK);
 	return Ret;
 }
 
-Math::Vector2 System::GetCursorPosition()
+Math::Vector2 OS::GetCursorPosition()
 {
 	::POINT Pos;
 	::GetCursorPos(&Pos);
@@ -158,7 +158,7 @@ Math::Vector2 System::GetCursorPosition()
 	return Math::Vector2(static_cast<float>(Pos.x), static_cast<float>(Pos.y));
 }
 
-size_t System::GetHardwareConcurrencyThreadsCount(bool UseHyperThreading)
+size_t OS::GetHardwareConcurrencyThreadsCount(bool UseHyperThreading)
 {
 	std::unique_ptr<uint8_t> Buffer;
 	::DWORD BufferSize = 0;
@@ -199,17 +199,17 @@ size_t System::GetHardwareConcurrencyThreadsCount(bool UseHyperThreading)
 
 Guid Guid::Create()
 {
-	return System::CreateGUID();
+	return OS::CreateGUID();
 }
 
-void System::SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Priority)
+void OS::SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Priority)
 {
 	std::stringstream Stream;
 	Stream << ThreadID;
 
 	::DWORD DwordThreadID = std::stoul(Stream.str());
 	::HANDLE ThreadHandle = ::OpenThread(THREAD_ALL_ACCESS, false, DwordThreadID);
-	VERIFY_WITH_SYSTEM_MESSAGE(ThreadHandle);
+	VERIFY_WITH_OS_MESSAGE(ThreadHandle);
 
 	int32_t ThreadPriority = THREAD_PRIORITY_NORMAL;
 	switch (Priority)
@@ -224,7 +224,7 @@ void System::SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Prior
 		ThreadPriority = THREAD_PRIORITY_BELOW_NORMAL;
 		break;
 	}
-	VERIFY_WITH_SYSTEM_MESSAGE(::SetThreadPriority(ThreadHandle, ThreadPriority) != 0);
+	VERIFY_WITH_OS_MESSAGE(::SetThreadPriority(ThreadHandle, ThreadPriority) != 0);
 }
 
 #endif // PLATFORM_WIN32

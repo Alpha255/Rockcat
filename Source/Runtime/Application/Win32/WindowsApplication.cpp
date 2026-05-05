@@ -2,23 +2,21 @@
 #include "Application/Win32/Resource.h"
 #include "Application/ApplicationSettings.h"
 #include "Services/SpdLogService.h"
-#include "System/System.h"
+#include "OS/OS.h"
 #include <windowsx.h>
 
 #if PLATFORM_WIN32
 
-WindowsApplication* WindowsApplication::s_Application = nullptr;
+extern BaseApplication* GApplication;
 
 WindowsApplication::WindowsApplication(const char* SettingsFile)
 	: BaseApplication(SettingsFile)
 {
-	s_Application = this;
-
-	HINSTANCE HInstance = reinterpret_cast<HINSTANCE>(System::GetApplicationInstance());
-	VERIFY_WITH_SYSTEM_MESSAGE(HInstance);
+	HINSTANCE HInstance = reinterpret_cast<HINSTANCE>(OS::GetApplicationInstance());
+	VERIFY_WITH_OS_MESSAGE(HInstance);
 
 	HICON HIcon = ::LoadIconW(HInstance, MAKEINTRESOURCEW(ICON_NVIDIA));
-	VERIFY_WITH_SYSTEM_MESSAGE(HIcon);
+	VERIFY_WITH_OS_MESSAGE(HIcon);
 
 	WNDCLASSEXW WndClassEx
 	{
@@ -35,7 +33,7 @@ WindowsApplication::WindowsApplication(const char* SettingsFile)
 		WINDOW_CLASS_NAME,
 		HIcon
 	};
-	VERIFY_WITH_SYSTEM_MESSAGE(::RegisterClassExW(&WndClassEx) != 0);
+	VERIFY_WITH_OS_MESSAGE(::RegisterClassExW(&WndClassEx) != 0);
 }
 
 void WindowsApplication::PumpMessages()
@@ -50,7 +48,12 @@ void WindowsApplication::PumpMessages()
 
 LRESULT WindowsApplication::AppMessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-	return s_Application->MessageProc(hWnd, Msg, wParam, lParam);
+	if (auto WinApp = Cast<WindowsApplication>(GApplication))
+	{
+		return WinApp->MessageProc(hWnd, Msg, wParam, lParam);
+	}
+
+	return E_FAIL;
 }
 
 LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)

@@ -1,6 +1,6 @@
 #include "Async/Task.h"
 #include "Core/ConsoleVariable.h"
-#include "System/System.h"
+#include "OS/OS.h"
 #include "Services/SpdLogService.h"
 
 DEFINE_LOG_CATEGORY(LogTaskFlow);
@@ -32,22 +32,22 @@ ConsoleVariable<uint32_t> CVarNumForegroundThreads(
 	"Number of foreground threads.",
 	2u);
 
-struct ThreadPriorityScope
+struct SetThreadPriorityScoped
 {
-	ThreadPriorityScope(TFTask::EPriority Priority)
+	SetThreadPriorityScoped(TFTask::EPriority Priority)
 		: SkipPriorityChange(!TFTask::IsWorkerThread() || Priority == TFTask::EPriority::Normal)
 	{
 		if (!SkipPriorityChange)
 		{
-			System::SetThreadPriority(std::this_thread::get_id(), Priority);
+			OS::SetThreadPriority(std::this_thread::get_id(), Priority);
 		}
 	}
 
-	~ThreadPriorityScope()
+	~SetThreadPriorityScoped()
 	{
 		if (!SkipPriorityChange)
 		{
-			System::SetThreadPriority(std::this_thread::get_id(), TFTask::EPriority::Normal);
+			OS::SetThreadPriority(std::this_thread::get_id(), TFTask::EPriority::Normal);
 		}
 	}
 
@@ -88,7 +88,7 @@ public:
 				Flow.emplace([]() {
 					const std::thread::id ThreadID = std::this_thread::get_id();
 
-					System::SetThreadPriority(ThreadID, TFTask::EPriority::High);
+					OS::SetThreadPriority(ThreadID, TFTask::EPriority::High);
 
 					std::stringstream Stream;
 					Stream << ThreadID;
@@ -187,7 +187,7 @@ uint32_t TFTask::GetNumWorkerThreads()
 	if (!s_NumWorkerThreads)
 	{
 		uint32_t NumSeperateThreads = 0u;
-		auto NumTotalThreads = System::GetHardwareConcurrencyThreadsCount(CVarUseHyperThreading.Get());
+		auto NumTotalThreads = OS::GetHardwareConcurrencyThreadsCount(CVarUseHyperThreading.Get());
 
 		NumSeperateThreads += CVarUseSeperateGameThread.Get() ? 1u : 0u;
 		NumSeperateThreads += CVarUseSeperateRenderThread.Get() ? 1u : 0u;

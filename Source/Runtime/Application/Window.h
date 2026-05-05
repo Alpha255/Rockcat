@@ -42,6 +42,8 @@ public:
 	const void* GetHandle() const { return m_Handle; }
 
 	void SetMode(EWindowMode Mode);
+	inline EWindowMode GetMode() const { return m_Mode; }
+	inline bool IsFullscreen() const { return m_Mode != EWindowMode::Windowed; }
 protected:
 	void UpdateSize(uint32_t Width, uint32_t Height);
 private:

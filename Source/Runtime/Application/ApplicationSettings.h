@@ -4,20 +4,24 @@
 #include "Rendering/RenderSettings.h"
 #include "Asset/SerializableAsset.h"
 
-struct ApplicationSettings : public Serializable<ApplicationSettings>
+class ApplicationSettings : public Serializable<ApplicationSettings>
 {
+public:
 	using BaseClass::BaseClass;
 
-	WindowSettings Window;
-	RenderSettings Rendering;
+	inline const WindowSettings& GetWindowSettings() const { return m_WindowSettings; }
+	inline const RenderSettings& GetRenderSettings() const { return m_RenderSettings; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
 		Ar(
 			CEREAL_BASE(BaseClass),
-			CEREAL_NVP(Window),
-			CEREAL_NVP(Rendering)
+			CEREAL_NVP(m_WindowSettings),
+			CEREAL_NVP(m_RenderSettings)
 		);
 	}
+private:
+	WindowSettings m_WindowSettings;
+	RenderSettings m_RenderSettings;
 };

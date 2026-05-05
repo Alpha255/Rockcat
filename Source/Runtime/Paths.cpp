@@ -1,12 +1,12 @@
 #include "Paths.h"
-#include "System/System.h"
+#include "OS/OS.h"
 
 const std::filesystem::path& Paths::RootPath()
 {
 	static std::filesystem::path Path;
 	if (Path.empty())
 	{
-		Path = System::GetApplicationDirectory().parent_path();
+		Path = OS::GetApplicationDirectory().parent_path();
 	}
 
 	return Path;

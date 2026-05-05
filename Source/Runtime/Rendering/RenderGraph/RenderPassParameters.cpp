@@ -29,11 +29,7 @@ uint32_t RDGSceneTextures::GetGBufferBindingSlots(RDGRenderTargetBindingSlots& S
 	return 0;
 }
 
-RDGSceneViewInfo::RDGSceneViewInfo(RDGRenderGraph& Graph, const SceneView& View)
-	: ViewMode(View.GetViewMode())
-	, OriginalViewSize(View.GetViewSize())
-	, DesiredViewSize(View.GetViewSize())
-	, FinalOutput(View.GetRenderSurface())
+RDGSceneViewInfo::RDGSceneViewInfo(RDGRenderGraph& Graph, const RHIViewWindow& ViewWindow)
 {
-	SceneTextures.InitializeWithSceneView(Graph, View);
+	//SceneTextures.InitializeWithSceneView(Graph, View);
 }

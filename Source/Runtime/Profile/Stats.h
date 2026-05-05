@@ -65,8 +65,8 @@ private:
 class Stats : public IService<Stats>
 {
 public:
-	void NotifyFrameBegin(bool Active);
-	void NotifyFrameEnd();
+	void OnFrameBegin(bool Active);
+	void OnFrameEnd();
 
 	inline bool IsEnabled() const { return m_Enabled; }
 	inline void SetEnable(bool Enable) { m_Enabled = Enable; }

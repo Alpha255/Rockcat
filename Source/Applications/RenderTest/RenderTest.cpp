@@ -103,8 +103,8 @@ void RenderTest::Initialize()
 
 void RenderTest::Render()
 {
-	RDGRenderGraph RenderGraph(m_Settings->Rendering);
-	std::unique_ptr<SceneRenderer> Renderer = SceneRenderer::Create(m_Settings->Rendering.RenderingPath, *m_Scene);
+	RDGRenderGraph RenderGraph(m_Settings->GetRenderSettings());
+	std::unique_ptr<SceneRenderer> Renderer = SceneRenderer::Create(m_Settings->GetRenderSettings().RenderingPath, *m_Scene);
 
 	Renderer->Render(RenderGraph);
 }

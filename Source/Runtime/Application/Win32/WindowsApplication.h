@@ -18,8 +18,6 @@ protected:
 	LRESULT MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 	virtual EKeyboardKey MapKeyCode(uint64_t KeyCode, int64_t Mask) override final;
-
-	static WindowsApplication* s_Application;
 };
 
 using PlatformApplication = WindowsApplication;

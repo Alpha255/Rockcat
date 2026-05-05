@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Tickable.h"
-#include "System/MessageHandler.h"
+#include "OS/MessageHandler.h"
 
 class BaseApplication : public NoneCopyable
 {
@@ -22,6 +22,8 @@ public:
 
 	inline bool IsActive() const { return m_Status == EApplicationStatus::Active; }
 	inline bool IsQuit() const { return m_Status == EApplicationStatus::Quit; }
+
+	inline class RHIDevice& GetRenderDevice() const { return *m_RenderDevice; }
 protected:
 	enum class EApplicationStatus
 	{
@@ -55,13 +57,17 @@ protected:
 	void DispatchAppInactiveChangedMessage();
 	void DispatchAppQuitMessage();
 
-	std::shared_ptr<struct ApplicationSettings> m_Settings;
+	void AddViewWindow(const class Window& InWindow);
+
+	std::shared_ptr<class ApplicationSettings> m_Settings;
 
 	std::unique_ptr<class Window> m_Window;
 	std::unique_ptr<class RHIDevice> m_RenderDevice;
 
 	KeyModifiers m_KeyModifiers;
 	std::vector<class MessageHandler*> m_MessageHandlers;
+
+	std::vector<std::unique_ptr<class RHIViewWindow>> m_ViewWindows;
 
 	EApplicationStatus m_Status = EApplicationStatus::Active;
 };

@@ -2,21 +2,26 @@
 #include "Application/ApplicationSettings.h"
 #include "Application/Window.h"
 #include "RHI/Vulkan/VulkanDevice.h"
+#include "RHI/RHISwapchain.h"
 #include "Services/AssetDatabase.h"
 #include "Services/ShaderLibrary.h"
 #include "Profile/CpuTimer.h"
 #include "Profile/Stats.h"
-#include "System/System.h"
+#include "OS/OS.h"
 #include "Async/Task.h"
+
+BaseApplication* GApplication = nullptr;
+RHIDevice* GRenderDevice = nullptr;
 
 BaseApplication::BaseApplication(const char* SettingsFile)
 { 
 	m_Settings = ApplicationSettings::Load(SettingsFile ? SettingsFile : "DefalutAppSettings.json");
+	GApplication = this;
 }
 
 bool BaseApplication::InitializeRHI()
 {
-	switch (m_Settings->Rendering.DeviceType)
+	switch (m_Settings->GetRenderSettings().DeviceType)
 	{
 	case ERHIDeviceType::Software:
 		break;
@@ -35,16 +40,18 @@ bool BaseApplication::InitializeRHI()
 
 	if (!m_RenderDevice)
 	{
-		LOG_CRITICAL(LogDefault, "Render backend \"{}\" is not support yet!", RHIDevice::GetName(m_Settings->Rendering.DeviceType));
+		LOG_CRITICAL(LogDefault, "Render backend \"{}\" is not support yet!", RHIDevice::GetName(m_Settings->GetRenderSettings().DeviceType));
 		return false;
 	}
+
+	GRenderDevice = m_RenderDevice.get();
 
 	return true;
 }
 
 void BaseApplication::RenderFrame()
 {
-	if (m_Settings->Rendering.Enable)
+	if (m_Settings->GetRenderSettings().Enable)
 	{
 		Render();
 		RenderGUI();
@@ -179,6 +186,13 @@ void BaseApplication::DispatchAppQuitMessage()
 	});
 }
 
+void BaseApplication::AddViewWindow(const Window& InWindow)
+{
+	m_ViewWindows.emplace_back(std::make_unique<RHIViewWindow>(InWindow, 
+		m_Settings->GetRenderSettings().VSync, 
+		m_Settings->GetRenderSettings().HDR));
+}
+
 void BaseApplication::Run()
 {
 	if (!std::filesystem::exists(Paths::AssetPath()))
@@ -187,23 +201,25 @@ void BaseApplication::Run()
 		return;
 	}
 
-	System::SetWorkingDirectory(Paths::AssetPath());
-	LOG_INFO(LogDefault, "Mount working directory to \"{}\".", System::GetWorkingDirectory().string());
+	OS::SetWorkingDirectory(Paths::AssetPath());
+	LOG_INFO(LogDefault, "Mount working directory to \"{}\".", OS::GetWorkingDirectory().string());
 
 	TFTask::Initialize();
 	AssetDatabase::Get().Initialize();
 	Stats::Get().Initialize();
 	ShaderLibrary::Get().Initialize();
 
-	if (m_Settings->Rendering.Enable)
+	if (m_Settings->GetRenderSettings().Enable)
 	{
-		m_Window = std::make_unique<Window>(m_Settings->Window);
+		m_Window = std::make_unique<Window>(m_Settings->GetWindowSettings());
 		assert(m_Window);
 
 		if (!InitializeRHI())
 		{
 			return;
 		}
+
+		AddViewWindow(*m_Window);
 	}
 
 	Initialize();
@@ -212,7 +228,7 @@ void BaseApplication::Run()
 	{
 		const bool Active = IsActive();
 
-		Stats::Get().NotifyFrameBegin(Active);
+		Stats::Get().OnFrameBegin(Active);
 
 		PumpMessages();
 
@@ -223,7 +239,7 @@ void BaseApplication::Run()
 			RenderFrame();
 		}
 
-		Stats::Get().NotifyFrameEnd();
+		Stats::Get().OnFrameEnd();
 	}
 
 	Finalize();

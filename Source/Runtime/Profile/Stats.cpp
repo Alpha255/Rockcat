@@ -39,7 +39,7 @@ void StatEvent::SetFlags(EEventFlags Flags)
 	m_Flags = m_Flags | Flags;
 }
 
-void Stats::NotifyFrameBegin(bool Active)
+void Stats::OnFrameBegin(bool Active)
 {
 	if (!m_FrameCpuTimer)
 	{
@@ -56,7 +56,7 @@ void Stats::NotifyFrameBegin(bool Active)
 	}
 }
 
-void Stats::NotifyFrameEnd()
+void Stats::OnFrameEnd()
 {
 	CalculateFrameTime();
 

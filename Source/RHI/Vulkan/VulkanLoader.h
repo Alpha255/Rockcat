@@ -1,6 +1,6 @@
 #pragma once
 
-#include "System/DynamicLinkLibrary.h"
+#include "OS/DynamicLinkLibrary.h"
 #include "RHI/RHIResource.h"
 #include "RHI/Vulkan/VulkanExtensionDefines.h"
 #include "Services/SpdlogService.h"

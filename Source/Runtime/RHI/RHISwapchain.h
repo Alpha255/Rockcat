@@ -43,3 +43,16 @@ protected:
 	const void* m_WindowHandle;
 	std::vector<RHITexturePtr> m_BackBuffers;
 };
+
+class RHIViewWindow
+{
+public:
+	RHIViewWindow(const class Window& InWindow, bool VSync, bool HDR);
+
+	Math::UInt2 GetViewSize() const;
+
+	inline RHITexture* GetViewSurface() const { return m_Swapchain->GetBackBuffer(); }
+private:
+	const class Window& m_Window;
+	RHISwapchainPtr m_Swapchain;
+};

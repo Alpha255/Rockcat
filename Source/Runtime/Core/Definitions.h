@@ -73,13 +73,13 @@
 }
 
 #if defined(PLATFORM_WIN32)
-#define VERIFY_WITH_SYSTEM_MESSAGE(Condition)                                                  \
-{                                                                                              \
-	if (!(Condition))                                                                          \
-	{                                                                                          \
-		LOG_ERROR(LogDefault, "Failed to invoke platform API, {}", System::GetErrorMessage()); \
-		assert(0);                                                                             \
-	}                                                                                          \
+#define VERIFY_WITH_OS_MESSAGE(Condition)                                                  \
+{                                                                                          \
+	if (!(Condition))                                                                      \
+	{                                                                                      \
+		LOG_ERROR(LogDefault, "Failed to invoke platform API, {}", OS::GetErrorMessage()); \
+		assert(0);                                                                         \
+	}                                                                                      \
 }
 
 #define DLL_EXTENSION ".dll"
