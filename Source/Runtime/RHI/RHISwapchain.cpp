@@ -3,15 +3,15 @@
 #include "Application/Window.h"
 #include "Application/BaseApplication.h"
 
-RHIViewWindow::RHIViewWindow(const Window& InWindow, bool VSync, bool HDR)
+RHIViewWindow::RHIViewWindow(const Window& InWindow, const RenderSettings& InRenderSettings)
 	: m_Window(InWindow)
 {
 	RHISwapchainDesc Desc;
 	Desc.SetWidth(InWindow.GetWidth())
 		.SetHeight(InWindow.GetHeight())
 		.SetFullscreen(InWindow.IsFullscreen())
-		.SetVSync(VSync)
-		.SetHDR(HDR)
+		.SetVSync(InRenderSettings.VSync)
+		.SetHDR(InRenderSettings.HDR)
 		.SetWindowHandle(InWindow.GetHandle());
 
 	extern BaseApplication* GApplication;

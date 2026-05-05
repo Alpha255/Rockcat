@@ -188,9 +188,7 @@ void BaseApplication::DispatchAppQuitMessage()
 
 void BaseApplication::AddViewWindow(const Window& InWindow)
 {
-	m_ViewWindows.emplace_back(std::make_unique<RHIViewWindow>(InWindow, 
-		m_Settings->GetRenderSettings().VSync, 
-		m_Settings->GetRenderSettings().HDR));
+	m_ViewWindows.emplace_back(std::make_unique<RHIViewWindow>(InWindow, m_Settings->GetRenderSettings()));
 }
 
 void BaseApplication::Run()

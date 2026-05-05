@@ -122,6 +122,8 @@ struct RenderSettings
 	bool EnableAsyncMeshDrawCommandsBuilding = false;
 	bool InverseDepth = false;
 
+	bool StereoRendering = false;
+
 	ERenderingPath RenderingPath = ERenderingPath::ForwardRendering;
 	ELightingPolicy LightingPolicy = ELightingPolicy::Default;
 	EShadowTechnique ShadowTechnique = EShadowTechnique::None;
@@ -148,6 +150,7 @@ struct RenderSettings
 			CEREAL_NVP(EnableAsyncCommandlistSubmission),
 			CEREAL_NVP(EnableAsyncMeshDrawCommandsBuilding),
 			CEREAL_NVP(InverseDepth),
+			CEREAL_NVP(StereoRendering),
 			CEREAL_NVP_ENUM(ERenderingPath, RenderingPath),
 			CEREAL_NVP_ENUM(ELightingPolicy, LightingPolicy),
 			CEREAL_NVP_ENUM(EShadowTechnique, ShadowTechnique),

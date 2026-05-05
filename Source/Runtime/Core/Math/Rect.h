@@ -1,40 +1,85 @@
 #pragma once
 
-#include "Core/Math/Vector4.h"
-
 NAMESPACE_START(Math)
 
-class Rect : public Vector4
+template<class T>
+struct Point
+{
+	Point()
+		: X(0), Y(0)
+	{
+	}
+
+	Point(T InX, T InY)
+		: X(InX), Y(InY)
+	{
+	}
+
+	Point(T InValue)
+		: X(InValue), Y(InValue)
+	{
+	}
+
+	Point(const Point&) = default;
+	Point& operator=(const Point&) = default;
+
+	T X, Y;
+};
+
+template<class T>
+class Rect
 {
 public:
 	Rect()
-		: Vector4(0.0f, 0.0f, 0.0f, 0.0f)
+		: m_LeftTop(0, 0), m_RightBottom(0, 0)
 	{
 	}
 
-	Rect(float Left, float Top, float Right, float Bottom)
-		: Vector4(Left, Top, Right, Bottom)
+	Rect(T InLeft, T InTop, T InRight, T InBottom)
+		: m_LeftTop(InLeft, InTop), m_RightBottom(InRight, InBottom)
 	{
 	}
 
-	Rect(const Vector4& Other)
-		: Vector4(Other)
+	Rect(const Rect& Other)
+		: m_LeftTop(Other.m_LeftTop), m_RightBottom(Other.m_RightBottom)
 	{
 	}
 
-	inline float Width()
+	Rect& operator=(const Rect&) = default;
+
+	inline T Width() const { return m_RightBottom.X - m_LeftTop.X; }
+	inline T Height() const { return m_RightBottom.Y - m_LeftTop.Y; }
+	inline T Area() const { return Width() * Height(); }
+
+	bool IsIntersect(const Rect& Other) const
 	{
-		return z - x;
+		return !(m_LeftTop.X >= Other.m_RightBottom.X || m_RightBottom.X <= Other.m_LeftTop.X || m_LeftTop.Y >= Other.m_RightBottom.Y || m_RightBottom.Y <= Other.m_LeftTop.Y);
 	}
 
-	inline float Height()
+	bool Contains(const Point<T>& Point) const
 	{
-		return w - y;
+		return Point.X >= m_LeftTop.X && Point.X <= m_RightBottom.X && Point.Y >= m_LeftTop.Y && Point.Y <= m_RightBottom.Y;
 	}
 
-	bool IsIntersect(const Rect& Other);
+	void Scale(T ScaleX, T ScaleY)
+	{
+		m_LeftTop.X *= ScaleX;
+		m_LeftTop.Y *= ScaleY;
+		m_RightBottom.X *= ScaleX;
+		m_RightBottom.Y *= ScaleY;
+	}
+
+	void Union(const Rect& Other)
+	{
+		m_LeftTop.X = std::min(m_LeftTop.X, Other.m_LeftTop.X);
+		m_LeftTop.Y = std::min(m_LeftTop.Y, Other.m_LeftTop.Y);
+		m_RightBottom.X = std::max(m_RightBottom.X, Other.m_RightBottom.X);
+		m_RightBottom.Y = std::max(m_RightBottom.Y, Other.m_RightBottom.Y);
+	}
 protected:
 private:
+	Point<T> m_LeftTop;
+	Point<T> m_RightBottom;
 };
 
 NAMESPACE_END(Math)

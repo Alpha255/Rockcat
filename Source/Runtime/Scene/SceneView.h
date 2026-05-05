@@ -2,21 +2,30 @@
 
 #include "Core/Definitions.h"
 #include "Core/Math/Frustum.h"
+#include "Core/Math/Rect.h"
 #include "RHI/RHIRenderStates.h"
 
-enum class EViewMode : uint8_t
-{
-	Lit,
-	UnLit,
-	Wireframe,
-	VisualizeDepth,
-	VisualizeGBuffer,
-	VisualizeShadowMap,
-};
+using ViewRect = Math::Rect<uint32_t>;
 
 class SceneView
 {
 public:
+	enum class EViewMode : uint8_t
+	{
+		Lit,
+		UnLit,
+		Wireframe,
+		VisualizeDepth,
+		VisualizeGBuffer,
+		VisualizeShadowMap,
+	};
+
+	enum class EProjectionMode : uint8_t
+	{
+		Perspective,
+		Orthographic
+	};
+
 	virtual ~SceneView() = default;
 	
 	virtual bool IsStereoView() const { return false; }
@@ -37,12 +46,12 @@ public:
 	inline const std::vector<RHIViewport>& GetViewports() const { return m_Viewports; }
 	inline const std::vector<RHIScissorRect>& GetScissorRects() const { return m_ScissorRects; }
 
-	inline RHITexture* GetRenderSurface() const { return m_RenderSurface.get(); }
-
 	inline EViewMode GetViewMode() const { return m_ViewMode; }
 	void SetViewMode(EViewMode ViewMode);
 
-	Math::UInt2 GetViewSize() const;
+	inline EProjectionMode GetProjectionMode() const { return m_ProjectionMode; }
+
+	inline const ViewRect& GetViewRect() const { return m_ViewRect; }
 
 	const Math::Matrix& GetWorldMartix() const;
 	const Math::Matrix& GetViewMatrix() const;
@@ -68,10 +77,11 @@ protected:
 	bool m_Mirrored = false;
 
 	EViewMode m_ViewMode = EViewMode::Lit;
+	EProjectionMode m_ProjectionMode = EProjectionMode::Perspective;
+
+	ViewRect m_ViewRect;
 
 	class Camera* m_Camera = nullptr;
-
-	RHITexturePtr m_RenderSurface;
 
 	std::vector<RHIViewport> m_Viewports;
 	std::vector<RHIScissorRect> m_ScissorRects;

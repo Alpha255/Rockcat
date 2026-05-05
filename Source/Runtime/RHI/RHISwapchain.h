@@ -47,11 +47,17 @@ protected:
 class RHIViewWindow
 {
 public:
-	RHIViewWindow(const class Window& InWindow, bool VSync, bool HDR);
+	enum class EFinalOutputMode : uint8_t
+	{
+		Default,
+		Offscreen
+	};
+
+	RHIViewWindow(const class Window& InWindow, const struct RenderSettings& InRenderSettings);
 
 	Math::UInt2 GetViewSize() const;
 
-	inline RHITexture* GetViewSurface() const { return m_Swapchain->GetBackBuffer(); }
+	inline RHITexture* GetViewSurface() const;
 private:
 	const class Window& m_Window;
 	RHISwapchainPtr m_Swapchain;

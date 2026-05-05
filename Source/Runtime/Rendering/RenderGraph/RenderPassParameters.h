@@ -189,11 +189,14 @@ struct RDGSceneViewInfo
 	RDGSceneViewInfo(class RDGRenderGraph& Graph, const class RHIViewWindow& ViewWindow);
 
 	Math::UInt2 OriginalViewSize;
-	Math::UInt2 DesiredViewSize;
+	Math::UInt2 FinalViewSize;
 
-	RHITexture* FinalOutput;
+	ViewRect OriginalViewRect;
+	ViewRect FinalViewRect;
 
 	RDGSceneTextures SceneTextures;
+
+	RHITexture* FinalOutput;
 
 	std::vector<SceneView> Views;
 };
