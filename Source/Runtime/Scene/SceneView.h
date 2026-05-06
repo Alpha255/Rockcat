@@ -7,6 +7,18 @@
 
 using ViewRect = Math::Rect<uint32_t>;
 
+struct ViewMatrices
+{
+	Math::Matrix Projection;
+	Math::Matrix InvProjection;
+	Math::Matrix View;
+	Math::Matrix InvView;
+	Math::Matrix ViewProjection;
+	Math::Matrix InvViewProjection;
+
+	Math::Vector3 ViewOrigin;
+};
+
 class SceneView
 {
 public:

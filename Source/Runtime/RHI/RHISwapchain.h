@@ -44,7 +44,7 @@ protected:
 	std::vector<RHITexturePtr> m_BackBuffers;
 };
 
-class RHIViewWindow
+class RHIViewportClient
 {
 public:
 	enum class EFinalOutputMode : uint8_t
@@ -53,12 +53,17 @@ public:
 		Offscreen
 	};
 
-	RHIViewWindow(const class Window& InWindow, const struct RenderSettings& InRenderSettings);
+	RHIViewportClient(const class Window& InWindow, const struct RenderSettings& InRenderSettings);
 
 	Math::UInt2 GetViewSize() const;
 
-	inline RHITexture* GetViewSurface() const;
+	RHITexture* GetViewSurface() const;
+
+	bool IsStereoRendering() const { return m_IsStereo; }
 private:
 	const class Window& m_Window;
 	RHISwapchainPtr m_Swapchain;
+	EFinalOutputMode m_FinalOutputMode = EFinalOutputMode::Default;
+	bool m_IsStereo = false;
+	RHITexturePtr m_OffscreenViewSurface = nullptr;
 };

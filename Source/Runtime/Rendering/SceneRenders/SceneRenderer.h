@@ -5,12 +5,10 @@
 class SceneRenderer
 {
 public:
-	SceneRenderer(const class Scene& InScene, const std::vector<class SceneView>& InViews);
+	SceneRenderer() = default;
 
-	virtual void Render(class RDGRenderGraph& RGD) = 0;
+	virtual void Render(class RDGRenderGraph& Graph, const struct RDGSceneViewInfo& ViewInfo) = 0;
 
-	static std::unique_ptr<SceneRenderer> Create(ERenderingPath RenderingPath, const class Scene& InScene, const std::vector<class SceneView>& InViews);
+	static std::unique_ptr<SceneRenderer> Create(const struct RenderSettings& InSettings);
 private:
-	const class Scene& m_Scene;
-	const std::vector<class SceneView>& m_Views;
 };

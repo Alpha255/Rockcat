@@ -12,8 +12,6 @@
 #include "Async/Task.h"
 #include "Scene/Components/CameraComponent.h"
 #include "Scene/Components/StaticMeshComponent.h"
-#include "Rendering/SceneRenders/SceneRenderer.h"
-#include "Rendering/RenderGraph/RenderGraph.h"
 #include "Application/ApplicationSettings.h"
 
 class TestPemutation1 : public ShaderDefineInt32<0, 1, 2, 3>
@@ -103,10 +101,7 @@ void RenderTest::Initialize()
 
 void RenderTest::Render()
 {
-	RDGRenderGraph RenderGraph(m_Settings->GetRenderSettings());
-	std::unique_ptr<SceneRenderer> Renderer = SceneRenderer::Create(m_Settings->GetRenderSettings().RenderingPath, *m_Scene);
-
-	Renderer->Render(RenderGraph);
+	RenderScene(*m_Scene);
 }
 
 REGISTER_APPLICATION(RenderTest);

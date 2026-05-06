@@ -20,22 +20,11 @@ public:
 
 	void Tick(float ElapsedSeconds) override final;
 
-	const std::vector<std::shared_ptr<class SceneView>>& GetViews() const { return m_Views; }
-
 	void AddPrimitive(const class PrimitiveComponent* PrimitiveComp);
 	void RemovePrimitive(const class PrimitiveComponent* PrimitiveComp);
 
 	inline const std::vector<const class PrimitiveComponent*>& GetAddedPrimitives() const { return m_AddedPrimitives; }
 	inline const std::vector<const class PrimitiveComponent*>& GetRemovedPrimitives() const { return m_RemovedPrimitives; }
-
-	template<class T>
-	std::shared_ptr<T> AddView()
-	{
-		auto View = Cast<T>(m_Views.emplace_back(std::make_shared<T>()));
-		auto Cam = m_Cameras.emplace_back(std::make_shared<class Camera>());
-		View->SetCamera(Cam.get());
-		return View;
-	}
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -44,7 +33,6 @@ public:
 			CEREAL_BASE(BaseClass),
 			CEREAL_BASE(SceneGraph),
 			CEREAL_NVP(m_AssimpScenes),
-			//CEREAL_NVP(m_Views),
 			CEREAL_NVP(m_Cameras),
 			CEREAL_NVP(m_Components)
 		);
@@ -54,7 +42,6 @@ protected:
 private:
 	std::vector<std::string> m_AssimpScenes;
 
-	std::vector<std::shared_ptr<class SceneView>> m_Views;
 	std::vector<std::shared_ptr<Camera>> m_Cameras;
 
 	std::vector<const class PrimitiveComponent*> m_AddedPrimitives;

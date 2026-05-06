@@ -9,6 +9,9 @@
 #include "Profile/Stats.h"
 #include "OS/OS.h"
 #include "Async/Task.h"
+#include "Scene/Scene.h"
+#include "Rendering/RenderGraph/RenderGraph.h"
+#include "Rendering/SceneRenders/SceneRenderer.h"
 
 BaseApplication* GApplication = nullptr;
 RHIDevice* GRenderDevice = nullptr;
@@ -186,9 +189,17 @@ void BaseApplication::DispatchAppQuitMessage()
 	});
 }
 
-void BaseApplication::AddViewWindow(const Window& InWindow)
+void BaseApplication::RenderScene(const Scene& InScene)
 {
-	m_ViewWindows.emplace_back(std::make_unique<RHIViewWindow>(InWindow, m_Settings->GetRenderSettings()));
+	if (InScene.IsReady())
+	{
+		RDGRenderGraph RenderGraph(m_Settings->GetRenderSettings());
+		RDGSceneViewInfo SceneViewInfo(RenderGraph, *m_ViewportClient, InScene);
+
+		std::unique_ptr<SceneRenderer> Renderer = SceneRenderer::Create(m_Settings->GetRenderSettings());
+
+		Renderer->Render(RenderGraph, SceneViewInfo);
+	}
 }
 
 void BaseApplication::Run()
@@ -217,7 +228,8 @@ void BaseApplication::Run()
 			return;
 		}
 
-		AddViewWindow(*m_Window);
+		m_ViewportClient = std::make_unique<RHIViewportClient>(*m_Window, m_Settings->GetRenderSettings());
+		assert(m_ViewportClient);
 	}
 
 	Initialize();

@@ -5,6 +5,7 @@
 #include "RHI/RHIRenderStates.h"
 #include "Scene/SceneView.h"
 #include "Rendering/RenderSettings.h"
+#include "Rendering/RenderScene.h"
 
 using DAGNodeID = DirectedAcyclicGraph::NodeID;
 using RDGResourceID = ObjectID<class RDGResource>;
@@ -169,7 +170,7 @@ struct RDGSceneTextures
 		RDGTexture* Roughness;
 	};
 
-	void InitializeWithSceneView(class RDGRenderGraph& Graph, const SceneView& View);
+	void InitializeWithSceneView(class RDGRenderGraph& Graph, const struct RDGSceneViewInfo& ViewInfo);
 
 	uint32_t GetSceneTextureBindingSlots(RDGRenderTargetBindingSlots& Slots, bool WithDepthStencil = true) const;
 	uint32_t GetGBufferBindingSlots(RDGRenderTargetBindingSlots& Slots) const;
@@ -186,7 +187,7 @@ struct RDGSceneTextures
 
 struct RDGSceneViewInfo
 {
-	RDGSceneViewInfo(class RDGRenderGraph& Graph, const class RHIViewWindow& ViewWindow);
+	RDGSceneViewInfo(class RDGRenderGraph& Graph, const class RHIViewportClient& ViewportClient, const class Scene& InScene);
 
 	Math::UInt2 OriginalViewSize;
 	Math::UInt2 FinalViewSize;
@@ -198,7 +199,12 @@ struct RDGSceneViewInfo
 
 	RHITexture* FinalOutput;
 
-	std::vector<SceneView> Views;
+	RenderScene SceneProxy;
+
+	std::vector<std::unique_ptr<SceneView>> Views;
+
+protected:
+	void SetupSceneViews(const class RHIViewportClient& ViewportClient);
 };
 
 class RDGRenderPassParameters

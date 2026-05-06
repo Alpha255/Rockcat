@@ -32,6 +32,7 @@ public:
 	inline const class Entity* GetOwner() const { return m_Owner; }
 
 	inline bool IsTickable() const { return m_Tickable; }
+	inline void SetTickable(bool Tickable) { m_Tickable = Tickable; }
 
 	virtual void Tick(float /*ElapsedSeconds*/) {}
 

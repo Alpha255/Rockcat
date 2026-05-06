@@ -21,7 +21,7 @@ void Scene::Tick(float ElapsedSeconds)
 
 		for (auto Comp : Entity.GetAllComponents())
 		{
-			if (Comp)
+			if (Comp && Comp->IsTickable())
 			{
 				Comp->Tick(ElapsedSeconds);
 			}

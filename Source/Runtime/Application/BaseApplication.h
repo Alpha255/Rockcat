@@ -42,6 +42,8 @@ protected:
 	virtual void Render() {}
 	virtual void RenderGUI() {}
 
+	virtual void RenderScene(const class Scene& InScene);
+
 	void DispatchKeyUpMessage(const KeyEvent& Event);
 	void DispatchKeyDownMessage(const KeyEvent& Event);
 	void DispatchKeyCharMessage(const char Character);
@@ -57,17 +59,15 @@ protected:
 	void DispatchAppInactiveChangedMessage();
 	void DispatchAppQuitMessage();
 
-	void AddViewWindow(const class Window& InWindow);
-
 	std::shared_ptr<class ApplicationSettings> m_Settings;
 
 	std::unique_ptr<class Window> m_Window;
+
 	std::unique_ptr<class RHIDevice> m_RenderDevice;
+	std::unique_ptr<class RHIViewportClient> m_ViewportClient;
 
 	KeyModifiers m_KeyModifiers;
 	std::vector<class MessageHandler*> m_MessageHandlers;
-
-	std::vector<std::unique_ptr<class RHIViewWindow>> m_ViewWindows;
 
 	EApplicationStatus m_Status = EApplicationStatus::Active;
 };
