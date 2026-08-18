@@ -41,22 +41,10 @@ workspace "Rockcat"
 			language "C++"
 			location "./Out/Intermediate/VCProjects"
 			files {
-				"./Source/Runtime/**",
-				"./Assets/Shaders/**"
+				"./Source/Runtime/**"
 			}
-			removefiles {
-				"./Assets/**.json"
-			}
-			vpaths {
-				["Source/*"] = { "./Source/Runtime/**" },
-			}
-			defines { "STB_IMAGE_IMPLEMENTATION" }
 			includedirs {
-				"$(SolutionDir)",
-				"$(SolutionDir)Source",
 				"$(SolutionDir)Source/Runtime",
-				"$(SolutionDir)Assets",
-				"$(SolutionDir)Submodules",
 				"$(SolutionDir)Submodules/taskflow",
 				"$(SolutionDir)Submodules/cereal/include",
 				"$(SolutionDir)Submodules/spdlog/include",
@@ -84,29 +72,13 @@ workspace "Rockcat"
 				location "./Out/Intermediate/VCProjects"
 				files {
 					"./Source/RHI/Vulkan/**",
-					"./Assets/Configs/VkEnvConfigs.json"
 				}
 				removefiles {
 					"./Source/RHI/Vulkan/Documents/**"
 				}
 				includedirs {
-				"$(SolutionDir)",
-				"$(SolutionDir)Source",
 				"$(SolutionDir)Source/Runtime",
-				"$(SolutionDir)Submodules",
-				"$(SolutionDir)Submodules/taskflow",
-				"$(SolutionDir)Submodules/cereal/include",
-				"$(SolutionDir)Submodules/spdlog/include",
-				"$(SolutionDir)Submodules/magic_enum/include",
 				"$(VK_SDK_PATH)/Include",
-				}
-				vpaths {
-					["Configs"] = {
-						"./Assets/Configs/VkEnvConfigs.json"
-					},
-					[""] = {
-						"./Source/RHI/Vulkan/**",
-					}
 				}
 			project "D3D12RHI"
 				kind "StaticLib"
@@ -118,12 +90,7 @@ workspace "Rockcat"
 					"./Source/RHI/D3D/DXGIInterface.cpp",
 				}
 				includedirs { 
-					"$(SolutionDir)",
-					"$(SolutionDir)Source",
 					"$(SolutionDir)Source/Runtime",
-					"$(SolutionDir)Submodules/cereal/include",
-					"$(SolutionDir)Submodules/spdlog/include",
-					"$(VK_SDK_PATH)/Include",
 				}
 				links {
 					"d3d12",
@@ -139,12 +106,7 @@ workspace "Rockcat"
 					"./Source/RHI/D3D/DXGIInterface.cpp",
 				}
 				includedirs { 
-					"$(SolutionDir)",
-					"$(SolutionDir)Source",
 					"$(SolutionDir)Source/Runtime",
-					"$(SolutionDir)Submodules/cereal/include",
-					"$(SolutionDir)Submodules/spdlog/include",
-					"$(VK_SDK_PATH)/Include",
 				}
 				links {
 					"d3d11",
@@ -175,9 +137,7 @@ workspace "Rockcat"
 			location "./Out/Intermediate/VCProjects"
 			targetdir "$(SolutionDir)Out"
 			targetname "$(ProjectName)_$(Configuration)"
-			buildoptions { "/bigobj" }
 			disablewarnings { "4131", "4127", "4244" }
-			--implibname "$(SolutionDir)Out/Intermediate/$(Configuration)/$(ProjectName)"
 			files {
 				"./Submodules/assimp/**.h",
 				"./Submodules/assimp/**.cpp",
@@ -284,31 +244,12 @@ workspace "Rockcat"
 			"./Source/Runtime/Application/Win32/Resource.rc"
 		}
 		includedirs { 
-			"$(SolutionDir)",
-			"$(SolutionDir)Source",
 			"$(SolutionDir)Source/Runtime",
-			"$(SolutionDir)Submodules",
-			"$(SolutionDir)Submodules/taskflow",
-			"$(SolutionDir)Submodules/cereal/include",
-			"$(SolutionDir)Submodules/spdlog/include",
-			"$(SolutionDir)Submodules/assimp/build/include",
-			"$(SolutionDir)Submodules/assimp/include",
-			"$(SolutionDir)Submodules/magic_enum/include",
-			"$(VK_SDK_PATH)/Include",
-		}
-		libdirs {
-			"$(VK_SDK_PATH)/Lib"
 		}
 		targetdir "$(SolutionDir)Out"
 		links { 
 			"Runtime",  
 			"VulkanRHI",
-			--"D3D12RHI",
-			"vulkan-1",
-			"dxcompiler",
-			"d3dcompiler",
-			"assimp",
-			"imgui"
 		}
 		vpaths {
 			["Resource"] = {
@@ -316,66 +257,6 @@ workspace "Rockcat"
 			},
 			[""] = {
 				"./Source/Applications/RenderTest/**",
-			}
-		}
-
-		project "ImGuiEditor"
-		kind "WindowedApp"
-		language "C++"
-		location "./Out/Intermediate/VCProjects"
-		targetname "$(ProjectName)_$(Configuration)"
-		files {
-			"./Source/Applications/ImGuiEditor/**",
-			"./Source/Runtime/Application/Win32/Resource.rc",
-			"./Submodules/imgui/backends/imgui_impl_vulkan.h",
-			"./Submodules/imgui/backends/imgui_impl_vulkan.cpp",
-			"./Submodules/imgui/backends/imgui_impl_Win32.h",
-			"./Submodules/imgui/backends/imgui_impl_win32.cpp",
-			"./Submodules/imgui/backends/imgui_impl_dx12.h",
-			"./Submodules/imgui/backends/imgui_impl_dx12.cpp"
-		}
-		includedirs {
-			"$(SolutionDir)",
-			"$(SolutionDir)Source",
-			"$(SolutionDir)Source/Runtime",
-			"$(SolutionDir)Submodules",
-			"$(SolutionDir)Submodules/taskflow",
-			"$(SolutionDir)Submodules/cereal/include",
-			"$(SolutionDir)Submodules/spdlog/include",
-			"$(SolutionDir)Submodules/assimp/build/include",
-			"$(SolutionDir)Submodules/assimp/include",
-			"$(SolutionDir)Submodules/magic_enum/include",
-			"$(VK_SDK_PATH)/Include",
-		}
-		libdirs {
-			"$(VK_SDK_PATH)/Lib"
-		}
-		targetdir "$(SolutionDir)Out"
-		links {
-			"Runtime",
-			"assimp",
-			"imgui",
-			"vulkan-1",
-			"dxcompiler",
-			"d3dcompiler",
-			"VulkanRHI",
-			"d3d12",
-			"dxgi"
-		}
-		vpaths {
-			["Resource"] = {
-				"./Source/Runtime/Application/Win32/Resource.rc"
-			},
-			[""] = {
-				"./Source/Applications/ImGuiEditor/**",
-			},
-			["ImGuiImpl"] = {
-				"./Submodules/imgui/backends/imgui_impl_vulkan.h",
-				"./Submodules/imgui/backends/imgui_impl_vulkan.cpp",
-				"./Submodules/imgui/backends/imgui_impl_Win32.h",
-				"./Submodules/imgui/backends/imgui_impl_win32.cpp",
-				"./Submodules/imgui/backends/imgui_impl_dx12.h",
-				"./Submodules/imgui/backends/imgui_impl_dx12.cpp"
 			}
 		}
 
