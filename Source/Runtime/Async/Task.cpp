@@ -1,7 +1,7 @@
 #include "Async/Task.h"
 #include "Core/ConsoleVariable.h"
 #include "OS/OS.h"
-#include "Services/SpdLogService.h"
+#include "Core/SpdLogger.h"
 
 DEFINE_LOG_CATEGORY(LogTaskFlow);
 

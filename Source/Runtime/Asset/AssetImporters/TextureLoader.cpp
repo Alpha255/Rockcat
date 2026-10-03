@@ -1,6 +1,6 @@
 #include "Asset/AssetLoaders/TextureLoader.h"
 #include "Asset/Texture.h"
-#include "Services/SpdLogService.h"
+#include "Core/SpdLogger.h"
 
 #include <Asset/DDS.h>
 #include <dxgiformat.h>

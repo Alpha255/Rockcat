@@ -20,8 +20,6 @@ namespace OS
 
 	void ExecuteProcess(const char* Commandline, bool WaitDone = true);
 
-	Guid CreateGUID();
-
 	Math::Vector2 GetCursorPosition();
 
 	size_t GetHardwareConcurrencyThreadsCount(bool UseHyperThreading);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Singleton.h"
+#include "Core/String.h"
 
 class ConsoleVariableManager : public Singleton<ConsoleVariableManager>
 {
@@ -9,9 +10,9 @@ public:
 
 	class IConsoleVariable* FindConsoleVariable(std::string_view Name) const;
 private:
-	std::string GetCategory(IConsoleVariable* CVar) const;
+	string GetCategory(IConsoleVariable* CVar) const;
 
-	std::unordered_map<std::string, std::unordered_map<std::string_view, class IConsoleVariable*>> m_Variables;
+	std::unordered_map<string, std::unordered_map<std::string_view, class IConsoleVariable*>> m_Variables;
 };
 
 class IConsoleVariable

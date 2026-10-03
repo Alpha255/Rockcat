@@ -1,5 +1,5 @@
 #include "OS/OS.h"
-#include "Services/SpdLogService.h"
+#include "Core/SpdLogger.h"
 
 #if PLATFORM_WIN32
 
@@ -143,13 +143,6 @@ void* OS::GetApplicationInstance()
 	return reinterpret_cast<void*>(Handle);
 }
 
-Guid OS::CreateGUID()
-{
-	Guid Ret;
-	VERIFY_WITH_OS_MESSAGE(::CoCreateGuid(reinterpret_cast<::GUID*>(&Ret)) == S_OK);
-	return Ret;
-}
-
 Math::Vector2 OS::GetCursorPosition()
 {
 	::POINT Pos;
@@ -195,11 +188,6 @@ size_t OS::GetHardwareConcurrencyThreadsCount(bool UseHyperThreading)
 	}
 
 	return UseHyperThreading ? LogicalCoreCount : PhysicalCoreCount;
-}
-
-Guid Guid::Create()
-{
-	return OS::CreateGUID();
 }
 
 void OS::SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Priority)

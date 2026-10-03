@@ -1,7 +1,7 @@
 #include "Application/Win32/WindowsApplication.h"
 #include "Application/Win32/Resource.h"
 #include "Application/ApplicationSettings.h"
-#include "Services/SpdLogService.h"
+#include "Core/SpdLogger.h"
 #include "OS/OS.h"
 #include <windowsx.h>
 

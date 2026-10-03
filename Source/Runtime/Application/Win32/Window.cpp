@@ -1,7 +1,7 @@
 #include "OS/OS.h"
 #include "Application/Window.h"
 #include "Application/Win32/Resource.h"
-#include "Services/SpdLogService.h"
+#include "Core/SpdLogger.h"
 
 #if PLATFORM_WIN32
 

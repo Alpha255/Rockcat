@@ -22,12 +22,12 @@ template<class T>
 class LazySingleton : public NoneCopyable
 {
 public:
-	template <class... TArgs> 
-	static void Create(TArgs&&... Args)
+	template <class... Args> 
+	static void Create(Args&&... InArgs)
 	{
 		if (!Instance)
 		{
-			Instance = std::unique_ptr<T>(new T(std::forward<TArgs>(Args)...));
+			Instance = std::unique_ptr<T>(new T(std::forward<Args>(InArgs)...));
 			/// std::shared_ptr<T>(new T(args...)) may call a non-public constructor of T if executed in context where it is accessible, 
 			/// while std::make_shared requires public access to the selected constructor.
 		}
@@ -50,25 +50,5 @@ private:
 	static std::unique_ptr<T> Instance;
 };
 template <class T> std::unique_ptr<T> LazySingleton<T>::Instance;
-
-#define ALLOW_ACCESS(ClassType) friend class Singleton<ClassType>;
-#define ALLOW_ACCESS_LAZY(ClassType) friend class LazySingleton<ClassType>;
-
-#define SINGLETON_DECLARE_TYPE(ClassType, SingletonType) \
-class ClassType : public SingletonType<ClassType>        \
-{                                                        \
-	friend class SingletonType<ClassType>;
-
-#define SINGLETON_DECLARE(ClassType) SINGLETON_DECLARE_TYPE(ClassType, Gear::Singleton)
-
-#define SINGLETON_DECLARE_LAZY(ClassType) SINGLETON_DECLARE_TYPE(ClassType, Gear::LazySingleton)
-
-class SingletonFactory : public Singleton<SingletonFactory>
-{
-public:
-protected:
-private:
-	std::unordered_map<std::type_info, std::unique_ptr<NoneCopyable>> m_Singletons;
-};
 
 

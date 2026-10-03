@@ -24,7 +24,6 @@ public:
 	void SetTickType(ETickType TickType) { m_TickType = TickType; }
 protected:
 	ETickType m_TickType = ETickType::Always;
-private:
 };
 
 class TickManager : public Singleton<TickManager>

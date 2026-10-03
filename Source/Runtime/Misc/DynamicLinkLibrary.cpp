@@ -1,6 +1,6 @@
 #include "System/DynamicLinkLibrary.h"
 #include "System/System.h"
-#include "Services/SpdLogService.h"
+#include "Core/SpdLogger.h"
 
 #if PLATFORM_WIN32
 

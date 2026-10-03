@@ -1,6 +1,6 @@
 #include "Services/ShaderLibrary.h"
 #include "Async/Task.h"
-#include "Services/SpdLogService.h"
+#include "Core/SpdLogger.h"
 #include "Paths.h"
 #include "RHI/RHIPipeline.h"
 #include "RHI/RHIDevice.h"

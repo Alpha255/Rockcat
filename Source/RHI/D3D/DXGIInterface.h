@@ -2,7 +2,7 @@
 
 #include "Core/StringUtils.h"
 #include "RHI/RHIResource.h"
-#include "Services/SpdLogService.h"
+#include "Core/SpdLogger.h"
 #include <d3d11.h>
 #include <d3d11_1.h>
 #include <d3d11_2.h>

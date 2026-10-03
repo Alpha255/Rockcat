@@ -2,7 +2,7 @@
 
 #include "Core/Cereal.h"
 #include "Asset/Asset.h"
-#include "Services/SpdLogService.h"
+#include "Core/SpdLogger.h"
 
 template<class T>
 class Serializable : public Asset

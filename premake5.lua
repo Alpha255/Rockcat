@@ -65,6 +65,32 @@ workspace "Rockcat"
 					"spirv-cross-core"
 				}
 
+		project "Editor"
+			filter {}
+			kind "StaticLib"
+			language "C++"
+			location "./Out/Intermediate/VCProjects"
+			files {
+				"./Source/Editor/**"
+			}
+			includedirs {
+				"$(SolutionDir)Source/Editor",
+				"$(SolutionDir)Source/Runtime",
+				"$(SolutionDir)Source/Runtime/Misc",
+				"$(SolutionDir)Submodules",
+				"$(SolutionDir)Submodules/taskflow",
+				"$(SolutionDir)Submodules/cereal/include",
+				"$(SolutionDir)Submodules/spdlog/include",
+				"$(SolutionDir)Submodules/assimp/build/include",
+				"$(SolutionDir)Submodules/assimp/include",
+				"$(SolutionDir)Submodules/magic_enum/include",
+				"$(VK_SDK_PATH)/Include",
+			}
+			links {
+				"Runtime",
+				"imgui",
+			}
+
 		group "RHI"
 			project "VulkanRHI"
 				kind "StaticLib"

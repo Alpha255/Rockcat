@@ -1,13 +1,12 @@
 #include "Core/ConsoleVariable.h" 
-#include "Core/StringUtils.h"
-#include "Services/SpdLogService.h"
+#include "Core/SpdLogging.h"
 
 void ConsoleVariableManager::RegisterConsoleVariable(IConsoleVariable* CVar)
 {
 	assert(CVar);
 
-	std::string Cagetory = GetCategory(CVar);
-	auto& VariableGroup = m_Variables[Cagetory];
+	string Category = GetCategory(CVar);
+	auto& VariableGroup = m_Variables[Category];
 
 	if (VariableGroup.find(CVar->GetName()) != VariableGroup.end())
 	{
@@ -45,7 +44,7 @@ bool IConsoleVariable::SetFromString(std::string_view Command)
 	auto Pos = Command.find(Name);
 	if (Pos != std::string_view::npos)
 	{
-		auto Value = String::Lowercase(std::string(Command.substr(Name.length() + 1u)));
+		auto Value = string(Command.substr(Name.length() + 1u)).lowercase();
 
 		if (IsBool())
 		{
@@ -83,13 +82,15 @@ bool IConsoleVariable::SetFromString(std::string_view Command)
 	return false;
 }
 
-std::string ConsoleVariableManager::GetCategory(IConsoleVariable* CVar) const
+string ConsoleVariableManager::GetCategory(IConsoleVariable* CVar) const
 {
+	assert(CVar);
+
 	auto Pos = CVar->GetName().find('.');
 	if (Pos != std::string_view::npos)
 	{
-		return std::string(CVar->GetName().substr(0, Pos));
+		return string(CVar->GetName().substr(0, Pos));
 	}
 
-	return std::string("common");
+	return string("Common");
 }
