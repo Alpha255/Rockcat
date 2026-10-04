@@ -72,17 +72,19 @@
 	}                     \
 }
 
-#if defined(PLATFORM_WIN32)
-#define VERIFY_WITH_OS_MESSAGE(Condition)                                                  \
-{                                                                                          \
-	if (!(Condition))                                                                      \
-	{                                                                                      \
-		LOG_ERROR(LogDefault, "Failed to invoke platform API, {}", OS::GetErrorMessage()); \
-		assert(0);                                                                         \
-	}                                                                                      \
+#define VERIFY_WITH_SYSTEM_MESSAGE(Condition)                                                        \
+{                                                                                                    \
+	if (!(Condition))                                                                                \
+	{                                                                                                \
+		LOG_ERROR(LogDefault, "Failed to invoke platform API, {}", PlatformMisc::GetErrorMessage()); \
+		assert(0);                                                                                   \
+	}                                                                                                \
 }
 
-#define DLL_EXTENSION ".dll"
+#if defined(PLATFORM_WIN32)
+	#define DLL_EXTENSION ".dll"
+#elif defined(PLATFORM_LINUX) || defined(PLATFORM_ANDROID)
+	#define DLL_EXTENSION ".so"
 #else
 	#error Unknown platform!
 #endif

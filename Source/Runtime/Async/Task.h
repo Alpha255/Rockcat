@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core/Name.h"
-#include "Core/Singleton.h"
 
 #pragma warning(push)
 #pragma warning(disable:4456 4244 4127 4267 4324)
@@ -9,7 +8,6 @@
 #include <taskflow/taskflow.hpp>
 #include <taskflow/core/task.hpp>
 #include <taskflow/algorithm/for_each.hpp>
-#include <taskflow/algorithm/sort.hpp>
 #pragma warning(pop)
 
 class TFTaskEvent
@@ -83,18 +81,18 @@ public:
 		Completed
 	};
 
-	TFTask(FName&& Name, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	TFTask(Name&& TaskName, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
 		: m_Thread(Thread)
 		, m_Priority(Priority)
-		, m_Name(std::move(Name))
+		, m_Name(std::move(TaskName))
 	{
 	}
 
 	template<class LAMBDA>
-	TFTask(FName&& Name, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	TFTask(Name&& TaskName, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
 		: m_Thread(Thread)
 		, m_Priority(Priority)
-		, m_Name(std::move(Name))
+		, m_Name(std::move(TaskName))
 		, m_TaskFunc(std::move([Func = std::forward<LAMBDA>(Lambda)]() { Func(); }))
 	{
 	}
@@ -113,7 +111,7 @@ public:
 	inline bool IsDispatched() const { return m_TFAsyncTask ? true : false; }
 	inline bool IsCanceled() const { return m_Canceled.load(std::memory_order_acquire); }
 
-	inline const FName& GetName() const { return m_Name; }
+	inline const Name& GetName() const { return m_Name; }
 
 	void AddPrerequisite(TFTask& Prerequisite);
 
@@ -163,17 +161,17 @@ public:
 	static uint32_t GetNumWorkerThreads();
 
 	template<class LAMBDA>
-	static std::shared_ptr<TFTask> Launch(FName&& Name, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	static std::shared_ptr<TFTask> Launch(Name&& TaskName, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
 	{
-		auto Task = std::make_shared<TFTask>(std::forward<FName>(Name), std::forward<LAMBDA>(Lambda), Thread, Priority);
+		auto Task = std::make_shared<TFTask>(std::forward<Name>(TaskName), std::forward<LAMBDA>(Lambda), Thread, Priority);
 		Task->Trigger();
 		return Task;
 	}
 
 	template<class LAMBDA>
-	static std::shared_ptr<TFTask> Launch(FName&& Name, LAMBDA&& Lambda, std::vector<TFTask*>&& PrerequisiteTasks, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	static std::shared_ptr<TFTask> Launch(Name&& TaskName, LAMBDA&& Lambda, std::vector<TFTask*>&& PrerequisiteTasks, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
 	{
-		auto Task = std::make_shared<TFTask>(std::forward<FName>(Name), std::forward<LAMBDA>(Lambda), Thread, Priority);
+		auto Task = std::make_shared<TFTask>(std::forward<Name>(TaskName), std::forward<LAMBDA>(Lambda), Thread, Priority);
 		for (auto PrerequisiteTask : PrerequisiteTasks)
 		{
 			Task->AddPrerequisite(*PrerequisiteTask);
@@ -234,7 +232,7 @@ private:
 	EThread m_Thread = EThread::WorkerThread;
 	EPriority m_Priority = EPriority::Normal;
 
-	FName m_Name;
+	Name m_Name;
 
 	std::unordered_set<TFTask*> m_Prerequisites;
 	std::unordered_set<TFTask*> m_Subsequents;

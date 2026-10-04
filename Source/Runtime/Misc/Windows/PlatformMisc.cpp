@@ -1,219 +1,359 @@
-#include "OS/OS.h"
-#include "Core/SpdLogger.h"
+#include "Misc/PlatformMisc.h"
+#include "Core/SpdLogging.h"
 
 #if PLATFORM_WIN32
 
+#if defined(GetEnvironmentVariable)
+#undef GetEnvironmentVariable
+
 #include <Windows.h>
-#include <windowsx.h>
-#include <shlobj.h>
 
-std::string OS::GetErrorMessage(uint32_t ErrorCode)
+namespace PlatformMisc
 {
-	static wchar_t s_Buffer[UINT16_MAX];
-	memset(s_Buffer, 0, sizeof(s_Buffer));
-
-	VERIFY(::FormatMessageW(
-		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		nullptr,
-		ErrorCode == ~0u ? ::GetLastError() : ErrorCode,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		s_Buffer,
-		UINT16_MAX,
-		nullptr) != 0);
-
-	return String::ToMultiByte(s_Buffer);
-}
-
-std::filesystem::path OS::GetApplicationDirectory()
-{
-	static wchar_t s_Buffer[UINT16_MAX];
-	memset(s_Buffer, 0, sizeof(s_Buffer));
-
-	VERIFY_WITH_OS_MESSAGE(::GetModuleFileNameW(nullptr, s_Buffer, sizeof(s_Buffer)) != 0);
-	return std::filesystem::path(s_Buffer).parent_path();
-}
-
-std::filesystem::path OS::GetWorkingDirectory()
-{
-	static wchar_t s_Buffer[UINT16_MAX];
-	memset(s_Buffer, 0, sizeof(s_Buffer));
-
-	VERIFY_WITH_OS_MESSAGE(::GetCurrentDirectoryW(sizeof(s_Buffer), s_Buffer) != 0);
-	return std::filesystem::path(s_Buffer);
-}
-
-void OS::SetWorkingDirectory(const std::filesystem::path& Directory)
-{
-	assert(std::filesystem::exists(Directory));
-	VERIFY_WITH_OS_MESSAGE(::SetCurrentDirectoryW(Directory.c_str()) != 0);
-}
-
-void OS::Sleep(uint32_t Milliseconds)
-{
-	::Sleep(static_cast<::DWORD>(Milliseconds));
-}
-
-void OS::ExecuteProcess(const char* Commandline, bool WaitDone)
-{
-	::SECURITY_ATTRIBUTES Security
+	string GetErrorMessage(uint32_t ErrorCode)
 	{
-		sizeof(::SECURITY_ATTRIBUTES),
+		std::vector<wchar_t> Buffer(UINT16_MAX, L'\0');
+
+		if (!::FormatMessageW(
+			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			nullptr,
+			ErrorCode == ~0u ? ::GetLastError() : ErrorCode,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			Buffer.data(),
+			static_cast<::DWORD>(Buffer.size()),
+			nullptr))
+		{
+			return string();
+		}
+
+		string Result = string::from_wide(Buffer.data());
+
+		while (!Result.empty() && (Result.back() == '\r' || Result.back() == '\n' || Result.back() == ' '))
+		{
+			Result.pop_back();
+		}
+
+		return Result;
+	}
+
+	std::filesystem::path GetApplicationPath()
+	{
+		std::vector<wchar_t> Buffer(UINT16_MAX, L'\0');
+
+		const ::DWORD Length = ::GetModuleFileNameW(nullptr, Buffer.data(), static_cast<::DWORD>(Buffer.size()));
+		if (Length == 0u || Length >= Buffer.size())
+		{
+			VERIFY_WITH_SYSTEM_MESSAGE(0);
+			return std::filesystem::path();
+		}
+
+		return std::filesystem::path(Buffer.data());
+	}
+
+	std::filesystem::path GetWorkingDirectory()
+	{
+		std::vector<wchar_t> Buffer(UINT16_MAX, L'\0');
+
+		const ::DWORD Length = ::GetCurrentDirectoryW(static_cast<::DWORD>(Buffer.size()), Buffer.data());
+		if (Length == 0u || Length >= Buffer.size())
+		{
+			VERIFY_WITH_SYSTEM_MESSAGE(0);
+			return std::filesystem::path();
+		}
+
+		return std::filesystem::path(Buffer.data());
+	}
+
+	void SetWorkingDirectory(const std::filesystem::path& Directory)
+	{
+		assert(std::filesystem::exists(Directory));
+		VERIFY_WITH_SYSTEM_MESSAGE(::SetCurrentDirectoryW(Directory.c_str()) != 0);
+	}
+
+	void Sleep(uint32_t Seconds)
+	{
+		::Sleep(static_cast<::DWORD>(static_cast<uint64_t>(Seconds) * 1000u));
+	}
+
+	void ExecuteProcess(const char* Commandline, bool WaitDone)
+	{
+		std::wstring WideCommandline = Utf8ToWide(Commandline);
+		if (WideCommandline.empty())
+		{
+			return;
+		}
+
+		::SECURITY_ATTRIBUTES Security
+		{
+			sizeof(::SECURITY_ATTRIBUTES),
 			nullptr,
 			true
-	};
+		};
 
-	::HANDLE Read = nullptr, Write = nullptr;
-	VERIFY_WITH_OS_MESSAGE(::CreatePipe(&Read, &Write, &Security, INT16_MAX) != 0);
-	VERIFY_WITH_OS_MESSAGE(::SetStdHandle(STD_OUTPUT_HANDLE, Write) != 0);
-
-	/// If an error occurs, the ANSI version of this function (GetStartupInfoA) can raise an exception. 
-	/// The Unicode version (GetStartupInfoW) does not fail
-	::STARTUPINFOW StartupInfo;
-	::GetStartupInfoW(&StartupInfo);
-	StartupInfo.cb = sizeof(::STARTUPINFOA);
-	StartupInfo.dwFlags = STARTF_USESTDHANDLES;
-	StartupInfo.hStdInput = Read;
-	StartupInfo.hStdOutput = Write;
-
-	static wchar_t s_Buffer[UINT16_MAX];
-	memset(s_Buffer, 0, sizeof(s_Buffer));
-
-	std::wstring wComandline = String::ToWide(Commandline);
-
-	::PROCESS_INFORMATION ProcessInfo;
-	if (::CreateProcessW(
-		nullptr,
-		const_cast<LPWSTR>(wComandline.c_str()),
-		nullptr,
-		nullptr,
-		true,
-		CREATE_NO_WINDOW,
-		nullptr,
-		nullptr,
-		&StartupInfo,
-		&ProcessInfo))
-	{
-		if (WaitDone)
+		::HANDLE Read = nullptr, Write = nullptr;
+		if (!::CreatePipe(&Read, &Write, &Security, 0))
 		{
-			::DWORD Exit = 0u;
-			::WaitForSingleObject(ProcessInfo.hProcess, INFINITE);
-			if (::GetExitCodeProcess(ProcessInfo.hProcess, &Exit) && Exit != 0u)
-			{
-				::DWORD Bytes = 0u;
-				VERIFY_WITH_OS_MESSAGE(::ReadFile(Read, s_Buffer, sizeof(s_Buffer), &Bytes, nullptr) != 0);
-				//buffer[bytes] = '\0';
-				std::string ErrorMessage = String::ToMultiByte(s_Buffer);
-				LOG_ERROR(LogDefault, "Failed to executing process \"%s\"", ErrorMessage);
-			}
-			else
-			{
-				VERIFY_WITH_OS_MESSAGE(0);
-			}
+			VERIFY_WITH_SYSTEM_MESSAGE(0);
+			return;
+		}
 
-			/// STILL_ACTIVE
+		::STARTUPINFOW StartupInfo{};
+		StartupInfo.cb = sizeof(::STARTUPINFOW);
+		StartupInfo.dwFlags = STARTF_USESTDHANDLES;
+		StartupInfo.hStdInput = ::GetStdHandle(STD_INPUT_HANDLE);
+		StartupInfo.hStdOutput = Write;
+		StartupInfo.hStdError = Write;
+
+		::PROCESS_INFORMATION ProcessInfo{};
+
+		if (!::CreateProcessW(
+			nullptr,
+			WideCommandline.data(),
+			nullptr,
+			nullptr,
+			true,
+			CREATE_NO_WINDOW,
+			nullptr,
+			nullptr,
+			&StartupInfo,
+			&ProcessInfo))
+		{
+			::CloseHandle(Read);
+			::CloseHandle(Write);
+			VERIFY_WITH_SYSTEM_MESSAGE(0);
+			return;
 		}
 
 		::CloseHandle(ProcessInfo.hThread);
-		::CloseHandle(ProcessInfo.hProcess);
-
-		::CloseHandle(Read);
 		::CloseHandle(Write);
 
-		return;
-	}
-
-	VERIFY_WITH_OS_MESSAGE(0);
-}
-
-std::string OS::GetEnvironmentVariables(const char* Variable)
-{
-	static wchar_t s_Buffer[UINT16_MAX];
-	memset(s_Buffer, 0, sizeof(s_Buffer));
-
-	std::wstring wVariable = String::ToWide(Variable);
-
-	VERIFY_WITH_OS_MESSAGE(::GetEnvironmentVariableW(wVariable.c_str(), s_Buffer, sizeof(s_Buffer)) != 0);
-	return String::ToMultiByte(s_Buffer);
-}
-
-void* OS::GetApplicationInstance()
-{
-	::HMODULE Handle = ::GetModuleHandleW(nullptr);
-	VERIFY_WITH_OS_MESSAGE(Handle);
-	return reinterpret_cast<void*>(Handle);
-}
-
-Math::Vector2 OS::GetCursorPosition()
-{
-	::POINT Pos;
-	::GetCursorPos(&Pos);
-
-	return Math::Vector2(static_cast<float>(Pos.x), static_cast<float>(Pos.y));
-}
-
-size_t OS::GetHardwareConcurrencyThreadsCount(bool UseHyperThreading)
-{
-	std::unique_ptr<uint8_t> Buffer;
-	::DWORD BufferSize = 0;
-	size_t PhysicalCoreCount = 0u;
-	size_t LogicalCoreCount = 0u;
-
-	if(!::GetLogicalProcessorInformationEx(::LOGICAL_PROCESSOR_RELATIONSHIP::RelationAll, (::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX)Buffer.get(), &BufferSize) &&
-		::GetLastError() == ERROR_INSUFFICIENT_BUFFER)
-	{
-		Buffer.reset(new uint8_t[BufferSize]());
-		if (::GetLogicalProcessorInformationEx(::LOGICAL_PROCESSOR_RELATIONSHIP::RelationAll, (::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX)Buffer.get(), &BufferSize))
+		if (!WaitDone)
 		{
-			uint8_t* BufferPtr = Buffer.get();
-			while (BufferPtr < Buffer.get() + BufferSize)
+			::CloseHandle(Read);
+			::CloseHandle(ProcessInfo.hProcess);
+			return;
+		}
+
+		std::string Output;
+		{
+			char Buffer[1024];
+			::DWORD Bytes = 0u;
+
+			while (::ReadFile(Read, Buffer, sizeof(Buffer), &Bytes, nullptr) && Bytes > 0u)
 			{
-				::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX ProcessorInfo = (::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX)BufferPtr;
-				if (!ProcessorInfo)
-				{
-					break;
-				}
+				Output.append(Buffer, Bytes);
+			}
+		}
 
-				if (ProcessorInfo->Relationship == ::LOGICAL_PROCESSOR_RELATIONSHIP::RelationProcessorCore)
-				{
-					++PhysicalCoreCount;
+		::CloseHandle(Read);
 
-					for (uint32_t Index = 0u; Index < ProcessorInfo->Processor.GroupCount; ++Index)
-					{
-						LogicalCoreCount += std::bitset<sizeof(::KAFFINITY) * CHAR_BIT>(ProcessorInfo->Processor.GroupMask[Index].Mask).count();
-					}
-				}
-				BufferPtr += ProcessorInfo->Size;
-			} 
+		::WaitForSingleObject(ProcessInfo.hProcess, INFINITE);
+
+		::DWORD ExitCode = 0u;
+		const bool bGotExitCode = ::GetExitCodeProcess(ProcessInfo.hProcess, &ExitCode) != 0;
+
+		::CloseHandle(ProcessInfo.hProcess);
+
+		if (!bGotExitCode)
+		{
+			VERIFY_WITH_SYSTEM_MESSAGE(0);
+			return;
+		}
+
+		if (ExitCode != 0u)
+		{
+			LOG_ERROR(LogDefault, "Process \"{}\" exited with code {}. {}", Commandline, ExitCode, Output);
 		}
 	}
 
-	return UseHyperThreading ? LogicalCoreCount : PhysicalCoreCount;
-}
-
-void OS::SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Priority)
-{
-	std::stringstream Stream;
-	Stream << ThreadID;
-
-	::DWORD DwordThreadID = std::stoul(Stream.str());
-	::HANDLE ThreadHandle = ::OpenThread(THREAD_ALL_ACCESS, false, DwordThreadID);
-	VERIFY_WITH_OS_MESSAGE(ThreadHandle);
-
-	int32_t ThreadPriority = THREAD_PRIORITY_NORMAL;
-	switch (Priority)
+	string GetEnvironmentVariable(const char* Name)
 	{
-	case TFTask::EPriority::Critical:
-		ThreadPriority = THREAD_PRIORITY_HIGHEST;
-		break;
-	case TFTask::EPriority::High:
-		ThreadPriority = THREAD_PRIORITY_ABOVE_NORMAL;
-		break;
-	case TFTask::EPriority::Low:
-		ThreadPriority = THREAD_PRIORITY_BELOW_NORMAL;
-		break;
+		const std::wstring WideName = Utf8ToWide(Name);
+		if (WideName.empty())
+		{
+			return string();
+		}
+
+		std::vector<wchar_t> Buffer(UINT16_MAX, L'\0');
+		const ::DWORD Length = ::GetEnvironmentVariableW(WideName.c_str(), Buffer.data(), static_cast<::DWORD>(Buffer.size()));
+		if (Length == 0u || Length >= Buffer.size())
+		{
+			return string();
+		}
+
+		return string::from_wide(std::wstring_view(Buffer.data(), Length));
 	}
-	VERIFY_WITH_OS_MESSAGE(::SetThreadPriority(ThreadHandle, ThreadPriority) != 0);
+
+	void* GetApplicationHandle()
+	{
+		::HMODULE Handle = ::GetModuleHandleW(nullptr);
+		VERIFY_WITH_SYSTEM_MESSAGE(Handle);
+		return reinterpret_cast<void*>(Handle);
+	}
+
+	Math::Vector2 GetCursorPosition()
+	{
+		::POINT Pos{};
+		if (!::GetCursorPos(&Pos))
+		{
+			return Math::Vector2(0.0f, 0.0f);
+		}
+
+		return Math::Vector2(static_cast<float>(Pos.x), static_cast<float>(Pos.y));
+	}
+
+	size_t GetNumHardwareConcurrencyThreads(bool UseHyperThreading)
+	{
+		std::unique_ptr<uint8_t[]> Buffer;
+		::DWORD BufferSize = 0;
+		size_t PhysicalCoreCount = 0u;
+		size_t LogicalCoreCount = 0u;
+
+		if (!::GetLogicalProcessorInformationEx(::LOGICAL_PROCESSOR_RELATIONSHIP::RelationAll, reinterpret_cast<::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX>(Buffer.get()), &BufferSize) &&
+			::GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+		{
+			Buffer = std::make_unique<uint8_t[]>(BufferSize);
+
+			if (::GetLogicalProcessorInformationEx(::LOGICAL_PROCESSOR_RELATIONSHIP::RelationAll, reinterpret_cast<::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX>(Buffer.get()), &BufferSize))
+			{
+				uint8_t* BufferPtr = Buffer.get();
+				uint8_t* const BufferEnd = Buffer.get() + BufferSize;
+
+				while (BufferPtr + sizeof(::SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX) <= BufferEnd)
+				{
+					::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX ProcessorInfo = reinterpret_cast<::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX>(BufferPtr);
+
+					if (ProcessorInfo->Size == 0u)
+					{
+						break;
+					}
+
+					if (ProcessorInfo->Relationship == ::LOGICAL_PROCESSOR_RELATIONSHIP::RelationProcessorCore)
+					{
+						++PhysicalCoreCount;
+
+						for (uint32_t Index = 0u; Index < ProcessorInfo->Processor.GroupCount; ++Index)
+						{
+							LogicalCoreCount += std::bitset<sizeof(::KAFFINITY) * CHAR_BIT>(ProcessorInfo->Processor.GroupMask[Index].Mask).count();
+						}
+					}
+
+					BufferPtr += ProcessorInfo->Size;
+				}
+			}
+		}
+
+		if (PhysicalCoreCount == 0u && LogicalCoreCount == 0u)
+		{
+			const size_t Fallback = std::thread::hardware_concurrency();
+			return Fallback > 0u ? Fallback : 1u;
+		}
+
+		return UseHyperThreading ? LogicalCoreCount : PhysicalCoreCount;
+	}
+
+	void SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Priority)
+	{
+		std::stringstream Stream;
+		Stream << ThreadID;
+
+		uint32_t NativeThreadID = 0u;
+		Stream >> NativeThreadID;
+
+		if (Stream.fail() || NativeThreadID == 0u)
+		{
+			return;
+		}
+
+		::HANDLE ThreadHandle = ::OpenThread(THREAD_SET_INFORMATION, false, static_cast<::DWORD>(NativeThreadID));
+		if (!ThreadHandle)
+		{
+			VERIFY_WITH_SYSTEM_MESSAGE(0);
+			return;
+		}
+
+		int32_t ThreadPriority = THREAD_PRIORITY_NORMAL;
+		switch (Priority)
+		{
+		case TFTask::EPriority::Critical:
+			ThreadPriority = THREAD_PRIORITY_HIGHEST;
+			break;
+		case TFTask::EPriority::High:
+			ThreadPriority = THREAD_PRIORITY_ABOVE_NORMAL;
+			break;
+		case TFTask::EPriority::Normal:
+			ThreadPriority = THREAD_PRIORITY_NORMAL;
+			break;
+		case TFTask::EPriority::Low:
+			ThreadPriority = THREAD_PRIORITY_BELOW_NORMAL;
+			break;
+		default:
+			ThreadPriority = THREAD_PRIORITY_NORMAL;
+			break;
+		}
+
+		VERIFY_WITH_SYSTEM_MESSAGE(::SetThreadPriority(ThreadHandle, ThreadPriority) != 0);
+
+		::CloseHandle(ThreadHandle);
+	}
+
+	std::wstring Utf8ToWide(std::string_view Str)
+	{
+		if (Str.empty())
+		{
+			return std::wstring();
+		}
+
+		const int32_t Length = ::MultiByteToWideChar(CP_UTF8, 0, Str.data(), static_cast<int32_t>(Str.size()), nullptr, 0);
+		if (Length <= 0)
+		{
+			return std::wstring();
+		}
+
+		std::wstring Result(static_cast<size_t>(Length), L'\0');
+		::MultiByteToWideChar(CP_UTF8, 0, Str.data(), static_cast<int32_t>(Str.size()), Result.data(), Length);
+
+		return Result;
+	}
+
+	string WideToUtf8(std::wstring_view Str)
+	{
+		if (Str.empty())
+		{
+			return std::string();
+		}
+
+		const int32_t Length = ::WideCharToMultiByte(CP_UTF8, 0, Str.data(), static_cast<int32_t>(Str.size()), nullptr, 0, nullptr, nullptr);
+		if (Length <= 0)
+		{
+			return std::string();
+		}
+
+		string Result(static_cast<size_t>(Length), '\0');
+		::WideCharToMultiByte(CP_UTF8, 0, Str.data(), static_cast<int32_t>(Str.size()), Result.data(), Length, nullptr, nullptr);
+
+		return Result;
+	}
+
+	SharedLibrary::SharedLibrary(const char* LibraryName)
+	{
+		const std::wstring WideModuleName = PlatformMisc::Utf8ToWide(string::format("{}{}", LibraryName, DLL_EXTENSION));
+		m_Handle = reinterpret_cast<void*>(::LoadLibraryW(WideModuleName.c_str()));
+		VERIFY_WITH_SYSTEM_MESSAGE(m_Handle);
+	}
+
+	void* SharedLibrary::GetProcAddress(const char* FunctionName)
+	{
+		assert(m_Handle);
+		return ::GetProcAddress(reinterpret_cast<::HMODULE>(m_Handle), FunctionName);
+	}
+
+	SharedLibrary::~SharedLibrary()
+	{
+		VERIFY_WITH_SYSTEM_MESSAGE(::FreeLibrary(reinterpret_cast<::HMODULE>(m_Handle)) != 0);
+	}
 }
 
+#endif // defined(GetEnvironmentVariable)
 #endif // PLATFORM_WIN32
 

@@ -1,29 +1,44 @@
 #pragma once
 
-#include "Core/GUID.h"
 #include "Core/Math/Vector2.h"
+#include "Core/String.h"
 #include "Async/Task.h"
 
-namespace OS
+namespace PlatformMisc
 {
-	std::string GetErrorMessage(uint32_t ErrorCode = ~0u);
+	string GetErrorMessage(uint32_t ErrorCode = ~0u);
 
 	std::filesystem::path GetWorkingDirectory();
 	void SetWorkingDirectory(const std::filesystem::path& Directory);
 
-	void Sleep(uint32_t Milliseconds);
+	void Sleep(uint32_t Seconds);
 
-	std::string GetEnvironmentVariables(const char* Variable);
+	string GetEnvironmentVariable(const char* Name);
 
-	std::filesystem::path GetApplicationDirectory();
-	void* GetApplicationInstance();
+	std::filesystem::path GetApplicationPath();
+	void* GetApplicationHandle();
 
 	void ExecuteProcess(const char* Commandline, bool WaitDone = true);
 
 	Math::Vector2 GetCursorPosition();
 
-	size_t GetHardwareConcurrencyThreadsCount(bool UseHyperThreading);
+	size_t GetNumHardwareConcurrencyThreads(bool UseHyperThreading);
 
 	void SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Priority);
+
+	std::wstring Utf8ToWide(std::string_view Str);
+	string WideToUtf8(std::wstring_view Str);
+
+	class SharedLibrary
+	{
+	public:
+		SharedLibrary(const char* LibraryName);
+		virtual ~SharedLibrary();
+
+		void* GetProcAddress(const char* FunctionName);
+	protected:
+	private:
+		void* m_Handle = nullptr;
+	};
 };
 

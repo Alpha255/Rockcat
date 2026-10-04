@@ -6,6 +6,7 @@ class Paths
 {
 public:
 	static const std::filesystem::path& RootPath();
+	static const std::filesystem::path& LogPath();
 	static const std::filesystem::path& AssetPath();
 	static const std::filesystem::path& ShaderPath();
 	static const std::filesystem::path& ShaderBinaryPath();

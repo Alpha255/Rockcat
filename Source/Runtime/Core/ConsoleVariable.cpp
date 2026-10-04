@@ -1,16 +1,16 @@
-#include "Core/ConsoleVariable.h" 
+#include "Core/ConsoleVariable.h"
 #include "Core/SpdLogging.h"
 
 void ConsoleVariableManager::RegisterConsoleVariable(IConsoleVariable* CVar)
 {
 	assert(CVar);
 
-	string Category = GetCategory(CVar);
+	const Name Category = GetCategory(CVar);
 	auto& VariableGroup = m_Variables[Category];
 
 	if (VariableGroup.find(CVar->GetName()) != VariableGroup.end())
 	{
-		LOG_WARNING(LogDefault, "Console variable '{}' is already registered.", CVar->GetName());
+		LOG_WARNING(LogDefault, "Console variable '{}' is already registered.", CVar->GetName().Get());
 		return;
 	}
 
@@ -18,17 +18,17 @@ void ConsoleVariableManager::RegisterConsoleVariable(IConsoleVariable* CVar)
 }
 
 IConsoleVariable::IConsoleVariable(const char* Name, const char* Description)
-	: m_Name(Name)
+	: m_Name(string(Name))
 	, m_Description(Description)
 {
 	ConsoleVariableManager::Get().RegisterConsoleVariable(this);
 }
 
-IConsoleVariable* ConsoleVariableManager::FindConsoleVariable(std::string_view Name) const
+IConsoleVariable* ConsoleVariableManager::FindConsoleVariable(const Name& VarName) const
 {
 	for (const auto& [Category, VariableGroup] : m_Variables)
 	{
-		auto It = VariableGroup.find(Name);
+		auto It = VariableGroup.find(VarName);
 		if (It != VariableGroup.end())
 		{
 			return It->second;
@@ -40,57 +40,47 @@ IConsoleVariable* ConsoleVariableManager::FindConsoleVariable(std::string_view N
 
 bool IConsoleVariable::SetFromString(std::string_view Command)
 {
-	auto Name = GetName();
-	auto Pos = Command.find(Name);
-	if (Pos != std::string_view::npos)
-	{
-		auto Value = string(Command.substr(Name.length() + 1u)).lowercase();
+	const string Trimmed = string(Command).stripped(" ");
+	const std::string_view VarName = m_Name.Get();
 
-		if (IsBool())
-		{
-			if (Value == "true")
-			{
-				static_cast<ConsoleVariable<bool>*>(this)->Set(true);
-			}
-			else if (Value == "false")
-			{
-				static_cast<ConsoleVariable<bool>*>(this)->Set(false);
-			}
-			else
-			{
-				static_cast<ConsoleVariable<bool>*>(this)->Set(std::stoi(Value.c_str()) > 0);
-			}
-		}
-		else if (IsInt())
-		{
-			static_cast<ConsoleVariable<int32_t>*>(this)->Set(std::stoi(Value.c_str()));
-		}
-		else if (IsUInt())
-		{
-			static_cast<ConsoleVariable<uint32_t>*>(this)->Set(std::stoul(Value.c_str()));
-		}
-		else if (IsFloat())
-		{
-			static_cast<ConsoleVariable<float>*>(this)->Set(std::stof(Value.c_str()));
-		}
-		else if (IsString())
-		{
-			//static_cast<ConsoleVariable<std::string>*>(this)->Set(Value);
-		}
+	if (!Trimmed.starts_with(VarName, ESearchCase::IgnoreCase))
+	{
+		return false;
 	}
 
-	return false;
+	const std::string_view Remainder = std::string_view(Trimmed).substr(VarName.length());
+
+	if (!Remainder.empty() && Remainder.front() != ' ' && Remainder.front() != '\t' && Remainder.front() != '=')
+	{
+		return false;
+	}
+
+	string Value = string(Remainder).stripped(" ");
+
+	if (!Value.empty() && Value.front() == '=')
+	{
+		Value = string(Value.substr(1u)).stripped(" ");
+	}
+
+	if (Value.empty())
+	{
+		return false;
+	}
+
+	return SetValue(Value);
 }
 
-string ConsoleVariableManager::GetCategory(IConsoleVariable* CVar) const
+Name ConsoleVariableManager::GetCategory(IConsoleVariable* CVar) const
 {
 	assert(CVar);
 
-	auto Pos = CVar->GetName().find('.');
+	const std::string_view VarName = CVar->GetName().Get();
+	const size_t Pos = VarName.find('.');
+
 	if (Pos != std::string_view::npos)
 	{
-		return string(CVar->GetName().substr(0, Pos));
+		return Name(VarName.substr(0u, Pos));
 	}
 
-	return string("Common");
+	return Name("Common");
 }

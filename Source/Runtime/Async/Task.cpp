@@ -1,9 +1,9 @@
 #include "Async/Task.h"
 #include "Core/ConsoleVariable.h"
 #include "OS/OS.h"
-#include "Core/SpdLogger.h"
+#include "Core/SpdLogging.h"
 
-DEFINE_LOG_CATEGORY(LogTaskFlow);
+DEFINE_LOGGER_CATEGORY(LogTaskFlow);
 
 thread_local TFTask::EThread t_ThreadTag = TFTask::EThread::WorkerThread;
 

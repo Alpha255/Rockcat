@@ -1,4 +1,5 @@
 #include "Core/String.h"
+#include "Misc/PlatformMisc.h"
 #include <stdarg.h>
 
 void string::tolower()
@@ -122,6 +123,33 @@ bool string::contains(std::string_view substr, ESearchCase searchcase) const
 	return false;
 }
 
+void string::strip(std::string_view token, ESearchCase searchcase)
+{
+	if (token.empty() || token.length() > length())
+	{
+		return;
+	}
+
+	auto comparefunc = searchcase == ESearchCase::IgnoreCase ? _strnicmp : strncmp;
+
+	while (token.length() <= length() && comparefunc(c_str(), token.data(), token.length()) == 0)
+	{
+		erase(0u, token.length());
+	}
+
+	while (token.length() <= length() && comparefunc(c_str() + (length() - token.length()), token.data(), token.length()) == 0)
+	{
+		erase(length() - token.length(), token.length());
+	}
+}
+
+string string::stripped(std::string_view token, ESearchCase searchcase) const
+{
+	string ret(*this);
+	ret.strip(token, searchcase);
+	return ret;
+}
+
 std::vector<string> string::splits(std::string_view token, ESearchCase searchcase) const
 {
 	std::vector<string> ret;
@@ -162,9 +190,14 @@ std::vector<string> string::splits(std::string_view token, ESearchCase searchcas
 	return ret;
 }
 
-std::wstring string::towide() const
+std::wstring string::to_wide() const
 {
-	return std::wstring(cbegin(), cend());
+	return PlatformMisc::Utf8ToWide(*this);
+}
+
+string string::from_wide(std::wstring_view str)
+{
+	return PlatformMisc::WideToUtf8(str);
 }
 
 bool string::compare(std::string_view other, ESearchCase searchcase) const

@@ -1,4 +1,5 @@
 #include "Core/SpdLogging.h"
+#include "Misc/Paths.h"
 #include <spdlog/sinks/msvc_sink.h>
 #include <spdlog/sinks/basic_file_sink.h>
 
@@ -10,7 +11,8 @@ SpdLogging::SpdLogging()
 	m_DebugSink->set_pattern(GetDebugPattern());
 	m_DebugSink->set_level(GetDefaultLevel());
 	
-	const string LogFileName = string::format("Logs\\{:%Y.%m.%d.%H.%M.%S}.log", std::chrono::system_clock::now());
+	const std::filesystem::path LogPath = Paths::LogPath();
+	const string LogFileName = string::format("{}\\{:%Y.%m.%d.%H.%M.%S}.log", LogPath.string(), std::chrono::system_clock::now());
 	m_FileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(LogFileName, true);
 	m_FileSink->set_pattern(GetFilePattern());
 	m_FileSink->set_level(spdlog::level::trace);

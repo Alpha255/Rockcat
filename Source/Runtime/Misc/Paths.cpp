@@ -1,12 +1,23 @@
 #include "Paths.h"
-#include "OS/OS.h"
+#include "Misc/PlatformMisc.h"
 
 const std::filesystem::path& Paths::RootPath()
 {
 	static std::filesystem::path Path;
 	if (Path.empty())
 	{
-		Path = OS::GetApplicationDirectory().parent_path();
+		Path = PlatformMisc::GetApplicationPath().parent_path().parent_path();
+	}
+
+	return Path;
+}
+
+const std::filesystem::path& Paths::LogPath()
+{
+	static std::filesystem::path Path;
+	if (Path.empty())
+	{
+		Path = PlatformMisc::GetApplicationPath().parent_path() / "Logs";
 	}
 
 	return Path;

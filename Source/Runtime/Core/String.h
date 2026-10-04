@@ -29,9 +29,13 @@ public:
 	bool ends_with(std::string_view postfix, ESearchCase searchcase = ESearchCase::CaseSensitive) const;
 	bool contains(std::string_view substr, ESearchCase searchcase = ESearchCase::CaseSensitive) const;
 
+	void strip(std::string_view token, ESearchCase searchcase = ESearchCase::CaseSensitive);
+	string stripped(std::string_view token, ESearchCase searchcase = ESearchCase::CaseSensitive) const;
+
 	std::vector<string> splits(std::string_view token, ESearchCase searchcase = ESearchCase::CaseSensitive) const;
 
-	std::wstring towide() const;
+	std::wstring to_wide() const;
+	static string from_wide(std::wstring_view str);
 
 	bool compare(std::string_view other, ESearchCase searchcase = ESearchCase::CaseSensitive) const;
 
@@ -43,5 +47,17 @@ public:
 		return std::format(fmt, std::forward<Args>(args)...);
 	}
 };
+
+namespace std
+{
+	template<>
+	struct hash<::string>
+	{
+		size_t operator()(const ::string& Value) const noexcept
+		{
+			return hash<std::string>{}(Value);
+		}
+	};
+}
 
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "OS/DynamicLinkLibrary.h"
+#include "Misc/PlatformMisc.h"
 #include "RHI/RHIResource.h"
 #include "RHI/Vulkan/VulkanExtensionDefines.h"
 #include "Services/SpdlogService.h"
@@ -212,7 +212,7 @@ VK_EXT_FUNC_TABLE_DECLAR
 
 #endif
 
-class VulkanLoader : public DynamicLinkLibrary
+class VulkanLoader : public PlatformMisc::SharedLibrary
 {
 public:
 	~VulkanLoader();
@@ -224,7 +224,7 @@ public:
 	void LoadExtFuncs(VkInstance Instance, VkDevice Device, bool SupportDebugMarker, bool SupportDebugUtils);
 protected:
 	VulkanLoader()
-		: DynamicLinkLibrary((std::string("vulkan-1") + DLL_EXTENSION).c_str())
+		: PlatformMisc::SharedLibrary("vulkan-1")
 	{
 	}
 private:

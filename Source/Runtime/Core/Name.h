@@ -13,6 +13,11 @@ public:
 	{
 	}
 
+	Name(std::string_view Value)
+		: m_ValueView(Value)
+	{
+	}
+
 	Name(const string& Value)
 		: m_Value(Value)
 		, m_ValueView(m_Value)
@@ -110,7 +115,7 @@ namespace std
 		size_t operator()(const Name& InName) const noexcept
 		{
 			auto lowercaseName = ::string(InName.Get()).lowercase();
-			return hash<std::string>::_Do_hash(lowercaseName);
+			return hash<std::string>{}(lowercaseName);
 		}
 	};
 }
