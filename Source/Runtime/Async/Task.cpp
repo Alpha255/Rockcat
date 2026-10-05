@@ -1,7 +1,9 @@
 #include "Async/Task.h"
 #include "Core/ConsoleVariable.h"
-#include "OS/OS.h"
+#include "Misc/PlatformMisc.h"
 #include "Core/SpdLogging.h"
+
+#include <barrier>
 
 DEFINE_LOGGER_CATEGORY(LogTaskFlow);
 
@@ -39,7 +41,7 @@ struct SetThreadPriorityScoped
 	{
 		if (!SkipPriorityChange)
 		{
-			OS::SetThreadPriority(std::this_thread::get_id(), Priority);
+			PlatformMisc::SetThreadPriority(std::this_thread::get_id(), Priority);
 		}
 	}
 
@@ -47,7 +49,7 @@ struct SetThreadPriorityScoped
 	{
 		if (!SkipPriorityChange)
 		{
-			OS::SetThreadPriority(std::this_thread::get_id(), TFTask::EPriority::Normal);
+			PlatformMisc::SetThreadPriority(std::this_thread::get_id(), TFTask::EPriority::Normal);
 		}
 	}
 
@@ -77,26 +79,27 @@ public:
 			}
 		}
 
-		if (CVarNumForegroundThreads.Get())
+		if (const uint32_t NumForegroundThreads = CVarNumForegroundThreads.Get())
 		{
-			auto Executor = GetExecutor(TFTask::EThread::WorkerThread, TFTask::EPriority::High);
-			assert(Executor);
-
-			tf::Taskflow Flow;
-			for (uint32_t Index = 0u; Index < CVarNumForegroundThreads.Get(); ++Index)
+			if (auto Executor = GetExecutor(TFTask::EThread::WorkerThread, TFTask::EPriority::High))
 			{
-				Flow.emplace([]() {
-					const std::thread::id ThreadID = std::this_thread::get_id();
+				// A thread runs one task at a time, so blocking all N here forces the priority change above onto N distinct workers.
+				std::barrier Barrier(static_cast<ptrdiff_t>(NumForegroundThreads));
 
-					OS::SetThreadPriority(ThreadID, TFTask::EPriority::High);
+				tf::Taskflow Flow;
+				for (uint32_t Index = 0u; Index < NumForegroundThreads; ++Index)
+				{
+					Flow.emplace([&Barrier]() {
+						PlatformMisc::SetThreadPriority(std::this_thread::get_id(), TFTask::EPriority::High);
+						Barrier.arrive_and_wait();
+					});
+				}
 
-					std::stringstream Stream;
-					Stream << ThreadID;
-					LOG_INFO(LogTaskFlow, "Set foreground thread {} high priority", std::stoul(Stream.str()));
-				});
+				Executor->run(Flow);
+				Executor->wait_for_all();
+
+				LOG_INFO(LogTaskFlow, "Set {} foreground thread(s) to high priority", NumForegroundThreads);
 			}
-			Executor->run(Flow);
-			Executor->wait_for_all();
 		}
 
 		const uint32_t NumSeperateThreads = CVarUseSeperateGameThread.Get() + CVarUseSeperateRenderThread.Get() + CVarNumForegroundThreads.Get();
@@ -116,23 +119,31 @@ public:
 				Executor.reset();
 			}
 		}
+
+		m_Executors.clear();
 	}
 
 	tf::Executor* GetExecutor(TFTask::EThread Thread, TFTask::EPriority Priority)
 	{
 		assert(Thread < TFTask::EThread::Num);
 
-		static Array<size_t, TFTask::EThread> s_ExecutorIndices {
+		static const Array<size_t, TFTask::EThread> s_ExecutorIndices {
 			static_cast<size_t>(TFTask::EThread::GameThread),
 			static_cast<size_t>(TFTask::EThread::RenderThread) - !CVarUseSeperateGameThread.Get(),
 			static_cast<size_t>(TFTask::EThread::WorkerThread) - !CVarUseSeperateGameThread.Get() - !CVarUseSeperateRenderThread.Get()
 		};
 
+		const size_t ThreadIndex = static_cast<size_t>(Thread);
+		assert(ThreadIndex < s_ExecutorIndices.size());
+
 		const bool IsHighPriority = (Priority > TFTask::EPriority::Normal) ||
 			(Thread == TFTask::EThread::GameThread && !CVarUseSeperateGameThread.Get()) ||
 			(Thread == TFTask::EThread::RenderThread && !CVarUseSeperateRenderThread.Get());
 
-		return m_Executors[s_ExecutorIndices[static_cast<size_t>(Thread)] + IsHighPriority].get();
+		const size_t ExecutorIndex = s_ExecutorIndices[ThreadIndex] + (IsHighPriority ? 1u : 0u);
+		assert(ExecutorIndex < m_Executors.size());
+
+		return m_Executors[ExecutorIndex].get();
 	}
 private:
 	std::vector<std::unique_ptr<tf::Executor>> m_Executors;
@@ -153,7 +164,7 @@ void TFTask::Finalize()
 
 void TFTask::InitializeThreadTags()
 {
-	t_ThreadTag = TFTask::EThread::MainThread;
+	t_ThreadTag = TFTask::EThread::WorkerThread;
 
 	if (CVarUseSeperateGameThread.Get())
 	{
@@ -182,26 +193,14 @@ TFTaskEventPtr TFTask::DispatchTaskFlow(tf::Taskflow&& Flow, EThread Thread, EPr
 
 uint32_t TFTask::GetNumWorkerThreads()
 {
-	static uint32_t s_NumWorkerThreads = 0u;
+	const uint32_t NumTotalThreads = PlatformMisc::GetNumHardwareConcurrencyThreads(CVarUseHyperThreading.Get());
 
-	if (!s_NumWorkerThreads)
-	{
-		uint32_t NumSeperateThreads = 0u;
-		auto NumTotalThreads = OS::GetHardwareConcurrencyThreadsCount(CVarUseHyperThreading.Get());
+	uint32_t NumSeperateThreads = 0u;
+	NumSeperateThreads += CVarUseSeperateGameThread.Get() ? 1u : 0u;
+	NumSeperateThreads += CVarUseSeperateRenderThread.Get() ? 1u : 0u;
+	NumSeperateThreads += CVarNumForegroundThreads.Get();
 
-		NumSeperateThreads += CVarUseSeperateGameThread.Get() ? 1u : 0u;
-		NumSeperateThreads += CVarUseSeperateRenderThread.Get() ? 1u : 0u;
-		NumSeperateThreads -= CVarNumForegroundThreads.Get();
-
-		s_NumWorkerThreads = static_cast<uint32_t>(NumTotalThreads - NumSeperateThreads);
-	}
-
-	return s_NumWorkerThreads;
-}
-
-bool TFTask::IsMainThread()
-{
-	return t_ThreadTag == EThread::MainThread;
+	return NumTotalThreads > NumSeperateThreads ? NumTotalThreads - NumSeperateThreads : 0u;
 }
 
 bool TFTask::IsGameThread()
@@ -223,19 +222,14 @@ void TFTask::AddPrerequisite(TFTask& Prerequisite)
 {
 	assert(IsSameExecutor(*this, Prerequisite) || !IsDispatched());
 
-	Prerequisite.AddSubsequents(*this);
+	std::scoped_lock Locker(m_Lock, Prerequisite.m_Lock);
 
-	std::lock_guard<std::mutex> Locker(m_Lock);
 	m_Prerequisites.insert(&Prerequisite);
-}
 
-void TFTask::AddSubsequents(TFTask& Subsequent)
-{
-	if (!IsSameExecutor(*this, Subsequent))
+	if (!IsSameExecutor(*this, Prerequisite))
 	{
-		std::lock_guard<std::mutex> Locker(m_Lock);
-		m_Subsequents.insert(&Subsequent);
-		Subsequent.AddRef();
+		Prerequisite.m_Subsequents.insert(this);
+		AddRef();
 	}
 }
 
@@ -249,10 +243,16 @@ void TFTask::Execute()
 
 void TFTask::TriggerSubsequents()
 {
-	std::lock_guard<std::mutex> Locker(m_Lock);
-	for (auto Subsequent : m_Subsequents)
+	std::vector<TFTask*> Subsequents;
+
 	{
-		if (Subsequent->ReleaseRef())
+		std::lock_guard<std::mutex> Locker(m_Lock);
+		Subsequents.assign(m_Subsequents.begin(), m_Subsequents.end());
+	}
+
+	for (auto Subsequent : Subsequents)
+	{
+		if (Subsequent && Subsequent->ReleaseRef())
 		{
 			Subsequent->Trigger();
 		}
@@ -261,52 +261,131 @@ void TFTask::TriggerSubsequents()
 
 bool TFTask::Restart()
 {
-	/// #TODO: Thread safe
-	if (IsDispatched() && IsCompleted())
-	{
-		SetCanceled(false);
-		m_TFAsyncTask.reset();
-
-		return Trigger();
-	}
-
-	return false;
-}
-
-bool TFTask::Trigger()
-{
-	/// #TODO: Thread safe
-	if (IsCanceled() || IsDispatched() || HasAnyRef())
+	if (!IsDispatched() || !IsCompleted())
 	{
 		return false;
 	}
 
-	if (auto Executor = TFExecutorManager::Get().GetExecutor(m_Thread, m_Priority))
 	{
-		std::vector<tf::AsyncTask> PrerequisiteTasks;
-		PrerequisiteTasks.reserve(m_Prerequisites.size());
-
-		for (auto Prerequisite : m_Prerequisites)
-		{
-			if (Prerequisite && Prerequisite->Trigger())
-			{
-				if (auto LowLevelTask = Prerequisite->GetAsyncTask())
-				{
-					PrerequisiteTasks.emplace_back(tf::AsyncTask(*LowLevelTask));
-				}
-			}
-		}
-
-		m_TFAsyncTask = std::make_shared<TFAsyncTask>(std::move(Executor->dependent_async([this]() {
-			//ThreadPriorityScope ScopedTaskPriority(m_Priority);
-			Execute();
-			TriggerSubsequents();
-		}, PrerequisiteTasks.begin(), PrerequisiteTasks.end())));
-
-		return true;
+		std::lock_guard<std::mutex> Locker(m_Lock);
+		m_AsyncTask.reset();
+		m_Future.reset();
 	}
 
-	return false;
+	SetCanceled(false);
+	m_Completed.store(false, std::memory_order_release);
+	m_Dispatched.store(false, std::memory_order_release);
+
+	return Trigger();
+}
+
+bool TFTask::Trigger()
+{
+	bool Expected = false;
+	if (!m_Dispatched.compare_exchange_strong(Expected, true, std::memory_order_acq_rel, std::memory_order_acquire))
+	{
+		return false;
+	}
+
+	if (IsCanceled() || HasAnyRef())
+	{
+		m_Dispatched.store(false, std::memory_order_release);
+		return false;
+	}
+
+	auto Executor = TFExecutorManager::Get().GetExecutor(m_Thread, m_Priority);
+	if (!Executor)
+	{
+		m_Dispatched.store(false, std::memory_order_release);
+		return false;
+	}
+
+	std::vector<TFTask*> Prerequisites;
+	{
+		std::lock_guard<std::mutex> Locker(m_Lock);
+		Prerequisites.assign(m_Prerequisites.begin(), m_Prerequisites.end());
+	}
+
+	std::vector<tf::AsyncTask> PrerequisiteTasks;
+	PrerequisiteTasks.reserve(Prerequisites.size());
+
+	for (auto Prerequisite : Prerequisites)
+	{
+		if (!Prerequisite)
+		{
+			continue;
+		}
+
+		Prerequisite->Trigger();
+
+		const tf::AsyncTask PrerequisiteTask = Prerequisite->GetAsyncTask();
+		if (!PrerequisiteTask.empty())
+		{
+			PrerequisiteTasks.emplace_back(PrerequisiteTask);
+		}
+	}
+
+	std::pair<tf::AsyncTask, std::future<void>> Result = Executor->dependent_async([this]() {
+		Execute();
+		TriggerSubsequents();
+		m_Completed.store(true, std::memory_order_release);
+	}, PrerequisiteTasks.begin(), PrerequisiteTasks.end());
+
+	{
+		std::lock_guard<std::mutex> Locker(m_Lock);
+		m_AsyncTask = std::move(Result.first);
+		m_Future = std::make_shared<std::future<void>>(std::move(Result.second));
+	}
+
+	return true;
+}
+
+bool TFTask::Wait()
+{
+	std::shared_ptr<std::future<void>> Future;
+	{
+		std::lock_guard<std::mutex> Locker(m_Lock);
+		Future = m_Future;
+	}
+
+	if (!Future)
+	{
+		return false;
+	}
+
+	if (!Future->valid())
+	{
+		return m_Completed.load(std::memory_order_acquire);
+	}
+
+	Future->get();
+	return true;
+}
+
+bool TFTask::WaitForSeconds(size_t Seconds)
+{
+	return WaitForMilliseconds(Seconds * 1000u);
+}
+
+bool TFTask::WaitForMilliseconds(size_t Milliseconds)
+{
+	std::shared_ptr<std::future<void>> Future;
+	{
+		std::lock_guard<std::mutex> Locker(m_Lock);
+		Future = m_Future;
+	}
+
+	if (!Future)
+	{
+		return false;
+	}
+
+	if (!Future->valid())
+	{
+		return m_Completed.load(std::memory_order_acquire);
+	}
+
+	return Future->wait_for(std::chrono::milliseconds(Milliseconds)) == std::future_status::ready;
 }
 
 bool TFTask::TryCancel()
@@ -325,7 +404,19 @@ TFTask::~TFTask()
 	if (IsDispatched() && !IsCompleted())
 	{
 		LOG_WARNING(LogTaskFlow, "Unexpected wait by task: {}", GetName().Get());
-		Wait();
+
+		try
+		{
+			Wait();
+		}
+		catch (const std::exception& Exception)
+		{
+			LOG_ERROR(LogTaskFlow, "Task \"{}\" threw an exception: {}", GetName().Get(), Exception.what());
+		}
+		catch (...)
+		{
+			LOG_ERROR(LogTaskFlow, "Task \"{}\" threw an unknown exception.", GetName().Get());
+		}
 	}
 }
 

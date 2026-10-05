@@ -1,7 +1,7 @@
-#include "Services/AssetDatabase.h"
-#include "Core/SpdLogger.h"
-#include "Asset/AssetLoaders/TextureLoader.h"
-#include "Asset/AssetLoaders/AssimpSceneLoader.h"
+#include "Asset/AssetDatabase.h"
+#include "Core/SpdLogging.h"
+#include "Asset/AssetImporters/TextureLoader.h"
+#include "Asset/AssetImporters/AssimpSceneLoader.h"
 #include "Async/Task.h"
 
 void AssetDatabase::Initialize()
@@ -69,7 +69,7 @@ void AssetDatabase::ProcessAssetLoadRequest(AssetLoadRequest& Request)
 		{
 			Request.Target = Loader->CreateAsset(UnifiedPath);
 
-			auto Task = std::make_shared<TFTask>(String::Format("LoadAsset:%s", UnifiedPath.filename().string().c_str()),
+			auto Task = std::make_shared<TFTask>(string::format("LoadAsset:{}", UnifiedPath.filename().string()),
 				[Loader, &Request, this]()
 				{
 					LoadAssetFunc(*Loader, Request);

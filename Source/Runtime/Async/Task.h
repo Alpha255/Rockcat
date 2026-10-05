@@ -3,7 +3,7 @@
 #include "Core/Name.h"
 
 #pragma warning(push)
-#pragma warning(disable:4456 4244 4127 4267 4324)
+#pragma warning(disable:4324)
 #include <taskflow/utility/traits.hpp>
 #include <taskflow/taskflow.hpp>
 #include <taskflow/core/task.hpp>
@@ -49,7 +49,6 @@ public:
 	}
 private:
 	std::future<void> m_Future;
-	std::weak_ptr<class TFTask> m_Task;
 };
 using TFTaskEventPtr = std::shared_ptr<TFTaskEvent>;
 
@@ -61,8 +60,7 @@ public:
 		GameThread,
 		RenderThread,
 		WorkerThread,
-		Num,
-		MainThread
+		Num
 	};
 
 	enum class EPriority : uint8_t
@@ -97,18 +95,17 @@ public:
 	{
 	}
 
-	TFTask(TFTask&& Other) noexcept
-		: m_Thread(Other.m_Thread)
-		, m_Priority(Other.m_Priority)
-		, m_Name(std::move(Other.m_Name))
-		, m_TaskFunc(std::move(Other.m_TaskFunc))
+	TFTask(TFTask&& Other) noexcept = delete;
+
+	virtual ~TFTask();
+
+	inline bool IsCompleted() const
 	{
+		return !m_Dispatched.load(std::memory_order_acquire) || m_Completed.load(std::memory_order_acquire);
 	}
 
-	~TFTask();
+	inline bool IsDispatched() const { return m_Dispatched.load(std::memory_order_acquire); }
 
-	inline bool IsCompleted() const { return m_TFAsyncTask ? m_TFAsyncTask->first.is_done() : false; }
-	inline bool IsDispatched() const { return m_TFAsyncTask ? true : false; }
 	inline bool IsCanceled() const { return m_Canceled.load(std::memory_order_acquire); }
 
 	inline const Name& GetName() const { return m_Name; }
@@ -119,41 +116,15 @@ public:
 
 	bool Restart();
 
-	inline bool Wait() 
-	{
-		if (m_TFAsyncTask)
-		{
-			m_TFAsyncTask->second.get();
-			return true;
-		}
+	bool Wait();
 
-		return false;
-	}
+	bool WaitForSeconds(size_t Seconds);
 
-	inline bool WaitForSeconds(size_t Seconds) 
-	{
-		if (m_TFAsyncTask)
-		{
-			return m_TFAsyncTask->second.wait_for(std::chrono::seconds(Seconds)) == std::future_status::ready;
-		}
-
-		return false;
-	}
-
-	inline bool WaitForMilliseconds(size_t Milliseconds)
-	{
-		if (m_TFAsyncTask)
-		{
-			return m_TFAsyncTask->second.wait_for(std::chrono::milliseconds(Milliseconds)) == std::future_status::ready;
-		}
-
-		return false;
-	}
+	bool WaitForMilliseconds(size_t Milliseconds);
 
 	static void Initialize();
 	static void Finalize();
 
-	static bool IsMainThread();
 	static bool IsGameThread();
 	static bool IsRenderThread();
 	static bool IsWorkerThread();
@@ -187,7 +158,7 @@ public:
 		assert(Thread < EThread::Num);
 
 		tf::Taskflow TFTaskFlow;
-		TFTaskFlow.for_each(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<LAMBDA>(Lambda));
+		TFTaskFlow.for_each(Begin, End, std::forward<LAMBDA>(Lambda));
 		return DispatchTaskFlow(std::move(TFTaskFlow), Thread, Priority);
 	}
 
@@ -197,7 +168,7 @@ public:
 		assert(Thread < EThread::Num);
 
 		tf::Taskflow TFTaskFlow;
-		TFTaskFlow.sort(std::forward<Iterator>(Begin), std::forward<Iterator>(End), std::forward<LAMBDA>(Lambda));
+		TFTaskFlow.sort(Begin, End, std::forward<LAMBDA>(Lambda));
 		return DispatchTaskFlow(std::move(TFTaskFlow), Thread, Priority);
 	}
 protected:
@@ -205,13 +176,15 @@ protected:
 
 	static TFTaskEventPtr DispatchTaskFlow(tf::Taskflow&&, EThread Thread, EPriority Priority);
 
-	void AddSubsequents(TFTask& Subsequent);
-
 	void TriggerSubsequents();
 
 	bool TryCancel();
 
-	inline tf::AsyncTask* GetAsyncTask() { return &m_TFAsyncTask->first; }
+	inline tf::AsyncTask GetAsyncTask() const
+	{
+		std::lock_guard<std::mutex> Locker(m_Lock);
+		return m_AsyncTask;
+	}
 
 	inline void SetCanceled(bool Canceled) { m_Canceled.store(Canceled, std::memory_order_release); }
 
@@ -223,12 +196,20 @@ protected:
 	inline void AddRef() { m_NumRef.fetch_add(1u, std::memory_order_relaxed); }
 	inline bool ReleaseRef()
 	{
-		assert(m_NumRef.load(std::memory_order_acquire) > 0u);
-		return m_NumRef.fetch_sub(1u, std::memory_order_acq_rel) == 1u;
+		uint32_t Current = m_NumRef.load(std::memory_order_acquire);
+
+		while (Current > 0u)
+		{
+			if (m_NumRef.compare_exchange_weak(Current, Current - 1u, std::memory_order_acq_rel, std::memory_order_acquire))
+			{
+				return Current == 1u;
+			}
+		}
+
+		assert(false);
+		return false;
 	}
 private:
-	using TFAsyncTask = std::pair<tf::AsyncTask, std::future<void>>;
-
 	EThread m_Thread = EThread::WorkerThread;
 	EPriority m_Priority = EPriority::Normal;
 
@@ -237,12 +218,15 @@ private:
 	std::unordered_set<TFTask*> m_Prerequisites;
 	std::unordered_set<TFTask*> m_Subsequents;
 
-	std::mutex m_Lock;
-	std::atomic<bool> m_Canceled;
+	mutable std::mutex m_Lock;
+	std::atomic<bool> m_Canceled{ false };
+	std::atomic<bool> m_Dispatched{ false };
+	std::atomic<bool> m_Completed{ false };
 
 	std::atomic<uint32_t> m_NumRef{ 0u };
 
 	std::function<void()> m_TaskFunc;
 
-	std::shared_ptr<TFAsyncTask> m_TFAsyncTask;
+	tf::AsyncTask m_AsyncTask;
+	std::shared_ptr<std::future<void>> m_Future;
 };

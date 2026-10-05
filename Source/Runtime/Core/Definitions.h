@@ -282,22 +282,6 @@ inline T& Cast(Any& Ref) { return static_cast<T&>(Ref); }
 template<class T, class Any>
 inline const T& Cast(const Any& Ref) { return static_cast<const T&>(Ref); }
 
-template<class T>
-struct Hasher
-{
-	size_t Hash = 0u;
-
-	inline bool operator==(const Hasher& Other) const { return Other.Hash == Hash; }
-	inline bool operator!=(const Hasher& Other) const { return Other.Hash != Hash; }
-
-	Hasher() = default;
-
-	Hasher(const T& Object)
-		: Hash(std::hash<T>()(Object))
-	{
-	}
-};
-
 template<class T, class Enum>
 class Array : public std::array<T, static_cast<size_t>(Enum::Num)>
 {

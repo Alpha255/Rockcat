@@ -1,7 +1,7 @@
 #include "Asset/Asset.h"
-#include "Services/AssetDatabase.h"
+#include "Asset/AssetDatabase.h"
 
-DEFINE_LOG_CATEGORY(LogAsset);
+DEFINE_LOGGER_CATEGORY(LogAsset);
 
 std::shared_ptr<DataBlock> Asset::LoadData(bool IsBinary) const
 {
@@ -12,6 +12,7 @@ std::shared_ptr<DataBlock> Asset::LoadData(bool IsBinary) const
 
 	auto Block = std::make_shared<DataBlock>(std::filesystem::file_size(GetPath()));
 	std::ifstream FileStream(GetPath(), IsBinary ? std::ios::in | std::ios::binary : std::ios::in);
+	assert(FileStream.is_open());
 	FileStream.read(reinterpret_cast<char*>(Block->Data.get()), Block->Size);
 	FileStream.close();
 

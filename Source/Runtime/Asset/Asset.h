@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Asset/File.h"
-#include "Services/SpdlogService.h"
+#include "Core/Spdlogging.h"
 
 struct DataBlock
 {
@@ -76,7 +76,7 @@ public:
 
 	using File::File;
 
-	inline bool IsReady(std::memory_order Order = std::memory_order_relaxed) const { return GetStatus(Order) == EStatus::Ready; }
+	inline bool IsReady(std::memory_order Order = std::memory_order_acquire) const { return GetStatus(Order) == EStatus::Ready; }
 	inline bool IsLoading() const { return GetStatus() == EStatus::Loading; }
 
 	std::shared_ptr<DataBlock> LoadData(bool IsBinary = true) const;
@@ -92,7 +92,7 @@ protected:
 	friend class AssetLoader;
 	friend struct AssetLoadRequest;
 
-	inline EStatus GetStatus(std::memory_order Order = std::memory_order_relaxed) const { return m_Status.load(Order); }
+	inline EStatus GetStatus(std::memory_order Order = std::memory_order_acquire) const { return m_Status.load(Order); }
 	inline void SetStatus(EStatus Status) { m_Status.store(Status, std::memory_order_release); }
 
 	std::atomic<EStatus> m_Status{ EStatus::None };
@@ -102,7 +102,7 @@ struct AssetLoadRequest
 {
 	using AssetLoadCallback = std::function<void(Asset&)>;
 
-	std::string Path;
+	string Path;
 	bool ForceReload = false;
 	bool Async = true;
 	std::shared_ptr<Asset> Target;
@@ -155,4 +155,4 @@ private:
 };
 
 
-DECLARE_LOG_CATEGOTY(LogAsset);
+DECLARE_LOGGER_CATEGORY(LogAsset);

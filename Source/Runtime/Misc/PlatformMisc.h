@@ -22,7 +22,7 @@ namespace PlatformMisc
 
 	Math::Vector2 GetCursorPosition();
 
-	size_t GetNumHardwareConcurrencyThreads(bool UseHyperThreading);
+	uint32_t GetNumHardwareConcurrencyThreads(bool UseHyperThreading);
 
 	void SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Priority);
 

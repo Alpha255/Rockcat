@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Core/Module.h"
-#include "Core/StringUtils.h"
+#include "Core/Singleton.h"
+#include "Core/String.h"
 #include "Asset/Asset.h"
 
-class AssetDatabase : public IService<AssetDatabase>
+class AssetDatabase : public Singleton<AssetDatabase>
 {
 public:
-	void Initialize() override final;
-	void Finalize() override final;
+	void Initialize();
+	void Finalize();
 
 	inline void RequestLoad(AssetLoadRequest& Request)
 	{
@@ -38,14 +38,13 @@ private:
 		std::shared_ptr<Asset> Target;
 	};
 
-	inline static std::filesystem::path GetUnifiedAssetPath(const std::string& Path, bool Lowercase = false)
+	inline static std::filesystem::path GetUnifiedAssetPath(const string& Path, bool Lowercase = false)
 	{
-		auto UnifiedPath = Lowercase ? std::filesystem::path(std::move(String::Lowercase(Path))) : std::filesystem::path(Path);
-		UnifiedPath.make_preferred();
-		return UnifiedPath;
+		std::string UnifiedPath = Lowercase ? Path.lowercase() : Path;
+		return std::filesystem::path(UnifiedPath).make_preferred();
 	}
 
-	AssetLoader* FindAssetLoader(const std::string& Extension);
+	AssetLoader* FindAssetLoader(const string& Extension);
 
 	void CreateAssetLoaders();
 

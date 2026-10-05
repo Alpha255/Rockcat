@@ -202,12 +202,12 @@ namespace PlatformMisc
 		return Math::Vector2(static_cast<float>(Pos.x), static_cast<float>(Pos.y));
 	}
 
-	size_t GetNumHardwareConcurrencyThreads(bool UseHyperThreading)
+	uint32_t GetNumHardwareConcurrencyThreads(bool UseHyperThreading)
 	{
 		std::unique_ptr<uint8_t[]> Buffer;
 		::DWORD BufferSize = 0;
-		size_t PhysicalCoreCount = 0u;
-		size_t LogicalCoreCount = 0u;
+		uint32_t PhysicalCoreCount = 0u;
+		uint32_t LogicalCoreCount = 0u;
 
 		if (!::GetLogicalProcessorInformationEx(::LOGICAL_PROCESSOR_RELATIONSHIP::RelationAll, reinterpret_cast<::PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX>(Buffer.get()), &BufferSize) &&
 			::GetLastError() == ERROR_INSUFFICIENT_BUFFER)
@@ -234,7 +234,7 @@ namespace PlatformMisc
 
 						for (uint32_t Index = 0u; Index < ProcessorInfo->Processor.GroupCount; ++Index)
 						{
-							LogicalCoreCount += std::bitset<sizeof(::KAFFINITY) * CHAR_BIT>(ProcessorInfo->Processor.GroupMask[Index].Mask).count();
+							LogicalCoreCount += static_cast<uint32_t>(std::bitset<sizeof(::KAFFINITY) * CHAR_BIT>(ProcessorInfo->Processor.GroupMask[Index].Mask).count());
 						}
 					}
 
@@ -245,7 +245,7 @@ namespace PlatformMisc
 
 		if (PhysicalCoreCount == 0u && LogicalCoreCount == 0u)
 		{
-			const size_t Fallback = std::thread::hardware_concurrency();
+			const uint32_t Fallback = std::thread::hardware_concurrency();
 			return Fallback > 0u ? Fallback : 1u;
 		}
 

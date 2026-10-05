@@ -161,7 +161,7 @@ namespace PlatformMisc
 		return Math::Vector2(0.0f, 0.0f);
 	}
 
-	size_t GetNumHardwareConcurrencyThreads(bool UseHyperThreading)
+	uint32_t GetNumHardwareConcurrencyThreads(bool UseHyperThreading)
 	{
 		const size_t LogicalCoreCount = std::thread::hardware_concurrency();
 
@@ -173,7 +173,7 @@ namespace PlatformMisc
 		std::ifstream CpuInfo("/proc/cpuinfo");
 		if (!CpuInfo)
 		{
-			return LogicalCoreCount;
+			return static_cast<uint32_t>(LogicalCoreCount);
 		}
 
 		std::set<std::pair<int32_t, int32_t>> Cores;
@@ -218,7 +218,7 @@ namespace PlatformMisc
 			Cores.emplace(PhysicalID, CoreID);
 		}
 
-		return Cores.empty() ? LogicalCoreCount : Cores.size();
+		return Cores.empty() ? static_cast<uint32_t>(LogicalCoreCount) : static_cast<uint32_t>(Cores.size());
 	}
 
 	void SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Priority)
