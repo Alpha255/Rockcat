@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Name.h"
-#include "RHI/RHIFormat.h"
+#include "Rendering/RHI/RHIFormat.h"
 #include <d3d11.h>
 
 enum ERHILimitations : uint8_t
@@ -194,18 +194,18 @@ public:
 	RHIResource() = default;
 	virtual ~RHIResource() = default;
 
-	RHIResource(const FName& DebugName)
+	RHIResource(const Name& DebugName)
 		: m_DebugName(DebugName)
 	{
 	}
 
-	RHIResource(FName&& DebugName)
+	RHIResource(Name&& DebugName)
 		: m_DebugName(std::move(DebugName))
 	{
 	}
 
-	virtual void SetDebugName(FName&& DebugName) { m_DebugName = std::move(DebugName); }
-	inline const FName& GetDebugName() const { return m_DebugName; }
+	virtual void SetDebugName(Name&& DebugName) { m_DebugName = std::move(DebugName); }
+	inline const Name& GetDebugName() const { return m_DebugName; }
 private:
-	FName m_DebugName;
+	Name m_DebugName;
 };

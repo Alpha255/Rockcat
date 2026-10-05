@@ -219,3 +219,18 @@ class SkinnedMeshBuffers : public PrimitiveBuffers
 class SkinnedMesh : public StaticMesh
 {
 };
+
+class MeshAsset
+{
+
+};
+
+class StaticMeshAsset
+{
+
+};
+
+class SkinnedMeshAsset
+{
+
+};

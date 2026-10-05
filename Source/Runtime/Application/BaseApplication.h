@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Core/Tickable.h"
-#include "OS/MessageHandler.h"
+#include "Misc/MessageHandler.h"
 
 class BaseApplication : public NoneCopyable
 {

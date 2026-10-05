@@ -2,14 +2,13 @@
 
 #include "Core/Cereal.h"
 #include "Asset/Asset.h"
-#include "Core/SpdLogger.h"
 
 template<class T>
-class Serializable : public Asset
+class JsonAsset : public Asset
 {
 public:
 	using Asset::Asset;
-	using BaseClass = Serializable<T>;
+	using BaseClass = JsonAsset<T>;
 
 	template<class Type = T, class... Args>
 	static std::shared_ptr<Type> Load(Args&&... InArgs)
@@ -35,7 +34,6 @@ public:
 		}
 		else
 		{
-			//LOG_TRACE("Create serializable asset: \"{}\".", GetPath().string());
 			Save<Type>(true);
 		}
 
@@ -73,18 +71,12 @@ public:
 					cereal::make_nvp(typeid(Type).name(), *static_cast<Type*>(this))
 				);
 			}
-			else
-			{
-				//LOG_ERROR("Failed to save serializable asset: \"{}\", {}", SavePath.string());
-			}
 
 			FileStream.close();
 
 			File::SetLastWriteTime(SavePath, SerializeTimepoint);
 		}
 	}
-
-	static const char* GetExtension() { return ".json"; }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -98,5 +90,7 @@ protected:
 	virtual void OnPreLoad() { SetStatus(EStatus::Loading); }
 
 	virtual void OnPostLoad() { SetStatus(EStatus::Ready); }
+private:
+	static const char* GetExtension() { return ".json"; }
 };
 

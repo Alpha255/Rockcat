@@ -1,7 +1,6 @@
 #pragma once
 
-#include "RHI/RHIResource.h"
-#include "Asset/Asset.h"
+#include "Rendering/RHI/RHIResource.h"
 
 enum class ERHITextureDimension : uint8_t
 {
@@ -65,7 +64,7 @@ struct RHITextureDesc
 
 	std::shared_ptr<DataBlock> BulkData;
 
-	FName Name;
+	Name DebugName;
 
 	inline RHITextureDesc& SetWidth(uint32_t Value) { Width = Value; return *this; }
 	inline RHITextureDesc& SetHeight(uint32_t Value) { Height = Value; return *this; }
@@ -81,7 +80,7 @@ struct RHITextureDesc
 	inline RHITextureDesc& SetBulkData(std::shared_ptr<DataBlock>& Data) { BulkData = Data; return *this; }
 	inline RHITextureDesc& SetBulkData(std::shared_ptr<DataBlock>&& Data) { BulkData = std::move(Data); return *this; }
 	inline RHITextureDesc& SetBulkData(size_t Size, const void* RawData = nullptr, size_t Offset = 0u) { BulkData = std::make_shared<DataBlock>(Size, RawData, Offset); return *this; }
-	inline RHITextureDesc& SetName(FName&& InName) { Name = std::move(InName); return *this; }
+	inline RHITextureDesc& SetName(Name&& InName) { DebugName = std::move(InName); return *this; }
 
 	static RHITextureDesc Create1D(uint32_t Width, ERHIFormat Format, ERHIBufferUsageFlags Flags, uint16_t NumMipLevel = 1u, ERHISampleCount NumSamples = ERHISampleCount::Sample_1_Bit)
 	{
@@ -186,7 +185,7 @@ public:
 		, m_Dimension(Desc.Dimension)
 		, m_Format(Desc.Format)
 		, m_State(Desc.PermanentState)
-		, RHIResource(Desc.Name)
+		, RHIResource(Desc.DebugName)
 	{
 	}
 
@@ -260,7 +259,7 @@ struct RHISamplerDesc
 	float MinLOD = 0.0f;
 	float MaxLOD = 0.0f;
 
-	FName Name;
+	Name DebugName;
 	
 	inline RHISamplerDesc& SetMinMagFilter(ERHIFilter Filter) { MinMagFilter = Filter; return *this; }
 	inline RHISamplerDesc& SetMipmapMode(ERHIFilter Mode) { MipmapMode = Mode; return *this; }
@@ -274,14 +273,14 @@ struct RHISamplerDesc
 	inline RHISamplerDesc& SetMipLODBias(float MipLODBiasValue) { MipLODBias = MipLODBiasValue; return *this; }
 	inline RHISamplerDesc& SetMinLOD(float MinLODValue) { MinLOD = MinLODValue; return *this; }
 	inline RHISamplerDesc& SetMaxLOD(float MaxLODValue) { MaxLOD = MaxLODValue; return *this; }
-	inline RHISamplerDesc& SetName(FName&& InName) { Name = std::move(InName); return *this; }
+	inline RHISamplerDesc& SetName(Name&& InName) { DebugName = std::move(InName); return *this; }
 };
 
 class RHISampler : public RHIResource
 {
 public:
 	RHISampler(const RHISamplerDesc& Desc)
-		: RHIResource(Desc.Name)
+		: RHIResource(Desc.DebugName)
 	{
 	}
 };

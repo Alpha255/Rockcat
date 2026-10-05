@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Runtime/Application/BaseApplication.h"
+#include "Application/BaseApplication.h"
 
 #if PLATFORM_WIN32
 
