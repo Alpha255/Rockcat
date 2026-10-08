@@ -3,22 +3,6 @@
 
 DEFINE_LOGGER_CATEGORY(LogAsset);
 
-std::shared_ptr<DataBlock> Asset::LoadData(bool IsBinary) const
-{
-	if (!std::filesystem::exists(GetPath()))
-	{
-		return nullptr;
-	}
-
-	auto Block = std::make_shared<DataBlock>(std::filesystem::file_size(GetPath()));
-	std::ifstream FileStream(GetPath(), IsBinary ? std::ios::in | std::ios::binary : std::ios::in);
-	assert(FileStream.is_open());
-	FileStream.read(reinterpret_cast<char*>(Block->Data.get()), Block->Size);
-	FileStream.close();
-
-	return Block;
-}
-
 bool AssetLoadRequest::Cancel()
 {
 	return AssetDatabase::Get().CancelLoad(*this);

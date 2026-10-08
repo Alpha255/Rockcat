@@ -36,6 +36,15 @@ public:
 		return m_LastWriteTime;
 	}
 
+	inline std::shared_ptr<DataBlock> ReadTextData() const
+	{
+		return ReadData(std::ios_base::in);
+	}
+	inline std::shared_ptr<DataBlock> ReadBinaryData() const
+	{
+		return ReadData(std::ios_base::in | std::ios_base::binary);
+	}
+
 	virtual bool IsDirty() const
 	{
 		std::time_t LastWriteTime = m_LastWriteTime;
@@ -111,6 +120,22 @@ protected:
 		{
 			m_LastWriteTime = std::chrono::system_clock::to_time_t(Timepoint);
 		}
+	}
+
+	std::shared_ptr<DataBlock> ReadData(std::ios_base::openmode Mode) const
+	{
+		if (!std::filesystem::exists(GetPath()))
+		{
+			return nullptr;
+		}
+
+		auto Block = std::make_shared<DataBlock>(std::filesystem::file_size(GetPath()));
+		std::ifstream FileStream(GetPath(), Mode);
+		assert(FileStream.is_open());
+		FileStream.read(reinterpret_cast<char*>(Block->Data.get()), Block->Size);
+		FileStream.close();
+
+		return Block;
 	}
 private:
 	std::filesystem::path m_Path; /// Notice the order of the members

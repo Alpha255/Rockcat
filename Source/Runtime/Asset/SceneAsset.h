@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Asset/Asset.h"
+#include "Asset/JsonAsset.h"
 
-class SceneAsset : public Asset
+class SceneAsset : public JsonAsset<SceneAsset>
 {
 public:
 	using Asset::Asset;

@@ -2,7 +2,7 @@
 
 #include "Core/Singleton.h"
 #include "Core/String.h"
-#include "Asset/Asset.h"
+#include "Asset/AssetMetaData.h"
 
 class AssetDatabase : public Singleton<AssetDatabase>
 {
@@ -58,3 +58,9 @@ private:
 	std::mutex m_Lock;
 };
 
+class AssetDatabase2 : public Singleton<AssetDatabase>
+{
+public:
+	bool HasAsset(std::string_view AssetPath) const;
+	
+};

@@ -209,3 +209,14 @@ public:
 private:
 	Name m_DebugName;
 };
+
+class RHIRenderResource
+{
+public:
+	RHIRenderResource() = default;
+	virtual ~RHIRenderResource() = default;
+
+protected:
+	virtual void InitRHI(class RHICommandlist& Commandlist) = 0;
+	virtual void ReleaseRHI() = 0;
+};
