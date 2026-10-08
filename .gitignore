@@ -2,7 +2,6 @@
 *.tlog
 *.log
 *.sdf
-*.exe
 *.link
 *.ilk
 *.user
@@ -49,3 +48,4 @@ build3
 build4
 Out/Intermediate
 Out/*.json
+Out/*.exe

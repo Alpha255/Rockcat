@@ -22,7 +22,7 @@ def PreMakeAssimp():
 
 def PreMake():
 	print('Build: Premake...')
-	ExecCommand(os.path.join(os.getcwd(), 'premake-5.0.0-beta8-windows\\premake5 ') + '--scripts=' + os.path.join(os.getcwd() + 'premake.lua vs2026'))
+	ExecCommand(os.path.join(os.getcwd(), 'premake-5.0.0-windows\\premake5 ') + '--scripts=' + os.path.join(os.getcwd() + 'premake.lua vs2026'))
 
 if __name__ == "__main__":
 	PreMakeAssimp()
