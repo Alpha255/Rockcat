@@ -1,0 +1,2058 @@
+From 36623fd68d5a39e92dbefd3e08cad01149b5a6d5 Mon Sep 17 00:00:00 2001
+From: xiaoma <xiaoma@cd-ophiuchus.com>
+Date: Sat, 10 Oct 2026 18:43:13 +0800
+Subject: [PATCH] * Optimize file structure, VulkanRHI compile able (WIP)
+
+---
+ Source/Applications/RenderTest/RenderTest.cpp |   2 +-
+ Source/RHI/Vulkan/VulkanBarrier.h             |   1 +
+ Source/RHI/Vulkan/VulkanBuffer.cpp            |   4 +-
+ Source/RHI/Vulkan/VulkanCommandBuffer.cpp     |   2 +-
+ Source/RHI/Vulkan/VulkanCommandBuffer.h       |   2 +-
+ Source/RHI/Vulkan/VulkanCommandListContext.h  |   2 +-
+ Source/RHI/Vulkan/VulkanCommandPool.h         |   1 -
+ Source/RHI/Vulkan/VulkanDevelopSettings.h     |   6 +-
+ Source/RHI/Vulkan/VulkanDevice.cpp            |  20 +-
+ Source/RHI/Vulkan/VulkanDevice.h              |   2 +-
+ Source/RHI/Vulkan/VulkanInstance.cpp          |  10 +-
+ Source/RHI/Vulkan/VulkanInstance.h            |   1 +
+ Source/RHI/Vulkan/VulkanLoader.cpp            |   2 +-
+ Source/RHI/Vulkan/VulkanLoader.h              |  40 +++-
+ Source/RHI/Vulkan/VulkanMemoryAllocator.h     |   2 -
+ Source/RHI/Vulkan/VulkanPipeline.cpp          |   2 +-
+ Source/RHI/Vulkan/VulkanQueue.h               |   1 +
+ Source/RHI/Vulkan/VulkanShader.cpp            |   3 +-
+ Source/RHI/Vulkan/VulkanSwapchain.cpp         |   8 +-
+ Source/RHI/Vulkan/VulkanSwapchain.h           |   2 +-
+ Source/RHI/Vulkan/VulkanTexture.cpp           |   4 +-
+ Source/RHI/Vulkan/VulkanTypes.cpp             |   2 +-
+ Source/RHI/Vulkan/VulkanTypes.h               |   3 +-
+ .../Runtime/Application/ApplicationSettings.h |   4 +-
+ Source/Runtime/Asset/Asset.h                  |  58 -----
+ Source/Runtime/Asset/AssetData.h              |  61 ++++++
+ Source/Runtime/Asset/File.h                   |  12 +-
+ Source/Runtime/Async/Task.cpp                 | 200 +-----------------
+ Source/Runtime/Async/Task.h                   | 101 ++-------
+ Source/Runtime/Async/TaskEvent.h              |  70 ++++++
+ Source/Runtime/Async/TaskExecutorManager.cpp  | 169 +++++++++++++++
+ Source/Runtime/Async/TaskExecutorManager.h    |  24 +++
+ Source/Runtime/Core/Definitions.h             |  14 +-
+ Source/Runtime/Misc/Linux/PlatformMisc.cpp    |  10 +-
+ Source/Runtime/Misc/PlatformMisc.h            |   4 +-
+ Source/Runtime/Misc/Windows/PlatformMisc.cpp  |  10 +-
+ Source/Runtime/Rendering/RHI/RHIBuffer.h      |  15 +-
+ .../Runtime/Rendering/RHI/RHICommandBuffer.h  |   4 +-
+ .../Rendering/RHI/RHICommandListContext.h     |   2 +-
+ Source/Runtime/Rendering/RHI/RHIDevice.h      |   3 +-
+ Source/Runtime/Rendering/RHI/RHIFormat.cpp    |  15 +-
+ Source/Runtime/Rendering/RHI/RHIFormat.h      |  23 +-
+ Source/Runtime/Rendering/RHI/RHIPipeline.h    |   8 +-
+ .../Runtime/Rendering/RHI/RHIRenderStates.h   |   2 +-
+ Source/Runtime/Rendering/RHI/RHIShader.h      |   6 +-
+ Source/Runtime/Rendering/RHI/RHISwapchain.h   |   2 +-
+ Source/Runtime/Rendering/RHI/RHITexture.h     |   1 +
+ .../Runtime/Rendering/RHI/RHIUploadManager.h  |   4 +-
+ .../RenderGraph/RenderPass/GeometryPass.cpp   |   2 +-
+ Source/Runtime/Rendering/Shader.cpp           |  10 +-
+ Source/Runtime/Rendering/Shader.h             |  12 +-
+ Source/Runtime/Rendering/ShaderLibrary.cpp    |   2 +-
+ premake5.lua                                  |  26 ++-
+ 53 files changed, 512 insertions(+), 484 deletions(-)
+ create mode 100644 Source/Runtime/Asset/AssetData.h
+ create mode 100644 Source/Runtime/Async/TaskEvent.h
+ create mode 100644 Source/Runtime/Async/TaskExecutorManager.cpp
+ create mode 100644 Source/Runtime/Async/TaskExecutorManager.h
+
+diff --git a/Source/Applications/RenderTest/RenderTest.cpp b/Source/Applications/RenderTest/RenderTest.cpp
+index 930bbab..b6b94b9 100644
+--- a/Source/Applications/RenderTest/RenderTest.cpp
++++ b/Source/Applications/RenderTest/RenderTest.cpp
+@@ -42,7 +42,7 @@ void RenderTest::Initialize()
+ 
+ 	auto TaskD = std::make_shared<TFTask>("TaskD", []() {
+ 		LOG_INFO(LogDefault, "TaskD");
+-	}, TFTask::EThread::WorkerThread, TFTask::EPriority::High);
++	}, TFTask::ETFTaskThread::WorkerThread, TFTask::ETFTaskPriority::High);
+ 
+ 	TaskC->AddPrerequisite(*TaskB);
+ 	TaskC->AddPrerequisite(*TaskD);
+diff --git a/Source/RHI/Vulkan/VulkanBarrier.h b/Source/RHI/Vulkan/VulkanBarrier.h
+index f169b97..3cd3138 100644
+--- a/Source/RHI/Vulkan/VulkanBarrier.h
++++ b/Source/RHI/Vulkan/VulkanBarrier.h
+@@ -1,6 +1,7 @@
+ #pragma once
+ 
+ #include "RHI/Vulkan/VulkanTypes.h"
++#include "Rendering/RHI/RHIDevice.h"
+ 
+ class VulkanPipelineBarrier : public VkBaseDeviceResource
+ {
+diff --git a/Source/RHI/Vulkan/VulkanBuffer.cpp b/Source/RHI/Vulkan/VulkanBuffer.cpp
+index 7557cef..2a6e45d 100644
+--- a/Source/RHI/Vulkan/VulkanBuffer.cpp
++++ b/Source/RHI/Vulkan/VulkanBuffer.cpp
+@@ -1,7 +1,7 @@
+ #include "RHI/Vulkan/VulkanBuffer.h"
+ #include "RHI/Vulkan/VulkanDevice.h"
+ #include "RHI/Vulkan/VulkanMemoryAllocator.h"
+-#include "RHI/RHIUploadManager.h"
++#include "Rendering/RHI/RHIUploadManager.h"
+ 
+ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferDesc& Desc)
+ 	: VkHwResource(Device)
+@@ -86,7 +86,7 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferDesc& Desc
+ 		//}
+ 	}
+ 
+-	VkHwResource::SetObjectName(Desc.Name.Get().data());
++	VkHwResource::SetObjectName(Desc.DebugName.Get().data());
+ }
+ 
+ void VulkanBuffer::AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags)
+diff --git a/Source/RHI/Vulkan/VulkanCommandBuffer.cpp b/Source/RHI/Vulkan/VulkanCommandBuffer.cpp
+index dfdee5a..32ed41b 100644
+--- a/Source/RHI/Vulkan/VulkanCommandBuffer.cpp
++++ b/Source/RHI/Vulkan/VulkanCommandBuffer.cpp
+@@ -5,7 +5,7 @@
+ #include "RHI/Vulkan/VulkanPipeline.h"
+ #include "RHI/Vulkan/VulkanLayerExtensions.h"
+ #include "RHI/Vulkan/VulkanBarrier.h"
+-#include "RHI/RHICommandListContext.h"
++#include "Rendering/RHI/RHICommandListContext.h"
+ 
+ VulkanCommandBuffer::VulkanCommandBuffer(const VulkanDevice& Device, VulkanCommandPool& Pool, ERHICommandBufferLevel Level)
+ 	: VkDeviceResource(Device)
+diff --git a/Source/RHI/Vulkan/VulkanCommandBuffer.h b/Source/RHI/Vulkan/VulkanCommandBuffer.h
+index 5aa5bdd..2505ef7 100644
+--- a/Source/RHI/Vulkan/VulkanCommandBuffer.h
++++ b/Source/RHI/Vulkan/VulkanCommandBuffer.h
+@@ -1,7 +1,7 @@
+ #pragma once
+ 
+ #include "RHI/Vulkan/VulkanAsync.h"
+-#include "RHI/RHICommandBuffer.h"
++#include "Rendering/RHI/RHICommandBuffer.h"
+ 
+ /// Command buffers are objects used to record commands which can be subsequently submitted to a device queue for execution. 
+ /// There are two levels of command buffers - primary command buffers, which can execute secondary command buffers, and which are submitted to queues, 
+diff --git a/Source/RHI/Vulkan/VulkanCommandListContext.h b/Source/RHI/Vulkan/VulkanCommandListContext.h
+index e7b96b4..177a890 100644
+--- a/Source/RHI/Vulkan/VulkanCommandListContext.h
++++ b/Source/RHI/Vulkan/VulkanCommandListContext.h
+@@ -2,7 +2,7 @@
+ 
+ #include "RHI/Vulkan/VulkanCommandPool.h"
+ #include "RHI/Vulkan/VulkanDescriptor.h"
+-#include "RHI/RHICommandListContext.h"
++#include "Rendering/RHI/RHICommandListContext.h"
+ 
+ class VulkanCommandListContext : public RHICommandListContext
+ {
+diff --git a/Source/RHI/Vulkan/VulkanCommandPool.h b/Source/RHI/Vulkan/VulkanCommandPool.h
+index 61dc1ae..a30175c 100644
+--- a/Source/RHI/Vulkan/VulkanCommandPool.h
++++ b/Source/RHI/Vulkan/VulkanCommandPool.h
+@@ -1,7 +1,6 @@
+ #pragma once
+ 
+ #include "RHI/Vulkan/VulkanCommandBuffer.h"
+-#include "RHI/RHIDevice.h"
+ 
+ class VulkanCommandPool final : public VkHwResource<vk::CommandPool>
+ {
+diff --git a/Source/RHI/Vulkan/VulkanDevelopSettings.h b/Source/RHI/Vulkan/VulkanDevelopSettings.h
+index 632993c..8f6e577 100644
+--- a/Source/RHI/Vulkan/VulkanDevelopSettings.h
++++ b/Source/RHI/Vulkan/VulkanDevelopSettings.h
+@@ -1,7 +1,7 @@
+ #pragma once
+ 
+-#include "Asset/SerializableAsset.h"
+-#include "RHI/RHIResource.h"
++#include "Asset/JsonAsset.h"
++#include "Rendering/RHI/RHIResource.h"
+ 
+ struct VulkanExtensionSettings
+ {
+@@ -111,7 +111,7 @@ struct VulkanDescriptorLimits
+ 	}
+ };
+ 
+-struct VulkanDevelopSettings : public Serializable<VulkanDevelopSettings>
++struct VulkanDevelopSettings : public JsonAsset<VulkanDevelopSettings>
+ {
+ 	using BaseClass::BaseClass;
+ 
+diff --git a/Source/RHI/Vulkan/VulkanDevice.cpp b/Source/RHI/Vulkan/VulkanDevice.cpp
+index d907caa..5fa7400 100644
+--- a/Source/RHI/Vulkan/VulkanDevice.cpp
++++ b/Source/RHI/Vulkan/VulkanDevice.cpp
+@@ -11,9 +11,9 @@
+ #include "RHI/Vulkan/VulkanSwapchain.h"
+ #include "RHI/Vulkan/VulkanMemoryAllocator.h"
+ #include "RHI/Vulkan/VulkanRenderPass.h"
+-#include "Paths.h"
+-#include "Services/ShaderLibrary.h"
+-#include "Async/Task.h"
++#include "Misc/Paths.h"
++//#include "Services/ShaderLibrary.h"
++#include "Async/TaskExecutorManager.h"
+ 
+ #if USE_DYNAMIC_VK_LOADER
+ 	VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
+@@ -114,12 +114,12 @@ VulkanDevice::VulkanDevice()
+ 	std::vector<const char*> EnabledLayers;
+ 	std::vector<const char*> EnabledExtensions;
+ 
+-	std::string LogValidDeviceLayers("Found available device layers:\n");
++	string LogValidDeviceLayers("Found available device layers:\n");
+ 	auto LayerProperties = m_PhysicalDevice.enumerateDeviceLayerProperties();
+ 
+ 	for (const auto& LayerProperty : LayerProperties)
+ 	{
+-		LogValidDeviceLayers += String::Format("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
++		LogValidDeviceLayers += string::printf("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
+ 	}
+ 	LOG_DEBUG(LogVulkan, LogValidDeviceLayers.c_str());
+ 
+@@ -140,12 +140,12 @@ VulkanDevice::VulkanDevice()
+ 		}
+ 	}
+ 
+-	std::string LogValidDeviceExtensions("Found available device extensions:\n");
++	string LogValidDeviceExtensions("Found available device extensions:\n");
+ 	auto ExtensionProperties = m_PhysicalDevice.enumerateDeviceExtensionProperties();
+ 
+ 	for (const auto& ExtensionProperty : ExtensionProperties)
+ 	{
+-		LogValidDeviceExtensions += String::Format("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
++		LogValidDeviceExtensions += string::printf("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
+ 	}
+ 	LOG_DEBUG(LogVulkan, LogValidDeviceExtensions.c_str());
+ 
+@@ -250,16 +250,16 @@ VulkanDevice::VulkanDevice()
+ 	
+ 	assert(PresentQueueIndex == GraphicsQueueIndex);
+ 
+-	for (uint8_t Index = 0u; Index < TFTask::GetNumWorkerThreads(); ++Index)
++	for (uint8_t Index = 0u; Index < TFTaskExecutorManager::Get().GetNumWorkerThreads(); ++Index)
+ 	{
+ 		m_ThreadedCmdListContexts.emplace(std::make_shared<VulkanCommandListContext>(*this, *m_Queues[ERHIDeviceQueue::Graphics]));
+ 	}
+ 
+ 	m_PipelineCache = std::make_shared<VulkanPipelineCache>(*this);
+ 	
+-	VulkanMemoryAllocator::Create(*this);
++	//VulkanMemoryAllocator::Create(*this);
+ 
+-	ShaderLibrary::Get().RegisterActiveCompiler(GetType());
++	//ShaderLibrary::Get().RegisterActiveCompiler(GetType());
+ }
+ 
+ RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderDesc& Desc) const
+diff --git a/Source/RHI/Vulkan/VulkanDevice.h b/Source/RHI/Vulkan/VulkanDevice.h
+index da22224..45d68ee 100644
+--- a/Source/RHI/Vulkan/VulkanDevice.h
++++ b/Source/RHI/Vulkan/VulkanDevice.h
+@@ -2,7 +2,7 @@
+ 
+ #include "RHI/Vulkan/VulkanTypes.h"
+ #include "RHI/Vulkan/VulkanDevelopSettings.h"
+-#include "RHI/RHIDevice.h"
++#include "Rendering/RHI/RHIDevice.h"
+ 
+ class VulkanDevice final : public RHIDevice
+ {
+diff --git a/Source/RHI/Vulkan/VulkanInstance.cpp b/Source/RHI/Vulkan/VulkanInstance.cpp
+index 936110f..c27d21f 100644
+--- a/Source/RHI/Vulkan/VulkanInstance.cpp
++++ b/Source/RHI/Vulkan/VulkanInstance.cpp
+@@ -50,7 +50,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsMessengerCallback(
+ 	(void)(UserData);
+ 	(void)(MessageTypeFlags);
+ 
+-	std::string Message = String::Format("[Validation]: [%3d][%10s]: %s",
++	string Message = string::printf("[Validation]: [%3d][%10s]: %s",
+ 		MessengerCallbackData->messageIdNumber,
+ 		MessengerCallbackData->pMessageIdName,
+ 		MessengerCallbackData->pMessage);
+@@ -124,11 +124,11 @@ VulkanInstance::VulkanInstance(VulkanExtensionSettings& Settings, ERHIDebugLayer
+ 	std::vector<const char*> EnabledExtensions;
+ 
+ 	auto LayerProperties = vk::enumerateInstanceLayerProperties();
+-	std::string LogValidInstanceLayers("Found available instance layers:\n");
++	string LogValidInstanceLayers("Found available instance layers:\n");
+ 
+ 	for (const auto& LayerProperty : LayerProperties)
+ 	{
+-		LogValidInstanceLayers += String::Format("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
++		LogValidInstanceLayers += string::printf("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
+ 	}
+ 	LOG_DEBUG(LogVulkan, LogValidInstanceLayers.c_str());
+ 	
+@@ -153,12 +153,12 @@ VulkanInstance::VulkanInstance(VulkanExtensionSettings& Settings, ERHIDebugLayer
+ 	VulkanExtension* DebugUtilExt = nullptr;
+ 	VulkanExtension* DebugReportExt = nullptr;
+ 
+-	std::string LogValidInstanceExtensions("Found available instance extensions:\n");
++	string LogValidInstanceExtensions("Found available instance extensions:\n");
+ 	auto ExtensionProperties = vk::enumerateInstanceExtensionProperties();
+ 
+ 	for (const auto& ExtensionProperty : ExtensionProperties)
+ 	{
+-		LogValidInstanceExtensions += String::Format("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
++		LogValidInstanceExtensions += string::printf("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
+ 	}
+ 	LOG_DEBUG(LogVulkan, LogValidInstanceExtensions.c_str());
+ 
+diff --git a/Source/RHI/Vulkan/VulkanInstance.h b/Source/RHI/Vulkan/VulkanInstance.h
+index 5e24add..78b7847 100644
+--- a/Source/RHI/Vulkan/VulkanInstance.h
++++ b/Source/RHI/Vulkan/VulkanInstance.h
+@@ -1,5 +1,6 @@
+ #pragma once
+ 
++#include "Rendering/RHI/RHIResource.h"
+ #include "RHI/Vulkan/VulkanLoader.h"
+ 
+ class VulkanInstance final
+diff --git a/Source/RHI/Vulkan/VulkanLoader.cpp b/Source/RHI/Vulkan/VulkanLoader.cpp
+index 4081bc3..263bcc3 100644
+--- a/Source/RHI/Vulkan/VulkanLoader.cpp
++++ b/Source/RHI/Vulkan/VulkanLoader.cpp
+@@ -2,7 +2,7 @@
+ #include "RHI/Vulkan/VulkanDevice.h"
+ #include "RHI/Vulkan/VulkanLayerExtensions.h"
+ 
+-DEFINE_LOG_CATEGORY(LogVulkan);
++DEFINE_LOGGER_CATEGORY(LogVulkan);
+ 
+ #if !defined(VULKAN_HPP_CPLUSPLUS)
+ 
+diff --git a/Source/RHI/Vulkan/VulkanLoader.h b/Source/RHI/Vulkan/VulkanLoader.h
+index 35fa809..c847a4a 100644
+--- a/Source/RHI/Vulkan/VulkanLoader.h
++++ b/Source/RHI/Vulkan/VulkanLoader.h
+@@ -1,9 +1,27 @@
+ #pragma once
+ 
++#define USE_DYNAMIC_VK_LOADER 1
++
++#if USE_DYNAMIC_VK_LOADER
++	#define VK_NO_PROTOTYPES
++#endif
++
++#if defined(_WIN32)
++	#if !defined(VK_USE_PLATFORM_WIN32_KHR)
++		#define VK_USE_PLATFORM_WIN32_KHR 1
++	#endif
++#elif defined(__ANDROID__)
++	#if !defined(VK_USE_PLATFORM_ANDROID_KHR)
++		#define VK_USE_PLATFORM_ANDROID_KHR 1
++	#endif
++#endif
++
+ #include "Misc/PlatformMisc.h"
+-#include "RHI/RHIResource.h"
++#include "Core/Spdlogging.h"
++
++#include <vulkan/vulkan.hpp>
++
+ #include "RHI/Vulkan/VulkanExtensionDefines.h"
+-#include "Services/SpdlogService.h"
+ 
+ #define VK_ALLOCATION_CALLBACKS nullptr
+ 
+@@ -274,14 +292,14 @@ protected:
+ 	class VulkanDevice* m_Device = nullptr;
+ };
+ #else
+-#define VERIFY_VK(Func)                                                                                                                         \
+-{                                                                                                                                               \
+-	vk::Result TempResult = (Func);                                                                                                             \
+-	if (TempResult != vk::Result::eSuccess)                                                                                                     \
+-	{                                                                                                                                           \
+-		LOG_CRITICAL(LogVulkan, "Failed to invoke VulkanAPI: File: {}, Line: {}, vkResult: {}", __FILE__, __LINE__, vk::to_string(TempResult)); \
+-		assert(0);                                                                                                                              \
+-	}                                                                                                                                           \
++#define VERIFY_VK(Func)                                                                                                                     \
++{                                                                                                                                           \
++	vk::Result Result = (Func);                                                                                                             \
++	if (Result != vk::Result::eSuccess)                                                                                                     \
++	{                                                                                                                                       \
++		LOG_CRITICAL(LogVulkan, "Failed to invoke VulkanAPI: File: {}, Line: {}, vkResult: {}", __FILE__, __LINE__, vk::to_string(Result)); \
++		assert(0);                                                                                                                          \
++	}                                                                                                                                       \
+ }
+ #endif
+ 
+@@ -341,4 +359,4 @@ public:
+ 	}
+ };
+ 
+-DECLARE_LOG_CATEGOTY(LogVulkan);
+\ No newline at end of file
++DECLARE_LOGGER_CATEGORY(LogVulkan);
+\ No newline at end of file
+diff --git a/Source/RHI/Vulkan/VulkanMemoryAllocator.h b/Source/RHI/Vulkan/VulkanMemoryAllocator.h
+index 62b0478..db8f65c 100644
+--- a/Source/RHI/Vulkan/VulkanMemoryAllocator.h
++++ b/Source/RHI/Vulkan/VulkanMemoryAllocator.h
+@@ -9,8 +9,6 @@ public:
+ 	VulkanDeviceMemory Allocate(vk::Buffer Buffer, ERHIDeviceAccessFlags AccessFlags);
+ 	VulkanDeviceMemory Allocate(vk::Image Image, ERHIDeviceAccessFlags AccessFlags);
+ protected:
+-	ALLOW_ACCESS_LAZY(VulkanMemoryAllocator)
+-
+ 	VulkanMemoryAllocator(const class VulkanDevice& Device);
+ 
+ 	uint32_t GetMemoryTypeIndex(uint32_t MemTypeBits, vk::MemoryPropertyFlags MemPropertyFlags) const;
+diff --git a/Source/RHI/Vulkan/VulkanPipeline.cpp b/Source/RHI/Vulkan/VulkanPipeline.cpp
+index e4faece..b8ce553 100644
+--- a/Source/RHI/Vulkan/VulkanPipeline.cpp
++++ b/Source/RHI/Vulkan/VulkanPipeline.cpp
+@@ -3,7 +3,7 @@
+ #include "RHI/Vulkan/VulkanLayerExtensions.h"
+ #include "RHI/Vulkan/VulkanShader.h"
+ #include "RHI/Vulkan/VulkanCommandListContext.h"
+-#include "Services/ShaderLibrary.h"
++//#include "Services/ShaderLibrary.h"
+ 
+ VulkanPipelineCache::VulkanPipelineCache(const VulkanDevice& Device)
+ 	: VkHwResource(Device)
+diff --git a/Source/RHI/Vulkan/VulkanQueue.h b/Source/RHI/Vulkan/VulkanQueue.h
+index 426755c..9edb027 100644
+--- a/Source/RHI/Vulkan/VulkanQueue.h
++++ b/Source/RHI/Vulkan/VulkanQueue.h
+@@ -1,6 +1,7 @@
+ #pragma once
+ 
+ #include "RHI/Vulkan/VulkanTypes.h"
++#include "Rendering/RHI/RHIDevice.h"
+ 
+ class VulkanQueue : public VkDeviceResource<vk::Queue>
+ {
+diff --git a/Source/RHI/Vulkan/VulkanShader.cpp b/Source/RHI/Vulkan/VulkanShader.cpp
+index c1f8523..2cbe3b7 100644
+--- a/Source/RHI/Vulkan/VulkanShader.cpp
++++ b/Source/RHI/Vulkan/VulkanShader.cpp
+@@ -1,6 +1,5 @@
+ #include "RHI/Vulkan/VulkanShader.h"
+ #include "RHI/Vulkan/VulkanDevice.h"
+-#include "Asset/Shader.h"
+ 
+ VulkanShader::VulkanShader(const VulkanDevice& Device, const RHIShaderDesc& Desc)
+ 	: VkHwResource(Device)
+@@ -15,7 +14,7 @@ VulkanShader::VulkanShader(const VulkanDevice& Device, const RHIShaderDesc& Desc
+ 
+ 	VERIFY_VK(GetNativeDevice().createShaderModule(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+ 
+-	VkHwResource::SetObjectName(Desc.Name.Get().data());
++	VkHwResource::SetObjectName(Desc.DebugName.Get().data());
+ }
+ 
+ VulkanInputLayout::VulkanInputLayout(const RHIInputLayoutDesc& Desc)
+diff --git a/Source/RHI/Vulkan/VulkanSwapchain.cpp b/Source/RHI/Vulkan/VulkanSwapchain.cpp
+index 385c5f0..f8777e4 100644
+--- a/Source/RHI/Vulkan/VulkanSwapchain.cpp
++++ b/Source/RHI/Vulkan/VulkanSwapchain.cpp
+@@ -1,7 +1,7 @@
+ #include "RHI/Vulkan/VulkanSwapChain.h"
+ #include "RHI/Vulkan/VulkanDevice.h"
+ #include "RHI/Vulkan/VulkanLayerExtensions.h"
+-#include "OS/OS.h"
++#include "Misc/PlatformMisc.h"
+ 
+ VulkanSurface::VulkanSurface(const VulkanDevice& Device, const void* WindowHandle)
+ 	: VkDeviceResource(Device)
+@@ -10,7 +10,7 @@ VulkanSurface::VulkanSurface(const VulkanDevice& Device, const void* WindowHandl
+ 
+ #if defined(PLATFORM_WIN32)
+ 	vk::Win32SurfaceCreateInfoKHR CreateInfo;
+-	CreateInfo.setHinstance(reinterpret_cast<::HINSTANCE>(OS::GetApplicationInstance()))
++	CreateInfo.setHinstance(reinterpret_cast<::HINSTANCE>(PlatformMisc::GetApplicationHandle()))
+ 		.setHwnd(reinterpret_cast<::HWND>(const_cast<void*>(WindowHandle)));
+ 
+ 	VERIFY_VK(GetNativeInstance().createWin32SurfaceKHR(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
+@@ -259,10 +259,10 @@ void VulkanSwapchain::Create(bool RecreateSurface)
+ 			.SetNumArrayLayer(1u)
+ 			.SetNumMipLevel(1u)
+ 			.SetDimension(ERHITextureDimension::T_2D)
+-			.SetFormat(RHI::GetRHIFormat(m_ColorFormat))
++			.SetFormat(RHI::VkFormatToRHIFormat(static_cast<uint32_t>(m_ColorFormat)))
+ 			.SetSampleCount(ERHISampleCount::Sample_1_Bit)
+ 			.SetUsages(ERHIBufferUsageFlags::None)
+-			.SetName(String::Format("SwapchainImage-%d", Index));
++			.SetName(string::format("SwapchainImage-{}", Index));
+ 		m_BackBuffers[Index] = std::make_shared<VulkanTexture>(GetDevice(), Desc, Images[Index]);
+ 	}
+ 
+diff --git a/Source/RHI/Vulkan/VulkanSwapchain.h b/Source/RHI/Vulkan/VulkanSwapchain.h
+index d467b58..658b9f6 100644
+--- a/Source/RHI/Vulkan/VulkanSwapchain.h
++++ b/Source/RHI/Vulkan/VulkanSwapchain.h
+@@ -2,7 +2,7 @@
+ 
+ #include "RHI/Vulkan/VulkanAsync.h"
+ #include "RHI/Vulkan/VulkanTexture.h"
+-#include "RHI/RHISwapchain.h"
++#include "Rendering/RHI/RHISwapchain.h"
+ 
+ class VulkanSurface final : public VkDeviceResource<vk::SurfaceKHR>
+ {
+diff --git a/Source/RHI/Vulkan/VulkanTexture.cpp b/Source/RHI/Vulkan/VulkanTexture.cpp
+index 4ac5d67..f48c025 100644
+--- a/Source/RHI/Vulkan/VulkanTexture.cpp
++++ b/Source/RHI/Vulkan/VulkanTexture.cpp
+@@ -1,7 +1,7 @@
+ #include "RHI/Vulkan/VulkanTexture.h"
+ #include "RHI/Vulkan/VulkanDevice.h"
+ #include "RHI/Vulkan/VulkanMemoryAllocator.h"
+-#include "RHI/RHIUploadManager.h"
++#include "Rendering/RHI/RHIUploadManager.h"
+ 
+ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureDesc& Desc, vk::Image Image)
+ 	: VkHwResource(Device)
+@@ -101,7 +101,7 @@ VulkanTexture::VulkanTexture(const VulkanDevice& Device, const RHITextureDesc& D
+ 		}
+ 	}
+ 
+-	VkHwResource::SetObjectName(Desc.Name.Get().data());
++	VkHwResource::SetObjectName(Desc.DebugName.Get().data());
+ }
+ 
+ void VulkanTexture::AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags)
+diff --git a/Source/RHI/Vulkan/VulkanTypes.cpp b/Source/RHI/Vulkan/VulkanTypes.cpp
+index 0e2225d..58cf074 100644
+--- a/Source/RHI/Vulkan/VulkanTypes.cpp
++++ b/Source/RHI/Vulkan/VulkanTypes.cpp
+@@ -163,7 +163,7 @@ vk::StencilOp GetStencilOp(ERHIStencilOp Op)
+ 
+ vk::Format GetFormat(ERHIFormat Format)
+ {
+-	return RHI::GetVulkanFormat(Format);
++	return static_cast<vk::Format>(RHI::GetVulkanFormat(Format));
+ }
+ 
+ vk::ShaderStageFlagBits GetShaderStage(ERHIShaderStage Stage)
+diff --git a/Source/RHI/Vulkan/VulkanTypes.h b/Source/RHI/Vulkan/VulkanTypes.h
+index 8b32926..833b8cb 100644
+--- a/Source/RHI/Vulkan/VulkanTypes.h
++++ b/Source/RHI/Vulkan/VulkanTypes.h
+@@ -1,7 +1,8 @@
+ #pragma once
+ 
+-#include "RHI/RHIDevice.h"
+ #include "RHI/Vulkan/VulkanLoader.h"
++#include "Rendering/RHI/RHIRenderStates.h"
++#include "Rendering/RHI/RHICommandBuffer.h"
+ 
+ vk::PolygonMode GetPolygonMode(ERHIPolygonMode Mode);
+ vk::CullModeFlagBits GetCullMode(ERHICullMode Mode);
+diff --git a/Source/Runtime/Application/ApplicationSettings.h b/Source/Runtime/Application/ApplicationSettings.h
+index 3ea07b4..d951d57 100644
+--- a/Source/Runtime/Application/ApplicationSettings.h
++++ b/Source/Runtime/Application/ApplicationSettings.h
+@@ -2,9 +2,9 @@
+ 
+ #include "Window.h"
+ #include "Rendering/RenderSettings.h"
+-#include "Asset/SerializableAsset.h"
++#include "Asset/JsonAsset.h"
+ 
+-class ApplicationSettings : public Serializable<ApplicationSettings>
++class ApplicationSettings : public JsonAsset<ApplicationSettings>
+ {
+ public:
+ 	using BaseClass::BaseClass;
+diff --git a/Source/Runtime/Asset/Asset.h b/Source/Runtime/Asset/Asset.h
+index aa757c8..b8208a2 100644
+--- a/Source/Runtime/Asset/Asset.h
++++ b/Source/Runtime/Asset/Asset.h
+@@ -3,64 +3,6 @@
+ #include "Asset/File.h"
+ #include "Core/Spdlogging.h"
+ 
+-struct DataBlock
+-{
+-	size_t Size = 0u;
+-	size_t Offset = 0u;
+-	std::shared_ptr<std::byte> Data;
+-
+-	DataBlock() = default;
+-
+-	DataBlock(size_t InSize, const void* InData = nullptr, size_t InOffset = 0u)
+-		: Size(InSize)
+-		, Offset(InOffset)
+-		, Data(new std::byte[InSize + InOffset]())
+-	{
+-		assert(Offset < Size);
+-
+-		if (InData)
+-		{
+-			VERIFY(memcpy_s(Data.get() + Offset, InSize, InData, InSize) == 0);
+-		}
+-	}
+-	
+-	inline bool IsValid() const { return Size && Data; }
+-
+-	inline void Reset()
+-	{
+-		Size = Offset = 0u;
+-		Data.reset();
+-	}
+-
+-	inline size_t GetSize() const { return Size; }
+-	inline size_t GetOffset() const { return Offset; }
+-	inline std::byte* GetRawData() const { return Data.get(); }
+-
+-	template<class Archive>
+-	void load(Archive& Ar)
+-	{
+-		Ar(
+-			CEREAL_NVP(Size),
+-			CEREAL_NVP(Offset)
+-		);
+-
+-		Data.reset(new std::byte[Size]());
+-
+-		Ar.loadBinaryValue(Data.get() + Offset, Size, "Data");
+-	}
+-
+-	template<class Archive>
+-	void save(Archive& Ar) const
+-	{
+-		Ar(
+-			CEREAL_NVP(Size),
+-			CEREAL_NVP(Offset)
+-		);
+-
+-		Ar.saveBinaryValue(Data.get() + Offset, Size, "Data");
+-	}
+-};
+-
+ class Asset : public File
+ {
+ public:
+diff --git a/Source/Runtime/Asset/AssetData.h b/Source/Runtime/Asset/AssetData.h
+new file mode 100644
+index 0000000..45315ef
+--- /dev/null
++++ b/Source/Runtime/Asset/AssetData.h
+@@ -0,0 +1,61 @@
++#pragma once
++
++#include "Core/Cereal.h"
++
++struct DataBlock
++{
++	size_t Size = 0u;
++	size_t Offset = 0u;
++	std::shared_ptr<std::byte> Data;
++
++	DataBlock() = default;
++
++	DataBlock(size_t InSize, const void* InData = nullptr, size_t InOffset = 0u)
++		: Size(InSize)
++		, Offset(InOffset)
++		, Data(new std::byte[InSize + InOffset]())
++	{
++		assert(Offset < Size);
++
++		if (InData)
++		{
++			VERIFY(memcpy_s(Data.get() + Offset, InSize, InData, InSize) == 0);
++		}
++	}
++
++	inline bool IsValid() const { return Size && Data; }
++
++	inline void Reset()
++	{
++		Size = Offset = 0u;
++		Data.reset();
++	}
++
++	inline size_t GetSize() const { return Size; }
++	inline size_t GetOffset() const { return Offset; }
++	inline std::byte* GetRawData() const { return Data.get(); }
++
++	template<class Archive>
++	void load(Archive& Ar)
++	{
++		Ar(
++			CEREAL_NVP(Size),
++			CEREAL_NVP(Offset)
++		);
++
++		Data.reset(new std::byte[Size]());
++
++		Ar.loadBinaryValue(Data.get() + Offset, Size, "Data");
++	}
++
++	template<class Archive>
++	void save(Archive& Ar) const
++	{
++		Ar(
++			CEREAL_NVP(Size),
++			CEREAL_NVP(Offset)
++		);
++
++		Ar.saveBinaryValue(Data.get() + Offset, Size, "Data");
++	}
++};
+\ No newline at end of file
+diff --git a/Source/Runtime/Asset/File.h b/Source/Runtime/Asset/File.h
+index f80dc6c..99a4924 100644
+--- a/Source/Runtime/Asset/File.h
++++ b/Source/Runtime/Asset/File.h
+@@ -27,9 +27,9 @@ public:
+ 	virtual ~File() = default;
+ 
+ 	inline const std::filesystem::path& GetPath() const { return m_Path; }
+-	inline const std::string& GetName() const { return m_Name; }
+-	inline const std::string& GetStem() const { return m_Stem; }
+-	inline const std::string& GetExtension() const { return m_Extension; }
++	inline const string& GetName() const { return m_Name; }
++	inline const string& GetStem() const { return m_Stem; }
++	inline const string& GetExtension() const { return m_Extension; }
+ 	inline std::time_t GetLastWriteTime() const
+ 	{
+ 		m_LastWriteTime = GetLastWriteTime(m_Path);
+@@ -140,9 +140,9 @@ protected:
+ private:
+ 	std::filesystem::path m_Path; /// Notice the order of the members
+ 
+-	std::string m_Name;
+-	std::string m_Stem;
+-	std::string m_Extension;
++	string m_Name;
++	string m_Stem;
++	string m_Extension;
+ 
+ 	mutable std::time_t m_LastWriteTime = 0u;
+ };
+\ No newline at end of file
+diff --git a/Source/Runtime/Async/Task.cpp b/Source/Runtime/Async/Task.cpp
+index 0280846..6ecd844 100644
+--- a/Source/Runtime/Async/Task.cpp
++++ b/Source/Runtime/Async/Task.cpp
+@@ -1,43 +1,13 @@
+ #include "Async/Task.h"
+-#include "Core/ConsoleVariable.h"
++#include "Async/TaskExecutorManager.h"
+ #include "Misc/PlatformMisc.h"
+-#include "Core/SpdLogging.h"
+-
+-#include <barrier>
+ 
+ DEFINE_LOGGER_CATEGORY(LogTaskFlow);
+ 
+-thread_local TFTask::EThread t_ThreadTag = TFTask::EThread::WorkerThread;
+-
+-ConsoleVariable<bool> CVarUseHyperThreading(
+-	"tf.use_hyper_threading",
+-	"Enable or disable hyper threading for taskflow executors.",
+-	false);
+-
+-ConsoleVariable<bool> CVarUseSeperateGameThread(
+-	"tf.use_seperate_game_thread",
+-	"Enable or disable seperate game thread.",
+-	false);
+-
+-ConsoleVariable<bool> CVarUseSeperateRenderThread(
+-	"tf.use_seperate_render_thread",
+-	"Enable or disable seperate render thread.",
+-	false);
+-
+-ConsoleVariable<bool> CVarUseSeperateRHIThread(
+-	"tf.use_seperate_rhi_thread",
+-	"Enable or disable seperate rhi thread.",
+-	false);
+-
+-ConsoleVariable<uint32_t> CVarNumForegroundThreads(
+-	"tf.num_foreground_threads",
+-	"Number of foreground threads.",
+-	2u);
+-
+ struct SetThreadPriorityScoped
+ {
+-	SetThreadPriorityScoped(TFTask::EPriority Priority)
+-		: SkipPriorityChange(!TFTask::IsWorkerThread() || Priority == TFTask::EPriority::Normal)
++	SetThreadPriorityScoped(ETFTaskPriority Priority)
++		: SkipPriorityChange(!TFTask::IsWorkerThread() || Priority == ETFTaskPriority::Normal)
+ 	{
+ 		if (!SkipPriorityChange)
+ 		{
+@@ -49,141 +19,16 @@ struct SetThreadPriorityScoped
+ 	{
+ 		if (!SkipPriorityChange)
+ 		{
+-			PlatformMisc::SetThreadPriority(std::this_thread::get_id(), TFTask::EPriority::Normal);
++			PlatformMisc::SetThreadPriority(std::this_thread::get_id(), ETFTaskPriority::Normal);
+ 		}
+ 	}
+ 
+ 	bool SkipPriorityChange;
+ };
+ 
+-class TFExecutorManager : public Singleton<TFExecutorManager>
++TFTaskEventPtr TFTask::DispatchTaskFlow(tf::Taskflow&& Flow, ETFTaskThread Thread, ETFTaskPriority Priority)
+ {
+-public:
+-	void Initialize()
+-	{
+-		std::vector<size_t> WorkersInExecutor
+-		{
+-			CVarUseSeperateGameThread.Get(),
+-			CVarUseSeperateRenderThread.Get(),
+-			TFTask::GetNumWorkerThreads(),
+-			CVarNumForegroundThreads.Get()
+-		};
+-
+-		m_Executors.reserve(WorkersInExecutor.size());
+-
+-		for (auto& NumWorkers : WorkersInExecutor)
+-		{
+-			if (NumWorkers > 0u)
+-			{
+-				m_Executors.emplace_back(std::make_unique<tf::Executor>(NumWorkers));
+-			}
+-		}
+-
+-		if (const uint32_t NumForegroundThreads = CVarNumForegroundThreads.Get())
+-		{
+-			if (auto Executor = GetExecutor(TFTask::EThread::WorkerThread, TFTask::EPriority::High))
+-			{
+-				// A thread runs one task at a time, so blocking all N here forces the priority change above onto N distinct workers.
+-				std::barrier Barrier(static_cast<ptrdiff_t>(NumForegroundThreads));
+-
+-				tf::Taskflow Flow;
+-				for (uint32_t Index = 0u; Index < NumForegroundThreads; ++Index)
+-				{
+-					Flow.emplace([&Barrier]() {
+-						PlatformMisc::SetThreadPriority(std::this_thread::get_id(), TFTask::EPriority::High);
+-						Barrier.arrive_and_wait();
+-					});
+-				}
+-
+-				Executor->run(Flow);
+-				Executor->wait_for_all();
+-
+-				LOG_INFO(LogTaskFlow, "Set {} foreground thread(s) to high priority", NumForegroundThreads);
+-			}
+-		}
+-
+-		const uint32_t NumSeperateThreads = CVarUseSeperateGameThread.Get() + CVarUseSeperateRenderThread.Get() + CVarNumForegroundThreads.Get();
+-		LOG_INFO(LogTaskFlow, "Create executors with {} seperate threads, {} worker threads, hyper threading is {}",
+-			NumSeperateThreads,
+-			TFTask::GetNumWorkerThreads(),
+-			CVarUseHyperThreading.Get() ? "enabled" : "disabled");
+-	}
+-
+-	void Finalize()
+-	{
+-		for (auto& Executor : m_Executors)
+-		{
+-			if (Executor)
+-			{
+-				Executor->wait_for_all();
+-				Executor.reset();
+-			}
+-		}
+-
+-		m_Executors.clear();
+-	}
+-
+-	tf::Executor* GetExecutor(TFTask::EThread Thread, TFTask::EPriority Priority)
+-	{
+-		assert(Thread < TFTask::EThread::Num);
+-
+-		static const Array<size_t, TFTask::EThread> s_ExecutorIndices {
+-			static_cast<size_t>(TFTask::EThread::GameThread),
+-			static_cast<size_t>(TFTask::EThread::RenderThread) - !CVarUseSeperateGameThread.Get(),
+-			static_cast<size_t>(TFTask::EThread::WorkerThread) - !CVarUseSeperateGameThread.Get() - !CVarUseSeperateRenderThread.Get()
+-		};
+-
+-		const size_t ThreadIndex = static_cast<size_t>(Thread);
+-		assert(ThreadIndex < s_ExecutorIndices.size());
+-
+-		const bool IsHighPriority = (Priority > TFTask::EPriority::Normal) ||
+-			(Thread == TFTask::EThread::GameThread && !CVarUseSeperateGameThread.Get()) ||
+-			(Thread == TFTask::EThread::RenderThread && !CVarUseSeperateRenderThread.Get());
+-
+-		const size_t ExecutorIndex = s_ExecutorIndices[ThreadIndex] + (IsHighPriority ? 1u : 0u);
+-		assert(ExecutorIndex < m_Executors.size());
+-
+-		return m_Executors[ExecutorIndex].get();
+-	}
+-private:
+-	std::vector<std::unique_ptr<tf::Executor>> m_Executors;
+-};
+-
+-void TFTask::Initialize()
+-{
+-	TFExecutorManager::Get().Initialize();
+-	InitializeThreadTags();
+-
+-	LOG_INFO(LogTaskFlow, "Use taskflow @{}", tf::version());
+-}
+-
+-void TFTask::Finalize()
+-{
+-	TFExecutorManager::Get().Finalize();
+-}
+-
+-void TFTask::InitializeThreadTags()
+-{
+-	t_ThreadTag = TFTask::EThread::WorkerThread;
+-
+-	if (CVarUseSeperateGameThread.Get())
+-	{
+-		Launch("tf.SetGameThreadTag", []() {
+-			t_ThreadTag = TFTask::EThread::GameThread;
+-		}, EThread::GameThread)->Wait();
+-	}
+-
+-	if (CVarUseSeperateRenderThread.Get())
+-	{
+-		Launch("tf.SetRenderThreadTag", []() {
+-			t_ThreadTag = TFTask::EThread::RenderThread;
+-		}, EThread::RenderThread)->Wait();
+-	}
+-}
+-
+-TFTaskEventPtr TFTask::DispatchTaskFlow(tf::Taskflow&& Flow, EThread Thread, EPriority Priority)
+-{
+-	if (auto Executor = TFExecutorManager::Get().GetExecutor(Thread, Priority))
++	if (auto Executor = TFTaskExecutorManager::Get().GetExecutor(Thread, Priority))
+ 	{
+ 		return std::make_shared<TFTaskEvent>(std::move(Executor->run(std::forward<tf::Taskflow>(Flow))));
+ 	}
+@@ -191,33 +36,6 @@ TFTaskEventPtr TFTask::DispatchTaskFlow(tf::Taskflow&& Flow, EThread Thread, EPr
+ 	return nullptr;
+ }
+ 
+-uint32_t TFTask::GetNumWorkerThreads()
+-{
+-	const uint32_t NumTotalThreads = PlatformMisc::GetNumHardwareConcurrencyThreads(CVarUseHyperThreading.Get());
+-
+-	uint32_t NumSeperateThreads = 0u;
+-	NumSeperateThreads += CVarUseSeperateGameThread.Get() ? 1u : 0u;
+-	NumSeperateThreads += CVarUseSeperateRenderThread.Get() ? 1u : 0u;
+-	NumSeperateThreads += CVarNumForegroundThreads.Get();
+-
+-	return NumTotalThreads > NumSeperateThreads ? NumTotalThreads - NumSeperateThreads : 0u;
+-}
+-
+-bool TFTask::IsGameThread()
+-{
+-	return t_ThreadTag == EThread::GameThread;
+-}
+-
+-bool TFTask::IsRenderThread()
+-{
+-	return t_ThreadTag == EThread::RenderThread;
+-}
+-
+-bool TFTask::IsWorkerThread()
+-{
+-	return t_ThreadTag == EThread::WorkerThread;
+-}
+-
+ void TFTask::AddPrerequisite(TFTask& Prerequisite)
+ {
+ 	assert(IsSameExecutor(*this, Prerequisite) || !IsDispatched());
+@@ -293,7 +111,7 @@ bool TFTask::Trigger()
+ 		return false;
+ 	}
+ 
+-	auto Executor = TFExecutorManager::Get().GetExecutor(m_Thread, m_Priority);
++	auto Executor = TFTaskExecutorManager::Get().GetExecutor(m_Thread, m_Priority);
+ 	if (!Executor)
+ 	{
+ 		m_Dispatched.store(false, std::memory_order_release);
+@@ -431,7 +249,7 @@ TFTask::~TFTask()
+ //		};
+ //		static FrameSyncTask s_FrameSyncTask;
+ //
+-//		m_ThreadSyncEvents[m_ThreadEventIndex] = DispatchTask(s_FrameSyncTask, EThread::RenderThread);
++//		m_ThreadSyncEvents[m_ThreadEventIndex] = DispatchTask(s_FrameSyncTask, ETFTaskThread::RenderThread);
+ //
+ //		if (AllowOneFrameLag)
+ //		{
+@@ -442,7 +260,7 @@ TFTask::~TFTask()
+ //		{
+ //			if (m_SeparateGameThread)
+ //			{
+-//				auto GameThreadCompledEvent = DispatchTask(s_FrameSyncTask, EThread::GameThread);
++//				auto GameThreadCompledEvent = DispatchTask(s_FrameSyncTask, ETFTaskThread::GameThread);
+ //				do {
+ //					GameThreadCompledEvent->WaitForMilliseconds(1u);
+ //				} while (!GameThreadCompledEvent->IsCompleted());
+diff --git a/Source/Runtime/Async/Task.h b/Source/Runtime/Async/Task.h
+index a37bee2..458c485 100644
+--- a/Source/Runtime/Async/Task.h
++++ b/Source/Runtime/Async/Task.h
+@@ -1,6 +1,8 @@
+ #pragma once
+ 
+ #include "Core/Name.h"
++#include "Core/SpdLogging.h"
++#include "Async/TaskEvent.h"
+ 
+ #pragma warning(push)
+ #pragma warning(disable:4324)
+@@ -10,76 +12,10 @@
+ #include <taskflow/algorithm/for_each.hpp>
+ #pragma warning(pop)
+ 
+-class TFTaskEvent
+-{
+-public:
+-	TFTaskEvent() = delete;
+-	TFTaskEvent(const TFTaskEvent&) = delete;
+-	TFTaskEvent(TFTaskEvent&& Other) noexcept = default;
+-	TFTaskEvent& operator=(const TFTaskEvent&) = delete;
+-	TFTaskEvent& operator=(TFTaskEvent&& Other) noexcept = default;
+-
+-	TFTaskEvent(std::future<void>&& Future) noexcept
+-		: m_Future(std::move(Future))
+-	{
+-	}
+-	
+-	inline void Wait() 
+-	{
+-		if (m_Future.valid())
+-		{
+-			m_Future.get();
+-		}
+-	}
+-
+-	inline void WaitForSeconds(size_t Seconds) 
+-	{
+-		if (m_Future.valid())
+-		{
+-			m_Future.wait_for(std::chrono::seconds(Seconds));
+-		}
+-	}
+-
+-	inline void WaitForMilliseconds(size_t Milliseconds)
+-	{
+-		if (m_Future.valid())
+-		{
+-			m_Future.wait_for(std::chrono::milliseconds(Milliseconds));
+-		}
+-	}
+-private:
+-	std::future<void> m_Future;
+-};
+-using TFTaskEventPtr = std::shared_ptr<TFTaskEvent>;
+-
+ class TFTask : public NoneCopyable
+ {
+ public:
+-	enum class EThread
+-	{
+-		GameThread,
+-		RenderThread,
+-		WorkerThread,
+-		Num
+-	};
+-
+-	enum class EPriority : uint8_t
+-	{
+-		Low,
+-		Normal,
+-		High,
+-		Critical
+-	};
+-
+-	enum class EState : uint8_t
+-	{
+-		None,
+-		Dispatched,
+-		Canceled,
+-		Completed
+-	};
+-
+-	TFTask(Name&& TaskName, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
++	TFTask(Name&& TaskName, ETFTaskThread Thread = ETFTaskThread::WorkerThread, ETFTaskPriority Priority = ETFTaskPriority::Normal)
+ 		: m_Thread(Thread)
+ 		, m_Priority(Priority)
+ 		, m_Name(std::move(TaskName))
+@@ -87,7 +23,7 @@ public:
+ 	}
+ 
+ 	template<class LAMBDA>
+-	TFTask(Name&& TaskName, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
++	TFTask(Name&& TaskName, LAMBDA&& Lambda, ETFTaskThread Thread = ETFTaskThread::WorkerThread, ETFTaskPriority Priority = ETFTaskPriority::Normal)
+ 		: m_Thread(Thread)
+ 		, m_Priority(Priority)
+ 		, m_Name(std::move(TaskName))
+@@ -122,17 +58,12 @@ public:
+ 
+ 	bool WaitForMilliseconds(size_t Milliseconds);
+ 
+-	static void Initialize();
+-	static void Finalize();
+-
+ 	static bool IsGameThread();
+ 	static bool IsRenderThread();
+ 	static bool IsWorkerThread();
+ 
+-	static uint32_t GetNumWorkerThreads();
+-
+ 	template<class LAMBDA>
+-	static std::shared_ptr<TFTask> Launch(Name&& TaskName, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
++	static std::shared_ptr<TFTask> Launch(Name&& TaskName, LAMBDA&& Lambda, ETFTaskThread Thread = ETFTaskThread::WorkerThread, ETFTaskPriority Priority = ETFTaskPriority::Normal)
+ 	{
+ 		auto Task = std::make_shared<TFTask>(std::forward<Name>(TaskName), std::forward<LAMBDA>(Lambda), Thread, Priority);
+ 		Task->Trigger();
+@@ -140,7 +71,7 @@ public:
+ 	}
+ 
+ 	template<class LAMBDA>
+-	static std::shared_ptr<TFTask> Launch(Name&& TaskName, LAMBDA&& Lambda, std::vector<TFTask*>&& PrerequisiteTasks, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
++	static std::shared_ptr<TFTask> Launch(Name&& TaskName, LAMBDA&& Lambda, std::vector<TFTask*>&& PrerequisiteTasks, ETFTaskThread Thread = ETFTaskThread::WorkerThread, ETFTaskPriority Priority = ETFTaskPriority::Normal)
+ 	{
+ 		auto Task = std::make_shared<TFTask>(std::forward<Name>(TaskName), std::forward<LAMBDA>(Lambda), Thread, Priority);
+ 		for (auto PrerequisiteTask : PrerequisiteTasks)
+@@ -153,9 +84,9 @@ public:
+ 	}
+ 
+ 	template<class Iterator, class LAMBDA>
+-	static TFTaskEventPtr ParallelFor(Iterator&& Begin, Iterator&& End, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
++	static TFTaskEventPtr ParallelFor(Iterator&& Begin, Iterator&& End, LAMBDA&& Lambda, ETFTaskThread Thread = ETFTaskThread::WorkerThread, ETFTaskPriority Priority = ETFTaskPriority::Normal)
+ 	{
+-		assert(Thread < EThread::Num);
++		assert(Thread < ETFTaskThread::Num);
+ 
+ 		tf::Taskflow TFTaskFlow;
+ 		TFTaskFlow.for_each(Begin, End, std::forward<LAMBDA>(Lambda));
+@@ -163,18 +94,16 @@ public:
+ 	}
+ 
+ 	template<class Iterator, class LAMBDA>
+-	static TFTaskEventPtr ParallelSort(Iterator&& Begin, Iterator&& End, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
++	static TFTaskEventPtr ParallelSort(Iterator&& Begin, Iterator&& End, LAMBDA&& Lambda, ETFTaskThread Thread = ETFTaskThread::WorkerThread, ETFTaskPriority Priority = ETFTaskPriority::Normal)
+ 	{
+-		assert(Thread < EThread::Num);
++		assert(Thread < ETFTaskThread::Num);
+ 
+ 		tf::Taskflow TFTaskFlow;
+ 		TFTaskFlow.sort(Begin, End, std::forward<LAMBDA>(Lambda));
+ 		return DispatchTaskFlow(std::move(TFTaskFlow), Thread, Priority);
+ 	}
+ protected:
+-	static void InitializeThreadTags();
+-
+-	static TFTaskEventPtr DispatchTaskFlow(tf::Taskflow&&, EThread Thread, EPriority Priority);
++	static TFTaskEventPtr DispatchTaskFlow(tf::Taskflow&&, ETFTaskThread Thread, ETFTaskPriority Priority);
+ 
+ 	void TriggerSubsequents();
+ 
+@@ -210,8 +139,8 @@ protected:
+ 		return false;
+ 	}
+ private:
+-	EThread m_Thread = EThread::WorkerThread;
+-	EPriority m_Priority = EPriority::Normal;
++	ETFTaskThread m_Thread = ETFTaskThread::WorkerThread;
++	ETFTaskPriority m_Priority = ETFTaskPriority::Normal;
+ 
+ 	Name m_Name;
+ 
+@@ -229,4 +158,6 @@ private:
+ 
+ 	tf::AsyncTask m_AsyncTask;
+ 	std::shared_ptr<std::future<void>> m_Future;
+-};
+\ No newline at end of file
++};
++
++DECLARE_LOGGER_CATEGORY(LogTaskFlow);
+\ No newline at end of file
+diff --git a/Source/Runtime/Async/TaskEvent.h b/Source/Runtime/Async/TaskEvent.h
+new file mode 100644
+index 0000000..1c7edeb
+--- /dev/null
++++ b/Source/Runtime/Async/TaskEvent.h
+@@ -0,0 +1,70 @@
++#pragma once
++
++#include "Core/Definitions.h"
++#include <future>
++
++enum class ETFTaskThread
++{
++	GameThread,
++	RenderThread,
++	WorkerThread,
++	Num
++};
++
++enum class ETFTaskPriority : uint8_t
++{
++	Low,
++	Normal,
++	High,
++	Critical
++};
++
++enum class ETFTaskState : uint8_t
++{
++	None,
++	Dispatched,
++	Canceled,
++	Completed
++};
++
++class TFTaskEvent
++{
++public:
++	TFTaskEvent() = delete;
++	TFTaskEvent(const TFTaskEvent&) = delete;
++	TFTaskEvent(TFTaskEvent&& Other) noexcept = default;
++	TFTaskEvent& operator=(const TFTaskEvent&) = delete;
++	TFTaskEvent& operator=(TFTaskEvent&& Other) noexcept = default;
++
++	TFTaskEvent(std::future<void>&& Future) noexcept
++		: m_Future(std::move(Future))
++	{
++	}
++
++	inline void Wait()
++	{
++		if (m_Future.valid())
++		{
++			m_Future.get();
++		}
++	}
++
++	inline void WaitForSeconds(size_t Seconds)
++	{
++		if (m_Future.valid())
++		{
++			m_Future.wait_for(std::chrono::seconds(Seconds));
++		}
++	}
++
++	inline void WaitForMilliseconds(size_t Milliseconds)
++	{
++		if (m_Future.valid())
++		{
++			m_Future.wait_for(std::chrono::milliseconds(Milliseconds));
++		}
++	}
++private:
++	std::future<void> m_Future;
++};
++using TFTaskEventPtr = std::shared_ptr<TFTaskEvent>;
+\ No newline at end of file
+diff --git a/Source/Runtime/Async/TaskExecutorManager.cpp b/Source/Runtime/Async/TaskExecutorManager.cpp
+new file mode 100644
+index 0000000..26f142a
+--- /dev/null
++++ b/Source/Runtime/Async/TaskExecutorManager.cpp
+@@ -0,0 +1,169 @@
++#include "Async/TaskExecutorManager.h"
++#include "Async/Task.h"
++#include "Core/ConsoleVariable.h"
++#include "Misc/PlatformMisc.h"
++#include "Core/SpdLogging.h"
++
++#include <barrier>
++
++ConsoleVariable<bool> CVarUseHyperThreading(
++	"tf.use_hyper_threading",
++	"Enable or disable hyper threading for taskflow executors.",
++	false);
++
++ConsoleVariable<bool> CVarUseSeperateGameThread(
++	"tf.use_seperate_game_thread",
++	"Enable or disable seperate game thread.",
++	false);
++
++ConsoleVariable<bool> CVarUseSeperateRenderThread(
++	"tf.use_seperate_render_thread",
++	"Enable or disable seperate render thread.",
++	false);
++
++ConsoleVariable<bool> CVarUseSeperateRHIThread(
++	"tf.use_seperate_rhi_thread",
++	"Enable or disable seperate rhi thread.",
++	false);
++
++ConsoleVariable<uint32_t> CVarNumForegroundThreads(
++	"tf.num_foreground_threads",
++	"Number of foreground threads.",
++	2u);
++
++thread_local ETFTaskThread t_ThreadTag = ETFTaskThread::WorkerThread;
++
++void TFTaskExecutorManager::Initialize()
++{
++	LOG_INFO(LogTaskFlow, "Use taskflow @{}", tf::version());
++
++	std::vector<size_t> WorkersInExecutor
++	{
++		CVarUseSeperateGameThread.Get(),
++		CVarUseSeperateRenderThread.Get(),
++		GetNumWorkerThreads(),
++		CVarNumForegroundThreads.Get()
++	};
++
++	m_Executors.reserve(WorkersInExecutor.size());
++
++	for (auto& NumWorkers : WorkersInExecutor)
++	{
++		if (NumWorkers > 0u)
++		{
++			m_Executors.emplace_back(std::make_shared<tf::Executor>(NumWorkers));
++		}
++	}
++
++	if (const uint32_t NumForegroundThreads = CVarNumForegroundThreads.Get())
++	{
++		if (auto Executor = GetExecutor(ETFTaskThread::WorkerThread, ETFTaskPriority::High))
++		{
++			// A thread runs one task at a time, so blocking all N here forces the priority change above onto N distinct workers.
++			std::barrier Barrier(static_cast<ptrdiff_t>(NumForegroundThreads));
++
++			tf::Taskflow Flow;
++			for (uint32_t Index = 0u; Index < NumForegroundThreads; ++Index)
++			{
++				Flow.emplace([&Barrier]() {
++					PlatformMisc::SetThreadPriority(std::this_thread::get_id(), ETFTaskPriority::High);
++					Barrier.arrive_and_wait();
++					});
++			}
++
++			Executor->run(Flow);
++			Executor->wait_for_all();
++
++			LOG_INFO(LogTaskFlow, "Set {} foreground thread(s) to high priority", NumForegroundThreads);
++		}
++	}
++
++	const uint32_t NumSeperateThreads = CVarUseSeperateGameThread.Get() + CVarUseSeperateRenderThread.Get() + CVarNumForegroundThreads.Get();
++	LOG_INFO(LogTaskFlow, "Create executors with {} seperate threads, {} worker threads, hyper threading is {}",
++		NumSeperateThreads,
++		GetNumWorkerThreads(),
++		CVarUseHyperThreading.Get() ? "enabled" : "disabled");
++}
++
++uint32_t TFTaskExecutorManager::GetNumWorkerThreads()
++{
++	const uint32_t NumTotalThreads = PlatformMisc::GetNumHardwareConcurrencyThreads(CVarUseHyperThreading.Get());
++
++	uint32_t NumSeperateThreads = 0u;
++	NumSeperateThreads += CVarUseSeperateGameThread.Get() ? 1u : 0u;
++	NumSeperateThreads += CVarUseSeperateRenderThread.Get() ? 1u : 0u;
++	NumSeperateThreads += CVarNumForegroundThreads.Get();
++
++	return NumTotalThreads > NumSeperateThreads ? NumTotalThreads - NumSeperateThreads : 0u;
++}
++
++tf::Executor* TFTaskExecutorManager::GetExecutor(ETFTaskThread Thread, ETFTaskPriority Priority)
++{
++	assert(Thread < ETFTaskThread::Num);
++
++	static const Array<size_t, ETFTaskThread> s_ExecutorIndices{
++		static_cast<size_t>(ETFTaskThread::GameThread),
++		static_cast<size_t>(ETFTaskThread::RenderThread) - !CVarUseSeperateGameThread.Get(),
++		static_cast<size_t>(ETFTaskThread::WorkerThread) - !CVarUseSeperateGameThread.Get() - !CVarUseSeperateRenderThread.Get()
++	};
++
++	const size_t ThreadIndex = static_cast<size_t>(Thread);
++	assert(ThreadIndex < s_ExecutorIndices.size());
++
++	const bool IsHighPriority = (Priority > ETFTaskPriority::Normal) ||
++		(Thread == ETFTaskThread::GameThread && !CVarUseSeperateGameThread.Get()) ||
++		(Thread == ETFTaskThread::RenderThread && !CVarUseSeperateRenderThread.Get());
++
++	const size_t ExecutorIndex = s_ExecutorIndices[ThreadIndex] + (IsHighPriority ? 1u : 0u);
++	assert(ExecutorIndex < m_Executors.size());
++
++	return m_Executors[ExecutorIndex].get();
++}
++
++void TFTaskExecutorManager::InitializeThreadTags()
++{
++	t_ThreadTag = ETFTaskThread::WorkerThread;
++
++	if (CVarUseSeperateGameThread.Get())
++	{
++		TFTask::Launch("tf.SetGameThreadTag", []() {
++			t_ThreadTag = ETFTaskThread::GameThread;
++			}, ETFTaskThread::GameThread)->Wait();
++	}
++
++	if (CVarUseSeperateRenderThread.Get())
++	{
++		TFTask::Launch("tf.SetRenderThreadTag", []() {
++			t_ThreadTag = ETFTaskThread::RenderThread;
++			}, ETFTaskThread::RenderThread)->Wait();
++	}
++}
++
++void TFTaskExecutorManager::Finalize()
++{
++	for (auto& Executor : m_Executors)
++	{
++		if (Executor)
++		{
++			Executor->wait_for_all();
++			Executor.reset();
++		}
++	}
++
++	m_Executors.clear();
++}
++
++bool TFTask::IsGameThread()
++{
++	return t_ThreadTag == ETFTaskThread::GameThread;
++}
++
++bool TFTask::IsRenderThread()
++{
++	return t_ThreadTag == ETFTaskThread::RenderThread;
++}
++
++bool TFTask::IsWorkerThread()
++{
++	return t_ThreadTag == ETFTaskThread::WorkerThread;
++}
+\ No newline at end of file
+diff --git a/Source/Runtime/Async/TaskExecutorManager.h b/Source/Runtime/Async/TaskExecutorManager.h
+new file mode 100644
+index 0000000..e6ddb0b
+--- /dev/null
++++ b/Source/Runtime/Async/TaskExecutorManager.h
+@@ -0,0 +1,24 @@
++#pragma once
++
++#include "Core/Singleton.h"
++#include "Async/TaskEvent.h"
++
++namespace tf
++{
++	class Executor;
++};
++
++class TFTaskExecutorManager : public Singleton<TFTaskExecutorManager>
++{
++public:
++	void Initialize();
++	void Finalize();
++
++	uint32_t GetNumWorkerThreads();
++
++	tf::Executor* GetExecutor(ETFTaskThread Thread, ETFTaskPriority Priority);
++private:
++	void InitializeThreadTags();
++
++	std::vector<std::shared_ptr<tf::Executor>> m_Executors;
++};
+\ No newline at end of file
+diff --git a/Source/Runtime/Core/Definitions.h b/Source/Runtime/Core/Definitions.h
+index 6580dd3..1b892de 100644
+--- a/Source/Runtime/Core/Definitions.h
++++ b/Source/Runtime/Core/Definitions.h
+@@ -1,5 +1,7 @@
+ #pragma once
+ 
++#define NOMINMAX 1
++
+ #include <stdint.h>
+ #include <assert.h>
+ #include <stdlib.h>
+@@ -34,27 +36,15 @@
+ #include <magic_enum/magic_enum.hpp>
+ 
+ #if defined(_WIN32)
+-	#if !defined(VK_USE_PLATFORM_WIN32_KHR)
+-		#define VK_USE_PLATFORM_WIN32_KHR 1
+-	#endif
+ 	#if !defined(PLATFORM_WIN32)
+ 		#define PLATFORM_WIN32 1
+ 	#endif
+-
+-	#define ENABLE_MULTI_RENDERER 1
+ #elif defined(__ANDRIOD__)
+-	#if !defined(VK_USE_PLATFORM_ANDROID_KHR)
+-		#define VK_USE_PLATFORM_ANDROID_KHR 1
+-	#endif
+ 	#if !defined(PLATFORM_ANDROID)
+ 		#define PLATFORM_ANDROID 1
+ 	#endif
+-
+-	#define ENABLE_MULTI_RENDERER 0
+ #endif
+ 
+-#define NOMINMAX 1
+-
+ #define NAMESPACE_START(Name) namespace Name {
+ #define NAMESPACE_END(Name) }
+ 
+diff --git a/Source/Runtime/Misc/Linux/PlatformMisc.cpp b/Source/Runtime/Misc/Linux/PlatformMisc.cpp
+index 5cd3dfb..c6638e6 100644
+--- a/Source/Runtime/Misc/Linux/PlatformMisc.cpp
++++ b/Source/Runtime/Misc/Linux/PlatformMisc.cpp
+@@ -221,7 +221,7 @@ namespace PlatformMisc
+ 		return Cores.empty() ? static_cast<uint32_t>(LogicalCoreCount) : static_cast<uint32_t>(Cores.size());
+ 	}
+ 
+-	void SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Priority)
++	void SetThreadPriority(std::thread::id ThreadID, ETFTaskPriority Priority)
+ 	{
+ 		if (ThreadID != std::this_thread::get_id())
+ 		{
+@@ -231,16 +231,16 @@ namespace PlatformMisc
+ 		int32_t NiceValue = 0;
+ 		switch (Priority)
+ 		{
+-		case TFTask::EPriority::Critical:
++		case ETFTaskPriority::Critical:
+ 			NiceValue = -10;
+ 			break;
+-		case TFTask::EPriority::High:
++		case ETFTaskPriority::High:
+ 			NiceValue = -5;
+ 			break;
+-		case TFTask::EPriority::Normal:
++		case ETFTaskPriority::Normal:
+ 			NiceValue = 0;
+ 			break;
+-		case TFTask::EPriority::Low:
++		case ETFTaskPriority::Low:
+ 			NiceValue = 5;
+ 			break;
+ 		default:
+diff --git a/Source/Runtime/Misc/PlatformMisc.h b/Source/Runtime/Misc/PlatformMisc.h
+index 15b3c40..9886a82 100644
+--- a/Source/Runtime/Misc/PlatformMisc.h
++++ b/Source/Runtime/Misc/PlatformMisc.h
+@@ -2,7 +2,7 @@
+ 
+ #include "Core/Math/Vector2.h"
+ #include "Core/String.h"
+-#include "Async/Task.h"
++#include "Async/TaskEvent.h"
+ 
+ namespace PlatformMisc
+ {
+@@ -24,7 +24,7 @@ namespace PlatformMisc
+ 
+ 	uint32_t GetNumHardwareConcurrencyThreads(bool UseHyperThreading);
+ 
+-	void SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Priority);
++	void SetThreadPriority(std::thread::id ThreadID, ETFTaskPriority Priority);
+ 
+ 	std::wstring Utf8ToWide(std::string_view Str);
+ 	string WideToUtf8(std::wstring_view Str);
+diff --git a/Source/Runtime/Misc/Windows/PlatformMisc.cpp b/Source/Runtime/Misc/Windows/PlatformMisc.cpp
+index 147c8c8..a47ccf7 100644
+--- a/Source/Runtime/Misc/Windows/PlatformMisc.cpp
++++ b/Source/Runtime/Misc/Windows/PlatformMisc.cpp
+@@ -252,7 +252,7 @@ namespace PlatformMisc
+ 		return UseHyperThreading ? LogicalCoreCount : PhysicalCoreCount;
+ 	}
+ 
+-	void SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Priority)
++	void SetThreadPriority(std::thread::id ThreadID, ETFTaskPriority Priority)
+ 	{
+ 		std::stringstream Stream;
+ 		Stream << ThreadID;
+@@ -275,16 +275,16 @@ namespace PlatformMisc
+ 		int32_t ThreadPriority = THREAD_PRIORITY_NORMAL;
+ 		switch (Priority)
+ 		{
+-		case TFTask::EPriority::Critical:
++		case ETFTaskPriority::Critical:
+ 			ThreadPriority = THREAD_PRIORITY_HIGHEST;
+ 			break;
+-		case TFTask::EPriority::High:
++		case ETFTaskPriority::High:
+ 			ThreadPriority = THREAD_PRIORITY_ABOVE_NORMAL;
+ 			break;
+-		case TFTask::EPriority::Normal:
++		case ETFTaskPriority::Normal:
+ 			ThreadPriority = THREAD_PRIORITY_NORMAL;
+ 			break;
+-		case TFTask::EPriority::Low:
++		case ETFTaskPriority::Low:
+ 			ThreadPriority = THREAD_PRIORITY_BELOW_NORMAL;
+ 			break;
+ 		default:
+diff --git a/Source/Runtime/Rendering/RHI/RHIBuffer.h b/Source/Runtime/Rendering/RHI/RHIBuffer.h
+index 5274fa6..6225bf0 100644
+--- a/Source/Runtime/Rendering/RHI/RHIBuffer.h
++++ b/Source/Runtime/Rendering/RHI/RHIBuffer.h
+@@ -1,7 +1,6 @@
+ #pragma once
+ 
+-#include "RHI/RHITexture.h"
+-#include "Asset/Asset.h"
++#include "Rendering/RHI/RHITexture.h"
+ 
+ #define RHI_WHOLE_SIZE ~0u
+ 
+@@ -14,14 +13,14 @@ struct RHIBufferDesc
+ 	size_t Size = 0ull;
+ 	const void* InitialData = nullptr;
+ 
+-	FName Name;
++	Name DebugName;
+ 
+ 	inline RHIBufferDesc& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; }
+ 	inline RHIBufferDesc& SetAccessFlags(ERHIDeviceAccessFlags Flags) { AccessFlags = Flags | AccessFlags; return *this; }
+ 	inline RHIBufferDesc& SetPermanentStates(ERHIResourceState States) { PermanentStates = States; return *this; }
+ 	inline RHIBufferDesc& SetSize(size_t InSize) { Size = InSize; return *this; }
+ 	inline RHIBufferDesc& SetInitialData(const void* Data) { InitialData = Data; return *this; }
+-	inline RHIBufferDesc& SetName(FName&& InName) { Name = std::move(InName); return *this; }
++	inline RHIBufferDesc& SetName(Name&& InName) { DebugName = std::move(InName); return *this; }
+ };
+ 
+ enum class ERHIMapMode
+@@ -42,7 +41,7 @@ class RHIBuffer : public RHIResource
+ {
+ public:
+ 	RHIBuffer(const RHIBufferDesc& Desc)
+-		: RHIResource(Desc.Name)
++		: RHIResource(Desc.DebugName)
+ 		, m_Size(Desc.Size)
+ 	{
+ 	}
+@@ -79,7 +78,7 @@ struct RHIFrameBufferDesc
+ 	RHIAttachment DepthStencilAttachment;
+ 	std::vector<RHIAttachment> ColorAttachments;
+ 
+-	FName Name;
++	Name DebugName;
+ 
+ 	inline uint32_t GetNumColorAttachments() const { return NumColorAttachments; }
+ 
+@@ -148,7 +147,7 @@ struct RHIFrameBufferDesc
+ 		return *this;
+ 	}
+ 
+-	inline RHIFrameBufferDesc& SetName(FName&& InName) { Name = std::move(InName); return *this; }
++	inline RHIFrameBufferDesc& SetName(Name&& InName) { DebugName = std::move(InName); return *this; }
+ private:
+ 	uint32_t NumColorAttachments = 0u;
+ 
+@@ -173,7 +172,7 @@ class RHIFrameBuffer : public RHIResource
+ {
+ public:
+ 	RHIFrameBuffer(const RHIFrameBufferDesc& Desc)
+-		: RHIResource(Desc.Name)
++		: RHIResource(Desc.DebugName)
+ 	{
+ 	}
+ 
+diff --git a/Source/Runtime/Rendering/RHI/RHICommandBuffer.h b/Source/Runtime/Rendering/RHI/RHICommandBuffer.h
+index 2fac33b..6091c13 100644
+--- a/Source/Runtime/Rendering/RHI/RHICommandBuffer.h
++++ b/Source/Runtime/Rendering/RHI/RHICommandBuffer.h
+@@ -1,8 +1,8 @@
+ #pragma once
+ 
+ #include "Core/Math/Color.h"
+-#include "RHI/RHIShader.h"
+-#include "RHI/RHIPipeline.h"
++#include "Rendering/RHI/RHIShader.h"
++#include "Rendering/RHI/RHIPipeline.h"
+ 
+ enum class ERHICommandBufferLevel : uint8_t
+ {
+diff --git a/Source/Runtime/Rendering/RHI/RHICommandListContext.h b/Source/Runtime/Rendering/RHI/RHICommandListContext.h
+index 1f44b8b..5954b43 100644
+--- a/Source/Runtime/Rendering/RHI/RHICommandListContext.h
++++ b/Source/Runtime/Rendering/RHI/RHICommandListContext.h
+@@ -1,6 +1,6 @@
+ #pragma once
+ 
+-#include "RHI/RHICommandBuffer.h"
++#include "Rendering/RHI/RHICommandBuffer.h"
+ 
+ class RHICommandListContext
+ {
+diff --git a/Source/Runtime/Rendering/RHI/RHIDevice.h b/Source/Runtime/Rendering/RHI/RHIDevice.h
+index 3a1429b..21238c8 100644
+--- a/Source/Runtime/Rendering/RHI/RHIDevice.h
++++ b/Source/Runtime/Rendering/RHI/RHIDevice.h
+@@ -1,7 +1,6 @@
+ #pragma once
+ 
+-#include "RHI/RHICommandBuffer.h"
+-#include "Core/SpdLogger.h"
++#include "Rendering/RHI/RHICommandBuffer.h"
+ 
+ /// <summary>
+ /// ****  Front face CCW
+diff --git a/Source/Runtime/Rendering/RHI/RHIFormat.cpp b/Source/Runtime/Rendering/RHI/RHIFormat.cpp
+index b9b08b3..1aef720 100644
+--- a/Source/Runtime/Rendering/RHI/RHIFormat.cpp
++++ b/Source/Runtime/Rendering/RHI/RHIFormat.cpp
+@@ -1,5 +1,6 @@
+-#include "RHI/RHIFormat.h"
++#include "Rendering/RHI/RHIFormat.h"
+ #include <gl/GL.h>
++#include <dxgiformat.h>
+ #include <vulkan/vulkan_format_traits.hpp>
+ 
+ /// https://docs.microsoft.com/en-us/windows/win32/api/dxgiformat/ne-dxgiformat-dxgi_format
+@@ -135,23 +136,23 @@ namespace RHI
+ 		return ERHIFormat::Unknown;
+ 	}
+ 
+-	DXGI_FORMAT GetDXGIFormat(ERHIFormat Format)
++	uint32_t GetDXGIFormat(ERHIFormat Format)
+ 	{
+ 		assert(s_FormatAttributes[static_cast<uint32_t>(Format)].RHIFormat == Format);
+ 		return s_FormatAttributes[static_cast<uint32_t>(Format)].DXGIFormat;
+ 	}
+ 
+-	vk::Format GetVulkanFormat(ERHIFormat Format)
++	uint32_t GetVulkanFormat(ERHIFormat Format)
+ 	{
+ 		assert(s_FormatAttributes[static_cast<uint32_t>(Format)].RHIFormat == Format);
+-		return static_cast<vk::Format>(s_FormatAttributes[static_cast<uint32_t>(Format)].VulkanFormat);
++		return static_cast<uint32_t>(s_FormatAttributes[static_cast<uint32_t>(Format)].VulkanFormat);
+ 	}
+ 
+-	ERHIFormat GetRHIFormat(vk::Format vkFormat)
++	ERHIFormat VkFormatToRHIFormat(uint32_t VkFormat)
+ 	{
+ 		for (auto& Attrs : s_FormatAttributes)
+ 		{
+-			if (static_cast<vk::Format>(Attrs.VulkanFormat) == vkFormat)
++			if (static_cast<uint32_t>(Attrs.VulkanFormat) == VkFormat)
+ 			{
+ 				return Attrs.RHIFormat;
+ 			}
+@@ -159,7 +160,7 @@ namespace RHI
+ 		return ERHIFormat::Unknown;
+ 	}
+ 
+-	ERHIFormat GetRHIFormat(DXGI_FORMAT DXGIFormat)
++	ERHIFormat DXGIFormatToRHIFormat(uint32_t DXGIFormat)
+ 	{
+ 		for (auto& Attrs : s_FormatAttributes)
+ 		{
+diff --git a/Source/Runtime/Rendering/RHI/RHIFormat.h b/Source/Runtime/Rendering/RHI/RHIFormat.h
+index 1076f99..e52c866 100644
+--- a/Source/Runtime/Rendering/RHI/RHIFormat.h
++++ b/Source/Runtime/Rendering/RHI/RHIFormat.h
+@@ -1,14 +1,6 @@
+ #pragma once
+ 
+-#include "RHI/RHIDeclarations.h"
+-#include <dxgiformat.h>
+-
+-#define USE_DYNAMIC_VK_LOADER 1
+-
+-#if USE_DYNAMIC_VK_LOADER
+-	#define VK_NO_PROTOTYPES
+-#endif
+-#include <vulkan/vulkan.hpp>
++#include "Rendering/RHI/RHIDeclarations.h"
+ 
+ enum class ERHIFormat : uint16_t
+ {
+@@ -128,8 +120,8 @@ enum class ERHIFormat : uint16_t
+ struct RHIFormatAttributes
+ {
+ 	ERHIFormat RHIFormat = ERHIFormat::Unknown;
+-	DXGI_FORMAT DXGIFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
+-	VkFormat VulkanFormat = VkFormat::VK_FORMAT_UNDEFINED;
++	uint32_t DXGIFormat = 0u;
++	uint32_t VulkanFormat = 0u;
+ 
+ 	uint32_t NumCols = 0u;
+ 	uint32_t NumRows = 0u;
+@@ -143,12 +135,13 @@ struct RHIFormatAttributes
+ 
+ namespace RHI
+ {
+-	DXGI_FORMAT GetDXGIFormat(ERHIFormat Format);
+-	vk::Format GetVulkanFormat(ERHIFormat Format);
++	uint32_t GetDXGIFormat(ERHIFormat Format);
++	uint32_t GetVulkanFormat(ERHIFormat Format);
++
+ 	ERHIFormat GetSRGBFormat(ERHIFormat Format);
+ 	ERHIFormat GetRHIFormatByName(const char* Name);
+-	ERHIFormat GetRHIFormat(vk::Format vkFormat);
+-	ERHIFormat GetRHIFormat(DXGI_FORMAT DXGIFormat);
++	ERHIFormat VkFormatToRHIFormat(uint32_t VkFormat);
++	ERHIFormat DXGIFormatToRHIFormat(uint32_t DXGIFormat);
+ 
+ 	bool IsColor(ERHIFormat Format);
+ 	bool IsDepth(ERHIFormat Format);
+diff --git a/Source/Runtime/Rendering/RHI/RHIPipeline.h b/Source/Runtime/Rendering/RHI/RHIPipeline.h
+index da0c654..2a6bdf0 100644
+--- a/Source/Runtime/Rendering/RHI/RHIPipeline.h
++++ b/Source/Runtime/Rendering/RHI/RHIPipeline.h
+@@ -1,9 +1,9 @@
+ #pragma once
+ 
+-#include "RHI/RHIBuffer.h"
+-#include "RHI/RHIShader.h"
+-#include "RHI/RHIRenderStates.h"
+-#include "Asset/Shader.h"
++#include "Rendering/RHI/RHIBuffer.h"
++#include "Rendering/RHI/RHIShader.h"
++#include "Rendering/RHI/RHIRenderStates.h"
++#include "Rendering/Shader.h"
+ 
+ struct RHIGraphicsPipelineDesc
+ {
+diff --git a/Source/Runtime/Rendering/RHI/RHIRenderStates.h b/Source/Runtime/Rendering/RHI/RHIRenderStates.h
+index 360db74..2390fd7 100644
+--- a/Source/Runtime/Rendering/RHI/RHIRenderStates.h
++++ b/Source/Runtime/Rendering/RHI/RHIRenderStates.h
+@@ -1,6 +1,6 @@
+ #pragma once
+ 
+-#include "RHI/RHITexture.h"
++#include "Rendering/RHI/RHITexture.h"
+ #include "Core/Math/Vector4.h"
+ 
+ enum class ERHIPolygonMode : uint8_t
+diff --git a/Source/Runtime/Rendering/RHI/RHIShader.h b/Source/Runtime/Rendering/RHI/RHIShader.h
+index 212c178..16d556a 100644
+--- a/Source/Runtime/Rendering/RHI/RHIShader.h
++++ b/Source/Runtime/Rendering/RHI/RHIShader.h
+@@ -1,6 +1,6 @@
+ #pragma once
+ 
+-#include "RHI/RHIResource.h"
++#include "Rendering/RHI/RHIResource.h"
+ 
+ enum class ERHIShaderLanguage : uint8_t
+ {
+@@ -100,12 +100,12 @@ struct RHIShaderDesc
+ 	ERHIShaderLanguage Language = ERHIShaderLanguage::HLSL;
+ 
+ 	const class ShaderBinary* Binary = nullptr;
+-	FName Name;
++	Name DebugName;
+ 
+ 	inline RHIShaderDesc& SetStage(ERHIShaderStage InStage) { Stage = InStage; return *this; }
+ 	inline RHIShaderDesc& SetLanguage(ERHIShaderLanguage InLanguage) { Language = InLanguage; return *this; }
+ 	inline RHIShaderDesc& SetShaderBinary(const class ShaderBinary* const InBinary) { Binary = InBinary; return *this; }
+-	inline RHIShaderDesc& SetName(FName&& InName) { Name = std::move(InName); return *this; }
++	inline RHIShaderDesc& SetName(Name&& InName) { DebugName = std::move(InName); return *this; }
+ };
+ 
+ class RHIShader
+diff --git a/Source/Runtime/Rendering/RHI/RHISwapchain.h b/Source/Runtime/Rendering/RHI/RHISwapchain.h
+index 7a63761..88265fd 100644
+--- a/Source/Runtime/Rendering/RHI/RHISwapchain.h
++++ b/Source/Runtime/Rendering/RHI/RHISwapchain.h
+@@ -1,6 +1,6 @@
+ #pragma once
+ 
+-#include "RHI/RHIRenderStates.h"
++#include "Rendering/RHI/RHIRenderStates.h"
+ 
+ class RHISwapchain
+ {
+diff --git a/Source/Runtime/Rendering/RHI/RHITexture.h b/Source/Runtime/Rendering/RHI/RHITexture.h
+index bd7d701..39ea50f 100644
+--- a/Source/Runtime/Rendering/RHI/RHITexture.h
++++ b/Source/Runtime/Rendering/RHI/RHITexture.h
+@@ -1,6 +1,7 @@
+ #pragma once
+ 
+ #include "Rendering/RHI/RHIResource.h"
++#include "Asset/AssetData.h"
+ 
+ enum class ERHITextureDimension : uint8_t
+ {
+diff --git a/Source/Runtime/Rendering/RHI/RHIUploadManager.h b/Source/Runtime/Rendering/RHI/RHIUploadManager.h
+index 242c707..1091c29 100644
+--- a/Source/Runtime/Rendering/RHI/RHIUploadManager.h
++++ b/Source/Runtime/Rendering/RHI/RHIUploadManager.h
+@@ -1,7 +1,7 @@
+ #pragma once
+ 
+ #include "Core/Singleton.h"
+-#include "RHI/RHIBuffer.h"
++#include "Rendering/RHI/RHIBuffer.h"
+ 
+ class RHIUploadManager : public LazySingleton<RHIUploadManager>
+ {
+@@ -15,8 +15,6 @@ public:
+ 
+ 	void FlushPendingFreeStagingBuffers();
+ protected:
+-	ALLOW_ACCESS_LAZY(RHIUploadManager);
+-
+ 	RHIUploadManager(RHIDevice& Device)
+ 		: m_Device(Device)
+ 	{
+diff --git a/Source/Runtime/Rendering/RenderGraph/RenderPass/GeometryPass.cpp b/Source/Runtime/Rendering/RenderGraph/RenderPass/GeometryPass.cpp
+index e34a84e..fbe2466 100644
+--- a/Source/Runtime/Rendering/RenderGraph/RenderPass/GeometryPass.cpp
++++ b/Source/Runtime/Rendering/RenderGraph/RenderPass/GeometryPass.cpp
+@@ -35,7 +35,7 @@ struct ScopeDebugMarker
+ //struct MeshDrawTask : public Task
+ //{
+ //	MeshDrawTask(const MeshDrawCommand& Command, RHICommandListContext* CommandListContext)
+-//		: Task("MeshDrawTask", EPriority::High)
++//		: Task("MeshDrawTask", ETFTaskPriority::High)
+ //		, DrawCommand(Command)
+ //		, CommandBuffer(CommandListContext->GetGraphicsCommandBuffer())
+ //	{
+diff --git a/Source/Runtime/Rendering/Shader.cpp b/Source/Runtime/Rendering/Shader.cpp
+index aa75a7c..9a00e8b 100644
+--- a/Source/Runtime/Rendering/Shader.cpp
++++ b/Source/Runtime/Rendering/Shader.cpp
+@@ -1,6 +1,5 @@
+-#include "Asset/Shader.h"
+-#include "RHI/RHIDevice.h"
+-#include "Paths.h"
++#include "Rendering/Shader.h"
++#include "Rendering/RHI/RHIDevice.h"
+ 
+ ShaderBinary::ShaderBinary(const Shader& InShader, ERHIDeviceType DeviceType, ShaderBlob& Blob)
+ 	: BaseClass(GetPath(InShader, DeviceType))
+@@ -16,10 +15,7 @@ std::filesystem::path ShaderBinary::GetPath(const Shader& InShader, ERHIDeviceTy
+ 	const std::filesystem::path RelativePath = std::filesystem::relative(InShader.GetPath(), Paths::ShaderPath()).parent_path();
+ 	return Paths::ShaderBinaryPath() / 
+ 		RelativePath / 
+-		String::Format("%s_%s_%llu.json", 
+-			InShader.GetStem().c_str(), 
+-			RHIDevice::GetName(DeviceType), 
+-			std::hash<Shader>()(InShader));
++		std::string(string::printf("%_%s_%llu.json", InShader.GetStem().c_str(), RHIDevice::GetName(DeviceType), std::hash<Shader>()(InShader)));
+ }
+ 
+ size_t Shader::GetHash() const
+diff --git a/Source/Runtime/Rendering/Shader.h b/Source/Runtime/Rendering/Shader.h
+index c8eebac..2126596 100644
+--- a/Source/Runtime/Rendering/Shader.h
++++ b/Source/Runtime/Rendering/Shader.h
+@@ -1,12 +1,12 @@
+ #pragma once
+ 
+ #include "Core/Math/Matrix.h"
+-#include "Asset/SerializableAsset.h"
+-#include "RHI/RHITexture.h"
+-#include "RHI/RHIShader.h"
+-#include "RHI/RHIBuffer.h"
++#include "Asset/JsonAsset.h"
++#include "Rendering/RHI/RHITexture.h"
++#include "Rendering/RHI/RHIShader.h"
++#include "Rendering/RHI/RHIBuffer.h"
+ #include "Rendering/RenderSettings.h"
+-#include "Paths.h"
++#include "Misc/Paths.h"
+ 
+ using ShaderBlob = DataBlock;
+ 
+@@ -128,7 +128,7 @@ private:
+ 	std::map<std::string, std::string> m_Defines;
+ };
+ 
+-class ShaderBinary : public Serializable<ShaderBinary>
++class ShaderBinary : public JsonAsset<ShaderBinary>
+ {
+ public:
+ 	using BaseClass::BaseClass;
+diff --git a/Source/Runtime/Rendering/ShaderLibrary.cpp b/Source/Runtime/Rendering/ShaderLibrary.cpp
+index 0c353a8..8e4d8b3 100644
+--- a/Source/Runtime/Rendering/ShaderLibrary.cpp
++++ b/Source/Runtime/Rendering/ShaderLibrary.cpp
+@@ -182,7 +182,7 @@ void ShaderLibrary::QueueCompile(Shader& InShader, ERHIDeviceType DeviceType)
+ {
+ 	//tf::Async([this, &InShader, DeviceType]() {
+ 	//	Compile(InShader, DeviceType);
+-	//}, EThread::WorkerThread, Task::EPriority::High);
++	//}, ETFTaskThread::WorkerThread, Task::ETFTaskPriority::High);
+ }
+ 
+ bool ShaderLibrary::RegisterCompileTask(size_t Hash)
+diff --git a/premake5.lua b/premake5.lua
+index 5c69e22..a4bd4c1 100644
+--- a/premake5.lua
++++ b/premake5.lua
+@@ -44,6 +44,7 @@ workspace "Rockcat"
+ 				"./Source/Runtime/**"
+ 			}
+ 			includedirs {
++				"$(SolutionDir)Source",
+ 				"$(SolutionDir)Source/Runtime",
+ 				"$(SolutionDir)Submodules/taskflow",
+ 				"$(SolutionDir)Submodules/cereal/include",
+@@ -74,6 +75,7 @@ workspace "Rockcat"
+ 				"./Source/Editor/**"
+ 			}
+ 			includedirs {
++				"$(SolutionDir)Source",
+ 				"$(SolutionDir)Source/Editor",
+ 				"$(SolutionDir)Source/Runtime",
+ 				"$(SolutionDir)Source/Runtime/Misc",
+@@ -103,8 +105,12 @@ workspace "Rockcat"
+ 					"./Source/RHI/Vulkan/Documents/**"
+ 				}
+ 				includedirs {
+-				"$(SolutionDir)Source/Runtime",
+-				"$(VK_SDK_PATH)/Include",
++					"$(SolutionDir)Source",
++					"$(SolutionDir)Source/Runtime",
++					"$(SolutionDir)Submodules/cereal/include",
++					"$(SolutionDir)Submodules/spdlog/include",
++					"$(SolutionDir)Submodules/magic_enum/include",
++					"$(VK_SDK_PATH)/Include",
+ 				}
+ 			project "D3D12RHI"
+ 				kind "StaticLib"
+@@ -115,8 +121,12 @@ workspace "Rockcat"
+ 					"./Source/RHI/D3D/DXGIInterface.h",
+ 					"./Source/RHI/D3D/DXGIInterface.cpp",
+ 				}
+-				includedirs { 
++				includedirs {
++					"$(SolutionDir)Source", 
+ 					"$(SolutionDir)Source/Runtime",
++					"$(SolutionDir)Submodules/cereal/include",
++					"$(SolutionDir)Submodules/spdlog/include",
++					"$(SolutionDir)Submodules/magic_enum/include",
+ 				}
+ 				links {
+ 					"d3d12",
+@@ -132,7 +142,11 @@ workspace "Rockcat"
+ 					"./Source/RHI/D3D/DXGIInterface.cpp",
+ 				}
+ 				includedirs { 
++					"$(SolutionDir)Source", 
+ 					"$(SolutionDir)Source/Runtime",
++					"$(SolutionDir)Submodules/cereal/include",
++					"$(SolutionDir)Submodules/spdlog/include",
++					"$(SolutionDir)Submodules/magic_enum/include",
+ 				}
+ 				links {
+ 					"d3d11",
+@@ -269,8 +283,12 @@ workspace "Rockcat"
+ 			"./Source/Applications/RenderTest/**",
+ 			"./Source/Runtime/Application/Win32/Resource.rc"
+ 		}
+-		includedirs { 
++		includedirs {
++			"$(SolutionDir)Source", 
+ 			"$(SolutionDir)Source/Runtime",
++			"$(SolutionDir)Submodules/cereal/include",
++			"$(SolutionDir)Submodules/spdlog/include",
++			"$(SolutionDir)Submodules/magic_enum/include",
+ 		}
+ 		targetdir "$(SolutionDir)Out"
+ 		links { 
+-- 
+2.55.0.windows.5
+
