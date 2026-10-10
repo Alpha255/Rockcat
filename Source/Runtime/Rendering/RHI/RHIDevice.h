@@ -1,7 +1,6 @@
 #pragma once
 
-#include "RHI/RHICommandBuffer.h"
-#include "Core/SpdLogger.h"
+#include "Rendering/RHI/RHICommandBuffer.h"
 
 /// <summary>
 /// ****  Front face CCW

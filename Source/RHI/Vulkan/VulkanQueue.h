@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RHI/Vulkan/VulkanTypes.h"
+#include "Rendering/RHI/RHIDevice.h"
 
 class VulkanQueue : public VkDeviceResource<vk::Queue>
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RHI/RHIResource.h"
+#include "Rendering/RHI/RHIResource.h"
 
 enum class ERHIShaderLanguage : uint8_t
 {
@@ -100,12 +100,12 @@ struct RHIShaderDesc
 	ERHIShaderLanguage Language = ERHIShaderLanguage::HLSL;
 
 	const class ShaderBinary* Binary = nullptr;
-	FName Name;
+	Name DebugName;
 
 	inline RHIShaderDesc& SetStage(ERHIShaderStage InStage) { Stage = InStage; return *this; }
 	inline RHIShaderDesc& SetLanguage(ERHIShaderLanguage InLanguage) { Language = InLanguage; return *this; }
 	inline RHIShaderDesc& SetShaderBinary(const class ShaderBinary* const InBinary) { Binary = InBinary; return *this; }
-	inline RHIShaderDesc& SetName(FName&& InName) { Name = std::move(InName); return *this; }
+	inline RHIShaderDesc& SetName(Name&& InName) { DebugName = std::move(InName); return *this; }
 };
 
 class RHIShader

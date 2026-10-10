@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Rendering/RHI/RHIResource.h"
 #include "RHI/Vulkan/VulkanLoader.h"
 
 class VulkanInstance final

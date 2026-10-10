@@ -1,7 +1,7 @@
 #include "RHI/Vulkan/VulkanBuffer.h"
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
-#include "RHI/RHIUploadManager.h"
+#include "Rendering/RHI/RHIUploadManager.h"
 
 VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferDesc& Desc)
 	: VkHwResource(Device)
@@ -86,7 +86,7 @@ VulkanBuffer::VulkanBuffer(const VulkanDevice& Device, const RHIBufferDesc& Desc
 		//}
 	}
 
-	VkHwResource::SetObjectName(Desc.Name.Get().data());
+	VkHwResource::SetObjectName(Desc.DebugName.Get().data());
 }
 
 void VulkanBuffer::AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags)

@@ -1,7 +1,7 @@
 #include "RHI/Vulkan/VulkanSwapChain.h"
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
-#include "OS/OS.h"
+#include "Misc/PlatformMisc.h"
 
 VulkanSurface::VulkanSurface(const VulkanDevice& Device, const void* WindowHandle)
 	: VkDeviceResource(Device)
@@ -10,7 +10,7 @@ VulkanSurface::VulkanSurface(const VulkanDevice& Device, const void* WindowHandl
 
 #if defined(PLATFORM_WIN32)
 	vk::Win32SurfaceCreateInfoKHR CreateInfo;
-	CreateInfo.setHinstance(reinterpret_cast<::HINSTANCE>(OS::GetApplicationInstance()))
+	CreateInfo.setHinstance(reinterpret_cast<::HINSTANCE>(PlatformMisc::GetApplicationHandle()))
 		.setHwnd(reinterpret_cast<::HWND>(const_cast<void*>(WindowHandle)));
 
 	VERIFY_VK(GetNativeInstance().createWin32SurfaceKHR(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
@@ -259,10 +259,10 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 			.SetNumArrayLayer(1u)
 			.SetNumMipLevel(1u)
 			.SetDimension(ERHITextureDimension::T_2D)
-			.SetFormat(RHI::GetRHIFormat(m_ColorFormat))
+			.SetFormat(RHI::VkFormatToRHIFormat(static_cast<uint32_t>(m_ColorFormat)))
 			.SetSampleCount(ERHISampleCount::Sample_1_Bit)
 			.SetUsages(ERHIBufferUsageFlags::None)
-			.SetName(String::Format("SwapchainImage-%d", Index));
+			.SetName(string::format("SwapchainImage-{}", Index));
 		m_BackBuffers[Index] = std::make_shared<VulkanTexture>(GetDevice(), Desc, Images[Index]);
 	}
 

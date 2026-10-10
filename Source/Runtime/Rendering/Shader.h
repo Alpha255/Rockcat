@@ -1,12 +1,12 @@
 #pragma once
 
 #include "Core/Math/Matrix.h"
-#include "Asset/SerializableAsset.h"
-#include "RHI/RHITexture.h"
-#include "RHI/RHIShader.h"
-#include "RHI/RHIBuffer.h"
+#include "Asset/JsonAsset.h"
+#include "Rendering/RHI/RHITexture.h"
+#include "Rendering/RHI/RHIShader.h"
+#include "Rendering/RHI/RHIBuffer.h"
 #include "Rendering/RenderSettings.h"
-#include "Paths.h"
+#include "Misc/Paths.h"
 
 using ShaderBlob = DataBlock;
 
@@ -128,7 +128,7 @@ private:
 	std::map<std::string, std::string> m_Defines;
 };
 
-class ShaderBinary : public Serializable<ShaderBinary>
+class ShaderBinary : public JsonAsset<ShaderBinary>
 {
 public:
 	using BaseClass::BaseClass;

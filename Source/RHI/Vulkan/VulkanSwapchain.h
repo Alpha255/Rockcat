@@ -2,7 +2,7 @@
 
 #include "RHI/Vulkan/VulkanAsync.h"
 #include "RHI/Vulkan/VulkanTexture.h"
-#include "RHI/RHISwapchain.h"
+#include "Rendering/RHI/RHISwapchain.h"
 
 class VulkanSurface final : public VkDeviceResource<vk::SurfaceKHR>
 {

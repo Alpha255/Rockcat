@@ -1,9 +1,27 @@
 #pragma once
 
+#define USE_DYNAMIC_VK_LOADER 1
+
+#if USE_DYNAMIC_VK_LOADER
+	#define VK_NO_PROTOTYPES
+#endif
+
+#if defined(_WIN32)
+	#if !defined(VK_USE_PLATFORM_WIN32_KHR)
+		#define VK_USE_PLATFORM_WIN32_KHR 1
+	#endif
+#elif defined(__ANDROID__)
+	#if !defined(VK_USE_PLATFORM_ANDROID_KHR)
+		#define VK_USE_PLATFORM_ANDROID_KHR 1
+	#endif
+#endif
+
 #include "Misc/PlatformMisc.h"
-#include "RHI/RHIResource.h"
+#include "Core/Spdlogging.h"
+
+#include <vulkan/vulkan.hpp>
+
 #include "RHI/Vulkan/VulkanExtensionDefines.h"
-#include "Services/SpdlogService.h"
 
 #define VK_ALLOCATION_CALLBACKS nullptr
 
@@ -274,14 +292,14 @@ protected:
 	class VulkanDevice* m_Device = nullptr;
 };
 #else
-#define VERIFY_VK(Func)                                                                                                                         \
-{                                                                                                                                               \
-	vk::Result TempResult = (Func);                                                                                                             \
-	if (TempResult != vk::Result::eSuccess)                                                                                                     \
-	{                                                                                                                                           \
-		LOG_CRITICAL(LogVulkan, "Failed to invoke VulkanAPI: File: {}, Line: {}, vkResult: {}", __FILE__, __LINE__, vk::to_string(TempResult)); \
-		assert(0);                                                                                                                              \
-	}                                                                                                                                           \
+#define VERIFY_VK(Func)                                                                                                                     \
+{                                                                                                                                           \
+	vk::Result Result = (Func);                                                                                                             \
+	if (Result != vk::Result::eSuccess)                                                                                                     \
+	{                                                                                                                                       \
+		LOG_CRITICAL(LogVulkan, "Failed to invoke VulkanAPI: File: {}, Line: {}, vkResult: {}", __FILE__, __LINE__, vk::to_string(Result)); \
+		assert(0);                                                                                                                          \
+	}                                                                                                                                       \
 }
 #endif
 
@@ -341,4 +359,4 @@ public:
 	}
 };
 
-DECLARE_LOG_CATEGOTY(LogVulkan);
+DECLARE_LOGGER_CATEGORY(LogVulkan);

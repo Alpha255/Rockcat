@@ -1,14 +1,6 @@
 #pragma once
 
-#include "RHI/RHIDeclarations.h"
-#include <dxgiformat.h>
-
-#define USE_DYNAMIC_VK_LOADER 1
-
-#if USE_DYNAMIC_VK_LOADER
-	#define VK_NO_PROTOTYPES
-#endif
-#include <vulkan/vulkan.hpp>
+#include "Rendering/RHI/RHIDeclarations.h"
 
 enum class ERHIFormat : uint16_t
 {
@@ -128,8 +120,8 @@ enum class ERHIFormat : uint16_t
 struct RHIFormatAttributes
 {
 	ERHIFormat RHIFormat = ERHIFormat::Unknown;
-	DXGI_FORMAT DXGIFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
-	VkFormat VulkanFormat = VkFormat::VK_FORMAT_UNDEFINED;
+	uint32_t DXGIFormat = 0u;
+	uint32_t VulkanFormat = 0u;
 
 	uint32_t NumCols = 0u;
 	uint32_t NumRows = 0u;
@@ -143,12 +135,13 @@ struct RHIFormatAttributes
 
 namespace RHI
 {
-	DXGI_FORMAT GetDXGIFormat(ERHIFormat Format);
-	vk::Format GetVulkanFormat(ERHIFormat Format);
+	uint32_t GetDXGIFormat(ERHIFormat Format);
+	uint32_t GetVulkanFormat(ERHIFormat Format);
+
 	ERHIFormat GetSRGBFormat(ERHIFormat Format);
 	ERHIFormat GetRHIFormatByName(const char* Name);
-	ERHIFormat GetRHIFormat(vk::Format vkFormat);
-	ERHIFormat GetRHIFormat(DXGI_FORMAT DXGIFormat);
+	ERHIFormat VkFormatToRHIFormat(uint32_t VkFormat);
+	ERHIFormat DXGIFormatToRHIFormat(uint32_t DXGIFormat);
 
 	bool IsColor(ERHIFormat Format);
 	bool IsDepth(ERHIFormat Format);

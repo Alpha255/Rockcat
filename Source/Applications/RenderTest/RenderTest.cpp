@@ -42,7 +42,7 @@ void RenderTest::Initialize()
 
 	auto TaskD = std::make_shared<TFTask>("TaskD", []() {
 		LOG_INFO(LogDefault, "TaskD");
-	}, TFTask::EThread::WorkerThread, TFTask::EPriority::High);
+	}, TFTask::ETFTaskThread::WorkerThread, TFTask::ETFTaskPriority::High);
 
 	TaskC->AddPrerequisite(*TaskB);
 	TaskC->AddPrerequisite(*TaskD);

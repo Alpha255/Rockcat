@@ -1,7 +1,6 @@
 #pragma once
 
-#include "RHI/RHITexture.h"
-#include "Asset/Asset.h"
+#include "Rendering/RHI/RHITexture.h"
 
 #define RHI_WHOLE_SIZE ~0u
 
@@ -14,14 +13,14 @@ struct RHIBufferDesc
 	size_t Size = 0ull;
 	const void* InitialData = nullptr;
 
-	FName Name;
+	Name DebugName;
 
 	inline RHIBufferDesc& SetUsages(ERHIBufferUsageFlags UsageFlags) { BufferUsageFlags = BufferUsageFlags | UsageFlags; return *this; }
 	inline RHIBufferDesc& SetAccessFlags(ERHIDeviceAccessFlags Flags) { AccessFlags = Flags | AccessFlags; return *this; }
 	inline RHIBufferDesc& SetPermanentStates(ERHIResourceState States) { PermanentStates = States; return *this; }
 	inline RHIBufferDesc& SetSize(size_t InSize) { Size = InSize; return *this; }
 	inline RHIBufferDesc& SetInitialData(const void* Data) { InitialData = Data; return *this; }
-	inline RHIBufferDesc& SetName(FName&& InName) { Name = std::move(InName); return *this; }
+	inline RHIBufferDesc& SetName(Name&& InName) { DebugName = std::move(InName); return *this; }
 };
 
 enum class ERHIMapMode
@@ -42,7 +41,7 @@ class RHIBuffer : public RHIResource
 {
 public:
 	RHIBuffer(const RHIBufferDesc& Desc)
-		: RHIResource(Desc.Name)
+		: RHIResource(Desc.DebugName)
 		, m_Size(Desc.Size)
 	{
 	}
@@ -79,7 +78,7 @@ struct RHIFrameBufferDesc
 	RHIAttachment DepthStencilAttachment;
 	std::vector<RHIAttachment> ColorAttachments;
 
-	FName Name;
+	Name DebugName;
 
 	inline uint32_t GetNumColorAttachments() const { return NumColorAttachments; }
 
@@ -148,7 +147,7 @@ struct RHIFrameBufferDesc
 		return *this;
 	}
 
-	inline RHIFrameBufferDesc& SetName(FName&& InName) { Name = std::move(InName); return *this; }
+	inline RHIFrameBufferDesc& SetName(Name&& InName) { DebugName = std::move(InName); return *this; }
 private:
 	uint32_t NumColorAttachments = 0u;
 
@@ -173,7 +172,7 @@ class RHIFrameBuffer : public RHIResource
 {
 public:
 	RHIFrameBuffer(const RHIFrameBufferDesc& Desc)
-		: RHIResource(Desc.Name)
+		: RHIResource(Desc.DebugName)
 	{
 	}
 

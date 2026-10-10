@@ -2,7 +2,7 @@
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 
-DEFINE_LOG_CATEGORY(LogVulkan);
+DEFINE_LOGGER_CATEGORY(LogVulkan);
 
 #if !defined(VULKAN_HPP_CPLUSPLUS)
 

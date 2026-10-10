@@ -1,7 +1,8 @@
 #pragma once
 
-#include "RHI/RHIDevice.h"
 #include "RHI/Vulkan/VulkanLoader.h"
+#include "Rendering/RHI/RHIRenderStates.h"
+#include "Rendering/RHI/RHICommandBuffer.h"
 
 vk::PolygonMode GetPolygonMode(ERHIPolygonMode Mode);
 vk::CullModeFlagBits GetCullMode(ERHICullMode Mode);

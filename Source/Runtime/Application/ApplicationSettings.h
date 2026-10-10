@@ -2,9 +2,9 @@
 
 #include "Window.h"
 #include "Rendering/RenderSettings.h"
-#include "Asset/SerializableAsset.h"
+#include "Asset/JsonAsset.h"
 
-class ApplicationSettings : public Serializable<ApplicationSettings>
+class ApplicationSettings : public JsonAsset<ApplicationSettings>
 {
 public:
 	using BaseClass::BaseClass;

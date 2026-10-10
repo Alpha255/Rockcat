@@ -35,7 +35,7 @@ struct ScopeDebugMarker
 //struct MeshDrawTask : public Task
 //{
 //	MeshDrawTask(const MeshDrawCommand& Command, RHICommandListContext* CommandListContext)
-//		: Task("MeshDrawTask", EPriority::High)
+//		: Task("MeshDrawTask", ETFTaskPriority::High)
 //		, DrawCommand(Command)
 //		, CommandBuffer(CommandListContext->GetGraphicsCommandBuffer())
 //	{

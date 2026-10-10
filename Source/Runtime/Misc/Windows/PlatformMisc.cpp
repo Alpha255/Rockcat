@@ -252,7 +252,7 @@ namespace PlatformMisc
 		return UseHyperThreading ? LogicalCoreCount : PhysicalCoreCount;
 	}
 
-	void SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Priority)
+	void SetThreadPriority(std::thread::id ThreadID, ETFTaskPriority Priority)
 	{
 		std::stringstream Stream;
 		Stream << ThreadID;
@@ -275,16 +275,16 @@ namespace PlatformMisc
 		int32_t ThreadPriority = THREAD_PRIORITY_NORMAL;
 		switch (Priority)
 		{
-		case TFTask::EPriority::Critical:
+		case ETFTaskPriority::Critical:
 			ThreadPriority = THREAD_PRIORITY_HIGHEST;
 			break;
-		case TFTask::EPriority::High:
+		case ETFTaskPriority::High:
 			ThreadPriority = THREAD_PRIORITY_ABOVE_NORMAL;
 			break;
-		case TFTask::EPriority::Normal:
+		case ETFTaskPriority::Normal:
 			ThreadPriority = THREAD_PRIORITY_NORMAL;
 			break;
-		case TFTask::EPriority::Low:
+		case ETFTaskPriority::Low:
 			ThreadPriority = THREAD_PRIORITY_BELOW_NORMAL;
 			break;
 		default:

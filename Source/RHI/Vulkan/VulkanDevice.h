@@ -2,7 +2,7 @@
 
 #include "RHI/Vulkan/VulkanTypes.h"
 #include "RHI/Vulkan/VulkanDevelopSettings.h"
-#include "RHI/RHIDevice.h"
+#include "Rendering/RHI/RHIDevice.h"
 
 class VulkanDevice final : public RHIDevice
 {

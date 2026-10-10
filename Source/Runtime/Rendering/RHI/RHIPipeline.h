@@ -1,9 +1,9 @@
 #pragma once
 
-#include "RHI/RHIBuffer.h"
-#include "RHI/RHIShader.h"
-#include "RHI/RHIRenderStates.h"
-#include "Asset/Shader.h"
+#include "Rendering/RHI/RHIBuffer.h"
+#include "Rendering/RHI/RHIShader.h"
+#include "Rendering/RHI/RHIRenderStates.h"
+#include "Rendering/Shader.h"
 
 struct RHIGraphicsPipelineDesc
 {

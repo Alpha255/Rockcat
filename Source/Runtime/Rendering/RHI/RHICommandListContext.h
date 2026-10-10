@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RHI/RHICommandBuffer.h"
+#include "Rendering/RHI/RHICommandBuffer.h"
 
 class RHICommandListContext
 {

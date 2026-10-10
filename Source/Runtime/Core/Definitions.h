@@ -1,5 +1,7 @@
 #pragma once
 
+#define NOMINMAX 1
+
 #include <stdint.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -34,26 +36,14 @@
 #include <magic_enum/magic_enum.hpp>
 
 #if defined(_WIN32)
-	#if !defined(VK_USE_PLATFORM_WIN32_KHR)
-		#define VK_USE_PLATFORM_WIN32_KHR 1
-	#endif
 	#if !defined(PLATFORM_WIN32)
 		#define PLATFORM_WIN32 1
 	#endif
-
-	#define ENABLE_MULTI_RENDERER 1
 #elif defined(__ANDRIOD__)
-	#if !defined(VK_USE_PLATFORM_ANDROID_KHR)
-		#define VK_USE_PLATFORM_ANDROID_KHR 1
-	#endif
 	#if !defined(PLATFORM_ANDROID)
 		#define PLATFORM_ANDROID 1
 	#endif
-
-	#define ENABLE_MULTI_RENDERER 0
 #endif
-
-#define NOMINMAX 1
 
 #define NAMESPACE_START(Name) namespace Name {
 #define NAMESPACE_END(Name) }

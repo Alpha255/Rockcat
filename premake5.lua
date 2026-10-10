@@ -44,6 +44,7 @@ workspace "Rockcat"
 				"./Source/Runtime/**"
 			}
 			includedirs {
+				"$(SolutionDir)Source",
 				"$(SolutionDir)Source/Runtime",
 				"$(SolutionDir)Submodules/taskflow",
 				"$(SolutionDir)Submodules/cereal/include",
@@ -74,6 +75,7 @@ workspace "Rockcat"
 				"./Source/Editor/**"
 			}
 			includedirs {
+				"$(SolutionDir)Source",
 				"$(SolutionDir)Source/Editor",
 				"$(SolutionDir)Source/Runtime",
 				"$(SolutionDir)Source/Runtime/Misc",
@@ -103,8 +105,12 @@ workspace "Rockcat"
 					"./Source/RHI/Vulkan/Documents/**"
 				}
 				includedirs {
-				"$(SolutionDir)Source/Runtime",
-				"$(VK_SDK_PATH)/Include",
+					"$(SolutionDir)Source",
+					"$(SolutionDir)Source/Runtime",
+					"$(SolutionDir)Submodules/cereal/include",
+					"$(SolutionDir)Submodules/spdlog/include",
+					"$(SolutionDir)Submodules/magic_enum/include",
+					"$(VK_SDK_PATH)/Include",
 				}
 			project "D3D12RHI"
 				kind "StaticLib"
@@ -115,8 +121,12 @@ workspace "Rockcat"
 					"./Source/RHI/D3D/DXGIInterface.h",
 					"./Source/RHI/D3D/DXGIInterface.cpp",
 				}
-				includedirs { 
+				includedirs {
+					"$(SolutionDir)Source", 
 					"$(SolutionDir)Source/Runtime",
+					"$(SolutionDir)Submodules/cereal/include",
+					"$(SolutionDir)Submodules/spdlog/include",
+					"$(SolutionDir)Submodules/magic_enum/include",
 				}
 				links {
 					"d3d12",
@@ -132,7 +142,11 @@ workspace "Rockcat"
 					"./Source/RHI/D3D/DXGIInterface.cpp",
 				}
 				includedirs { 
+					"$(SolutionDir)Source", 
 					"$(SolutionDir)Source/Runtime",
+					"$(SolutionDir)Submodules/cereal/include",
+					"$(SolutionDir)Submodules/spdlog/include",
+					"$(SolutionDir)Submodules/magic_enum/include",
 				}
 				links {
 					"d3d11",
@@ -269,8 +283,12 @@ workspace "Rockcat"
 			"./Source/Applications/RenderTest/**",
 			"./Source/Runtime/Application/Win32/Resource.rc"
 		}
-		includedirs { 
+		includedirs {
+			"$(SolutionDir)Source", 
 			"$(SolutionDir)Source/Runtime",
+			"$(SolutionDir)Submodules/cereal/include",
+			"$(SolutionDir)Submodules/spdlog/include",
+			"$(SolutionDir)Submodules/magic_enum/include",
 		}
 		targetdir "$(SolutionDir)Out"
 		links { 

@@ -221,7 +221,7 @@ namespace PlatformMisc
 		return Cores.empty() ? static_cast<uint32_t>(LogicalCoreCount) : static_cast<uint32_t>(Cores.size());
 	}
 
-	void SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Priority)
+	void SetThreadPriority(std::thread::id ThreadID, ETFTaskPriority Priority)
 	{
 		if (ThreadID != std::this_thread::get_id())
 		{
@@ -231,16 +231,16 @@ namespace PlatformMisc
 		int32_t NiceValue = 0;
 		switch (Priority)
 		{
-		case TFTask::EPriority::Critical:
+		case ETFTaskPriority::Critical:
 			NiceValue = -10;
 			break;
-		case TFTask::EPriority::High:
+		case ETFTaskPriority::High:
 			NiceValue = -5;
 			break;
-		case TFTask::EPriority::Normal:
+		case ETFTaskPriority::Normal:
 			NiceValue = 0;
 			break;
-		case TFTask::EPriority::Low:
+		case ETFTaskPriority::Low:
 			NiceValue = 5;
 			break;
 		default:

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Core/Name.h"
+#include "Core/SpdLogging.h"
+#include "Async/TaskEvent.h"
 
 #pragma warning(push)
 #pragma warning(disable:4324)
@@ -10,76 +12,10 @@
 #include <taskflow/algorithm/for_each.hpp>
 #pragma warning(pop)
 
-class TFTaskEvent
-{
-public:
-	TFTaskEvent() = delete;
-	TFTaskEvent(const TFTaskEvent&) = delete;
-	TFTaskEvent(TFTaskEvent&& Other) noexcept = default;
-	TFTaskEvent& operator=(const TFTaskEvent&) = delete;
-	TFTaskEvent& operator=(TFTaskEvent&& Other) noexcept = default;
-
-	TFTaskEvent(std::future<void>&& Future) noexcept
-		: m_Future(std::move(Future))
-	{
-	}
-	
-	inline void Wait() 
-	{
-		if (m_Future.valid())
-		{
-			m_Future.get();
-		}
-	}
-
-	inline void WaitForSeconds(size_t Seconds) 
-	{
-		if (m_Future.valid())
-		{
-			m_Future.wait_for(std::chrono::seconds(Seconds));
-		}
-	}
-
-	inline void WaitForMilliseconds(size_t Milliseconds)
-	{
-		if (m_Future.valid())
-		{
-			m_Future.wait_for(std::chrono::milliseconds(Milliseconds));
-		}
-	}
-private:
-	std::future<void> m_Future;
-};
-using TFTaskEventPtr = std::shared_ptr<TFTaskEvent>;
-
 class TFTask : public NoneCopyable
 {
 public:
-	enum class EThread
-	{
-		GameThread,
-		RenderThread,
-		WorkerThread,
-		Num
-	};
-
-	enum class EPriority : uint8_t
-	{
-		Low,
-		Normal,
-		High,
-		Critical
-	};
-
-	enum class EState : uint8_t
-	{
-		None,
-		Dispatched,
-		Canceled,
-		Completed
-	};
-
-	TFTask(Name&& TaskName, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	TFTask(Name&& TaskName, ETFTaskThread Thread = ETFTaskThread::WorkerThread, ETFTaskPriority Priority = ETFTaskPriority::Normal)
 		: m_Thread(Thread)
 		, m_Priority(Priority)
 		, m_Name(std::move(TaskName))
@@ -87,7 +23,7 @@ public:
 	}
 
 	template<class LAMBDA>
-	TFTask(Name&& TaskName, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	TFTask(Name&& TaskName, LAMBDA&& Lambda, ETFTaskThread Thread = ETFTaskThread::WorkerThread, ETFTaskPriority Priority = ETFTaskPriority::Normal)
 		: m_Thread(Thread)
 		, m_Priority(Priority)
 		, m_Name(std::move(TaskName))
@@ -122,17 +58,12 @@ public:
 
 	bool WaitForMilliseconds(size_t Milliseconds);
 
-	static void Initialize();
-	static void Finalize();
-
 	static bool IsGameThread();
 	static bool IsRenderThread();
 	static bool IsWorkerThread();
 
-	static uint32_t GetNumWorkerThreads();
-
 	template<class LAMBDA>
-	static std::shared_ptr<TFTask> Launch(Name&& TaskName, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	static std::shared_ptr<TFTask> Launch(Name&& TaskName, LAMBDA&& Lambda, ETFTaskThread Thread = ETFTaskThread::WorkerThread, ETFTaskPriority Priority = ETFTaskPriority::Normal)
 	{
 		auto Task = std::make_shared<TFTask>(std::forward<Name>(TaskName), std::forward<LAMBDA>(Lambda), Thread, Priority);
 		Task->Trigger();
@@ -140,7 +71,7 @@ public:
 	}
 
 	template<class LAMBDA>
-	static std::shared_ptr<TFTask> Launch(Name&& TaskName, LAMBDA&& Lambda, std::vector<TFTask*>&& PrerequisiteTasks, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	static std::shared_ptr<TFTask> Launch(Name&& TaskName, LAMBDA&& Lambda, std::vector<TFTask*>&& PrerequisiteTasks, ETFTaskThread Thread = ETFTaskThread::WorkerThread, ETFTaskPriority Priority = ETFTaskPriority::Normal)
 	{
 		auto Task = std::make_shared<TFTask>(std::forward<Name>(TaskName), std::forward<LAMBDA>(Lambda), Thread, Priority);
 		for (auto PrerequisiteTask : PrerequisiteTasks)
@@ -153,9 +84,9 @@ public:
 	}
 
 	template<class Iterator, class LAMBDA>
-	static TFTaskEventPtr ParallelFor(Iterator&& Begin, Iterator&& End, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	static TFTaskEventPtr ParallelFor(Iterator&& Begin, Iterator&& End, LAMBDA&& Lambda, ETFTaskThread Thread = ETFTaskThread::WorkerThread, ETFTaskPriority Priority = ETFTaskPriority::Normal)
 	{
-		assert(Thread < EThread::Num);
+		assert(Thread < ETFTaskThread::Num);
 
 		tf::Taskflow TFTaskFlow;
 		TFTaskFlow.for_each(Begin, End, std::forward<LAMBDA>(Lambda));
@@ -163,18 +94,16 @@ public:
 	}
 
 	template<class Iterator, class LAMBDA>
-	static TFTaskEventPtr ParallelSort(Iterator&& Begin, Iterator&& End, LAMBDA&& Lambda, EThread Thread = EThread::WorkerThread, EPriority Priority = EPriority::Normal)
+	static TFTaskEventPtr ParallelSort(Iterator&& Begin, Iterator&& End, LAMBDA&& Lambda, ETFTaskThread Thread = ETFTaskThread::WorkerThread, ETFTaskPriority Priority = ETFTaskPriority::Normal)
 	{
-		assert(Thread < EThread::Num);
+		assert(Thread < ETFTaskThread::Num);
 
 		tf::Taskflow TFTaskFlow;
 		TFTaskFlow.sort(Begin, End, std::forward<LAMBDA>(Lambda));
 		return DispatchTaskFlow(std::move(TFTaskFlow), Thread, Priority);
 	}
 protected:
-	static void InitializeThreadTags();
-
-	static TFTaskEventPtr DispatchTaskFlow(tf::Taskflow&&, EThread Thread, EPriority Priority);
+	static TFTaskEventPtr DispatchTaskFlow(tf::Taskflow&&, ETFTaskThread Thread, ETFTaskPriority Priority);
 
 	void TriggerSubsequents();
 
@@ -210,8 +139,8 @@ protected:
 		return false;
 	}
 private:
-	EThread m_Thread = EThread::WorkerThread;
-	EPriority m_Priority = EPriority::Normal;
+	ETFTaskThread m_Thread = ETFTaskThread::WorkerThread;
+	ETFTaskPriority m_Priority = ETFTaskPriority::Normal;
 
 	Name m_Name;
 
@@ -230,3 +159,5 @@ private:
 	tf::AsyncTask m_AsyncTask;
 	std::shared_ptr<std::future<void>> m_Future;
 };
+
+DECLARE_LOGGER_CATEGORY(LogTaskFlow);

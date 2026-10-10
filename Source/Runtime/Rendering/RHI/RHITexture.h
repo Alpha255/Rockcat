@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Rendering/RHI/RHIResource.h"
+#include "Asset/AssetData.h"
 
 enum class ERHITextureDimension : uint8_t
 {

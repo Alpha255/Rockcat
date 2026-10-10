@@ -27,9 +27,9 @@ public:
 	virtual ~File() = default;
 
 	inline const std::filesystem::path& GetPath() const { return m_Path; }
-	inline const std::string& GetName() const { return m_Name; }
-	inline const std::string& GetStem() const { return m_Stem; }
-	inline const std::string& GetExtension() const { return m_Extension; }
+	inline const string& GetName() const { return m_Name; }
+	inline const string& GetStem() const { return m_Stem; }
+	inline const string& GetExtension() const { return m_Extension; }
 	inline std::time_t GetLastWriteTime() const
 	{
 		m_LastWriteTime = GetLastWriteTime(m_Path);
@@ -140,9 +140,9 @@ protected:
 private:
 	std::filesystem::path m_Path; /// Notice the order of the members
 
-	std::string m_Name;
-	std::string m_Stem;
-	std::string m_Extension;
+	string m_Name;
+	string m_Stem;
+	string m_Extension;
 
 	mutable std::time_t m_LastWriteTime = 0u;
 };

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Singleton.h"
-#include "RHI/RHIBuffer.h"
+#include "Rendering/RHI/RHIBuffer.h"
 
 class RHIUploadManager : public LazySingleton<RHIUploadManager>
 {
@@ -15,8 +15,6 @@ public:
 
 	void FlushPendingFreeStagingBuffers();
 protected:
-	ALLOW_ACCESS_LAZY(RHIUploadManager);
-
 	RHIUploadManager(RHIDevice& Device)
 		: m_Device(Device)
 	{

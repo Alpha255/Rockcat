@@ -163,7 +163,7 @@ vk::StencilOp GetStencilOp(ERHIStencilOp Op)
 
 vk::Format GetFormat(ERHIFormat Format)
 {
-	return RHI::GetVulkanFormat(Format);
+	return static_cast<vk::Format>(RHI::GetVulkanFormat(Format));
 }
 
 vk::ShaderStageFlagBits GetShaderStage(ERHIShaderStage Stage)

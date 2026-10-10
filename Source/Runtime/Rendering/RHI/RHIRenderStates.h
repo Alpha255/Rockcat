@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RHI/RHITexture.h"
+#include "Rendering/RHI/RHITexture.h"
 #include "Core/Math/Vector4.h"
 
 enum class ERHIPolygonMode : uint8_t

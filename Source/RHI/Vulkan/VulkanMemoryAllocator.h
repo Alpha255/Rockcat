@@ -9,8 +9,6 @@ public:
 	VulkanDeviceMemory Allocate(vk::Buffer Buffer, ERHIDeviceAccessFlags AccessFlags);
 	VulkanDeviceMemory Allocate(vk::Image Image, ERHIDeviceAccessFlags AccessFlags);
 protected:
-	ALLOW_ACCESS_LAZY(VulkanMemoryAllocator)
-
 	VulkanMemoryAllocator(const class VulkanDevice& Device);
 
 	uint32_t GetMemoryTypeIndex(uint32_t MemTypeBits, vk::MemoryPropertyFlags MemPropertyFlags) const;

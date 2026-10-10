@@ -11,9 +11,9 @@
 #include "RHI/Vulkan/VulkanSwapchain.h"
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
 #include "RHI/Vulkan/VulkanRenderPass.h"
-#include "Paths.h"
-#include "Services/ShaderLibrary.h"
-#include "Async/Task.h"
+#include "Misc/Paths.h"
+//#include "Services/ShaderLibrary.h"
+#include "Async/TaskExecutorManager.h"
 
 #if USE_DYNAMIC_VK_LOADER
 	VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
@@ -114,12 +114,12 @@ VulkanDevice::VulkanDevice()
 	std::vector<const char*> EnabledLayers;
 	std::vector<const char*> EnabledExtensions;
 
-	std::string LogValidDeviceLayers("Found available device layers:\n");
+	string LogValidDeviceLayers("Found available device layers:\n");
 	auto LayerProperties = m_PhysicalDevice.enumerateDeviceLayerProperties();
 
 	for (const auto& LayerProperty : LayerProperties)
 	{
-		LogValidDeviceLayers += String::Format("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
+		LogValidDeviceLayers += string::printf("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
 	}
 	LOG_DEBUG(LogVulkan, LogValidDeviceLayers.c_str());
 
@@ -140,12 +140,12 @@ VulkanDevice::VulkanDevice()
 		}
 	}
 
-	std::string LogValidDeviceExtensions("Found available device extensions:\n");
+	string LogValidDeviceExtensions("Found available device extensions:\n");
 	auto ExtensionProperties = m_PhysicalDevice.enumerateDeviceExtensionProperties();
 
 	for (const auto& ExtensionProperty : ExtensionProperties)
 	{
-		LogValidDeviceExtensions += String::Format("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
+		LogValidDeviceExtensions += string::printf("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
 	}
 	LOG_DEBUG(LogVulkan, LogValidDeviceExtensions.c_str());
 
@@ -250,16 +250,16 @@ VulkanDevice::VulkanDevice()
 	
 	assert(PresentQueueIndex == GraphicsQueueIndex);
 
-	for (uint8_t Index = 0u; Index < TFTask::GetNumWorkerThreads(); ++Index)
+	for (uint8_t Index = 0u; Index < TFTaskExecutorManager::Get().GetNumWorkerThreads(); ++Index)
 	{
 		m_ThreadedCmdListContexts.emplace(std::make_shared<VulkanCommandListContext>(*this, *m_Queues[ERHIDeviceQueue::Graphics]));
 	}
 
 	m_PipelineCache = std::make_shared<VulkanPipelineCache>(*this);
 	
-	VulkanMemoryAllocator::Create(*this);
+	//VulkanMemoryAllocator::Create(*this);
 
-	ShaderLibrary::Get().RegisterActiveCompiler(GetType());
+	//ShaderLibrary::Get().RegisterActiveCompiler(GetType());
 }
 
 RHIShaderPtr VulkanDevice::CreateShader(const RHIShaderDesc& Desc) const

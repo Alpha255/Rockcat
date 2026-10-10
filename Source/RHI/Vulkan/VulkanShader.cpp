@@ -1,6 +1,5 @@
 #include "RHI/Vulkan/VulkanShader.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "Asset/Shader.h"
 
 VulkanShader::VulkanShader(const VulkanDevice& Device, const RHIShaderDesc& Desc)
 	: VkHwResource(Device)
@@ -15,7 +14,7 @@ VulkanShader::VulkanShader(const VulkanDevice& Device, const RHIShaderDesc& Desc
 
 	VERIFY_VK(GetNativeDevice().createShaderModule(&CreateInfo, VK_ALLOCATION_CALLBACKS, &m_Native));
 
-	VkHwResource::SetObjectName(Desc.Name.Get().data());
+	VkHwResource::SetObjectName(Desc.DebugName.Get().data());
 }
 
 VulkanInputLayout::VulkanInputLayout(const RHIInputLayoutDesc& Desc)

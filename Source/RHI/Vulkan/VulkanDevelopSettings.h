@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Asset/SerializableAsset.h"
-#include "RHI/RHIResource.h"
+#include "Asset/JsonAsset.h"
+#include "Rendering/RHI/RHIResource.h"
 
 struct VulkanExtensionSettings
 {
@@ -111,7 +111,7 @@ struct VulkanDescriptorLimits
 	}
 };
 
-struct VulkanDevelopSettings : public Serializable<VulkanDevelopSettings>
+struct VulkanDevelopSettings : public JsonAsset<VulkanDevelopSettings>
 {
 	using BaseClass::BaseClass;
 

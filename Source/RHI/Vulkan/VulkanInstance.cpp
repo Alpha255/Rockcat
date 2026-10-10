@@ -50,7 +50,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsMessengerCallback(
 	(void)(UserData);
 	(void)(MessageTypeFlags);
 
-	std::string Message = String::Format("[Validation]: [%3d][%10s]: %s",
+	string Message = string::printf("[Validation]: [%3d][%10s]: %s",
 		MessengerCallbackData->messageIdNumber,
 		MessengerCallbackData->pMessageIdName,
 		MessengerCallbackData->pMessage);
@@ -124,11 +124,11 @@ VulkanInstance::VulkanInstance(VulkanExtensionSettings& Settings, ERHIDebugLayer
 	std::vector<const char*> EnabledExtensions;
 
 	auto LayerProperties = vk::enumerateInstanceLayerProperties();
-	std::string LogValidInstanceLayers("Found available instance layers:\n");
+	string LogValidInstanceLayers("Found available instance layers:\n");
 
 	for (const auto& LayerProperty : LayerProperties)
 	{
-		LogValidInstanceLayers += String::Format("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
+		LogValidInstanceLayers += string::printf("\t\t\t\t\"%s\"\n", LayerProperty.layerName.data());
 	}
 	LOG_DEBUG(LogVulkan, LogValidInstanceLayers.c_str());
 	
@@ -153,12 +153,12 @@ VulkanInstance::VulkanInstance(VulkanExtensionSettings& Settings, ERHIDebugLayer
 	VulkanExtension* DebugUtilExt = nullptr;
 	VulkanExtension* DebugReportExt = nullptr;
 
-	std::string LogValidInstanceExtensions("Found available instance extensions:\n");
+	string LogValidInstanceExtensions("Found available instance extensions:\n");
 	auto ExtensionProperties = vk::enumerateInstanceExtensionProperties();
 
 	for (const auto& ExtensionProperty : ExtensionProperties)
 	{
-		LogValidInstanceExtensions += String::Format("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
+		LogValidInstanceExtensions += string::printf("\t\t\t\t\"%s\"\n", ExtensionProperty.extensionName.data());
 	}
 	LOG_DEBUG(LogVulkan, LogValidInstanceExtensions.c_str());
 

@@ -1,6 +1,5 @@
-#include "Asset/Shader.h"
-#include "RHI/RHIDevice.h"
-#include "Paths.h"
+#include "Rendering/Shader.h"
+#include "Rendering/RHI/RHIDevice.h"
 
 ShaderBinary::ShaderBinary(const Shader& InShader, ERHIDeviceType DeviceType, ShaderBlob& Blob)
 	: BaseClass(GetPath(InShader, DeviceType))
@@ -16,10 +15,7 @@ std::filesystem::path ShaderBinary::GetPath(const Shader& InShader, ERHIDeviceTy
 	const std::filesystem::path RelativePath = std::filesystem::relative(InShader.GetPath(), Paths::ShaderPath()).parent_path();
 	return Paths::ShaderBinaryPath() / 
 		RelativePath / 
-		String::Format("%s_%s_%llu.json", 
-			InShader.GetStem().c_str(), 
-			RHIDevice::GetName(DeviceType), 
-			std::hash<Shader>()(InShader));
+		std::string(string::printf("%_%s_%llu.json", InShader.GetStem().c_str(), RHIDevice::GetName(DeviceType), std::hash<Shader>()(InShader)));
 }
 
 size_t Shader::GetHash() const

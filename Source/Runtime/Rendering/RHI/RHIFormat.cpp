@@ -1,5 +1,6 @@
-#include "RHI/RHIFormat.h"
+#include "Rendering/RHI/RHIFormat.h"
 #include <gl/GL.h>
+#include <dxgiformat.h>
 #include <vulkan/vulkan_format_traits.hpp>
 
 /// https://docs.microsoft.com/en-us/windows/win32/api/dxgiformat/ne-dxgiformat-dxgi_format
@@ -135,23 +136,23 @@ namespace RHI
 		return ERHIFormat::Unknown;
 	}
 
-	DXGI_FORMAT GetDXGIFormat(ERHIFormat Format)
+	uint32_t GetDXGIFormat(ERHIFormat Format)
 	{
 		assert(s_FormatAttributes[static_cast<uint32_t>(Format)].RHIFormat == Format);
 		return s_FormatAttributes[static_cast<uint32_t>(Format)].DXGIFormat;
 	}
 
-	vk::Format GetVulkanFormat(ERHIFormat Format)
+	uint32_t GetVulkanFormat(ERHIFormat Format)
 	{
 		assert(s_FormatAttributes[static_cast<uint32_t>(Format)].RHIFormat == Format);
-		return static_cast<vk::Format>(s_FormatAttributes[static_cast<uint32_t>(Format)].VulkanFormat);
+		return static_cast<uint32_t>(s_FormatAttributes[static_cast<uint32_t>(Format)].VulkanFormat);
 	}
 
-	ERHIFormat GetRHIFormat(vk::Format vkFormat)
+	ERHIFormat VkFormatToRHIFormat(uint32_t VkFormat)
 	{
 		for (auto& Attrs : s_FormatAttributes)
 		{
-			if (static_cast<vk::Format>(Attrs.VulkanFormat) == vkFormat)
+			if (static_cast<uint32_t>(Attrs.VulkanFormat) == VkFormat)
 			{
 				return Attrs.RHIFormat;
 			}
@@ -159,7 +160,7 @@ namespace RHI
 		return ERHIFormat::Unknown;
 	}
 
-	ERHIFormat GetRHIFormat(DXGI_FORMAT DXGIFormat)
+	ERHIFormat DXGIFormatToRHIFormat(uint32_t DXGIFormat)
 	{
 		for (auto& Attrs : s_FormatAttributes)
 		{

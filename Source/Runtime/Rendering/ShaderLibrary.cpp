@@ -182,7 +182,7 @@ void ShaderLibrary::QueueCompile(Shader& InShader, ERHIDeviceType DeviceType)
 {
 	//tf::Async([this, &InShader, DeviceType]() {
 	//	Compile(InShader, DeviceType);
-	//}, EThread::WorkerThread, Task::EPriority::High);
+	//}, ETFTaskThread::WorkerThread, Task::ETFTaskPriority::High);
 }
 
 bool ShaderLibrary::RegisterCompileTask(size_t Hash)

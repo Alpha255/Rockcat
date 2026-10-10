@@ -2,7 +2,7 @@
 
 #include "Core/Math/Vector2.h"
 #include "Core/String.h"
-#include "Async/Task.h"
+#include "Async/TaskEvent.h"
 
 namespace PlatformMisc
 {
@@ -24,7 +24,7 @@ namespace PlatformMisc
 
 	uint32_t GetNumHardwareConcurrencyThreads(bool UseHyperThreading);
 
-	void SetThreadPriority(std::thread::id ThreadID, TFTask::EPriority Priority);
+	void SetThreadPriority(std::thread::id ThreadID, ETFTaskPriority Priority);
 
 	std::wstring Utf8ToWide(std::string_view Str);
 	string WideToUtf8(std::wstring_view Str);

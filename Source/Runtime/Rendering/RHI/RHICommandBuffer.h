@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Core/Math/Color.h"
-#include "RHI/RHIShader.h"
-#include "RHI/RHIPipeline.h"
+#include "Rendering/RHI/RHIShader.h"
+#include "Rendering/RHI/RHIPipeline.h"
 
 enum class ERHICommandBufferLevel : uint8_t
 {
