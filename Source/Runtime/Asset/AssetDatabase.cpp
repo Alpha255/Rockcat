@@ -1,7 +1,7 @@
 #include "Asset/AssetDatabase.h"
 #include "Core/SpdLogging.h"
-#include "Asset/AssetImporters/TextureLoader.h"
-#include "Asset/AssetImporters/AssimpSceneLoader.h"
+//#include "Asset/AssetImporters/TextureLoader.h"
+//#include "Asset/AssetImporters/AssimpSceneLoader.h"
 #include "Async/Task.h"
 
 void AssetDatabase::Initialize()
@@ -11,11 +11,11 @@ void AssetDatabase::Initialize()
 
 void AssetDatabase::CreateAssetLoaders()
 {
-	m_AssetLoaders.emplace_back(std::make_unique<TextureLoader>());
-	m_AssetLoaders.emplace_back(std::make_unique<AssimpSceneLoader>());
+	//m_AssetLoaders.emplace_back(std::make_unique<TextureLoader>());
+	//m_AssetLoaders.emplace_back(std::make_unique<AssimpSceneLoader>());
 }
 
-AssetLoader* AssetDatabase::FindAssetLoader(const std::string& Extension)
+AssetLoader* AssetDatabase::FindAssetLoader(const string& Extension)
 {
 	for (auto& Loader : m_AssetLoaders)
 	{

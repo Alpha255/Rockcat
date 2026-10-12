@@ -1,6 +1,7 @@
+#if 0
 #include "Rendering/RenderGraph/RenderPassParameters.h"
 #include "Rendering/RenderGraph/RenderGraph.h"
-#include "RHI/RHISwapchain.h"
+#include "Rendering/RHI/RHISwapchain.h"
 
 void RDGSceneTextures::InitializeWithSceneView(RDGRenderGraph& Graph, const RDGSceneViewInfo& ViewInfo)
 {
@@ -61,3 +62,4 @@ void RDGSceneViewInfo::SetupSceneViews(const RHIViewportClient& ViewportClient)
 		}
 	}
 }
+#endif

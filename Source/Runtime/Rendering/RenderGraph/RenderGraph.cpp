@@ -1,3 +1,4 @@
+#if 0
 #include "Rendering/RenderGraph/RenderGraph.h"
 #include "Rendering/RenderGraph/ResourceManager.h"
 #include "Scene/Scene.h"
@@ -25,3 +26,4 @@ RDGBuffer* RDGRenderGraph::CreateBuffer(const RHIBufferDesc& Desc)
 void RDGRenderGraph::Compile()
 {
 }
+#endif

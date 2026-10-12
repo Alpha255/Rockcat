@@ -1,4 +1,5 @@
 #include "Rendering/RHI/RHIFormat.h"
+#include <Windows.h>
 #include <gl/GL.h>
 #include <dxgiformat.h>
 #include <vulkan/vulkan_format_traits.hpp>

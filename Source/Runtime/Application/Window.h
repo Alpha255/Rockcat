@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Definitions.h"
+#include "Core/String.h"
 #include "Core/Cereal.h"
 
 #define MINIMAL_WINDOW_SIZE 32
@@ -18,7 +18,7 @@ struct WindowSettings
 	uint32_t Width = 1280u;
 	uint32_t Height = 720u;
 	EWindowMode Mode = EWindowMode::Windowed;
-	std::string Title = "RockcatWindow";
+	string Title = "RockcatWindow";
 
 	template<class Archive>
 	void serialize(Archive& Ar)

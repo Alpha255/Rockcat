@@ -1,8 +1,8 @@
 #include "Application/Win32/WindowsApplication.h"
 #include "Application/Win32/Resource.h"
 #include "Application/ApplicationSettings.h"
-#include "Core/SpdLogger.h"
-#include "OS/OS.h"
+#include "Core/SpdLogging.h"
+#include "Misc/PlatformMisc.h"
 #include <windowsx.h>
 
 #if PLATFORM_WIN32
@@ -12,11 +12,11 @@ extern BaseApplication* GApplication;
 WindowsApplication::WindowsApplication(const char* SettingsFile)
 	: BaseApplication(SettingsFile)
 {
-	HINSTANCE HInstance = reinterpret_cast<HINSTANCE>(OS::GetApplicationInstance());
-	VERIFY_WITH_OS_MESSAGE(HInstance);
+	HINSTANCE HInstance = reinterpret_cast<HINSTANCE>(PlatformMisc::GetApplicationHandle());
+	VERIFY_WITH_SYSTEM_MESSAGE(HInstance);
 
 	HICON HIcon = ::LoadIconW(HInstance, MAKEINTRESOURCEW(ICON_NVIDIA));
-	VERIFY_WITH_OS_MESSAGE(HIcon);
+	VERIFY_WITH_SYSTEM_MESSAGE(HIcon);
 
 	WNDCLASSEXW WndClassEx
 	{
@@ -33,7 +33,7 @@ WindowsApplication::WindowsApplication(const char* SettingsFile)
 		WINDOW_CLASS_NAME,
 		HIcon
 	};
-	VERIFY_WITH_OS_MESSAGE(::RegisterClassExW(&WndClassEx) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::RegisterClassExW(&WndClassEx) != 0);
 }
 
 void WindowsApplication::PumpMessages()
@@ -154,9 +154,9 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	}
 	case WM_CHAR:
 	{
-		const wchar_t wCharacter = static_cast<wchar_t>(wParam);
-		const auto Character = String::ToMultiByte(&wCharacter);
-		DispatchKeyCharMessage(Character[0]);
+		const wchar_t WChar = static_cast<wchar_t>(wParam);
+		const auto Char = string::from_wide(&WChar);
+		DispatchKeyCharMessage(Char[0]);
 		break;
 	}
 	case WM_INPUT:

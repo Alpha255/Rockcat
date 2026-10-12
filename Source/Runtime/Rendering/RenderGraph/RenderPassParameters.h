@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Core/DirectedAcyclicGraph.h"
-#include "RHI/RHIBuffer.h"
-#include "RHI/RHIRenderStates.h"
+#include "Rendering/RHI/RHIBuffer.h"
+#include "Rendering/RHI/RHIRenderStates.h"
 #include "Scene/SceneView.h"
 #include "Rendering/RenderSettings.h"
 #include "Rendering/RenderScene.h"

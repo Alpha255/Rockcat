@@ -1,6 +1,6 @@
+#if 0
 #include "Rendering/RenderGraph/RenderPass/OpaquePass.h"
 #include "Rendering/RenderGraph/RenderGraph.h"
-#if 0
 #include "Colorful/IRenderer/RenderGraph/RenderPass/ForwardShadingPass.h"
 #include "Colorful/IRenderer/IRenderer.h"
 #include "Scene/Scene.h"
@@ -230,7 +230,6 @@ void ForwardShadingPass::Render(ICommandBuffer* Command)
 
 NAMESPACE_END(RHI)
 
-#endif
 
 //class OpaquePassMeshDrawCommandBuilder : public GeometryPassMeshDrawCommandBuilder<GenericVS, DefaultLit>
 //{
@@ -247,3 +246,4 @@ OpaquePass::OpaquePass(DAGNodeID ID, RenderGraph& Graph)
 	: GeometryPass(ID, "OpaquePass", Graph)
 {
 }
+#endif

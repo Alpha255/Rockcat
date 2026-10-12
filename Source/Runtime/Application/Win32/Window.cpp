@@ -1,7 +1,7 @@
-#include "OS/OS.h"
+#include "Misc/PlatformMisc.h"
 #include "Application/Window.h"
 #include "Application/Win32/Resource.h"
-#include "Core/SpdLogger.h"
+#include "Core/SpdLogging.h"
 
 #if PLATFORM_WIN32
 
@@ -22,16 +22,16 @@ Window::Window(const WindowSettings& Settings)
 		static_cast<long>(m_Width), 
 		static_cast<long>(m_Height) 
 	};
-	VERIFY_WITH_OS_MESSAGE(::AdjustWindowRect(&Rect, WS_OVERLAPPEDWINDOW, false) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::AdjustWindowRect(&Rect, WS_OVERLAPPEDWINDOW, false) != 0);
 
-	HINSTANCE HInstance = reinterpret_cast<HINSTANCE>(OS::GetApplicationInstance());
-	VERIFY_WITH_OS_MESSAGE(HInstance);
+	HINSTANCE HInstance = reinterpret_cast<HINSTANCE>(PlatformMisc::GetApplicationHandle());
+	VERIFY_WITH_SYSTEM_MESSAGE(HInstance);
 
 	uint32_t ExtraWindowStyle = 0u;
 	::HWND Handle = ::CreateWindowExW(
 		0,
 		WINDOW_CLASS_NAME,
-		String::ToWide(Settings.Title).c_str(),
+		Settings.Title.to_wide().c_str(),
 		WS_OVERLAPPEDWINDOW ^ ExtraWindowStyle,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
@@ -41,10 +41,10 @@ Window::Window(const WindowSettings& Settings)
 		nullptr,
 		HInstance,
 		nullptr);
-	VERIFY_WITH_OS_MESSAGE(Handle);
+	VERIFY_WITH_SYSTEM_MESSAGE(Handle);
 
 	::ShowWindow(Handle, SW_SHOWDEFAULT);
-	VERIFY_WITH_OS_MESSAGE(::UpdateWindow(Handle) != 0);
+	VERIFY_WITH_SYSTEM_MESSAGE(::UpdateWindow(Handle) != 0);
 
 	m_Handle = reinterpret_cast<void*>(Handle);
 
@@ -56,7 +56,7 @@ void Window::UpdateSize(uint32_t Width, uint32_t Height)
 	if (Width == 0 || Height == 0)
 	{
 		::RECT Rect{};
-		VERIFY_WITH_OS_MESSAGE(::GetClientRect(reinterpret_cast<::HWND>(m_Handle), &Rect) != 0);
+		VERIFY_WITH_SYSTEM_MESSAGE(::GetClientRect(reinterpret_cast<::HWND>(m_Handle), &Rect) != 0);
 		Width = Rect.right - Rect.left;
 		Height = Rect.bottom - Rect.top;
 	}

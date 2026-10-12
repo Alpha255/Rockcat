@@ -1,3 +1,4 @@
+#if 0
 #include "Rendering/RenderGraph/RenderPass/TranslucentPass.h"
 #include "Rendering/RenderGraph/RenderGraph.h"
 
@@ -17,3 +18,4 @@ TranslucentPass::TranslucentPass(DAGNodeID ID, RenderGraph& Graph)
 	: GeometryPass(ID, "TranslucentPass", Graph)
 {
 }
+#endif

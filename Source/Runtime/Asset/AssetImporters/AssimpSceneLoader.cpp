@@ -1,3 +1,4 @@
+#if 0
 #include "Asset/AssetLoaders/AssimpSceneLoader.h"
 #include "Scene/Scene.h"
 #include "Services/AssetDatabase.h"
@@ -499,3 +500,4 @@ void AssimpSceneLoader::ProcessTextures(const aiMaterial* AiMaterial, MaterialPr
 		}
 	}
 }
+#endif

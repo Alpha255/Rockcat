@@ -2,16 +2,15 @@
 #include "Application/ApplicationSettings.h"
 #include "Application/Window.h"
 #include "RHI/Vulkan/VulkanDevice.h"
-#include "RHI/RHISwapchain.h"
-#include "Services/AssetDatabase.h"
-#include "Services/ShaderLibrary.h"
+#include "Rendering/RHI/RHISwapchain.h"
+#include "Asset/AssetDatabase.h"
 #include "Profile/CpuTimer.h"
 #include "Profile/Stats.h"
-#include "OS/OS.h"
-#include "Async/Task.h"
+#include "Misc/PlatformMisc.h"
+#include "Async/TaskExecutorManager.h"
 #include "Scene/Scene.h"
-#include "Rendering/RenderGraph/RenderGraph.h"
-#include "Rendering/SceneRenders/SceneRenderer.h"
+//#include "Rendering/RenderGraph/RenderGraph.h"
+//#include "Rendering/SceneRenders/SceneRenderer.h"
 
 BaseApplication* GApplication = nullptr;
 RHIDevice* GRenderDevice = nullptr;
@@ -65,8 +64,8 @@ void BaseApplication::RenderFrame()
 
 void BaseApplication::Tick()
 {
-	auto FrameTime = Stats::Get().GetFrameTime();
-	TickManager::Get().TickObjects(FrameTime);
+	//auto FrameTime = Stats::Get().GetFrameTime();
+	//TickManager::Get().TickObjects(FrameTime);
 }
 
 void BaseApplication::DispatchKeyUpMessage(const KeyEvent& Event)
@@ -191,15 +190,15 @@ void BaseApplication::DispatchAppQuitMessage()
 
 void BaseApplication::RenderScene(const Scene& InScene)
 {
-	if (InScene.IsReady())
-	{
-		RDGRenderGraph RenderGraph(m_Settings->GetRenderSettings());
-		RDGSceneViewInfo SceneViewInfo(RenderGraph, *m_ViewportClient, InScene);
+	//if (InScene.IsReady())
+	//{
+	//	RDGRenderGraph RenderGraph(m_Settings->GetRenderSettings());
+	//	RDGSceneViewInfo SceneViewInfo(RenderGraph, *m_ViewportClient, InScene);
 
-		std::unique_ptr<SceneRenderer> Renderer = SceneRenderer::Create(m_Settings->GetRenderSettings());
+	//	std::unique_ptr<SceneRenderer> Renderer = SceneRenderer::Create(m_Settings->GetRenderSettings());
 
-		Renderer->Render(RenderGraph, SceneViewInfo);
-	}
+	//	Renderer->Render(RenderGraph, SceneViewInfo);
+	//}
 }
 
 void BaseApplication::Run()
@@ -210,13 +209,13 @@ void BaseApplication::Run()
 		return;
 	}
 
-	OS::SetWorkingDirectory(Paths::AssetPath());
-	LOG_INFO(LogDefault, "Mount working directory to \"{}\".", OS::GetWorkingDirectory().string());
+	PlatformMisc::SetWorkingDirectory(Paths::AssetPath());
+	LOG_INFO(LogDefault, "Mount working directory to \"{}\".", PlatformMisc::GetWorkingDirectory().string());
 
-	TFTask::Initialize();
+	TFTaskExecutorManager::Get().Initialize();
 	AssetDatabase::Get().Initialize();
-	Stats::Get().Initialize();
-	ShaderLibrary::Get().Initialize();
+	//Stats::Get().Initialize();
+	//ShaderLibrary::Get().Initialize();
 
 	if (m_Settings->GetRenderSettings().Enable)
 	{
@@ -238,7 +237,7 @@ void BaseApplication::Run()
 	{
 		const bool Active = IsActive();
 
-		Stats::Get().OnFrameBegin(Active);
+		//Stats::Get().OnFrameBegin(Active);
 
 		PumpMessages();
 
@@ -249,15 +248,15 @@ void BaseApplication::Run()
 			RenderFrame();
 		}
 
-		Stats::Get().OnFrameEnd();
+		//Stats::Get().OnFrameEnd();
 	}
 
 	Finalize();
 
-	ShaderLibrary::Get().Finalize();
+	//ShaderLibrary::Get().Finalize();
 	AssetDatabase::Get().Finalize();
-	TFTask::Finalize();
-	Stats::Get().Finalize();
+	TFTaskExecutorManager::Get().Finalize();
+	//Stats::Get().Finalize();
 
 	FinalizeRHI();
 }

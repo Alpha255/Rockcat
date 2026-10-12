@@ -1,3 +1,4 @@
+#if 0
 #include "Rendering/RenderGraph/RenderPass.h"
 #include "Rendering/RenderGraph/RenderGraph.h"
 #include "Rendering/RenderGraph/ResourceManager.h"
@@ -43,3 +44,4 @@ RDGResource& RenderPass::AddResource(RDGResource::EType Type, const char* Name, 
 {
 	return GetResourceManager().GetOrAllocateResource(Type, Name, Visibility);
 }
+#endif

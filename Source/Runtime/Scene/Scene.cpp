@@ -1,9 +1,9 @@
 #include "Scene/Scene.h"
 #include "Scene/SceneVisitor.h"
-#include "Services/AssetDatabase.h"
+#include "Asset/AssetDatabase.h"
 #include "Async/Task.h"
 #include "Components/PrimitiveComponent.h"
-#include "Paths.h"
+#include "Misc/Paths.h"
 
 void Scene::Tick(float ElapsedSeconds)
 {
@@ -36,7 +36,7 @@ void Scene::AddPrimitive(const PrimitiveComponent* PrimitiveComp)
 
 void Scene::RemovePrimitive(const PrimitiveComponent* PrimitiveComp)
 {
-	assert(TFTask::IsMainThread() || TFTask::IsGameThread());
+	assert(TFTask::IsGameThread());
 
 	m_RemovedPrimitives.push_back(PrimitiveComp);
 }
@@ -67,7 +67,7 @@ void Scene::OnPostLoad()
 		Request.OnLoaded = [LocalLoadRequests = m_AssimpLoadRequests.get(), this](Asset&) {
 			for (const auto& LocalRequest : *LocalLoadRequests)
 			{
-				if (!LocalRequest.Target->IsReady(std::memory_order_acquire))
+				if (!LocalRequest.Target->IsReady())
 				{
 					return;
 				}

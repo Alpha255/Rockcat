@@ -55,10 +55,10 @@ void SceneView::SetViewMode(EViewMode ViewMode)
 	}
 }
 
-Math::UInt2 SceneView::GetViewSize() const
-{
-	return m_Viewports.empty() ? Math::UInt2(0u, 0u) : Math::UInt2(static_cast<uint32_t>(m_Viewports[0].GetWidth()), static_cast<uint32_t>(m_Viewports[0].GetHeight()));
-}
+//Math::UInt2 SceneView::GetViewSize() const
+//{
+//	return m_Viewports.empty() ? Math::UInt2(0u, 0u) : Math::UInt2(static_cast<uint32_t>(m_Viewports[0].GetWidth()), static_cast<uint32_t>(m_Viewports[0].GetHeight()));
+//}
 
 void PlanarSceneView::SetViewport(const RHIViewport& Viewport)
 {

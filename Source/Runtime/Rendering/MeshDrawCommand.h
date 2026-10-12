@@ -3,7 +3,7 @@
 #include "RHI/RHIBuffer.h"
 #include "RHI/RHIRenderStates.h"
 #include "RHI/RHIPipeline.h"
-#include "Asset/Material.h"
+//#include "Asset/Material.h"
 
 enum class EGeometryPass
 {
@@ -32,7 +32,7 @@ struct MeshDrawCommand
 	uint32_t NumInstances = 1u;
 	ERHIIndexFormat IndexFormat = ERHIIndexFormat::UInt16;
 
-	const MaterialProperty* Material = nullptr;
+	//const MaterialProperty* Material = nullptr;
 	RHIGraphicsPipelineDesc PipelineDesc;
 
 	union
@@ -51,9 +51,10 @@ struct MeshDrawCommand
 	};
 
 	MeshDrawCommand() = default;
-	MeshDrawCommand(const class StaticMesh& Mesh);
+	//MeshDrawCommand(const class StaticMesh& Mesh);
 
 	const char* GetDebugName() const {
-		return Material ? Material->Name.c_str() : "Unknown";
+		//return Material ? Material->Name.c_str() : "Unknown";
+		return "Unknown";
 	}
 };

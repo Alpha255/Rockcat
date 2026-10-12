@@ -1,5 +1,5 @@
 #include "Scene/Components/Camera.h"
-#include "OS/OS.h"
+#include "Misc/PlatformMisc.h"
 
 void Camera::SetLookAt(const Math::Vector3& Eye, const Math::Vector3& LookAt)
 {
@@ -69,7 +69,7 @@ void Camera::UpdateMouseDelta()
 {
 	if (m_MouseMovements.IsButtonDown(EMouseButton::Left))
 	{
-		Math::Vector2 CursorPos = OS::GetCursorPosition();
+		Math::Vector2 CursorPos = PlatformMisc::GetCursorPosition();
 
 		auto Delta = CursorPos - m_MouseMovements.LastPos;
 		m_MouseMovements.LastPos = CursorPos;

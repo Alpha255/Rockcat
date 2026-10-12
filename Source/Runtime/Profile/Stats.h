@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Core/Module.h"
 #include "Core/Tickable.h"
+#include "Core/Singleton.h"
 #include "Profile/CpuTimer.h"
 
 class StatEvent
@@ -62,7 +62,7 @@ private:
 //	Event& m_Event;
 //};
 
-class Stats : public IService<Stats>
+class Stats : public Singleton<Stats>
 {
 public:
 	void OnFrameBegin(bool Active);

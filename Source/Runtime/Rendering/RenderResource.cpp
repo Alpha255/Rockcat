@@ -1,3 +1,4 @@
+#if 0
 #include "Asset/RenderResource.h"
 #include "Core/Singleton.h"
 
@@ -66,3 +67,4 @@ void RenderResource::Initialize()
 		m_Index = FGlobalRenderResourceList::Get().Allocate(this);
 	}
 }
+#endif

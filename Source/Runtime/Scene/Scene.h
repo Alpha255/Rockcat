@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Asset/SerializableAsset.h"
+#include "Asset/JsonAsset.h"
 #include "Scene/SceneGraph.h"
 #include "Components/ComponentPool.h"
 #include "Components/Camera.h"
@@ -11,7 +11,7 @@ struct AssimpScene : public Asset, public SceneGraph
 	using Asset::Asset;
 };
 
-class Scene : public ITickable, public SceneGraph, public Serializable<Scene>
+class Scene : public ITickable, public SceneGraph, public JsonAsset<Scene>
 {
 public:
 	using BaseClass::BaseClass;

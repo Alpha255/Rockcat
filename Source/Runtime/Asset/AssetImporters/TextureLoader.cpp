@@ -1,3 +1,4 @@
+#if 0
 #include "Asset/AssetLoaders/TextureLoader.h"
 #include "Asset/Texture.h"
 #include "Core/SpdLogger.h"
@@ -329,3 +330,4 @@ bool TextureLoader::LoadDDS(Texture& Image)
 
 	return false;
 }
+#endif

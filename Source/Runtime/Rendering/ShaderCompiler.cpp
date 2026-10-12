@@ -1,6 +1,7 @@
-#include "Asset/ShaderCompiler.h"
+#include "Rendering/ShaderCompiler.h"
+#include "Core/SpdLogging.h"
 
-DEFINE_LOG_CATEGORY(LogShaderCompiler);
+DEFINE_LOGGER_CATEGORY(LogShaderCompiler);
 
 DxcShaderCompiler::DxcShaderCompiler(bool GenerateSpirv)
 	: m_GenSpirv(GenerateSpirv)
@@ -43,8 +44,8 @@ ShaderBlob DxcShaderCompiler::Compile(
 	uint32_t Index = 0u;
 	for (const auto& [Name, Value] : Definitions.GetDefines())
 	{
-		LocalShaderDefinitions[Index].Name = std::move(String::ToWide(Name.c_str()));
-		LocalShaderDefinitions[Index].Value = std::move(String::ToWide(Value.c_str()));
+		LocalShaderDefinitions[Index].Name = std::move(Name.to_wide());
+		LocalShaderDefinitions[Index].Value = std::move(Value.to_wide());
 		++Index;
 	}
 
@@ -62,9 +63,9 @@ ShaderBlob DxcShaderCompiler::Compile(
 		DxcDefines[Index].Value = L"1";
 	}
 
-	auto WSourceName = SourceName ? String::ToWide(SourceName).c_str() : std::wstring();
-	auto WEntryPoint = String::ToWide(EntryPoint);
-	auto WProfile = String::ToWide(GetProfile(ShaderStage, true));
+	auto WSourceName = SourceName ? string(SourceName).to_wide() : std::wstring();
+	auto WEntryPoint = string(EntryPoint).to_wide();
+	auto WProfile = string(GetProfile(ShaderStage, true)).to_wide();
 
 	std::vector<const wchar_t*> Args;
 	//auto IncludeDirectoryArg = String::ToWide(String::Format("-I %s", ASSET_PATH_SHADERS));

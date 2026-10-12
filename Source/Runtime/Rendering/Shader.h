@@ -7,6 +7,7 @@
 #include "Rendering/RHI/RHIBuffer.h"
 #include "Rendering/RenderSettings.h"
 #include "Misc/Paths.h"
+#include "Core/String.h"
 
 using ShaderBlob = DataBlock;
 
@@ -113,7 +114,7 @@ public:
 	inline void SetDefine(const char* Name, T Value) { m_Defines[Name] = (std::stringstream() << Value).str(); }
 
 	template<class T>
-	inline void SetDefine(const std::string& Name, T Value) { m_Defines[Name] = (std::stringstream() << Value).str(); }
+	inline void SetDefine(const string& Name, T Value) { m_Defines[Name] = (std::stringstream() << Value).str(); }
 
 	void Merge(const ShaderDefines& Other)
 	{
@@ -123,9 +124,9 @@ public:
 		}
 	}
 
-	const std::map<std::string, std::string>& GetDefines() const { return m_Defines; }
+	const std::map<string, string>& GetDefines() const { return m_Defines; }
 private:
-	std::map<std::string, std::string> m_Defines;
+	std::map<string, string> m_Defines;
 };
 
 class ShaderBinary : public JsonAsset<ShaderBinary>

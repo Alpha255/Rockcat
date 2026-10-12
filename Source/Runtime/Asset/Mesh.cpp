@@ -1,3 +1,4 @@
+#if 0
 #include "Scene/Components/StaticMesh.h"
 #include "RHI/RHIDevice.h"
 #include "RHI/RHICommandListContext.h"
@@ -141,3 +142,4 @@ void PrimitiveBuffers::CreateRHI(const MeshData& Data, RHIDevice& Device)
 			//String::Format("%s-VertexColor", Data.GetName()));
 	}
 }
+#endif

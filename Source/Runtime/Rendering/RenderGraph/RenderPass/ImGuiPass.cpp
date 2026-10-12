@@ -1,12 +1,12 @@
+#if 0
 #include "Rendering/RenderGraph/RenderPass/ImGuiPass.h"
-#include <imgui/imgui.h>
+//#include <imgui/imgui.h>
 
 ImGUIPass::~ImGUIPass()
 {
-	ImGui::DestroyContext();
+	//ImGui::DestroyContext();
 }
 
-#if 0
 #include "Colorful/IRenderer/RenderGraph/RenderPass/ImGUIPass.h"
 #include "Colorful/IRenderer/IRenderer.h"
 #include "Asset/Material.h"

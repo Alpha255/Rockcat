@@ -1,3 +1,4 @@
+#if 0
 #include "Rendering/RenderGraph/RenderPass/ShadowPass.h"
 #include "Rendering/RenderGraph/RenderGraph.h"
 #include "Rendering/RenderSettings.h"
@@ -31,3 +32,4 @@ ShadowPass::ShadowPass(DAGNodeID ID, RenderGraph& Graph)
 	: GeometryPass(ID, "ShadowPass", Graph)
 {
 }
+#endif

@@ -1,7 +1,8 @@
+#if 0
 #include "Rendering/RenderGraph/RenderPass/GeometryPass.h"
-#include "RHI/RHIDevice.h"
-#include "RHI/RHICommandListContext.h"
-#include "Scene/Components/StaticMesh.h"
+#include "Rendering/RHI/RHIDevice.h"
+#include "Rendering/RHI/RHICommandListContext.h"
+//#include "Scene/Components/StaticMesh.h"
 #include "Rendering/RenderScene.h"
 #include "Rendering/RenderGraph/RenderGraph.h"
 #include "Async/Task.h"
@@ -118,3 +119,4 @@ void GeometryPass::Execute(const RenderScene& Scene)
 	//	}
 	//}
 }
+#endif

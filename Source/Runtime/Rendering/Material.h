@@ -2,8 +2,8 @@
 
 #include "Core/Math/Matrix.h"
 #include "Core/Math/Color.h"
-#include "Asset/SerializableAsset.h"
-#include "Asset/Texture.h"
+#include "Asset/JsonAsset.h"
+#include "Asset/TextureAsset.h"
 #include "RHI/RHIRenderStates.h"
 
 enum class EShadingMode : uint8_t
@@ -21,7 +21,7 @@ enum class EBlendMode : uint8_t
 	Translucent,
 };
 
-struct MaterialProperty : public Serializable<MaterialProperty>
+struct MaterialProperty : public JsonAsset<MaterialProperty>
 {
 	using BaseClass::BaseClass;
 
@@ -91,7 +91,7 @@ struct MaterialProperty : public Serializable<MaterialProperty>
 		}
 	} Factors;
 
-	Array<std::shared_ptr<Texture>, ETextureType> Textures;
+	Array<std::shared_ptr<TextureAsset>, ETextureType> Textures;
 
 	template<class Archive>
 	void serialize(Archive& Ar)

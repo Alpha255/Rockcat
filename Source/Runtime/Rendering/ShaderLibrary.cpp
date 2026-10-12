@@ -1,3 +1,4 @@
+#if 0
 #include "Services/ShaderLibrary.h"
 #include "Async/Task.h"
 #include "Core/SpdLogger.h"
@@ -217,3 +218,4 @@ void ShaderLibrary::Finalize()
 	}
 	m_ShaderFileWatch.reset();
 }
+#endif

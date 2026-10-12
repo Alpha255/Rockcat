@@ -3,7 +3,7 @@
 #include "RHI/D3D/DXGIInterface.h"
 #include "RHI/RHIShader.h"
 #include "Rendering/RenderSettings.h"
-#include "Asset/Shader.h"
+#include "Rendering/Shader.h"
 #include <dxc/dxcapi.h>
 
 class IShaderCompiler

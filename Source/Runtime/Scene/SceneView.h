@@ -3,11 +3,10 @@
 #include "Core/Definitions.h"
 #include "Core/Math/Frustum.h"
 #include "Core/Math/Rect.h"
-#include "RHI/RHIRenderStates.h"
+#include "Rendering/RHI/RHIRenderStates.h"
 
 using ViewRect = Math::Rect<uint32_t>;
 
-struct ViewMatrices
 {
 	Math::Matrix Projection;
 	Math::Matrix InvProjection;

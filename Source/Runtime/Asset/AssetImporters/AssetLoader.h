@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/Definitions.h"
+
 class AssetLoader
 {
 public:
@@ -15,11 +17,11 @@ public:
 			}) != m_SupportedFormats.end();
 	}
 
-	virtual bool Load(Asset& Target) = 0;
+	virtual bool Load(class Asset& Target) = 0;
 protected:
 	friend class AssetDatabase;
 
-	virtual std::shared_ptr<Asset> CreateAsset(const std::filesystem::path& Path) = 0;
+	virtual std::shared_ptr<class Asset> CreateAsset(const std::filesystem::path& Path) = 0;
 private:
 	std::vector<std::string_view> m_SupportedFormats;
 };

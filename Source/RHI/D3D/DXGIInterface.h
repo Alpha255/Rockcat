@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Core/StringUtils.h"
-#include "RHI/RHIResource.h"
-#include "Core/SpdLogger.h"
+#include "Core/String.h"
+#include "Rendering/RHI/RHIResource.h"
+#include "Core/SpdLogging.h"
 #include <d3d11.h>
 #include <d3d11_1.h>
 #include <d3d11_2.h>
@@ -77,7 +77,7 @@ public:
 		return *this;
 	}
 
-	void SetDebugName(FName&& DebugName) override final
+	void SetDebugName(Name&& DebugName) override final
 	{
 		assert(m_Native);
 #if 0
@@ -194,5 +194,5 @@ inline uint32_t CalcSubresource(uint32_t MipLevel, uint32_t ArrayLayer, uint32_t
 	return MipLevel + (ArrayLayer * NumMips) + (PlaneSlice * NumMips * NumArray);
 }
 
-DECLARE_LOG_CATEGOTY(LogD3D11);
-DECLARE_LOG_CATEGOTY(LogD3D12);
+DECLARE_LOGGER_CATEGORY(LogD3D11);
+DECLARE_LOGGER_CATEGORY(LogD3D12);

@@ -2,7 +2,9 @@
 
 #include "Core/Singleton.h"
 #include "Core/String.h"
+#include "Asset/Asset.h"
 #include "Asset/AssetMetaData.h"
+#include "Asset/AssetImporters/AssetLoader.h"
 
 class AssetDatabase : public Singleton<AssetDatabase>
 {

@@ -20,8 +20,8 @@ public:
 	inline bool IsCastShadow() const { return m_CastShadow; }
 	inline void SetCastShadow(bool CastShadow) { m_CastShadow = CastShadow; }
 
-	inline const FName& GetName() const { return m_Name; }
-	inline void SetName(FName&& Name) { m_Name = std::move(Name); }
+	inline const Name& GetName() const { return m_Name; }
+	inline void SetName(Name&& InName) { m_Name = std::move(InName); }
 
 	template<class Archive>
 	void serialize(Archive& Ar)
@@ -40,5 +40,5 @@ private:
 
 	bool m_CastShadow = true;
 
-	FName m_Name;
+	Name m_Name;
 };

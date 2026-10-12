@@ -5,7 +5,7 @@
 struct AssetMetaData
 {
     std::filesystem::path Path;
-    std::string_view Name;
+    std::string_view AssetName;
     Name TypeName;
 
     class Asset* GetAsset();
@@ -28,8 +28,8 @@ struct IAssetType
     {
     }
 
-    virtual class std::shared_ptr<Asset> CreateAsset() = 0;
-    virtual class std::shared_ptr<AssetImporter> CreateAssetImporter() = 0;
+    virtual class std::shared_ptr<class Asset> CreateAsset() = 0;
+    virtual class std::shared_ptr<class AssetImporter> CreateAssetImporter() = 0;
 
     bool IsValidType(std::filesystem::path Path) const
     {
@@ -54,14 +54,14 @@ struct AssetType : public IAssetType
     }
 };
 
-template<class TAsset, class TAssetImporter>
-struct AssetTypeRegister
-{
-    AssetTypeRegister(Name TypeName, std::string_view Descriptions, std::vector<string> Extensions, class AssetDatabase& Database)
-    {
-        Database.RegisterAssetType(std::make_shared<AssetType<TAsset, TAssetImporter>>(TypeName, Descriptions, Extensions));
-    }
-};
-
-#define REGISTER_ASSET_TYPE(AssetType, AssetImporter, TypeName, Descriptions, Extensions) \
-    static AssetTypeRegister<AssetType, AssetImporter> _##AssetType##_Register(TypeName, Descriptions, Extensions, AssetDatabase::Get());
+//template<class TAsset, class TAssetImporter>
+//struct AssetTypeRegister
+//{
+//    AssetTypeRegister(Name TypeName, std::string_view Descriptions, std::vector<string> Extensions, AssetDatabase& Database)
+//    {
+//        Database.RegisterAssetType(std::make_shared<AssetType<TAsset, TAssetImporter>>(TypeName, Descriptions, Extensions));
+//    }
+//};
+//
+//#define REGISTER_ASSET_TYPE(AssetType, AssetImporter, TypeName, Descriptions, Extensions) \
+//    static AssetTypeRegister<AssetType, AssetImporter> _##AssetType##_Register(TypeName, Descriptions, Extensions, AssetDatabase::Get());

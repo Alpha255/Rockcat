@@ -10,10 +10,10 @@ class Entity
 public:
 	Entity() = default;
 
-	Entity(FName&& Name, EntityID ID, EntityID Parent = EntityID())
+	Entity(Name&& InName, EntityID ID, EntityID Parent = EntityID())
 		: m_ID(ID)
 		, m_Parent(Parent)
-		, m_Name(std::move(Name))
+		, m_Name(std::move(InName))
 	{
 	}
 
@@ -46,8 +46,8 @@ public:
 	inline bool IsSelected() const { return m_Selected; }
 	inline Entity& SetSelected(bool Selected) { m_Selected = Selected; return *this; }
 
-	inline const FName& GetName() const { return m_Name; }
-	inline Entity& SetName(FName&& Name) { m_Name = std::move(Name); return *this; }
+	inline const Name& GetName() const { return m_Name; }
+	inline Entity& SetName(Name&& InName) { m_Name = std::move(InName); return *this; }
 
 	inline bool IsAlive() const { return m_Alive; }
 
@@ -163,7 +163,7 @@ private:
 	bool m_Visible = true;
 	bool m_Selected = false;
 
-	FName m_Name;
+	Name m_Name;
 
 	std::vector<std::shared_ptr<ComponentBase>> m_Components;
 };
@@ -171,7 +171,7 @@ private:
 class SceneGraph
 {
 public:
-	inline Entity& AddSibling(Entity& Sibling, FName&& Name)
+	inline Entity& AddSibling(Entity& Sibling, Name&& InName)
 	{
 		assert(Sibling.IsValid() && Sibling.GetID().GetIndex() < m_Entities.size());
 
@@ -181,39 +181,39 @@ public:
 			NextSibing = GetEntity(NextSibing->GetSibling());
 		}
 
-		Entity& Node = AddEntity(NextSibing->GetParent(), std::move(Name));
+		Entity& Node = AddEntity(NextSibing->GetParent(), std::move(InName));
 		NextSibing->SetSibling(Node);
 		return Node;
 	}
 
-	inline Entity& AddSibling(EntityID SiblingID, FName&& Name)
+	inline Entity& AddSibling(EntityID SiblingID, Name&& InName)
 	{
-		return AddSibling(*GetEntity(SiblingID), std::move(Name));
+		return AddSibling(*GetEntity(SiblingID), std::move(InName));
 	}
 
-	inline Entity& AddChild(Entity& Parent, FName&& Name)
+	inline Entity& AddChild(Entity& Parent, Name&& InName)
 	{
 		assert(Parent.IsValid() && Parent.GetID().GetIndex() < m_Entities.size());
 
 		if (Parent.HasChild())
 		{
-			return AddSibling(Parent.GetChild(), std::move(Name));
+			return AddSibling(Parent.GetChild(), std::move(InName));
 		}
 
-		Entity& Node = AddEntity(Parent.GetID(), std::move(Name));
+		Entity& Node = AddEntity(Parent.GetID(), std::move(InName));
 		Parent.SetChild(Node.GetID());
 		return Node;
 	}
 
-	inline Entity& AddChild(EntityID ParentID, FName&& Name)
+	inline Entity& AddChild(EntityID ParentID, Name&& InName)
 	{
-		return AddChild(*GetEntity(ParentID), std::move(Name));
+		return AddChild(*GetEntity(ParentID), std::move(InName));
 	}
 
-	inline Entity& AddEntity(EntityID Parent, FName&& Name)
+	inline Entity& AddEntity(EntityID Parent, Name&& InName)
 	{
 		EntityID ID = EntityID(static_cast<EntityID::IndexType>(m_Entities.size()));
-		return m_Entities.emplace_back(Entity(std::move(Name), ID, Parent));
+		return m_Entities.emplace_back(Entity(std::move(InName), ID, Parent));
 	}
 
 	void RemoveEntity(EntityID ID)
@@ -239,11 +239,11 @@ public:
 		std::swap(m_Entities, AliveEntities);
 	}
 
-	const Entity* GetEntity(FName&& Name) const
+	const Entity* GetEntity(Name&& InName) const
 	{
 		for (auto& Entity : m_Entities)
 		{
-			if (Entity.IsAlive() && Entity.GetName() == Name)
+			if (Entity.IsAlive() && Entity.GetName() == InName)
 			{
 				return &Entity;
 			}
@@ -251,11 +251,11 @@ public:
 		return nullptr;
 	}
 
-	inline Entity* GetEntity(FName&& Name)
+	inline Entity* GetEntity(Name&& InName)
 	{
 		for (auto& Entity : m_Entities)
 		{
-			if (Entity.IsAlive() && Entity.GetName() == Name)
+			if (Entity.IsAlive() && Entity.GetName() == InName)
 			{
 				return &Entity;
 			}

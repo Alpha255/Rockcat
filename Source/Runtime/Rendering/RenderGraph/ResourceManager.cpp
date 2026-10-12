@@ -1,5 +1,6 @@
+#if 0
 #include "Rendering/RenderGraph/ResourceManager.h"
-#include "RHI/RHIDevice.h"
+#include "Rendering/RHI/RHIDevice.h"
 
 ResourceManager::ResourceManager(RHIDevice& Device)
 	: m_Device(Device)
@@ -32,3 +33,4 @@ void ResourceManager::ResolveResources()
 		Resource->CreateRHI(m_Device);
 	}
 }
+#endif

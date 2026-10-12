@@ -91,7 +91,7 @@ public:
 		{
 			if (m_Value.empty())
 			{
-				m_Value = m_ValueView;
+				m_Value = std::move(string(m_ValueView));
 			}
 		}
 

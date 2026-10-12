@@ -1,3 +1,4 @@
+#if 0
 #include "Rendering/RenderGraph/RenderPass/PreDepthPass.h"
 #include "Rendering/RenderGraph/RenderGraph.h"
 #include "Asset/GlobalShaders.h"
@@ -59,3 +60,4 @@ void PreDepthPass::Compile()
 	//	.SetFormat(ERHIFormat::D32_Float_S8_UInt)
 	//	.SetUsages(ERHIBufferUsageFlags::DepthStencil);
 }
+#endif

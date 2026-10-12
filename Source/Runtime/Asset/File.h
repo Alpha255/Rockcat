@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Core/Definitions.h"
 #include "Core/Cereal.h"
+#include "Core/String.h"
+#include "Asset/AssetData.h"
 
 class File
 {

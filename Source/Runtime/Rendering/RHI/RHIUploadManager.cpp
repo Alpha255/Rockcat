@@ -1,6 +1,6 @@
-#include "RHI/RHIUploadManager.h"
-#include "RHI/RHICommandListContext.h"
-#include "RHI/RHIDevice.h"
+#include "Rendering/RHI/RHIUploadManager.h"
+#include "Rendering/RHI/RHICommandListContext.h"
+#include "Rendering/RHI/RHIDevice.h"
 
 thread_local std::shared_ptr<RHICommandListContext> t_CommandListContext;
 

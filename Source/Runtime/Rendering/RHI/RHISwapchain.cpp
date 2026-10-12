@@ -1,5 +1,5 @@
-#include "RHI/RHISwapchain.h"
-#include "RHI/RHIDevice.h"
+#include "Rendering/RHI/RHISwapchain.h"
+#include "Rendering/RHI/RHIDevice.h"
 #include "Application/Window.h"
 #include "Application/BaseApplication.h"
 
