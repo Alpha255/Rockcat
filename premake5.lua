@@ -287,10 +287,10 @@ workspace "Rockcat"
 			"$(SolutionDir)Source", 
 			"$(SolutionDir)Source/Runtime",
 			"$(SolutionDir)Submodules/cereal/include",
+			"$(SolutionDir)Submodules/taskflow",
 			"$(SolutionDir)Submodules/spdlog/include",
 			"$(SolutionDir)Submodules/magic_enum/include",
 		}
-		targetdir "$(SolutionDir)Out"
 		links { 
 			"Runtime",  
 			"VulkanRHI",

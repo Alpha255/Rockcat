@@ -375,3 +375,23 @@ void VulkanSwapchain::Present()
 
 	AdvanceFrame();
 }
+
+VulkanSwapchain::~VulkanSwapchain()
+{
+	/// Nothing may still be referencing the presentable images or the swapchain itself.
+	GetDevice().WaitIdle();
+
+	/// Presentable images are owned by the swapchain and are destroyed by vkDestroySwapchainKHR.
+	/// Detach the handles first, otherwise ~VulkanTexture (VkHwResource<vk::Image>) calls
+	/// vkDestroyImage on them, which is undefined behaviour.
+	for (auto& BackBuffer : m_BackBuffers)
+	{
+		static_cast<VulkanTexture*>(BackBuffer.get())->GetNative() = nullptr;
+	}
+	m_BackBuffers.clear();
+
+	/// The swapchain must be destroyed before the surface it was created from.
+	VkHwResource::Destroy();
+
+	m_Surface.reset();
+}

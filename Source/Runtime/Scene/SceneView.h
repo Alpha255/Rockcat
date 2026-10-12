@@ -7,6 +7,7 @@
 
 using ViewRect = Math::Rect<uint32_t>;
 
+struct ViewMatrices
 {
 	Math::Matrix Projection;
 	Math::Matrix InvProjection;

@@ -1,6 +1,6 @@
 {
     "struct VulkanDevelopSettings": {
-        "class Serializable<struct VulkanDevelopSettings>": {
+        "class JsonAsset<struct VulkanDevelopSettings>": {
             "class Asset": {
                 "class File": {
                     "m_LastWriteTime": 1760425061

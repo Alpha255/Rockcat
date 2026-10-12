@@ -136,6 +136,18 @@ bool TFTask::Trigger()
 
 		Prerequisite->Trigger();
 
+		// Prerequisites running on another executor are already enforced by the reference
+		// counting in AddPrerequisite()/TriggerSubsequents(): this task is not dispatched until
+		// every one of them released its reference, so they have all finished by now.
+		// Their tf::AsyncTask must NOT be handed to this executor either, because
+		// tf::Executor::_process_dependent_async() pushes our node into the predecessor node's
+		// edge list, which makes the *other* executor schedule and tear down a node that belongs
+		// to this one.
+		if (!IsSameExecutor(*this, *Prerequisite))
+		{
+			continue;
+		}
+
 		const tf::AsyncTask PrerequisiteTask = Prerequisite->GetAsyncTask();
 		if (!PrerequisiteTask.empty())
 		{
@@ -145,8 +157,13 @@ bool TFTask::Trigger()
 
 	std::pair<tf::AsyncTask, std::future<void>> Result = Executor->dependent_async([this]() {
 		Execute();
-		TriggerSubsequents();
+
+		// Publish the completion as soon as our own work is done. TriggerSubsequents() runs
+		// afterwards and can dispatch (and wait on) downstream tasks, which would otherwise keep
+		// this task reporting "not completed" long after it actually finished.
 		m_Completed.store(true, std::memory_order_release);
+
+		TriggerSubsequents();
 	}, PrerequisiteTasks.begin(), PrerequisiteTasks.end());
 
 	{

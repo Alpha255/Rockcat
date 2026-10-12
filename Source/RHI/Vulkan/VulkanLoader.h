@@ -348,14 +348,22 @@ protected:
 		assert(Name);
 		VkBaseDeviceResource::SetObjectName(VkObject::objectType, reinterpret_cast<uint64_t>((NativeType)BaseType::GetNative()), Name);
 	}
+
+	inline void Destroy()
+	{
+		if (BaseType::GetNative())
+		{
+			BaseType::GetNativeDevice().destroy(BaseType::GetNative(), VK_ALLOCATION_CALLBACKS, vk::detail::defaultDispatchLoaderDynamic);
+			BaseType::GetNative() = nullptr;
+		}
+	}
 public:
 	using NativeType = VkObject::NativeType;
 	using BaseType::BaseType;
 
 	virtual ~VkHwResource()
 	{ 
-		BaseType::GetNativeDevice().destroy(BaseType::GetNative(), VK_ALLOCATION_CALLBACKS, vk::detail::defaultDispatchLoaderDynamic);
-		BaseType::GetNative() = nullptr;
+		Destroy();
 	}
 };
 

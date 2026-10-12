@@ -37,7 +37,10 @@ public:
 
 	inline bool IsCompleted() const
 	{
-		return !m_Dispatched.load(std::memory_order_acquire) || m_Completed.load(std::memory_order_acquire);
+		// A task that has not been dispatched yet is *pending*, not completed: Trigger() defers
+		// dispatching while the task still holds references from prerequisites living on another
+		// executor, and such a task has obviously not run yet.
+		return m_Completed.load(std::memory_order_acquire);
 	}
 
 	inline bool IsDispatched() const { return m_Dispatched.load(std::memory_order_acquire); }

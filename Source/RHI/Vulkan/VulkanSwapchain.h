@@ -17,6 +17,8 @@ class VulkanSwapchain final : public VkHwResource<vk::SwapchainKHR>, public RHIS
 public:
 	VulkanSwapchain(const class VulkanDevice& Device, const RHISwapchainDesc& Desc);
 
+	~VulkanSwapchain();
+
 	void Resize(uint32_t Width, uint32_t Height) override final;
 
 #if 0

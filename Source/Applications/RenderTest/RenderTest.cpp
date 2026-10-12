@@ -2,29 +2,29 @@
 #include "Application/ApplicationManager.h"
 #include "Scene/Scene.h"
 #include "Scene/SceneView.h"
-#include "Rendering/RenderGraph/RenderGraph.h"
+//#include "Rendering/RenderGraph/RenderGraph.h"
 
-#include "Asset/GlobalShaders.h"
+//#include "Asset/GlobalShaders.h"
 #include "Scene/Components/TransformComponent.h"
 
-#include "Asset/ShaderPermutation.h"
+//#include "Asset/ShaderPermutation.h"
 #include "Core/Name.h"
 #include "Async/Task.h"
 #include "Scene/Components/CameraComponent.h"
 #include "Scene/Components/StaticMeshComponent.h"
 #include "Application/ApplicationSettings.h"
 
-class TestPemutation1 : public ShaderDefineInt32<0, 1, 2, 3>
-{
-};
-
-class TestPemutation2 : public ShaderDefineBool
-{
-};
-
-class Permutation : public ShaderVariants<TestPemutation1, TestPemutation2>
-{
-};
+//class TestPemutation1 : public ShaderDefineInt32<0, 1, 2, 3>
+//{
+//};
+//
+//class TestPemutation2 : public ShaderDefineBool
+//{
+//};
+//
+//class Permutation : public ShaderVariants<TestPemutation1, TestPemutation2>
+//{
+//};
 
 void RenderTest::Initialize()
 {
@@ -42,7 +42,7 @@ void RenderTest::Initialize()
 
 	auto TaskD = std::make_shared<TFTask>("TaskD", []() {
 		LOG_INFO(LogDefault, "TaskD");
-	}, TFTask::ETFTaskThread::WorkerThread, TFTask::ETFTaskPriority::High);
+	}, ETFTaskThread::WorkerThread, ETFTaskPriority::High);
 
 	TaskC->AddPrerequisite(*TaskB);
 	TaskC->AddPrerequisite(*TaskD);
@@ -59,9 +59,10 @@ void RenderTest::Initialize()
 	};
 
 	LOG_INFO(LogDefault, "TaskA is {}, TaskB is {}, TaskC is {}, TaskD is {}", GetState(TaskA), GetState(TaskB), GetState(TaskC), GetState(TaskD));
+
 	TaskD->Wait();
 
-	size_t NumVariants = Permutation::Num;
+	//size_t NumVariants = Permutation::Num;
 
 	auto Comp = new CameraComponent();
 	const auto IsACamera = Comp->IsA<CameraComponent>();
@@ -74,7 +75,7 @@ void RenderTest::Initialize()
 	const auto IsATrans = StaticMesh->IsA<TransformComponent>();
 	const auto IsACam = StaticMesh->IsA<CameraComponent>();
 
-	m_Scene = Scene::Load(Paths::ScenePath() / "RenderTest.json");
+	//m_Scene = Scene::Load(Paths::ScenePath() / "RenderTest.json");
 
 	//m_Scene->AddEntity(EntityID::NullIndex, "entity0");
 	//m_Scene->AddEntity(EntityID::NullIndex, "entity1");

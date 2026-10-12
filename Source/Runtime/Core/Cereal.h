@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Definitions.h"
+#include "Core/String.h"
 
 //#define CEREAL_THREAD_SAFE 1
 
@@ -89,5 +90,45 @@ namespace cereal
 			Ar(PathStr);
 			Path = std::move(std::filesystem::path(PathStr));
 		}
+	}
+
+	// ::string publicly derives from std::string, so cereal's std::basic_string save/load
+	// (cereal/types/string.hpp / json.hpp) already pick it up through derived-to-base deduction.
+	// Do NOT add a serialize() overload here: that would give ::string two serializers and
+	// trigger cereal's C2338 ("found more than one compatible serialization function").
+	//
+	// However, deduction alone is not enough for the JSON archives: binding ::string to
+	// std::basic_string<...> const& is a derived-to-base *conversion*, which ranks worse than
+	// the identity match of cereal's generic prologue(JSONOutputArchive&, T const&). So the
+	// generic "object" prologue/epilogue win, calling startNode()/finishNode() around a value
+	// that was written as a plain string, which makes rapidjson throw.
+	// These exact-type (non-template) overloads win the overload resolution and make the JSON
+	// archives treat ::string exactly like std::string.
+
+	inline void prologue(JSONOutputArchive& Ar, ::string const&)
+	{
+		Ar.writeName();
+	}
+
+	inline void epilogue(JSONOutputArchive&, ::string const&)
+	{
+	}
+
+	inline void prologue(JSONInputArchive&, ::string const&)
+	{
+	}
+
+	inline void epilogue(JSONInputArchive&, ::string const&)
+	{
+	}
+
+	inline void save(JSONOutputArchive& Ar, ::string const& Str)
+	{
+		Ar.saveValue(static_cast<std::string const&>(Str));
+	}
+
+	inline void load(JSONInputArchive& Ar, ::string& Str)
+	{
+		Ar.loadValue(static_cast<std::string&>(Str));
 	}
 }

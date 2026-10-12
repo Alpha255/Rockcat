@@ -16,6 +16,8 @@ public:
 	{
 	}
 
+	virtual ~RHISwapchain() = default;
+
 	inline uint32_t GetWidth() const { return m_Width; }
 	inline uint32_t GetHeight() const { return m_Height; }
 	inline uint32_t GetNumBackBuffer() const { return m_NumBackBuffer; }

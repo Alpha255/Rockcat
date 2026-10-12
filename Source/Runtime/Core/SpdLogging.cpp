@@ -16,8 +16,6 @@ SpdLogging::SpdLogging()
 	m_FileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(LogFileName, true);
 	m_FileSink->set_pattern(GetFilePattern());
 	m_FileSink->set_level(spdlog::level::trace);
-
-	//LOG_INFO(LogDefault, "Use spdlog @{}", SPDLOG_VERSION);
 }
 
 spdlog::logger& SpdLogging::GetLogger(Name LoggerName)

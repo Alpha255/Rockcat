@@ -203,6 +203,8 @@ void BaseApplication::RenderScene(const Scene& InScene)
 
 void BaseApplication::Run()
 {
+	LOG_INFO(LogDefault, "Use spdlog @{}", SPDLOG_VERSION);
+
 	if (!std::filesystem::exists(Paths::AssetPath()))
 	{
 		LOG_CRITICAL(LogDefault, "Invalid assets directory: {}.", Paths::AssetPath().string());
@@ -263,6 +265,10 @@ void BaseApplication::Run()
 
 void BaseApplication::FinalizeRHI()
 {
+	if (m_ViewportClient)
+	{
+		m_ViewportClient.reset();
+	}
 	//ShaderLibrary::Destroy();
 	//RHIUploadManager::Destroy();
 

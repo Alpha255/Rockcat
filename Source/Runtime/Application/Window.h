@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Core/String.h"
 #include "Core/Cereal.h"
 
 #define MINIMAL_WINDOW_SIZE 32
