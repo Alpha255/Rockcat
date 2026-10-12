@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Editor/ImGuiExtensions.h"
-#include "Asset/SerializableAsset.h"
+#include "Asset/JsonAsset.h"
+#include "Core/String.h"
 
-struct ImGuiTheme : public ImGuiStyle, public Serializable<ImGuiTheme>
+struct ImGuiTheme : public ImGuiStyle, public JsonAsset<ImGuiTheme>
 {
     using BaseClass::BaseClass;
 
@@ -12,7 +13,7 @@ struct ImGuiTheme : public ImGuiStyle, public Serializable<ImGuiTheme>
         Save<ImGuiTheme>(true);
     }
 
-    std::string Name;
+    string Name;
 
 	template<class Archive>
 	void serialize(Archive& Ar)

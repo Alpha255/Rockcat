@@ -2,12 +2,14 @@
 
 #include "Editor/ImGuiPanel.h"
 
-class LogConsolePanel : public ImGuiPanel, public SpdLogService::LogRedirector
+class LogConsolePanel : public ImGuiPanel
 {
 public:
 	LogConsolePanel();
 
-	void Log(const SpdLogMessage& Log) override;
+	/// Log feeding is disabled: SpdLogService::LogRedirector no longer exists and SpdLogging has
+	/// no redirect hook. Re-enable once the logging service exposes one again.
+	// void Log(const SpdLogMessage& Log) override;
 protected:
 	void OnDraw() override final;
 private:

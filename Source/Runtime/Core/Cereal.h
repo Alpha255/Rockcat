@@ -3,6 +3,9 @@
 #include "Core/Definitions.h"
 #include "Core/String.h"
 
+#include <algorithm>
+#include <cstring>
+
 //#define CEREAL_THREAD_SAFE 1
 
 #include <cereal/archives/json.hpp>
@@ -104,6 +107,11 @@ namespace cereal
 	// that was written as a plain string, which makes rapidjson throw.
 	// These exact-type (non-template) overloads win the overload resolution and make the JSON
 	// archives treat ::string exactly like std::string.
+	//
+	// save()/load() are constrained to std::string-derived types on purpose: as plain
+	// ::string-overloads they are also viable for char[N]/char const* (the array decays to a
+	// pointer and ::string has a converting constructor), which gives char[N] a second output
+	// serializer next to cereal's own C array support and trips cereal's C2338.
 
 	inline void prologue(JSONOutputArchive& Ar, ::string const&)
 	{
@@ -122,13 +130,60 @@ namespace cereal
 	{
 	}
 
-	inline void save(JSONOutputArchive& Ar, ::string const& Str)
+	template<class T, std::enable_if_t<std::is_base_of_v<std::string, T>, int> = 0>
+	inline void save(JSONOutputArchive& Ar, T const& Str)
 	{
 		Ar.saveValue(static_cast<std::string const&>(Str));
 	}
 
-	inline void load(JSONInputArchive& Ar, ::string& Str)
+	template<class T, std::enable_if_t<std::is_base_of_v<std::string, T>, int> = 0>
+	inline void load(JSONInputArchive& Ar, T& Str)
 	{
 		Ar.loadValue(static_cast<std::string&>(Str));
+	}
+
+	// C style character arrays (e.g. ImFontConfig::Name) round-trip as a single string instead of
+	// the element wise array cereal would write by default (cereal/types/common.hpp). Being more
+	// specialized than cereal's generic C array support, this wins the overload resolution and
+	// leaves char[N] with exactly one serializer.
+	template<class Archive, size_t N>
+	void serialize(Archive& Ar, char (&Str)[N])
+	{
+		if constexpr (Archive::is_saving::value)
+		{
+			Ar.saveValue(static_cast<char const*>(Str));
+		}
+		else if constexpr (Archive::is_loading::value)
+		{
+			std::string Value;
+			Ar.loadValue(Value);
+
+			const size_t Length = std::min(Value.size(), N - 1);
+			std::memcpy(Str, Value.data(), Length);
+			Str[Length] = '\0';
+		}
+	}
+
+	// char[N] is written as a plain value, so it must not open/close a node the way cereal's
+	// generic (non-arithmetic) JSON prologue/epilogue would.
+	template<size_t N>
+	void prologue(JSONOutputArchive& Ar, char const (&)[N])
+	{
+		Ar.writeName();
+	}
+
+	template<size_t N>
+	void epilogue(JSONOutputArchive&, char const (&)[N])
+	{
+	}
+
+	template<size_t N>
+	void prologue(JSONInputArchive&, char const (&)[N])
+	{
+	}
+
+	template<size_t N>
+	void epilogue(JSONInputArchive&, char const (&)[N])
+	{
 	}
 }

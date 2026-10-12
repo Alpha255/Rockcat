@@ -1,5 +1,5 @@
 #include "Editor/ImGuiConfiguration.h"
-#include "Core/SpdLogger.h"
+#include "Core/SpdLogging.h"
 #include "Editor/Icons/Icons.h"
 #include "Paths.h"
 

@@ -43,7 +43,7 @@ private:
 	bool m_Show = true;
 	int32_t m_WindowFlags = 0;
 	std::string_view m_Title;
-	std::string m_TitleWithIcon;
+	string m_TitleWithIcon;
 };
 
 ENUM_FLAG_OPERATORS(ImGuiPanel::EStatus)

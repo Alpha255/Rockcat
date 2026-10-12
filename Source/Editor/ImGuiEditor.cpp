@@ -21,11 +21,14 @@ ImGuiEditor::ImGuiEditor(uint32_t AppWindowWidth, uint32_t AppWindowHeight)
 	
 	m_Configs = ImGuiConfiguration::Load(Paths::ConfigPath() / "EditorSettings.json");
     
-    auto LogPanel = m_Panels.emplace_back(std::make_shared<LogConsolePanel>()).get();
+    m_Panels.emplace_back(std::make_shared<LogConsolePanel>());
     m_Panels.emplace_back(std::make_shared<SceneViewPanel>());
     m_Panels.emplace_back(std::make_shared<AssetBrowserPanel>());
 
-    SpdLogService::Get().RegisterRedirector(Cast<LogConsolePanel>(LogPanel));
+    /// Log feeding is disabled: SpdLogService::LogRedirector no longer exists and SpdLogging has
+    /// no redirect hook. Re-enable once the logging service exposes one again.
+    /// auto LogPanel = m_Panels.emplace_back(std::make_shared<LogConsolePanel>()).get();
+    /// SpdLogService::Get().RegisterRedirector(Cast<LogConsolePanel>(LogPanel));
 }
 
 void ImGuiEditor::Draw()

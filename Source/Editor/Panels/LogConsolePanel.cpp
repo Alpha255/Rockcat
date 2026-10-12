@@ -50,11 +50,11 @@ LogConsolePanel::LogConsolePanel()
 	}
 }
 
-void LogConsolePanel::Log(const SpdLogMessage& Log)
-{
-	/// TODO: Thread safe ???
-	m_LogMessages.emplace_back(LogMessage(Log, static_cast<int32_t>(m_LogMessages.size())));
-}
+// void LogConsolePanel::Log(const SpdLogMessage& Log)
+// {
+// 	/// TODO: Thread safe ???
+// 	m_LogMessages.emplace_back(LogMessage(Log, static_cast<int32_t>(m_LogMessages.size())));
+// }
 
 void LogConsolePanel::DrawHeader()
 {
