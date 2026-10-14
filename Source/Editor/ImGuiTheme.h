@@ -8,6 +8,12 @@ struct ImGuiTheme : public ImGuiStyle, public JsonAsset<ImGuiTheme>
 {
     using BaseClass::BaseClass;
 
+	ImGuiTheme(const std::filesystem::path& Path, const ImGuiStyle& Style)
+		: JsonAsset<ImGuiTheme>(Path)
+        , ImGuiStyle(Style)
+	{
+	}
+
     ~ImGuiTheme()
     {
         Save<ImGuiTheme>(true);

@@ -1,0 +1,14 @@
+{
+    "class ImGuiConfiguration": {
+        "class JsonAsset<class ImGuiConfiguration>": {
+            "class Asset": {
+                "class File": {
+                    "m_LastWriteTime": 1791948631
+                }
+            }
+        },
+        "m_DefaultTheme": "",
+        "m_DefaultFont": "",
+        "m_Fonts": []
+    }
+}

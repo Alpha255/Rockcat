@@ -31,6 +31,11 @@ ImGuiEditor::ImGuiEditor(uint32_t AppWindowWidth, uint32_t AppWindowHeight)
     /// SpdLogService::Get().RegisterRedirector(Cast<LogConsolePanel>(LogPanel));
 }
 
+bool ImGuiEditor::SetDisplayScale(float DisplayScale)
+{
+	return m_Configs ? m_Configs->SetDisplayScale(DisplayScale) : false;
+}
+
 void ImGuiEditor::Draw()
 {
     DrawMenuBar();

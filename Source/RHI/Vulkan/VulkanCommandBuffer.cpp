@@ -5,6 +5,7 @@
 #include "RHI/Vulkan/VulkanPipeline.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
 #include "RHI/Vulkan/VulkanBarrier.h"
+#include "RHI/Vulkan/VulkanTexture.h"
 #include "Rendering/RHI/RHICommandListContext.h"
 
 VulkanCommandBuffer::VulkanCommandBuffer(const VulkanDevice& Device, VulkanCommandPool& Pool, ERHICommandBufferLevel Level)
@@ -490,36 +491,44 @@ void VulkanCommandBuffer::ClearColorTexture(const RHITexture* Texture, const Mat
 {
 	assert(!IsInsideRenderPass() && Texture);
 
-//#if true
-//	if (m_InsideRenderPass)
-//	{
-//		EndRenderPass();
-//	}
-//#endif
-//
-//	assert(DstImage && !m_InsideRenderPass);
-//
-//	auto VkImage = static_cast<VulkanImage*>(DstImage);
-//
-//	m_Tracker.Images.insert(VkImage);
-//
-//	VkImageSubresourceRange SubresourceRange
-//	{
-//		VK_IMAGE_ASPECT_COLOR_BIT,
-//		0u,
-//		VK_REMAINING_MIP_LEVELS,
-//		0u,
-//		VK_REMAINING_ARRAY_LAYERS
-//	};
-//	m_Barrier->TransitionResourcEStatus(VkImage, VkImage->CurrentState, EResourcEStatus::TransferDst, SubresourceRange);
-//
-//	VkClearColorValue ClearColorValue
-//	{
-//		ClearColor.x, ClearColor.y, ClearColor.z, ClearColor.w
-//	};
-//	vkCmdClearColorImage(m_Handle, VkImage->Get(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &ClearColorValue, 1u, &SubresourceRange);
-//
-//	m_Barrier->TransitionResourcEStatus(VkImage, EResourcEStatus::TransferDst, VkImage->RequiredState, SubresourceRange);
+	auto Image = static_cast<const VulkanTexture*>(Texture);
+	assert(Image && Image->GetNative());
+
+	const vk::ImageSubresourceRange SubresourceRange(
+		vk::ImageAspectFlagBits::eColor,
+		0u,
+		VK_REMAINING_MIP_LEVELS,
+		0u,
+		VK_REMAINING_ARRAY_LAYERS);
+
+	/// The swap chain images are reacquired every frame, so they start from an undefined layout.
+	{
+		VulkanPipelineBarrier Barrier(GetDevice());
+		Barrier.AddImageLayoutTransition(
+			ERHIDeviceQueue::Graphics,
+			ERHIDeviceQueue::Graphics,
+			Image->GetNative(),
+			vk::ImageLayout::eUndefined,
+			vk::ImageLayout::eTransferDstOptimal,
+			SubresourceRange);
+		Barrier.Submit(this);
+	}
+
+	vk::ClearColorValue ClearValue(std::array<float, 4u>{ ClearColor.x, ClearColor.y, ClearColor.z, ClearColor.w });
+	GetNative().clearColorImage(Image->GetNative(), vk::ImageLayout::eTransferDstOptimal, ClearValue, SubresourceRange);
+
+	/// Leave the image ready to be rendered into (e.g. by the UI pass).
+	{
+		VulkanPipelineBarrier Barrier(GetDevice());
+		Barrier.AddImageLayoutTransition(
+			ERHIDeviceQueue::Graphics,
+			ERHIDeviceQueue::Graphics,
+			Image->GetNative(),
+			vk::ImageLayout::eTransferDstOptimal,
+			vk::ImageLayout::eColorAttachmentOptimal,
+			SubresourceRange);
+		Barrier.Submit(this);
+	}
 }
 
 void VulkanCommandBuffer::ClearDepthStencilTexture(const RHITexture* Texture, bool ClearDepth, bool ClearStencil, float Depth, uint8_t Stencil)

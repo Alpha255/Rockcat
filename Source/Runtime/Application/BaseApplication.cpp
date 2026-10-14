@@ -68,6 +68,23 @@ void BaseApplication::Tick()
 	//TickManager::Get().TickObjects(FrameTime);
 }
 
+void BaseApplication::AddMessageHandler(MessageHandler* Handler)
+{
+	assert(Handler);
+	assert(std::find(m_MessageHandlers.begin(), m_MessageHandlers.end(), Handler) == m_MessageHandlers.end());
+
+	m_MessageHandlers.push_back(Handler);
+}
+
+void BaseApplication::RemoveMessageHandler(MessageHandler* Handler)
+{
+	auto It = std::find(m_MessageHandlers.begin(), m_MessageHandlers.end(), Handler);
+	if (It != m_MessageHandlers.end())
+	{
+		m_MessageHandlers.erase(It);
+	}
+}
+
 void BaseApplication::DispatchKeyUpMessage(const KeyEvent& Event)
 {
 	std::for_each(m_MessageHandlers.begin(), m_MessageHandlers.end(), [&Event, this](auto Handler) {

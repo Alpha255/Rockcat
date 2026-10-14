@@ -37,6 +37,9 @@ spdlog::logger& SpdLogging::GetOrCreateLogger(Name LoggerName, spdlog::level::le
 	auto Logger = std::make_shared<spdlog::logger>(std::string(LoggerName.Get()), Sinks.begin(), Sinks.end());
 	Logger->set_level(Level);
 	Logger->set_pattern(Pattern);
+	/// Without an explicit flush policy the sink only spills every few kilobytes, so anything logged
+	/// right before a crash (or a killed process) used to be lost from the log file.
+	Logger->flush_on(spdlog::level::trace);
 
 	return *m_Loggers.emplace(LoggerName, std::move(Logger)).first->second;
 }

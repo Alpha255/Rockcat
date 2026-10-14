@@ -9,6 +9,97 @@
 #include <windowsx.h>
 #include <shlobj.h>
 
+namespace
+{
+	/// Density of a 100% display. Every layout below is authored in logical units at that density.
+	static constexpr UINT kBaseDpi = 96u;
+
+	/// Values of the Win32 DPI enums, spelled out so this compiles against any SDK version.
+	/// Some of them are only exposed by recent headers and this engine targets older ones too.
+	static constexpr intptr_t kAwarenessPerMonitorV2 = -4;  /// DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
+	static constexpr int kAwarenessPerMonitorv1 = 2;        /// PROCESS_PER_MONITOR_DPI_AWARE
+
+	/// Ask Windows for per monitor DPI scaling before the first window exists.
+	///
+	/// Without this the shell reports 96 DPI for every monitor and afterwards bitmap stretches the
+	/// finished frame, which is the blurry, soft looking UI we had. Windows locks the awareness in
+	/// the first time anything queries it, hence doing this before a single HWND is created.
+	///
+	/// The APIs are resolved dynamically: they live in user32.dll but only from a certain OS
+	/// version on, and there is no point refusing to start on an old one.
+	void EnablePerMonitorDpiAwareness()
+	{
+		if (const ::HMODULE User32 = ::GetModuleHandleW(L"user32.dll"))
+		{
+			/// Windows 10 1607+: additionally scales the non-client area itself and sends
+			/// WM_DPICHANGED when the window moves between monitors of another density.
+			if (const auto SetDpiAwarenessContext = reinterpret_cast<BOOL(WINAPI*)(intptr_t)>(
+				::GetProcAddress(User32, "SetProcessDpiAwarenessContext")))
+			{
+				if (SetDpiAwarenessContext(kAwarenessPerMonitorV2))
+				{
+					return;
+				}
+			}
+
+			/// Windows 8.1: per monitor scaling of the client area only.
+			if (const auto SetDpiAwareness = reinterpret_cast<HRESULT(WINAPI*)(int)>(
+				::GetProcAddress(User32, "SetProcessDpiAwareness")))
+			{
+				if (SUCCEEDED(SetDpiAwareness(kAwarenessPerMonitorv1)))
+				{
+					return;
+				}
+			}
+		}
+
+		/// Windows Vista fallback: not per monitor, but at least no stretch by the shell.
+		::SetProcessDPIAware();
+	}
+
+	float QueryDpiScale(::HWND Handle)
+	{
+		if (!Handle)
+		{
+			return 1.0f;
+		}
+
+		if (const ::HMODULE User32 = ::GetModuleHandleW(L"user32.dll"))
+		{
+			if (const auto GetDpiForWindowFn = reinterpret_cast<UINT(WINAPI*)(::HWND)>(
+				::GetProcAddress(User32, "GetDpiForWindow")))
+			{
+				return static_cast<float>(GetDpiForWindowFn(Handle)) / static_cast<float>(kBaseDpi);
+			}
+
+			if (const auto GetDpiForMonitorFn = reinterpret_cast<HRESULT(WINAPI*)(::HMONITOR, int, UINT*, UINT*)>(
+				::GetProcAddress(User32, "GetDpiForMonitor")))
+			{
+				const ::HMONITOR Monitor = ::MonitorFromWindow(Handle, MONITOR_DEFAULTTONEAREST);
+
+				UINT DpiX = kBaseDpi;
+				UINT DpiY = kBaseDpi;
+				if (SUCCEEDED(GetDpiForMonitorFn(Monitor, 0 /* MDT_EFFECTIVE_DPI */, &DpiX, &DpiY)))
+				{
+					return static_cast<float>(DpiX) / static_cast<float>(kBaseDpi);
+				}
+			}
+		}
+
+		return 1.0f;
+	}
+}
+
+void InitializeDpiAwareness()
+{
+	EnablePerMonitorDpiAwareness();
+}
+
+float Window::GetDpiScale() const
+{
+	return QueryDpiScale(reinterpret_cast<::HWND>(m_Handle));
+}
+
 Window::Window(const WindowSettings& Settings)
 	: m_Width(std::max<uint32_t>(Settings.Width, MINIMAL_WINDOW_SIZE))
 	, m_Height(std::max<uint32_t>(Settings.Height, MINIMAL_WINDOW_SIZE))

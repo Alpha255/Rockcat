@@ -23,6 +23,12 @@ public:
 	inline bool IsQuit() const { return m_Status == EApplicationStatus::Quit; }
 
 	inline class RHIDevice& GetRenderDevice() const { return *m_RenderDevice; }
+
+	/// Registers a handler that receives every dispatched input/window message. Handlers are not
+	/// owned: unregister before destroying one.
+	void AddMessageHandler(class MessageHandler* Handler);
+	void RemoveMessageHandler(class MessageHandler* Handler);
+
 protected:
 	enum class EApplicationStatus
 	{

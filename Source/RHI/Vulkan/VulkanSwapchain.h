@@ -30,6 +30,8 @@ public:
 
 	void Present() override final;
 
+	void TransitionToPresent(class RHICommandBuffer* CommandBuffer) override final;
+
 	inline vk::Format GetColorFormat() const { return m_ColorFormat; }
 protected:
 	void AdvanceFrame() override final;

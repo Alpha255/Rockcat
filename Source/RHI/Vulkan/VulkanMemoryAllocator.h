@@ -5,6 +5,9 @@
 
 class VulkanMemoryAllocator : public LazySingleton<VulkanMemoryAllocator>, public VkBaseDeviceResource
 {
+	/// LazySingleton<T>::Create() news up T, which needs access to the protected constructor.
+	friend class LazySingleton<VulkanMemoryAllocator>;
+
 public:
 	VulkanDeviceMemory Allocate(vk::Buffer Buffer, ERHIDeviceAccessFlags AccessFlags);
 	VulkanDeviceMemory Allocate(vk::Image Image, ERHIDeviceAccessFlags AccessFlags);

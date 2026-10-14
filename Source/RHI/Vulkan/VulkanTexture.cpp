@@ -157,23 +157,11 @@ void VulkanTexture::AllocateAndBindMemory(ERHIDeviceAccessFlags AccessFlags)
 
 VulkanTexture::~VulkanTexture()
 {
-#if 0
-	if (m_Own)
+	if (m_Memory.Native)
 	{
-		vkDestroyImage(m_Device->Get(), m_Handle, VK_ALLOCATION_CALLBACKS);
+		GetNativeDevice().freeMemory(m_Memory.Native, VK_ALLOCATION_CALLBACKS);
+		m_Memory.Native = nullptr;
 	}
-
-	for (auto ImageView : m_Views.second)
-	{
-		vkDestroyImageView(m_Device->Get(), ImageView.second, VK_ALLOCATION_CALLBACKS);
-	}
-
-	if (m_DeviceMemory.Handle)
-	{
-		vkFreeMemory(m_Device->Get(), m_DeviceMemory.Handle, VK_ALLOCATION_CALLBACKS);
-		m_DeviceMemory.Handle = VK_NULL_HANDLE;
-	}
-#endif
 }
 
 VulkanSampler::VulkanSampler(const VulkanDevice& Device, const RHISamplerDesc& Desc)

@@ -3,6 +3,7 @@
 #include "Application/ApplicationSettings.h"
 #include "Core/SpdLogging.h"
 #include "Misc/PlatformMisc.h"
+#include "Application/Window.h"
 #include <windowsx.h>
 
 #if PLATFORM_WIN32
@@ -12,6 +13,10 @@ extern BaseApplication* GApplication;
 WindowsApplication::WindowsApplication(const char* SettingsFile)
 	: BaseApplication(SettingsFile)
 {
+	/// Has to be the very first DPI dependent call in the process, well before the first HWND of
+	/// the WNDCLASSEX below exists. See InitializeDpiAwareness().
+	InitializeDpiAwareness();
+
 	HINSTANCE HInstance = reinterpret_cast<HINSTANCE>(PlatformMisc::GetApplicationHandle());
 	VERIFY_WITH_SYSTEM_MESSAGE(HInstance);
 
@@ -74,7 +79,40 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	case WM_ACTIVATE:
 		break;
 	case WM_SIZE:
+	{
+		/// Nothing else keeps Width/Height in sync with the real client area, and everything that
+		/// has to follow it (the swap chain, and through it the UI) reads them off the window.
+		/// SIZE_MINIMIZED carries a 0x0 client area, which is not a size worth rendering at.
+		if (wParam != SIZE_MINIMIZED && LOWORD(lParam) != 0 && HIWORD(lParam) != 0)
+		{
+			const uint32_t Width = static_cast<uint32_t>(LOWORD(lParam));
+			const uint32_t Height = static_cast<uint32_t>(HIWORD(lParam));
+
+			if (m_Window)
+			{
+				m_Window->UpdateSize(Width, Height);
+			}
+
+			DispatchWindowResizedMessage(Width, Height);
+		}
 		break;
+	}
+	case WM_DPICHANGED:
+	{
+		/// Sent when the window lands on a monitor of another density. Windows already scaled the
+		/// non-client area for us and proposes a rect that keeps the whole window - client area
+		/// included - the same physical size; ignoring it leaves the UI laid out for the old one.
+		const ::RECT* SuggestedRect = reinterpret_cast<const ::RECT*>(lParam);
+		if (SuggestedRect)
+		{
+			::SetWindowPos(hWnd, nullptr,
+				SuggestedRect->left, SuggestedRect->top,
+				SuggestedRect->right - SuggestedRect->left,
+				SuggestedRect->bottom - SuggestedRect->top,
+				SWP_NOZORDER | SWP_NOACTIVATE);
+		}
+		break;
+	}
 	case WM_ENTERSIZEMOVE:
 		break;
 	case WM_EXITSIZEMOVE:

@@ -32,8 +32,14 @@ public:
 
 	virtual void Resize(uint32_t Width, uint32_t Height) = 0;
 	virtual void Present() = 0;
-protected:
+
+	/// Acquires the next back buffer. Must be the first thing a frame does.
 	virtual void AdvanceFrame() {}
+
+	/// Records whatever the backend needs right before Present() (e.g. moving the back buffer into
+	/// the layout presentation expects). No-op for backends that don't need it.
+	virtual void TransitionToPresent(class RHICommandBuffer* CommandBuffer) {}
+protected:
 	void SetNumBackBuffer(uint32_t Num) { m_NumBackBuffer = Num; }
 
 	bool m_VSync;
@@ -60,6 +66,8 @@ public:
 	Math::UInt2 GetViewSize() const;
 
 	RHITexture* GetViewSurface() const;
+
+	RHISwapchain* GetSwapchain() const { return m_Swapchain.get(); }
 
 	bool IsStereoRendering() const { return m_IsStereo; }
 private:

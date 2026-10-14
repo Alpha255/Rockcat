@@ -107,6 +107,7 @@ workspace "Rockcat"
 				includedirs {
 					"$(SolutionDir)Source",
 					"$(SolutionDir)Source/Runtime",
+					"$(SolutionDir)Submodules",
 					"$(SolutionDir)Submodules/cereal/include",
 					"$(SolutionDir)Submodules/spdlog/include",
 					"$(SolutionDir)Submodules/magic_enum/include",
@@ -279,20 +280,24 @@ workspace "Rockcat"
 		language "C++"
 		location "./Out/Intermediate/VCProjects"
 		targetname "$(ProjectName)_$(Configuration)"
+		targetdir "$(SolutionDir)Out"
 		files {
 			"./Source/Applications/RenderTest/**",
 			"./Source/Runtime/Application/Win32/Resource.rc"
 		}
 		includedirs {
-			"$(SolutionDir)Source", 
+			"$(SolutionDir)Source",
 			"$(SolutionDir)Source/Runtime",
+			"$(SolutionDir)Submodules",
 			"$(SolutionDir)Submodules/cereal/include",
 			"$(SolutionDir)Submodules/taskflow",
 			"$(SolutionDir)Submodules/spdlog/include",
 			"$(SolutionDir)Submodules/magic_enum/include",
+			"$(VK_SDK_PATH)/Include",
 		}
-		links { 
-			"Runtime",  
+		links {
+			"Runtime",
+			"Editor",
 			"VulkanRHI",
 		}
 		vpaths {

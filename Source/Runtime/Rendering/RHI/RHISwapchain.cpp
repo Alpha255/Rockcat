@@ -3,13 +3,30 @@
 #include "Application/Window.h"
 #include "Application/BaseApplication.h"
 
+#include <cmath>
+
+namespace
+{
+	/// Logical units -> device pixels, rounding so a fractional scale (175%, 225%, ...) can never
+	/// leave the swap chain a pixel short of the surface it has to fill.
+	uint32_t ToDevicePixels(uint32_t LogicalValue, float DpiScale)
+	{
+		return static_cast<uint32_t>(std::lroundf(static_cast<float>(LogicalValue) * DpiScale));
+	}
+}
+
 RHIViewportClient::RHIViewportClient(const Window& InWindow, const RenderSettings& InRenderSettings)
 	: m_Window(InWindow)
 	, m_IsStereo(InRenderSettings.StereoRendering)
 {
+	/// The client area is reported in logical units while the swap chain is measured in real
+	/// device pixels. Skipping the conversion is what makes a UI on a HiDPI display look soft:
+	/// everything is rendered small and afterwards stretched by the compositor.
+	const float DpiScale = InWindow.GetDpiScale();
+
 	RHISwapchainDesc Desc;
-	Desc.SetWidth(InWindow.GetWidth())
-		.SetHeight(InWindow.GetHeight())
+	Desc.SetWidth(ToDevicePixels(InWindow.GetWidth(), DpiScale))
+		.SetHeight(ToDevicePixels(InWindow.GetHeight(), DpiScale))
 		.SetFullscreen(InWindow.IsFullscreen())
 		.SetVSync(InRenderSettings.VSync)
 		.SetHDR(InRenderSettings.HDR)

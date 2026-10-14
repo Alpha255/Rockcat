@@ -8,6 +8,11 @@ public:
 	ImGuiEditor(uint32_t AppWindowWidth, uint32_t AppWindowHeight);
 
 	void Draw();
+
+	/// Device pixels per logical pixel the UI should be laid out at, 1.0 at 96 DPI. Returns whether
+	/// anything had to be rebuilt, which is the caller's cue to put the font atlas back on the GPU
+	/// through VulkanImGuiRenderer::RebuildFontAtlas().
+	bool SetDisplayScale(float DisplayScale);
 protected:
 private:
 	struct ScopedDockSpace

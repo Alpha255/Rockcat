@@ -1,5 +1,6 @@
 #include "RHI/Vulkan/VulkanQueue.h"
 #include "RHI/Vulkan/VulkanDevice.h"
+#include "RHI/Vulkan/VulkanCommandBuffer.h"
 #include "RHI/Vulkan/VulkanCommandListContext.h"
 
 VulkanCommandListContext::VulkanCommandListContext(const VulkanDevice& Device, VulkanQueue& Queue)
@@ -11,32 +12,37 @@ VulkanCommandListContext::VulkanCommandListContext(const VulkanDevice& Device, V
 	GetGraphicsCommandBuffer();
 }
 
-void VulkanCommandListContext::SubmitGraphicsCommandBuffer()
+void VulkanCommandListContext::SubmitCommandBuffer(RHICommandBuffer* CommandBuffer)
 {
+	if (!CommandBuffer)
 	{
-		std::lock_guard Locker(m_PrimaryCommandBufferList.Lock);
-		if (m_PrimaryCommandBufferList.Graphics)
-		{
-			SubmitUploadCommandBuffer(m_PrimaryCommandBufferList.Upload);
-		}
+		return;
 	}
 
-	//{
-	//	std::lock_guard Locker(m_SecondaryCommandBufferList.Lock);
-	//	if (m_SecondaryCommandBufferList.Graphics)
-	//	{
-	//		assert(false);
-	//	}
-	//}
+	auto VulkanCommand = static_cast<VulkanCommandBuffer*>(CommandBuffer);
+	assert(VulkanCommand->IsEnded());
+
+	m_Queue.Submit(VulkanCommand, 0u, nullptr);
 }
 
 void VulkanCommandListContext::SubmitUploadCommandBuffer(RHICommandBuffer* UploadCommandBuffer)
 {
 	{
 		std::lock_guard Locker(m_PrimaryCommandBufferList.Lock);
+
 		auto CommandBuffer = UploadCommandBuffer ? UploadCommandBuffer : m_PrimaryCommandBufferList.Upload;
 		if (CommandBuffer)
 		{
+			/// RHIUploadManager records its staging -> device copies here. Without this the upload
+			/// command buffer is never ended nor submitted, so anything uploaded through it
+			/// (textures, buffer initial data) would silently never reach the GPU.
+			EndAndMarkSubmitted(CommandBuffer);
+
+			m_Queue.Submit(static_cast<VulkanCommandBuffer*>(CommandBuffer), 0u, nullptr);
+
+			/// Drop the cached handle so the next upload goes through GetCommandBuffer() again and
+			/// gets recycled. Recording into a submitted command buffer is invalid.
+			m_PrimaryCommandBufferList.Upload = nullptr;
 		}
 	}
 

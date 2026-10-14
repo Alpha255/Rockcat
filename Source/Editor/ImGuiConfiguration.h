@@ -164,6 +164,16 @@ public:
 	void SetTheme(const char* const ThemeName, bool Force = false);
 	ImGuiTheme* GetTheme() const { return m_Theme; }
 
+	/// Device pixels per logical pixel the editor is drawn at. Everything is authored at 1.0 and
+	/// stretched from there, so the UI keeps the same physical size on every monitor.
+	///
+	/// The glyphs are rasterized again for the new density - scaling the atlas of another one would
+	/// leave the text blurry - which means the GPU side has to be rebuilt afterwards, see
+	/// VulkanImGuiRenderer::RebuildFontAtlas(). The texture itself is *not* touched here: this class
+	/// knows nothing about any backend.
+	float GetDisplayScale() const { return m_DisplayScale; }
+	bool SetDisplayScale(float DisplayScale);
+
 	template<class Archive>
 	void serialize(Archive& Ar)
 	{
@@ -181,9 +191,19 @@ private:
 
 	std::unordered_map<std::string, std::shared_ptr<ImGuiTheme>>& GetThemes() { return m_Themes; }
 
+	/// Re-assigns the selected theme and stretches it to the current density afterwards. The style
+	/// object is replaced wholesale by the assignment, so this has to run after every one of them,
+	/// including theme switches at runtime.
+	void ApplyTheme();
+
 	ImGuiTheme* m_Theme = nullptr;
 	std::string m_DefaultTheme;
 	std::string m_DefaultFont;
+
+	/// Device pixels per logical pixel. Themes and font sizes coming out of the asset are authored
+	/// at 1.0 and only multiplied by this when they are handed to ImGui, so switching densities
+	/// rebuilds from the same source instead of compounding onto the previous scale.
+	float m_DisplayScale = 1.0f;
 
 	std::unordered_map<std::string, std::shared_ptr<ImGuiTheme>> m_Themes;
 	std::map<std::string, ImGuiFont> m_Fonts;

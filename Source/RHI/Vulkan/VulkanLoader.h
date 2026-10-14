@@ -345,7 +345,13 @@ protected:
 
 	void SetObjectName(const char* Name)
 	{
-		assert(Name);
+		/// A debug name is purely cosmetic, so a resource created without one (e.g. an internal
+		/// staging buffer) must not trip an assert.
+		if (!Name || *Name == '\0')
+		{
+			return;
+		}
+
 		VkBaseDeviceResource::SetObjectName(VkObject::objectType, reinterpret_cast<uint64_t>((NativeType)BaseType::GetNative()), Name);
 	}
 

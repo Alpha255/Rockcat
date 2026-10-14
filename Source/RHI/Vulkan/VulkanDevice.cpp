@@ -11,6 +11,7 @@
 #include "RHI/Vulkan/VulkanSwapchain.h"
 #include "RHI/Vulkan/VulkanMemoryAllocator.h"
 #include "RHI/Vulkan/VulkanRenderPass.h"
+#include "Rendering/RHI/RHIUploadManager.h"
 #include "Misc/Paths.h"
 //#include "Services/ShaderLibrary.h"
 #include "Async/TaskExecutorManager.h"
@@ -256,8 +257,15 @@ VulkanDevice::VulkanDevice()
 	}
 
 	m_PipelineCache = std::make_shared<VulkanPipelineCache>(*this);
-	
-	//VulkanMemoryAllocator::Create(*this);
+
+	/// Without this the first resource that needs device memory (VulkanTexture::AllocateAndBindMemory /
+	/// VulkanBuffer) dereferences a null LazySingleton and trips its assert.
+	VulkanMemoryAllocator::Create(*this);
+
+	/// Same story: the staging buffers of the first bulk upload would dereference a null singleton.
+	/// RHIUploadManager is backend agnostic and only wants a RHIDevice&, so once a second backend
+	/// shows up this should move into a shared device initialization step.
+	RHIUploadManager::Create(*this);
 
 	//ShaderLibrary::Get().RegisterActiveCompiler(GetType());
 }

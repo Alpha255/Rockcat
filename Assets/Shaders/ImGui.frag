@@ -1,5 +1,4 @@
 #include "Shaders/Definitions.hlsli"
-#include "Shaders/VertexInputLayout.hlsli"
 
 VK_BINDING(0, 0) Texture2D FontImage : register(t0);
 VK_BINDING(1, 0) SamplerState LinearSampler : register(s0);

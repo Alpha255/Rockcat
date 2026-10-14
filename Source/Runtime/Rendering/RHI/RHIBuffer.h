@@ -2,7 +2,7 @@
 
 #include "Rendering/RHI/RHITexture.h"
 
-#define RHI_WHOLE_SIZE ~0u
+#define RHI_WHOLE_SIZE (~0ULL)
 
 struct RHIBufferDesc
 {

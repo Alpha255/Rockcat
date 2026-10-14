@@ -5,6 +5,9 @@
 
 class RHIUploadManager : public LazySingleton<RHIUploadManager>
 {
+	/// LazySingleton<T>::Create() news up T, which needs access to the protected constructor.
+	friend class LazySingleton<RHIUploadManager>;
+
 public:
 	inline size_t GetAllocatedMemorySize() const { return m_AllocatedMemorySize.load(); }
 	inline size_t GetUsedMemorySize() const { return m_UsedMemorySize.load(); }

@@ -1,6 +1,10 @@
 #include "RHI/Vulkan/VulkanSwapChain.h"
+#include "RHI/Vulkan/VulkanBarrier.h"
+#include "RHI/Vulkan/VulkanCommandBuffer.h"
 #include "RHI/Vulkan/VulkanDevice.h"
 #include "RHI/Vulkan/VulkanLayerExtensions.h"
+#include "RHI/Vulkan/VulkanQueue.h"
+#include "RHI/Vulkan/VulkanTexture.h"
 #include "Misc/PlatformMisc.h"
 
 VulkanSurface::VulkanSurface(const VulkanDevice& Device, const void* WindowHandle)
@@ -97,11 +101,24 @@ void VulkanSwapchain::Create(bool RecreateSurface)
 
 	auto SurfaceCapabilities = GetNativePhysicalDevice().getSurfaceCapabilitiesKHR(m_Surface->GetNative());
 
-	vk::Extent2D Extent
+	/// currentExtent is authoritative whenever it is defined (always the case on Win32): the window
+	/// system sizes the surface itself and the spec demands imageExtent to match it. Silently
+	/// clamping a different request here would both create a swapchain of another size than asked
+	/// for and overwrite m_Width/m_Height with that size, sending callers that compare against
+	/// their request into resizing every single frame.
+	vk::Extent2D Extent;
+	if (SurfaceCapabilities.currentExtent.width != UINT32_MAX)
 	{
-		std::max<uint32_t>(std::min<uint32_t>(m_Width, SurfaceCapabilities.maxImageExtent.width), SurfaceCapabilities.minImageExtent.width),
-		std::max<uint32_t>(std::min<uint32_t>(m_Height, SurfaceCapabilities.maxImageExtent.height), SurfaceCapabilities.minImageExtent.height),
-	};
+		Extent = SurfaceCapabilities.currentExtent;
+	}
+	else
+	{
+		Extent = vk::Extent2D
+		{
+			std::max<uint32_t>(std::min<uint32_t>(m_Width, SurfaceCapabilities.maxImageExtent.width), SurfaceCapabilities.minImageExtent.width),
+			std::max<uint32_t>(std::min<uint32_t>(m_Height, SurfaceCapabilities.maxImageExtent.height), SurfaceCapabilities.minImageExtent.height),
+		};
+	}
 
 	m_Width = Extent.width;
 	m_Height = Extent.height;
@@ -290,11 +307,20 @@ void VulkanSwapchain::Recreate()
 
 void VulkanSwapchain::Resize(uint32_t Width, uint32_t Height)
 {
-	if ((Width && Height) && (m_Width != Width || m_Height != Height))
+	if ((Width == 0u || Height == 0u) || (m_Width == Width && m_Height == Height))
 	{
-		m_Width = Width;
-		m_Height = Height;
+		return;
 	}
+
+	m_Width = Width;
+	m_Height = Height;
+
+	/// Recording the new size is not enough on its own: the only other caller of Create() is
+	/// AdvanceFrame(), and only once acquireNextImageKHR() complains the chain is out of date,
+	/// which drivers are free to never do for a window that merely changed density. Building it
+	/// right here is also what hands back images of the new extent in the same frame.
+	GetDevice().WaitIdle();
+	Create(false);
 }
 
 void VulkanSwapchain::AdvanceFrame()
@@ -330,6 +356,31 @@ void VulkanSwapchain::AdvanceFrame()
 #endif
 }
 
+void VulkanSwapchain::TransitionToPresent(RHICommandBuffer* CommandBuffer)
+{
+	assert(m_Native && CommandBuffer);
+
+	auto BackBuffer = static_cast<const VulkanTexture*>(GetBackBuffer());
+	assert(BackBuffer && BackBuffer->GetNative());
+
+	const vk::ImageSubresourceRange SubresourceRange(
+		vk::ImageAspectFlagBits::eColor,
+		0u,
+		VK_REMAINING_MIP_LEVELS,
+		0u,
+		VK_REMAINING_ARRAY_LAYERS);
+
+	VulkanPipelineBarrier Barrier(GetDevice());
+	Barrier.AddImageLayoutTransition(
+		ERHIDeviceQueue::Graphics,
+		ERHIDeviceQueue::Graphics,
+		BackBuffer->GetNative(),
+		vk::ImageLayout::eColorAttachmentOptimal,
+		vk::ImageLayout::ePresentSrcKHR,
+		SubresourceRange);
+	Barrier.Submit(static_cast<VulkanCommandBuffer*>(CommandBuffer));
+}
+
 void VulkanSwapchain::Present()
 {
 	assert(m_Native);
@@ -338,19 +389,19 @@ void VulkanSwapchain::Present()
 	m_Device->Queue(EQueueType::Graphics)->AddSignalSemaphore(m_PresentComplete->get());
 #endif
 
-	const vk::Semaphore WaitSemaphores[]
-	{
-		//m_PresentComplete->Get()
-		nullptr
-	};
-
 	const vk::SwapchainKHR Swapchains[]
 	{
 		m_Native
 	};
 
-	//vk::Queue PresentQueue = m_Device->Queue(EQueueType::Graphics)->Get();
-	vk::Queue PresentQueue;
+	/// Swapchain creation asserts the graphics queue is also the present queue.
+	const vk::Queue& PresentQueue = GetDevice().GetQueue(ERHIDeviceQueue::Graphics).GetNative();
+
+	/// Skeleton synchronization: wait for the frame to land before presenting. Proper implementations
+	/// signal a semaphore from the submit and wait on it here.
+	PresentQueue.waitIdle();
+
+	std::vector<vk::Semaphore> WaitSemaphores;
 
 	/// Before an application can present an image, the image's layout must be transitioned to the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout, 
 	/// or for a shared presentable image the VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR layout.
@@ -373,7 +424,9 @@ void VulkanSwapchain::Present()
 		}
 	}
 
-	AdvanceFrame();
+	/// Do NOT call AdvanceFrame() here: the next frame acquires its own image at the start of the
+	/// frame (see RHISwapchain::AdvanceFrame). Acquiring twice per frame would leak a presented
+	/// image every frame and eventually starve the swapchain.
 }
 
 VulkanSwapchain::~VulkanSwapchain()

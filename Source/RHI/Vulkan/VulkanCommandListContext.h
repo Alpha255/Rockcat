@@ -9,11 +9,11 @@ class VulkanCommandListContext : public RHICommandListContext
 public:
 	VulkanCommandListContext(const class VulkanDevice& Device, class VulkanQueue& Queue);
 
-	void SubmitGraphicsCommandBuffer() override final;
 	void SubmitUploadCommandBuffer(RHICommandBuffer* UploadCommandBuffer) override final;
 
 	VulkanDescriptorPool& AcquireDescriptorPool();
 protected:
+	void SubmitCommandBuffer(RHICommandBuffer* CommandBuffer) override final;
 	RHICommandBufferPtr AllocateCommandBuffer(ERHICommandBufferLevel Level) override final
 	{
 		return m_Pool.AllocateCommandBuffer(Level);
