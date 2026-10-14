@@ -28,11 +28,12 @@ struct ImGuiFontConfigs : public ImFontConfig
 			CEREAL_NVP(RasterizerMultiply),
 			CEREAL_NVP(RasterizerDensity),
 			CEREAL_NVP(Flags),
-			CEREAL_NVP(GlyphRangesPayload)
+			CEREAL_NVP(GlyphRangesPayload),
+			CEREAL_NVP(MergeIconFont),
+			CEREAL_NVP(FontSize)
 		);
 
 		if constexpr (Archive::is_loading::value)
-		{
 			GlyphRanges = GlyphRangesPayload.data();
 		}
 	}

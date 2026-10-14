@@ -3,12 +3,241 @@
         "class JsonAsset<class ImGuiConfiguration>": {
             "class Asset": {
                 "class File": {
-                    "m_LastWriteTime": 1791948631
+                    "m_LastWriteTime": 1791983637
                 }
             }
         },
-        "m_DefaultTheme": "",
-        "m_DefaultFont": "",
-        "m_Fonts": []
+        "m_DefaultTheme": "Classic",
+        "m_DefaultFont": "Inter",
+        "m_Fonts": [
+            {
+                "key": "Inter",
+                "value": {
+                    "Configs": {
+                        "Name": "Inter",
+                        "FontDataSize": 0,
+                        "FontDataOwnedByAtlas": true,
+                        "MergeMode": false,
+                        "PixelSnapH": false,
+                        "PixelSnapV": false,
+                        "OversampleH": 0,
+                        "OversampleV": 0,
+                        "EllipsisChar": 0,
+                        "SizePixels": 0.0,
+                        "GlyphOffset": {
+                            "Vec2.x": 0.0,
+                            "Vec2.y": 0.0
+                        },
+                        "GlyphMinAdvanceX": 0.0,
+                        "GlyphMaxAdvanceX": 3.4028234663852886e+38,
+                        "GlyphExtraAdvanceX": 0.0,
+                        "FontNo": 0,
+                        "FontLoaderFlags": 0,
+                        "RasterizerMultiply": 1.0,
+                        "RasterizerDensity": 1.0,
+                        "Flags": 0,
+                        "GlyphRangesPayload": [],
+                        "MergeIconFont": true,
+                        "FontSize": 12
+                    }
+                }
+            },
+            {
+                "key": "Noto Sans CJK Regular",
+                "value": {
+                    "Configs": {
+                        "Name": "Noto Sans CJK Regular",
+                        "FontDataSize": 0,
+                        "FontDataOwnedByAtlas": true,
+                        "MergeMode": false,
+                        "PixelSnapH": false,
+                        "PixelSnapV": false,
+                        "OversampleH": 0,
+                        "OversampleV": 0,
+                        "EllipsisChar": 0,
+                        "SizePixels": 0.0,
+                        "GlyphOffset": {
+                            "Vec2.x": 0.0,
+                            "Vec2.y": 0.0
+                        },
+                        "GlyphMinAdvanceX": 0.0,
+                        "GlyphMaxAdvanceX": 3.4028234663852886e+38,
+                        "GlyphExtraAdvanceX": 0.0,
+                        "FontNo": 0,
+                        "FontLoaderFlags": 0,
+                        "RasterizerMultiply": 1.0,
+                        "RasterizerDensity": 1.0,
+                        "Flags": 0,
+                        "GlyphRangesPayload": [],
+                        "MergeIconFont": false,
+                        "FontSize": 12
+                    }
+                }
+            },
+            {
+                "key": "Roboto-Black",
+                "value": {
+                    "Configs": {
+                        "Name": "Roboto-Black",
+                        "FontDataSize": 0,
+                        "FontDataOwnedByAtlas": true,
+                        "MergeMode": false,
+                        "PixelSnapH": false,
+                        "PixelSnapV": false,
+                        "OversampleH": 0,
+                        "OversampleV": 0,
+                        "EllipsisChar": 0,
+                        "SizePixels": 0.0,
+                        "GlyphOffset": {
+                            "Vec2.x": 0.0,
+                            "Vec2.y": 0.0
+                        },
+                        "GlyphMinAdvanceX": 0.0,
+                        "GlyphMaxAdvanceX": 3.4028234663852886e+38,
+                        "GlyphExtraAdvanceX": 0.0,
+                        "FontNo": 0,
+                        "FontLoaderFlags": 0,
+                        "RasterizerMultiply": 1.0,
+                        "RasterizerDensity": 1.0,
+                        "Flags": 0,
+                        "GlyphRangesPayload": [],
+                        "MergeIconFont": false,
+                        "FontSize": 12
+                    }
+                }
+            },
+            {
+                "key": "Roboto-Bold",
+                "value": {
+                    "Configs": {
+                        "Name": "Roboto-Bold",
+                        "FontDataSize": 0,
+                        "FontDataOwnedByAtlas": true,
+                        "MergeMode": false,
+                        "PixelSnapH": false,
+                        "PixelSnapV": false,
+                        "OversampleH": 0,
+                        "OversampleV": 0,
+                        "EllipsisChar": 0,
+                        "SizePixels": 0.0,
+                        "GlyphOffset": {
+                            "Vec2.x": 0.0,
+                            "Vec2.y": 0.0
+                        },
+                        "GlyphMinAdvanceX": 0.0,
+                        "GlyphMaxAdvanceX": 3.4028234663852886e+38,
+                        "GlyphExtraAdvanceX": 0.0,
+                        "FontNo": 0,
+                        "FontLoaderFlags": 0,
+                        "RasterizerMultiply": 1.0,
+                        "RasterizerDensity": 1.0,
+                        "Flags": 0,
+                        "GlyphRangesPayload": [],
+                        "MergeIconFont": false,
+                        "FontSize": 12
+                    }
+                }
+            },
+            {
+                "key": "Roboto-Medium",
+                "value": {
+                    "Configs": {
+                        "Name": "Roboto-Medium",
+                        "FontDataSize": 0,
+                        "FontDataOwnedByAtlas": true,
+                        "MergeMode": false,
+                        "PixelSnapH": false,
+                        "PixelSnapV": false,
+                        "OversampleH": 0,
+                        "OversampleV": 0,
+                        "EllipsisChar": 0,
+                        "SizePixels": 0.0,
+                        "GlyphOffset": {
+                            "Vec2.x": 0.0,
+                            "Vec2.y": 0.0
+                        },
+                        "GlyphMinAdvanceX": 0.0,
+                        "GlyphMaxAdvanceX": 3.4028234663852886e+38,
+                        "GlyphExtraAdvanceX": 0.0,
+                        "FontNo": 0,
+                        "FontLoaderFlags": 0,
+                        "RasterizerMultiply": 1.0,
+                        "RasterizerDensity": 1.0,
+                        "Flags": 0,
+                        "GlyphRangesPayload": [],
+                        "MergeIconFont": false,
+                        "FontSize": 12
+                    }
+                }
+            },
+            {
+                "key": "Roboto-Regular",
+                "value": {
+                    "Configs": {
+                        "Name": "Roboto-Regular",
+                        "FontDataSize": 0,
+                        "FontDataOwnedByAtlas": true,
+                        "MergeMode": false,
+                        "PixelSnapH": false,
+                        "PixelSnapV": false,
+                        "OversampleH": 0,
+                        "OversampleV": 0,
+                        "EllipsisChar": 0,
+                        "SizePixels": 0.0,
+                        "GlyphOffset": {
+                            "Vec2.x": 0.0,
+                            "Vec2.y": 0.0
+                        },
+                        "GlyphMinAdvanceX": 0.0,
+                        "GlyphMaxAdvanceX": 3.4028234663852886e+38,
+                        "GlyphExtraAdvanceX": 0.0,
+                        "FontNo": 0,
+                        "FontLoaderFlags": 0,
+                        "RasterizerMultiply": 1.0,
+                        "RasterizerDensity": 1.0,
+                        "Flags": 0,
+                        "GlyphRangesPayload": [],
+                        "MergeIconFont": false,
+                        "FontSize": 12
+                    }
+                }
+            },
+            {
+                "key": "materialdesignicons-webfont",
+                "value": {
+                    "Configs": {
+                        "Name": "materialdesignicons-webfont",
+                        "FontDataSize": 0,
+                        "FontDataOwnedByAtlas": true,
+                        "MergeMode": true,
+                        "PixelSnapH": false,
+                        "PixelSnapV": false,
+                        "OversampleH": 0,
+                        "OversampleV": 0,
+                        "EllipsisChar": 0,
+                        "SizePixels": 20.0,
+                        "GlyphOffset": {
+                            "Vec2.x": 0.0,
+                            "Vec2.y": 2.0
+                        },
+                        "GlyphMinAdvanceX": 4.0,
+                        "GlyphMaxAdvanceX": 3.4028234663852886e+38,
+                        "GlyphExtraAdvanceX": 0.0,
+                        "FontNo": 0,
+                        "FontLoaderFlags": 0,
+                        "RasterizerMultiply": 1.0,
+                        "RasterizerDensity": 1.0,
+                        "Flags": 0,
+                        "GlyphRangesPayload": [
+                            63116,
+                            990487,
+                            0
+                        ],
+                        "MergeIconFont": false,
+                        "FontSize": 20.0
+                    }
+                }
+            }
+        ]
     }
 }

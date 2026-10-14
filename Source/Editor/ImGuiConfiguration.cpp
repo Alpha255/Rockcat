@@ -103,6 +103,8 @@ void ImGuiConfiguration::LoadDefaultFonts()
 			}
 		}
 	}
+
+	//Save(true);
 }
 
 void ImGuiConfiguration::LoadDefaultThemes()
