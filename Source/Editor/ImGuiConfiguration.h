@@ -34,6 +34,7 @@ struct ImGuiFontConfigs : public ImFontConfig
 		);
 
 		if constexpr (Archive::is_loading::value)
+		{
 			GlyphRanges = GlyphRangesPayload.data();
 		}
 	}

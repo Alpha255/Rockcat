@@ -5,6 +5,12 @@
 #define MINIMAL_WINDOW_SIZE 32
 #define WINDOW_CLASS_NAME L"RockcatWindowClass"
 
+#if PLATFORM_LINUX
+	/// Nothing up here is platform specific but the shape of the handle, so that is all that comes
+	/// in: GetHandle() returns a LinuxWindowHandle on this platform.
+	#include "Application/Linux/LinuxWindow.h"
+#endif
+
 enum class EWindowMode
 {
 	Windowed,

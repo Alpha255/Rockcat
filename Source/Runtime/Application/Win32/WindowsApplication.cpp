@@ -44,7 +44,11 @@ WindowsApplication::WindowsApplication(const char* SettingsFile)
 void WindowsApplication::PumpMessages()
 {
 	MSG Message;
-	if (::PeekMessageW(&Message, nullptr, 0u, 0u, PM_REMOVE))
+
+	/// Drained instead of a single message per frame: a key press alone already arrives as three of
+	/// them (down, char, up), and dropping to one per frame makes input lag behind the presentation,
+	/// which stalls waiting for the queue on top of that.
+	while (::PeekMessageW(&Message, nullptr, 0u, 0u, PM_REMOVE))
 	{
 		::TranslateMessage(&Message);
 		::DispatchMessageW(&Message);
@@ -63,15 +67,25 @@ LRESULT WindowsApplication::AppMessageProc(HWND hWnd, UINT Msg, WPARAM wParam, L
 
 LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-	auto GetCursorPos = [this, &hWnd](LPARAM lParam) -> Math::Vector2 {
+	/// Everything downstream - ImGui above all - works in client coordinates: with multi viewports
+	/// turned off its main viewport starts at (0, 0), so a position handed over in screen space is
+	/// off by the origin of the window and hits something else entirely. The lParam of the mouse
+	/// messages below already is a client position, hence it is passed on as it comes.
+	auto GetCursorPos = [](LPARAM lParam) -> Math::Vector2 {
+		return Math::Vector2(static_cast<float>(GET_X_LPARAM(lParam)), static_cast<float>(GET_Y_LPARAM(lParam)));
+	};
+
+	/// The two messages that carry a *screen* position instead, which has to be brought back into
+	/// that same space before it goes anywhere.
+	auto GetScreenCursorPos = [&hWnd](LPARAM lParam) -> Math::Vector2 {
 		POINT CursorPos
 		{
 			GET_X_LPARAM(lParam),
 			GET_Y_LPARAM(lParam)
 		};
-		::ClientToScreen(hWnd, &CursorPos);
+		::ScreenToClient(hWnd, &CursorPos);
 
-		return Math::Vector2(CursorPos.x, CursorPos.y);
+		return Math::Vector2(static_cast<float>(CursorPos.x), static_cast<float>(CursorPos.y));
 	};
 
 	switch (Msg)
@@ -156,12 +170,17 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	{
 		static const float s_SpinFactor = 1.0f / WHEEL_DELTA;
 		const short WheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
-		DispatchMouseWheelMessage(WheelDelta * s_SpinFactor, GetCursorPos(lParam));
+
+		/// WM_MOUSEWHEEL (and WM_NCMOUSEMOVE below) is the exception: its lParam holds a screen
+		/// position, unlike every other mouse message.
+		DispatchMouseWheelMessage(WheelDelta * s_SpinFactor, GetScreenCursorPos(lParam));
 		break;
 	}
 	case WM_MOUSEMOVE:
-	case WM_NCMOUSEMOVE:
 		DispatchMouseMoveMessage(GetCursorPos(lParam));
+		break;
+	case WM_NCMOUSEMOVE:
+		DispatchMouseMoveMessage(GetScreenCursorPos(lParam));
 		break;
 	case WM_KEYDOWN:
 	case WM_SYSKEYDOWN:
@@ -192,9 +211,14 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	}
 	case WM_CHAR:
 	{
-		const wchar_t WChar = static_cast<wchar_t>(wParam);
-		const auto Char = string::from_wide(&WChar);
-		DispatchKeyCharMessage(Char[0]);
+		/// from_wide() counts on a terminated range: handing it the address of a lone wchar_t makes
+		/// it read past that variable for the length, which is undefined behaviour.
+		const wchar_t WChar[] { static_cast<wchar_t>(wParam), L'\0' };
+		const auto Char = string::from_wide(std::wstring_view(WChar, 1u));
+		if (!Char.empty())
+		{
+			DispatchKeyCharMessage(Char[0]);
+		}
 		break;
 	}
 	case WM_INPUT:

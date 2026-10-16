@@ -87,14 +87,19 @@ void TFTaskExecutorManager::Initialize()
 
 uint32_t TFTaskExecutorManager::GetNumWorkerThreads()
 {
-	const uint32_t NumTotalThreads = PlatformMisc::GetNumHardwareConcurrencyThreads(CVarUseHyperThreading.Get());
+	if (!m_NumWorkerThreads)
+	{
+		const uint32_t NumTotalThreads = PlatformMisc::GetNumHardwareConcurrencyThreads(CVarUseHyperThreading.Get());
 
-	uint32_t NumSeperateThreads = 0u;
-	NumSeperateThreads += CVarUseSeperateGameThread.Get() ? 1u : 0u;
-	NumSeperateThreads += CVarUseSeperateRenderThread.Get() ? 1u : 0u;
-	NumSeperateThreads += CVarNumForegroundThreads.Get();
+		uint32_t NumSeperateThreads = 0u;
+		NumSeperateThreads += CVarUseSeperateGameThread.Get() ? 1u : 0u;
+		NumSeperateThreads += CVarUseSeperateRenderThread.Get() ? 1u : 0u;
+		NumSeperateThreads += CVarNumForegroundThreads.Get();
 
-	return NumTotalThreads > NumSeperateThreads ? NumTotalThreads - NumSeperateThreads : 0u;
+		m_NumWorkerThreads = NumTotalThreads > NumSeperateThreads ? NumTotalThreads - NumSeperateThreads : 0u;
+	}
+
+	return m_NumWorkerThreads;
 }
 
 tf::Executor* TFTaskExecutorManager::GetExecutor(ETFTaskThread Thread, ETFTaskPriority Priority)

@@ -21,4 +21,5 @@ private:
 	void InitializeThreadTags();
 
 	std::vector<std::shared_ptr<tf::Executor>> m_Executors;
+	uint32_t m_NumWorkerThreads = 0u;
 };
