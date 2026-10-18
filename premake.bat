@@ -1,3 +1,0 @@
-python Build.py
-
-@pause
