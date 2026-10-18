@@ -2,7 +2,7 @@
 
 #include "Application/BaseApplication.h"
 
-#if PLATFORM_WIN32
+#if PLATFORM_WINDOWS
 
 #include <Windows.h>
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core/Math/Math.h"
-#include "Core/Singleton.h"
 
 enum class EMouseButton : uint8_t
 {

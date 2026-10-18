@@ -28,7 +28,7 @@ VulkanExtensionArray VulkanExtension::GetWantedInstanceExtensions(VulkanExtensio
 	VulkanExtensionArray WantedExts;
 
 	ADD_EXTENSION(VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_surface, true, KHRSurface);
-#if PLATFORM_WIN32
+#if PLATFORM_WINDOWS
 	ADD_EXTENSION(VK_KHR_WIN32_SURFACE_EXTENSION_NAME, VK_KHR_win32_surface, true, KHRSurface);
 #elif PLATFORM_LINUX
 	ADD_EXTENSION(VK_KHR_XCB_SURFACE_EXTENSION_NAME, VK_KHR_surface, true, KHRSurface);

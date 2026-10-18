@@ -36,8 +36,8 @@
 #include <magic_enum/magic_enum.hpp>
 
 #if defined(_WIN32)
-	#if !defined(PLATFORM_WIN32)
-		#define PLATFORM_WIN32 1
+	#if !defined(PLATFORM_WINDOWS)
+		#define PLATFORM_WINDOWS 1
 	#endif
 #elif defined(__ANDRIOD__)
 	#if !defined(PLATFORM_ANDROID)
@@ -71,7 +71,7 @@
 	}                                                                                                \
 }
 
-#if defined(PLATFORM_WIN32)
+#if defined(PLATFORM_WINDOWS)
 	#define DLL_EXTENSION ".dll"
 #elif defined(PLATFORM_LINUX) || defined(PLATFORM_ANDROID)
 	#define DLL_EXTENSION ".so"

@@ -6,7 +6,7 @@
 #include "Application/Window.h"
 #include <windowsx.h>
 
-#if PLATFORM_WIN32
+#if PLATFORM_WINDOWS
 
 extern BaseApplication* GApplication;
 
@@ -16,29 +16,6 @@ WindowsApplication::WindowsApplication(const char* SettingsFile)
 	/// Has to be the very first DPI dependent call in the process, well before the first HWND of
 	/// the WNDCLASSEX below exists. See InitializeDpiAwareness().
 	InitializeDpiAwareness();
-
-	HINSTANCE HInstance = reinterpret_cast<HINSTANCE>(PlatformMisc::GetApplicationHandle());
-	VERIFY_WITH_SYSTEM_MESSAGE(HInstance);
-
-	HICON HIcon = ::LoadIconW(HInstance, MAKEINTRESOURCEW(ICON_NVIDIA));
-	VERIFY_WITH_SYSTEM_MESSAGE(HIcon);
-
-	WNDCLASSEXW WndClassEx
-	{
-		sizeof(WNDCLASSEXW),
-		CS_HREDRAW | CS_VREDRAW,
-		AppMessageProc,
-		0,
-		sizeof(void*),
-		HInstance,
-		HIcon,
-		::LoadCursorW(0, IDC_ARROW),
-		static_cast<HBRUSH>(::GetStockObject(DKGRAY_BRUSH)),
-		nullptr,
-		WINDOW_CLASS_NAME,
-		HIcon
-	};
-	VERIFY_WITH_SYSTEM_MESSAGE(::RegisterClassExW(&WndClassEx) != 0);
 }
 
 void WindowsApplication::PumpMessages()

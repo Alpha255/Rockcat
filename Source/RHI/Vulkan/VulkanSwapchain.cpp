@@ -12,7 +12,7 @@ VulkanSurface::VulkanSurface(const VulkanDevice& Device, const void* WindowHandl
 {
 	assert(WindowHandle);
 
-#if defined(PLATFORM_WIN32)
+#if defined(PLATFORM_WINDOWS)
 	vk::Win32SurfaceCreateInfoKHR CreateInfo;
 	CreateInfo.setHinstance(reinterpret_cast<::HINSTANCE>(PlatformMisc::GetApplicationHandle()))
 		.setHwnd(reinterpret_cast<::HWND>(const_cast<void*>(WindowHandle)));

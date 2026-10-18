@@ -1,7 +1,7 @@
 #include "Misc/PlatformMisc.h"
 #include "Core/SpdLogging.h"
 
-#if PLATFORM_WIN32
+#if PLATFORM_WINDOWS
 
 #if defined(GetEnvironmentVariable)
 #undef GetEnvironmentVariable
@@ -355,5 +355,5 @@ namespace PlatformMisc
 }
 
 #endif // defined(GetEnvironmentVariable)
-#endif // PLATFORM_WIN32
+#endif // PLATFORM_WINDOWS
 

@@ -62,7 +62,7 @@ VulkanDevice::VulkanDevice()
 				}
 				if (IS_VALID_PROPERTY_INDEX(PresentQueueIndex))
 				{
-#if PLATFORM_WIN32
+#if PLATFORM_WINDOWS
 					if (PhysicalDevice.getWin32PresentationSupportKHR(Index))
 					{
 						PresentQueueIndex = Index;
