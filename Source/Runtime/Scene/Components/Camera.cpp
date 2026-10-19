@@ -1,5 +1,5 @@
 #include "Scene/Components/Camera.h"
-#include "Misc/PlatformMisc.h"
+#include "Application/Application.h"
 
 void Camera::SetLookAt(const Math::Vector3& Eye, const Math::Vector3& LookAt)
 {
@@ -69,11 +69,11 @@ void Camera::UpdateMouseDelta()
 {
 	if (m_MouseMovements.IsButtonDown(EMouseButton::Left))
 	{
-		Math::Vector2 CursorPos = PlatformMisc::GetCursorPosition();
+		//Math::Vector2 CursorPos = PlatformMisc::GetCursorPosition();
+		Math::Vector2 CursorPos;
 
 		auto Delta = CursorPos - m_MouseMovements.LastPos;
 		m_MouseMovements.LastPos = CursorPos;
-
 		/// Smooth the relative mouse data over a few frames so it isn't 
 		/// jerky when moving slowly at low frame rates.
 		float PercentNew = 1.0f / m_FrameCountToSmooth;

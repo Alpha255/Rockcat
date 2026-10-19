@@ -1,16 +1,24 @@
-#include "Misc/PlatformMisc.h"
 #include "Core/SpdLogging.h"
 
 #if PLATFORM_WINDOWS
 
-#if defined(GetEnvironmentVariable)
-#undef GetEnvironmentVariable
-
 #include <Windows.h>
+
+#if defined(GetEnvironmentVariable)
+	#undef GetEnvironmentVariable
+#endif
+
+#if defined(SetEnvironmentVariable)
+	#undef SetEnvironmentVariable
+#endif
+
+#if defined(GetCommandLine)
+	#undef GetCommandLine
+#endif
 
 namespace PlatformMisc
 {
-	string GetErrorMessage(uint32_t ErrorCode)
+	string GetSystemErrorMessage(uint32_t ErrorCode)
 	{
 		std::vector<wchar_t> Buffer(UINT16_MAX, L'\0');
 
@@ -36,7 +44,7 @@ namespace PlatformMisc
 		return Result;
 	}
 
-	std::filesystem::path GetApplicationPath()
+	std::filesystem::path GetExecutablePath()
 	{
 		std::vector<wchar_t> Buffer(UINT16_MAX, L'\0');
 
@@ -184,11 +192,30 @@ namespace PlatformMisc
 		return string::from_wide(std::wstring_view(Buffer.data(), Length));
 	}
 
+	void SetEnvironmentVariable(const char* Name, const char* Value)
+	{
+		const std::wstring WideName = Utf8ToWide(Name);
+		if (WideName.empty())
+		{
+			return;
+		}
+
+		const std::wstring WideValue = Utf8ToWide(Value);
+
+		VERIFY_WITH_SYSTEM_MESSAGE(::SetEnvironmentVariableW(WideName.c_str(), WideValue.c_str()));
+	}
+
 	void* GetApplicationHandle()
 	{
 		::HMODULE Handle = ::GetModuleHandleW(nullptr);
 		VERIFY_WITH_SYSTEM_MESSAGE(Handle);
 		return reinterpret_cast<void*>(Handle);
+	}
+
+	const string GetCommandline()
+	{
+		std::wstring Commandline(::GetCommandLineW());
+		return string::from_wide(Commandline);
 	}
 
 	Math::Vector2 GetCursorPosition()
@@ -354,6 +381,5 @@ namespace PlatformMisc
 	}
 }
 
-#endif // defined(GetEnvironmentVariable)
 #endif // PLATFORM_WINDOWS
 

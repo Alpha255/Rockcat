@@ -18,7 +18,7 @@
 
 namespace PlatformMisc
 {
-	string GetErrorMessage(uint32_t ErrorCode)
+	string GetSystemErrorMessage(uint32_t ErrorCode)
 	{
 		const int32_t Code = ErrorCode == ~0u ? errno : static_cast<int32_t>(ErrorCode);
 		return string(std::generic_category().message(Code));

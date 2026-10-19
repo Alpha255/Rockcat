@@ -1,5 +1,5 @@
 #include "Application/Window.h"
-#include "Misc/PlatformMisc.h"
+#include "Application/Application.h"
 #include "Core/SpdLogging.h"
 
 Window::Window(uint32_t Width, uint32_t Height, const char* Title)

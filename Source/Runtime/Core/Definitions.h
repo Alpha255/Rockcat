@@ -62,13 +62,13 @@
 	}                     \
 }
 
-#define VERIFY_WITH_SYSTEM_MESSAGE(Condition)                                                        \
-{                                                                                                    \
-	if (!(Condition))                                                                                \
-	{                                                                                                \
-		LOG_ERROR(LogDefault, "Failed to invoke platform API, {}", PlatformMisc::GetErrorMessage()); \
-		assert(0);                                                                                   \
-	}                                                                                                \
+#define VERIFY_WITH_SYSTEM_MESSAGE(Condition)                                                             \
+{                                                                                                         \
+	if (!(Condition))                                                                                     \
+	{                                                                                                     \
+		LOG_ERROR(LogDefault, "Failed to invoke platform API, {}", Application::GetSystemErrorMessage()); \
+		assert(0);                                                                                        \
+	}                                                                                                     \
 }
 
 #if defined(PLATFORM_WINDOWS)

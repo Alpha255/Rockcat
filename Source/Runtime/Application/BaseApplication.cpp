@@ -6,7 +6,7 @@
 #include "Asset/AssetDatabase.h"
 #include "Profile/CpuTimer.h"
 #include "Profile/Stats.h"
-#include "Misc/PlatformMisc.h"
+#include "Application/Application.h"
 #include "Async/TaskExecutorManager.h"
 #include "Scene/Scene.h"
 //#include "Rendering/RenderGraph/RenderGraph.h"

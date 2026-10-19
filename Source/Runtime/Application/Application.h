@@ -1,10 +1,14 @@
 #include "Core/String.h"
 #include "Async/TaskEvent.h"
+#include "Misc/MessageHandler.h"
 
 class Application
 {
 public:
 	static Application& Get();
+
+	Application();
+	virtual ~Application() = default;
 
 	void Loop();
 
@@ -13,22 +17,27 @@ public:
 	inline bool IsActive() const { return m_Status == EStatus::Active; }
 	inline bool IsQuit() const { return m_Status == EStatus::Quit; }
 
+	inline void* GetHandle() const { return m_Handle; }
+
 	//inline class RenderBackend& GetRenderBackend() const { return *m_RenderBackend; }
 	virtual std::shared_ptr<class Window> CreateWindow(uint32_t Width, uint32_t Height, const char* Title) = 0;
 
-	void AddMessageHandler(class MessageHandler* Handler);
-	void RemoveMessageHandler(class MessageHandler* Handler);
+	void AddMessageHandler(MessageHandler* Handler);
+	void RemoveMessageHandler(MessageHandler* Handler);
+
+	static string GetSystemErrorMessage(uint32_t ErrorCode = std::numeric_limits<uint32_t>().max());
+
+	static std::filesystem::path GetExecutablePath();
 
 	static std::filesystem::path GetWorkingDirectory();
 	static void SetWorkingDirectory(const std::filesystem::path& Directory);
 
 	static void Sleep(uint32_t Seconds);
-	static void Sleep(uint32_t Milliseconds);
 
 	static string GetEnvironmentVariable(const char* Name);
 	static void SetEnvironmentVariable(const char* Name, const char* Value);
 
-	static const char* GetCommandline();
+	static string GetCommandline();
 
 	static void ExecuteProcess(const char* Commandline, bool WaitDone = true);
 	
@@ -48,6 +57,8 @@ protected:
 	void Finalize();
 
 	void Tick(float ElapsedSeconds);
+
+	virtual EKeyboardKey DecodeKeyboardKey(uint64_t KeyCode, int64_t Mask) = 0;
 private:
 	EStatus m_Status;
 	//std::unique_ptr<GameInstance> m_GameInstance;

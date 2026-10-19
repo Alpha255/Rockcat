@@ -1,6 +1,6 @@
 #include "Async/Task.h"
 #include "Async/TaskExecutorManager.h"
-#include "Misc/PlatformMisc.h"
+#include "Application/Application.h"
 
 DEFINE_LOGGER_CATEGORY(LogTaskFlow);
 
@@ -11,7 +11,7 @@ struct SetThreadPriorityScoped
 	{
 		if (!SkipPriorityChange)
 		{
-			PlatformMisc::SetThreadPriority(std::this_thread::get_id(), Priority);
+			Application::SetThreadPriority(std::this_thread::get_id(), Priority);
 		}
 	}
 
@@ -19,7 +19,7 @@ struct SetThreadPriorityScoped
 	{
 		if (!SkipPriorityChange)
 		{
-			PlatformMisc::SetThreadPriority(std::this_thread::get_id(), ETFTaskPriority::Normal);
+			Application::SetThreadPriority(std::this_thread::get_id(), ETFTaskPriority::Normal);
 		}
 	}
 

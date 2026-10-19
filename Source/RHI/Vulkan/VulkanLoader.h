@@ -16,7 +16,6 @@
 	#endif
 #endif
 
-#include "Misc/PlatformMisc.h"
 #include "Core/Spdlogging.h"
 
 #include <vulkan/vulkan.hpp>

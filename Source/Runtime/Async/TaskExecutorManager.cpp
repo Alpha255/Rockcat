@@ -1,7 +1,7 @@
 #include "Async/TaskExecutorManager.h"
 #include "Async/Task.h"
 #include "Core/ConsoleVariable.h"
-#include "Misc/PlatformMisc.h"
+#include "Application/Application.h"
 #include "Core/SpdLogging.h"
 
 #include <barrier>
@@ -66,7 +66,7 @@ void TFTaskExecutorManager::Initialize()
 			for (uint32_t Index = 0u; Index < NumForegroundThreads; ++Index)
 			{
 				Flow.emplace([&Barrier]() {
-					PlatformMisc::SetThreadPriority(std::this_thread::get_id(), ETFTaskPriority::High);
+					Application::SetThreadPriority(std::this_thread::get_id(), ETFTaskPriority::High);
 					Barrier.arrive_and_wait();
 					});
 			}
@@ -89,7 +89,7 @@ uint32_t TFTaskExecutorManager::GetNumWorkerThreads()
 {
 	if (!m_NumWorkerThreads)
 	{
-		const uint32_t NumTotalThreads = PlatformMisc::GetNumHardwareConcurrencyThreads(CVarUseHyperThreading.Get());
+		const uint32_t NumTotalThreads = Application::GetNumHardwareConcurrencyThreads(CVarUseHyperThreading.Get());
 
 		uint32_t NumSeperateThreads = 0u;
 		NumSeperateThreads += CVarUseSeperateGameThread.Get() ? 1u : 0u;

@@ -1,5 +1,5 @@
 #include "Core/String.h"
-#include "Misc/PlatformMisc.h"
+#include "Application/Application.h"
 #include <stdarg.h>
 
 void string::tolower()

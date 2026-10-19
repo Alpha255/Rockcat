@@ -1,21 +1,15 @@
-#include "Application/Win32/WindowsApplication.h"
-#include "Application/Win32/Resource.h"
+#include "Application/Windows/WindowsApplication.h"
+#include "Application/Windows/Resource.h"
+#include "Application/Windows/WindowsWindow.h"
 #include "Application/ApplicationSettings.h"
 #include "Core/SpdLogging.h"
-#include "Misc/PlatformMisc.h"
-#include "Application/Window.h"
 #include <windowsx.h>
 
 #if PLATFORM_WINDOWS
 
-extern BaseApplication* GApplication;
-
-WindowsApplication::WindowsApplication(const char* SettingsFile)
-	: BaseApplication(SettingsFile)
+WindowsApplication::WindowsApplication()
+	: Application()
 {
-	/// Has to be the very first DPI dependent call in the process, well before the first HWND of
-	/// the WNDCLASSEX below exists. See InitializeDpiAwareness().
-	InitializeDpiAwareness();
 }
 
 void WindowsApplication::PumpMessages()
@@ -207,7 +201,7 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	return 0;
 }
 
-EKeyboardKey WindowsApplication::MapKeyCode(uint64_t KeyCode, int64_t Mask)
+EKeyboardKey WindowsApplication::DecodeKeyboardKey(uint64_t KeyCode, int64_t Mask)
 {
 	EKeyboardKey ActualKeyCode = EKeyboardKey::None;
 

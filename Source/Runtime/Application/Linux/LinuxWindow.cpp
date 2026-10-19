@@ -1,4 +1,4 @@
-#include "Misc/PlatformMisc.h"
+#include "Application/Application.h"
 #include "Application/Window.h"
 #include "Core/SpdLogging.h"
 
