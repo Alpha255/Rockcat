@@ -8,7 +8,7 @@ public:
 	static Application& Get();
 
 	Application();
-	virtual ~Application() = default;
+	virtual ~Application();
 
 	void Loop();
 
@@ -53,12 +53,31 @@ protected:
 
 	inline void SetStatus(EStatus Status) { m_Status = Status; }
 
+	inline std::shared_ptr<class Window> GetMainWindow() { return m_MainWindow; }
+
 	void Initialize();
 	void Finalize();
 
 	void Tick(float ElapsedSeconds);
 
+	void DispatchKeyUpMessage(const KeyEvent& Event);
+	void DispatchKeyDownMessage(const KeyEvent& Event);
+	void DispatchKeyCharMessage(const char Character);
+
+	void DispatchMouseButtonUpMessage(const EMouseButton Button);
+	void DispatchMouseButtonDownMessage(const EMouseButton Button, const Math::Vector2& CursorPos);
+	void DispatchMouseButtonDoubleClickMessage(const EMouseButton Button, const Math::Vector2& CursorPos);
+	void DispatchMouseMoveMessage(const Math::Vector2& CursorPos);
+	void DispatchMouseWheelMessage(float WheelDelta, const Math::Vector2& CursorPos);
+
+	void DispatchMainWindowResizedMessage(uint32_t Width, uint32_t Height);
+	void DispatchAppActiveChangedMessage();
+	void DispatchAppInactiveChangedMessage();
+	void DispatchAppQuitMessage();
+
 	virtual EKeyboardKey DecodeKeyboardKey(uint64_t KeyCode, int64_t Mask) = 0;
+
+	KeyModifiers m_KeyModifiers;
 private:
 	EStatus m_Status;
 	//std::unique_ptr<GameInstance> m_GameInstance;
@@ -70,4 +89,5 @@ private:
 #endif
 	void* m_Handle = nullptr;
 	std::shared_ptr<class Window> m_MainWindow;
+	std::vector<MessageHandler*> m_MessageHandlers;
 };

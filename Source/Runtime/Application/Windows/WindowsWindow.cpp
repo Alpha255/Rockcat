@@ -1,36 +1,16 @@
-#include "Application/Window.h"
+#include "Application/Windows/WindowsWindow.h"
+
+#if PLATFORM_WINDOWS
+
 #include "Application/Application.h"
 #include "Core/SpdLogging.h"
 
-Window::Window(uint32_t Width, uint32_t Height, const char* Title)
-	: m_Width(std::max<uint32_t>(Width, MINIMAL_WINDOW_SIZE))
-	, m_Height(std::max<uint32_t>(Height, MINIMAL_WINDOW_SIZE))
-	, m_Mode(EWindowMode::Windowed)
-	, m_Handle(nullptr)
-	, m_Title(Title)
+const std::wstring_view WindowsWindow::WindowClassName(L"RockCatWindow");
+
+WindowsWindow::WindowsWindow(HINSTANCE HInstance, uint32_t Width, uint32_t Height, const char* Title)
+	: Window(Width, Height, Title)
 {
-	HINSTANCE HInstance = reinterpret_cast<HINSTANCE>(PlatformMisc::GetApplicationHandle());
-	VERIFY_WITH_SYSTEM_MESSAGE(HInstance);
-
-	HICON HIcon = ::LoadIconW(HInstance, MAKEINTRESOURCEW(ICON_NVIDIA));
-	VERIFY_WITH_SYSTEM_MESSAGE(HIcon);
-
-	WNDCLASSEXW WndClassEx
-	{
-		sizeof(WNDCLASSEXW),
-		CS_HREDRAW | CS_VREDRAW,
-		AppMessageProc,
-		0,
-		sizeof(void*),
-		HInstance,
-		HIcon,
-		::LoadCursorW(0, IDC_ARROW),
-		static_cast<HBRUSH>(::GetStockObject(DKGRAY_BRUSH)),
-		nullptr,
-		WINDOW_CLASS_NAME,
-		HIcon
-	};
-	VERIFY_WITH_SYSTEM_MESSAGE(::RegisterClassExW(&WndClassEx) != 0);
+	assert(HInstance);
 
 	::RECT Rect
 	{ 
@@ -41,14 +21,13 @@ Window::Window(uint32_t Width, uint32_t Height, const char* Title)
 	};
 	VERIFY_WITH_SYSTEM_MESSAGE(::AdjustWindowRect(&Rect, WS_OVERLAPPEDWINDOW, false) != 0);
 
-	HINSTANCE HInstance = reinterpret_cast<HINSTANCE>(PlatformMisc::GetApplicationHandle());
-	VERIFY_WITH_SYSTEM_MESSAGE(HInstance);
+	std::wstring WindowTitle = string(Title).to_wide();
 
 	uint32_t ExtraWindowStyle = 0u;
 	::HWND Handle = ::CreateWindowExW(
 		0,
-		WINDOW_CLASS_NAME,
-		Settings.Title.to_wide().c_str(),
+		WindowClassName.data(),
+		WindowTitle.c_str(),
 		WS_OVERLAPPEDWINDOW ^ ExtraWindowStyle,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
@@ -65,10 +44,19 @@ Window::Window(uint32_t Width, uint32_t Height, const char* Title)
 
 	m_Handle = reinterpret_cast<void*>(Handle);
 
-	SetMode(Settings.Mode);
+	SetMode(m_Mode);
 }
 
-void Window::UpdateSize(uint32_t Width, uint32_t Height)
+void WindowsWindow::SetTitle(const char* Title)
+{
+	std::wstring WindowTile = string(Title).to_wide();
+	if (!WindowTile.empty())
+	{
+		VERIFY_WITH_SYSTEM_MESSAGE(::SetWindowTextW(reinterpret_cast<::HWND>(m_Handle), WindowTile.c_str()));
+	}
+}
+
+void WindowsWindow::OnResize(uint32_t Width, uint32_t Height)
 {
 	if (Width == 0 || Height == 0)
 	{
@@ -86,7 +74,7 @@ void Window::UpdateSize(uint32_t Width, uint32_t Height)
 	}
 }
 
-void Window::SetMode(EWindowMode Mode)
+void WindowsWindow::SetMode(EWindowMode Mode)
 {
 	if (m_Mode == Mode)
 	{
@@ -121,7 +109,7 @@ void Window::SetMode(EWindowMode Mode)
 			::SendMessageW(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
 		}
 
-		UpdateSize(0u, 0u);
+		OnResize(0u, 0u);
 	}
 	else if (Mode == EWindowMode::BorderlessFullscreen || Mode == EWindowMode::ExclusiveFullscreen)
 	{
@@ -162,7 +150,7 @@ void Window::SetMode(EWindowMode Mode)
 		::SetWindowPos(hWnd, nullptr, MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top, TargetClientWidth, TargetClientHeight, 
 			SWP_NOZORDER | SWP_NOACTIVATE | ((m_Mode == EWindowMode::ExclusiveFullscreen) ? SWP_NOSENDCHANGING : 0));
 
-		UpdateSize(TargetClientWidth, TargetClientHeight);
+		OnResize(TargetClientWidth, TargetClientHeight);
 	}
 }
 

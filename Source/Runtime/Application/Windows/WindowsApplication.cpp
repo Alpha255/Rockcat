@@ -1,20 +1,47 @@
+
 #include "Application/Windows/WindowsApplication.h"
-#include "Application/Windows/Resource.h"
-#include "Application/Windows/WindowsWindow.h"
-#include "Application/ApplicationSettings.h"
-#include "Core/SpdLogging.h"
-#include <windowsx.h>
 
 #if PLATFORM_WINDOWS
+#include "Application/Windows/WindowsWindow.h"
+#include "Application/Windows/Resource.h"
+#include "Core/SpdLogging.h"
+#include <windowsx.h>
 
 WindowsApplication::WindowsApplication()
 	: Application()
 {
+	RegisterClass();
+}
+
+void WindowsApplication::RegisterClass()
+{
+	HINSTANCE HInstance = reinterpret_cast<HINSTANCE>(GetHandle());
+	VERIFY_WITH_SYSTEM_MESSAGE(HInstance);
+
+	HICON HIcon = ::LoadIconW(HInstance, MAKEINTRESOURCEW(ICON_NVIDIA));
+	VERIFY_WITH_SYSTEM_MESSAGE(HIcon);
+
+	WNDCLASSEXW WndClassEx
+	{
+		sizeof(WNDCLASSEXW),
+		CS_HREDRAW | CS_VREDRAW,
+		ApplicationMessageProc,
+		0,
+		sizeof(void*),
+		HInstance,
+		HIcon,
+		::LoadCursorW(0, IDC_ARROW),
+		static_cast<HBRUSH>(::GetStockObject(DKGRAY_BRUSH)),
+		nullptr,
+		WindowsWindow::WindowClassName.data(),
+		HIcon
+	};
+	VERIFY_WITH_SYSTEM_MESSAGE(::RegisterClassExW(&WndClassEx) != 0);
 }
 
 void WindowsApplication::PumpMessages()
 {
-	MSG Message;
+	::MSG Message;
 
 	/// Drained instead of a single message per frame: a key press alone already arrives as three of
 	/// them (down, char, up), and dropping to one per frame makes input lag behind the presentation,
@@ -26,14 +53,14 @@ void WindowsApplication::PumpMessages()
 	}
 }
 
-LRESULT WindowsApplication::AppMessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+std::shared_ptr<Window> WindowsApplication::CreateWindow(uint32_t Width, uint32_t Height, const char* Title)
 {
-	if (auto WinApp = Cast<WindowsApplication>(GApplication))
-	{
-		return WinApp->MessageProc(hWnd, Msg, wParam, lParam);
-	}
+	return std::make_shared<WindowsWindow>(reinterpret_cast<HINSTANCE>(GetHandle()), Width, Height, Title);
+}
 
-	return E_FAIL;
+LRESULT WindowsApplication::ApplicationMessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	return Cast<WindowsApplication>(Application::Get()).MessageProc(hWnd, Msg, wParam, lParam);
 }
 
 LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
@@ -42,13 +69,13 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	/// turned off its main viewport starts at (0, 0), so a position handed over in screen space is
 	/// off by the origin of the window and hits something else entirely. The lParam of the mouse
 	/// messages below already is a client position, hence it is passed on as it comes.
-	auto GetCursorPos = [](LPARAM lParam) -> Math::Vector2 {
+	static auto GetCursorPos = [](LPARAM lParam) -> Math::Vector2 {
 		return Math::Vector2(static_cast<float>(GET_X_LPARAM(lParam)), static_cast<float>(GET_Y_LPARAM(lParam)));
 	};
 
 	/// The two messages that carry a *screen* position instead, which has to be brought back into
 	/// that same space before it goes anywhere.
-	auto GetScreenCursorPos = [&hWnd](LPARAM lParam) -> Math::Vector2 {
+	static auto GetScreenCursorPos = [&hWnd](LPARAM lParam) -> Math::Vector2 {
 		POINT CursorPos
 		{
 			GET_X_LPARAM(lParam),
@@ -73,9 +100,9 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 			const uint32_t Width = static_cast<uint32_t>(LOWORD(lParam));
 			const uint32_t Height = static_cast<uint32_t>(HIWORD(lParam));
 
-			if (m_Window)
+			if (auto MainWindow = GetMainWindow())
 			{
-				m_Window->UpdateSize(Width, Height);
+				MainWindow->OnResize(Width, Height);
 			}
 
 			DispatchWindowResizedMessage(Width, Height);
@@ -106,7 +133,7 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	case WM_DESTROY:
 		::PostQuitMessage(0);
 		DispatchAppQuitMessage();
-		SetStatus(EApplicationStatus::Quit);
+		SetStatus(EStatus::Quit);
 		break;
 	case WM_NCLBUTTONDBLCLK:
 		break;
@@ -156,17 +183,17 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	case WM_KEYDOWN:
 	case WM_SYSKEYDOWN:
 	{
-		auto ActualKeyCode = MapKeyCode(wParam, lParam);
-		DispatchKeyDownMessage(KeyEvent{ ActualKeyCode, wParam });
-		LOG_DEBUG(LogDefault, "Key \"{}\" down", magic_enum::enum_name(ActualKeyCode).data());
+		auto KeyboardKey = DecodeKeyboardKey(wParam, lParam);
+		DispatchKeyDownMessage(KeyEvent{ KeyboardKey, wParam });
+		LOG_DEBUG(LogDefault, "Key \"{}\" down", magic_enum::enum_name(KeyboardKey).data());
 		break;
 	}
 	case WM_KEYUP:
 	case WM_SYSKEYUP:
 	{
-		auto ActualKeyCode = MapKeyCode(wParam, lParam);
-		DispatchKeyUpMessage(KeyEvent{ ActualKeyCode, wParam });
-		LOG_DEBUG(LogDefault, "Key \"{}\" up", magic_enum::enum_name(ActualKeyCode).data());
+		auto KeyboardKey = DecodeKeyboardKey(wParam, lParam);
+		DispatchKeyUpMessage(KeyEvent{ KeyboardKey, wParam });
+		LOG_DEBUG(LogDefault, "Key \"{}\" up", magic_enum::enum_name(KeyboardKey).data());
 		break;
 	}
 	case WM_GETMINMAXINFO:
@@ -203,150 +230,150 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 
 EKeyboardKey WindowsApplication::DecodeKeyboardKey(uint64_t KeyCode, int64_t Mask)
 {
-	EKeyboardKey ActualKeyCode = EKeyboardKey::None;
+	EKeyboardKey KeyboardKey = EKeyboardKey::None;
 
 	switch (KeyCode)
 	{
 	case VK_ESCAPE:
-		ActualKeyCode = EKeyboardKey::Esc;
+		KeyboardKey = EKeyboardKey::Esc;
 		break;
 	case VK_TAB:
-		ActualKeyCode = EKeyboardKey::Tab;
+		KeyboardKey = EKeyboardKey::Tab;
 		break;
 	case VK_RETURN:
-		ActualKeyCode = EKeyboardKey::Enter;
+		KeyboardKey = EKeyboardKey::Enter;
 		break;
 	case VK_SHIFT:
 		if ((Mask & 0x1000000) == 0)
 		{
-			ActualKeyCode = EKeyboardKey::LeftShift;
+			KeyboardKey = EKeyboardKey::LeftShift;
 			m_KeyModifiers.LeftShift = !m_KeyModifiers.LeftShift;
 		}
 		else
 		{
-			ActualKeyCode = EKeyboardKey::RightShift;
+			KeyboardKey = EKeyboardKey::RightShift;
 			m_KeyModifiers.RightShift = !m_KeyModifiers.RightShift;
 		}
 		break;
 	case VK_CONTROL:
 		if ((Mask & 0x1000000) == 0)
 		{
-			ActualKeyCode = EKeyboardKey::LeftCtrl;
+			KeyboardKey = EKeyboardKey::LeftCtrl;
 			m_KeyModifiers.LeftCtrl = !m_KeyModifiers.LeftCtrl;
 		}
 		else
 		{
-			ActualKeyCode = EKeyboardKey::RightCtrl;
+			KeyboardKey = EKeyboardKey::RightCtrl;
 			m_KeyModifiers.RightCtrl = !m_KeyModifiers.RightCtrl;
 		}
 		break;
 	case VK_MENU:
 		if ((Mask & 0x1000000) == 0)
 		{
-			ActualKeyCode = EKeyboardKey::LeftAlt;
+			KeyboardKey = EKeyboardKey::LeftAlt;
 			m_KeyModifiers.LeftAlt = !m_KeyModifiers.LeftAlt;
 		}
 		else
 		{
-			ActualKeyCode = EKeyboardKey::RightAlt;
+			KeyboardKey = EKeyboardKey::RightAlt;
 			m_KeyModifiers.RightAlt = !m_KeyModifiers.RightAlt;
 		}
 		break;
 	case VK_CAPITAL:
-		ActualKeyCode = EKeyboardKey::CapsLock;
+		KeyboardKey = EKeyboardKey::CapsLock;
 		m_KeyModifiers.CapsLock = (::GetKeyState(VK_CAPITAL) & 0x0001) != 0;
 		break;
 	case VK_INSERT:
-		ActualKeyCode = EKeyboardKey::Insert;
+		KeyboardKey = EKeyboardKey::Insert;
 		break;
 	case VK_DELETE:
-		ActualKeyCode = EKeyboardKey::Delete;
+		KeyboardKey = EKeyboardKey::Delete;
 		break;
 	case VK_HOME:
-		ActualKeyCode = EKeyboardKey::Home;
+		KeyboardKey = EKeyboardKey::Home;
 		break;
 	case VK_END:
-		ActualKeyCode = EKeyboardKey::End;
+		KeyboardKey = EKeyboardKey::End;
 		break;
 	case VK_PRIOR:
-		ActualKeyCode = EKeyboardKey::PageUp;
+		KeyboardKey = EKeyboardKey::PageUp;
 		break;
 	case VK_NEXT:
-		ActualKeyCode = EKeyboardKey::PageDown;
+		KeyboardKey = EKeyboardKey::PageDown;
 		break;
 	case VK_LEFT:
-		ActualKeyCode = EKeyboardKey::Left;
+		KeyboardKey = EKeyboardKey::Left;
 		break;
 	case VK_UP:
-		ActualKeyCode = EKeyboardKey::Up;
+		KeyboardKey = EKeyboardKey::Up;
 		break;
 	case VK_RIGHT:
-		ActualKeyCode = EKeyboardKey::Right;
+		KeyboardKey = EKeyboardKey::Right;
 		break;
 	case VK_DOWN:
-		ActualKeyCode = EKeyboardKey::Down;
+		KeyboardKey = EKeyboardKey::Down;
 		break;
 	case VK_F1:
-		ActualKeyCode = EKeyboardKey::F1;
+		KeyboardKey = EKeyboardKey::F1;
 		break;
 	case VK_F2:
-		ActualKeyCode = EKeyboardKey::F2;
+		KeyboardKey = EKeyboardKey::F2;
 		break;
 	case VK_F3:
-		ActualKeyCode = EKeyboardKey::F3;
+		KeyboardKey = EKeyboardKey::F3;
 		break;
 	case VK_F4:
-		ActualKeyCode = EKeyboardKey::F4;
+		KeyboardKey = EKeyboardKey::F4;
 		break;
 	case VK_F5:
-		ActualKeyCode = EKeyboardKey::F5;
+		KeyboardKey = EKeyboardKey::F5;
 		break;
 	case VK_F6:
-		ActualKeyCode = EKeyboardKey::F6;
+		KeyboardKey = EKeyboardKey::F6;
 		break;
 	case VK_F7:
-		ActualKeyCode = EKeyboardKey::F7;
+		KeyboardKey = EKeyboardKey::F7;
 		break;
 	case VK_F8:
-		ActualKeyCode = EKeyboardKey::F8;
+		KeyboardKey = EKeyboardKey::F8;
 		break;
 	case VK_F9:
-		ActualKeyCode = EKeyboardKey::F9;
+		KeyboardKey = EKeyboardKey::F9;
 		break;
 	case VK_F10:
-		ActualKeyCode = EKeyboardKey::F10;
+		KeyboardKey = EKeyboardKey::F10;
 		break;
 	case VK_F11:
-		ActualKeyCode = EKeyboardKey::F11;
+		KeyboardKey = EKeyboardKey::F11;
 		break;
 	case VK_F12:
-		ActualKeyCode = EKeyboardKey::F12;
+		KeyboardKey = EKeyboardKey::F12;
 		break;
 	case VK_SPACE:
-		ActualKeyCode = EKeyboardKey::Space;
+		KeyboardKey = EKeyboardKey::Space;
 		break;
 	case VK_LWIN:
-		ActualKeyCode = EKeyboardKey::LeftMenu;
+		KeyboardKey = EKeyboardKey::LeftMenu;
 		break;
 	case VK_RWIN:
-		ActualKeyCode = EKeyboardKey::RightMenu;
+		KeyboardKey = EKeyboardKey::RightMenu;
 		break;
 	case VK_BACK:
-		ActualKeyCode = EKeyboardKey::Backspace;
+		KeyboardKey = EKeyboardKey::Backspace;
 		break;
 	default:
 		if ((KeyCode >= '0' && KeyCode <= '9') || (KeyCode >= 'A' && KeyCode <= 'Z'))
 		{
-			ActualKeyCode = static_cast<EKeyboardKey>(KeyCode);
+			KeyboardKey = static_cast<EKeyboardKey>(KeyCode);
 		}
 		else
 		{
-			ActualKeyCode = EKeyboardKey::OEM;
+			KeyboardKey = EKeyboardKey::OEM;
 		}
 		break;
 	}
 
-	return ActualKeyCode;
+	return KeyboardKey;
 }
 
 #endif

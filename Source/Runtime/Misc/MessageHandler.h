@@ -120,8 +120,7 @@ public:
 	virtual bool OnMouseMove(const Math::Vector2&) { return false; }
 	virtual bool OnMouseWheel(const float, const Math::Vector2&) { return false; }
 
-	virtual bool OnWindowResized(uint32_t, uint32_t) { return false; }
+	virtual bool OnMainWindowResized(uint32_t, uint32_t) { return false; }
 	virtual bool OnAppActive() { return false; }
 	virtual bool OnAppInactive() { return false; }
 	virtual bool OnAppQuit() { return false; }
-};
