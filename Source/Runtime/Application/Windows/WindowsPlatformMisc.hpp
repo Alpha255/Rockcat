@@ -1,23 +1,69 @@
+#pragma once
+
 #include "Core/SpdLogging.h"
 
 #if PLATFORM_WINDOWS
 
 #include <Windows.h>
 
-#if defined(GetEnvironmentVariable)
+#ifdef CreateWindow
+	#undef CreateWindow
+#endif
+
+#ifdef RegisterClass
+	#undef RegisterClass
+#endif
+
+#ifdef GetEnvironmentVariable
 	#undef GetEnvironmentVariable
 #endif
 
-#if defined(SetEnvironmentVariable)
+#ifdef SetEnvironmentVariable
 	#undef SetEnvironmentVariable
 #endif
 
-#if defined(GetCommandLine)
-	#undef GetCommandLine
-#endif
+#include "Application/Application.h"
 
 namespace PlatformMisc
 {
+	std::wstring Utf8ToWide(std::string_view Str)
+	{
+		if (Str.empty())
+		{
+			return std::wstring();
+		}
+
+		const int32_t Length = ::MultiByteToWideChar(CP_UTF8, 0, Str.data(), static_cast<int32_t>(Str.size()), nullptr, 0);
+		if (Length <= 0)
+		{
+			return std::wstring();
+		}
+
+		std::wstring Result(static_cast<size_t>(Length), L'\0');
+		::MultiByteToWideChar(CP_UTF8, 0, Str.data(), static_cast<int32_t>(Str.size()), Result.data(), Length);
+
+		return Result;
+	}
+
+	string WideToUtf8(std::wstring_view Str)
+	{
+		if (Str.empty())
+		{
+			return std::string();
+		}
+
+		const int32_t Length = ::WideCharToMultiByte(CP_UTF8, 0, Str.data(), static_cast<int32_t>(Str.size()), nullptr, 0, nullptr, nullptr);
+		if (Length <= 0)
+		{
+			return std::string();
+		}
+
+		string Result(static_cast<size_t>(Length), '\0');
+		::WideCharToMultiByte(CP_UTF8, 0, Str.data(), static_cast<int32_t>(Str.size()), Result.data(), Length, nullptr, nullptr);
+
+		return Result;
+	}
+
 	string GetSystemErrorMessage(uint32_t ErrorCode)
 	{
 		std::vector<wchar_t> Buffer(UINT16_MAX, L'\0');
@@ -324,61 +370,23 @@ namespace PlatformMisc
 		::CloseHandle(ThreadHandle);
 	}
 
-	std::wstring Utf8ToWide(std::string_view Str)
-	{
-		if (Str.empty())
-		{
-			return std::wstring();
-		}
+	//SharedLibrary::SharedLibrary(const char* LibraryName)
+	//{
+	//	const std::wstring WideModuleName = PlatformMisc::Utf8ToWide(string::format("{}{}", LibraryName, DLL_EXTENSION));
+	//	m_Handle = reinterpret_cast<void*>(::LoadLibraryW(WideModuleName.c_str()));
+	//	VERIFY_WITH_SYSTEM_MESSAGE(m_Handle);
+	//}
 
-		const int32_t Length = ::MultiByteToWideChar(CP_UTF8, 0, Str.data(), static_cast<int32_t>(Str.size()), nullptr, 0);
-		if (Length <= 0)
-		{
-			return std::wstring();
-		}
+	//void* SharedLibrary::GetProcAddress(const char* FunctionName)
+	//{
+	//	assert(m_Handle);
+	//	return ::GetProcAddress(reinterpret_cast<::HMODULE>(m_Handle), FunctionName);
+	//}
 
-		std::wstring Result(static_cast<size_t>(Length), L'\0');
-		::MultiByteToWideChar(CP_UTF8, 0, Str.data(), static_cast<int32_t>(Str.size()), Result.data(), Length);
-
-		return Result;
-	}
-
-	string WideToUtf8(std::wstring_view Str)
-	{
-		if (Str.empty())
-		{
-			return std::string();
-		}
-
-		const int32_t Length = ::WideCharToMultiByte(CP_UTF8, 0, Str.data(), static_cast<int32_t>(Str.size()), nullptr, 0, nullptr, nullptr);
-		if (Length <= 0)
-		{
-			return std::string();
-		}
-
-		string Result(static_cast<size_t>(Length), '\0');
-		::WideCharToMultiByte(CP_UTF8, 0, Str.data(), static_cast<int32_t>(Str.size()), Result.data(), Length, nullptr, nullptr);
-
-		return Result;
-	}
-
-	SharedLibrary::SharedLibrary(const char* LibraryName)
-	{
-		const std::wstring WideModuleName = PlatformMisc::Utf8ToWide(string::format("{}{}", LibraryName, DLL_EXTENSION));
-		m_Handle = reinterpret_cast<void*>(::LoadLibraryW(WideModuleName.c_str()));
-		VERIFY_WITH_SYSTEM_MESSAGE(m_Handle);
-	}
-
-	void* SharedLibrary::GetProcAddress(const char* FunctionName)
-	{
-		assert(m_Handle);
-		return ::GetProcAddress(reinterpret_cast<::HMODULE>(m_Handle), FunctionName);
-	}
-
-	SharedLibrary::~SharedLibrary()
-	{
-		VERIFY_WITH_SYSTEM_MESSAGE(::FreeLibrary(reinterpret_cast<::HMODULE>(m_Handle)) != 0);
-	}
+	//SharedLibrary::~SharedLibrary()
+	//{
+	//	VERIFY_WITH_SYSTEM_MESSAGE(::FreeLibrary(reinterpret_cast<::HMODULE>(m_Handle)) != 0);
+	//}
 }
 
 #endif // PLATFORM_WINDOWS

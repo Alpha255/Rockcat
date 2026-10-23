@@ -1,18 +1,10 @@
 #pragma once
 
-#include "Application/Application.h"
+#include "Core/Definitions.h"
 
 #if PLATFORM_WINDOWS
 
-#include <Windows.h>
-
-#if defined(CreateWindow)
-	#undef CreateWindow
-#endif
-
-#if defined(RegisterClass)
-	#undef RegisterClass
-#endif
+#include "Application/Windows/WindowsPlatformMisc.hpp"
 
 class WindowsApplication : public Application
 {
@@ -27,7 +19,7 @@ protected:
 
 	LRESULT MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
-	virtual EKeyboardKey DecodeKeyboardKey(uint64_t KeyCode, int64_t Mask) override final;
+	virtual EKeyboardKey DecodeKeyboardKey(uint64_t KeyCode, int64_t Mask, KeyModifiers& Modifiers) override final;
 
 	void RegisterClass();
 };

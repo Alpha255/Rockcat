@@ -124,3 +124,4 @@ public:
 	virtual bool OnAppActive() { return false; }
 	virtual bool OnAppInactive() { return false; }
 	virtual bool OnAppQuit() { return false; }
+};

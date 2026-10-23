@@ -1,6 +1,10 @@
 #include "Core/String.h"
-#include "Application/Application.h"
 #include <stdarg.h>
+
+#if PLATFORM_WINDOWS
+	#include "Application/Windows/WindowsPlatformMisc.hpp"
+#elif PLATFORM_LINUX
+#endif
 
 void string::tolower()
 {

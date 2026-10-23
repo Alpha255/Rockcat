@@ -2,6 +2,10 @@
 
 #include "Application/Window.h"
 
+#if PLATFORM_WINDOWS
+
+#include "Application/Windows/WindowsPlatformMisc.hpp"
+
 class WindowsWindow : public Window
 {
 public:
@@ -15,3 +19,5 @@ public:
 
 	static const std::wstring_view WindowClassName;
 };
+
+#endif

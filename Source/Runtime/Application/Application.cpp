@@ -1,8 +1,8 @@
 #include "Application/Application.h"
 #include "Core/Spdlogging.h"
+#include "Profile/CpuTimer.h"
 #include "Async/TaskExecutorManager.h"
 #include "Asset/AssetDatabase.h"
-#include "Profile/CpuTimer.h"
 
 void Application::Loop()
 {
@@ -65,22 +65,22 @@ void Application::RemoveMessageHandler(MessageHandler* Handler)
 	}
 }
 
-void Application::DispatchKeyUpMessage(const KeyEvent& Event)
+void Application::DispatchKeyUpMessage(const KeyEvent& Event, const KeyModifiers& Modifiers)
 {
-	std::for_each(m_MessageHandlers.begin(), m_MessageHandlers.end(), [&Event, this](auto Handler) {
+	std::for_each(m_MessageHandlers.begin(), m_MessageHandlers.end(), [&Event, &Modifiers, this](auto Handler) {
 		if (Handler)
 		{
-			Handler->OnKeyUp(Event, m_KeyModifiers);
+			Handler->OnKeyUp(Event, Modifiers);
 		}
 	});
 }
 
-void Application::DispatchKeyDownMessage(const KeyEvent& Event)
+void Application::DispatchKeyDownMessage(const KeyEvent& Event, const KeyModifiers& Modifiers)
 {
-	std::for_each(m_MessageHandlers.begin(), m_MessageHandlers.end(), [&Event, this](auto Handler) {
+	std::for_each(m_MessageHandlers.begin(), m_MessageHandlers.end(), [&Event, &Modifiers, this](auto Handler) {
 		if (Handler)
 		{
-			Handler->OnKeyDown(Event, m_KeyModifiers);
+			Handler->OnKeyDown(Event, Modifiers);
 		}
 	});
 }
@@ -187,10 +187,8 @@ void Application::DispatchAppQuitMessage()
 
 #if PLATFORM_WINDOWS
 	#include "Application/Windows/WindowsApplication.h"
-	#include "Application/Windows/WindowsPlatformMisc.hpp"
 #elif PLATFORM_LINUX
 	#include "Application/Linux/LinuxApplication.h"
-	#include "Application/Linux/LinuxPlatformMisc.hpp"
 #else
 	#error "Unknown Platform"
 #endif
@@ -262,7 +260,7 @@ string Application::GetCommandline()
 	return PlatformMisc::GetCommandline();
 }
 
-void Application::ExecuteProcess(const char* Commandline, bool WaitDone = true)
+void Application::ExecuteProcess(const char* Commandline, bool WaitDone)
 {
 	return PlatformMisc::ExecuteProcess(Commandline, WaitDone);
 }

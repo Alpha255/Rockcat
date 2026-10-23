@@ -1,8 +1,8 @@
-#include "Application/Windows/WindowsWindow.h"
+#include "Core/Definitions.h"
 
 #if PLATFORM_WINDOWS
 
-#include "Application/Application.h"
+#include "Application/Windows/WindowsWindow.h"
 #include "Core/SpdLogging.h"
 
 const std::wstring_view WindowsWindow::WindowClassName(L"RockCatWindow");

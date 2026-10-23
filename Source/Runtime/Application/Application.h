@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Core/String.h"
 #include "Async/TaskEvent.h"
 #include "Misc/MessageHandler.h"
@@ -19,7 +21,6 @@ public:
 
 	inline void* GetHandle() const { return m_Handle; }
 
-	//inline class RenderBackend& GetRenderBackend() const { return *m_RenderBackend; }
 	virtual std::shared_ptr<class Window> CreateWindow(uint32_t Width, uint32_t Height, const char* Title) = 0;
 
 	void AddMessageHandler(MessageHandler* Handler);
@@ -60,8 +61,8 @@ protected:
 
 	void Tick(float ElapsedSeconds);
 
-	void DispatchKeyUpMessage(const KeyEvent& Event);
-	void DispatchKeyDownMessage(const KeyEvent& Event);
+	void DispatchKeyUpMessage(const KeyEvent& Event, const KeyModifiers& Modifiers);
+	void DispatchKeyDownMessage(const KeyEvent& Event, const KeyModifiers& Modifiers);
 	void DispatchKeyCharMessage(const char Character);
 
 	void DispatchMouseButtonUpMessage(const EMouseButton Button);
@@ -75,9 +76,7 @@ protected:
 	void DispatchAppInactiveChangedMessage();
 	void DispatchAppQuitMessage();
 
-	virtual EKeyboardKey DecodeKeyboardKey(uint64_t KeyCode, int64_t Mask) = 0;
-
-	KeyModifiers m_KeyModifiers;
+	virtual EKeyboardKey DecodeKeyboardKey(uint64_t KeyCode, int64_t Mask, KeyModifiers& Modifiers) = 0;
 private:
 	EStatus m_Status;
 	//std::unique_ptr<GameInstance> m_GameInstance;

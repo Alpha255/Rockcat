@@ -2,10 +2,53 @@
 #include "Application/Windows/WindowsApplication.h"
 
 #if PLATFORM_WINDOWS
+
 #include "Application/Windows/WindowsWindow.h"
 #include "Application/Windows/Resource.h"
 #include "Core/SpdLogging.h"
 #include <windowsx.h>
+
+void LogKeyEvent(EKeyboardKey Key, const KeyModifiers& Modifiers, uint32_t Msg)
+{
+	string KeyState = (Msg == WM_KEYDOWN || Msg == WM_SYSKEYDOWN) ? "down" : "up";
+	string Modifier;
+
+	static const std::vector<string> KeyNames
+	{
+		"LeftCtrl",
+		"LeftShift",
+		"LeftAlt",
+		"LeftMenu",
+		"RightCtrl",
+		"RightShift",
+		"RightAlt",
+		"RightMenu",
+		"CapsLock"
+	};
+	const std::vector<bool> KeyEnabled
+	{
+		Modifiers.LeftCtrl,
+		Modifiers.LeftShift,
+		Modifiers.LeftAlt,
+		Modifiers.LeftMenu,
+		Modifiers.RightCtrl,
+		Modifiers.RightShift,
+		Modifiers.RightAlt,
+		Modifiers.RightMenu,
+		Modifiers.CapsLock
+	};
+
+	for (uint32_t Index = 0u; Index < KeyEnabled.size(); ++Index)
+	{
+		if (KeyEnabled[Index])
+		{
+			Modifier += "+";
+			Modifier += KeyNames[Index];
+		}
+	}
+
+	LOG_INFO(LogDefault, "Key \"{}{}\" {}", magic_enum::enum_name(Key).data(), Modifier, KeyState);
+}
 
 WindowsApplication::WindowsApplication()
 	: Application()
@@ -105,7 +148,7 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 				MainWindow->OnResize(Width, Height);
 			}
 
-			DispatchWindowResizedMessage(Width, Height);
+			DispatchMainWindowResizedMessage(Width, Height);
 		}
 		break;
 	}
@@ -183,17 +226,19 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	case WM_KEYDOWN:
 	case WM_SYSKEYDOWN:
 	{
-		auto KeyboardKey = DecodeKeyboardKey(wParam, lParam);
-		DispatchKeyDownMessage(KeyEvent{ KeyboardKey, wParam });
-		LOG_DEBUG(LogDefault, "Key \"{}\" down", magic_enum::enum_name(KeyboardKey).data());
+		KeyModifiers Modifiers;
+		auto KeyboardKey = DecodeKeyboardKey(wParam, lParam, Modifiers);
+		DispatchKeyDownMessage(KeyEvent{ KeyboardKey, wParam }, Modifiers);
+		LogKeyEvent(KeyboardKey, Modifiers, Msg);
 		break;
 	}
 	case WM_KEYUP:
 	case WM_SYSKEYUP:
 	{
-		auto KeyboardKey = DecodeKeyboardKey(wParam, lParam);
-		DispatchKeyUpMessage(KeyEvent{ KeyboardKey, wParam });
-		LOG_DEBUG(LogDefault, "Key \"{}\" up", magic_enum::enum_name(KeyboardKey).data());
+		KeyModifiers Modifiers;
+		auto KeyboardKey = DecodeKeyboardKey(wParam, lParam, Modifiers);
+		DispatchKeyUpMessage(KeyEvent{ KeyboardKey, wParam }, Modifiers);
+		LogKeyEvent(KeyboardKey, Modifiers, Msg);
 		break;
 	}
 	case WM_GETMINMAXINFO:
@@ -228,7 +273,7 @@ LRESULT WindowsApplication::MessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	return 0;
 }
 
-EKeyboardKey WindowsApplication::DecodeKeyboardKey(uint64_t KeyCode, int64_t Mask)
+EKeyboardKey WindowsApplication::DecodeKeyboardKey(uint64_t KeyCode, int64_t Mask, KeyModifiers& Modifiers)
 {
 	EKeyboardKey KeyboardKey = EKeyboardKey::None;
 
@@ -247,41 +292,41 @@ EKeyboardKey WindowsApplication::DecodeKeyboardKey(uint64_t KeyCode, int64_t Mas
 		if ((Mask & 0x1000000) == 0)
 		{
 			KeyboardKey = EKeyboardKey::LeftShift;
-			m_KeyModifiers.LeftShift = !m_KeyModifiers.LeftShift;
+			Modifiers.LeftShift = true;
 		}
 		else
 		{
 			KeyboardKey = EKeyboardKey::RightShift;
-			m_KeyModifiers.RightShift = !m_KeyModifiers.RightShift;
+			Modifiers.RightShift = true;
 		}
 		break;
 	case VK_CONTROL:
 		if ((Mask & 0x1000000) == 0)
 		{
 			KeyboardKey = EKeyboardKey::LeftCtrl;
-			m_KeyModifiers.LeftCtrl = !m_KeyModifiers.LeftCtrl;
+			Modifiers.LeftCtrl = true;
 		}
 		else
 		{
 			KeyboardKey = EKeyboardKey::RightCtrl;
-			m_KeyModifiers.RightCtrl = !m_KeyModifiers.RightCtrl;
+			Modifiers.RightCtrl = true;
 		}
 		break;
 	case VK_MENU:
 		if ((Mask & 0x1000000) == 0)
 		{
 			KeyboardKey = EKeyboardKey::LeftAlt;
-			m_KeyModifiers.LeftAlt = !m_KeyModifiers.LeftAlt;
+			Modifiers.LeftAlt = true;
 		}
 		else
 		{
 			KeyboardKey = EKeyboardKey::RightAlt;
-			m_KeyModifiers.RightAlt = !m_KeyModifiers.RightAlt;
+			Modifiers.RightAlt = true;
 		}
 		break;
 	case VK_CAPITAL:
 		KeyboardKey = EKeyboardKey::CapsLock;
-		m_KeyModifiers.CapsLock = (::GetKeyState(VK_CAPITAL) & 0x0001) != 0;
+		Modifiers.CapsLock = (::GetKeyState(VK_CAPITAL) & 0x0001) != 0;
 		break;
 	case VK_INSERT:
 		KeyboardKey = EKeyboardKey::Insert;
