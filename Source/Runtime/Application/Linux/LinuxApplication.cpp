@@ -1,13 +1,11 @@
-#include "Application/BaseApplication.h"
+#include "Application/Application.h"
 
 #if PLATFORM_LINUX
 
-class LinuxApplication : public BaseApplication
+class LinuxApplication : public Application
 {
 public:
-	using BaseApplication::BaseApplication;
+	using Application::Application;
 };
-
-using PlatformApplication = LinuxApplication;
 
 #endif

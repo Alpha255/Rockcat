@@ -1,9 +1,8 @@
 #pragma once
 
-#include "RHI/D3D/DXGIInterface.h"
-#include "RHI/RHIShader.h"
-#include "Rendering/RenderSettings.h"
-#include "Rendering/Shader.h"
+#include "Rendering/RHI/RHIShader.h"
+#include "Rendering/GraphicsSettings.h"
+#include "Rendering/Shader/Shader.h"
 #include <dxc/dxcapi.h>
 
 class IShaderCompiler

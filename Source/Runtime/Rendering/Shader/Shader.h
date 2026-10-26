@@ -5,7 +5,7 @@
 #include "Rendering/RHI/RHITexture.h"
 #include "Rendering/RHI/RHIShader.h"
 #include "Rendering/RHI/RHIBuffer.h"
-#include "Rendering/RenderSettings.h"
+#include "Rendering/GraphicsSettings.h"
 #include "Misc/Paths.h"
 #include "Core/String.h"
 
