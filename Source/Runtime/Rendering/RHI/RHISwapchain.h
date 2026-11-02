@@ -61,7 +61,7 @@ public:
 		Offscreen
 	};
 
-	RHIViewportClient(const class Window& InWindow, const struct RenderSettings& InRenderSettings);
+	RHIViewportClient(const class Window& InWindow, const struct GraphicsSettings& InRenderSettings);
 
 	Math::UInt2 GetViewSize() const;
 

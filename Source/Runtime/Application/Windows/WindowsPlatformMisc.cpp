@@ -1,28 +1,9 @@
 #pragma once
 
 #include "Core/SpdLogging.h"
+#include "Application/Windows/WindowsApplication.h"
 
 #if PLATFORM_WINDOWS
-
-#include <Windows.h>
-
-#ifdef CreateWindow
-	#undef CreateWindow
-#endif
-
-#ifdef RegisterClass
-	#undef RegisterClass
-#endif
-
-#ifdef GetEnvironmentVariable
-	#undef GetEnvironmentVariable
-#endif
-
-#ifdef SetEnvironmentVariable
-	#undef SetEnvironmentVariable
-#endif
-
-#include "Application/Application.h"
 
 namespace PlatformMisc
 {

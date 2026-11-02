@@ -3,7 +3,7 @@
 #include "Rendering/RHI/RHIBuffer.h"
 #include "Rendering/RHI/RHIShader.h"
 #include "Rendering/RHI/RHIRenderStates.h"
-#include "Rendering/Shader.h"
+#include "Rendering/Shader/Shader.h"
 
 struct RHIGraphicsPipelineDesc
 {

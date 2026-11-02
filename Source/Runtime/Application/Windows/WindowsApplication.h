@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Core/Definitions.h"
+#include "Application/Application.h"
+#include "Application/Windows/WindowsWindow.h"
 
 #if PLATFORM_WINDOWS
-
-#include "Application/Windows/WindowsPlatformMisc.hpp"
 
 class WindowsApplication : public Application
 {
@@ -13,7 +13,7 @@ public:
 
 	void PumpMessages() override final;
 
-	virtual std::shared_ptr<class Window> CreateWindow(uint32_t Width, uint32_t Height, const char* Title) override final;
+	virtual std::shared_ptr<Window> MakeWindow(uint32_t Width, uint32_t Height, const char* Title) override final;
 protected:
 	static LRESULT CALLBACK ApplicationMessageProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 

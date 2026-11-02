@@ -1,14 +1,15 @@
 #pragma once
 
-#include "Application/PlatformApplication.h"
+#include "Application/Application.h"
 #include "Misc/MessageHandler.h"
 
 #include "RHI/Vulkan/VulkanImGuiRenderer.h"
 
-class RenderTest final : public PlatformApplication, public MessageHandler
+#if 0
+class RenderTest final : public Application, public MessageHandler
 {
 public:
-	using PlatformApplication::PlatformApplication;
+	using Application::Application;
 
 	void Initialize() override final;
 	void Render() override final;
@@ -51,3 +52,4 @@ private:
 
 	VulkanImGuiRenderer m_ImGuiRenderer;
 };
+#endif

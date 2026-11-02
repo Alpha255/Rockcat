@@ -4,7 +4,23 @@
 
 #if PLATFORM_WINDOWS
 
-#include "Application/Windows/WindowsPlatformMisc.hpp"
+#include <Windows.h>
+
+#ifdef CreateWindow
+	#undef CreateWindow
+#endif
+
+#ifdef RegisterClass
+	#undef RegisterClass
+#endif
+
+#ifdef GetEnvironmentVariable
+	#undef GetEnvironmentVariable
+#endif
+
+#ifdef SetEnvironmentVariable
+	#undef SetEnvironmentVariable
+#endif
 
 class WindowsWindow : public Window
 {

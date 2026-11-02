@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Rendering/RHI/RHIShader.h"
+#include "RHI/D3D/DXGIInterface.h"
 #include "Rendering/GraphicsSettings.h"
 #include "Rendering/Shader/Shader.h"
 #include <dxc/dxcapi.h>

@@ -1,4 +1,4 @@
-#include "Rendering/ShaderCompiler.h"
+#include "Rendering/Shader/ShaderCompiler.h"
 #include "Core/SpdLogging.h"
 
 DEFINE_LOGGER_CATEGORY(LogShaderCompiler);

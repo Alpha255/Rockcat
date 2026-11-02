@@ -1,6 +1,8 @@
 #pragma once
 
 #define NOMINMAX 1
+//#define COM_NO_WINDOWS_H 1
+//#define RPC_NO_WINDOWS_H 1
 
 #include <stdint.h>
 #include <assert.h>

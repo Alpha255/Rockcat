@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Rendering/RenderSettings.h"
+#include "Rendering/GraphicsSettings.h"
 
 class SceneRenderer
 {
@@ -9,6 +9,6 @@ public:
 
 	virtual void Render(class RDGRenderGraph& Graph, const struct RDGSceneViewInfo& ViewInfo) = 0;
 
-	static std::unique_ptr<SceneRenderer> Create(const struct RenderSettings& InSettings);
+	static std::unique_ptr<SceneRenderer> Create(const struct GraphicsSettings& InSettings);
 private:
 };

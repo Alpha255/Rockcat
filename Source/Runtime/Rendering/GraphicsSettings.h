@@ -2,6 +2,16 @@
 
 #include "Core/Cereal.h"
 
+enum class ERHIDeviceType
+{
+	D3D11,
+	D3D12,
+	Vulkan,
+	OpenGL,
+	Software,
+	Num
+};
+
 enum class ERenderingPath
 {
 	Forward,

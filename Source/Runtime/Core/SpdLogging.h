@@ -1,10 +1,7 @@
 #pragma once
 
-#define SPDLOG_LEVEL_NAMES                                              \
-	{                                                                   \
-		"Trace", "Debug", "Info", "Warning", "Error", "Critical", "Off" \
-	}
-
+/// The level names are set where spdlog itself is compiled (see the spdlog project in premake5.lua);
+/// defining them here would only reach the translation units that happen to include this header.
 #include "Core/Singleton.h"
 #include "Core/Name.h"
 #include <spdlog/spdlog.h>
@@ -60,5 +57,3 @@ private:
 #define LOG_CRITICAL(Category, ...) SPD_LOG(Category, spdlog::level::critical, __VA_ARGS__)
 
 DECLARE_LOGGER_CATEGORY(LogDefault);
-
-#undef SPDLOG_LEVEL_NAMES

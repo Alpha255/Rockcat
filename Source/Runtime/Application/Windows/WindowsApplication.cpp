@@ -1,8 +1,6 @@
-
 #include "Application/Windows/WindowsApplication.h"
 
 #if PLATFORM_WINDOWS
-
 #include "Application/Windows/WindowsWindow.h"
 #include "Application/Windows/Resource.h"
 #include "Core/SpdLogging.h"
@@ -96,7 +94,7 @@ void WindowsApplication::PumpMessages()
 	}
 }
 
-std::shared_ptr<Window> WindowsApplication::CreateWindow(uint32_t Width, uint32_t Height, const char* Title)
+std::shared_ptr<Window> WindowsApplication::MakeWindow(uint32_t Width, uint32_t Height, const char* Title)
 {
 	return std::make_shared<WindowsWindow>(reinterpret_cast<HINSTANCE>(GetHandle()), Width, Height, Title);
 }

@@ -1,4 +1,4 @@
-#include "Rendering/Shader.h"
+#include "Rendering/Shader/Shader.h"
 #include "Rendering/RHI/RHIDevice.h"
 
 ShaderBinary::ShaderBinary(const Shader& InShader, ERHIDeviceType DeviceType, ShaderBlob& Blob)

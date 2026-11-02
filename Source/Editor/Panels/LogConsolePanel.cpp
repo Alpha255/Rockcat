@@ -106,7 +106,10 @@ void LogConsolePanel::DrawHeader()
 
 		if (ImGui::IsItemHovered())
 		{
-			ImGui::SetTooltip("%s", spdlog::level::level_string_views[Index]);
+			/// level_string_views lives in spdlog's common-inl.h, which a compiled spdlog keeps to
+			/// itself; to_string_view() is the declared part of the same table.
+			const spdlog::string_view_t LevelName = spdlog::level::to_string_view(static_cast<spdlog::level::level_enum>(Index));
+			ImGui::SetTooltip("%.*s", static_cast<int>(LevelName.size()), LevelName.data());
 		}
 
 		ImGui::SameLine();

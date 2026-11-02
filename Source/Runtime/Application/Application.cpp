@@ -3,6 +3,7 @@
 #include "Profile/CpuTimer.h"
 #include "Async/TaskExecutorManager.h"
 #include "Asset/AssetDatabase.h"
+#include "Application/PlatformMisc.h"
 
 void Application::Loop()
 {

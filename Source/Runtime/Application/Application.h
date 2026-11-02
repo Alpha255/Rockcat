@@ -21,7 +21,7 @@ public:
 
 	inline void* GetHandle() const { return m_Handle; }
 
-	virtual std::shared_ptr<class Window> CreateWindow(uint32_t Width, uint32_t Height, const char* Title) = 0;
+	virtual std::shared_ptr<class Window> MakeWindow(uint32_t Width, uint32_t Height, const char* Title) = 0;
 
 	void AddMessageHandler(MessageHandler* Handler);
 	void RemoveMessageHandler(MessageHandler* Handler);

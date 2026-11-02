@@ -1,7 +1,7 @@
 #include "Rendering/RHI/RHISwapchain.h"
 #include "Rendering/RHI/RHIDevice.h"
 #include "Application/Window.h"
-#include "Application/BaseApplication.h"
+#include "Application/Application.h"
 
 #include <cmath>
 
@@ -15,38 +15,38 @@ namespace
 	}
 }
 
-RHIViewportClient::RHIViewportClient(const Window& InWindow, const RenderSettings& InRenderSettings)
+RHIViewportClient::RHIViewportClient(const Window& InWindow, const GraphicsSettings& InRenderSettings)
 	: m_Window(InWindow)
 	, m_IsStereo(InRenderSettings.StereoRendering)
 {
 	/// The client area is reported in logical units while the swap chain is measured in real
 	/// device pixels. Skipping the conversion is what makes a UI on a HiDPI display look soft:
 	/// everything is rendered small and afterwards stretched by the compositor.
-	const float DpiScale = InWindow.GetDpiScale();
+	//const float DpiScale = InWindow.GetDpiScale();
 
-	RHISwapchainDesc Desc;
-	Desc.SetWidth(ToDevicePixels(InWindow.GetWidth(), DpiScale))
-		.SetHeight(ToDevicePixels(InWindow.GetHeight(), DpiScale))
-		.SetFullscreen(InWindow.IsFullscreen())
-		.SetVSync(InRenderSettings.VSync)
-		.SetHDR(InRenderSettings.HDR)
-		.SetWindowHandle(InWindow.GetHandle());
+	//RHISwapchainDesc Desc;
+	//Desc.SetWidth(ToDevicePixels(InWindow.GetWidth(), DpiScale))
+	//	.SetHeight(ToDevicePixels(InWindow.GetHeight(), DpiScale))
+	//	.SetFullscreen(InWindow.IsFullscreen())
+	//	.SetVSync(InRenderSettings.VSync)
+	//	.SetHDR(InRenderSettings.HDR)
+	//	.SetWindowHandle(InWindow.GetHandle());
 
-	extern BaseApplication* GApplication;
-	m_Swapchain = GApplication->GetRenderDevice().CreateSwapchain(Desc);
+	//extern BaseApplication* GApplication;
+	//m_Swapchain = GApplication->GetRenderDevice().CreateSwapchain(Desc);
 
-	if (m_FinalOutputMode == EFinalOutputMode::Offscreen)
-	{
-		RHITextureDesc Desc;
-		Desc.SetWidth(m_Window.GetWidth())
-			.SetHeight(m_Window.GetHeight())
-			.SetDimension(ERHITextureDimension::T_2D)
-			.SetFormat(InRenderSettings.HDR ? ERHIFormat::RGB10A2_UNorm : ERHIFormat::RGBA8_UNorm)
-			.SetUsages(ERHIBufferUsageFlags::RenderTarget | ERHIBufferUsageFlags::ShaderResource)
-			.SetPermanentState(ERHIResourceState::RenderTarget);
+	//if (m_FinalOutputMode == EFinalOutputMode::Offscreen)
+	//{
+	//	RHITextureDesc Desc;
+	//	Desc.SetWidth(m_Window.GetWidth())
+	//		.SetHeight(m_Window.GetHeight())
+	//		.SetDimension(ERHITextureDimension::T_2D)
+	//		.SetFormat(InRenderSettings.HDR ? ERHIFormat::RGB10A2_UNorm : ERHIFormat::RGBA8_UNorm)
+	//		.SetUsages(ERHIBufferUsageFlags::RenderTarget | ERHIBufferUsageFlags::ShaderResource)
+	//		.SetPermanentState(ERHIResourceState::RenderTarget);
 
-		m_OffscreenViewSurface = GApplication->GetRenderDevice().CreateTexture(Desc);
-	}
+	//	m_OffscreenViewSurface = GApplication->GetRenderDevice().CreateTexture(Desc);
+	//}
 }
 
 Math::UInt2 RHIViewportClient::GetViewSize() const

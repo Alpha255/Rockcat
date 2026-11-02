@@ -34,6 +34,12 @@ workspace "Rockcat"
 	filter {}
 	disablewarnings { "4996", "5054" }
 	buildoptions { "/Zc:char8_t-" }
+	-- spdlog is built as its own library under group "Submodules" instead of being inlined into
+	-- every translation unit. In header only mode spdlog.h reaches
+	-- spdlog/details/os-inl.h, which is the one place that includes windows.h - and with it macros
+	-- such as CreateWindow, GetEnvironmentVariable or RegisterClass, which then collide with names
+	-- of our own wherever windows.h happens to come in first.
+	defines { "SPDLOG_COMPILED_LIB" }
 
 	group "Gear"
 		project "Runtime"
@@ -154,6 +160,30 @@ workspace "Rockcat"
 					"dxgi"
 				}
 	group "Submodules"
+		project "spdlog"
+			kind "StaticLib"
+			language "C++"
+			location "./Out/Intermediate/VCProjects"
+			-- Built as a library instead of being inlined everywhere: see SPDLOG_COMPILED_LIB above.
+			-- Every one of these translation units is needed, they are split so that a sink nobody
+			-- asks for is never linked in, which means picking single files out leaves holes:
+			-- spdlog.cpp pulls in the registry, which wants the periodic worker from async.cpp, the
+			-- default logger wants the colour sinks, and the bundled fmt stops being header only
+			-- along with spdlog itself.
+			files {
+				"./Submodules/spdlog/src/**.cpp",
+				"./Submodules/spdlog/include/**.h",
+			}
+			includedirs {
+				"$(SolutionDir)Submodules/spdlog/include"
+			}
+			-- The names shown for %l and by level::to_string_view(). They are baked into this
+			-- library now, so they have to be defined where spdlog is compiled rather than in a
+			-- header some translation units happen to include first.
+			defines {
+				[[SPDLOG_LEVEL_NAMES={"Trace","Debug","Info","Warning","Error","Critical","Off"}]]
+			}
+
 		project "imgui"
 			kind "StaticLib"
 			language "C++"
@@ -283,7 +313,7 @@ workspace "Rockcat"
 		targetdir "$(SolutionDir)Out"
 		files {
 			"./Source/Applications/RenderTest/**",
-			"./Source/Runtime/Application/Win32/Resource.rc"
+			"./Source/Runtime/Application/Windows/Resource.rc"
 		}
 		includedirs {
 			"$(SolutionDir)Source",
@@ -295,14 +325,16 @@ workspace "Rockcat"
 			"$(SolutionDir)Submodules/magic_enum/include",
 			"$(VK_SDK_PATH)/Include",
 		}
+		-- Static libraries do not resolve anything themselves, so the single executable that pulls
+		-- them in is the only place spdlog has to be named.
 		links {
 			"Runtime",
 			"Editor",
 			"VulkanRHI",
+			"spdlog",
 		}
 		vpaths {
 			["Resource"] = {
-				"./Source/Runtime/Application/Win32/Resource.rc"
 			},
 			[""] = {
 				"./Source/Applications/RenderTest/**",

@@ -1,5 +1,5 @@
 #include "Applications/RenderTest/RenderTest.h"
-#include "Application/ApplicationManager.h"
+//#include "Application/ApplicationManager.h"
 #include "Scene/Scene.h"
 #include "Scene/SceneView.h"
 #include "Editor/ImGuiEditor.h"
@@ -38,6 +38,7 @@
 //{
 //};
 
+#if 0
 namespace
 {
 	/// Validation hook: a single-monitor dev machine cannot change the OS scaling between runs, so
@@ -479,3 +480,5 @@ void RenderTest::Finalize()
 }
 
 REGISTER_APPLICATION(RenderTest);
+
+#endif
